@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import Loading from "../components/loading";
+import Dash from "../components/dash";
 
 function Page() {
   const [tasks, setTasks] = useState([]);
@@ -38,23 +40,19 @@ function Page() {
 
   return (
     <div>
-      <div className={loading == true ? "hidden" : ""}>
-        <h1>Task Flow - Dashboard</h1>
-        <input
+      <h1>Task Flow - Dashboard</h1>
+      {loading ? (
+        <Loading />
+      ) : (
+        <Dash
           value={taskTitle}
           type="text"
           onChange={(e) => setTaskTitle(e.target.value)}
           placeholder="Enter Your Task"
-        ></input>
-        <button onClick={addTask}>Add Your Task</button>
-        <h2>Task List</h2>
-        <ul>
-          {tasks && tasks.map((task) => <li key={task.id}>{task.task}</li>)}
-        </ul>
-      </div>
-      <div className={loading == false ? "hidden" : ""}>
-        <h1>Loading...</h1>
-      </div>
+          addTask={addTask}
+          taskArr={tasks}
+        />
+      )}
     </div>
   );
 }
