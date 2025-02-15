@@ -1,14 +1,16 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import axios from "axios";
 import Loading from "../components/loading";
 import Dash from "../components/dash";
+import AlertDisplay from "../components/alertDisplay";
 
 function Page() {
   const [tasks, setTasks] = useState([]);
   const [taskTitle, setTaskTitle] = useState("");
   const [loading, setLoading] = useState(true);
+  const [alert, setAlert] = useState(false);
 
   useEffect(() => {
     axios
@@ -16,6 +18,7 @@ function Page() {
       .then((response) => {
         setTasks(response.data);
         setLoading(false);
+        setAlert(true);
       })
       .catch((error) => {
         console.error(error);
@@ -51,6 +54,7 @@ function Page() {
           taskArr={tasks}
         />
       )}
+      <AlertDisplay alert={alert} setAlert={setAlert} />
     </div>
   );
 }
