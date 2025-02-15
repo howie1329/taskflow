@@ -58,7 +58,7 @@ function Page() {
   };
 
   return (
-    <div className="flex p-5 flex-col items-center h-screen gap-2">
+    <div className="flex m-2 flex-col items-center h-screen">
       <h1 className="font-bold text-2xl">Task Flow - Dashboard</h1>
       {loading ? (
         <Loading />

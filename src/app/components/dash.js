@@ -5,7 +5,7 @@ import { TaskCard } from "./taskCard";
 
 const Dash = ({ value, onChange, addTask, taskArr }) => {
   return (
-    <div className="flex p-5 flex-col items-center h-screen gap-2">
+    <div className="flex flex-col w-full h-full gap-2">
       <div className="flex flex-row gap-2">
         <Input
           value={value}
@@ -15,8 +15,8 @@ const Dash = ({ value, onChange, addTask, taskArr }) => {
         ></Input>
         <Button onClick={addTask}>Add Your Task</Button>
       </div>
-      <h2 className="font-semibold text-xl">Task List</h2>
-      <ul className="flex justify-evenly flex-wrap">
+      <h2 className="font-semibold text-xl text-center">Task List</h2>
+      <ul className="flex flex-col">
         {taskArr && taskArr.map((task) => <TaskCard key={task.id} {...task} />)}
       </ul>
     </div>
