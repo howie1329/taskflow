@@ -14,9 +14,8 @@ export async function GET() {
 }
 
 export async function POST(req) {
-  const { task } = req.body;
-  console.log(task);
-  const { data, error } = await supabaseClient.from("todos").insert({ task });
+  const { data: title } = await req.json();
+  const { data, error } = await supabaseClient.from("todos").insert(title);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
