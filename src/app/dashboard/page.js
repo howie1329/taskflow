@@ -46,9 +46,7 @@ function Page() {
       ) : (
         <Dash
           value={taskTitle}
-          type="text"
           onChange={(e) => setTaskTitle(e.target.value)}
-          placeholder="Enter Your Task"
           addTask={addTask}
           taskArr={tasks}
         />

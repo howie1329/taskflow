@@ -1,13 +1,13 @@
 import React from "react";
 
-const Dash = ({ value, type, onChange, placeholder, addTask, taskArr }) => {
+const Dash = ({ value, onChange, addTask, taskArr }) => {
   return (
     <>
       <input
         value={value}
-        type={type}
+        type="text"
         onChange={onChange}
-        placeholder={placeholder}
+        placeholder="Enter Your Task"
       ></input>
       <button onClick={addTask}>Add Your Task</button>
       <h2>Task List</h2>
