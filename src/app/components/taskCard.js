@@ -9,7 +9,7 @@ import {
 
 export const TaskCard = ({ title, description = null, dueDate = null }) => {
   return (
-    <Card>
+    <Card className="w-3/4 p-2 m-2">
       <CardHeader>
         <CardTitle>{title}</CardTitle>
         <CardDescription>{description}</CardDescription>
