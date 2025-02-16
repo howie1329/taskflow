@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { useToast } from "./use-toast";
 
-const useGetTasks = (apiEndpoint) => {
+const useGetTasks = (apiEndpoint, setRefresh) => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -28,7 +28,7 @@ const useGetTasks = (apiEndpoint) => {
         setError(error);
         console.log(error);
       });
-  }, [apiEndpoint]);
+  }, [apiEndpoint, setRefresh]);
 
   return { tasks, loading, error };
 };

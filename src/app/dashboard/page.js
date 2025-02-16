@@ -5,7 +5,8 @@ import Dash from "../features/tasks/components/dash";
 import useGetTasks from "@/hooks/useGetTasks";
 
 function Page() {
-  const { tasks, loading } = useGetTasks("/api/todo");
+  const [refresh, setRefresh] = useState(false);
+  const { tasks, loading } = useGetTasks("/api/todo", refresh);
   const [taskTitle, setTaskTitle] = useState("");
 
   return (
@@ -18,6 +19,8 @@ function Page() {
           value={taskTitle}
           onChange={(e) => setTaskTitle(e.target.value)}
           taskArr={tasks}
+          setRefresh={setRefresh}
+          refresh={refresh}
         />
       )}
     </div>

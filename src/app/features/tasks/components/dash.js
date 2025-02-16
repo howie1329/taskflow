@@ -5,12 +5,22 @@ import { TaskCard } from "./taskCard";
 import { CreateTaskModal } from "./modal";
 import useUpload from "@/hooks/useUpload";
 
-const Dash = ({ value, taskArr }) => {
+const Dash = ({ value, taskArr, setRefresh, refresh }) => {
   const [showModal, setShowModal] = useState(false);
   const { data, setData, loading, error, addTask } = useUpload("/api/todo");
 
   const handleModalToggle = () => {
     setShowModal(!showModal);
+  };
+
+  const handleTask = async (e) => {
+    e.preventDefault();
+    try {
+      await addTask();
+      setRefresh(!refresh);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -22,7 +32,7 @@ const Dash = ({ value, taskArr }) => {
           onChange={(e) => setData({ title: e.target.value })}
           placeholder="Enter Your Task"
         ></Input>
-        <Button onClick={addTask}>Add Your Task</Button>
+        <Button onClick={handleTask}>Add Your Task</Button>
       </div>
       <Button onClick={handleModalToggle}>Test Button</Button>
       {showModal && <CreateTaskModal handleModalToggle={handleModalToggle} />}
