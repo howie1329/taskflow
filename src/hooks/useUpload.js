@@ -3,7 +3,7 @@ import axios from "axios";
 import { useToast } from "./use-toast";
 
 const useUpload = (url) => {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState();
   const { toast } = useToast();

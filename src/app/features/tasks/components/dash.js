@@ -7,7 +7,7 @@ import useUpload from "@/hooks/useUpload";
 
 const Dash = ({ taskArr, setRefresh, refresh }) => {
   const [showModal, setShowModal] = useState(false);
-  const { data, setData, loading, error, addTask } = useUpload("/api/todo");
+  const { data, setData, loading, addTask } = useUpload("/api/todo");
 
   const handleModalToggle = () => {
     setShowModal(!showModal);
@@ -16,8 +16,10 @@ const Dash = ({ taskArr, setRefresh, refresh }) => {
   const handleTask = async (e) => {
     e.preventDefault();
     try {
+      console.log(data);
       await addTask();
       setRefresh(!refresh);
+      setData({ title: "", description: "" });
     } catch (error) {
       console.log(error);
     }
@@ -29,8 +31,14 @@ const Dash = ({ taskArr, setRefresh, refresh }) => {
         <Input
           value={data.title}
           type="text"
-          onChange={(e) => setData({ title: e.target.value })}
+          onChange={(e) => setData({ ...data, title: e.target.value })}
           placeholder="Enter Your Task"
+        ></Input>
+        <Input
+          value={data.description}
+          type="text"
+          onChange={(e) => setData({ ...data, description: e.target.value })}
+          placeholder="Enter Task Description"
         ></Input>
         <Button onClick={handleTask}>Add Your Task</Button>
       </div>

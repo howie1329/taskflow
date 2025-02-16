@@ -30,7 +30,7 @@ const useGetTasks = (apiEndpoint, setRefresh) => {
       });
   }, [apiEndpoint, setRefresh]);
 
-  return { tasks, loading, error };
+  return { tasks, loading };
 };
 
 export default useGetTasks;
