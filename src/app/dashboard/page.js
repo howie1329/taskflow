@@ -7,7 +7,6 @@ import useGetTasks from "@/hooks/useGetTasks";
 function Page() {
   const [refresh, setRefresh] = useState(false);
   const { tasks, loading } = useGetTasks("/api/todo", refresh);
-  const [taskTitle, setTaskTitle] = useState("");
 
   return (
     <div className="flex m-2 flex-col items-center h-screen">
@@ -15,13 +14,7 @@ function Page() {
       {loading ? (
         <Loading />
       ) : (
-        <Dash
-          value={taskTitle}
-          onChange={(e) => setTaskTitle(e.target.value)}
-          taskArr={tasks}
-          setRefresh={setRefresh}
-          refresh={refresh}
-        />
+        <Dash taskArr={tasks} setRefresh={setRefresh} refresh={refresh} />
       )}
     </div>
   );

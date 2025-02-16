@@ -5,7 +5,7 @@ import { TaskCard } from "./taskCard";
 import { CreateTaskModal } from "./modal";
 import useUpload from "@/hooks/useUpload";
 
-const Dash = ({ value, taskArr, setRefresh, refresh }) => {
+const Dash = ({ taskArr, setRefresh, refresh }) => {
   const [showModal, setShowModal] = useState(false);
   const { data, setData, loading, error, addTask } = useUpload("/api/todo");
 
