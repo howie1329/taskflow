@@ -8,11 +8,11 @@ const useUpload = (url) => {
   const [error, setError] = useState();
   const { toast } = useToast();
 
-  const addTask = () => {
+  const addTask = (data) => {
     setLoading(true);
     axios
-      .post(url, { data })
-      .then((response) => {
+      .post(url, data)
+      .then(() => {
         setLoading(false);
         toast({
           title: "Task Flow",

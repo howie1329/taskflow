@@ -7,14 +7,14 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 
-export const TaskCard = ({ title, description = null, dueDate = null }) => {
+export const TaskCard = ({ title, description = null, date = null }) => {
   return (
     <Card className="flex flex-col mb-2 p-1">
       <CardHeader>
         <CardTitle>{title}</CardTitle>
         <CardDescription>{description}</CardDescription>
       </CardHeader>
-      <CardFooter>{dueDate}</CardFooter>
+      <CardFooter>{date}</CardFooter>
     </Card>
   );
 };
