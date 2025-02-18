@@ -5,7 +5,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { cn } from "@/lib/utils";
-import { format, parse } from "date-fns";
+import { format } from "date-fns";
 import {
   Form,
   FormControl,
@@ -35,11 +35,6 @@ const formSchema = z.object({
 export const CreateTaskModal = ({ handleModalToggle }) => {
   const { addTask } = useUpload("/api/todo");
 
-  const test = (idk) => {
-    console.log(idk);
-    idk.onChange();
-  };
-
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -50,9 +45,8 @@ export const CreateTaskModal = ({ handleModalToggle }) => {
   });
 
   const onSubmit = (data) => {
-    console.log(data);
+    data["date"] = format(data.date, "P");
     addTask(data);
-    console.log("Submitted Successfully");
     handleModalToggle();
   };
 
@@ -114,7 +108,7 @@ export const CreateTaskModal = ({ handleModalToggle }) => {
                           )}
                         >
                           {field.value ? (
-                            format(field.value, "PPP")
+                            format(field.value, "P")
                           ) : (
                             <span>Pick a date</span>
                           )}
@@ -127,7 +121,6 @@ export const CreateTaskModal = ({ handleModalToggle }) => {
                         mode="single"
                         selected={field.value}
                         onSelect={field.onChange}
-                        //onSelect={(e) => test(field)}
                         disabled={(date) => date < new Date()}
                         initialFocus
                       />

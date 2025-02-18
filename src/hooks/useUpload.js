@@ -10,10 +10,9 @@ const useUpload = (url) => {
 
   const addTask = (info) => {
     setLoading(true);
-    console.log(info);
     axios
       .post(url, info)
-      .then((response) => {
+      .then(() => {
         setLoading(false);
         toast({
           title: "Task Flow",

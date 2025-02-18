@@ -4,7 +4,7 @@ export async function GET() {
   const { data: item, error } = await supabaseClient
     .from("todos")
     .select("*")
-    .order("id", { ascending: true });
+    .order("date", { ascending: true });
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -14,8 +14,10 @@ export async function GET() {
 }
 
 export async function POST(req) {
-  const { data: title } = await req.json();
-  const { data, error } = await supabaseClient.from("todos").insert(title);
+  const requestedData = await req.json();
+  const { data, error } = await supabaseClient
+    .from("todos")
+    .insert(requestedData);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
