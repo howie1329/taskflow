@@ -35,6 +35,11 @@ const formSchema = z.object({
 export const CreateTaskModal = ({ handleModalToggle }) => {
   const { addTask } = useUpload("/api/todo");
 
+  const test = (idk) => {
+    console.log(idk);
+    idk.onChange();
+  };
+
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -122,6 +127,7 @@ export const CreateTaskModal = ({ handleModalToggle }) => {
                         mode="single"
                         selected={field.value}
                         onSelect={field.onChange}
+                        //onSelect={(e) => test(field)}
                         disabled={(date) => date < new Date()}
                         initialFocus
                       />
