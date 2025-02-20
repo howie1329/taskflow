@@ -1,36 +1,24 @@
-import { useState, useEffect } from "react";
+"use client";
 import axios from "axios";
 import { useToast } from "./use-toast";
+import { useQuery } from "@tanstack/react-query";
 
-const useGetTasks = (apiEndpoint, setRefresh) => {
-  const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+const fetchTask = async () => {
+  try {
+    const response = await axios.get("/api/todo");
+    return response.data;
+  } catch (error) {
+    console.error(error);
+  }
+};
+const useGetTasks = () => {
   const { toast } = useToast();
 
-  useEffect(() => {
-    axios
-      .get("/api/todo")
-      .then((response) => {
-        setTasks(response.data);
-        setLoading(false);
-        toast({
-          title: "Task Flow",
-          description: "Your tasks has been loaded successfully.",
-        });
-      })
-      .catch((error) => {
-        toast({
-          variant: "error",
-          title: "Task Flow",
-          description: "Failed to load tasks.",
-        });
-        setError(error);
-        console.log(error);
-      });
-  }, [apiEndpoint, setRefresh]);
-
-  return { tasks, loading };
+  return useQuery({
+    queryKey: ["tasks"],
+    queryFn: fetchTask,
+    staleTime: 60 * 10000,
+  });
 };
 
 export default useGetTasks;

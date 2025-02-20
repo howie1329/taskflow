@@ -23,9 +23,7 @@ import {
 } from "@/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
-
 import useUpload from "@/hooks/useUpload";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const formSchema = z.object({
   title: z.string().min(1),
@@ -34,12 +32,7 @@ const formSchema = z.object({
 });
 
 export const CreateTaskModal = ({ handleModalToggle }) => {
-  const { addTask } = useUpload("/api/todo");
-  const queryClient = useQueryClient();
-  const mutation = useMutation({
-    mutationFn: addTask,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
-  });
+  const mutation = useUpload();
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -53,10 +46,6 @@ export const CreateTaskModal = ({ handleModalToggle }) => {
   const onSubmit = (data) => {
     data["date"] = format(data.date, "P");
     mutation.mutate(data);
-    if (mutation.isSuccess) {
-      console.log("Run");
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
-    }
     handleModalToggle();
   };
 

@@ -1,36 +1,21 @@
-import { useState } from "react";
 import axios from "axios";
-import { useToast } from "./use-toast";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-const useUpload = (url) => {
-  const [data, setData] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState();
-  const { toast } = useToast();
+const uploadTask = async (data) => {
+  try {
+    const response = await axios.post("/api/todo", data);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+  }
+};
 
-  const addTask = (data) => {
-    setLoading(true);
-    axios
-      .post(url, data)
-      .then(() => {
-        setLoading(false);
-        toast({
-          title: "Task Flow",
-          description: "Your task has been added successfully.",
-        });
-      })
-      .catch((error) => {
-        toast({
-          variant: "error",
-          title: "Task Flow",
-          description: "Failed to add task.",
-        });
-        setError(error);
-        console.error(error);
-      });
-  };
-
-  return { data, setData, loading, error, addTask };
+const useUpload = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: uploadTask,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
+  });
 };
 
 export default useUpload;

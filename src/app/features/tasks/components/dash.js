@@ -3,24 +3,12 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { TaskCard } from "./taskCard";
 import { CreateTaskModal } from "./modal";
-import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 import Loading from "@/app/components/loading";
-
-const fetchTask = async () => {
-  try {
-    const response = await axios.get("/api/todo");
-    return response.data;
-  } catch (error) {}
-};
+import useGetTasks from "@/hooks/useGetTasks";
 
 const Dash = () => {
   const [showModal, setShowModal] = useState(false);
-  const { data, isLoading, error, isError } = useQuery({
-    queryKey: ["tasks"],
-    queryFn: fetchTask,
-    staleTime: 60 * 10000,
-  });
+  const { data, isLoading, error, isError } = useGetTasks();
 
   const handleModalToggle = () => {
     setShowModal(!showModal);
