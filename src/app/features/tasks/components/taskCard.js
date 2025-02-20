@@ -31,9 +31,17 @@ export const TaskCard = ({
       <CardFooter>
         <div className="flex gap-2">
           {isCompleted ? (
-            <Button onClick={buttonClick}>Completed</Button>
+            <Button size="status" variant="ghostComplete" onClick={buttonClick}>
+              Completed
+            </Button>
           ) : (
-            <Button onClick={buttonClick}>Not Completed</Button>
+            <Button
+              size="status"
+              variant="ghostIncomplete"
+              onClick={buttonClick}
+            >
+              Not Completed
+            </Button>
           )}
           <div>Due Date: {date}</div>
         </div>
