@@ -1,5 +1,6 @@
 import { supabaseClient } from "@/app/lib/supabaseClient";
 import { NextResponse } from "next/server";
+
 export async function GET() {
   const { data: item, error } = await supabaseClient
     .from("todos")
