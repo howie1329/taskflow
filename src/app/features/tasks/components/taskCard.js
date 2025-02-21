@@ -31,10 +31,12 @@ export const TaskCard = ({
   return (
     <Card className="flex flex-col mb-2 p-1">
       <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        <Button size="icon" variant="status" onClick={deleteButtonClick}>
-          DELETE
-        </Button>
+        <div className="flex flex-row justify-between">
+          <CardTitle>{title}</CardTitle>
+          <Button size="icon" variant="status" onClick={deleteButtonClick}>
+            D
+          </Button>
+        </div>
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardFooter>
