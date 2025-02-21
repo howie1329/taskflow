@@ -23,7 +23,6 @@ import {
 } from "@/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
-
 import useUpload from "@/hooks/useUpload";
 
 const formSchema = z.object({
@@ -33,7 +32,7 @@ const formSchema = z.object({
 });
 
 export const CreateTaskModal = ({ handleModalToggle }) => {
-  const { addTask } = useUpload("/api/todo");
+  const mutation = useUpload();
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -46,7 +45,7 @@ export const CreateTaskModal = ({ handleModalToggle }) => {
 
   const onSubmit = (data) => {
     data["date"] = format(data.date, "P");
-    addTask(data);
+    mutation.mutate(data);
     handleModalToggle();
   };
 

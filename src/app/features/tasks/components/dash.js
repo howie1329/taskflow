@@ -1,27 +1,26 @@
+"use client";
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { TaskCard } from "./taskCard";
 import { CreateTaskModal } from "./modal";
+import Loading from "@/app/components/loading";
+import useGetTasks from "@/hooks/useGetTasks";
 
-const Dash = ({ taskArr, setRefresh, refresh }) => {
+const Dash = () => {
   const [showModal, setShowModal] = useState(false);
-  //const { data, setData, loading, addTask } = useUpload("/api/todo");
+  const { data, isLoading, error, isError } = useGetTasks();
 
   const handleModalToggle = () => {
     setShowModal(!showModal);
   };
 
-  const handleTask = async (e) => {
-    e.preventDefault();
-    try {
-      console.log(data);
-      await addTask();
-      setRefresh(!refresh);
-      setData({ title: "", description: "" });
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  if (isLoading) {
+    return <Loading />;
+  }
+
+  if (isError) {
+    return <p>{error.message}</p>;
+  }
 
   return (
     <div className="flex flex-col w-full h-full gap-2">
@@ -29,7 +28,7 @@ const Dash = ({ taskArr, setRefresh, refresh }) => {
       {showModal && <CreateTaskModal handleModalToggle={handleModalToggle} />}
       <h2 className="font-semibold text-xl text-center">Task List</h2>
       <ul className="flex flex-col">
-        {taskArr && taskArr.map((task) => <TaskCard key={task.id} {...task} />)}
+        {data && data.map((task, key) => <TaskCard key={key} {...task} />)}
       </ul>
     </div>
   );
