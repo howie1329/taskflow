@@ -1,15 +1,14 @@
 "use client";
-
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-const useIsComplete = () => {
+const useDeleteTask = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, data }) => {
+    mutationFn: async ({ id }) => {
       try {
-        const response = await axios.patch(`/api/todo/${id}`, data);
+        const response = await axios.delete(`/api/todo/${id}`);
         return response.data;
       } catch (error) {
         console.error(error);
@@ -19,9 +18,9 @@ const useIsComplete = () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
     },
     onError: () => {
-      console.error("Error completing task");
+      console.error("Error deleting task");
     },
   });
 };
 
-export default useIsComplete;
+export default useDeleteTask;

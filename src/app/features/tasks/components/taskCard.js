@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import useIsComplete from "@/hooks/useIsComplete";
+import useDeleteTask from "@/hooks/useDeleteTask";
 
 export const TaskCard = ({
   title,
@@ -16,29 +17,41 @@ export const TaskCard = ({
   id,
   isCompleted,
 }) => {
-  const mutation = useIsComplete();
+  const updateMutation = useIsComplete();
+  const deleteMutation = useDeleteTask();
 
-  const buttonClick = () => {
+  const deleteButtonClick = () => {
+    deleteMutation.mutate({ id: id });
+  };
+
+  const completeButtonClick = () => {
     const data = { isCompleted: !isCompleted };
-    mutation.mutate({ id: id, data: data });
+    updateMutation.mutate({ id: id, data: data });
   };
   return (
     <Card className="flex flex-col mb-2 p-1">
       <CardHeader>
         <CardTitle>{title}</CardTitle>
+        <Button size="icon" variant="status" onClick={deleteButtonClick}>
+          DELETE
+        </Button>
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardFooter>
         <div className="flex gap-2">
           {isCompleted ? (
-            <Button size="status" variant="ghostComplete" onClick={buttonClick}>
+            <Button
+              size="status"
+              variant="ghostComplete"
+              onClick={completeButtonClick}
+            >
               Completed
             </Button>
           ) : (
             <Button
               size="status"
               variant="ghostIncomplete"
-              onClick={buttonClick}
+              onClick={completeButtonClick}
             >
               Not Completed
             </Button>
