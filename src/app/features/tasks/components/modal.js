@@ -24,6 +24,7 @@ import {
 import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import useUpload from "@/hooks/useUpload";
+import { Textarea } from "@/components/ui/textarea";
 
 const formSchema = z.object({
   title: z.string().min(1),
@@ -50,7 +51,7 @@ export const CreateTaskModal = ({ handleModalToggle }) => {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70">
       <div className="bg-white p-4 rounded w-1/2 h-fit space-y-4">
         <h2 className="text-xl font-semibold">New Task</h2>
         <Form {...form}>
@@ -80,7 +81,11 @@ export const CreateTaskModal = ({ handleModalToggle }) => {
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter Description" {...field} />
+                    <Textarea
+                      className="resize-none"
+                      placeholder="Enter Description"
+                      {...field}
+                    />
                   </FormControl>
                   <FormDescription>
                     This is the description of your task.
