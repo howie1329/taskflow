@@ -1,7 +1,9 @@
-import React from "react";
+"use client";
+import React, { useState } from "react";
 import Loading from "../components/loading";
+import useGetTasks from "@/hooks/useGetTasks";
 
-const Kanban = () => {
+const Page = () => {
   const { data, isLoading, error, isError } = useGetTasks();
   if (isLoading) {
     return <Loading />;
@@ -27,4 +29,4 @@ const columns = ({ title, headingColor, column, cards, setCards }) => {
   return <div></div>;
 };
 
-export default Kanban;
+export default Page;
