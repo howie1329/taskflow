@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   const { data: item, error } = await supabaseClient
-    .from("todos")
+    .from("tasks")
     .select("*")
     .order("date", { ascending: true });
 
@@ -17,7 +17,7 @@ export async function GET() {
 export async function POST(req) {
   const requestedData = await req.json();
   const { data, error } = await supabaseClient
-    .from("todos")
+    .from("tasks")
     .insert(requestedData);
 
   if (error) {

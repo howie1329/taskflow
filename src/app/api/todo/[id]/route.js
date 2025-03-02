@@ -6,7 +6,7 @@ export async function PATCH(req, { params }) {
   const requestedData = await req.json();
 
   const { data: item, error } = await supabaseClient
-    .from("todos")
+    .from("tasks")
     .update(requestedData)
     .eq("id", id.toString())
     .select();
@@ -21,7 +21,7 @@ export async function DELETE(req, { params }) {
   const { id } = await params;
 
   const { error } = await supabaseClient
-    .from("todos")
+    .from("tasks")
     .delete()
     .eq("id", id.toString());
 

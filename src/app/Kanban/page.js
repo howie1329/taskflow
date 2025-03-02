@@ -18,7 +18,9 @@ const Kanban = () => {
 
 const Board = () => {
   const [cards, setCards] = useState([]);
-  return <div className="flex h-full w-full gap-3 overflow-scroll p-12"></div>;
+  return (
+    <div className="flex h-full w-full gap-3 overflow-scroll p-12">Hello</div>
+  );
 };
 
 const columns = ({ title, headingColor, column, cards, setCards }) => {
