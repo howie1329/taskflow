@@ -9,12 +9,18 @@ const uploadTask = async (data) => {
       subTasks = data.subTasks;
       delete data.subTasks;
     }
-    data.tags = data.tags.split(",");
+    if (data.tags == "" || data.tags.length == 0) {
+      data.tags = null;
+    } else {
+      data.tags = data.tags.split(",");
+    }
+
     const response = await axios.post("/api/todo", data);
     if (subTasks) {
       subTasks.forEach(async (subTask) => {
         subTask["task_id"] = response.data[0].id;
-        if (subTask.subTask_name === "") return;
+        console.log("subtask name", subTask.subTask_name);
+        if (subTask.subTask_name == null) return;
         await uploadSubtask(subTask);
       });
     }
