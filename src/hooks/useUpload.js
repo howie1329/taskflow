@@ -13,6 +13,7 @@ const uploadTask = async (data) => {
     if (subTasks) {
       subTasks.forEach(async (subTask) => {
         subTask["task_id"] = response.data[0].id;
+        if (subTask.subTask_name === "") return;
         await uploadSubtask(subTask);
       });
     }
