@@ -7,6 +7,14 @@ export async function GET() {
     .select("*")
     .order("date", { ascending: true });
 
+  for (let i = 0; i < item.length; i++) {
+    const { data: subTask, error } = await supabaseClient
+      .from("subTasks")
+      .select("*")
+      .eq("task_id", item[i].id);
+    item[i].subTasks = [...subTask];
+  }
+
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   } else {

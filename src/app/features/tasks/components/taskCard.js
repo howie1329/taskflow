@@ -16,6 +16,7 @@ export const TaskCard = ({
   date = null,
   id,
   isCompleted,
+  subTasks,
 }) => {
   const updateMutation = useIsComplete();
   const deleteMutation = useDeleteTask();
@@ -37,7 +38,16 @@ export const TaskCard = ({
             D
           </Button>
         </div>
-        <CardDescription>{description}</CardDescription>
+        <CardDescription>
+          {description}
+          <div>
+            {subTasks && <p>Sub Tasks:{subTasks.length}</p>}
+            {subTasks &&
+              subTasks.map((task, key) => (
+                <p key={task.id}>{task.subTask_name}</p>
+              ))}
+          </div>
+        </CardDescription>
       </CardHeader>
       <CardFooter>
         <div className="flex gap-2">
