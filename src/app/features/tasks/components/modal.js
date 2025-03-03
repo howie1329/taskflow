@@ -182,7 +182,10 @@ export const CreateTaskModal = ({ handleModalToggle }) => {
               ))}
 
             {subTaskSwitch && (
-              <Button onClick={() => setSubTask([...subTask, {}])}>
+              <Button
+                type="button"
+                onClick={() => setSubTask([...subTask, {}])}
+              >
                 Add Sub Task
               </Button>
             )}
