@@ -27,6 +27,7 @@ import useUpload from "@/hooks/useUpload";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import SubTaskView from "./subTaskView";
 
 const formSchema = z.object({
   title: z.string().min(1),
@@ -159,22 +160,14 @@ export const CreateTaskModal = ({ handleModalToggle }) => {
         </Form>
 
         {subTaskSwitch &&
-          subTask.map((_, i) => (
-            <div key={i}>
-              <Input
-                value={subTask[i].subTask_name}
-                onChange={(e) =>
-                  setSubTask(
-                    subTask.map((item, index) =>
-                      index === i
-                        ? { ...item, subTask_name: e.target.value }
-                        : item
-                    )
-                  )
-                }
-                placeholder="Subtask "
-              />
-            </div>
+          subTask.map((task, i) => (
+            <SubTaskView
+              key={i}
+              task={task}
+              subTask={subTask}
+              setSubTask={setSubTask}
+              index={i}
+            />
           ))}
 
         {subTaskSwitch && (

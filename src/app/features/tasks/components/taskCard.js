@@ -43,9 +43,7 @@ export const TaskCard = ({
           <div>
             {subTasks && <p>Sub Tasks:{subTasks.length}</p>}
             {subTasks &&
-              subTasks.map((task, key) => (
-                <p key={task.id}>{task.subTask_name}</p>
-              ))}
+              subTasks.map((task, key) => <p key={key}>{task.subTask_name}</p>)}
           </div>
         </CardDescription>
       </CardHeader>
