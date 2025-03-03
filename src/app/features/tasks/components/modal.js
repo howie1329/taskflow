@@ -32,6 +32,7 @@ import SubTaskView from "./subTaskView";
 const formSchema = z.object({
   title: z.string().min(1),
   description: z.string().min(1),
+  tags: z.string(),
   date: z.date(),
 });
 
@@ -45,6 +46,7 @@ export const CreateTaskModal = ({ handleModalToggle }) => {
     defaultValues: {
       title: "",
       description: "",
+      tags: "",
       date: new Date(),
     },
   });
@@ -58,21 +60,23 @@ export const CreateTaskModal = ({ handleModalToggle }) => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70">
-      <div className="bg-white p-4 rounded w-1/2 h-fit space-y-4">
-        <h2 className="text-xl font-semibold">New Task</h2>
-        <div>
-          <Switch
-            id="subTask"
-            checked={subTaskSwitch}
-            onCheckedChange={() => setSubTaskSwitch(!subTaskSwitch)}
-          >
-            Sub Task
-          </Switch>
-          <Label>Need SubTasks?</Label>
+      <div className="bg-white p-4 rounded w-1/2 h-4/6 space-y-4 overflow-y-auto">
+        <div className="flex justify-between">
+          <h2 className="text-xl font-semibold">Create New Task</h2>
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="subTask"
+              checked={subTaskSwitch}
+              onCheckedChange={() => setSubTaskSwitch(!subTaskSwitch)}
+            >
+              Sub Task
+            </Switch>
+            <Label>Need SubTasks?</Label>
+          </div>
         </div>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
             <FormField
               control={form.control}
               name="title"
@@ -90,6 +94,21 @@ export const CreateTaskModal = ({ handleModalToggle }) => {
                 </FormItem>
               )}
             />
+
+            <FormField
+              control={form.control}
+              name="tags"
+              label="Tags"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input placeholder="Enter Tags" {...field} />
+                  </FormControl>
+                  <FormDescription>Seperate Tags with a comma</FormDescription>
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="description"
@@ -151,6 +170,22 @@ export const CreateTaskModal = ({ handleModalToggle }) => {
                 </FormItem>
               )}
             />
+            {subTaskSwitch &&
+              subTask.map((task, i) => (
+                <SubTaskView
+                  key={i}
+                  task={task}
+                  subTask={subTask}
+                  setSubTask={setSubTask}
+                  index={i}
+                />
+              ))}
+
+            {subTaskSwitch && (
+              <Button onClick={() => setSubTask([...subTask, {}])}>
+                Add Sub Task
+              </Button>
+            )}
 
             <div className="flex justify-between">
               <Button onClick={handleModalToggle}>Close</Button>
@@ -158,23 +193,6 @@ export const CreateTaskModal = ({ handleModalToggle }) => {
             </div>
           </form>
         </Form>
-
-        {subTaskSwitch &&
-          subTask.map((task, i) => (
-            <SubTaskView
-              key={i}
-              task={task}
-              subTask={subTask}
-              setSubTask={setSubTask}
-              index={i}
-            />
-          ))}
-
-        {subTaskSwitch && (
-          <Button onClick={() => setSubTask([...subTask, {}])}>
-            Add Sub Task
-          </Button>
-        )}
       </div>
     </div>
   );
