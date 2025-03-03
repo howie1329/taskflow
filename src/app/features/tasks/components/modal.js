@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,6 +25,8 @@ import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import useUpload from "@/hooks/useUpload";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 const formSchema = z.object({
   title: z.string().min(1),
@@ -33,6 +35,8 @@ const formSchema = z.object({
 });
 
 export const CreateTaskModal = ({ handleModalToggle }) => {
+  const [subTaskSwitch, setSubTaskSwitch] = useState(false);
+  const [subTask, setSubTask] = useState([{}]);
   const mutation = useUpload();
 
   const form = useForm({
@@ -46,6 +50,7 @@ export const CreateTaskModal = ({ handleModalToggle }) => {
 
   const onSubmit = (data) => {
     data["date"] = format(data.date, "P");
+    data["subTasks"] = subTask;
     mutation.mutate(data);
     handleModalToggle();
   };
@@ -54,6 +59,17 @@ export const CreateTaskModal = ({ handleModalToggle }) => {
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70">
       <div className="bg-white p-4 rounded w-1/2 h-fit space-y-4">
         <h2 className="text-xl font-semibold">New Task</h2>
+        <div>
+          <Switch
+            id="subTask"
+            checked={subTaskSwitch}
+            onCheckedChange={() => setSubTaskSwitch(!subTaskSwitch)}
+          >
+            Sub Task
+          </Switch>
+          <Label>Need SubTasks?</Label>
+        </div>
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <FormField
@@ -134,12 +150,38 @@ export const CreateTaskModal = ({ handleModalToggle }) => {
                 </FormItem>
               )}
             />
+
             <div className="flex justify-between">
               <Button onClick={handleModalToggle}>Close</Button>
               <Button type="submit">Add Task</Button>
             </div>
           </form>
         </Form>
+
+        {subTaskSwitch &&
+          subTask.map((_, i) => (
+            <div key={i}>
+              <Input
+                value={subTask[i].subTask_name}
+                onChange={(e) =>
+                  setSubTask(
+                    subTask.map((item, index) =>
+                      index === i
+                        ? { ...item, subTask_name: e.target.value }
+                        : item
+                    )
+                  )
+                }
+                placeholder="Subtask "
+              />
+            </div>
+          ))}
+
+        {subTaskSwitch && (
+          <Button onClick={() => setSubTask([...subTask, {}])}>
+            Add Sub Task
+          </Button>
+        )}
       </div>
     </div>
   );
