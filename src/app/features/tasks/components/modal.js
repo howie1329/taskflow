@@ -76,14 +76,13 @@ export const CreateTaskModal = ({ handleModalToggle }) => {
         </div>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
               name="title"
               label="Title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Title</FormLabel>
                   <FormControl>
                     <Input placeholder="Enter Your Task" {...field} />
                   </FormControl>
@@ -115,7 +114,6 @@ export const CreateTaskModal = ({ handleModalToggle }) => {
               label="Description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
                   <FormControl>
                     <Textarea
                       className="resize-none"
@@ -136,7 +134,6 @@ export const CreateTaskModal = ({ handleModalToggle }) => {
               label="Date"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel>Date</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
