@@ -31,7 +31,7 @@ import SubTaskView from "./subTaskView";
 
 const formSchema = z.object({
   title: z.string().min(1),
-  description: z.string().min(1),
+  description: z.string(),
   labels: z.string(),
   date: z.date(),
 });

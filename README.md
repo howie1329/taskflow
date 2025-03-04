@@ -1,80 +1,95 @@
-# Task Flow
+# 🚀 Productivity App
 
-Task Flow is a simple task management application built with Next.js, React, and Supabase.
+An all-in-one productivity app for individuals, combining **task management, calendar integration, and project management** with AI-powered optimizations. Designed to help users organize their tasks, schedule time effectively, and stay on top of their productivity goals.
 
-## Getting Started
+## 🌟 Features
 
-First, clone the repository:
+### **MVP Features (Initial Release)**
 
-````bash
-git clone https://github.com/your-username/taskflow.git
-cd taskflow
+- ✅ **Task Management** – Create, edit, prioritize, and categorize tasks.
+- ✅ **Recurring Tasks** – Set daily, weekly, or monthly repeating tasks.
+- ✅ **Calendar Integration** – Sync tasks with Google Calendar.
+- ✅ **Time Blocking** – Assign tasks to specific time slots.
+- ✅ **Notes Section (Optional Feature)** – Take rich-text notes and organize them.
+- ✅ **Pomodoro Timer & Time Tracking** – Focus mode with logged task time.
+- ✅ **Reminders & Notifications** – Alerts for upcoming deadlines.
+- ✅ **Dark Mode & Custom UI** – Modern, responsive design.
+- ✅ **User Authentication** – Secure login with Clerk and Supabase.
+- ✅ **Subscription Model** – Free & premium feature separation with Stripe integration.
 
-Sure! Here is a new README.md file for your project:
+### **Enhanced Features (Future Updates)**
 
-```markdown
-# Task Flow
+- 🚀 AI-powered **Smart Task Prioritization & Scheduling**
+- 🚀 **Advanced Recurring Tasks** (e.g., "Repeat every weekday" or "2nd Tuesday of the month")
+- 🚀 **Kanban Board & Gantt Chart Views**
+- 🚀 **Task Dependencies** (Task B cannot start until Task A is completed)
+- 🚀 **Two-Way Calendar Sync** (Google Calendar, Notion, Apple Calendar)
+- 🚀 **Collaboration & Shared Tasks**
+- 🚀 **AI Insights & Productivity Reports**
+- 🚀 **Premium Integrations** (Slack, Zoom, cloud storage)
 
-Task Flow is a simple task management application built with Next.js, React, and Supabase.
+## 🛠 Tech Stack
 
-## Getting Started
+- **Frontend:** Next.js, Tailwind CSS, ShadCN
+- **Backend & Database:** Supabase
+- **Authentication:** Clerk
+- **Payments:** Stripe
+- **Notifications:** Browser APIs, SendGrid
+- **State Management:** React Context API (potentially Redux or Zustand for scalability)
 
-First, clone the repository:
+## 🚀 Getting Started
 
-```bash
-git clone https://github.com/your-username/taskflow.git
-cd taskflow
-````
+### **1. Clone the Repository**
 
-Install the dependencies:
-
-```bash
-npm install
-# or
-yarn install
+```sh
+git clone https://github.com/your-username/productivity-app.git
+cd productivity-app
 ```
 
-Set up your environment variables. Create a .env.local file in the root of your project and add the following:
+### **2. Install Dependencies**
 
-```env
+```sh
+yarn install  # or npm install
+```
+
+### **3. Set Up Environment Variables**
+
+Create a `.env.local` file and configure the following:
+
+```sh
 NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-key
+NEXT_PUBLIC_CLERK_FRONTEND_API=your-clerk-api-key
+NEXT_PUBLIC_STRIPE_PUBLIC_KEY=your-stripe-public-key
 ```
 
-Run the development server:
+### **4. Run the App**
 
-```bash
-npm run dev
-# or
-yarn dev
+```sh
+yarn dev  # or npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The app will be available at `http://localhost:3000`
 
-## Project Structure
+## 📌 Roadmap
 
-- page.js: Main dashboard page where tasks are displayed and managed.
-- route.js: API route for handling GET and POST requests to manage tasks.
-- supabaseClient.js: Supabase client configuration.
-- toaster.jsx: Toaster component for displaying notifications.
-- taskCard.js: Task card component for displaying individual tasks.
+- [ ] Finalize MVP features
+- [ ] Beta testing & user feedback
+- [ ] Implement AI-powered smart task suggestions
+- [ ] Expand integrations (Notion, Todoist, Apple Calendar)
+- [ ] Release iOS app companion
 
-## Learn More
+## 🤝 Contributing
 
-To learn more about Next.js, take a look at the following resources:
+Interested in contributing? Feel free to submit a PR or open an issue!
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📜 License
 
-To learn more about Supabase, take a look at the following resources:
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-- [Supabase Documentation](https://supabase.io/docs) - learn about Supabase features and API.
+---
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new) from the creators of Next.js.
-
-Check out the [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Built with ❤️ by Howard Thomas**
 
 ## License
 
