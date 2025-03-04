@@ -32,7 +32,7 @@ import SubTaskView from "./subTaskView";
 const formSchema = z.object({
   title: z.string().min(1),
   description: z.string().min(1),
-  tags: z.string(),
+  labels: z.string(),
   date: z.date(),
 });
 
@@ -46,7 +46,7 @@ export const CreateTaskModal = ({ handleModalToggle }) => {
     defaultValues: {
       title: "",
       description: "",
-      tags: "",
+      labels: "",
       date: new Date(),
     },
   });
@@ -96,14 +96,16 @@ export const CreateTaskModal = ({ handleModalToggle }) => {
 
             <FormField
               control={form.control}
-              name="tags"
-              label="Tags"
+              name="labels"
+              label="Labels"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input placeholder="Enter Tags" {...field} />
+                    <Input placeholder="Enter Labels" {...field} />
                   </FormControl>
-                  <FormDescription>Seperate Tags with a comma</FormDescription>
+                  <FormDescription>
+                    Seperate Labels with a comma
+                  </FormDescription>
                 </FormItem>
               )}
             />
