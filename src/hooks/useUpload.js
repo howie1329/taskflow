@@ -9,10 +9,14 @@ const uploadTask = async (data) => {
       subTasks = data.subTasks;
       delete data.subTasks;
     }
-    if (data.labels == "" || data.tags.length == 0) {
+    if (data.labels == "" || data.labels == null) {
       data.labels = null;
     } else {
-      data.labels = data.tags.split(",");
+      if (data.labels.includes(",")) {
+        data.labels = data.labels.split(",");
+      } else {
+        data.labels = [data.labels];
+      }
     }
 
     const response = await axios.post("/api/todo", data);

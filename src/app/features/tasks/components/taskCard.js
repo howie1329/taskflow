@@ -18,6 +18,7 @@ export const TaskCard = ({
   isCompleted,
   subTasks,
   labels,
+  priority,
 }) => {
   const updateMutation = useIsComplete();
   const deleteMutation = useDeleteTask();
@@ -42,6 +43,10 @@ export const TaskCard = ({
                   {tag}
                 </Button>
               ))}
+
+            <Button size="status" variant="priority">
+              {priority}
+            </Button>
           </div>
           <Button size="icon" variant="status" onClick={deleteButtonClick}>
             D

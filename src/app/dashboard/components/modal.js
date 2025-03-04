@@ -28,12 +28,20 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import SubTaskModalView from "./subTaskModalView";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const formSchema = z.object({
   title: z.string().min(1),
   description: z.string(),
   labels: z.string(),
   date: z.date(),
+  priority: z.string(),
 });
 
 export const CreateTaskModal = ({ handleModalToggle }) => {
@@ -48,6 +56,7 @@ export const CreateTaskModal = ({ handleModalToggle }) => {
       description: "",
       labels: "",
       date: new Date(),
+      priority: "None",
     },
   });
 
@@ -61,21 +70,50 @@ export const CreateTaskModal = ({ handleModalToggle }) => {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70">
       <div className="bg-white p-4 rounded w-1/2 h-4/6 space-y-4 overflow-y-auto">
-        <div className="flex justify-between">
-          <h2 className="text-xl font-semibold">Create New Task</h2>
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="subTask"
-              checked={subTaskSwitch}
-              onCheckedChange={() => setSubTaskSwitch(!subTaskSwitch)}
-            >
-              Sub Task
-            </Switch>
-            <Label>Need SubTasks?</Label>
-          </div>
-        </div>
-
         <Form {...form}>
+          <div className="flex justify-between">
+            <h2 className="text-xl font-semibold">Create New Task</h2>
+            <div className="flex items-center space-x-2">
+              <FormField
+                control={form.control}
+                name="priority"
+                label="Priority"
+                render={({ field }) => (
+                  <FormItem>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-32">
+                          <SelectValue value="Priority" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="None">None</SelectItem>
+                        <SelectItem value="Low">Low</SelectItem>
+                        <SelectItem value="Medium">Medium</SelectItem>
+                        <SelectItem value="High">High</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+              />
+
+              <Label>Priority</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="subTask"
+                checked={subTaskSwitch}
+                onCheckedChange={() => setSubTaskSwitch(!subTaskSwitch)}
+              >
+                Sub Task
+              </Switch>
+              <Label>Need SubTasks?</Label>
+            </div>
+          </div>
+
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
