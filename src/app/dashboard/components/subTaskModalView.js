@@ -1,7 +1,7 @@
 import { Input } from "@/components/ui/input";
 import React from "react";
 
-const SubTaskView = ({ task, subTask, setSubTask, index }) => {
+const SubTaskModalView = ({ task, subTask, setSubTask, index }) => {
   return (
     <div>
       <Input
@@ -19,4 +19,4 @@ const SubTaskView = ({ task, subTask, setSubTask, index }) => {
   );
 };
 
-export default SubTaskView;
+export default SubTaskModalView;

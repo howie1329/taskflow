@@ -1,5 +1,5 @@
 import react from "react";
-import Dash from "../features/tasks/components/dash";
+import Dash from "./components/dash";
 
 function Page() {
   return (

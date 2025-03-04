@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { TaskCard } from "./taskCard";
+import { TaskCard } from "../../features/tasks/components/taskCard";
 import { CreateTaskModal } from "./modal";
 import Loading from "@/app/components/loading";
 import useGetTasks from "@/hooks/useGetTasks";
