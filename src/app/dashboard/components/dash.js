@@ -24,6 +24,7 @@ const Dash = () => {
 
   return (
     <div className="flex flex-col w-full h-full gap-2">
+      <h1 className="font-bold text-2xl text-center">Task Flow - Dashboard</h1>
       <Button onClick={handleModalToggle}>Add Your Task</Button>
       {showModal && <CreateTaskModal handleModalToggle={handleModalToggle} />}
       <h2 className="font-semibold text-xl text-center">Task List</h2>
