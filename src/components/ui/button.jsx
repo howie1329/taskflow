@@ -26,6 +26,7 @@ const buttonVariants = cva(
         status: "text-primary-foreground bg-primary",
         tag: "text-primary-foreground bg-primary bg-blue-600 ",
         priority: "text-primary-foreground bg-primary bg-rose-500",
+        basic: "",
       },
       size: {
         default: "h-9 px-4 py-2",
@@ -33,6 +34,7 @@ const buttonVariants = cva(
         lg: "h-10 rounded-md px-8",
         icon: "h-9 w-9",
         status: "h-4 rounded-md p-2 text-xs",
+        basic: "",
       },
     },
     defaultVariants: {
