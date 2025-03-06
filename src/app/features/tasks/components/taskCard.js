@@ -36,7 +36,7 @@ export const TaskCard = ({
       <CardHeader>
         <div className="flex flex-row justify-between">
           <div className="flex gap-1">
-            <CardTitle>{title}</CardTitle>
+            <h1>{title}</h1>
             {labels &&
               labels.map((tag, key) => (
                 <Button size="status" variant="tag" key={key}>

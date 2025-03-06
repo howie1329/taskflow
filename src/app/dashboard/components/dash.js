@@ -7,6 +7,7 @@ import Loading from "@/app/components/loading";
 import useGetTasks from "@/hooks/useGetTasks";
 import datas from "@/app/taskData.json";
 import useUpload from "@/hooks/useUpload";
+import { TaskModal } from "@/app/features/tasks/components/taskModal";
 
 const Dash = () => {
   const [showModal, setShowModal] = useState(false);
@@ -38,8 +39,8 @@ const Dash = () => {
       {showModal && <CreateTaskModal handleModalToggle={handleModalToggle} />}
       <h2 className="font-semibold text-xl text-center">Task List</h2>
       <Button onClick={onClick}>Upload JSON</Button>
-      <ul className="flex flex-col">
-        {data && data.map((task, key) => <TaskCard key={key} {...task} />)}
+      <ul className="flex gap-2 flex-wrap">
+        {data && data.map((task, key) => <TaskModal key={key} task={task} />)}
       </ul>
     </div>
   );
