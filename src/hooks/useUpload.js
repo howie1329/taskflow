@@ -23,7 +23,6 @@ const uploadTask = async (data) => {
     if (subTasks) {
       subTasks.forEach(async (subTask) => {
         subTask["task_id"] = response.data[0].id;
-        console.log("subtask name", subTask.subTask_name);
         if (subTask.subTask_name == null) return;
         await uploadSubtask(subTask);
       });

@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 export async function GET() {
   const { data: item, error } = await supabaseClient
     .from("tasks")
-    .select("*", "subTasks(*)")
+    .select("*")
     .order("date", { ascending: true });
 
   for (let i = 0; i < item.length; i++) {

@@ -3,7 +3,6 @@ import { NextResponse } from "next/server";
 
 export async function POST(req) {
   const requestedData = await req.json();
-  console.log(requestedData);
   const { data, error } = await supabaseClient
     .from("subTasks")
     .insert(requestedData)

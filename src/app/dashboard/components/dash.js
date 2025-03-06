@@ -5,10 +5,19 @@ import { TaskCard } from "../../features/tasks/components/taskCard";
 import { CreateTaskModal } from "./modal";
 import Loading from "@/app/components/loading";
 import useGetTasks from "@/hooks/useGetTasks";
+import datas from "@/app/taskData.json";
+import useUpload from "@/hooks/useUpload";
 
 const Dash = () => {
   const [showModal, setShowModal] = useState(false);
   const { data, isLoading, error, isError } = useGetTasks();
+  const mutation = useUpload();
+
+  const onClick = () => {
+    datas.map((data) => {
+      mutation.mutate(data);
+    });
+  };
 
   const handleModalToggle = () => {
     setShowModal(!showModal);
@@ -28,6 +37,7 @@ const Dash = () => {
       <Button onClick={handleModalToggle}>Add Your Task</Button>
       {showModal && <CreateTaskModal handleModalToggle={handleModalToggle} />}
       <h2 className="font-semibold text-xl text-center">Task List</h2>
+      <Button onClick={onClick}>Upload JSON</Button>
       <ul className="flex flex-col">
         {data && data.map((task, key) => <TaskCard key={key} {...task} />)}
       </ul>
