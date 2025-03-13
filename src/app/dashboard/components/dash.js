@@ -33,9 +33,9 @@ const Dash = () => {
       <CreateTaskModal />
       <h2 className="font-semibold text-xl text-center">Task List</h2>
       <Button onClick={onClick}>Upload JSON</Button>
-      <ul className="flex gap-2 flex-wrap">
+      <div className="flex gap-2 flex-wrap">
         {data && data.map((task, key) => <TaskModal key={key} task={task} />)}
-      </ul>
+      </div>
       <EditTaskCard />
     </div>
   );
