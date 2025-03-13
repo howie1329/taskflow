@@ -7,6 +7,7 @@ import useGetTasks from "@/hooks/useGetTasks";
 import datas from "@/app/taskData.json";
 import useUpload from "@/hooks/useUpload";
 import { TaskModal } from "@/app/features/tasks/components/taskModal";
+import { EditTaskCard } from "@/app/features/tasks/components/editTaskCard";
 
 const Dash = () => {
   const { data, isLoading, error, isError } = useGetTasks();
@@ -35,6 +36,7 @@ const Dash = () => {
       <ul className="flex gap-2 flex-wrap">
         {data && data.map((task, key) => <TaskModal key={key} task={task} />)}
       </ul>
+      <EditTaskCard />
     </div>
   );
 };

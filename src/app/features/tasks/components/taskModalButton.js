@@ -7,7 +7,7 @@ export const TaskModalButton = ({ task }) => {
     <Button
       variant="basic"
       size="basic"
-      className="w-64 h-36 min-w-fit min-h-fit bg-gray-400 text-black rounded-xl p-1 "
+      className="w-[20rem] h-36 min-w-fit min-h-fit bg-gray-400 text-black rounded-xl p-1 "
     >
       <div className="grid grid-cols-12 grid-rows-12 w-full h-full ">
         <div className="flex col-start-1 row-start-1 col-end-13 row-end-3 space-x-2 pt-1">
