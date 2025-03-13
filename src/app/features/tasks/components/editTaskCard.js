@@ -1,5 +1,5 @@
 import { Card, CardHeader } from "@/components/ui/card";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, SeparatorHorizontal } from "lucide-react";
 import React from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -37,7 +37,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { ChevronsUpDown } from "lucide-react";
 
 const formSchema = z.object({
   title: z.string().min(1),
@@ -72,8 +71,8 @@ export const EditTaskCard = () => {
         <div className="flex flex-row justify-between items-center">
           <h4 className="font-semibold">Create New Task</h4>
           <CollapsibleTrigger>
-            <Button>
-              <ChevronsUpDown className="h-4 w-4" />
+            <Button variant="ghost" size="sm">
+              <SeparatorHorizontal className="h-4 w-4" />
             </Button>
           </CollapsibleTrigger>
         </div>
