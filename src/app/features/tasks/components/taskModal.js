@@ -9,7 +9,6 @@ import {
 
 import React from "react";
 import { TaskCard } from "./taskCard";
-import { Button } from "@/components/ui/button";
 import { TaskModalButton } from "./taskModalButton";
 
 export const TaskModal = ({ task }) => {

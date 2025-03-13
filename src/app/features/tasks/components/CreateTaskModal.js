@@ -12,7 +12,6 @@ import {
   FormDescription,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -27,7 +26,7 @@ import useUpload from "@/hooks/useUpload";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import SubTaskModalView from "./subTaskModalView";
+import SubTaskModalView from "../../../dashboard/components/subTaskModalView";
 import {
   Select,
   SelectContent,
@@ -35,6 +34,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogContent,
+} from "@/components/ui/dialog";
 
 const formSchema = z.object({
   title: z.string().min(1),
@@ -44,7 +50,7 @@ const formSchema = z.object({
   priority: z.string(),
 });
 
-export const CreateTaskModal = ({ handleModalToggle }) => {
+export const CreateTaskModal = () => {
   const [subTaskSwitch, setSubTaskSwitch] = useState(false);
   const [subTask, setSubTask] = useState([{}]);
   const mutation = useUpload();
@@ -68,11 +74,17 @@ export const CreateTaskModal = ({ handleModalToggle }) => {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70">
-      <div className="bg-white p-4 rounded w-1/2 h-4/6 space-y-4 overflow-y-auto">
+    <Dialog>
+      <DialogTrigger>
+        <Button>Create New Task</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Create Task</DialogTitle>
+        </DialogHeader>
+
         <Form {...form}>
           <div className="flex justify-between">
-            <h2 className="text-xl font-semibold">Create New Task</h2>
             <div className="flex items-center space-x-2">
               <FormField
                 control={form.control}
@@ -228,12 +240,11 @@ export const CreateTaskModal = ({ handleModalToggle }) => {
             )}
 
             <div className="flex justify-between">
-              <Button onClick={handleModalToggle}>Close</Button>
               <Button type="submit">Add Task</Button>
             </div>
           </form>
         </Form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };
