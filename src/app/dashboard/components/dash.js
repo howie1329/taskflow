@@ -27,16 +27,38 @@ const Dash = () => {
     return <p>{error.message}</p>;
   }
 
+  const filterTaskPriority = (priority) => {
+    const sorted = data
+      .filter((task) => task.priority === priority)
+      .sort((task1, task2) => task1.position - task2.position)
+      .map((task, key) => <TaskModal key={key} task={task} />);
+    return sorted;
+  };
+
   return (
     <div className="flex flex-col w-full h-full gap-2">
       <h1 className="font-bold text-2xl text-center">Task Flow - Dashboard</h1>
       <CreateTaskModal />
       <h2 className="font-semibold text-xl text-center">Task List</h2>
       <Button onClick={onClick}>Upload JSON</Button>
-      <div className="flex gap-2 flex-wrap">
-        {data && data.map((task, key) => <TaskModal key={key} task={task} />)}
+      <div className="flex justify-between ">
+        <div className="flex flex-col gap-2">
+          <h2>Low Priority</h2>
+          {filterTaskPriority("None")}
+          {filterTaskPriority("Low")}
+          <EditTaskCard />
+        </div>
+        <div className="flex flex-col gap-2">
+          <h2>Medium Priority</h2>
+          {filterTaskPriority("Medium")}
+          <EditTaskCard />
+        </div>
+        <div className="flex flex-col gap-2">
+          <h2>High Priority</h2>
+          {filterTaskPriority("High")}
+          <EditTaskCard />
+        </div>
       </div>
-      <EditTaskCard />
     </div>
   );
 };
