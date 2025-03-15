@@ -1,12 +1,12 @@
 "use client";
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { CreateTaskModal } from "../../features/tasks/components/CreateTask/CreateTaskModal";
+import { CreateTaskModal } from "@/app/features/tasks/components/CreateTaskModal";
 import Loading from "@/app/components/loading";
 import useGetTasks from "@/hooks/useGetTasks";
 import datas from "@/app/taskData.json";
 import useUpload from "@/hooks/useUpload";
-import { EditTaskForm } from "@/app/features/tasks/components/CreateTask/EditTaskForm";
+import { EditTaskForm } from "@/app/features/tasks/components/EditTaskForm";
 import { TaskModal } from "@/app/features/tasks/components/taskModal";
 
 const filterTaskPriority = (data, priority) => {

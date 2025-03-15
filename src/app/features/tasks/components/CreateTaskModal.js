@@ -1,7 +1,6 @@
 "use client";
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { TaskCreateForm } from "../TaskCreateForm";
 import {
   Dialog,
   DialogHeader,
@@ -9,6 +8,7 @@ import {
   DialogTrigger,
   DialogContent,
 } from "@/components/ui/dialog";
+import { TaskCreateForm } from "./TaskCreateForm";
 
 export const CreateTaskModal = () => {
   return (
