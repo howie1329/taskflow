@@ -25,6 +25,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import useChangePosition from "@/hooks/useUpPosition";
+import TaskDialogCard from "./TaskDialogCard";
 
 export const TaskModal = ({ task }) => {
   const changePosition = useChangePosition();
@@ -81,12 +82,8 @@ export const TaskModal = ({ task }) => {
           </CollapsibleContent>
         </Collapsible>
         <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{task.title}</DialogTitle>
-            <DialogDescription>{task.description}</DialogDescription>
-          </DialogHeader>
-          <TaskCard {...task} />
-        </DialogContent>{" "}
+          <TaskDialogCard task={task} />
+        </DialogContent>
       </Dialog>
     </Card>
   );

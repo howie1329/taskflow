@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import useIsComplete from "@/hooks/useIsComplete";
 import useDeleteTask from "@/hooks/useDeleteTask";
+import { Trash2 } from "lucide-react";
 
 export const TaskCard = ({
   title,
@@ -49,7 +50,7 @@ export const TaskCard = ({
             </Button>
           </div>
           <Button size="icon" variant="status" onClick={deleteButtonClick}>
-            D
+            <Trash2 />
           </Button>
         </div>
         <CardDescription>

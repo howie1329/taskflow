@@ -1,0 +1,77 @@
+import React from "react";
+import {
+  DialogHeader,
+  DialogDescription,
+  DialogTitle,
+  DialogContent,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Trash2 } from "lucide-react";
+import useIsComplete from "@/hooks/useIsComplete";
+import useDeleteTask from "@/hooks/useDeleteTask";
+
+const TaskDialogCard = ({ task }) => {
+  const updateMutation = useIsComplete();
+  const deleteMutation = useDeleteTask();
+
+  const deleteButtonClick = () => {
+    deleteMutation.mutate({ id: task.id });
+  };
+
+  const completeButtonClick = () => {
+    const data = { isCompleted: !task.isCompleted };
+    updateMutation.mutate({ id: task.id, data: data });
+  };
+  return (
+    <>
+      <DialogHeader>
+        <DialogTitle>{task.title}</DialogTitle>
+        {task.labels &&
+          task.labels.map((tag, key) => (
+            <Button size="status" variant="tag" key={key}>
+              {tag}
+            </Button>
+          ))}
+        <Button size="status" variant="priority">
+          {task.priority}
+        </Button>
+        <Button size="icon" variant="status" onClick={deleteButtonClick}>
+          <Trash2 />
+        </Button>
+        <DialogDescription>{task.description}</DialogDescription>
+      </DialogHeader>
+      <div>
+        {task.subTasks && <p>Sub Tasks:{task.subTasks.length}</p>}
+        {task.subTasks &&
+          task.subTasks.map((task, key) => (
+            <p key={key}>{task.subTask_name}</p>
+          ))}
+      </div>
+      <DialogFooter>
+        <div className="flex gap-2">
+          {task.isCompleted ? (
+            <Button
+              size="status"
+              variant="ghostComplete"
+              onClick={completeButtonClick}
+            >
+              Completed
+            </Button>
+          ) : (
+            <Button
+              size="status"
+              variant="ghostIncomplete"
+              onClick={completeButtonClick}
+            >
+              Not Completed
+            </Button>
+          )}
+          <p>Due Date: {task.date}</p>
+        </div>
+      </DialogFooter>
+    </>
+  );
+};
+
+export default TaskDialogCard;
