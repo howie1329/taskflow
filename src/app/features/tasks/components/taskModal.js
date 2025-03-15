@@ -47,31 +47,31 @@ export const TaskModal = ({ task }) => {
               <div className="flex flex-col items-center">
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="xs"
                   onClick={() => updatePosition(1)}
                 >
-                  <ChevronUp className="h-4 w-4" />
+                  <ChevronUp className="h-2 w-2" />
                 </Button>
-                <p>{task.position}</p>
+                <p className="font-semibold text-xs">{task.position}</p>
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="xs"
                   onClick={() => updatePosition(-1)}
                 >
-                  <ChevronDown className="h-4 w-4" />
+                  <ChevronDown className="h-2 w-2" />
                 </Button>
               </div>
               <h2 className="font-semibold truncate">{task.title}</h2>
             </div>
             <div className="flex flex-row space-x-2">
               <CollapsibleTrigger>
-                <Button variant="ghost" size="sm">
-                  <SeparatorHorizontal className="h-4 w-4" />
+                <Button variant="ghost" size="xs">
+                  <SeparatorHorizontal className="h-2 w-2" />
                 </Button>
               </CollapsibleTrigger>
               <DialogTrigger>
-                <Button variant="ghost" size="sm">
-                  <MoveDiagonal className="h-4 w-4" />
+                <Button variant="ghost" size="xs">
+                  <MoveDiagonal className="h-2 w-2" />
                 </Button>
               </DialogTrigger>
             </div>
