@@ -1,10 +1,10 @@
 import react from "react";
-import Dash from "./components/dash";
+import TaskDashboard from "./components/TaskDashboard";
 
 function Page() {
   return (
     <div className="flex m-2 flex-col items-center flex-1">
-      <Dash />
+      <TaskDashboard />
     </div>
   );
 }

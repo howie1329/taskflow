@@ -25,7 +25,6 @@ import useUpload from "@/hooks/useUpload";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import SubTaskModalView from "../../../dashboard/components/subTaskModalView";
 import {
   Select,
   SelectContent,
@@ -33,6 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import SubTaskInput from "@/app/dashboard/components/SubTaskInput";
 
 const formSchema = z.object({
   title: z.string().min(1),
@@ -200,7 +200,7 @@ export const TaskCreateForm = () => {
         />
         {subTaskSwitch &&
           subTask.map((task, i) => (
-            <SubTaskModalView
+            <SubTaskInput
               key={i}
               task={task}
               subTask={subTask}

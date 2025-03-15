@@ -45,7 +45,7 @@ const formSchema = z.object({
   priority: z.string(),
 });
 
-export const EditTaskCard = () => {
+export const EditTaskForm = () => {
   const mutation = useUpload();
 
   const form = useForm({

@@ -9,7 +9,7 @@ import {
   DialogTrigger,
   DialogContent,
 } from "@/components/ui/dialog";
-import { TaskCreateForm } from "./taskCreateForm";
+import { TaskCreateForm } from "./TaskCreateForm";
 
 export const CreateTaskModal = () => {
   return (

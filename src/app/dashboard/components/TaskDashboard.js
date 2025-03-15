@@ -7,9 +7,26 @@ import useGetTasks from "@/hooks/useGetTasks";
 import datas from "@/app/taskData.json";
 import useUpload from "@/hooks/useUpload";
 import { TaskModal } from "@/app/features/tasks/components/taskModal";
-import { EditTaskCard } from "@/app/features/tasks/components/editTaskCard";
+import { EditTaskForm } from "@/app/features/tasks/components/EditTaskForm";
 
-const Dash = () => {
+const filterTaskPriority = (data, priority) => {
+  return data
+    .filter((task) => task.priority === priority)
+    .sort((task1, task2) => task1.position - task2.position)
+    .map((task, key) => <TaskModal key={key} task={task} />);
+};
+
+const TaskPrioritySection = ({ title, tasks }) => {
+  return (
+    <div className="flex flex-col gap-2">
+      <h2>{title}</h2>
+      {tasks}
+      <EditTaskForm />
+    </div>
+  );
+};
+
+const TaskDashboard = () => {
   const { data, isLoading, error, isError } = useGetTasks();
   const mutation = useUpload();
 
@@ -27,22 +44,7 @@ const Dash = () => {
     return <p>{error.message}</p>;
   }
 
-  const filterTaskPriority = (data, priority) => {
-    return data
-      .filter((task) => task.priority === priority)
-      .sort((task1, task2) => task1.position - task2.position)
-      .map((task, key) => <TaskModal key={key} task={task} />);
-  };
-
-  const TaskPrioritySection = ({ title, tasks }) => {
-    return (
-      <div className="flex flex-col gap-2">
-        <h2>{title}</h2>
-        {tasks}
-      </div>
-    );
-  };
-
+  const nonePriorityTasks = filterTaskPriority(data, "None");
   const lowPriorityTasks = filterTaskPriority(data, "Low");
   const mediumPriorityTasks = filterTaskPriority(data, "Medium");
   const highPriorityTasks = filterTaskPriority(data, "High");
@@ -54,6 +56,7 @@ const Dash = () => {
       <h2 className="font-semibold text-xl text-center">Task List</h2>
       <Button onClick={onClick}>Upload JSON</Button>
       <div className="flex justify-between ">
+        <TaskPrioritySection title="None" tasks={nonePriorityTasks} />
         <TaskPrioritySection title="Low Priority" tasks={lowPriorityTasks} />
         <TaskPrioritySection
           title="Medium Priority"
@@ -65,4 +68,4 @@ const Dash = () => {
   );
 };
 
-export default Dash;
+export default TaskDashboard;
