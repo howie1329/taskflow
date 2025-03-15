@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { TaskCreateForm } from "./TaskCreateForm";
+import { TaskCreateForm } from "../TaskCreateForm";
 import {
   Dialog,
   DialogHeader,
