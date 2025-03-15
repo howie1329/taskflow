@@ -3,7 +3,7 @@
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-const useUpPosition = () => {
+const useChangePosition = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -24,4 +24,4 @@ const useUpPosition = () => {
   });
 };
 
-export default useUpPosition;
+export default useChangePosition;

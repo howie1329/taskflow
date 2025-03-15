@@ -24,23 +24,18 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import useUpPosition from "@/hooks/useUpPosition";
+import useChangePosition from "@/hooks/useUpPosition";
 
 export const TaskModal = ({ task }) => {
-  const upPositionMutation = useUpPosition();
+  const changePosition = useChangePosition();
 
-  const upPositionClick = () => {
-    const todoData = { position: task.position };
-    const newPosition = (todoData.position += 1);
-    todoData.position = newPosition;
-    upPositionMutation.mutate({ id: task.id, data: todoData });
-  };
-
-  const downPositionClick = () => {
-    const todoData = { position: task.position };
-    const newPosition = (todoData.position -= 1);
-    todoData.position = newPosition;
-    upPositionMutation.mutate({ id: task.id, data: todoData });
+  const updatePosition = (increment) => {
+    if (task.position == 0) {
+      return;
+    }
+    const newPosition = task.position + increment;
+    const todoData = { position: newPosition };
+    changePosition.mutate({ id: task.id, data: todoData });
   };
 
   return (
@@ -50,11 +45,19 @@ export const TaskModal = ({ task }) => {
           <div className="flex flex-row justify-between  items-center space-x-2 mx-2">
             <div className="flex gap-2 truncate items-center">
               <div className="flex flex-col items-center">
-                <Button variant="ghost" size="sm" onClick={upPositionClick}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => updatePosition(1)}
+                >
                   <ChevronUp className="h-4 w-4" />
                 </Button>
                 <p>{task.position}</p>
-                <Button variant="ghost" size="sm" onClick={downPositionClick}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => updatePosition(-1)}
+                >
                   <ChevronDown className="h-4 w-4" />
                 </Button>
               </div>
