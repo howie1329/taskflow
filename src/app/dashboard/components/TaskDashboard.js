@@ -6,7 +6,7 @@ import Loading from "@/app/components/loading";
 import useGetTasks from "@/hooks/useGetTasks";
 import datas from "@/app/taskData.json";
 import useUpload from "@/hooks/useUpload";
-import { TaskModal } from "@/app/features/tasks/components/taskModal";
+import { TaskModal } from "@/app/features/tasks/components/TaskModal";
 import { EditTaskForm } from "@/app/features/tasks/components/EditTaskForm";
 
 const filterTaskPriority = (data, priority) => {
@@ -18,8 +18,8 @@ const filterTaskPriority = (data, priority) => {
 
 const TaskPrioritySection = ({ title, tasks }) => {
   return (
-    <div className="flex flex-col gap-2">
-      <h2>{title}</h2>
+    <div className="flex flex-col gap-2 items-center">
+      <h2 className="font-bold">{title}</h2>
       {tasks}
       <EditTaskForm />
     </div>

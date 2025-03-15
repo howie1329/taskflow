@@ -39,7 +39,7 @@ export const TaskModal = ({ task }) => {
   };
 
   return (
-    <Card className="w-[23rem]">
+    <Card className="w-[20rem]">
       <Dialog className="flex flex-row">
         <Collapsible className="flex flex-col">
           <div className="flex flex-row justify-between  items-center space-x-2 mx-2">
