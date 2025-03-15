@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/collapsible";
 
 import React from "react";
-import { TaskCard } from "./TaskCard";
 import { TaskModalButton } from "./taskModalButton";
 import {
   MoveDiagonal,
