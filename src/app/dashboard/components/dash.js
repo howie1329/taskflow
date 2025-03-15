@@ -27,13 +27,25 @@ const Dash = () => {
     return <p>{error.message}</p>;
   }
 
-  const filterTaskPriority = (priority) => {
-    const sorted = data
+  const filterTaskPriority = (data, priority) => {
+    return data
       .filter((task) => task.priority === priority)
       .sort((task1, task2) => task1.position - task2.position)
       .map((task, key) => <TaskModal key={key} task={task} />);
-    return sorted;
   };
+
+  const TaskPrioritySection = ({ title, tasks }) => {
+    return (
+      <div className="flex flex-col gap-2">
+        <h2>{title}</h2>
+        {tasks}
+      </div>
+    );
+  };
+
+  const lowPriorityTasks = filterTaskPriority(data, "Low");
+  const mediumPriorityTasks = filterTaskPriority(data, "Medium");
+  const highPriorityTasks = filterTaskPriority(data, "High");
 
   return (
     <div className="flex flex-col w-full h-full gap-2">
@@ -42,22 +54,12 @@ const Dash = () => {
       <h2 className="font-semibold text-xl text-center">Task List</h2>
       <Button onClick={onClick}>Upload JSON</Button>
       <div className="flex justify-between ">
-        <div className="flex flex-col gap-2">
-          <h2>Low Priority</h2>
-          {filterTaskPriority("None")}
-          {filterTaskPriority("Low")}
-          <EditTaskCard />
-        </div>
-        <div className="flex flex-col gap-2">
-          <h2>Medium Priority</h2>
-          {filterTaskPriority("Medium")}
-          <EditTaskCard />
-        </div>
-        <div className="flex flex-col gap-2">
-          <h2>High Priority</h2>
-          {filterTaskPriority("High")}
-          <EditTaskCard />
-        </div>
+        <TaskPrioritySection title="Low Priority" tasks={lowPriorityTasks} />
+        <TaskPrioritySection
+          title="Medium Priority"
+          tasks={mediumPriorityTasks}
+        />
+        <TaskPrioritySection title="High Priority" tasks={highPriorityTasks} />
       </div>
     </div>
   );
