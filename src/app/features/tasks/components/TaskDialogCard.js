@@ -26,19 +26,19 @@ const TaskDialogCard = ({ task }) => {
   return (
     <>
       <DialogHeader>
+        <div className="flex gap-2">
+          {task.labels &&
+            task.labels.map((tag, key) => (
+              <Button size="status" variant="tag" key={key}>
+                {tag}
+              </Button>
+            ))}
+          <Button size="status" variant="priority">
+            {task.priority}
+          </Button>
+        </div>
         <DialogTitle>{task.title}</DialogTitle>
-        {task.labels &&
-          task.labels.map((tag, key) => (
-            <Button size="status" variant="tag" key={key}>
-              {tag}
-            </Button>
-          ))}
-        <Button size="status" variant="priority">
-          {task.priority}
-        </Button>
-        <Button size="icon" variant="status" onClick={deleteButtonClick}>
-          <Trash2 />
-        </Button>
+
         <DialogDescription>{task.description}</DialogDescription>
       </DialogHeader>
       <div>
@@ -49,7 +49,10 @@ const TaskDialogCard = ({ task }) => {
           ))}
       </div>
       <DialogFooter>
-        <div className="flex gap-2">
+        <div className="flex gap-2 w-full justify-between items-center">
+          <Button size="icon" variant="status" onClick={deleteButtonClick}>
+            <Trash2 />
+          </Button>
           {task.isCompleted ? (
             <Button
               size="status"
