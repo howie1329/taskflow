@@ -7,7 +7,7 @@ import useGetTasks from "@/hooks/useGetTasks";
 import datas from "@/app/taskData.json";
 import useUpload from "@/hooks/useUpload";
 import { EditTaskForm } from "@/app/features/tasks/components/EditTaskForm";
-import { TaskModal } from "@/app/features/tasks/components/TaskModal";
+import { TaskModal } from "@/app/dashboard/components/TaskModal";
 
 const filterTaskPriority = (data, priority) => {
   return data

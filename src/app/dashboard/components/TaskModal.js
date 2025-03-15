@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/collapsible";
 
 import React from "react";
-import { TaskModalButton } from "./taskModalButton";
+import { TaskModalButton } from "../../features/tasks/components/taskModalButton";
 import {
   MoveDiagonal,
   SeparatorHorizontal,
@@ -24,7 +24,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import useChangePosition from "@/hooks/useUpPosition";
-import TaskDialogCard from "./TaskDialogCard";
+import TaskDialogCard from "../../features/tasks/components/TaskDialogCard";
 
 export const TaskModal = ({ task }) => {
   const changePosition = useChangePosition();
