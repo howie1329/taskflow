@@ -5,7 +5,7 @@ export async function GET() {
   const { data: item, error } = await supabaseClient
     .from("tasks")
     .select("*")
-    .order("date", { ascending: true });
+    .order("position", { ascending: true });
 
   for (let i = 0; i < item.length; i++) {
     const { data: subTask, error } = await supabaseClient
