@@ -9,7 +9,7 @@ const useSubTaskIsComplete = () => {
   return useMutation({
     mutationFn: async ({ id, data }) => {
       try {
-        const response = await axios.patch(`/api/todo/subtask/${id}`, data);
+        const response = await axios.patch(`/api/subtask/${id}`, data);
         return response.data;
       } catch (error) {
         console.error(error);

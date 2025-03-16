@@ -8,7 +8,7 @@ const useDeleteTask = () => {
   return useMutation({
     mutationFn: async ({ id }) => {
       try {
-        const response = await axios.delete(`/api/todo/${id}`);
+        const response = await axios.delete(`/api/task/${id}`);
         return response.data;
       } catch (error) {
         console.error(error);

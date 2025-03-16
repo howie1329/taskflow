@@ -19,7 +19,7 @@ const uploadTask = async (data) => {
       }
     }
 
-    const response = await axios.post("/api/todo", data);
+    const response = await axios.post("/api/task", data);
     if (subTasks) {
       subTasks.forEach(async (subTask) => {
         subTask["task_id"] = response.data[0].id;

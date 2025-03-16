@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 
 const fetchTask = async () => {
   try {
-    const response = await axios.get("/api/todo");
+    const response = await axios.get("/api/task");
     return response.data;
   } catch (error) {
     console.error(error);
