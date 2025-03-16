@@ -1,9 +1,11 @@
 import { Button } from "@/components/ui/button";
+import { useFetchSingleSubTask } from "@/hooks/useFetchSingleSubTask";
 import useSubTaskIsComplete from "@/hooks/useSubTaskIsComplete";
 import React from "react";
 
 export const TaskCollapsibleButton = ({ task }) => {
   const mutation = useSubTaskIsComplete();
+  const { data: subTasks } = useFetchSingleSubTask(task.id);
 
   const completeButtonClick = (subTaskItem) => {
     const updateInfo = { isComplete: !subTaskItem.isComplete };
@@ -36,8 +38,8 @@ export const TaskCollapsibleButton = ({ task }) => {
     <div className="flex flex-col mx-2 gap-2">
       <p className="text-xs text-wrap font-extralight ">{task.description}</p>
 
-      {task.subTasks &&
-        task.subTasks.map((item, key) => <SubTaskItem key={key} item={item} />)}
+      {subTasks &&
+        subTasks.map((item, key) => <SubTaskItem key={key} item={item} />)}
 
       <div className="flex justify-between items-center">
         {task.isCompleted ? (
@@ -50,10 +52,8 @@ export const TaskCollapsibleButton = ({ task }) => {
           </p>
         )}
         <p>Date:{task.date}</p>
-        {task.subTasks && (
-          <p className="text-xs font-thin col-start-6">
-            {task.subTasks.length}
-          </p>
+        {subTasks && (
+          <p className="text-xs font-thin col-start-6">{subTasks.length}</p>
         )}
       </div>
     </div>

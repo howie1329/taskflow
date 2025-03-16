@@ -9,10 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import useIsComplete from "@/hooks/useIsComplete";
 import useDeleteTask from "@/hooks/useDeleteTask";
+import { useFetchSingleSubTask } from "@/hooks/useFetchSingleSubTask";
 
 const TaskDialogCard = ({ task }) => {
   const updateMutation = useIsComplete();
   const deleteMutation = useDeleteTask();
+
+  const { data: subTasks, isLoading } = useFetchSingleSubTask(task.id);
 
   const deleteButtonClick = () => {
     deleteMutation.mutate({ id: task.id });
@@ -40,13 +43,17 @@ const TaskDialogCard = ({ task }) => {
 
         <DialogDescription>{task.description}</DialogDescription>
       </DialogHeader>
-      <div>
-        {task.subTasks && <p>Sub Tasks:{task.subTasks.length}</p>}
-        {task.subTasks &&
-          task.subTasks.map((task, key) => (
-            <p key={key}>{task.subTask_name}</p>
-          ))}
-      </div>
+
+      {isLoading ? (
+        <p>Loading SubTask...</p>
+      ) : (
+        <div>
+          {subTasks && <p>Sub Tasks:{subTasks.length}</p>}
+          {subTasks &&
+            subTasks.map((task, key) => <p key={key}>{task.subTask_name}</p>)}
+        </div>
+      )}
+
       <DialogFooter>
         <div className="flex gap-2 w-full justify-between items-center">
           <Button size="icon" variant="status" onClick={deleteButtonClick}>
