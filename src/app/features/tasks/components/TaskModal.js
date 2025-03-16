@@ -25,10 +25,10 @@ export const TaskModal = ({ task }) => {
   const completeUpdateMutation = useIsComplete();
 
   const updatePosition = (increment) => {
-    if (task.position == 0) {
+    const newPosition = task.position + increment;
+    if (newPosition == 0) {
       return;
     }
-    const newPosition = task.position + increment;
     const todoData = { position: newPosition };
     changePosition.mutate({ id: task.id, data: todoData });
   };
