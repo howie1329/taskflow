@@ -4,7 +4,6 @@ import { NextResponse } from "next/server";
 export async function PATCH(req, { params }) {
   const { id } = await params;
   const requestedData = await req.json();
-  console.log(requestedData);
 
   const { data: item, error } = await supabaseClient
     .from("tasks")

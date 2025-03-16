@@ -15,12 +15,14 @@ export const TaskCollapsibleButton = ({ task }) => {
       <div className="flex items-center space-x-1 font-thin text-sm">
         {item.isComplete ? (
           <Button
-            className=" bg-green-700 h-1 w-1 rounded-full "
+            className=" bg-green-700 h-3 w-3 rounded-full "
+            size="basic"
             onClick={() => completeButtonClick(item)}
           ></Button>
         ) : (
           <Button
-            className=" bg-red-700 h-1 w-1 rounded-full "
+            className=" bg-red-700 h-3 w-3 rounded-full "
+            size="basic"
             onClick={() => completeButtonClick(item)}
           ></Button>
         )}
