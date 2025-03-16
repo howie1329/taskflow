@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import useChangePosition from "@/hooks/useUpPosition";
 import TaskDialogCard from "./TaskDialogCard";
+import { TaskCollapsibleButton } from "./TaskCollapsibleButton";
 
 export const TaskModal = ({ task }) => {
   const changePosition = useChangePosition();
@@ -70,7 +71,7 @@ export const TaskModal = ({ task }) => {
             </div>
           </div>
           <CollapsibleContent>
-            <TaskModalButton task={task} />
+            <TaskCollapsibleButton task={task} />
           </CollapsibleContent>
         </Collapsible>
         <DialogContent>
