@@ -14,13 +14,27 @@ const useDeleteTask = () => {
         console.error(error);
       }
     },
+    onMutate: async ({ id }) => {
+      await queryClient.cancelQueries({ queryKey: ["tasks"] });
+
+      const previousTask = queryClient.getQueryData(["tasks"]);
+
+      queryClient.setQueryData(["tasks"], (old) => updateTask(old, id));
+
+      return { previousTask };
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
     },
-    onError: () => {
+    onError: (context) => {
+      queryClient.setQueryData(["tasks"], context.previousTask);
       console.error("Error deleting task");
     },
   });
+};
+
+const updateTask = (old, id) => {
+  return old?.filter((task) => task.id != id);
 };
 
 export default useDeleteTask;
