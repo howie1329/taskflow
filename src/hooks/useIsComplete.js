@@ -9,7 +9,7 @@ const useIsComplete = () => {
   return useMutation({
     mutationFn: async ({ id, data }) => {
       try {
-        const response = await axios.patch(`/api/todo/${id}`, data);
+        const response = await axios.patch(`/api/task/${id}`, data);
         return response.data;
       } catch (error) {
         console.error(error);

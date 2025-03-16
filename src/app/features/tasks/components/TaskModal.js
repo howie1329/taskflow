@@ -19,8 +19,11 @@ import useChangePosition from "@/hooks/useUpPosition";
 import TaskDialogCard from "./TaskDialogCard";
 import { TaskCollapsibleButton } from "./TaskCollapsibleButton";
 import useIsComplete from "@/hooks/useIsComplete";
+import { useQueryClient } from "@tanstack/react-query";
+import { singleSubTask } from "@/hooks/useFetchSingleSubTask";
 
 export const TaskModal = ({ task }) => {
+  const queryClient = useQueryClient();
   const changePosition = useChangePosition();
   const completeUpdateMutation = useIsComplete();
 
@@ -38,8 +41,16 @@ export const TaskModal = ({ task }) => {
     completeUpdateMutation.mutate({ id: task.id, data: data });
   };
 
+  const preFetchSubtask = () => {
+    queryClient.prefetchQuery({
+      queryKey: ["subtasks", task.id],
+      queryFn: () => singleSubTask(task.id),
+      staleTime: 300_000,
+    });
+  };
+
   return (
-    <Card className="w-[20rem]">
+    <Card className="w-[20rem]" onMouseEnter={() => preFetchSubtask()}>
       <Dialog className="flex flex-row">
         <Collapsible className="flex flex-col">
           <div className="flex flex-row justify-between items-center space-x-1 mx-1">
@@ -77,17 +88,9 @@ export const TaskModal = ({ task }) => {
                     ></Button>
                   )}
                 </div>
-                <div className="truncate w-full">
+                <div className="truncate w-full ">
                   <h2 className="font-semibold truncate">{task.title}</h2>
                   <div className="flex flex-row justify-between">
-                    {task.subTasks ? (
-                      <p className="font-extralight text-xs">
-                        SubTasks: {task.subTasks.length}
-                      </p>
-                    ) : (
-                      <></>
-                    )}
-
                     <p className="font-extralight text-xs">{task.date}</p>
                   </div>
                 </div>
