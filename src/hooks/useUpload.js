@@ -37,6 +37,20 @@ const useUpload = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: uploadTask,
+    onMutate: async (newTask) => {
+      await queryClient.cancelQueries({ queryKey: ["tasks"] });
+
+      const previousTask = queryClient.getQueryData(["tasks"]);
+
+      console.log(newTask);
+
+      queryClient.setQueryData(["tasks"], (old) => [...old, newTask]);
+
+      return { previousTask };
+    },
+    onError: (context) => {
+      queryClient.setQueryData(["tasks"], context.previousTask);
+    },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
   });
 };

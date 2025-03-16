@@ -80,9 +80,14 @@ export const TaskModal = ({ task }) => {
                 <div className="truncate w-full">
                   <h2 className="font-semibold truncate">{task.title}</h2>
                   <div className="flex flex-row justify-between">
-                    <p className="font-extralight text-xs">
-                      SubTasks: {task.subTasks.length}
-                    </p>
+                    {task.subTasks ? (
+                      <p className="font-extralight text-xs">
+                        SubTasks: {task.subTasks.length}
+                      </p>
+                    ) : (
+                      <></>
+                    )}
+
                     <p className="font-extralight text-xs">{task.date}</p>
                   </div>
                 </div>

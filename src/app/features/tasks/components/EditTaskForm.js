@@ -61,7 +61,6 @@ export const EditTaskForm = () => {
 
   const onSubmit = (data) => {
     data["date"] = format(data.date, "P");
-    console.log(data);
     mutation.mutate(data);
     form.reset();
   };
