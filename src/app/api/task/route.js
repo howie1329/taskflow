@@ -5,7 +5,7 @@ export async function GET() {
   const { data: item, error } = await supabaseClient
     .from("tasks")
     .select("*")
-    .order("date", { ascending: true });
+    .order("position", { ascending: true });
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
