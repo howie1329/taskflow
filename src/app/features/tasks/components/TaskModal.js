@@ -7,7 +7,6 @@ import {
 } from "@/components/ui/collapsible";
 
 import React from "react";
-import { TaskModalButton } from "./taskModalButton";
 import {
   MoveDiagonal,
   SeparatorHorizontal,
