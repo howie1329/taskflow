@@ -8,7 +8,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "./sidebar";
-import { Home, Presentation } from "lucide-react";
+import { Home, Presentation, ScrollTextIcon } from "lucide-react";
 export default function AppSidebar() {
   return (
     <Sidebar collapsible="icon" variant="inset">
@@ -45,5 +45,10 @@ const items = [
     title: "Dashboard",
     icon: Presentation,
     url: "/dashboard",
+  },
+  {
+    title: "Notes",
+    icon: ScrollTextIcon,
+    url: "/dashboard/notes",
   },
 ];
