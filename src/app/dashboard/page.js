@@ -20,7 +20,7 @@ function Page() {
           <Switch
             checked={tableView}
             onCheckedChange={() => setTableView(!tableView)}
-          />{" "}
+          />
           {tableView ? (
             <Label className="font-semibold">Table View</Label>
           ) : (

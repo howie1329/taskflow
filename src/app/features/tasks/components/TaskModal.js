@@ -21,11 +21,16 @@ import { TaskCollapsibleButton } from "./TaskCollapsibleButton";
 import useIsComplete from "@/hooks/useIsComplete";
 import { useQueryClient } from "@tanstack/react-query";
 import { singleSubTask } from "@/hooks/useFetchSingleSubTask";
+import { Input } from "@/components/ui/input";
+import useTaskUpdateField from "@/hooks/useTaskUpdateField";
 
 export const TaskModal = ({ task }) => {
   const queryClient = useQueryClient();
   const changePosition = useChangePosition();
   const completeUpdateMutation = useIsComplete();
+
+  // TODO: EASY UPDATE FIELD UI
+  // const updateFieldMutation = useTaskUpdateField();
 
   const updatePosition = (increment) => {
     const newPosition = task.position + increment;
@@ -40,6 +45,15 @@ export const TaskModal = ({ task }) => {
     const data = { isCompleted: !task.isCompleted };
     completeUpdateMutation.mutate({ id: task.id, data: data });
   };
+
+  /* TODO: EASY UPDATE FIELD UI 
+  const updateFieldBlur = (field, value) => {
+    updateFieldMutation.mutate({
+      id: task.id,
+      changedField: field,
+      updateData: value,
+    });
+  }; */
 
   const preFetchSubtask = () => {
     queryClient.prefetchQuery({
@@ -90,6 +104,12 @@ export const TaskModal = ({ task }) => {
                 </div>
                 <div className="truncate w-full ">
                   <h2 className="font-semibold truncate">{task.title}</h2>
+                  {/*  TODO: FOR EASY UPDATE FIELD UI
+                  <Input
+                    className="font-semibold truncate border-none"
+                    placeholder={task.title}
+                    onBlur={(e) => updateFieldBlur("title", e.target.value)}
+                  /> */}
                   <div className="flex flex-row justify-between">
                     <p className="font-extralight text-xs">{task.date}</p>
                   </div>
