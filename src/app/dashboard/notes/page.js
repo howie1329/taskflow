@@ -1,4 +1,5 @@
 import React from "react";
+import Tiptap from "./components/TipTap";
 
 const Page = () => {
   return (
@@ -8,6 +9,7 @@ const Page = () => {
       </div>
       <div>
         <p>Body Part</p>
+        <Tiptap />
       </div>
     </div>
   );
