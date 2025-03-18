@@ -51,9 +51,7 @@ const TaskDashboard = () => {
 
   return (
     <div className="flex flex-col w-full h-full gap-2">
-      <h1 className="font-bold text-2xl text-center">Task Flow - Dashboard</h1>
-      <CreateTaskModal />
-      <h2 className="font-semibold text-xl text-center">Task List</h2>
+      <h2 className="font-semibold text-xl text-center">Task Cards</h2>
       <Button onClick={onClick}>Upload JSON</Button>
       <div className="flex justify-between ">
         <TaskPrioritySection title="None" tasks={nonePriorityTasks} />
