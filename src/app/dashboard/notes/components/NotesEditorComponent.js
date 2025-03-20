@@ -58,7 +58,7 @@ const NotesEditorComponent = ({ content }) => {
 const LinkTaskComboBox = ({ linkedTask, setLinkedTask }) => {
   const [open, setOpen] = useState(false);
   const { data: allTask } = useGetTasks();
-  console.log(allTask);
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
