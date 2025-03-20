@@ -3,11 +3,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "./use-toast";
 const uploadNote = async (data) => {
   try {
-    const note = {
-      title: data.title,
-      description: data.description,
-      content: data.content,
-    };
     const response = await axios.post("/api/notes", data);
     return response.data;
   } catch (error) {
