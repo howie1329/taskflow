@@ -12,6 +12,7 @@ export const TaskCollapsibleButton = ({ task }) => {
     mutation.mutate({
       id: subTaskItem.subTask_id,
       data: updateInfo,
+      parent_id: task.id,
     });
   };
 
