@@ -1,12 +1,20 @@
 import axios from "axios";
 
-const uploadNote = async (data) => {
-  try {
-    const response = await axios.post("/api/note", data);
-    return response.data;
-  } catch (error) {
-    console.error(error);
-  }
+const useUploadNote = () => {
+  const uploadNote = async (data) => {
+    try {
+      const note = {
+        title: data.title,
+        description: data.description,
+        content: data.content,
+      };
+      const response = await axios.post("/api/notes", note);
+      return response.data;
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  return uploadNote;
 };
 
-export default uploadNote;
+export default useUploadNote;
