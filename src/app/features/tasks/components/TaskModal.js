@@ -23,6 +23,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { singleSubTask } from "@/hooks/useFetchSingleSubTask";
 import { Input } from "@/components/ui/input";
 import useTaskUpdateField from "@/hooks/useTaskUpdateField";
+import { singleNote } from "@/hooks/useFetchSingleNote";
 
 export const TaskModal = ({ task }) => {
   const queryClient = useQueryClient();
@@ -54,7 +55,6 @@ export const TaskModal = ({ task }) => {
       updateData: value,
     });
   }; */
-
   const preFetchSubtask = () => {
     queryClient.prefetchQuery({
       queryKey: ["subtasks", task.id],
@@ -63,8 +63,20 @@ export const TaskModal = ({ task }) => {
     });
   };
 
+  const preFetchNotes = () => {
+    queryClient.prefetchQuery({
+      queryKey: ["notes", task.id],
+      queryFn: () => singleNote(task.id),
+      staleTime: 300_000,
+    });
+  };
+  const preFetch = () => {
+    preFetchSubtask();
+    preFetchNotes();
+  };
+
   return (
-    <Card className="w-[20rem]" onMouseEnter={() => preFetchSubtask()}>
+    <Card className="w-[20rem]" onMouseEnter={() => preFetch()}>
       <Dialog className="flex flex-row">
         <Collapsible className="flex flex-col">
           <div className="flex flex-row justify-between items-center space-x-1 mx-1">
