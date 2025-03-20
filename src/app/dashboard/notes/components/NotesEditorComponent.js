@@ -23,9 +23,9 @@ import {
 const NotesEditorComponent = ({ content }) => {
   const router = useRouter();
   const upload = useUploadNote();
-  const { data: allTask } = useGetTasks();
-  const [noteTitle, setNoteTitle] = useState();
-  const [note, setNote] = useState();
+
+  const [noteTitle, setNoteTitle] = useState("");
+  const [note, setNote] = useState("");
   const [linkedTask, setLinkedTask] = useState(null);
   const onChange = (content) => {
     setNote(content);
@@ -48,23 +48,20 @@ const NotesEditorComponent = ({ content }) => {
         value={noteTitle}
         onChange={(e) => setNoteTitle(e.target.value)}
       />
-      <LinkTaskComboBox
-        allTask={allTask}
-        linkedTask={linkedTask}
-        setLinkedTask={setLinkedTask}
-      />
+      <LinkTaskComboBox linkedTask={linkedTask} setLinkedTask={setLinkedTask} />
       <Tiptap content={content} onChange={onChange} />
       <Button onClick={onClick}>Save</Button>
     </div>
   );
 };
 
-const LinkTaskComboBox = ({ allTask, linkedTask, setLinkedTask }) => {
+const LinkTaskComboBox = ({ linkedTask, setLinkedTask }) => {
   const [open, setOpen] = useState(false);
+  const { data: allTask } = useGetTasks();
   console.log(allTask);
   return (
-    <Popover open={open} setOpen={setOpen}>
-      <PopoverTrigger>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
         <Button onClick={() => setOpen(!open)}>
           {allTask && linkedTask !== null
             ? allTask.find((task) => task.id === linkedTask).title
