@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import useUploadNote from "@/hooks/useUploadNote";
 import { useRouter } from "next/navigation";
 
-const NotesEditorComponent = () => {
+const NotesEditorComponent = ({ content }) => {
   const router = useRouter();
   const upload = useUploadNote();
   const [noteTitle, setNoteTitle] = useState();
