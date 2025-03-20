@@ -11,7 +11,7 @@ function Page() {
   return (
     <div className="flex m-2 flex-col items-center flex-1 ">
       <div className="flex justify-evenly items-center w-full">
-        <h1 className="font-bold text-2xl text-center">
+        <h1 className="font-bold text-2xl text-center ">
           Task Flow - Dashboard
         </h1>
 
