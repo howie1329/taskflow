@@ -19,7 +19,6 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { set } from "date-fns";
 
 const NotesEditorComponent = ({ content }) => {
   const router = useRouter();
@@ -27,7 +26,7 @@ const NotesEditorComponent = ({ content }) => {
   const { data: allTask } = useGetTasks();
   const [noteTitle, setNoteTitle] = useState();
   const [note, setNote] = useState();
-  const [linkedTask, setLinkedTask] = useState("");
+  const [linkedTask, setLinkedTask] = useState(null);
   const onChange = (content) => {
     setNote(content);
   };
@@ -37,8 +36,9 @@ const NotesEditorComponent = ({ content }) => {
       title: noteTitle,
       description: "Note Description",
       content: note,
+      task_id: linkedTask,
     };
-    upload(noteData);
+    upload.mutate(noteData);
     router.push("/dashboard/notes");
   };
   return (
@@ -66,7 +66,9 @@ const LinkTaskComboBox = ({ allTask, linkedTask, setLinkedTask }) => {
     <Popover open={open} setOpen={setOpen}>
       <PopoverTrigger>
         <Button onClick={() => setOpen(!open)}>
-          {linkedTask === "" ? "Select Task" : linkedTask}
+          {allTask && linkedTask !== null
+            ? allTask.find((task) => task.id === linkedTask).title
+            : "Link A Task ..."}
         </Button>
       </PopoverTrigger>
       <PopoverContent>
@@ -75,16 +77,19 @@ const LinkTaskComboBox = ({ allTask, linkedTask, setLinkedTask }) => {
           <CommandList>
             <CommandEmpty>No Task Found</CommandEmpty>
             <CommandGroup>
-              {allTask.map((task, key) => (
-                <CommandItem
-                  key={key}
-                  value={task.id}
-                  onSelect={(currentValue) => {
-                    setLinkedTask(currentValue);
-                    setOpen(false);
-                  }}
-                />
-              ))}
+              {allTask &&
+                allTask.map((task, key) => (
+                  <CommandItem
+                    key={task.id}
+                    value={task.id}
+                    onSelect={() => {
+                      setLinkedTask(task.id);
+                      setOpen(false);
+                    }}
+                  >
+                    {task.title}
+                  </CommandItem>
+                ))}
             </CommandGroup>
           </CommandList>
         </Command>

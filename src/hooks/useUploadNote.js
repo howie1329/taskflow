@@ -8,7 +8,7 @@ const uploadNote = async (data) => {
       description: data.description,
       content: data.content,
     };
-    const response = await axios.post("/api/notes", note);
+    const response = await axios.post("/api/notes", data);
     return response.data;
   } catch (error) {
     console.error(error);
