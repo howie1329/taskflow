@@ -14,5 +14,5 @@ export async function PATCH(req, { params }) {
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
-  return NextResponse.json(item, { status: 200 });
+  return NextResponse.json(item[0], { status: 200 });
 }

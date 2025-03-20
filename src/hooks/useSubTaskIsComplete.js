@@ -26,9 +26,9 @@ const useSubTaskIsComplete = () => {
 
       return { previousSubTask };
     },
-    onSuccess: (data) => {
+    onSuccess: ({ task_id }) => {
       queryClient.invalidateQueries({
-        queryKey: ["subtasks", data[0].task_id],
+        queryKey: ["subtasks", task_id],
       });
     },
     onError: () => {
