@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const useDeleteTask = () => {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   return useMutation({
     mutationFn: async ({ id }) => {
@@ -24,6 +25,7 @@ const useDeleteTask = () => {
       return { previousTask };
     },
     onSuccess: () => {
+      toast({ title: "Task Deleted Successfully", status: "success" });
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
     },
     onError: (context) => {

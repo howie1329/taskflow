@@ -2,9 +2,11 @@
 
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "./use-toast";
 
 const useSubTaskIsComplete = () => {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   return useMutation({
     mutationFn: async ({ id, data, parent_id }) => {
@@ -27,6 +29,10 @@ const useSubTaskIsComplete = () => {
       return { previousSubTask };
     },
     onSuccess: ({ task_id }) => {
+      toast({
+        title: "Subtask Status Changed Successfully",
+        status: "success",
+      });
       queryClient.invalidateQueries({
         queryKey: ["subtasks", task_id],
       });

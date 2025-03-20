@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const useTaskUpdateField = () => {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   return useMutation({
     mutationFn: async ({ id, changedField, updateData }) => {
@@ -27,6 +28,7 @@ const useTaskUpdateField = () => {
       return { previousTask };
     },
     onSuccess: () => {
+      toast({ title: "Task updated successfully", status: "success" });
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
     },
     onError: (context) => {

@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "./use-toast";
 const uploadNote = async (data) => {
   try {
     const note = {
@@ -15,6 +16,7 @@ const uploadNote = async (data) => {
 };
 const useUploadNote = () => {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   return useMutation({
     mutationFn: uploadNote,
     onMutate: async (newNote) => {
@@ -26,7 +28,10 @@ const useUploadNote = () => {
 
       return { previousNotes };
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["notes"] }),
+    onSuccess: () => {
+      toast({ title: "Note Added Successfully", status: "success" });
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+    },
     onError: (context) => {
       queryClient.setQueryData(["notes"], context.previous);
       console.error("Error uploading note");

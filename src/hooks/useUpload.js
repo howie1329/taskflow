@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import uploadSubtask from "./useUploadSubTask";
+import { useToast } from "./use-toast";
 
 const uploadTask = async (data) => {
   try {
@@ -35,6 +36,7 @@ const uploadTask = async (data) => {
 
 const useUpload = () => {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   return useMutation({
     mutationFn: uploadTask,
     onMutate: async (newTask) => {
@@ -51,7 +53,10 @@ const useUpload = () => {
     onError: (context) => {
       queryClient.setQueryData(["tasks"], context.previousTask);
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
+    onSuccess: () => {
+      toast({ title: "Task Uploaded Successfully", status: "success" });
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    },
   });
 };
 
