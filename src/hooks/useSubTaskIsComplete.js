@@ -15,8 +15,11 @@ const useSubTaskIsComplete = () => {
         console.error(error);
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    onSuccess: (data) => {
+      console.log(data);
+      queryClient.invalidateQueries({
+        queryKey: ["subtasks", data[0].task_id],
+      });
     },
     onError: () => {
       console.error("Error completing task");

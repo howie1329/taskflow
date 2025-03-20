@@ -9,7 +9,10 @@ export const TaskCollapsibleButton = ({ task }) => {
 
   const completeButtonClick = (subTaskItem) => {
     const updateInfo = { isComplete: !subTaskItem.isComplete };
-    mutation.mutate({ id: subTaskItem.subTask_id, data: updateInfo });
+    mutation.mutate({
+      id: subTaskItem.subTask_id,
+      data: updateInfo,
+    });
   };
 
   const SubTaskItem = ({ item }) => {
