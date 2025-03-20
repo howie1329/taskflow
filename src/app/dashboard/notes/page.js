@@ -23,19 +23,24 @@ const Page = () => {
       {isLoading ? (
         <p>Loading All Notes...</p>
       ) : (
-        <NotesDashboard data={data} onClick={onClick} />
+        <NotesDashboard data={data} onClick={onClick} router={router} />
       )}
     </div>
   );
 };
 
-const NotesDashboard = ({ data, onClick }) => {
+const NotesDashboard = ({ data, onClick, router }) => {
+  const onOpen = (slug) => {
+    router.push(`/dashboard/notes/${slug}`);
+  };
   return (
     <div className="flex flex-col gap-2 w-full">
       <Button onClick={onClick}>Create New Note</Button>
       <div className="flex flex-row gap-2 flex-wrap">
         {data.map((note, key) => (
-          <NoteCard key={key} note={note} />
+          <Button key={key} onClick={() => onOpen(note.id)}>
+            <NoteCard key={key} note={note} />
+          </Button>
         ))}
       </div>
     </div>
