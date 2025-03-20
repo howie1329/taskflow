@@ -6,16 +6,20 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Files, Trash2 } from "lucide-react";
 import useIsComplete from "@/hooks/useIsComplete";
 import useDeleteTask from "@/hooks/useDeleteTask";
 import { useFetchSingleSubTask } from "@/hooks/useFetchSingleSubTask";
+import { useFetchSingleNote } from "@/hooks/useFetchSingleNote";
 
 const TaskDialogCard = ({ task }) => {
   const updateMutation = useIsComplete();
   const deleteMutation = useDeleteTask();
 
-  const { data: subTasks, isLoading } = useFetchSingleSubTask(task.id);
+  const { data: subTasks, isLoading: subtaskLoading } = useFetchSingleSubTask(
+    task.id
+  );
+  const { data: notes, isLoading: notesLoading } = useFetchSingleNote(task.id);
 
   const deleteButtonClick = () => {
     deleteMutation.mutate({ id: task.id });
@@ -43,12 +47,24 @@ const TaskDialogCard = ({ task }) => {
 
         <DialogDescription>{task.description}</DialogDescription>
       </DialogHeader>
+      {notesLoading ? (
+        <p>Loading Notes...</p>
+      ) : (
+        <div className="flex gap-2">
+          {notes &&
+            notes.map((note, key) => (
+              <Button variant="outline" key={key}>
+                <Files />
+                <p>{note.title}</p>
+              </Button>
+            ))}
+        </div>
+      )}
 
-      {isLoading ? (
+      {subtaskLoading ? (
         <p>Loading SubTask...</p>
       ) : (
         <div>
-          {subTasks && <p>Sub Tasks:{subTasks.length}</p>}
           {subTasks &&
             subTasks.map((task, key) => <p key={key}>{task.subTask_name}</p>)}
         </div>
