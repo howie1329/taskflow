@@ -11,15 +11,21 @@ import useIsComplete from "@/hooks/useIsComplete";
 import useDeleteTask from "@/hooks/useDeleteTask";
 import { useFetchSingleSubTask } from "@/hooks/useFetchSingleSubTask";
 import { useFetchSingleNote } from "@/hooks/useFetchSingleNote";
+import { useRouter } from "next/navigation";
 
 const TaskDialogCard = ({ task }) => {
   const updateMutation = useIsComplete();
   const deleteMutation = useDeleteTask();
+  const router = useRouter();
 
   const { data: subTasks, isLoading: subtaskLoading } = useFetchSingleSubTask(
     task.id
   );
   const { data: notes, isLoading: notesLoading } = useFetchSingleNote(task.id);
+
+  const noteRoute = (notesId) => {
+    router.push(`/dashboard/notes/${notesId}`);
+  };
 
   const deleteButtonClick = () => {
     deleteMutation.mutate({ id: task.id });
@@ -53,7 +59,11 @@ const TaskDialogCard = ({ task }) => {
         <div className="flex gap-2">
           {notes &&
             notes.map((note, key) => (
-              <Button variant="outline" key={key}>
+              <Button
+                variant="outline"
+                key={key}
+                onClick={() => noteRoute(note.id)}
+              >
                 <Files />
                 <p>{note.title}</p>
               </Button>
