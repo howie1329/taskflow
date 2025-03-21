@@ -10,7 +10,7 @@ export default function Layout({ children }) {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <main>
+        <main className="font-second">
           <SidebarTrigger />
           {children}
         </main>
