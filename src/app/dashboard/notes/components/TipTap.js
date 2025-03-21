@@ -7,8 +7,6 @@ import TextAlign from "@tiptap/extension-text-align";
 
 const Tiptap = ({ content, onChange }) => {
   const editor = useEditor({
-    immediatelyRender: true,
-    shouldRerenderOnTransaction: true,
     extensions: [
       StarterKit.configure({
         bulletList: {
