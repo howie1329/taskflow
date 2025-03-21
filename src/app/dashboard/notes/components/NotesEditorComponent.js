@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import React, { useState } from "react";
 import Tiptap from "./TipTap";
 import { Button } from "@/components/ui/button";
-import useUploadNote from "@/hooks/useUploadNote";
+import { useUploadNote } from "@/hooks/useUploadNote";
 import { useRouter } from "next/navigation";
 import {
   Popover,

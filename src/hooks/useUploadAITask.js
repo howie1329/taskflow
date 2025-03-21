@@ -1,26 +1,24 @@
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import uploadSubtask from "./useUploadSubTask";
 import { useToast } from "./use-toast";
+import uploadSubtask from "./useUploadSubTask";
+import { uploadNote } from "./useUploadNote";
 
-const uploadTask = async (data) => {
+const uploadAITask = async (data) => {
   try {
     let subTasks = null;
-    if (data.subTasks) {
-      subTasks = data.subTasks;
-      delete data.subTasks;
+    let note = null;
+    const aiResponse = await axios.post("/api/ai", data);
+    if (aiResponse.data.subTasks) {
+      subTasks = aiResponse.data.subTasks;
+      delete aiResponse.data.subTasks;
     }
-    if (data.labels == "" || data.labels == null) {
-      data.labels = null;
-    } else {
-      if (data.labels.includes(",")) {
-        data.labels = data.labels.split(",");
-      } else {
-        data.labels = [data.labels];
-      }
+    if (aiResponse.data.notes) {
+      note = aiResponse.data.notes;
+      delete aiResponse.data.notes;
     }
-
-    const response = await axios.post("/api/task", data);
+    console.log("ai DAta:", aiResponse.data);
+    const response = await axios.post("/api/task", aiResponse.data);
     if (subTasks) {
       subTasks.forEach(async (subTask) => {
         subTask["task_id"] = response.data[0].id;
@@ -28,17 +26,21 @@ const uploadTask = async (data) => {
         await uploadSubtask(subTask);
       });
     }
-    return response;
+    if (note) {
+      note["task_id"] = response.data[0].id;
+      await uploadNote(note);
+    }
+    return aiResponse;
   } catch (error) {
     console.error(error);
   }
 };
 
-const useUpload = () => {
+const useUploadAITask = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   return useMutation({
-    mutationFn: uploadTask,
+    mutationFn: uploadAITask,
     onMutate: async (newTask) => {
       await queryClient.cancelQueries({ queryKey: ["tasks"] });
 
@@ -61,4 +63,4 @@ const useUpload = () => {
   });
 };
 
-export default useUpload;
+export default useUploadAITask;

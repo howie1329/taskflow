@@ -34,4 +34,4 @@ const useUploadNote = () => {
   });
 };
 
-export default useUploadNote;
+export { useUploadNote, uploadNote };

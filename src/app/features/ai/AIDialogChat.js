@@ -9,13 +9,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import useUpload from "@/hooks/useUpload";
+import useUploadAITask from "@/hooks/useUploadAITask";
 import { DialogTrigger } from "@radix-ui/react-dialog";
 import axios from "axios";
 import React, { useState } from "react";
 
 const AIDialogChat = () => {
-  const uploadAiTask = useUpload();
+  const uploadAI = useUploadAITask();
   const [userResponse, setUserResponse] = useState("");
 
   const sendToAI = () => {
@@ -23,10 +23,8 @@ const AIDialogChat = () => {
       "The users is going to give you a prompt. I want you to break it down into subtask and add any notes you think might be helpful to complete the task. The user will also provide you with a priority level, a due date, and labels for the task.";
     const fullPrompt = prompt + userResponse;
     const data = { prompt: prompt + fullPrompt };
-    axios.post("/api/ai", data).then((res) => {
-      console.log(res);
-      uploadAiTask.mutate(res.data);
-    });
+    uploadAI.mutate(data);
+    setUserResponse("");
   };
   return (
     <Dialog>

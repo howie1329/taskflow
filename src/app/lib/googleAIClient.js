@@ -34,11 +34,13 @@ const schema = {
         },
         description: {
           type: "string",
-          description: "The description of the note",
+          description:
+            "Sort summary of the content of the note. Description of the note",
         },
         content: {
           type: "string",
-          description: "The content of the note in html format",
+          description:
+            "The content of the note in html format wrapped in a string",
         },
       },
     },
@@ -46,8 +48,9 @@ const schema = {
       type: "string",
       description: "The priority level of the task",
     },
-    dueDate: {
+    date: {
       type: "string",
+      format: "date-time",
       description: "The due date of the task",
     },
     labels: {
@@ -57,8 +60,8 @@ const schema = {
       },
       description: "Labels for the task",
     },
-    required: ["title", "description", "subTasks"],
   },
+  required: ["title", "description", "subTasks"],
 };
 
 const model = genAI.getGenerativeModel({
