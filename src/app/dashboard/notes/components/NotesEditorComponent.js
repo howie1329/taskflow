@@ -43,14 +43,20 @@ const NotesEditorComponent = ({ content }) => {
   };
   return (
     <div className="flex flex-col w-3/4 gap-2">
-      <Input
-        placeholder={"Note Title...."}
-        value={noteTitle}
-        onChange={(e) => setNoteTitle(e.target.value)}
-      />
-      <LinkTaskComboBox linkedTask={linkedTask} setLinkedTask={setLinkedTask} />
+      <div className="flex flex-row gap-2">
+        <Input
+          placeholder={"Note Title...."}
+          value={noteTitle}
+          onChange={(e) => setNoteTitle(e.target.value)}
+        />
+        <LinkTaskComboBox
+          linkedTask={linkedTask}
+          setLinkedTask={setLinkedTask}
+        />
+        <Button onClick={onClick}>Save</Button>
+      </div>
+
       <Tiptap content={content} onChange={onChange} />
-      <Button onClick={onClick}>Save</Button>
     </div>
   );
 };

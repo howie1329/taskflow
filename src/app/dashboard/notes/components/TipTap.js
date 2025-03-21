@@ -28,7 +28,7 @@ const Tiptap = ({ content, onChange }) => {
     editorProps: {
       attributes: {
         class:
-          "min-h-[156px] border rounded-md bg-slate-50 py-2 px-3 min-w-[1056px]",
+          "min-h-[655px] border rounded-md bg-slate-50 py-2 px-3 min-w-[1056px]",
       },
     },
     onUpdate: ({ editor }) => {

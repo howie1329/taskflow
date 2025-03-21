@@ -6,6 +6,7 @@ import useGetAllNotes from "@/hooks/useGetAllNotes";
 import { Card, CardDescription, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const Page = () => {
   const { data, isLoading } = useGetAllNotes();
@@ -23,24 +24,21 @@ const Page = () => {
       {isLoading ? (
         <p>Loading All Notes...</p>
       ) : (
-        <NotesDashboard data={data} onClick={onClick} router={router} />
+        <NotesDashboard data={data} onClick={onClick} />
       )}
     </div>
   );
 };
 
-const NotesDashboard = ({ data, onClick, router }) => {
-  const onOpen = (slug) => {
-    router.push(`/dashboard/notes/${slug}`);
-  };
+const NotesDashboard = ({ data, onClick }) => {
   return (
     <div className="flex flex-col gap-2 w-full">
       <Button onClick={onClick}>Create New Note</Button>
       <div className="flex flex-row gap-2 flex-wrap">
         {data.map((note, key) => (
-          <Button key={key} onClick={() => onOpen(note.id)}>
+          <Link key={key} href={`/dashboard/notes/${note.id}`}>
             <NoteCard key={key} note={note} />
-          </Button>
+          </Link>
         ))}
       </div>
     </div>
@@ -52,7 +50,9 @@ const NoteCard = ({ note }) => {
     <Card className="flex flex-col w-[20rem]">
       <div className="flex flex-col m-2">
         <CardHeader>{note.title}</CardHeader>
-        <CardDescription>{note.description}</CardDescription>
+        <CardDescription className="overflow-hidden truncate">
+          {note.content}
+        </CardDescription>
       </div>
     </Card>
   );
