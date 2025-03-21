@@ -19,4 +19,4 @@ const useFetchNote = (id) => {
   });
 };
 
-export default useFetchNote;
+export { useFetchNote, singleNote };

@@ -1,5 +1,5 @@
 "use client";
-import useFetchNote from "@/hooks/useFetchNote";
+import { useFetchNote } from "@/hooks/useFetchNote";
 import HTMLReactParser from "html-react-parser";
 
 const NotePage = ({ params }) => {

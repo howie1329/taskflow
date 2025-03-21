@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import HTMLReactParser from "html-react-parser";
+import { useQueryClient } from "@tanstack/react-query";
+import { singleNote } from "@/hooks/useFetchNote";
 
 const Page = () => {
   const { data, isLoading } = useGetAllNotes();
@@ -47,8 +49,16 @@ const NotesDashboard = ({ data, onClick }) => {
 
 const NoteCard = ({ note }) => {
   var parser = HTMLReactParser;
+  const queryClient = useQueryClient();
+  const preFetch = () => {
+    queryClient.prefetchQuery({
+      queryKey: ["note", note.id],
+      queryFn: () => singleNote(note.id),
+      staleTime: 300_000,
+    });
+  };
   return (
-    <Card className="flex flex-col w-[20rem]">
+    <Card className="flex flex-col w-[20rem]" onMouseEnter={() => preFetch()}>
       <div className="flex flex-col m-2">
         <CardHeader>{note.title}</CardHeader>
         <CardDescription className="overflow-hidden truncate">
