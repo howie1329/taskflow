@@ -7,9 +7,11 @@ import { Label } from "@/components/ui/label";
 import { CreateTaskModal } from "../features/tasks/components/CreateTaskModal";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
+import useUpload from "@/hooks/useUpload";
 
 function Page() {
   const [tableView, setTableView] = useState(false);
+  const upload = useUpload();
 
   const askAI = () => {
     console.log("Ask AI");
@@ -18,6 +20,7 @@ function Page() {
     const data = { prompt: prompt };
     axios.post("/api/ai", data).then((res) => {
       console.log(res);
+      upload.mutate(res.data);
     });
   };
 

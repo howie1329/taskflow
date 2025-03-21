@@ -1,5 +1,4 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { sub } from "date-fns";
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_KEY);
 const schema = {
@@ -13,25 +12,21 @@ const schema = {
       type: "string",
       description: "Detailed information about the task",
     },
-    subtasks: {
+    subTasks: {
       type: "array",
       items: {
         type: "object",
         properties: {
-          subtask_name: {
+          subTask_name: {
             type: "string",
             description: "The name of the subtask",
           },
         },
-        required: ["subtask_name"],
+        required: ["subTask_name"],
       },
     },
-    note: {
-      type: "string",
-      description: "Notes for the task",
-    },
   },
-  required: ["title", "description", "subtasks", "note"],
+  required: ["title", "description", "subTasks"],
 };
 
 const model = genAI.getGenerativeModel({
