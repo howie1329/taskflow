@@ -1,5 +1,6 @@
 "use client";
 import useFetchNote from "@/hooks/useFetchNote";
+import HTMLReactParser from "html-react-parser";
 
 const NotePage = ({ params }) => {
   const { data, isLoading } = useFetchNote(params);
@@ -16,6 +17,7 @@ const NotePageContent = ({ data }) => {
     <div>
       <h1>{data.title}</h1>
       <p>{data.description}</p>
+      <div>{HTMLReactParser(data.content)}</div>
     </div>
   );
 };

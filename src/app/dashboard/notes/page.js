@@ -1,15 +1,15 @@
 "use client";
-import React, { useState } from "react";
-import Tiptap from "./components/TipTap";
-import { Input } from "@/components/ui/input";
+import React from "react";
 import useGetAllNotes from "@/hooks/useGetAllNotes";
 import { Card, CardDescription, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import HTMLReactParser from "html-react-parser";
 
 const Page = () => {
   const { data, isLoading } = useGetAllNotes();
+
   const router = useRouter();
 
   const onClick = () => {
@@ -46,12 +46,13 @@ const NotesDashboard = ({ data, onClick }) => {
 };
 
 const NoteCard = ({ note }) => {
+  var parser = HTMLReactParser;
   return (
     <Card className="flex flex-col w-[20rem]">
       <div className="flex flex-col m-2">
         <CardHeader>{note.title}</CardHeader>
         <CardDescription className="overflow-hidden truncate">
-          {note.content}
+          {parser(note.content)}
         </CardDescription>
       </div>
     </Card>
