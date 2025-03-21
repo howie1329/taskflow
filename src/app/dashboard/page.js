@@ -13,8 +13,11 @@ function Page() {
 
   const askAI = () => {
     console.log("Ask AI");
-    axios.get("/api/ai").then((res) => {
-      console.log(res.data);
+    const prompt =
+      "Create subtasks for the task of creating a simple todo react native and add any notes you think might be helpful.";
+    const data = { prompt: prompt };
+    axios.post("/api/ai", data).then((res) => {
+      console.log(res);
     });
   };
 

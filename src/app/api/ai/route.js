@@ -1,9 +1,9 @@
 import model from "@/app/lib/googleAIClient";
+import { NextResponse } from "next/server";
 
-export async function GET(req, res) {
-  const prompt =
-    "Create subtasks for the task of creating a simple todo react native and add any notes you think might be helpful.";
-  const result = await model.generateContent(prompt);
+export async function POST(req, res) {
+  const requestedData = await req.json();
+  const result = await model.generateContent(requestedData.prompt);
   console.log(result.response.text());
-  res.json({ result });
+  return NextResponse.json({ result });
 }
