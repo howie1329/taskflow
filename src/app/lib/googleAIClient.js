@@ -25,8 +25,40 @@ const schema = {
         required: ["subTask_name"],
       },
     },
+    notes: {
+      type: "object",
+      properties: {
+        title: {
+          type: "string",
+          description: "The title of the note",
+        },
+        description: {
+          type: "string",
+          description: "The description of the note",
+        },
+        content: {
+          type: "string",
+          description: "The content of the note in html format",
+        },
+      },
+    },
+    priority: {
+      type: "string",
+      description: "The priority level of the task",
+    },
+    dueDate: {
+      type: "string",
+      description: "The due date of the task",
+    },
+    labels: {
+      type: "array",
+      items: {
+        type: "string",
+      },
+      description: "Labels for the task",
+    },
+    required: ["title", "description", "subTasks"],
   },
-  required: ["title", "description", "subTasks"],
 };
 
 const model = genAI.getGenerativeModel({
