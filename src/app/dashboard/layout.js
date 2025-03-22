@@ -1,5 +1,6 @@
 import AppSidebar from "@/components/ui/app-sidebar";
 import {
+  Sidebar,
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
@@ -9,12 +10,10 @@ export default function Layout({ children }) {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset>
-        <main className="font-second">
-          <SidebarTrigger />
-          {children}
-        </main>
-      </SidebarInset>
+      <main className="font-second w-full h-full">
+        <SidebarTrigger />
+        {children}
+      </main>
     </SidebarProvider>
   );
 }

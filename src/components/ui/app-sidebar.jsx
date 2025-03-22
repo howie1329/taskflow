@@ -12,7 +12,7 @@ import {
 import { Home, Presentation, ScrollTextIcon } from "lucide-react";
 export default function AppSidebar() {
   return (
-    <Sidebar collapsible="icon" variant="inset">
+    <Sidebar collapsible="icon">
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Application</SidebarGroupLabel>
