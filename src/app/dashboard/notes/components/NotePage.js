@@ -19,13 +19,15 @@ const NotePage = ({ params }) => {
 const NotePageContent = ({ data }) => {
   const deleteMutation = useDeleteNote();
   const router = useRouter();
+
   const deleteNote = () => {
-    const parent_id = data.task_id === null ? "" : data.task_id;
-    console.log("Parent ID:", parent_id);
-    deleteMutation.mutate({ id: data.id, parent_id: parent_id });
-    router.push("/dashboard");
+    console.log("about to delete note with id: ", data.id);
+    deleteMutation.mutate({ id: data.id, parent_id: data.task_id || "" });
+    router.push("/dashboard/notes");
   };
+
   console.log("Data:", data);
+
   return (
     <div className="m-5">
       <h1>{data.title}</h1>

@@ -8,46 +8,51 @@ const useDeleteNote = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ id, parent_id }) => {
+    mutationFn: async ({ id, parent_id = "" }) => {
+      console.log("Deleting task with id: ", id);
       try {
-        console.log("Deleting task with id: ", id);
         const response = await axios.delete(`/api/notes/${id}`);
         return response.data;
       } catch (error) {
         console.error(error);
+        throw error; // Ensure the error is thrown to trigger onError
       }
     },
     onMutate: async ({ id, parent_id }) => {
       await queryClient.cancelQueries({ queryKey: ["note", id] });
-
       await queryClient.cancelQueries({ queryKey: ["notes", parent_id] });
 
       const previousNote = queryClient.getQueryData(["note", id]);
       const previousTaskNote = queryClient.getQueryData(["notes", parent_id]);
 
-      queryClient.setQueryData(["note", id], (old) => updateTask(old, id));
-      queryClient.setQueryData(["notes", parent_id], (old) =>
-        updateTask(old, id)
-      );
+      queryClient.setQueryData(["notes"], (old) => {});
+      queryClient.setQueryData(["note", id], (old) => {});
+      queryClient.setQueryData(["notes", parent_id], (old) => {});
 
       return { previousNote, previousTaskNote };
     },
-    onSuccess: ({ id, parent_id }) => {
+    onSuccess: (data, variables, context) => {
       toast({ title: "Task Deleted Successfully", status: "success" });
-      queryClient.invalidateQueries({ queryKey: ["note", id] });
-      queryClient.invalidateQueries({ queryKey: ["notes", parent_id] });
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      queryClient.invalidateQueries({ queryKey: ["note", variables.id] });
+      queryClient.invalidateQueries({
+        queryKey: ["notes", variables.parent_id],
+      });
     },
-    onError: ({ context, id }) => {
-      queryClient.setQueryData(["note", id], context.previousNote);
-      queryClient.setQueryData(["notes", parent_id], context.previousTaskNote);
+    onError: (error, variables, context) => {
+      queryClient.setQueryData(["notes"], context.previousNote);
+      queryClient.setQueryData(
+        ["note", variables.id],
+        context.previousTaskNote
+      );
+      queryClient.setQueryData(
+        ["notes", variables.parent_id],
+        context.previousTaskNote
+      );
       toast({ title: "Error Deleting Task", status: "error" });
-      console.error("Error deleting task");
+      console.error("Error deleting task:", error);
     },
   });
-};
-
-const updateTask = (old, id) => {
-  return old?.filter((note) => note.id != id);
 };
 
 export default useDeleteNote;

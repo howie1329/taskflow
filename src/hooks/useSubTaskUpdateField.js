@@ -30,12 +30,17 @@ const useSubtaskUpdateField = () => {
 
       return { previousTask };
     },
-    onSuccess: ({ parent_id }) => {
+    onSuccess: (variables) => {
       toast({ title: "Task updated successfully", status: "success" });
-      queryClient.invalidateQueries({ queryKey: ["subtasks", parent_id] });
+      queryClient.invalidateQueries({
+        queryKey: ["subtasks", variables.parent_id],
+      });
     },
-    onError: ({ context, parent_id }) => {
-      queryClient.setQueryData(["subtasks", parent_id], context.previousTask);
+    onError: (context, variables) => {
+      queryClient.setQueryData(
+        ["subtasks", variables.parent_id],
+        context.previousTask
+      );
       console.error("Error completing task");
     },
   });
