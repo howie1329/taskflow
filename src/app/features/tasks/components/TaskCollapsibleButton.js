@@ -1,11 +1,15 @@
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useFetchSingleSubTask } from "@/hooks/useFetchSingleSubTask";
 import useSubTaskIsComplete from "@/hooks/useSubTaskIsComplete";
-import React from "react";
+import useSubtaskUpdateField from "@/hooks/useSubTaskUpdateField";
+import React, { useState } from "react";
 
 export const TaskCollapsibleButton = ({ task }) => {
   const mutation = useSubTaskIsComplete();
   const { data: subTasks } = useFetchSingleSubTask(task.id);
+
+  const updateFieldMutation = useSubtaskUpdateField();
 
   const completeButtonClick = (subTaskItem) => {
     const updateInfo = { isComplete: !subTaskItem.isComplete };
@@ -16,7 +20,17 @@ export const TaskCollapsibleButton = ({ task }) => {
     });
   };
 
+  const updateFieldBlur = (subTask_id, field, value) => {
+    updateFieldMutation.mutate({
+      id: subTask_id,
+      changedField: field,
+      updateData: value,
+      parent_id: task.id,
+    });
+  };
+
   const SubTaskItem = ({ item }) => {
+    const [updateField, setUpdateField] = useState(item.subTask_name);
     return (
       <div className="flex items-center space-x-1 font-thin text-sm">
         {item.isComplete ? (
@@ -33,7 +47,17 @@ export const TaskCollapsibleButton = ({ task }) => {
           ></Button>
         )}
 
-        <p>{item.subTask_name}</p>
+        <Input
+          className="border-none"
+          value={updateField}
+          placeholder={item.subTask_name}
+          onChange={(e) => setUpdateField(e.target.value)}
+          onKeyUp={(e) => {
+            if (e.key === "Enter") {
+              updateFieldBlur(item.subTask_id, "subTask_name", updateField);
+            }
+          }}
+        />
       </div>
     );
   };

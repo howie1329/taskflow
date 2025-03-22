@@ -6,7 +6,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 
-import React from "react";
+import React, { useState } from "react";
 import {
   MoveDiagonal,
   SeparatorHorizontal,
@@ -29,9 +29,10 @@ export const TaskModal = ({ task }) => {
   const queryClient = useQueryClient();
   const changePosition = useChangePosition();
   const completeUpdateMutation = useIsComplete();
+  const [updateField, setUpdateField] = useState(task.title);
 
   // TODO: EASY UPDATE FIELD UI
-  // const updateFieldMutation = useTaskUpdateField();
+  const updateFieldMutation = useTaskUpdateField();
 
   const updatePosition = (increment) => {
     const newPosition = task.position + increment;
@@ -47,14 +48,15 @@ export const TaskModal = ({ task }) => {
     completeUpdateMutation.mutate({ id: task.id, data: data });
   };
 
-  /* TODO: EASY UPDATE FIELD UI 
+  // TODO: EASY UPDATE FIELD UI
   const updateFieldBlur = (field, value) => {
     updateFieldMutation.mutate({
       id: task.id,
       changedField: field,
       updateData: value,
     });
-  }; */
+  };
+
   const preFetchSubtask = () => {
     queryClient.prefetchQuery({
       queryKey: ["subtasks", task.id],
@@ -115,7 +117,19 @@ export const TaskModal = ({ task }) => {
                   )}
                 </div>
                 <div className="truncate w-full ">
-                  <h2 className="font-semibold truncate">{task.title}</h2>
+                  {/* <h2 className="font-semibold truncate">{task.title}</h2> */}
+                  <Input
+                    className="font-semibold truncate border-none"
+                    placeholder={task.title}
+                    value={updateField}
+                    onChange={(e) => setUpdateField(e.target.value)}
+                    onKeyUp={(e) => {
+                      if (e.key === "Enter") {
+                        updateFieldBlur("title", updateField);
+                      }
+                    }}
+                    //onBlur={(e) => updateFieldBlur("title", updateField)}
+                  />
                   {/*  TODO: FOR EASY UPDATE FIELD UI
                   <Input
                     className="font-semibold truncate border-none"

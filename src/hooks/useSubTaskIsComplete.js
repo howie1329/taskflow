@@ -28,13 +28,13 @@ const useSubTaskIsComplete = () => {
 
       return { previousSubTask };
     },
-    onSuccess: ({ task_id }) => {
+    onSuccess: ({ parent_id }) => {
       toast({
         title: "Subtask Status Changed Successfully",
         status: "success",
       });
       queryClient.invalidateQueries({
-        queryKey: ["subtasks", task_id],
+        queryKey: ["subtasks", parent_id],
       });
     },
     onError: () => {
