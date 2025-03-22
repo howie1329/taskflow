@@ -9,7 +9,12 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "./sidebar";
-import { Home, Presentation, ScrollTextIcon } from "lucide-react";
+import {
+  HomeIcon,
+  ListChecksIcon,
+  PresentationIcon,
+  ScrollTextIcon,
+} from "lucide-react";
 export default function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
@@ -39,13 +44,18 @@ export default function AppSidebar() {
 const items = [
   {
     title: "Home",
-    icon: Home,
+    icon: HomeIcon,
     url: "/",
   },
   {
     title: "Dashboard",
-    icon: Presentation,
+    icon: PresentationIcon,
     url: "/dashboard",
+  },
+  {
+    title: "Tasks",
+    icon: ListChecksIcon,
+    url: "/dashboard/tasks",
   },
   {
     title: "Notes",
