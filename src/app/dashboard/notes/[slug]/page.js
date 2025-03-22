@@ -4,8 +4,7 @@ import NotePage from "../components/NotePage";
 export default async function Page({ params }) {
   const { slug } = await params;
   return (
-    <div>
-      <h1>{slug}</h1>
+    <div className="flex flex-col flex-1 w-full h-full">
       <NotePage params={slug} />
     </div>
   );

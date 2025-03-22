@@ -5,7 +5,6 @@ import { Card, CardDescription, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import HTMLReactParser from "html-react-parser";
 import { useQueryClient } from "@tanstack/react-query";
 import { singleNote } from "@/hooks/useFetchNote";
 
@@ -48,7 +47,6 @@ const NotesDashboard = ({ data, onClick }) => {
 };
 
 const NoteCard = ({ note }) => {
-  var parser = HTMLReactParser;
   const queryClient = useQueryClient();
   const preFetch = () => {
     queryClient.prefetchQuery({
@@ -62,7 +60,7 @@ const NoteCard = ({ note }) => {
       <div className="flex flex-col m-2">
         <CardHeader>{note.title}</CardHeader>
         <CardDescription className="overflow-hidden truncate">
-          {parser(note.content)}
+          {note.description}
         </CardDescription>
       </div>
     </Card>
