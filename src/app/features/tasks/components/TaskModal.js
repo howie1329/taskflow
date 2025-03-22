@@ -119,7 +119,7 @@ export const TaskModal = ({ task }) => {
                 <div className="truncate w-full ">
                   {/* <h2 className="font-semibold truncate">{task.title}</h2> */}
                   <Input
-                    className="font-semibold truncate border-none"
+                    className="font-semibold text-2xl truncate border-none"
                     placeholder={task.title}
                     value={updateField}
                     onChange={(e) => setUpdateField(e.target.value)}
