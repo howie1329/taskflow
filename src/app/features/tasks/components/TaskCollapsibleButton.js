@@ -1,73 +1,16 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useFetchSingleSubTask } from "@/hooks/useFetchSingleSubTask";
-import useSubTaskIsComplete from "@/hooks/useSubTaskIsComplete";
-import useSubtaskUpdateField from "@/hooks/useSubTaskUpdateField";
-import React, { useState } from "react";
+import React from "react";
+import SubtaskLineItem from "../../subtask/SubtaskLineItem";
 
 export const TaskCollapsibleButton = ({ task }) => {
-  const mutation = useSubTaskIsComplete();
   const { data: subTasks } = useFetchSingleSubTask(task.id);
-
-  const updateFieldMutation = useSubtaskUpdateField();
-
-  const completeButtonClick = (subTaskItem) => {
-    const updateInfo = { isComplete: !subTaskItem.isComplete };
-    mutation.mutate({
-      id: subTaskItem.subTask_id,
-      data: updateInfo,
-      parent_id: task.id,
-    });
-  };
-
-  const updateFieldBlur = (subTask_id, field, value) => {
-    updateFieldMutation.mutate({
-      id: subTask_id,
-      changedField: field,
-      updateData: value,
-      parent_id: task.id,
-    });
-  };
-
-  const SubTaskItem = ({ item }) => {
-    const [updateField, setUpdateField] = useState(item.subTask_name);
-    return (
-      <div className="flex items-center space-x-1 font-thin text-sm">
-        {item.isComplete ? (
-          <Button
-            className=" bg-green-700 h-3 w-3 rounded-full "
-            size="basic"
-            onClick={() => completeButtonClick(item)}
-          ></Button>
-        ) : (
-          <Button
-            className=" bg-red-700 h-3 w-3 rounded-full "
-            size="basic"
-            onClick={() => completeButtonClick(item)}
-          ></Button>
-        )}
-
-        <Input
-          className="border-none"
-          value={updateField}
-          placeholder={item.subTask_name}
-          onChange={(e) => setUpdateField(e.target.value)}
-          onKeyUp={(e) => {
-            if (e.key === "Enter") {
-              updateFieldBlur(item.subTask_id, "subTask_name", updateField);
-            }
-          }}
-        />
-      </div>
-    );
-  };
 
   return (
     <div className="flex flex-col mx-2 gap-2">
       <p className="text-xs text-wrap font-extralight ">{task.description}</p>
 
       {subTasks &&
-        subTasks.map((item, key) => <SubTaskItem key={key} item={item} />)}
+        subTasks.map((item, key) => <SubtaskLineItem key={key} item={item} />)}
 
       <div className="flex justify-between items-center">
         {task.isCompleted ? (

@@ -12,6 +12,7 @@ import useDeleteTask from "@/hooks/useDeleteTask";
 import { useFetchSingleSubTask } from "@/hooks/useFetchSingleSubTask";
 import { useFetchSingleNote } from "@/hooks/useFetchSingleNote";
 import { useRouter } from "next/navigation";
+import SubtaskLineItem from "../../subtask/SubtaskLineItem";
 
 const TaskDialogCard = ({ task }) => {
   const updateMutation = useIsComplete();
@@ -76,7 +77,9 @@ const TaskDialogCard = ({ task }) => {
       ) : (
         <div>
           {subTasks &&
-            subTasks.map((task, key) => <p key={key}>{task.subTask_name}</p>)}
+            subTasks.map((task, key) => (
+              <SubtaskLineItem key={key} item={task} />
+            ))}
         </div>
       )}
 
