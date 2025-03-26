@@ -95,10 +95,7 @@ const TaskDashboard = () => {
       <Button onClick={onClick}>Upload JSON</Button>
       <div className="flex justify-evenly ">
         {Object.keys(newTaskGroups).map((section) => (
-          <div
-            className="w-full h-screen overflow-scroll border-red-500 border-2"
-            key={section}
-          >
+          <div className="w-full h-screen overflow-scroll" key={section}>
             <p>{section}</p>
             {Object.entries(newTaskGroups[section]).map(([priority, tasks]) => (
               <div className="" key={priority}>
