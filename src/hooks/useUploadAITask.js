@@ -17,9 +17,6 @@ const uploadAITask = async (data) => {
       note = aiResponse.data.notes;
       delete aiResponse.data.notes;
     }
-    if (aiResponse && aiResponse.data) {
-      aiResponse.data["isCompleted"] = false;
-    }
     console.log("ai DAta:", aiResponse.data);
     const response = await axios.post("/api/task", aiResponse.data);
     if (subTasks) {

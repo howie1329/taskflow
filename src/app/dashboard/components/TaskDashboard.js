@@ -63,6 +63,12 @@ const TaskDashboard = () => {
       const isOverDue = taskDate < today;
       const isNoDeadLine = !date;
 
+      Object.keys(groupings).forEach((group) => {
+        if (!groupings[group][priority]) {
+          groupings[group][priority] = [];
+        }
+      });
+
       if (isToday) {
         groupings.Today[priority].push(task);
       } else if (isThisWeek) {
