@@ -3,7 +3,6 @@ import { NextResponse } from "next/server";
 
 export async function DELETE(req, { params }) {
   const { id } = await params;
-  console.log("id", id);
 
   const { error } = await supabaseClient
     .from("notes")

@@ -1,15 +1,20 @@
 import { supabaseClient } from "@/app/lib/supabaseClient";
 import { NextResponse } from "next/server";
-import { currentUser } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 
 export async function GET(req, { params }) {
-  const user = await currentUser();
+  const { userId } = await auth();
+
+  if (!userId) {
+    return NextResponse.json("Unauthorized", { status: 401 });
+  }
+
   const { filter } = await params;
   const { data: item, error } = await supabaseClient
     .from("tasks")
     .select("*")
     .eq("priority", filter)
-    .eq("userId", user.id)
+    .eq("userId", userId)
     .order("position", { ascending: true });
 
   if (error) {
