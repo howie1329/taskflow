@@ -61,8 +61,7 @@ export default {
         },
       },
       fontFamily: {
-        basic: ["var(--font-geist-mono)"],
-        second: ["--font-noto-sans"],
+        sans: ["var(--font-inter)"],
       },
       borderRadius: {
         lg: "var(--radius)",

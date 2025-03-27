@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono, Noto_Sans } from "next/font/google";
+import { Geist, Geist_Mono, Noto_Sans, Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import QueryProvider from "@/lib/QueryProvider";
@@ -11,6 +11,11 @@ import {
   UserButton,
 } from "@clerk/nextjs";
 
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+});
+
 const notoSans = Noto_Sans({
   variable: "--font-noto-sans",
   subsets: ["latin"],
@@ -19,6 +24,7 @@ const notoSans = Noto_Sans({
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  variable: "--font-inter",
 });
 
 const geistMono = Geist_Mono({
@@ -35,9 +41,7 @@ export default function RootLayout({ children }) {
   return (
     <ClerkProvider>
       <html lang="en">
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} ${notoSans.variable} antialiased`}
-        >
+        <body className={inter.variable}>
           <header className="flex justify-end items-center p-4 gap-4 h-16">
             <SignedOut>
               <SignInButton />
