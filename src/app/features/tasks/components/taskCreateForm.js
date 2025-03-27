@@ -198,23 +198,18 @@ export const TaskCreateForm = () => {
             </FormItem>
           )}
         />
-        {subTaskSwitch &&
-          subTask.map((task, i) => (
-            <SubTaskInput
-              key={i}
-              task={task}
-              subTask={subTask}
-              setSubTask={setSubTask}
-              index={i}
-            />
-          ))}
-
-        {subTaskSwitch && (
-          <Button type="button" onClick={() => setSubTask([...subTask, {}])}>
-            Add Sub Task
-          </Button>
-        )}
-
+        <div className="flex flex-col flex-1 space-y-2 overflow-auto max-h-[80px]">
+          {subTaskSwitch &&
+            subTask.map((task, i) => (
+              <SubTaskInput
+                key={i}
+                task={task}
+                subTask={subTask}
+                setSubTask={setSubTask}
+                index={i}
+              />
+            ))}
+        </div>
         <div className="flex justify-between">
           <Button type="submit">Add Task</Button>
         </div>

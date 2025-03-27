@@ -105,7 +105,7 @@ const TaskDialogCard = ({ task }) => {
               Not Completed
             </Button>
           )}
-          <p>Due Date: {task.date}</p>
+          <p>{task.date}</p>
         </div>
       </DialogFooter>
     </>
