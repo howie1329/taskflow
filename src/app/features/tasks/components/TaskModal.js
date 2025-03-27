@@ -137,7 +137,11 @@ export const TaskModal = ({ task }) => {
                     onBlur={(e) => updateFieldBlur("title", e.target.value)}
                   /> */}
                   <div className="flex flex-row justify-between">
-                    <p className="font-extralight text-xs">{task.date}</p>
+                    <p className="font-extralight text-xs">
+                      {task.date instanceof Date
+                        ? task.date.toDateString()
+                        : "Invalid Date"}
+                    </p>
                   </div>
                 </div>
               </div>
