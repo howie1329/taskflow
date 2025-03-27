@@ -7,9 +7,19 @@ import { Label } from "@/components/ui/label";
 import { CreateTaskModal } from "@/app/features/tasks/components/CreateTaskModal";
 import AIDialogChat from "@/app/features/ai/AIDialogChat";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import datas from "@/app/taskData.json";
+import useUpload from "@/hooks/useUpload";
 
 function Page() {
   const [tableView, setTableView] = useState(false);
+  const mutation = useUpload();
+
+  const onClick = () => {
+    datas.map((data) => {
+      mutation.mutate(data);
+    });
+  };
 
   return (
     <div className="flex mx-2 flex-col flex-1 gap-2 ">
@@ -17,9 +27,10 @@ function Page() {
         <Card className="flex justify-between items-center h-16 px-2 ">
           23 Task
         </Card>
-        <Card className="flex justify-between items-center w-96 h-16 px-2 ">
+        <Card className="flex justify-between items-center h-16 px-2 space-x-2">
           <AIDialogChat />
           <CreateTaskModal />
+          <Button onClick={onClick}>Upload JSON</Button>
           <Switch
             checked={tableView}
             onCheckedChange={() => setTableView(!tableView)}

@@ -45,7 +45,7 @@ const AIDialogChat = () => {
         />
         <DialogFooter>
           <Button type="submit" onClick={sendToAI}>
-            Create Task
+            Ask Flow
           </Button>
         </DialogFooter>
       </DialogContent>

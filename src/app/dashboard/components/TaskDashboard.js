@@ -1,22 +1,12 @@
 "use client";
 import React from "react";
-import { Button } from "@/components/ui/button";
 import Loading from "@/app/components/loading";
 import useGetTasks from "@/hooks/useGetTasks";
-import datas from "@/app/taskData.json";
-import useUpload from "@/hooks/useUpload";
 import { TaskModal } from "@/app/features/tasks/components/TaskModal";
 import { EditTaskForm } from "@/app/features/tasks/components/EditTaskForm";
 
 const TaskDashboard = () => {
   const { data, isLoading, error, isError } = useGetTasks();
-  const mutation = useUpload();
-
-  const onClick = () => {
-    datas.map((data) => {
-      mutation.mutate(data);
-    });
-  };
 
   if (isLoading) {
     return <Loading />;
@@ -65,12 +55,11 @@ const TaskDashboard = () => {
 
   return (
     <div className="flex flex-col w-full h-full gap-2">
-      <Button onClick={onClick}>Upload JSON</Button>
-      <div className="flex justify-evenly w-full h-[660px]  ">
+      <div className="flex justify-evenly w-full h-[700px]  ">
         {Object.keys(newTaskGroup).map((dayHeader) => (
           <div className="" key={dayHeader}>
-            <p className="text-center mt-1">{dayHeader}</p>
-            <div className="flex flex-col  h-[95%] overflow-auto gap-2">
+            <p className="text-center mt-1">{dayHeader.toUpperCase()}</p>
+            <div className="flex flex-col h-[95%] overflow-auto gap-2">
               <EditTaskForm />
               {newTaskGroup[dayHeader].length > 0 ? (
                 newTaskGroup[dayHeader].map((task, index) => (
