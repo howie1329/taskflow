@@ -1,8 +1,24 @@
 import Link from "next/link";
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  SignUpButton,
+  UserButton,
+} from "@clerk/nextjs";
 
 export default function Home() {
   return (
     <div className="flex flex-col items-center justify-center w-screen h-screen gap-2 font-second">
+      <header>
+        <SignedOut>
+          <SignInButton />
+          <SignUpButton />
+        </SignedOut>
+        <SignedIn>
+          <UserButton />
+        </SignedIn>
+      </header>
       <h1>TaskFlow</h1>
       <p>TaskFlow... The Ultimate All In One Productivy App.</p>
       <Link

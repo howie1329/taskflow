@@ -10,6 +10,13 @@ import {
   SidebarMenuItem,
 } from "./sidebar";
 import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  SignUpButton,
+  UserButton,
+} from "@clerk/nextjs";
+import {
   HomeIcon,
   ListChecksIcon,
   PresentationIcon,
@@ -33,6 +40,13 @@ export default function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              <SignedOut>
+                <SignInButton />
+                <SignUpButton />
+              </SignedOut>
+              <SignedIn>
+                <UserButton />
+              </SignedIn>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
