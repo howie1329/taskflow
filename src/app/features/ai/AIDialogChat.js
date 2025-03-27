@@ -11,7 +11,6 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import useUploadAITask from "@/hooks/useUploadAITask";
 import { DialogTrigger } from "@radix-ui/react-dialog";
-import axios from "axios";
 import React, { useState } from "react";
 
 const AIDialogChat = () => {
