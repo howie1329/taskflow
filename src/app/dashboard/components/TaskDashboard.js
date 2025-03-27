@@ -6,6 +6,7 @@ import useGetTasks from "@/hooks/useGetTasks";
 import datas from "@/app/taskData.json";
 import useUpload from "@/hooks/useUpload";
 import { TaskModal } from "@/app/features/tasks/components/TaskModal";
+import { EditTaskForm } from "@/app/features/tasks/components/EditTaskForm";
 
 const TaskDashboard = () => {
   const { data, isLoading, error, isError } = useGetTasks();
@@ -63,14 +64,14 @@ const TaskDashboard = () => {
   const newTaskGroup = timeGroupings(data);
 
   return (
-    <div className="flex flex-col w-full h-screen gap-2">
-      <h2 className="font-semibold text-xl text-center">Task Cards</h2>
+    <div className="flex flex-col w-full h-full gap-2">
       <Button onClick={onClick}>Upload JSON</Button>
-      <div className="flex justify-evenly ">
+      <div className="flex justify-evenly w-full h-[660px]  ">
         {Object.keys(newTaskGroup).map((dayHeader) => (
-          <div className="w-full h-full" key={dayHeader}>
-            <p>{dayHeader}</p>
-            <div className="flex flex-col h-full overflow-scroll gap-2">
+          <div className="" key={dayHeader}>
+            <p className="text-center mt-1">{dayHeader}</p>
+            <div className="flex flex-col  h-[95%] overflow-auto gap-2">
+              <EditTaskForm />
               {newTaskGroup[dayHeader].length > 0 ? (
                 newTaskGroup[dayHeader].map((task, index) => (
                   <TaskModal key={index} task={task} />

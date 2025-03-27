@@ -6,16 +6,19 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { CreateTaskModal } from "@/app/features/tasks/components/CreateTaskModal";
 import AIDialogChat from "@/app/features/ai/AIDialogChat";
+import { Card } from "@/components/ui/card";
 
 function Page() {
   const [tableView, setTableView] = useState(false);
 
   return (
-    <div className="flex m-2 flex-col items-center flex-1">
-      <div className="flex justify-evenly items-center w-full">
-        <h1 className="font-bold text-2xl text-center ">Tasks</h1>
-        <AIDialogChat />
-        <div className="flex justify-center items-center gap-2">
+    <div className="flex mx-2 flex-col flex-1 gap-2 ">
+      <div className="flex w-full justify-between">
+        <Card className="flex justify-between items-center h-16 px-2 ">
+          23 Task
+        </Card>
+        <Card className="flex justify-between items-center w-96 h-16 px-2 ">
+          <AIDialogChat />
           <CreateTaskModal />
           <Switch
             checked={tableView}
@@ -26,10 +29,9 @@ function Page() {
           ) : (
             <Label className="font-semibold">Card View</Label>
           )}
-        </div>
+        </Card>
       </div>
-
-      {tableView ? <TaskTable /> : <TaskDashboard />}
+      <Card>{tableView ? <TaskTable /> : <TaskDashboard />}</Card>
     </div>
   );
 }

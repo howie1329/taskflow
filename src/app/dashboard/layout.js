@@ -10,7 +10,7 @@ export default function Layout({ children }) {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <main className="font-second w-full h-full">
+      <main className="font-second w-screen h-screen overflow-hidden">
         <SidebarTrigger />
         {children}
       </main>

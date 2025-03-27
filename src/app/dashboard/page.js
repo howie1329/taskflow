@@ -16,7 +16,7 @@ const Page = () => {
   const [filter, setFilter] = useState("None");
   const { data: filteredTask, isLoading, isError } = useFetchFilterTask(filter);
   return (
-    <div className="m-2 border-2 border-black">
+    <div className="m-2 h-full w-full ">
       <h1>Dashboard</h1>
       <p>Welcome to the dashboard</p>
       <Separator />
