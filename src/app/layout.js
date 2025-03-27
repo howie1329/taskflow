@@ -2,6 +2,14 @@ import { Geist, Geist_Mono, Noto_Sans } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import QueryProvider from "@/lib/QueryProvider";
+import {
+  ClerkProvider,
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  SignUpButton,
+  UserButton,
+} from "@clerk/nextjs";
 
 const notoSans = Noto_Sans({
   variable: "--font-noto-sans",
@@ -25,13 +33,24 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} ${notoSans.variable} antialiased`}
-      >
-        <QueryProvider>{children}</QueryProvider>
-        <Toaster />
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} ${notoSans.variable} antialiased`}
+        >
+          <header className="flex justify-end items-center p-4 gap-4 h-16">
+            <SignedOut>
+              <SignInButton />
+              <SignUpButton />
+            </SignedOut>
+            <SignedIn>
+              <UserButton />
+            </SignedIn>
+          </header>
+          <QueryProvider>{children}</QueryProvider>
+          <Toaster />
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
