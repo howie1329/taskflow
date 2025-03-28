@@ -15,7 +15,6 @@ export async function GET() {
   }
 
   const client = redisClient;
-
   if (!client.isOpen) {
     await client.connect();
   }
@@ -23,8 +22,8 @@ export async function GET() {
   const key = `tasks:${userId}`;
 
   try {
-    const cacheAllTask = client.get(key);
-    if (cacheAllTask) {
+    const cacheAllTask = await client.get(key);
+    if (cacheAllTask != null) {
       return NextResponse.json(JSON.parse(cacheAllTask), { status: 200 });
     }
     const { data: item, error } = await supabaseClient
