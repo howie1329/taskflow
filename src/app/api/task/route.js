@@ -63,8 +63,8 @@ export async function POST(req) {
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   } else {
-    invalidateAllRedisTaskFilters();
-    invalidateAllRedisTask();
+    invalidateAllRedisTaskFilters(userId);
+    invalidateAllRedisTask(userId);
     return NextResponse.json(data, { status: 201 });
   }
 }

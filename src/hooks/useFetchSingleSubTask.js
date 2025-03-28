@@ -4,9 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 
 const singleSubTask = async (id) => {
   try {
-    console.log("Subtask fetch");
     const response = await axios.get(`/api/task/subtask/${id}`);
-    console.log(response);
     return response.data;
   } catch (error) {
     console.error(error);

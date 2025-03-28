@@ -1,10 +1,8 @@
 import redisClient from "@/app/lib/redisClient";
-import { auth } from "@clerk/nextjs/server";
 
 const client = redisClient;
 
-export async function invalidateAllRedisTask() {
-  const { userId } = auth;
+export async function invalidateAllRedisTask(userId) {
   const key = `tasks:${userId}`;
   if (!client.isOpen) {
     await client.connect();
@@ -12,13 +10,11 @@ export async function invalidateAllRedisTask() {
 
   const exist = await client.exists(key);
   if (exist) {
-    console.log("Exist", exist);
     await client.del(key);
   }
 }
 
-export async function invalidateRedisCacheTaskFilter(filter) {
-  const { userId } = await auth;
+export async function invalidateRedisCacheTaskFilter(userId, filter) {
   const today = new Date().toISOString().split("T")[0];
   const cacheFilterKey = `tasks:${userId}:today:${today}:filter:${filter}`;
   if (!client.isOpen) {
@@ -30,12 +26,12 @@ export async function invalidateRedisCacheTaskFilter(filter) {
   }
 }
 
-export const invalidateAllRedisTaskFilters = () => {
+export const invalidateAllRedisTaskFilters = (userId) => {
   if (!client.isOpen) {
     client.connect();
   }
-  invalidateRedisCacheTaskFilter("None");
-  invalidateRedisCacheTaskFilter("Low");
-  invalidateRedisCacheTaskFilter("Medium");
-  invalidateRedisCacheTaskFilter("High");
+  invalidateRedisCacheTaskFilter(userId, "None");
+  invalidateRedisCacheTaskFilter(userId, "Low");
+  invalidateRedisCacheTaskFilter(userId, "Medium");
+  invalidateRedisCacheTaskFilter(userId, "High");
 };
