@@ -27,7 +27,6 @@ const TaskDashboard = () => {
       .split("T")[0];
 
     tasksData.map((task) => {
-      console.log(task);
       const { date } = task;
 
       const isToday = date === today;

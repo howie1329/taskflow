@@ -4,7 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 const client = redisClient;
 
 export async function invalidateAllRedisTask() {
-  const { userId } = await auth;
+  const { userId } = auth;
   const key = `tasks:${userId}`;
   if (!client.isOpen) {
     await client.connect();
