@@ -1,6 +1,7 @@
 import { supabaseClient } from "@/app/lib/supabaseClient";
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { invalidateAllRedisTaskFilters } from "@/lib/redisUtils";
 
 export async function GET() {
   const { userId } = await auth();
@@ -39,6 +40,7 @@ export async function POST(req) {
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   } else {
+    invalidateAllRedisTaskFilters();
     return NextResponse.json(data, { status: 201 });
   }
 }

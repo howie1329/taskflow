@@ -2,7 +2,6 @@
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "./use-toast";
-import { invalidateAllRedisTaskFilters } from "@/lib/redisUtils";
 
 const useDeleteTask = () => {
   const queryClient = useQueryClient();
@@ -29,7 +28,6 @@ const useDeleteTask = () => {
     onSuccess: () => {
       toast({ title: "Task Deleted Successfully", status: "success" });
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
-      invalidateAllRedisTaskFilters();
     },
     onError: (context) => {
       queryClient.setQueryData(["tasks"], context.previousTask);

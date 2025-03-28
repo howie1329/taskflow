@@ -16,6 +16,9 @@ export async function invalidateRedisCacheTaskFilter(filter) {
 }
 
 export const invalidateAllRedisTaskFilters = () => {
+  if (!redisClient.isOpen) {
+    redisClient.connect();
+  }
   invalidateRedisCacheTaskFilter("None");
   invalidateRedisCacheTaskFilter("Low");
   invalidateRedisCacheTaskFilter("Medium");

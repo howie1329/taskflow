@@ -2,7 +2,6 @@ import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import uploadSubtask from "./useUploadSubTask";
 import { useToast } from "./use-toast";
-import { invalidateRedisCacheTaskFilter } from "@/lib/redisUtils";
 
 const uploadTask = async (data) => {
   try {
@@ -58,10 +57,6 @@ const useUpload = () => {
     onSuccess: () => {
       toast({ title: "Task Uploaded Successfully", status: "success" });
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
-      invalidateRedisCacheTaskFilter("None");
-      invalidateRedisCacheTaskFilter("Low");
-      invalidateRedisCacheTaskFilter("Medium");
-      invalidateRedisCacheTaskFilter("High");
     },
   });
 };

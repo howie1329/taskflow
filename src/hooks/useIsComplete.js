@@ -1,9 +1,7 @@
 "use client";
-
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "./use-toast";
-import { invalidateAllRedisTaskFilters } from "@/lib/redisUtils";
 
 const useIsComplete = () => {
   const queryClient = useQueryClient();
@@ -30,7 +28,6 @@ const useIsComplete = () => {
     onSuccess: () => {
       toast({ title: "Task Status Changed Successfully", status: "success" });
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
-      invalidateAllRedisTaskFilters();
     },
     onError: (context) => {
       toast({ title: "Error completing task", status: "error" });
