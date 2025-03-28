@@ -6,8 +6,8 @@ import {
 import { NextResponse } from "next/server";
 
 export async function PATCH(req, { params }) {
-  invalidateAllRedisTask();
-  invalidateAllRedisTaskFilters();
+  await invalidateAllRedisTask();
+  await invalidateAllRedisTaskFilters();
 
   const { id } = await params;
   const requestedData = await req.json();
