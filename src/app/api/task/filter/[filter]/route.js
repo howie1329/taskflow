@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 
 export async function GET(req, { params }) {
+  const today = new Date().toISOString().split("T")[0];
   const { userId } = await auth();
 
   if (!userId) {
@@ -15,6 +16,7 @@ export async function GET(req, { params }) {
     .select("*")
     .eq("priority", filter)
     .eq("userId", userId)
+    .eq("date", today)
     .order("position", { ascending: true });
 
   if (error) {

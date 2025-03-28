@@ -1,16 +1,9 @@
 import { NextResponse } from "next/server";
-import { createClient } from "redis";
+import redisClient from "@/app/lib/redisClient";
 
 export async function GET() {
   console.log("Redis Start");
-  const client = createClient({
-    username: "default",
-    password: process.env.REDIS_PASS,
-    socket: {
-      host: process.env.REDIS_URL,
-      port: process.env.REDIS_PORT,
-    },
-  });
+  const client = redisClient;
 
   client.on("error", (err) => console.log("Redis Client Error", err));
 
