@@ -37,7 +37,7 @@ export async function GET(req, { params }) {
     }
 
     if (item.length > 0) {
-      await client.set(key, JSON.stringify(item), { EX: 120 });
+      await client.set(key, JSON.stringify(item), { EX: 600 });
     }
 
     return NextResponse.json(item, { status: 200 });
