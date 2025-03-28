@@ -6,6 +6,9 @@ import {
 import { NextResponse } from "next/server";
 
 export async function PATCH(req, { params }) {
+  invalidateAllRedisTask();
+  invalidateAllRedisTaskFilters();
+
   const { id } = await params;
   const requestedData = await req.json();
 
@@ -18,8 +21,7 @@ export async function PATCH(req, { params }) {
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
-  invalidateAllRedisTaskFilters();
-  invalidateAllRedisTask();
+
   return NextResponse.json(item, { status: 200 });
 }
 
@@ -35,6 +37,6 @@ export async function DELETE(req, { params }) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
   invalidateAllRedisTaskFilters();
-  invalidateAllRedisTaskFilters();
+  invalidateAllRedisTask();
   return NextResponse.json({ id }, { status: 200 });
 }
