@@ -1,7 +1,11 @@
 import { supabaseClient } from "@/app/lib/supabaseClient";
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { invalidateAllRedisTaskFilters } from "@/lib/redisUtils";
+import {
+  invalidateAllRedisTask,
+  invalidateAllRedisTaskFilters,
+} from "@/lib/redisUtils";
+import redisClient from "@/app/lib/redisClient";
 
 export async function GET() {
   const { userId } = await auth();
@@ -10,16 +14,36 @@ export async function GET() {
     return NextResponse.json("Unauthorized", { status: 401 });
   }
 
-  const { data: item, error } = await supabaseClient
-    .from("tasks")
-    .select("*")
-    .eq("userId", userId)
-    .order("position", { ascending: true });
+  const client = redisClient;
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  } else {
+  if (!client.isOpen) {
+    await client.connect();
+  }
+
+  const key = `tasks:${userId}`;
+
+  try {
+    const cacheAllTask = client.get(key);
+    if (cacheAllTask) {
+      return NextResponse.json(JSON.parse(cacheAllTask), { status: 200 });
+    }
+    const { data: item, error } = await supabaseClient
+      .from("tasks")
+      .select("*")
+      .eq("userId", userId)
+      .order("position", { ascending: true });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    if (item.length > 0) {
+      await client.set(key, JSON.stringify(item), { EX: 600 });
+    }
+
     return NextResponse.json(item, { status: 200 });
+  } catch (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
 
@@ -41,6 +65,7 @@ export async function POST(req) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   } else {
     invalidateAllRedisTaskFilters();
+    invalidateAllRedisTask();
     return NextResponse.json(data, { status: 201 });
   }
 }

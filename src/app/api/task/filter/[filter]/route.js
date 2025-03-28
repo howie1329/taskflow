@@ -8,13 +8,13 @@ export async function GET(req, { params }) {
   const { userId } = await auth();
   const { filter } = await params;
 
+  if (!userId) {
+    return NextResponse.json("Unauthorized", { status: 401 });
+  }
+
   const client = redisClient;
   if (!client.isOpen) {
     await client.connect();
-  }
-
-  if (!userId) {
-    return NextResponse.json("Unauthorized", { status: 401 });
   }
 
   const key = `tasks:${userId}:today:${today}:filter:${filter}`;

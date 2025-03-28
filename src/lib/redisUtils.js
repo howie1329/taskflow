@@ -4,6 +4,18 @@ import { auth } from "@clerk/nextjs/server";
 const { userId } = auth;
 const today = new Date().toISOString().split("T")[0];
 
+export async function invalidateAllRedisTask() {
+  const key = `tasks:${userId}`;
+  if (!redisClient.isOpen) {
+    redisClient.connect();
+  }
+
+  const exist = redisClient.exists(key);
+  if (exist) {
+    await redisClient.del(key);
+  }
+}
+
 export async function invalidateRedisCacheTaskFilter(filter) {
   const cacheFilterKey = `tasks:${userId}:today:${today}:filter:${filter}`;
   if (!redisClient.isOpen) {
