@@ -135,10 +135,9 @@ export const TaskModal = ({ task }) => {
                   />
                   <div className="flex flex-row justify-between">
                     <p
-                      className={
-                        "font-extralight text-xs shadow rounded-md px-2 text-primary-foreground hover:bg-primary/90 " +
+                      className={`font-extralight text-xs shadow rounded-md px-2 text-primary-foreground ${
                         statusButtonColor[task.priority]
-                      }
+                      } hover:opacity-90`}
                     >
                       {task.priority}
                     </p>
