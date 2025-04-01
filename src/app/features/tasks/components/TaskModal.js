@@ -114,9 +114,9 @@ export const TaskModal = ({ task }) => {
                     ></Button>
                   )}
                 </div>
-                <div className="truncate w-full ">
+                <div className="flex flex-col truncate w-full gap-1">
                   <Input
-                    className="font-semibold text-2xl truncate border-none"
+                    className="text-3xl truncate border-none h-fit p-0"
                     placeholder={task.title}
                     value={updateField}
                     onChange={(e) => setUpdateField(e.target.value)}
@@ -127,7 +127,10 @@ export const TaskModal = ({ task }) => {
                     }}
                   />
                   <div className="flex flex-row justify-between">
-                    <p className="font-extralight text-xs">{task.date}</p>
+                    <p className="bg-primary font-extralight text-xs shadow rounded-md px-2 text-primary-foreground hover:bg-primary/90 ">
+                      {task.priority}
+                    </p>
+                    <p className="font-extralight text-xs ">{task.date}</p>
                   </div>
                 </div>
               </div>
