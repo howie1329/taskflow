@@ -75,6 +75,13 @@ export const TaskModal = ({ task }) => {
     preFetchNotes();
   };
 
+  const statusButtonColor = {
+    None: "bg-primary",
+    Low: "bg-blue-600",
+    Medium: "bg-yellow-600",
+    High: "bg-red-600",
+  };
+
   return (
     <Card className="w-[20rem]" onMouseEnter={() => preFetch()}>
       <Dialog className="flex flex-row">
@@ -127,7 +134,12 @@ export const TaskModal = ({ task }) => {
                     }}
                   />
                   <div className="flex flex-row justify-between">
-                    <p className="bg-primary font-extralight text-xs shadow rounded-md px-2 text-primary-foreground hover:bg-primary/90 ">
+                    <p
+                      className={
+                        "font-extralight text-xs shadow rounded-md px-2 text-primary-foreground hover:bg-primary/90 " +
+                        statusButtonColor[task.priority]
+                      }
+                    >
                       {task.priority}
                     </p>
                     <p className="font-extralight text-xs ">{task.date}</p>
