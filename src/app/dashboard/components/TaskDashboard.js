@@ -74,7 +74,7 @@ const TaskDashboard = () => {
                   <TaskModal key={index} task={task} />
                 ))
               ) : (
-                <p>No Task Here.</p>
+                <p className="self-center">No Task Here.</p>
               )}
             </div>
           </div>
