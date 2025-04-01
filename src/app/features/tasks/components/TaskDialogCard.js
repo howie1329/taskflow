@@ -36,6 +36,13 @@ const TaskDialogCard = ({ task }) => {
     const data = { isCompleted: !task.isCompleted };
     updateMutation.mutate({ id: task.id, data: data });
   };
+
+  const statusButtonColor = {
+    None: "bg-primary",
+    Low: "bg-blue-600",
+    Medium: "bg-yellow-600",
+    High: "bg-red-600",
+  };
   return (
     <>
       <DialogHeader>
@@ -46,7 +53,11 @@ const TaskDialogCard = ({ task }) => {
                 {tag}
               </Button>
             ))}
-          <Button size="status" variant="priority">
+          <Button
+            size="status"
+            variant="priority"
+            className={statusButtonColor[task.priority]}
+          >
             {task.priority}
           </Button>
         </div>

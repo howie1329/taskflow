@@ -24,8 +24,8 @@ const buttonVariants = cva(
           "hover:bg-red-400 hover:text-accent-foreground bg-red-300 text-black",
         link: "text-primary underline-offset-4 hover:underline",
         status: "text-primary-foreground bg-primary",
-        tag: "text-primary-foreground bg-primary bg-blue-600 ",
-        priority: "text-primary-foreground bg-primary bg-rose-500",
+        tag: "text-primary-foreground bg-primary ",
+        priority: "text-primary-foreground bg-rose-500",
         basic: "",
       },
       size: {
