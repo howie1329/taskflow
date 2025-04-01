@@ -6,6 +6,7 @@ import { TaskModal } from "@/app/features/tasks/components/TaskModal";
 import { EditTaskForm } from "@/app/features/tasks/components/EditTaskForm";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 const TaskDashboard = () => {
   const { data, isLoading, error, isError } = useGetTasks();
@@ -65,8 +66,8 @@ const TaskDashboard = () => {
                 {newTaskGroup[dayHeader].length}
               </p>
             </div>
-
-            <div className="flex flex-col h-[94%] overflow-auto gap-2">
+            <Separator />
+            <div className="flex flex-col h-[94%] overflow-auto gap-2 pt-2">
               <EditTaskForm />
               {newTaskGroup[dayHeader].length > 0 ? (
                 newTaskGroup[dayHeader].map((task, index) => (
