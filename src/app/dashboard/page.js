@@ -22,11 +22,14 @@ const Page = () => {
       <Separator />
       <div className="flex flex-row mt-5 space-x-2">
         <Card className="flex flex-col w-[600px] h-[450px]  items-center">
-          <CardHeader>Task Filter</CardHeader>
           <Select onValueChange={setFilter} defaultValue="None">
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="None" />
-            </SelectTrigger>
+            <div className="flex items-center justify-center space-x-2  my-2">
+              <CardHeader>Todays Task</CardHeader>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="None" />
+              </SelectTrigger>
+            </div>
+            <Separator />
             <SelectContent>
               <SelectItem value="None">None</SelectItem>
               <SelectItem value="Low">Low</SelectItem>
