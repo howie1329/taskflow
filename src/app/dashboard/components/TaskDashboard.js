@@ -53,24 +53,24 @@ const TaskDashboard = () => {
     return timeGroup;
   };
 
-  const newTaskGroup = timeGroupings(data);
+  const newTimeGroup = timeGroupings(data);
 
   return (
     <div className="flex flex-col w-full h-full gap-2">
       <div className="flex justify-evenly w-full h-[700px]  ">
-        {Object.keys(newTaskGroup).map((dayHeader) => (
+        {Object.keys(newTimeGroup).map((dayHeader) => (
           <div className="" key={dayHeader}>
             <div className="flex justify-center items-center space-x-2 my-2 text-center">
               <p>{dayHeader.toUpperCase()}</p>
               <p className="bg-primary text-center text-primary-foreground shadow hover:bg-primary/90 rounded-md p-1 text-xs">
-                {newTaskGroup[dayHeader].length}
+                {newTimeGroup[dayHeader].length}
               </p>
             </div>
             <Separator />
             <div className="flex flex-col h-[94%] overflow-auto gap-2 pt-2">
               <EditTaskForm />
-              {newTaskGroup[dayHeader].length > 0 ? (
-                newTaskGroup[dayHeader].map((task, index) => (
+              {newTimeGroup[dayHeader].length > 0 ? (
+                newTimeGroup[dayHeader].map((task, index) => (
                   <TaskModal key={index} task={task} />
                 ))
               ) : (
