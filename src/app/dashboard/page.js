@@ -12,6 +12,9 @@ import React, { useState } from "react";
 import { TaskModal } from "../features/tasks/components/TaskModal";
 import { Separator } from "@/components/ui/separator";
 import { QuickNotes } from "./components/QuickNotes";
+import { Button } from "@/components/ui/button";
+import { PlusIcon } from "lucide-react";
+import { CreateTaskModal } from "../features/tasks/components/CreateTaskModal";
 
 const Page = () => {
   const [filter, setFilter] = useState("None");
@@ -25,10 +28,13 @@ const Page = () => {
         <Card className="flex flex-col w-[600px] h-[450px]  items-center">
           <Select onValueChange={setFilter} defaultValue="None">
             <div className="flex items-center justify-center space-x-2  my-2">
-              <CardHeader>Todays Task</CardHeader>
+              <CardHeader>
+                <h2>Todays Task</h2>
+              </CardHeader>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="None" />
               </SelectTrigger>
+              <CreateTaskModal small={true} />
             </div>
             <Separator />
             <SelectContent>
