@@ -48,6 +48,8 @@ function Page() {
 
   const statsHeader = ["Total", "Completed", "Overdue"];
 
+  /// TODO: STATS NEED TO BE CACHED IN REDIS ///
+
   return (
     <div className="flex mx-2 flex-col flex-1 gap-2 ">
       <div className="flex w-full justify-between items-center">
