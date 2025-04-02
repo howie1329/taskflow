@@ -11,12 +11,34 @@ import { Button } from "@/components/ui/button";
 import datas from "@/app/taskData.json";
 import useUpload from "@/hooks/useUpload";
 import useFetchStats from "@/hooks/useFetchStats";
-import { RadicalChart } from "./components/RadicalChart";
+import { useFilteringTasks } from "@/hooks/useFilteringTasks";
+import useGetTasks from "@/hooks/useGetTasks";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { SlidersIcon } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 function Page() {
   const [tableView, setTableView] = useState(false);
   const mutation = useUpload();
-  const { data: stat, isLoading, isError } = useFetchStats();
+  const { data: stat, isLoading } = useFetchStats();
+  const {
+    data: tasks,
+    isLoading: isTaskLoading,
+    error,
+    isError,
+  } = useGetTasks();
+  const { setPriorityFilter, setStatus, priorityFilter, status } =
+    useFilteringTasks(tasks);
 
   const onClick = () => {
     datas.map((data) => {
@@ -41,6 +63,15 @@ function Page() {
               </Card>
             ))}
         </div>
+        <Card className="w-fit h-fit p-2 bg-primary hover:bg-primary/90 shadow hover:cursor-pointer">
+          <CollapsibleFilter
+            priorityFilter={priorityFilter}
+            setPriorityFilter={setPriorityFilter}
+            setStatusFilter={setStatus}
+            statusFilter={status}
+          />
+        </Card>
+
         <Card className="flex justify-between items-center h-16 px-2 space-x-2">
           <AIDialogChat />
           <CreateTaskModal />
@@ -56,9 +87,70 @@ function Page() {
           )}
         </Card>
       </div>
-      <Card>{tableView ? <TaskTable /> : <TaskDashboard />}</Card>
+      <Card>
+        {tableView ? (
+          <TaskTable />
+        ) : (
+          <TaskDashboard
+            tasksData={tasks}
+            status={status}
+            priorityFilter={priorityFilter}
+            isLoading={isTaskLoading}
+          />
+        )}
+      </Card>
     </div>
   );
 }
+
+const CollapsibleFilter = ({
+  priorityFilter,
+  setPriorityFilter,
+  setStatusFilter,
+  statusFilter,
+}) => {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <SlidersIcon color="#ffffff" />
+      </PopoverTrigger>
+      <PopoverContent>
+        <div className="flex flex-col space-y-2">
+          <div className="flex flex-row items-center justify-center space-x-1">
+            <Label>Priority</Label>
+            <Select
+              defaultValue={priorityFilter}
+              onValueChange={setPriorityFilter}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Priority" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="None">None</SelectItem>
+                <SelectItem value="Low">Low</SelectItem>
+                <SelectItem value="Medium">Medium</SelectItem>
+                <SelectItem value="High">High</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex flex-row items-center justify-center space-x-1">
+            <Label>Status</Label>
+            <Select defaultValue={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={false}>Not Complete</SelectItem>
+                <SelectItem value={true}>Complete</SelectItem>
+                <SelectItem value={null}>All</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+};
 
 export default Page;

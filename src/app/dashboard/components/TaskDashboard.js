@@ -7,16 +7,25 @@ import { EditTaskForm } from "@/app/features/tasks/components/EditTaskForm";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { useFilteringTasks } from "@/hooks/useFilteringTasks";
+import { filterTasks } from "@/lib/filterTasks";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { SlidersIcon } from "lucide-react";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 
-const TaskDashboard = () => {
-  const { data, isLoading, error, isError } = useGetTasks();
-
+const TaskDashboard = ({ tasksData, status, priorityFilter, isLoading }) => {
   if (isLoading) {
     return <NewLoading />;
-  }
-
-  if (isError) {
-    return <p>{error.message}</p>;
   }
 
   const timeGroupings = (tasksData) => {
@@ -27,7 +36,12 @@ const TaskDashboard = () => {
       .toISOString()
       .split("T")[0];
 
-    tasksData.map((task) => {
+    const filterFinal = filterTasks(tasksData, {
+      status: status,
+      priorityFilter: priorityFilter,
+    });
+
+    filterFinal.map((task) => {
       const { date } = task;
 
       const isToday = date === today;
@@ -53,11 +67,11 @@ const TaskDashboard = () => {
     return timeGroup;
   };
 
-  const newTimeGroup = timeGroupings(data);
+  const newTimeGroup = timeGroupings(tasksData);
 
   return (
     <div className="flex flex-col w-full h-full gap-2">
-      <div className="flex justify-evenly w-full h-[700px]  ">
+      <div className="flex justify-evenly w-full h-[700px]">
         {Object.keys(newTimeGroup).map((dayHeader) => (
           <div className="" key={dayHeader}>
             <div className="flex justify-center items-center space-x-2 my-2 text-center">
