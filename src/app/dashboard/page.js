@@ -11,6 +11,7 @@ import { useFetchFilterTask } from "@/hooks/useFetchFilterTask";
 import React, { useState } from "react";
 import { TaskModal } from "../features/tasks/components/TaskModal";
 import { Separator } from "@/components/ui/separator";
+import { QuickNotes } from "./components/QuickNotes";
 
 const Page = () => {
   const [filter, setFilter] = useState("None");
@@ -53,9 +54,9 @@ const Page = () => {
           <div className="border-2 border-red-600 w-full h-[250px]">
             Calander
           </div>
-          <div className="border-2 border-blue-500 w-[475px] h-[325px]">
-            Quick Notes
-          </div>
+          <Card className="flex w-[400px] h-[325px]">
+            <QuickNotes />
+          </Card>
         </div>
       </div>
     </div>

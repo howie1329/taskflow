@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 import { singleNote } from "@/hooks/useFetchNote";
 import { Skeleton } from "@/components/ui/skeleton";
+import SingleNoteCard from "./components/SingleNoteCard";
 
 const Page = () => {
   const { data, isLoading } = useGetAllNotes();
@@ -43,7 +44,7 @@ const NotesDashboard = ({ data, onClick }) => {
       <div className="flex flex-row gap-2 flex-wrap">
         {data.map((note, key) => (
           <Link key={key} href={`/dashboard/notes/${note.id}`}>
-            <NoteCard key={key} note={note} />
+            <SingleNoteCard key={key} note={note} />
           </Link>
         ))}
       </div>
@@ -77,27 +78,6 @@ const LoadingNoteCard = () => {
         </CardHeader>
         <CardDescription>
           <Skeleton className="w-full h-4" />
-        </CardDescription>
-      </div>
-    </Card>
-  );
-};
-
-const NoteCard = ({ note }) => {
-  const queryClient = useQueryClient();
-  const preFetch = () => {
-    queryClient.prefetchQuery({
-      queryKey: ["note", note.id],
-      queryFn: () => singleNote(note.id),
-      staleTime: 300_000,
-    });
-  };
-  return (
-    <Card className="flex flex-col w-[20rem]" onMouseEnter={() => preFetch()}>
-      <div className="flex flex-col m-2">
-        <CardHeader>{note.title}</CardHeader>
-        <CardDescription className="overflow-hidden truncate">
-          {note.description}
         </CardDescription>
       </div>
     </Card>
