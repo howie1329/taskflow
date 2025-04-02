@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import datas from "@/app/taskData.json";
 import useUpload from "@/hooks/useUpload";
 import useFetchStats from "@/hooks/useFetchStats";
+import { RadicalChart } from "./components/RadicalChart";
 
 function Page() {
   const [tableView, setTableView] = useState(false);
@@ -40,7 +41,6 @@ function Page() {
               </Card>
             ))}
         </div>
-
         <Card className="flex justify-between items-center h-16 px-2 space-x-2">
           <AIDialogChat />
           <CreateTaskModal />
