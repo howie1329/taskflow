@@ -33,3 +33,11 @@ export const clearTasksFromIndexedDB = async () => {
     console.error("Error clearing IndexedDB:", error);
   }
 };
+
+export const updateTaskToIndexDB = async (task) => {
+  try {
+    await db.tasks.put(task);
+  } catch (error) {
+    console.error("Error Updating Task Change: ", error);
+  }
+};

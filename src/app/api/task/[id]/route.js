@@ -22,6 +22,7 @@ export async function PATCH(req, { params }) {
     if (error) {
       throw new Error(error.message);
     }
+    console.log("Update: ", item[0]);
     return NextResponse.json(item, { status: 200 });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

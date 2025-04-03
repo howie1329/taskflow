@@ -16,8 +16,9 @@ export async function GET() {
   }
 
   try {
-    const tasksData = fetchAllTasksRedis(userId);
-    if (tasksData != null) {
+    const tasksData = await fetchAllTasksRedis(userId);
+    console.log("TaskDataAPI: ", tasksData);
+    if (tasksData.length > 0) {
       return NextResponse.json(JSON.parse(tasksData), { status: 200 });
     }
 
@@ -25,7 +26,7 @@ export async function GET() {
       .from("tasks")
       .select("*")
       .eq("userId", userId)
-      .order("position", { ascending: true });
+      .order("id", { ascending: true });
 
     if (error) {
       throw new Error(error.message);

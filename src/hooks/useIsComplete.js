@@ -2,6 +2,7 @@
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "./use-toast";
+import { clearTasksFromIndexedDB, updateTaskToIndexDB } from "@/lib/DexieDB";
 
 const useIsComplete = () => {
   const queryClient = useQueryClient();
@@ -11,7 +12,7 @@ const useIsComplete = () => {
     mutationFn: async ({ id, data }) => {
       try {
         const response = await axios.patch(`/api/task/${id}`, data);
-        return response.data;
+        return { data: response.data[0] };
       } catch (error) {
         console.error(error);
       }
@@ -25,9 +26,14 @@ const useIsComplete = () => {
 
       return { previousTask };
     },
-    onSuccess: () => {
+    onSuccess: async (context) => {
       toast({ title: "Task Status Changed Successfully", status: "success" });
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+
+      await clearTasksFromIndexedDB();
+
+      queryClient.invalidateQueries({
+        queryKey: ["tasks"],
+      });
     },
     onError: (context) => {
       toast({ title: "Error completing task", status: "error" });
@@ -38,10 +44,9 @@ const useIsComplete = () => {
 };
 
 const updateTask = (old, id, data) => {
-  const updated = old?.map((task) =>
+  return old?.map((task) =>
     task.id === id ? { ...task, ...data } : { ...task }
   );
-  return updated;
 };
 
 export default useIsComplete;
