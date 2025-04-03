@@ -1,9 +1,13 @@
 "use client";
 import axios from "axios";
-import { useToast } from "./use-toast";
 import { useQuery } from "@tanstack/react-query";
+import {
+  clearTasksFromIndexedDB,
+  getAllTaskFromDexie,
+  saveTaskToDexie,
+} from "@/lib/DexieDB";
 
-const fetchTask = async () => {
+const fetchTaskFromApi = async () => {
   try {
     const response = await axios.get("/api/task");
 
@@ -12,13 +16,29 @@ const fetchTask = async () => {
     console.error(error);
   }
 };
-const useGetTasks = () => {
-  const { toast } = useToast();
 
+const fetchTasks = async (userId) => {
+  if (!userId) return [];
+
+  const cachedTask = await getAllTaskFromDexie(userId);
+
+  if (cachedTask.length > 0) {
+    return cachedTask;
+  }
+
+  const tasks = await fetchTaskFromApi();
+  await clearTasksFromIndexedDB();
+  await saveTaskToDexie(tasks);
+
+  return tasks;
+};
+
+const useGetTasks = (userId) => {
   return useQuery({
     queryKey: ["tasks"],
-    queryFn: fetchTask,
+    queryFn: () => fetchTasks(userId),
     staleTime: 60 * 10000,
+    enabled: !!userId,
   });
 };
 

@@ -1,27 +1,11 @@
 "use client";
 import React, { useState } from "react";
-import Loading from "@/app/components/loading";
-import useGetTasks from "@/hooks/useGetTasks";
 import { TaskModal } from "@/app/features/tasks/components/TaskModal";
 import { EditTaskForm } from "@/app/features/tasks/components/EditTaskForm";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { useFilteringTasks } from "@/hooks/useFilteringTasks";
 import { filterTasks } from "@/lib/filterTasks";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { SlidersIcon } from "lucide-react";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
 
 const TaskDashboard = ({ tasksData, status, priorityFilter, isLoading }) => {
   if (isLoading) {

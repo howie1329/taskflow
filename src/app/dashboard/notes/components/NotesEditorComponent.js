@@ -19,6 +19,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { useAuth } from "@clerk/nextjs";
 
 const NotesEditorComponent = ({ content }) => {
   const router = useRouter();
@@ -63,7 +64,8 @@ const NotesEditorComponent = ({ content }) => {
 
 const LinkTaskComboBox = ({ linkedTask, setLinkedTask }) => {
   const [open, setOpen] = useState(false);
-  const { data: allTask } = useGetTasks();
+  const { userId } = useAuth();
+  const { data: allTask } = useGetTasks(userId);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

@@ -15,12 +15,11 @@ export async function GET() {
   }
 
   const client = redisClient;
+  const key = `tasks:${userId}`;
+
   if (!client.isOpen) {
     await client.connect();
   }
-
-  const key = `tasks:${userId}`;
-
   try {
     const cacheAllTask = await client.get(key);
     if (cacheAllTask != null) {
