@@ -12,7 +12,7 @@ export async function PATCH(req, { params }) {
   const requestedData = await req.json();
   try {
     await invalidateAllRedisTask(userId);
-    await invalidateAllRedisTaskFilters(userId);
+    invalidateAllRedisTaskFilters(userId);
     const { data: item, error } = await supabaseClient
       .from("tasks")
       .update(requestedData)

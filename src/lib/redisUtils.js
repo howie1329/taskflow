@@ -2,6 +2,28 @@ import redisClient from "@/app/lib/redisClient";
 
 const client = redisClient;
 
+export async function fetchAllTasksRedis(userId) {
+  const key = `tasks:${userId}`;
+  if (!client.isOpen) {
+    await client.connect();
+  }
+
+  const tasks = await client.get(key);
+
+  if (tasks != null) {
+    return tasks;
+  }
+
+  return [];
+}
+
+export async function setAllTaskRedis(userId, item) {
+  const key = `tasks:${userId}`;
+  if (item.length > 0) {
+    await client.set(key, JSON.stringify(item), { EX: 600 });
+  }
+}
+
 export async function invalidateAllRedisTask(userId) {
   const key = `tasks:${userId}`;
   if (!client.isOpen) {
