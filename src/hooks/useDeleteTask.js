@@ -2,6 +2,7 @@
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "./use-toast";
+import { clearTasksFromIndexedDB } from "@/lib/DexieDB";
 
 const useDeleteTask = () => {
   const queryClient = useQueryClient();
@@ -25,8 +26,9 @@ const useDeleteTask = () => {
 
       return { previousTask };
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast({ title: "Task Deleted Successfully", status: "success" });
+      await clearTasksFromIndexedDB();
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
     },
     onError: (context) => {

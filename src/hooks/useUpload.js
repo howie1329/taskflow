@@ -2,6 +2,7 @@ import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import uploadSubtask from "./useUploadSubTask";
 import { useToast } from "./use-toast";
+import { clearTasksFromIndexedDB } from "@/lib/DexieDB";
 
 const uploadTask = async (data) => {
   try {
@@ -54,8 +55,9 @@ const useUpload = () => {
       toast({ title: "Task Upload Failed", status: "error" });
       queryClient.setQueryData(["tasks"], context.previousTask);
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast({ title: "Task Uploaded Successfully", status: "success" });
+      await clearTasksFromIndexedDB();
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
     },
   });

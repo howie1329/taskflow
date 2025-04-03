@@ -20,6 +20,7 @@ const fetchTaskFromApi = async () => {
 const fetchTasks = async (userId) => {
   if (!userId) return [];
 
+  console.log("2 MIN REFRESH");
   const cachedTask = await getAllTaskFromDexie(userId);
 
   if (cachedTask.length > 0) {
@@ -37,7 +38,7 @@ const useGetTasks = (userId) => {
   return useQuery({
     queryKey: ["tasks"],
     queryFn: () => fetchTasks(userId),
-    staleTime: 60 * 10000,
+    staleTime: 60 * 2000, // 2 mins
     enabled: !!userId,
   });
 };
