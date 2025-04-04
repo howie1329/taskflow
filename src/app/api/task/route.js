@@ -16,9 +16,10 @@ export async function GET() {
   }
 
   try {
-    console.log("Fetching tasks from Redis in API route");
+    console.log("Fetching tasks from Redis in API route : api/task");
     const tasksData = await fetchAllTasksRedis(userId);
     if (tasksData.length > 0) {
+      console.log("Returning tasks from Redis in API route");
       return NextResponse.json(JSON.parse(tasksData), { status: 200 });
     }
     console.log("Fetching tasks from Supabase in API route");

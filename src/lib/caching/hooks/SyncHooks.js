@@ -2,10 +2,11 @@
 import { useEffect } from "react";
 import { syncIndexedDBWithRedis } from "../SyncIndexToRedis";
 import { syncRedisToSupabase } from "../SyncRedisToSupabase";
-import { INDEXEDDB_STALE_TIME, REDIS_STALE_TIME } from "@/lib/constants";
+import { INDEXEDDB_STALE_TIME, REDIS_CACHE_TIME } from "@/lib/constants";
 
 export function useSyncIndexedDBWithRedis() {
   useEffect(() => {
+    console.log("Syncing IndexedDB with Redis");
     syncIndexedDBWithRedis();
 
     const interval = setInterval(syncIndexedDBWithRedis, INDEXEDDB_STALE_TIME); // 6 minutes
@@ -15,9 +16,10 @@ export function useSyncIndexedDBWithRedis() {
 
 export const useSyncRedisToSupabase = () => {
   useEffect(() => {
+    console.log("Syncing Redis to Supabase");
     syncRedisToSupabase();
 
-    const interval = setInterval(syncRedisToSupabase, REDIS_STALE_TIME); // 10 minutes
+    const interval = setInterval(syncRedisToSupabase, REDIS_CACHE_TIME); // 10 minutes
     return () => clearInterval(interval);
   }, []);
 };

@@ -1,4 +1,5 @@
 import redisClient from "@/app/lib/redisClient";
+import { REDIS_EXPIRE_TIME } from "./constants";
 
 const client = redisClient;
 
@@ -20,7 +21,7 @@ export async function fetchAllTasksRedis(userId) {
 export async function setAllTaskRedis(userId, item) {
   const key = `tasks:${userId}`;
   if (item.length > 0) {
-    await client.set(key, JSON.stringify(item), { EX: 480 }); // 8 minutes
+    await client.set(key, JSON.stringify(item), { EX: REDIS_EXPIRE_TIME }); // 8 minutes
   }
 }
 
