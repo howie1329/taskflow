@@ -6,6 +6,7 @@ import {
   getAllTaskFromDexie,
   saveTaskToDexie,
 } from "@/lib/DexieDB";
+import { TANSTACK_QUERY_STALE_TIME } from "@/lib/constants";
 
 const fetchTaskFromApi = async () => {
   try {
@@ -40,7 +41,7 @@ const useGetTasks = (userId) => {
   return useQuery({
     queryKey: ["tasks"],
     queryFn: () => fetchTasks(userId),
-    staleTime: 60 * 2000, // 2 mins
+    staleTime: TANSTACK_QUERY_STALE_TIME, // 2 mins
     enabled: !!userId,
   });
 };

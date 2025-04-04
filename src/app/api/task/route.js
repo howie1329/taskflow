@@ -21,7 +21,7 @@ export async function GET() {
     if (tasksData.length > 0) {
       return NextResponse.json(JSON.parse(tasksData), { status: 200 });
     }
-
+    console.log("Fetching tasks from Supabase in API route");
     const { data: item, error } = await supabaseClient
       .from("tasks")
       .select("*")
@@ -31,7 +31,7 @@ export async function GET() {
     if (error) {
       throw new Error(error.message);
     }
-
+    console.log("Fetching tasks from Supabase in API route adding to Redis");
     await setAllTaskRedis(userId, item);
 
     return NextResponse.json(item, { status: 200 });
