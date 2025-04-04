@@ -4,6 +4,7 @@ import {
   invalidateAllRedisTask,
   setAllTaskRedis,
 } from "@/lib/redisUtils";
+import { auth } from "@clerk/nextjs/server";
 
 export async function GET() {
   const { userId } = await auth();
@@ -17,6 +18,7 @@ export async function GET() {
     if (task.length > 0) {
       return NextResponse.json(JSON.parse(task), { status: 200 });
     }
+    return NextResponse.json([], { status: 200 });
   } catch (error) {
     console.error("Error in GET:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
