@@ -27,6 +27,8 @@ const fetchTasks = async (userId) => {
     return cachedTask;
   }
 
+  // Fetch from API if no cached data
+  console.log("Fallback to Fetching from API as no data in indexedDB");
   const tasks = await fetchTaskFromApi();
   await clearTasksFromIndexedDB();
   await saveTaskToDexie(tasks);

@@ -12,8 +12,6 @@ import React, { useState } from "react";
 import { TaskModal } from "../features/tasks/components/TaskModal";
 import { Separator } from "@/components/ui/separator";
 import { QuickNotes } from "./components/QuickNotes";
-import { Button } from "@/components/ui/button";
-import { PlusIcon } from "lucide-react";
 import { CreateTaskModal } from "../features/tasks/components/CreateTaskModal";
 
 const Page = () => {

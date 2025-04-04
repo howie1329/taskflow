@@ -1,3 +1,4 @@
+"use client";
 import AppSidebar from "@/components/ui/app-sidebar";
 import {
   Sidebar,
@@ -5,8 +6,14 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import {
+  useSyncIndexedDBWithRedis,
+  useSyncRedisToSupabase,
+} from "@/lib/caching/hooks/SyncHooks";
 
 export default function Layout({ children }) {
+  useSyncRedisToSupabase();
+  useSyncIndexedDBWithRedis();
   return (
     <SidebarProvider>
       <AppSidebar />

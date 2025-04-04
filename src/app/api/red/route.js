@@ -1,29 +1,41 @@
 import { NextResponse } from "next/server";
-import redisClient from "@/app/lib/redisClient";
+import {
+  fetchAllTasksRedis,
+  invalidateAllRedisTask,
+  setAllTaskRedis,
+} from "@/lib/redisUtils";
 
 export async function GET() {
-  const today = new Date().toISOString().split("T")[0];
-  console.log("Redis Start");
-  const client = redisClient;
-
-  client.on("error", (err) => console.log("Redis Client Error", err));
-
-  await client.connect();
-
-  //await client.set("foo", "bar");
-  const key = `tasks:user_2usb0Md2SjCvMehu1XHJBN2y03c:today:${today}:filter:None`;
-  const result = await client.get(key);
-
-  if (!result) {
-    console.log(`Key "${key}" does not exist in Redis.`);
-  } else {
-    console.log(result); // >>> bar
+  const { userId } = await auth();
+  if (!userId) {
+    return NextResponse.json("Unauthorized", { status: 401 });
   }
-  console.log(result); // >>> bar
 
-  await client.set("foo", 10);
+  try {
+    const task = await fetchAllTasksRedis(userId);
+    console.log("Fetching tasks from Redis in API route");
+    if (task.length > 0) {
+      return NextResponse.json(JSON.parse(task), { status: 200 });
+    }
+  } catch (error) {
+    console.error("Error in GET:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
 
-  client.disconnect();
-
-  return NextResponse.json("Success", { status: 200 });
+export async function POST(req) {
+  const { userId } = await auth();
+  const newTask = await req.json();
+  if (!userId) {
+    return NextResponse.json("Unauthorized", { status: 401 });
+  }
+  try {
+    await invalidateAllRedisTask(userId);
+    await setAllTaskRedis(userId, newTask);
+    console.log("Task added to Redis successfully");
+    return NextResponse.json(newTask, { status: 201 });
+  } catch (error) {
+    console.error("Error in POST:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
 }

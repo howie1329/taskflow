@@ -16,8 +16,8 @@ export async function GET() {
   }
 
   try {
+    console.log("Fetching tasks from Redis in API route");
     const tasksData = await fetchAllTasksRedis(userId);
-    console.log("TaskDataAPI: ", tasksData);
     if (tasksData.length > 0) {
       return NextResponse.json(JSON.parse(tasksData), { status: 200 });
     }

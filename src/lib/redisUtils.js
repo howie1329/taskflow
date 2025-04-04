@@ -20,7 +20,7 @@ export async function fetchAllTasksRedis(userId) {
 export async function setAllTaskRedis(userId, item) {
   const key = `tasks:${userId}`;
   if (item.length > 0) {
-    await client.set(key, JSON.stringify(item), { EX: 300 }); // 5 minutes
+    await client.set(key, JSON.stringify(item), { EX: 480 }); // 8 minutes
   }
 }
 
