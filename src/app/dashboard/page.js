@@ -15,19 +15,20 @@ import { QuickNotes } from "./components/QuickNotes";
 import { CreateTaskModal } from "../features/tasks/components/CreateTaskModal";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
+import { useAuth } from "@clerk/nextjs";
 
 const Page = () => {
   const [filter, setFilter] = useState("None");
   const { data: filteredTask, isLoading, isError } = useFetchFilterTask(filter);
+  const { getToken } = useAuth();
   //http://localhost:3001
   //https://taskflow-backend-production-8812.up.railway.app
-  const onClick = () => {
+  const onClick = async () => {
+    const token = await getToken();
     axios
       .get(
         "https://taskflow-backend-production-8812.up.railway.app/api/tasks/user",
-        {
-          withCredentials: true,
-        }
+        { headers: { Authorization: token }, withCredentials: true }
       )
       .then((res) => {
         console.log(res);
