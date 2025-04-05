@@ -13,14 +13,27 @@ import { TaskModal } from "../features/tasks/components/TaskModal";
 import { Separator } from "@/components/ui/separator";
 import { QuickNotes } from "./components/QuickNotes";
 import { CreateTaskModal } from "../features/tasks/components/CreateTaskModal";
+import { Button } from "@/components/ui/button";
+import axios from "axios";
 
 const Page = () => {
   const [filter, setFilter] = useState("None");
   const { data: filteredTask, isLoading, isError } = useFetchFilterTask(filter);
+
+  const onClick = () => {
+    axios
+      .get("http://localhost:3000/api/tasks/user", {
+        withCredentials: true,
+      })
+      .then((res) => {
+        console.log(res);
+      });
+  };
   return (
     <div className="m-2 h-full w-full ">
       <h1>Dashboard</h1>
       <p>Welcome to the dashboard</p>
+      <Button onClick={onClick}>Check</Button>
       <Separator />
       <div className="flex flex-row mt-5 space-x-2">
         <Card className="flex flex-col w-[600px] h-[450px]  items-center">
