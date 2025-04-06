@@ -1,17 +1,23 @@
-import axios from "axios";
+import axiosClient from "../axiosClient";
 
-export async function syncRedisToSupabase() {
+export const syncRedisToSupabase = async (getToken) => {
+  const token = await getToken();
+
   try {
-    const data = await axios.get("/api/task/sync");
-    console.log("Data from Redis:", data);
-    if (data.data && data.data.length > 0) {
-      console.log("Redis invalidated successfully");
-      const response = await axios.post("/api/redis", data.data);
-      console.log("Redis set successfully");
+    if (token) {
+      const response = await axiosClient.get("/background/sync", {
+        headers: { Authorization: token },
+        withCredentials: true,
+      });
 
-      return response;
+      if (response) {
+        console.log(
+          "Sync From Supabase To Redis was Sucessful at: " +
+            new Date().toLocaleString()
+        );
+      }
     }
   } catch (error) {
-    console.error("Error syncing Redis to Supabase:", error);
+    console.error("Error syncing Supabase to Redis: ", error);
   }
-}
+};

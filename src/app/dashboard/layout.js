@@ -1,19 +1,14 @@
 "use client";
 import AppSidebar from "@/components/ui/app-sidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import {
-  Sidebar,
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
-import {
-  useSyncIndexedDBWithRedis,
-  useSyncRedisToSupabase,
-} from "@/lib/caching/hooks/SyncHooks";
+  useRedisToIndexedDb,
+  useRedisToSupabaseSync,
+} from "@/lib/caching/hooks/DataSync";
 
 export default function Layout({ children }) {
-  useSyncRedisToSupabase();
-  useSyncIndexedDBWithRedis();
+  useRedisToSupabaseSync();
+  useRedisToIndexedDb();
   return (
     <SidebarProvider>
       <AppSidebar />
