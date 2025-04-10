@@ -2,10 +2,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import useSubTaskIsComplete from "@/hooks/useSubTaskIsComplete";
 import useSubtaskUpdateField from "@/hooks/useSubTaskUpdateField";
+import { useAuth } from "@clerk/nextjs";
 import React, { useState } from "react";
 
 const SubtaskLineItem = ({ item }) => {
-  const mutation = useSubTaskIsComplete();
+  const { getToken } = useAuth();
+  const mutation = useSubTaskIsComplete(getToken);
   const updateFieldMutation = useSubtaskUpdateField();
 
   const completeButtonClick = () => {

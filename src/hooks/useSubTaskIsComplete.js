@@ -3,16 +3,25 @@
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "./use-toast";
+import axiosClient from "@/lib/axiosClient";
 
-const useSubTaskIsComplete = () => {
+const useSubTaskIsComplete = (getToken) => {
+  const token = getToken();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   return useMutation({
     mutationFn: async ({ id, data, parent_id }) => {
       try {
-        const response = await axios.patch(`/api/subtask/${id}`, data);
-        return response.data;
+        const response = await axiosClient.patch(
+          `/api/subtasks/update/${id}`,
+          data,
+          {
+            headers: { Authorization: token },
+            withCredentials: true,
+          }
+        );
+        return response.data.subtask[0];
       } catch (error) {
         console.error(error);
       }
