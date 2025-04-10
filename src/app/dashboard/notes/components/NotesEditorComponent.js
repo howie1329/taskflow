@@ -22,6 +22,7 @@ import {
 import { useAuth } from "@clerk/nextjs";
 
 const NotesEditorComponent = ({ content }) => {
+  const { getToken, userId } = useAuth();
   const router = useRouter();
   const upload = useUploadNote();
 
@@ -33,11 +34,14 @@ const NotesEditorComponent = ({ content }) => {
   };
 
   const onClick = () => {
+    const token = getToken();
     const noteData = {
       title: noteTitle,
       description: "Note Description",
       content: note,
       task_id: linkedTask,
+      token: token,
+      userId: userId,
     };
     upload.mutate(noteData);
     router.push("/dashboard/notes");

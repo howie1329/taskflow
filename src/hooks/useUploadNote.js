@@ -1,10 +1,17 @@
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "./use-toast";
+import axiosClient from "@/lib/axiosClient";
 const uploadNote = async (data) => {
+  console.log(data);
+  const token = data.token;
+  delete data.token;
   try {
-    const response = await axios.post("/api/notes", data);
-    return response.data;
+    const response = await axiosClient.post("/api/notes/create", data, {
+      headers: { Authorization: token },
+      withCredentials: true,
+    });
+    return response.data.note[0];
   } catch (error) {
     console.error(error);
   }
