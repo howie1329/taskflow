@@ -8,7 +8,7 @@ import React, { useState } from "react";
 const SubtaskLineItem = ({ item }) => {
   const { getToken } = useAuth();
   const mutation = useSubTaskIsComplete(getToken);
-  const updateFieldMutation = useSubtaskUpdateField();
+  const updateFieldMutation = useSubtaskUpdateField(getToken);
 
   const completeButtonClick = () => {
     const updateInfo = { isComplete: !item.isComplete };
