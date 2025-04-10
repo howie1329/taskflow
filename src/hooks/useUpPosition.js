@@ -2,15 +2,20 @@
 
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import axiosClient from "@/lib/axiosClient";
 
-const useChangePosition = () => {
+const useChangePosition = (getToken) => {
+  const token = getToken();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({ id, data }) => {
       try {
-        const response = await axios.patch(`/api/task/${id}`, data);
-        return response.data;
+        const response = await axiosClient.patch(
+          `/api/tasks/update/${id}`,
+          data
+        );
+        return response.data.task[0];
       } catch (error) {
         console.error(error);
       }

@@ -29,7 +29,7 @@ import { useAuth } from "@clerk/nextjs";
 export const TaskModal = ({ task }) => {
   const { getToken } = useAuth();
   const queryClient = useQueryClient();
-  const changePosition = useChangePosition();
+  const changePosition = useChangePosition(getToken);
   const completeUpdateMutation = useIsComplete(getToken);
   const [updateField, setUpdateField] = useState(task.title);
 
