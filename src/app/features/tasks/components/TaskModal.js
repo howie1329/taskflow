@@ -33,7 +33,7 @@ export const TaskModal = ({ task }) => {
   const completeUpdateMutation = useIsComplete(getToken);
   const [updateField, setUpdateField] = useState(task.title);
 
-  const updateFieldMutation = useTaskUpdateField();
+  const updateFieldMutation = useTaskUpdateField(getToken);
 
   const updatePosition = (increment) => {
     const newPosition = task.position + increment;
