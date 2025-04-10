@@ -11,7 +11,7 @@ const uploadTask = async (data) => {
   try {
     console.log("Inside Try");
     let subTasks = null;
-    if (data.subTasks.length > 0) {
+    if (data.subTasks) {
       subTasks = data.subTasks;
       delete data.subTasks;
     }
@@ -33,11 +33,12 @@ const uploadTask = async (data) => {
       withCredentials: true,
     });
     console.log("Subtasks: ", subTasks);
-    if (subTasks.length > 0) {
+    if (subTasks) {
+      console.log("Response: ", response.data.task);
       subTasks.forEach(async (subTask) => {
-        subTask["task_id"] = response.data[0].id;
+        subTask["task_id"] = response.data.task[0].id;
         if (subTask.subTask_name == null) return;
-        await uploadSubtask(subTask);
+        await uploadSubtask(subTask, token);
       });
     }
     return response.data.task[0];

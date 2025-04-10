@@ -46,7 +46,7 @@ const formSchema = z.object({
 export const TaskCreateForm = () => {
   const { getToken, userId } = useAuth();
   const [subTaskSwitch, setSubTaskSwitch] = useState(false);
-  const [subTask, setSubTask] = useState([]);
+  const [subTask, setSubTask] = useState([{}]);
   const mutation = useUpload();
 
   const form = useForm({
@@ -63,7 +63,9 @@ export const TaskCreateForm = () => {
   const onSubmit = (data) => {
     const token = getToken();
     data["date"] = format(data.date, "P");
-    data["subTasks"] = subTask;
+    if (subTaskSwitch) {
+      data["subTasks"] = subTask;
+    }
     data["token"] = token;
     data["userId"] = userId;
     mutation.mutate(data);
@@ -203,7 +205,7 @@ export const TaskCreateForm = () => {
             </FormItem>
           )}
         />
-        <div className="flex flex-col flex-1 space-y-2 overflow-auto max-h-[80px]">
+        <div className="flex flex-col flex-1 space-y-2 overflow-auto max-h-[80px] border-black border-2">
           {subTaskSwitch &&
             subTask.map((task, i) => (
               <SubTaskInput
