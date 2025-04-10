@@ -18,7 +18,7 @@ import { useAuth } from "@clerk/nextjs";
 const TaskDialogCard = ({ task }) => {
   const { getToken } = useAuth();
   const updateMutation = useIsComplete(getToken);
-  const deleteMutation = useDeleteTask();
+  const deleteMutation = useDeleteTask(getToken);
   const router = useRouter();
 
   const { data: subTasks, isLoading: subtaskLoading } = useFetchSingleSubTask(
