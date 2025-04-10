@@ -6,7 +6,7 @@ import axiosClient from "@/lib/axiosClient";
 import { useAuth } from "@clerk/nextjs";
 
 const fetchAllNotes = async (getToken) => {
-  const token = getToken();
+  const token = await getToken();
   try {
     const response = await axiosClient.get("/api/notes/user", {
       headers: { Authorization: token },

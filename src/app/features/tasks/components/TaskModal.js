@@ -24,11 +24,13 @@ import { singleSubTask } from "@/hooks/useFetchSingleSubTask";
 import { Input } from "@/components/ui/input";
 import useTaskUpdateField from "@/hooks/useTaskUpdateField";
 import { singleNote } from "@/hooks/useFetchSingleNote";
+import { useAuth } from "@clerk/nextjs";
 
 export const TaskModal = ({ task }) => {
+  const { getToken } = useAuth();
   const queryClient = useQueryClient();
   const changePosition = useChangePosition();
-  const completeUpdateMutation = useIsComplete();
+  const completeUpdateMutation = useIsComplete(getToken);
   const [updateField, setUpdateField] = useState(task.title);
 
   const updateFieldMutation = useTaskUpdateField();

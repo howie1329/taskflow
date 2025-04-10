@@ -5,7 +5,7 @@ import { useAuth } from "@clerk/clerk-react";
 import axiosClient from "@/lib/axiosClient";
 
 const singleNote = async (id, getToken) => {
-  const token = getToken();
+  const token = await getToken();
   try {
     const response = await axiosClient.get(`/api/tasks/notes/${id}`, {
       headers: { Authorization: token },

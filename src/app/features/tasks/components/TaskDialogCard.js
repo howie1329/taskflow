@@ -13,9 +13,11 @@ import { useFetchSingleSubTask } from "@/hooks/useFetchSingleSubTask";
 import { useFetchSingleNote } from "@/hooks/useFetchSingleNote";
 import { useRouter } from "next/navigation";
 import SubtaskLineItem from "../../subtask/SubtaskLineItem";
+import { useAuth } from "@clerk/nextjs";
 
 const TaskDialogCard = ({ task }) => {
-  const updateMutation = useIsComplete();
+  const { getToken } = useAuth();
+  const updateMutation = useIsComplete(getToken);
   const deleteMutation = useDeleteTask();
   const router = useRouter();
 
