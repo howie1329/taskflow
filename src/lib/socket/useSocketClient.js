@@ -1,17 +1,26 @@
 import { useEffect } from "react";
-import { socket } from "./socketClient";
+import { getSocket } from "./socketClient";
 
 export const useSocketClient = () => {
+  const socket = getSocket();
   useEffect(() => {
-    socket.on("connect", () => {
-      console.log("User connected");
-    });
-
-    socket.on("disconnect", () => {
-      console.log("User disconnect");
-    });
-    return () => {
-      socket.disconnect();
+    const handleConnect = () => {
+      console.log("User connected", socket?.userId);
     };
-  }, []);
+
+    const handleDisconnect = () => {
+      console.log("User disconnect", socket?.userId);
+    };
+
+    if (socket) {
+      socket.on("connect", handleConnect);
+
+      socket.on("disconnect", handleDisconnect);
+      return () => {
+        socket.off("connect", handleConnect);
+        socket.off("disconnect", handleDisconnect);
+      };
+    }
+    return;
+  }, [socket]);
 };

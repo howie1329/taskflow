@@ -1,9 +1,12 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
+import { getSocket } from "./socketClient";
 
-export const useSocketClientListener = (socket) => {
+export const useSocketClientListener = () => {
   const queryClient = useQueryClient();
+
   useEffect(() => {
+    const socket = getSocket();
     if (!socket) return;
 
     const handleCreatedTask = () => {
@@ -16,5 +19,5 @@ export const useSocketClientListener = (socket) => {
     return () => {
       socket.off("task-created", handleCreatedTask);
     };
-  }, [socket, queryClient]);
+  }, [queryClient]);
 };

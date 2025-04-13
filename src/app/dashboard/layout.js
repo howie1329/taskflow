@@ -7,13 +7,21 @@ import {
 } from "@/lib/caching/hooks/DataSync";
 import { useSocketClientListener } from "@/lib/socket/socketClientListener";
 import { useSocketClient } from "@/lib/socket/useSocketClient";
-import { socket } from "@/lib/socket/socketClient";
+import { startSocket } from "@/lib/socket/socketClient";
+import { useAuth } from "@clerk/nextjs";
+import { useEffect } from "react";
 
 export default function Layout({ children }) {
+  const { getToken, userId } = useAuth();
+  useEffect(() => {
+    if (userId) {
+      startSocket(userId);
+    }
+  }, [userId]);
   useRedisToSupabaseSync();
   useRedisToIndexedDb();
   useSocketClient();
-  useSocketClientListener(socket);
+  useSocketClientListener();
   return (
     <SidebarProvider>
       <AppSidebar />

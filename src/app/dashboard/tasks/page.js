@@ -27,7 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAuth } from "@clerk/nextjs";
-import { socket } from "@/lib/socket/socketClient";
+import { getSocket } from "@/lib/socket/socketClient";
 
 function Page() {
   const [tableView, setTableView] = useState(false);
@@ -37,6 +37,7 @@ function Page() {
   const { data: tasks, isLoading: isTaskLoading } = useGetTasks(userId);
   const { setPriorityFilter, setStatus, priorityFilter, status } =
     useFilteringTasks(tasks);
+  const socket = getSocket();
 
   const onClick = () => {
     socket.emit("task-created");
