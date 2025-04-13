@@ -27,6 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAuth } from "@clerk/nextjs";
+import { socket } from "@/lib/socket/socketClient";
 
 function Page() {
   const [tableView, setTableView] = useState(false);
@@ -38,9 +39,14 @@ function Page() {
     useFilteringTasks(tasks);
 
   const onClick = () => {
-    datas.map((data) => {
-      mutation.mutate(data);
-    });
+    socket.emit("task-created");
+    {
+      /*
+      datas.map((data) => {
+        mutation.mutate(data);
+      });
+    */
+    }
   };
 
   const statsHeader = ["Total", "Completed", "Overdue"];

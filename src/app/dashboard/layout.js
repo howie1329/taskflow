@@ -5,10 +5,12 @@ import {
   useRedisToIndexedDb,
   useRedisToSupabaseSync,
 } from "@/lib/caching/hooks/DataSync";
+import { useSocketClient } from "@/lib/socket/useSocketClient";
 
 export default function Layout({ children }) {
   useRedisToSupabaseSync();
   useRedisToIndexedDb();
+  useSocketClient();
   return (
     <SidebarProvider>
       <AppSidebar />
