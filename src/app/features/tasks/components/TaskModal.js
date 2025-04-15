@@ -85,7 +85,7 @@ export const TaskModal = ({ task }) => {
   };
 
   return (
-    <Card className="w-[20rem]" onMouseEnter={() => preFetch()}>
+    <Card className="w-full" onMouseEnter={() => preFetch()}>
       <Dialog className="flex flex-row">
         <Collapsible className="flex flex-col">
           <div className="flex flex-row justify-between items-center space-x-1 mx-1">

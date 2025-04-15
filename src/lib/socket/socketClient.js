@@ -1,6 +1,7 @@
+import { useEffect } from "react";
 import { io } from "socket.io-client";
 
-let socket;
+let socket = null;
 
 export const startSocket = (userId) => {
   if (!socket) {
@@ -9,8 +10,15 @@ export const startSocket = (userId) => {
       withCredentials: true,
     });
   }
-
   return socket;
+};
+
+export const useStart = (userId) => {
+  useEffect(() => {
+    if (userId) {
+      startSocket(userId);
+    }
+  }, [userId]);
 };
 
 export const getSocket = () => {

@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/select";
 import { useAuth } from "@clerk/nextjs";
 import { getSocket } from "@/lib/socket/socketClient";
+import { VTaskDash } from "@/_main/VTaskDashboard/components/VTaskDash";
 
 function Page() {
   const [tableView, setTableView] = useState(false);
@@ -98,7 +99,8 @@ function Page() {
       </div>
       <Card>
         {tableView ? (
-          <TaskTable />
+          //CHANGED OUT TASKTABLE FOR VTASKDASH
+          <VTaskDash />
         ) : (
           <TaskDashboard
             tasksData={tasks}

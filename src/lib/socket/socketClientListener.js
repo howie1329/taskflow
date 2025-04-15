@@ -4,20 +4,29 @@ import { getSocket } from "./socketClient";
 
 export const useSocketClientListener = () => {
   const queryClient = useQueryClient();
-
+  const socket = getSocket();
   useEffect(() => {
-    const socket = getSocket();
-    if (!socket) return;
+    if (!socket) {
+      console.log("Returned");
+      return;
+    }
 
+    console.log("Foundddde");
     const handleCreatedTask = () => {
       console.log("Task-Created Invalidate cache");
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
     };
 
+    const handleRefresh = () => {
+      console.log("WORKS");
+    };
+
     socket.on("task-created", handleCreatedTask);
+    socket.on("refresh", handleRefresh);
 
     return () => {
       socket.off("task-created", handleCreatedTask);
+      socket.off("refresh", handleRefresh);
     };
-  }, [queryClient]);
+  }, [socket, queryClient]);
 };

@@ -7,17 +7,18 @@ import {
 } from "@/lib/caching/hooks/DataSync";
 import { useSocketClientListener } from "@/lib/socket/socketClientListener";
 import { useSocketClient } from "@/lib/socket/useSocketClient";
-import { startSocket } from "@/lib/socket/socketClient";
+import {
+  startSocket,
+  useStart,
+  useStartSocket,
+} from "@/lib/socket/socketClient";
 import { useAuth } from "@clerk/nextjs";
 import { useEffect } from "react";
 
 export default function Layout({ children }) {
   const { getToken, userId } = useAuth();
-  useEffect(() => {
-    if (userId) {
-      startSocket(userId);
-    }
-  }, [userId]);
+
+  useStart(userId);
   useRedisToSupabaseSync();
   useRedisToIndexedDb();
   useSocketClient();
