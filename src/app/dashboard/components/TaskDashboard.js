@@ -68,20 +68,18 @@ const TaskDashboard = ({ tasksData, status, priorityFilter, isLoading }) => {
 
 const VTaskBoardView = ({ newTimeGroup }) => {
   return (
-    <div className="flex flex-col space-y-2 w-full h-[700px] p-2 overflow-scroll">
+    <div className="flex flex-col space-y-2 w-full h-[700px] overflow-scroll">
       {Object.keys(newTimeGroup).map((dayHeader) => (
-        <Collapsible key={dayHeader} className="w-full ">
-          <CollapsibleTrigger className="w-full">
-            <div className="flex w-full justify-center items-center space-x-2 my-2 text-center ">
-              <p>{dayHeader.toUpperCase()}</p>
-              <p className="bg-primary text-center text-primary-foreground shadow hover:bg-primary/90 rounded-md p-1 text-xs">
-                {newTimeGroup[dayHeader].length}
-              </p>
-            </div>
-            <Separator />
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <div className="flex flex-col gap-2 pt-2">
+        <Card key={dayHeader} className="w-full h-[60%] p-2">
+          <div className="flex w-full justify-center items-center space-x-2 my-2 text-center">
+            <p>{dayHeader.toUpperCase()}</p>
+            <p className="bg-primary text-center text-primary-foreground shadow hover:bg-primary/90 rounded-md p-1 text-xs">
+              {newTimeGroup[dayHeader].length}
+            </p>
+          </div>
+          <Separator />
+          <div className="h-full">
+            <div className="flex flex-col h-[87%] gap-2 pt-2 overflow-scroll">
               <EditTaskForm />
               {newTimeGroup[dayHeader].length > 0 ? (
                 newTimeGroup[dayHeader].map((task, index) => (
@@ -91,8 +89,8 @@ const VTaskBoardView = ({ newTimeGroup }) => {
                 <p className="self-center">No Task Here.</p>
               )}
             </div>
-          </CollapsibleContent>
-        </Collapsible>
+          </div>
+        </Card>
       ))}
     </div>
   );

@@ -97,10 +97,10 @@ function Page() {
           )}
         </Card>
       </div>
-      <Card>
+      <div>
         {tableView ? (
           //CHANGED OUT TASKTABLE FOR VTASKDASH
-          <VTaskDash />
+          <TaskTable />
         ) : (
           <TaskDashboard
             tasksData={tasks}
@@ -109,7 +109,7 @@ function Page() {
             isLoading={isTaskLoading}
           />
         )}
-      </Card>
+      </div>
     </div>
   );
 }
