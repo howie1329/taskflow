@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import useSubTaskIsComplete from "@/hooks/useSubTaskIsComplete";
 import useSubtaskUpdateField from "@/hooks/useSubTaskUpdateField";
@@ -31,19 +32,10 @@ const SubtaskLineItem = ({ item }) => {
   const [updateField, setUpdateField] = useState(item.subTask_name);
   return (
     <div className="flex items-center space-x-1 font-thin text-sm">
-      {item.isComplete ? (
-        <Button
-          className=" bg-green-700 h-3 w-3 rounded-full "
-          size="basic"
-          onClick={completeButtonClick}
-        ></Button>
-      ) : (
-        <Button
-          className=" bg-red-700 h-3 w-3 rounded-full "
-          size="basic"
-          onClick={completeButtonClick}
-        ></Button>
-      )}
+      <Checkbox
+        checked={item.isCompleted}
+        onCheckedChange={completeButtonClick}
+      />
 
       <Input
         className="border-none"
