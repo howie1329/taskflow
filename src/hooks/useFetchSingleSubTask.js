@@ -7,6 +7,7 @@ import { useAuth } from "@clerk/nextjs";
 const singleSubTask = async (id, getToken) => {
   const token = await getToken();
   try {
+    console.log("Running PreFetch: ");
     const response = await axiosClient.get(`/api/tasks/subtasks/${id}`, {
       headers: { Authorization: token },
       withCredentials: true,

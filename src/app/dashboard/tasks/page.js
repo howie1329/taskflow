@@ -99,7 +99,6 @@ function Page() {
       </div>
       <div>
         {tableView ? (
-          //CHANGED OUT TASKTABLE FOR VTASKDASH
           <TaskTable />
         ) : (
           <TaskDashboard

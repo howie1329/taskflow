@@ -60,7 +60,7 @@ export const TaskModal = ({ task }) => {
   const preFetchSubtask = () => {
     queryClient.prefetchQuery({
       queryKey: ["subtasks", task.id],
-      queryFn: () => singleSubTask(task.id),
+      queryFn: () => singleSubTask(task.id, getToken),
       staleTime: 300_000,
     });
   };
@@ -73,6 +73,7 @@ export const TaskModal = ({ task }) => {
     });
   };
   const preFetch = () => {
+    console.log("Prefetch");
     preFetchSubtask();
     preFetchNotes();
   };
