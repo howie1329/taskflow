@@ -25,6 +25,7 @@ import { Input } from "@/components/ui/input";
 import useTaskUpdateField from "@/hooks/useTaskUpdateField";
 import { singleNote } from "@/hooks/useFetchSingleNote";
 import { useAuth } from "@clerk/nextjs";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export const TaskModal = ({ task }) => {
   const { getToken } = useAuth();
@@ -110,19 +111,10 @@ export const TaskModal = ({ task }) => {
               </div>
               <div className="flex flex-row justify-center truncate w-full">
                 <div className="flex mr-1 items-center">
-                  {task.isCompleted ? (
-                    <Button
-                      className=" bg-green-700 h-3 w-3 rounded-full"
-                      size="basic"
-                      onClick={completeButtonClick}
-                    ></Button>
-                  ) : (
-                    <Button
-                      className=" bg-red-700 h-3 w-3 rounded-full"
-                      size="basic"
-                      onClick={completeButtonClick}
-                    ></Button>
-                  )}
+                  <Checkbox
+                    checked={task.isCompleted}
+                    onCheckedChange={completeButtonClick}
+                  />
                 </div>
                 <div className="flex flex-col truncate w-full gap-1">
                   <Input

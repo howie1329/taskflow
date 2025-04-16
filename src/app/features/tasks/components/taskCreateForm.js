@@ -205,7 +205,7 @@ export const TaskCreateForm = () => {
             </FormItem>
           )}
         />
-        <div className="flex flex-col flex-1 space-y-2 overflow-auto max-h-[80px] border-black border-2">
+        <div className="flex flex-col flex-1 space-y-2 overflow-auto max-h-[80px]">
           {subTaskSwitch &&
             subTask.map((task, i) => (
               <SubTaskInput
