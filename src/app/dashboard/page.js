@@ -21,8 +21,6 @@ const Page = () => {
   const [filter, setFilter] = useState("None");
   const { data: filteredTask, isLoading, isError } = useFetchFilterTask(filter);
   const { getToken } = useAuth();
-  //http://localhost:3001
-  //https://taskflow-backend-production-8812.up.railway.app
   const onClick = async () => {
     const token = await getToken();
     axios

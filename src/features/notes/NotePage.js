@@ -1,8 +1,8 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import useDeleteNote from "@/hooks/useDeleteNote";
-import { useFetchNote } from "@/hooks/useFetchNote";
+import useDeleteNote from "@/features/notes/hooks/useDeleteNote";
+import { useFetchNote } from "@/features/notes/hooks/useFetchNote";
 import { useAuth } from "@clerk/nextjs";
 import HTMLReactParser from "html-react-parser";
 import { Trash2Icon } from "lucide-react";
@@ -27,8 +27,6 @@ const NotePageContent = ({ data }) => {
     deleteMutation.mutate({ id: data.id, parent_id: data.task_id || "" });
     router.push("/dashboard/notes");
   };
-
-  console.log("Data:", data);
 
   return (
     <div className="m-5">

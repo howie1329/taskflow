@@ -1,6 +1,6 @@
 "use client";
 import axios from "axios";
-import { useToast } from "./use-toast";
+import { useToast } from "../../../hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import axiosClient from "@/lib/axiosClient";
 import { useAuth } from "@clerk/nextjs";

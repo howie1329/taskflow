@@ -1,5 +1,5 @@
+import NotePage from "@/features/notes/NotePage";
 import React from "react";
-import NotePage from "../components/NotePage";
 
 export default async function Page({ params }) {
   const { slug } = await params;
