@@ -33,7 +33,7 @@ const SubtaskLineItem = ({ item }) => {
   return (
     <div className="flex items-center space-x-1 font-thin text-sm">
       <Checkbox
-        checked={item.isCompleted}
+        checked={item.isComplete}
         onCheckedChange={completeButtonClick}
       />
 
