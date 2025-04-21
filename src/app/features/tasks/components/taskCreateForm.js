@@ -33,6 +33,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import SubTaskInput from "@/app/dashboard/components/SubTaskInput";
+import { useAuth } from "@clerk/nextjs";
 
 const formSchema = z.object({
   title: z.string().min(1),
@@ -43,6 +44,7 @@ const formSchema = z.object({
 });
 
 export const TaskCreateForm = () => {
+  const { getToken, userId } = useAuth();
   const [subTaskSwitch, setSubTaskSwitch] = useState(false);
   const [subTask, setSubTask] = useState([{}]);
   const mutation = useUpload();
@@ -59,10 +61,15 @@ export const TaskCreateForm = () => {
   });
 
   const onSubmit = (data) => {
+    const token = getToken();
     data["date"] = format(data.date, "P");
-    data["subTasks"] = subTask;
+    if (subTaskSwitch) {
+      data["subTasks"] = subTask;
+    }
+    data["token"] = token;
+    data["userId"] = userId;
     mutation.mutate(data);
-    handleModalToggle();
+    //handleModalToggle();
   };
 
   return (

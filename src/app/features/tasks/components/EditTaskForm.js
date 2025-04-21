@@ -67,7 +67,7 @@ export const EditTaskForm = () => {
 
   return (
     <Collapsible>
-      <Card className=" flex flex-col h-fit w-[20rem] p-1">
+      <Card className=" flex flex-col h-fit w-full p-1">
         <div className="flex flex-row justify-between items-center">
           <h4 className="font-semibold text-sm">Create New Task</h4>
           <CollapsibleTrigger>

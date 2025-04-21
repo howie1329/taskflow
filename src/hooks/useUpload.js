@@ -2,14 +2,20 @@ import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import uploadSubtask from "./useUploadSubTask";
 import { useToast } from "./use-toast";
+import { clearTasksFromIndexedDB } from "@/lib/DexieDB";
+import axiosClient from "@/lib/axiosClient";
 
 const uploadTask = async (data) => {
+  const token = await data.token;
+  console.log("DATA START:", data);
   try {
+    console.log("Inside Try");
     let subTasks = null;
     if (data.subTasks) {
       subTasks = data.subTasks;
       delete data.subTasks;
     }
+    console.log("Before Labels");
     if (data.labels == "" || data.labels == null) {
       data.labels = null;
     } else {
@@ -19,16 +25,23 @@ const uploadTask = async (data) => {
         data.labels = [data.labels];
       }
     }
+    console.log("Here");
+    delete data.token;
 
-    const response = await axios.post("/api/task", data);
+    const response = await axiosClient.post("/api/tasks/create", data, {
+      headers: { Authorization: token },
+      withCredentials: true,
+    });
+    console.log("Subtasks: ", subTasks);
     if (subTasks) {
+      console.log("Response: ", response.data.task);
       subTasks.forEach(async (subTask) => {
-        subTask["task_id"] = response.data[0].id;
+        subTask["task_id"] = response.data.task[0].id;
         if (subTask.subTask_name == null) return;
-        await uploadSubtask(subTask);
+        await uploadSubtask(subTask, token);
       });
     }
-    return response;
+    return response.data.task[0];
   } catch (error) {
     console.error(error);
   }
@@ -54,8 +67,9 @@ const useUpload = () => {
       toast({ title: "Task Upload Failed", status: "error" });
       queryClient.setQueryData(["tasks"], context.previousTask);
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast({ title: "Task Uploaded Successfully", status: "success" });
+      await clearTasksFromIndexedDB();
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
     },
   });

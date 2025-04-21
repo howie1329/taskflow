@@ -24,14 +24,17 @@ import { singleSubTask } from "@/hooks/useFetchSingleSubTask";
 import { Input } from "@/components/ui/input";
 import useTaskUpdateField from "@/hooks/useTaskUpdateField";
 import { singleNote } from "@/hooks/useFetchSingleNote";
+import { useAuth } from "@clerk/nextjs";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export const TaskModal = ({ task }) => {
+  const { getToken } = useAuth();
   const queryClient = useQueryClient();
-  const changePosition = useChangePosition();
-  const completeUpdateMutation = useIsComplete();
+  const changePosition = useChangePosition(getToken);
+  const completeUpdateMutation = useIsComplete(getToken);
   const [updateField, setUpdateField] = useState(task.title);
 
-  const updateFieldMutation = useTaskUpdateField();
+  const updateFieldMutation = useTaskUpdateField(getToken);
 
   const updatePosition = (increment) => {
     const newPosition = task.position + increment;
@@ -58,7 +61,7 @@ export const TaskModal = ({ task }) => {
   const preFetchSubtask = () => {
     queryClient.prefetchQuery({
       queryKey: ["subtasks", task.id],
-      queryFn: () => singleSubTask(task.id),
+      queryFn: () => singleSubTask(task.id, getToken),
       staleTime: 300_000,
     });
   };
@@ -71,6 +74,7 @@ export const TaskModal = ({ task }) => {
     });
   };
   const preFetch = () => {
+    console.log("Prefetch");
     preFetchSubtask();
     preFetchNotes();
   };
@@ -83,7 +87,7 @@ export const TaskModal = ({ task }) => {
   };
 
   return (
-    <Card className="w-[20rem]" onMouseEnter={() => preFetch()}>
+    <Card className="w-full" onMouseEnter={() => preFetch()}>
       <Dialog className="flex flex-row">
         <Collapsible className="flex flex-col">
           <div className="flex flex-row justify-between items-center space-x-1 mx-1">
@@ -107,19 +111,10 @@ export const TaskModal = ({ task }) => {
               </div>
               <div className="flex flex-row justify-center truncate w-full">
                 <div className="flex mr-1 items-center">
-                  {task.isCompleted ? (
-                    <Button
-                      className=" bg-green-700 h-3 w-3 rounded-full"
-                      size="basic"
-                      onClick={completeButtonClick}
-                    ></Button>
-                  ) : (
-                    <Button
-                      className=" bg-red-700 h-3 w-3 rounded-full"
-                      size="basic"
-                      onClick={completeButtonClick}
-                    ></Button>
-                  )}
+                  <Checkbox
+                    checked={task.isCompleted}
+                    onCheckedChange={completeButtonClick}
+                  />
                 </div>
                 <div className="flex flex-col truncate w-full gap-1">
                   <Input

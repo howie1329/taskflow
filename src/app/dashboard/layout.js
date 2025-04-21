@@ -1,12 +1,28 @@
+"use client";
 import AppSidebar from "@/components/ui/app-sidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import {
-  Sidebar,
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
+  useRedisToIndexedDb,
+  useRedisToSupabaseSync,
+} from "@/lib/caching/hooks/DataSync";
+import { useSocketClientListener } from "@/lib/socket/socketClientListener";
+import { useSocketClient } from "@/lib/socket/useSocketClient";
+import {
+  startSocket,
+  useStart,
+  useStartSocket,
+} from "@/lib/socket/socketClient";
+import { useAuth } from "@clerk/nextjs";
+import { useEffect } from "react";
 
 export default function Layout({ children }) {
+  const { getToken, userId } = useAuth();
+
+  useStart(userId);
+  useRedisToSupabaseSync();
+  useRedisToIndexedDb();
+  useSocketClient();
+  useSocketClientListener();
   return (
     <SidebarProvider>
       <AppSidebar />

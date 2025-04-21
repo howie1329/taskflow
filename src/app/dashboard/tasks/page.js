@@ -1,5 +1,5 @@
 "use client";
-import react, { useState } from "react";
+import react, { useEffect, useState } from "react";
 import TaskDashboard from "../components/TaskDashboard";
 import { TaskTable } from "../components/TaskTable";
 import { Switch } from "@/components/ui/switch";
@@ -26,44 +26,52 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useAuth } from "@clerk/nextjs";
+import { getSocket } from "@/lib/socket/socketClient";
+import { VTaskDash } from "@/_main/VTaskDashboard/components/VTaskDash";
 
 function Page() {
   const [tableView, setTableView] = useState(false);
   const mutation = useUpload();
+  const { userId } = useAuth();
   const { data: stat, isLoading } = useFetchStats();
-  const {
-    data: tasks,
-    isLoading: isTaskLoading,
-    error,
-    isError,
-  } = useGetTasks();
+  const { data: tasks, isLoading: isTaskLoading } = useGetTasks(userId);
   const { setPriorityFilter, setStatus, priorityFilter, status } =
     useFilteringTasks(tasks);
+  const socket = getSocket();
 
   const onClick = () => {
-    datas.map((data) => {
-      mutation.mutate(data);
-    });
+    socket.emit("task-created");
+    {
+      /*
+      datas.map((data) => {
+        mutation.mutate(data);
+      });
+    */
+    }
   };
 
   const statsHeader = ["Total", "Completed", "Overdue"];
 
   /// TODO: STATS NEED TO BE CACHED IN REDIS ///
 
+  if (!userId || isLoading || isTaskLoading) {
+    return <p>Loading...</p>;
+  }
+
   return (
     <div className="flex mx-2 flex-col flex-1 gap-2 ">
       <div className="flex w-full justify-between items-center">
         <div className="flex gap-2">
-          {isLoading == false &&
-            statsHeader.map((item, key) => (
-              <Card
-                className="flex flex-col justify-center items-center w-32 h-fit "
-                key={key}
-              >
-                <p>{stat.data[item]}</p>
-                <p>{item}</p>
-              </Card>
-            ))}
+          {statsHeader.map((item, key) => (
+            <Card
+              className="flex flex-col justify-center items-center w-32 h-fit "
+              key={key}
+            >
+              <p>{stat.data[item]}</p>
+              <p>{item}</p>
+            </Card>
+          ))}
         </div>
         <Card className="w-fit h-fit p-2 bg-primary hover:bg-primary/90 shadow hover:cursor-pointer">
           <CollapsibleFilter
@@ -89,7 +97,7 @@ function Page() {
           )}
         </Card>
       </div>
-      <Card>
+      <div>
         {tableView ? (
           <TaskTable />
         ) : (
@@ -100,7 +108,7 @@ function Page() {
             isLoading={isTaskLoading}
           />
         )}
-      </Card>
+      </div>
     </div>
   );
 }

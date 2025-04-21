@@ -19,8 +19,10 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { useAuth } from "@clerk/nextjs";
 
 const NotesEditorComponent = ({ content }) => {
+  const { getToken, userId } = useAuth();
   const router = useRouter();
   const upload = useUploadNote();
 
@@ -32,11 +34,14 @@ const NotesEditorComponent = ({ content }) => {
   };
 
   const onClick = () => {
+    const token = getToken();
     const noteData = {
       title: noteTitle,
       description: "Note Description",
       content: note,
       task_id: linkedTask,
+      token: token,
+      userId: userId,
     };
     upload.mutate(noteData);
     router.push("/dashboard/notes");
@@ -63,7 +68,8 @@ const NotesEditorComponent = ({ content }) => {
 
 const LinkTaskComboBox = ({ linkedTask, setLinkedTask }) => {
   const [open, setOpen] = useState(false);
-  const { data: allTask } = useGetTasks();
+  const { userId } = useAuth();
+  const { data: allTask } = useGetTasks(userId);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

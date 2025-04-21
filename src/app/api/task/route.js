@@ -2,10 +2,11 @@ import { supabaseClient } from "@/app/lib/supabaseClient";
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import {
+  fetchAllTasksRedis,
   invalidateAllRedisTask,
   invalidateAllRedisTaskFilters,
+  setAllTaskRedis,
 } from "@/lib/redisUtils";
-import redisClient from "@/app/lib/redisClient";
 
 export async function GET() {
   const { userId } = await auth();
@@ -14,31 +15,25 @@ export async function GET() {
     return NextResponse.json("Unauthorized", { status: 401 });
   }
 
-  const client = redisClient;
-  if (!client.isOpen) {
-    await client.connect();
-  }
-
-  const key = `tasks:${userId}`;
-
   try {
-    const cacheAllTask = await client.get(key);
-    if (cacheAllTask != null) {
-      return NextResponse.json(JSON.parse(cacheAllTask), { status: 200 });
+    console.log("Fetching tasks from Redis in API route : api/task");
+    const tasksData = await fetchAllTasksRedis(userId);
+    if (tasksData.length > 0) {
+      console.log("Returning tasks from Redis in API route");
+      return NextResponse.json(JSON.parse(tasksData), { status: 200 });
     }
+    console.log("Fetching tasks from Supabase in API route");
     const { data: item, error } = await supabaseClient
       .from("tasks")
       .select("*")
       .eq("userId", userId)
-      .order("position", { ascending: true });
+      .order("id", { ascending: true });
 
     if (error) {
       throw new Error(error.message);
     }
-
-    if (item.length > 0) {
-      await client.set(key, JSON.stringify(item), { EX: 600 });
-    }
+    console.log("Fetching tasks from Supabase in API route adding to Redis");
+    await setAllTaskRedis(userId, item);
 
     return NextResponse.json(item, { status: 200 });
   } catch (error) {
@@ -64,7 +59,7 @@ export async function POST(req) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   } else {
     invalidateAllRedisTaskFilters(userId);
-    invalidateAllRedisTask(userId);
+    await invalidateAllRedisTask(userId);
     return NextResponse.json(data, { status: 201 });
   }
 }

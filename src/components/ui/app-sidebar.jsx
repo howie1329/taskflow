@@ -17,6 +17,7 @@ import {
   UserButton,
 } from "@clerk/nextjs";
 import {
+  FolderKanbanIcon,
   HomeIcon,
   ListChecksIcon,
   PresentationIcon,
@@ -75,5 +76,10 @@ const items = [
     title: "Notes",
     icon: ScrollTextIcon,
     url: "/dashboard/notes",
+  },
+  {
+    title: "Projects",
+    icon: FolderKanbanIcon,
+    url: "/dashboard/tasks",
   },
 ];

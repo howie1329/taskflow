@@ -1,12 +1,15 @@
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import useSubTaskIsComplete from "@/hooks/useSubTaskIsComplete";
 import useSubtaskUpdateField from "@/hooks/useSubTaskUpdateField";
+import { useAuth } from "@clerk/nextjs";
 import React, { useState } from "react";
 
 const SubtaskLineItem = ({ item }) => {
-  const mutation = useSubTaskIsComplete();
-  const updateFieldMutation = useSubtaskUpdateField();
+  const { getToken } = useAuth();
+  const mutation = useSubTaskIsComplete(getToken);
+  const updateFieldMutation = useSubtaskUpdateField(getToken);
 
   const completeButtonClick = () => {
     const updateInfo = { isComplete: !item.isComplete };
@@ -29,19 +32,10 @@ const SubtaskLineItem = ({ item }) => {
   const [updateField, setUpdateField] = useState(item.subTask_name);
   return (
     <div className="flex items-center space-x-1 font-thin text-sm">
-      {item.isComplete ? (
-        <Button
-          className=" bg-green-700 h-3 w-3 rounded-full "
-          size="basic"
-          onClick={completeButtonClick}
-        ></Button>
-      ) : (
-        <Button
-          className=" bg-red-700 h-3 w-3 rounded-full "
-          size="basic"
-          onClick={completeButtonClick}
-        ></Button>
-      )}
+      <Checkbox
+        checked={item.isComplete}
+        onCheckedChange={completeButtonClick}
+      />
 
       <Input
         className="border-none"

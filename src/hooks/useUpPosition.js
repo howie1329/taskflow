@@ -2,15 +2,25 @@
 
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import axiosClient from "@/lib/axiosClient";
+import { clearTasksFromIndexedDB } from "@/lib/DexieDB";
 
-const useChangePosition = () => {
+const useChangePosition = (getToken) => {
+  const token = getToken();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({ id, data }) => {
       try {
-        const response = await axios.patch(`/api/task/${id}`, data);
-        return response.data;
+        const response = await axiosClient.patch(
+          `/api/tasks/update/${id}`,
+          data,
+          {
+            headers: { Authorization: token },
+            withCredentials: true,
+          }
+        );
+        return response.data.task[0];
       } catch (error) {
         console.error(error);
       }
@@ -24,7 +34,8 @@ const useChangePosition = () => {
 
       return { previousTask };
     },
-    onSuccess: () => {
+    onSuccess: async () => {
+      await clearTasksFromIndexedDB();
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
     },
     onError: () => {

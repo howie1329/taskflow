@@ -3,8 +3,11 @@
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "./use-toast";
+import { clearTasksFromIndexedDB } from "@/lib/DexieDB";
+import axiosClient from "@/lib/axiosClient";
 
-const useTaskUpdateField = () => {
+const useTaskUpdateField = (getToken) => {
+  const token = getToken();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -12,8 +15,15 @@ const useTaskUpdateField = () => {
     mutationFn: async ({ id, changedField, updateData }) => {
       try {
         const data = { [changedField]: updateData };
-        const response = await axios.patch(`/api/task/${id}`, data);
-        return response.data;
+        const response = await axiosClient.patch(
+          `/api/tasks/update/${id}`,
+          data,
+          {
+            headers: { Authorization: token },
+            withCredentials: true,
+          }
+        );
+        return response.data.task[0];
       } catch (error) {
         console.error(error);
       }
@@ -28,8 +38,9 @@ const useTaskUpdateField = () => {
 
       return { previousTask };
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast({ title: "Task updated successfully", status: "success" });
+      await clearTasksFromIndexedDB();
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
     },
     onError: (context) => {

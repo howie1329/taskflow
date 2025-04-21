@@ -2,16 +2,22 @@
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "./use-toast";
+import { clearTasksFromIndexedDB } from "@/lib/DexieDB";
+import axiosClient from "@/lib/axiosClient";
 
-const useDeleteTask = () => {
+const useDeleteTask = (getToken) => {
+  const token = getToken();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   return useMutation({
     mutationFn: async ({ id }) => {
       try {
-        const response = await axios.delete(`/api/task/${id}`);
-        return response.data;
+        const response = await axiosClient.delete(`/api/tasks/delete/${id}`, {
+          headers: { Authorization: token },
+          withCredentials: true,
+        });
+        return response.data.message;
       } catch (error) {
         console.error(error);
       }
@@ -25,8 +31,9 @@ const useDeleteTask = () => {
 
       return { previousTask };
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast({ title: "Task Deleted Successfully", status: "success" });
+      await clearTasksFromIndexedDB();
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
     },
     onError: (context) => {

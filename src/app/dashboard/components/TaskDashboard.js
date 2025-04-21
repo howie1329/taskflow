@@ -1,27 +1,16 @@
 "use client";
 import React, { useState } from "react";
-import Loading from "@/app/components/loading";
-import useGetTasks from "@/hooks/useGetTasks";
 import { TaskModal } from "@/app/features/tasks/components/TaskModal";
 import { EditTaskForm } from "@/app/features/tasks/components/EditTaskForm";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { useFilteringTasks } from "@/hooks/useFilteringTasks";
 import { filterTasks } from "@/lib/filterTasks";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { SlidersIcon } from "lucide-react";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 const TaskDashboard = ({ tasksData, status, priorityFilter, isLoading }) => {
   if (isLoading) {
@@ -71,17 +60,26 @@ const TaskDashboard = ({ tasksData, status, priorityFilter, isLoading }) => {
 
   return (
     <div className="flex flex-col w-full h-full gap-2">
-      <div className="flex justify-evenly w-full h-[700px]">
-        {Object.keys(newTimeGroup).map((dayHeader) => (
-          <div className="" key={dayHeader}>
-            <div className="flex justify-center items-center space-x-2 my-2 text-center">
-              <p>{dayHeader.toUpperCase()}</p>
-              <p className="bg-primary text-center text-primary-foreground shadow hover:bg-primary/90 rounded-md p-1 text-xs">
-                {newTimeGroup[dayHeader].length}
-              </p>
-            </div>
-            <Separator />
-            <div className="flex flex-col h-[94%] overflow-auto gap-2 pt-2">
+      {/* <HTaskDashBoardView newTimeGroup={newTimeGroup} /> */}
+      <VTaskBoardView newTimeGroup={newTimeGroup} />
+    </div>
+  );
+};
+
+const VTaskBoardView = ({ newTimeGroup }) => {
+  return (
+    <div className="flex flex-col space-y-2 w-full h-[700px] overflow-scroll">
+      {Object.keys(newTimeGroup).map((dayHeader) => (
+        <Card key={dayHeader} className="w-full h-[60%] p-2">
+          <div className="flex w-full justify-center items-center space-x-2 my-2 text-center">
+            <p>{dayHeader.toUpperCase()}</p>
+            <p className="bg-primary text-center text-primary-foreground shadow hover:bg-primary/90 rounded-md p-1 text-xs">
+              {newTimeGroup[dayHeader].length}
+            </p>
+          </div>
+          <Separator />
+          <div className="h-full">
+            <div className="flex flex-col h-[87%] gap-2 pt-2 overflow-scroll">
               <EditTaskForm />
               {newTimeGroup[dayHeader].length > 0 ? (
                 newTimeGroup[dayHeader].map((task, index) => (
@@ -92,8 +90,36 @@ const TaskDashboard = ({ tasksData, status, priorityFilter, isLoading }) => {
               )}
             </div>
           </div>
-        ))}
-      </div>
+        </Card>
+      ))}
+    </div>
+  );
+};
+
+const HTaskDashBoardView = ({ newTimeGroup }) => {
+  return (
+    <div className="flex justify-evenly w-full h-[700px]">
+      {Object.keys(newTimeGroup).map((dayHeader) => (
+        <div className="" key={dayHeader}>
+          <div className="flex justify-center items-center space-x-2 my-2 text-center">
+            <p>{dayHeader.toUpperCase()}</p>
+            <p className="bg-primary text-center text-primary-foreground shadow hover:bg-primary/90 rounded-md p-1 text-xs">
+              {newTimeGroup[dayHeader].length}
+            </p>
+          </div>
+          <Separator />
+          <div className="flex flex-col h-[94%] overflow-auto gap-2 pt-2">
+            <EditTaskForm />
+            {newTimeGroup[dayHeader].length > 0 ? (
+              newTimeGroup[dayHeader].map((task, index) => (
+                <TaskModal key={index} task={task} />
+              ))
+            ) : (
+              <p className="self-center">No Task Here.</p>
+            )}
+          </div>
+        </div>
+      ))}
     </div>
   );
 };

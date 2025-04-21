@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import useDeleteNote from "@/hooks/useDeleteNote";
 import { useFetchNote } from "@/hooks/useFetchNote";
+import { useAuth } from "@clerk/nextjs";
 import HTMLReactParser from "html-react-parser";
 import { Trash2Icon } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -17,7 +18,8 @@ const NotePage = ({ params }) => {
 };
 
 const NotePageContent = ({ data }) => {
-  const deleteMutation = useDeleteNote();
+  const { getToken } = useAuth();
+  const deleteMutation = useDeleteNote(getToken);
   const router = useRouter();
 
   const deleteNote = () => {
