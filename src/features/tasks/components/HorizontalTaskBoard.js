@@ -1,5 +1,5 @@
-import { EditTaskForm } from "@/app/features/tasks/components/EditTaskForm";
-import { TaskModal } from "@/app/features/tasks/components/TaskModal";
+import TaskCreateModal from "@/features/tasks/TaskCreateModal";
+import { TaskModal } from "@/features/tasks/TaskModal";
 import { Separator } from "@radix-ui/react-select";
 import React from "react";
 
@@ -16,7 +16,7 @@ export const HTaskDashBoardView = ({ newTimeGroup }) => {
           </div>
           <Separator />
           <div className="flex flex-col h-[94%] overflow-auto gap-2 pt-2">
-            <EditTaskForm />
+            <TaskCreateModal />
             {newTimeGroup[dayHeader].length > 0 ? (
               newTimeGroup[dayHeader].map((task, index) => (
                 <TaskModal key={index} task={task} />

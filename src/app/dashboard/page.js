@@ -9,10 +9,10 @@ import {
 } from "@/components/ui/select";
 import { useFetchFilterTask } from "@/hooks/useFetchFilterTask";
 import React, { useState } from "react";
-import { TaskModal } from "../features/tasks/components/TaskModal";
+import { TaskModal } from "@/features/tasks/TaskModal";
 import { Separator } from "@/components/ui/separator";
 import { QuickNotes } from "./components/QuickNotes";
-import { CreateTaskModal } from "../features/tasks/components/CreateTaskModal";
+import { TaskCreateModal } from "@/features/tasks/TaskCreateModal";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { useAuth } from "@clerk/nextjs";
@@ -48,7 +48,7 @@ const Page = () => {
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="None" />
               </SelectTrigger>
-              <CreateTaskModal small={true} />
+              <TaskCreateModal small={true} />
             </div>
             <Separator />
             <SelectContent>

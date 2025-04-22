@@ -2,8 +2,8 @@
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { EditTaskForm } from "@/app/features/tasks/components/EditTaskForm";
-import { TaskModal } from "@/app/features/tasks/components/TaskModal";
+import { TaskCreateModal } from "@/features/tasks/TaskCreateModal";
+import { TaskModal } from "@/features/tasks/TaskModal";
 
 const VerticalTaskBoardView = ({ newTimeGroup }) => {
   return (
@@ -19,7 +19,7 @@ const VerticalTaskBoardView = ({ newTimeGroup }) => {
           <Separator />
           <div className="h-full">
             <div className="flex flex-col h-[87%] gap-2 pt-2 overflow-scroll">
-              <EditTaskForm />
+              <TaskCreateModal />
               {newTimeGroup[dayHeader].length > 0 ? (
                 newTimeGroup[dayHeader].map((task, index) => (
                   <TaskModal key={index} task={task} />

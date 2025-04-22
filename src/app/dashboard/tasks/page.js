@@ -4,8 +4,8 @@ import react, { useEffect, useState } from "react";
 import { TaskTable } from "../components/TaskTable";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { CreateTaskModal } from "@/app/features/tasks/components/CreateTaskModal";
-import AIDialogChat from "@/app/features/ai/AIDialogChat";
+import { TaskCreateModal } from "@/features/tasks/TaskCreateModal";
+import AIDialogChat from "@/features/Ai/AIDialogChat";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import datas from "@/app/taskData.json";
@@ -84,7 +84,7 @@ function Page() {
 
         <Card className="flex justify-between items-center h-16 px-2 space-x-2">
           <AIDialogChat />
-          <CreateTaskModal />
+          <TaskCreateModal />
           <Button onClick={onClick}>Upload JSON</Button>
           <Switch
             checked={tableView}

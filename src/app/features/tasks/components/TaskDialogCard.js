@@ -12,7 +12,7 @@ import useDeleteTask from "@/hooks/useDeleteTask";
 import { useFetchSingleSubTask } from "@/hooks/useFetchSingleSubTask";
 import { useFetchSingleNote } from "@/hooks/useFetchSingleNote";
 import { useRouter } from "next/navigation";
-import SubtaskLineItem from "../../subtask/SubtaskLineItem";
+import SubtaskLineItem from "@/features/subtasks/SubtaskLineItem";
 import { useAuth } from "@clerk/nextjs";
 
 const TaskDialogCard = ({ task }) => {
