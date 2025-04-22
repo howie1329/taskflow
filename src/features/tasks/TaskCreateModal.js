@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { CalendarIcon, SeparatorHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
-import useUpload from "@/hooks/useUpload";
+import useTaskCreate from "@/features/tasks/hooks/useTaskCreate";
 
 // UI Components
 import { Card, CardHeader } from "@/components/ui/card";
@@ -155,7 +155,7 @@ const TaskFormFields = ({ form }) => (
 );
 
 export const TaskCreateModal = () => {
-  const mutation = useUpload();
+  const mutation = useTaskCreate();
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {

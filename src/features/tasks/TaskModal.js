@@ -19,7 +19,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@clerk/nextjs";
 import { useQueryClient } from "@tanstack/react-query";
 
-import useChangePosition from "@/hooks/useUpPosition";
+import useTaskPositionUpdate from "@/features/tasks/hooks/useTaskPositionUpdate";
 import useIsComplete from "@/hooks/useIsComplete";
 import useTaskUpdateField from "@/hooks/useTaskUpdateField";
 import { singleSubTask } from "@/hooks/useFetchSingleSubTask";
@@ -86,7 +86,7 @@ const TaskContent = ({
 export const TaskModal = ({ task }) => {
   const { getToken } = useAuth();
   const queryClient = useQueryClient();
-  const changePosition = useChangePosition(getToken);
+  const changePosition = useTaskPositionUpdate(getToken);
   const completeUpdateMutation = useIsComplete(getToken);
   const [updateField, setUpdateField] = useState(task.title);
   const updateFieldMutation = useTaskUpdateField(getToken);

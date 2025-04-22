@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axiosClient from "@/lib/axiosClient";
 import { clearTasksFromIndexedDB } from "@/lib/DexieDB";
 
-const useChangePosition = (getToken) => {
+const useTaskPositionUpdate = (getToken) => {
   const token = getToken();
   const queryClient = useQueryClient();
 
@@ -51,4 +51,4 @@ const updateTask = (old, id, data) => {
   return updated;
 };
 
-export default useChangePosition;
+export default useTaskPositionUpdate;

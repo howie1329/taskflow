@@ -16,7 +16,7 @@ import { TaskCreateModal } from "@/features/tasks/TaskCreateModal";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { useAuth } from "@clerk/nextjs";
-
+import { TaskCreateDialog } from "@/features/tasks/TaskCreateDialog";
 const Page = () => {
   const [filter, setFilter] = useState("None");
   const { data: filteredTask, isLoading, isError } = useFetchFilterTask(filter);
@@ -48,7 +48,7 @@ const Page = () => {
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="None" />
               </SelectTrigger>
-              <TaskCreateModal small={true} />
+              <TaskCreateDialog small={true} />
             </div>
             <Separator />
             <SelectContent>

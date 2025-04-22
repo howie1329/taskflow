@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import uploadSubtask from "./useUploadSubTask";
-import { useToast } from "./use-toast";
+import uploadSubtask from "../../../hooks/useUploadSubTask";
+import { useToast } from "../../../hooks/use-toast";
 import { clearTasksFromIndexedDB } from "@/lib/DexieDB";
 import axiosClient from "@/lib/axiosClient";
 
@@ -47,7 +47,7 @@ const uploadTask = async (data) => {
   }
 };
 
-const useUpload = () => {
+const useTaskCreate = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   return useMutation({
@@ -75,4 +75,4 @@ const useUpload = () => {
   });
 };
 
-export default useUpload;
+export default useTaskCreate;
