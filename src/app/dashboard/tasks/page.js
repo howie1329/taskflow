@@ -1,6 +1,6 @@
 "use client";
 import react, { useEffect, useState } from "react";
-import TaskDashboard from "../components/TaskDashboard";
+
 import { TaskTable } from "../components/TaskTable";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -11,8 +11,8 @@ import { Button } from "@/components/ui/button";
 import datas from "@/app/taskData.json";
 import useUpload from "@/hooks/useUpload";
 import useFetchStats from "@/hooks/useFetchStats";
-import { useFilteringTasks } from "@/hooks/useFilteringTasks";
-import useGetTasks from "@/hooks/useGetTasks";
+import { useFilteringTasks } from "@/features/tasks/hooks/useFilteringTasks";
+import useGetTasks from "@/features/tasks/hooks/useGetTasks";
 import {
   Popover,
   PopoverContent,
@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/select";
 import { useAuth } from "@clerk/nextjs";
 import { getSocket } from "@/lib/socket/socketClient";
-import { VTaskDash } from "@/_main/VTaskDashboard/components/VTaskDash";
+import TaskDashboard from "@/features/tasks/components/TaskDashboard";
 
 function Page() {
   const [tableView, setTableView] = useState(false);

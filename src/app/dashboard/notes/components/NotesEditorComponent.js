@@ -10,7 +10,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import useGetTasks from "@/hooks/useGetTasks";
+import useGetTasks from "@/features/tasks/hooks/useGetTasks";
 import {
   Command,
   CommandEmpty,
