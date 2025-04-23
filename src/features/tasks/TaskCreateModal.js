@@ -49,78 +49,88 @@ const formSchema = z.object({
 });
 
 const PrioritySelect = ({ field }) => (
-  <div className="flex flex-row gap-2 items-center">
-    <Label>Priority</Label>
-    <FormItem>
-      <Select onValueChange={field.onChange} defaultValue={field.value}>
-        <FormControl>
-          <SelectTrigger className="w-32 h-8">
-            <SelectValue value="Priority" />
-          </SelectTrigger>
-        </FormControl>
-        <SelectContent>
-          {["None", "Low", "Medium", "High"].map((priority) => (
-            <SelectItem key={priority} value={priority}>
-              {priority}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </FormItem>
-  </div>
+  <FormItem className="flex flex-col space-y-2">
+    <Label className="text-sm font-medium">Priority</Label>
+    <Select onValueChange={field.onChange} defaultValue={field.value}>
+      <FormControl>
+        <SelectTrigger className="w-full h-10 bg-background">
+          <SelectValue placeholder="Select priority" />
+        </SelectTrigger>
+      </FormControl>
+      <SelectContent>
+        {["None", "Low", "Medium", "High"].map((priority) => (
+          <SelectItem
+            key={priority}
+            value={priority}
+            className="flex items-center gap-2"
+          >
+            <div
+              className={`w-2 h-2 rounded-full ${
+                priority === "High"
+                  ? "bg-red-500"
+                  : priority === "Medium"
+                  ? "bg-yellow-500"
+                  : priority === "Low"
+                  ? "bg-green-500"
+                  : "bg-gray-300"
+              }`}
+            />
+            {priority}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  </FormItem>
 );
 
 const DatePicker = ({ field }) => (
-  <FormItem className="flex flex-col">
+  <FormItem className="flex flex-col space-y-2">
+    <Label className="text-sm font-medium">Due Date</Label>
     <Popover>
       <PopoverTrigger asChild>
         <FormControl>
           <Button
             variant="outline"
             className={cn(
-              "w-[240px] pl-3 text-left font-normal h-fit",
+              "w-full h-10 pl-3 text-left font-normal",
               !field.value && "text-muted-foreground"
             )}
           >
-            {field.value ? format(field.value, "P") : <span>Pick a date</span>}
+            {field.value ? (
+              format(field.value, "PPP")
+            ) : (
+              <span>Select a date</span>
+            )}
             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
           </Button>
         </FormControl>
       </PopoverTrigger>
-      <PopoverContent>
+      <PopoverContent className="w-auto p-0" align="start">
         <Calendar
           mode="single"
           selected={field.value}
           onSelect={field.onChange}
           disabled={(date) => date < new Date()}
           initialFocus
+          className="rounded-md border"
         />
       </PopoverContent>
     </Popover>
-    <FormDescription>Due Date Of Task</FormDescription>
   </FormItem>
 );
 
 const TaskFormFields = ({ form }) => (
-  <>
-    <CardHeader className="flex flex-row justify-between items-center">
-      <FormField
-        control={form.control}
-        name="priority"
-        label="Priority"
-        render={({ field }) => <PrioritySelect field={field} />}
-      />
-    </CardHeader>
-
+  <div className="space-y-4 p-4">
     <FormField
       control={form.control}
       name="title"
       render={({ field }) => (
         <FormItem>
+          <Label className="text-sm font-medium">Task Title</Label>
           <FormControl>
             <Input
-              className="h-fit my-1"
-              placeholder="Enter Your Task"
+              className="h-10"
+              placeholder="What needs to be done?"
               {...field}
             />
           </FormControl>
@@ -134,10 +144,11 @@ const TaskFormFields = ({ form }) => (
       name="description"
       render={({ field }) => (
         <FormItem>
+          <Label className="text-sm font-medium">Description</Label>
           <FormControl>
             <Textarea
-              className="resize-none my-1"
-              placeholder="Enter Description"
+              className="min-h-[100px] resize-none"
+              placeholder="Add details about your task..."
               {...field}
             />
           </FormControl>
@@ -146,12 +157,19 @@ const TaskFormFields = ({ form }) => (
       )}
     />
 
-    <FormField
-      control={form.control}
-      name="date"
-      render={({ field }) => <DatePicker field={field} />}
-    />
-  </>
+    <div className="grid grid-cols-2 gap-4">
+      <FormField
+        control={form.control}
+        name="priority"
+        render={({ field }) => <PrioritySelect field={field} />}
+      />
+      <FormField
+        control={form.control}
+        name="date"
+        render={({ field }) => <DatePicker field={field} />}
+      />
+    </div>
+  </div>
 );
 
 export const TaskCreateModal = () => {
@@ -176,21 +194,29 @@ export const TaskCreateModal = () => {
   };
 
   return (
-    <Collapsible>
-      <Card className="flex flex-col h-fit w-full p-1">
-        <div className="flex flex-row justify-between items-center">
-          <h4 className="font-semibold text-sm">Create New Task</h4>
-          <CollapsibleTrigger>
-            <Button variant="ghost" size="sm">
+    <Collapsible className="w-full">
+      <Card className="w-full border-none shadow-lg">
+        <div className="flex items-center justify-between p-4 border-b">
+          <h4 className="text-lg font-semibold">Create New Task</h4>
+          <CollapsibleTrigger asChild>
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
               <SeparatorHorizontal className="h-4 w-4" />
             </Button>
           </CollapsibleTrigger>
         </div>
         <CollapsibleContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <TaskFormFields form={form} />
-              <Button type="submit">Submit</Button>
+              <div className="flex justify-end p-4 border-t">
+                <Button
+                  type="submit"
+                  className="w-full sm:w-auto"
+                  disabled={mutation.isPending}
+                >
+                  {mutation.isPending ? "Creating..." : "Create Task"}
+                </Button>
+              </div>
             </form>
           </Form>
         </CollapsibleContent>
