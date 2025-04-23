@@ -17,7 +17,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { SlidersIcon, LayoutGrid, Table } from "lucide-react";
+import { SlidersIcon, LayoutGrid, Table, LayoutDashboard } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -81,6 +81,8 @@ function Page() {
               <Button variant="outline" size="icon">
                 {view === "table" ? (
                   <Table className="h-4 w-4" />
+                ) : view === "board" ? (
+                  <LayoutDashboard className="h-4 w-4" />
                 ) : (
                   <LayoutGrid className="h-4 w-4" />
                 )}
@@ -98,6 +100,10 @@ function Page() {
                   <Label htmlFor="card">Card View</Label>
                 </div>
                 <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="board" id="board" />
+                  <Label htmlFor="board">Board View</Label>
+                </div>
+                <div className="flex items-center space-x-2">
                   <RadioGroupItem value="table" id="table" />
                   <Label htmlFor="table">Table View</Label>
                 </div>
@@ -109,8 +115,9 @@ function Page() {
       <div>
         {view === "table" ? (
           <TaskTable />
+        ) : view === "board" ? (
+          <TaskBoardView />
         ) : (
-          //<TaskBoardView />
           <TaskDashboard
             tasksData={tasks}
             status={status}
