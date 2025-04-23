@@ -8,8 +8,8 @@ import {
   DialogTrigger,
   DialogContent,
 } from "@/components/ui/dialog";
-import { TaskCreateForm } from "@/app/features/tasks/components/taskCreateForm";
 import { PlusIcon } from "lucide-react";
+import { TaskCreateForm } from "./TaskCreateForm";
 
 export const TaskCreateDialog = ({ small = false }) => {
   return (

@@ -51,7 +51,7 @@ const TaskDashboard = ({ tasksData, status, priorityFilter, isLoading }) => {
   const newTimeGroup = timeGroupings(tasksData);
 
   return (
-    <div className="flex flex-col w-full h-full gap-2">
+    <div className="flex flex-col w-full h-screen gap-2 overflow-auto">
       <VerticalTaskBoardView newTimeGroup={newTimeGroup} />
     </div>
   );

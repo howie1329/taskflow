@@ -7,7 +7,7 @@ import { TaskModal } from "@/features/tasks/TaskModal";
 
 const VerticalTaskBoardView = ({ newTimeGroup }) => {
   return (
-    <div className="flex flex-col space-y-2 w-full h-[700px] overflow-auto">
+    <div className="flex flex-col space-y-2 w-full h-[700px] overflow-scroll">
       {Object.keys(newTimeGroup).map((dayHeader) => (
         <Card key={dayHeader} className="w-full h-[60%] p-2">
           <div className="flex w-full justify-center items-center space-x-2 my-2 text-center">

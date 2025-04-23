@@ -24,9 +24,8 @@ import useIsComplete from "@/hooks/useIsComplete";
 import useTaskUpdateField from "@/hooks/useTaskUpdateField";
 import { singleSubTask } from "@/hooks/useFetchSingleSubTask";
 import { singleNote } from "@/hooks/useFetchSingleNote";
-
-import TaskDialogCard from "../../app/features/tasks/components/TaskDialogCard";
 import { TaskCollapsibleButton } from "./TaskCollapsibleButton";
+import TaskDialogCard from "./TaskDialogCard";
 
 const PositionControls = ({ position, onPositionChange }) => (
   <div className="flex flex-col items-center">
