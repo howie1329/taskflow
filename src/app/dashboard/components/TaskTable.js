@@ -15,7 +15,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import useGetTasks from "@/hooks/useGetTasks";
+import useGetTasks from "@/features/tasks/hooks/useGetTasks";
 
 export const TaskTable = () => {
   // const [isLoading, setIsLoading] = useState(false);

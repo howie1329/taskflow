@@ -3,14 +3,14 @@ import { Input } from "@/components/ui/input";
 import React, { useState } from "react";
 import Tiptap from "./TipTap";
 import { Button } from "@/components/ui/button";
-import { useUploadNote } from "@/hooks/useUploadNote";
+import { useUploadNote } from "@/features/notes/hooks/useUploadNote";
 import { useRouter } from "next/navigation";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import useGetTasks from "@/hooks/useGetTasks";
+import useGetTasks from "@/features/tasks/hooks/useGetTasks";
 import {
   Command,
   CommandEmpty,

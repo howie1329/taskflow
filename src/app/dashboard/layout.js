@@ -7,13 +7,8 @@ import {
 } from "@/lib/caching/hooks/DataSync";
 import { useSocketClientListener } from "@/lib/socket/socketClientListener";
 import { useSocketClient } from "@/lib/socket/useSocketClient";
-import {
-  startSocket,
-  useStart,
-  useStartSocket,
-} from "@/lib/socket/socketClient";
+import { useStart } from "@/lib/socket/socketClient";
 import { useAuth } from "@clerk/nextjs";
-import { useEffect } from "react";
 
 export default function Layout({ children }) {
   const { getToken, userId } = useAuth();

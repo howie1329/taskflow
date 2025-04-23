@@ -1,8 +1,8 @@
-import { useFetchNote } from "@/hooks/useFetchNote";
+import { useFetchNote } from "@/features/notes/hooks/useFetchNote";
 import Link from "next/link";
 import React from "react";
-import SingleNoteCard from "../notes/components/SingleNoteCard";
-import useGetAllNotes from "@/hooks/useGetAllNotes";
+import SingleNoteCard from "../../../features/notes/SingleNoteCard";
+import useGetAllNotes from "@/features/notes/hooks/useGetAllNotes";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { PlusIcon } from "lucide-react";

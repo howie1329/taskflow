@@ -7,22 +7,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useFetchFilterTask } from "@/hooks/useFetchFilterTask";
 import React, { useState } from "react";
-import { TaskModal } from "../features/tasks/components/TaskModal";
 import { Separator } from "@/components/ui/separator";
 import { QuickNotes } from "./components/QuickNotes";
-import { CreateTaskModal } from "../features/tasks/components/CreateTaskModal";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { useAuth } from "@clerk/nextjs";
-
+import { TaskCreateDialog } from "@/features/tasks/TaskCreateDialog";
 const Page = () => {
   const [filter, setFilter] = useState("None");
-  const { data: filteredTask, isLoading, isError } = useFetchFilterTask(filter);
   const { getToken } = useAuth();
-  //http://localhost:3001
-  //https://taskflow-backend-production-8812.up.railway.app
   const onClick = async () => {
     const token = await getToken();
     axios
@@ -50,7 +44,7 @@ const Page = () => {
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="None" />
               </SelectTrigger>
-              <CreateTaskModal small={true} />
+              <TaskCreateDialog small={true} />
             </div>
             <Separator />
             <SelectContent>
@@ -61,14 +55,7 @@ const Page = () => {
             </SelectContent>
           </Select>
           <CardContent className="flex flex-col gap-2 overflow-scroll items-center my-1">
-            {isLoading ? (
-              <p>Loading Task...</p>
-            ) : (
-              filteredTask.map((task) => (
-                <TaskModal className="mx-0" key={task.id} task={task} />
-              ))
-            )}
-            {filter === "None" ? <p>Select A Filter To Start</p> : ""}
+            <p>No Tasks</p>
           </CardContent>
         </Card>
 
