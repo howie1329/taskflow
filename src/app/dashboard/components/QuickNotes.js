@@ -29,7 +29,7 @@ export const QuickNotes = () => {
         </Button>
       </div>
       <Separator />
-      <div className="w-full h-[82%] flex flex-col items-center gap-2 overflow-scroll mt-1">
+      <div className="w-full h-[95%] flex flex-wrap gap-2 pt-1 overflow-auto ">
         {data.map((note, key) => (
           <Link key={key} href={`/dashboard/notes/${note.id}`}>
             <SingleNoteCard key={key} note={note} />

@@ -11,7 +11,10 @@ const SingleNoteCard = ({ note }) => {
     });
   };
   return (
-    <Card className="flex flex-col w-[20rem]" onMouseEnter={() => preFetch()}>
+    <Card
+      className="flex flex-col min-w-[20rem] max-w-[30rem]"
+      onMouseEnter={() => preFetch()}
+    >
       <div className="flex flex-col m-2">
         <CardHeader>{note.title}</CardHeader>
         <CardDescription className="overflow-hidden truncate">

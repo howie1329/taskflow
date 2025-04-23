@@ -3,56 +3,60 @@ import React, { useState } from "react";
 import { filterTasks } from "@/lib/filterTasks";
 import { LoadingHorizontalTaskBoard } from "./LoadingHorizontalTaskBoard";
 import VerticalTaskBoardView from "./VerticalTaskBoardView";
+import { useAuth } from "@clerk/clerk-react";
+import useGetTasks from "../hooks/useGetTasks";
 
-const TaskDashboard = ({ tasksData, status, priorityFilter, isLoading }) => {
-  if (isLoading) {
-    return <LoadingHorizontalTaskBoard />;
-  }
+const TaskDashboard = () => {
+  const { userId } = useAuth();
+  const { data: tasksData, isLoading: isTaskLoading } = useGetTasks(userId);
+  const [columns] = useState([
+    { id: "noDeadline", title: "No Deadline", tasks: [] },
+    { id: "today", title: "Today", tasks: [] },
+    { id: "thisWeek", title: "This Week", tasks: [] },
+    { id: "overdue", title: "Overdue", tasks: [] },
+  ]);
 
-  const timeGroupings = (tasksData) => {
+  const columnsWithTasks = (tasksData) => {
+    if (!tasksData) return columns;
     const today = new Date().toISOString().split("T")[0];
-    const timeGroup = { NoDeadLine: [], Today: [], ThisWeek: [], OverDue: [] };
-
     const isoWeek = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
       .toISOString()
       .split("T")[0];
 
-    const filterFinal = filterTasks(tasksData, {
-      status: status,
-      priorityFilter: priorityFilter,
-    });
+    const newColumns = columns.map((col) => ({ ...col, tasks: [] }));
 
-    filterFinal.map((task) => {
+    tasksData.forEach((task) => {
       const { date } = task;
-
+      const noDeadline = date == null;
       const isToday = date === today;
       const isThisWeek = date >= today && date <= isoWeek;
       const isOverDue = date < today;
-      const isNoDeadLine = date == null;
 
-      // Add Upcoming
-
-      if (isToday) {
-        timeGroup.Today.push(task);
+      if (isOverDue) {
+        newColumns[3].tasks.push(task);
+      } else if (noDeadline) {
+        newColumns[0].tasks.push(task);
+      } else if (isToday) {
+        newColumns[1].tasks.push(task);
       } else if (isThisWeek) {
-        timeGroup.ThisWeek.push(task);
-      } else if (isOverDue) {
-        timeGroup.OverDue.push(task);
-      } else if (isNoDeadLine) {
-        timeGroup.NoDeadLine.push(task);
+        newColumns[2].tasks.push(task);
       } else {
-        timeGroup.NoDeadLine.push(task);
+        // Default case: put in No Deadline
+        newColumns[0].tasks.push(task);
       }
     });
 
-    return timeGroup;
+    return newColumns;
   };
+  const newColumns = columnsWithTasks(tasksData);
 
-  const newTimeGroup = timeGroupings(tasksData);
+  if (isTaskLoading) {
+    return <LoadingHorizontalTaskBoard />;
+  }
 
   return (
     <div className="flex flex-col w-full h-screen gap-2 overflow-auto">
-      <VerticalTaskBoardView newTimeGroup={newTimeGroup} />
+      <VerticalTaskBoardView newTimeGroup={newColumns} />
     </div>
   );
 };

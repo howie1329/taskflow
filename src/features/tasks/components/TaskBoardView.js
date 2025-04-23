@@ -1,6 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
+import useGetTasks from "../hooks/useGetTasks";
+import { useAuth } from "@clerk/nextjs";
+import { TaskCreateModal } from "../TaskCreateModal";
+import { TaskCreateDialog } from "../TaskCreateDialog";
+import TaskCard from "./TaskCard";
 
 function TaskBoardView() {
+  const { userId } = useAuth();
+  const { data: tasks, isLoading: isTaskLoading } = useGetTasks(userId);
   const [columns] = useState([
     { id: "notStarted", title: "Not Started", tasks: [] },
     { id: "todo", title: "To Do", tasks: [] },
@@ -9,9 +16,50 @@ function TaskBoardView() {
     { id: "overdue", title: "Overdue", tasks: [] },
   ]);
 
+  const newColumns = useMemo(() => {
+    if (!tasks) return columns;
+
+    columns.forEach((item) => {
+      const data = tasks.filter((task) => task.status === item.id);
+      item.tasks = data;
+    });
+
+    console.log("Here", columns);
+    return columns;
+  }, [tasks, columns]);
+
+  if (isTaskLoading) {
+    return (
+      <div className="flex gap-4 p-6 h-[calc(100vh-64px)] overflow-x-auto bg-gray-50 w-full">
+        {columns.map((column) => (
+          <div
+            key={column.id}
+            className="bg-white rounded-lg flex-1 min-w-[300px] h-fit max-h-full flex flex-col shadow-sm"
+          >
+            <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+              <div className="h-5 w-24 bg-gray-200 rounded animate-pulse"></div>
+              <div className="h-6 w-8 bg-gray-200 rounded-full animate-pulse"></div>
+            </div>
+            <div className="p-2 flex-1 overflow-y-auto">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="bg-white border border-gray-200 rounded-md p-4 mb-2"
+                >
+                  <div className="h-4 w-3/4 bg-gray-200 rounded animate-pulse mb-2"></div>
+                  <div className="h-3 w-1/2 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className="flex gap-4 p-6 h-[calc(100vh-64px)] overflow-x-auto bg-gray-50 w-full">
-      {columns.map((column) => (
+      {newColumns.map((column) => (
         <div
           key={column.id}
           className="bg-white rounded-lg flex-1 min-w-[300px] h-fit max-h-full flex flex-col shadow-sm"
@@ -26,18 +74,10 @@ function TaskBoardView() {
           </div>
           <div className="p-2 flex-1 overflow-y-auto">
             {column.tasks.map((task) => (
-              <div
-                key={task.id}
-                className="bg-white border border-gray-200 rounded-md p-4 mb-2 cursor-pointer transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
-              >
-                <h4 className="text-sm font-medium text-gray-700 mb-2 m-0">
-                  {task.title}
-                </h4>
-                <p className="text-xs text-gray-600 m-0">{task.description}</p>
-              </div>
+              <TaskCard key={task.id} task={task} />
             ))}
             <button className="w-full p-3 border-2 border-dashed border-gray-300 rounded-md text-gray-600 cursor-pointer transition-all duration-200 hover:border-gray-400 hover:text-gray-700">
-              + Add Task
+              <TaskCreateDialog plain={true} />
             </button>
           </div>
         </div>

@@ -8,26 +8,26 @@ import { TaskModal } from "@/features/tasks/TaskModal";
 const VerticalTaskBoardView = ({ newTimeGroup }) => {
   return (
     <div className="flex flex-col space-y-4 w-full h-[90%] overflow-scroll px-2 py-4">
-      {Object.keys(newTimeGroup).map((dayHeader) => (
+      {newTimeGroup.map((column) => (
         <Card
-          key={dayHeader}
+          key={column.id}
           className="w-full min-h-[200px] flex-1 p-4 transition-all duration-200 hover:shadow-lg border border-border/50"
         >
           <div className="flex w-full justify-between items-center mb-3">
             <div className="flex items-center space-x-3">
               <h2 className="text-lg font-semibold text-foreground/90">
-                {dayHeader.toUpperCase()}
+                {column.title.toUpperCase()}
               </h2>
               <span className="bg-primary/10 text-primary px-2.5 py-1 rounded-full text-sm font-medium">
-                {newTimeGroup[dayHeader].length}
+                {column.tasks.length}
               </span>
             </div>
           </div>
           <Separator className="mb-4" />
           <div className="h-full">
             <div className="flex flex-col h-[calc(100%-60px)] gap-3 pt-2 overflow-scroll custom-scrollbar">
-              {newTimeGroup[dayHeader].length > 0 ? (
-                newTimeGroup[dayHeader].map((task, index) => (
+              {column.tasks.length > 0 ? (
+                column.tasks.map((task, index) => (
                   <TaskModal key={index} task={task} />
                 ))
               ) : (
