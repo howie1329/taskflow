@@ -1,23 +1,20 @@
 "use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import React, { useState } from "react";
-import { Separator } from "@/components/ui/separator";
 import { QuickNotes } from "./components/QuickNotes";
 import { Timer } from "./components/Timer";
-import { Button } from "@/components/ui/button";
 import { TaskCreateDialog } from "@/features/tasks/TaskCreateDialog";
 import { Calendar } from "@/components/ui/calendar";
+import { useAuth } from "@clerk/nextjs";
+import useGetTasks from "@/features/tasks/hooks/useGetTasks";
+import { TaskModal } from "@/features/tasks/TaskModal";
 
 const Page = () => {
-  const [filter, setFilter] = useState("None");
+  const { userId } = useAuth();
   const [date, setDate] = useState(new Date());
+  const { data: tasks, isLoading: isTaskLoading } = useGetTasks(userId);
+  const today = new Date().toISOString().split("T")[0];
+  const todayTasks = tasks?.filter((task) => task.date === today) || [];
 
   return (
     <div className="h-screen w-screen p-4">
@@ -42,22 +39,15 @@ const Page = () => {
                 <CardTitle className="text-xl font-semibold">
                   Today&apos;s Tasks
                 </CardTitle>
-                <Select onValueChange={setFilter} defaultValue="None">
-                  <SelectTrigger className="w-[120px]">
-                    <SelectValue placeholder="Priority" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="None">All</SelectItem>
-                    <SelectItem value="Low">Low</SelectItem>
-                    <SelectItem value="Medium">Medium</SelectItem>
-                    <SelectItem value="High">High</SelectItem>
-                  </SelectContent>
-                </Select>
               </CardHeader>
-              <CardContent className="h-[calc(100%-60px)] overflow-auto">
+              <CardContent className="h-[calc(100%-60px)] max-h-[500px] overflow-y-auto">
                 <div className="space-y-4">
-                  <p className="text-sm text-muted-foreground">
-                    No tasks for today
+                  <p className="text-sm text-muted-foreground ">
+                    {todayTasks.length === 0
+                      ? "No tasks for today"
+                      : todayTasks.map((task) => (
+                          <TaskModal key={task.id} task={task} />
+                        ))}
                   </p>
                 </div>
               </CardContent>
