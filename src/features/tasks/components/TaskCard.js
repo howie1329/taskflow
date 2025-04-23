@@ -1,18 +1,55 @@
-import React from "react";
+import React, { useState } from "react";
 import { format } from "date-fns";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import TaskDialogCard from "../TaskDialogCard";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@clerk/nextjs";
 import useIsComplete from "../hooks/useIsComplete";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import useTaskUpdateField from "../hooks/useTaskUpdateField";
 
 const TaskCard = ({ task }) => {
   const { getToken } = useAuth();
   const updateMutation = useIsComplete(getToken);
+  const updateFieldMutation = useTaskUpdateField(getToken);
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [title, setTitle] = useState(task.title);
+  const [description, setDescription] = useState(task.description);
 
   const handleCompleteChange = () => {
     const data = { isCompleted: !task.isCompleted };
     updateMutation.mutate({ id: task.id, data: data });
+  };
+
+  const handleTitleUpdate = () => {
+    if (title !== task.title) {
+      updateFieldMutation.mutate({
+        id: task.id,
+        changedField: "title",
+        updateData: title,
+      });
+    }
+    setIsEditingTitle(false);
+  };
+
+  const handleDescriptionUpdate = () => {
+    if (description !== task.description) {
+      updateFieldMutation.mutate({
+        id: task.id,
+        changedField: "description",
+        updateData: description,
+      });
+    }
+    setIsEditingDescription(false);
+  };
+
+  const handleKeyPress = (e, updateFunction) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      updateFunction();
+    }
   };
 
   const getPriorityColor = (priority) => {
@@ -40,13 +77,29 @@ const TaskCard = ({ task }) => {
                 onClick={(e) => e.stopPropagation()}
                 className="mt-1"
               />
-              <h4
-                className={`text-sm font-medium text-gray-900 m-0 line-clamp-2 ${
-                  task.isCompleted ? "line-through text-gray-500" : ""
-                }`}
-              >
-                {task.title}
-              </h4>
+              {isEditingTitle ? (
+                <Input
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  onBlur={handleTitleUpdate}
+                  onKeyPress={(e) => handleKeyPress(e, handleTitleUpdate)}
+                  onClick={(e) => e.stopPropagation()}
+                  className="h-6 text-sm"
+                  autoFocus
+                />
+              ) : (
+                <h4
+                  className={`text-sm font-medium text-gray-900 m-0 line-clamp-2 ${
+                    task.isCompleted ? "line-through text-gray-500" : ""
+                  }`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsEditingTitle(true);
+                  }}
+                >
+                  {task.title}
+                </h4>
+              )}
             </div>
             {task.priority && (
               <span
@@ -59,9 +112,27 @@ const TaskCard = ({ task }) => {
             )}
           </div>
 
-          <p className="text-xs text-gray-600 mb-3 line-clamp-2">
-            {task.description}
-          </p>
+          {isEditingDescription ? (
+            <Textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              onBlur={handleDescriptionUpdate}
+              onKeyPress={(e) => handleKeyPress(e, handleDescriptionUpdate)}
+              onClick={(e) => e.stopPropagation()}
+              className="text-xs min-h-[60px] mb-3"
+              autoFocus
+            />
+          ) : (
+            <p
+              className="text-xs text-gray-600 mb-3 line-clamp-2"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsEditingDescription(true);
+              }}
+            >
+              {task.description}
+            </p>
+          )}
 
           <div className="flex items-center justify-between text-xs text-gray-500">
             {task.date && (
