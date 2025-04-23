@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import useSubTaskIsComplete from "@/hooks/useSubTaskIsComplete";
-import useSubtaskUpdateField from "@/hooks/useSubTaskUpdateField";
+import useSubTaskIsComplete from "@/features/subtasks/hooks/useSubTaskIsComplete";
+import useSubtaskUpdateField from "@/features/subtasks/hooks/useSubTaskUpdateField";
 import { useAuth } from "@clerk/nextjs";
 import React, { useState } from "react";
 

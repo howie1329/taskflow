@@ -1,6 +1,6 @@
 import React from "react";
 import SubtaskLineItem from "@/features/subtasks/SubtaskLineItem";
-import { useFetchSingleSubTask } from "@/hooks/useFetchSingleSubTask";
+import { useFetchSingleSubTask } from "@/features/subtasks/hooks/useFetchSingleSubTask";
 
 const TaskDescription = ({ description }) => (
   <p className="text-xs text-wrap font-extralight">{description}</p>

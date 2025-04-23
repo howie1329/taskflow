@@ -7,8 +7,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Files, Trash2 } from "lucide-react";
-import { useFetchSingleSubTask } from "@/hooks/useFetchSingleSubTask";
-import { useFetchSingleNote } from "@/hooks/useFetchSingleNote";
+import { useFetchSingleSubTask } from "@/features/subtasks/hooks/useFetchSingleSubTask";
+import { useFetchSingleNote } from "@/features/notes/hooks/useFetchSingleNote";
 import { useRouter } from "next/navigation";
 import SubtaskLineItem from "@/features/subtasks/SubtaskLineItem";
 import { useAuth } from "@clerk/nextjs";

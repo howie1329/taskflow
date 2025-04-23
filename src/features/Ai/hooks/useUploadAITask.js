@@ -1,9 +1,9 @@
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useToast } from "./use-toast";
-import uploadSubtask from "./useUploadSubTask";
-import { uploadNote } from "./useUploadNote";
 import { clearTasksFromIndexedDB } from "@/lib/DexieDB";
+import { uploadNote } from "@/features/notes/hooks/useUploadNote";
+import uploadSubtask from "@/features/subtasks/hooks/useUploadSubTask";
+import { useToast } from "@/hooks/use-toast";
 
 const uploadAITask = async (data) => {
   try {

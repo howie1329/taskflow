@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import useUploadAITask from "@/hooks/useUploadAITask";
+import useUploadAITask from "@/features/Ai/hooks/useUploadAITask";
 import { DialogTrigger } from "@radix-ui/react-dialog";
 import React, { useState } from "react";
 

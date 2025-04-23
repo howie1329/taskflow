@@ -8,10 +8,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import React, { useState } from "react";
-import { TaskModal } from "@/features/tasks/TaskModal";
 import { Separator } from "@/components/ui/separator";
 import { QuickNotes } from "./components/QuickNotes";
-import { TaskCreateModal } from "@/features/tasks/TaskCreateModal";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { useAuth } from "@clerk/nextjs";

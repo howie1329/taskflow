@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import uploadSubtask from "../../../hooks/useUploadSubTask";
+import uploadSubtask from "../../subtasks/hooks/useUploadSubTask";
 import { useToast } from "../../../hooks/use-toast";
 import { clearTasksFromIndexedDB } from "@/lib/DexieDB";
 import axiosClient from "@/lib/axiosClient";
