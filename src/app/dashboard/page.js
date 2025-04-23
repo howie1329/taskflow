@@ -10,6 +10,7 @@ import {
 import React, { useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import { QuickNotes } from "./components/QuickNotes";
+import { Timer } from "./components/Timer";
 import { Button } from "@/components/ui/button";
 import { TaskCreateDialog } from "@/features/tasks/TaskCreateDialog";
 import { Calendar } from "@/components/ui/calendar";
@@ -78,6 +79,9 @@ const Page = () => {
                 />
               </CardContent>
             </Card>
+
+            {/* Timer Section */}
+            <Timer className="col-span-1 h-full" />
 
             {/* Quick Notes Section */}
             <Card className="col-span-1 lg:col-span-3 h-full">
