@@ -18,7 +18,6 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@clerk/nextjs";
 import { useQueryClient } from "@tanstack/react-query";
-
 import useTaskPositionUpdate from "@/features/tasks/hooks/useTaskPositionUpdate";
 import { singleSubTask } from "@/hooks/useFetchSingleSubTask";
 import { singleNote } from "@/hooks/useFetchSingleNote";
