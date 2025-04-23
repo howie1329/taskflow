@@ -15,45 +15,16 @@ function TaskBoardView() {
     { id: "overdue", title: "Overdue", tasks: [] },
   ]);
 
-  const columnsWithTasks = useMemo(() => {
+  const newColumns = useMemo(() => {
     if (!tasks) return columns;
 
-    return columns.map((column) => {
-      let columnTasks = [];
-
-      switch (column.id) {
-        case "overdue":
-          columnTasks = tasks.filter((task) => {
-            if (!task.date) return false;
-            const dueDate = new Date(task.date);
-            const today = new Date();
-            return dueDate < today && !task.isCompleted;
-          });
-          break;
-        case "notStarted":
-          columnTasks = tasks.filter(
-            (task) => !task.status || task.status === "notStarted"
-          );
-          break;
-        case "todo":
-          columnTasks = tasks.filter((task) => task.status === "todo");
-          break;
-        case "inProgress":
-          columnTasks = tasks.filter((task) => task.status === "inProgress");
-          break;
-        case "done":
-          columnTasks = tasks.filter((task) => task.isCompleted);
-          break;
-
-        default:
-          columnTasks = [];
-      }
-
-      return {
-        ...column,
-        tasks: columnTasks,
-      };
+    columns.forEach((item) => {
+      const data = tasks.filter((task) => task.status === item.id);
+      item.tasks = data;
     });
+
+    console.log("Here", columns);
+    return columns;
   }, [tasks, columns]);
 
   if (isTaskLoading) {
@@ -87,7 +58,7 @@ function TaskBoardView() {
 
   return (
     <div className="flex gap-4 p-6 h-[calc(100vh-64px)] overflow-x-auto bg-gray-50 w-full">
-      {columnsWithTasks.map((column) => (
+      {newColumns.map((column) => (
         <div
           key={column.id}
           className="bg-white rounded-lg flex-1 min-w-[300px] h-fit max-h-full flex flex-col shadow-sm"

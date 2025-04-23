@@ -33,7 +33,7 @@ import TaskBoardView from "@/features/tasks/components/TaskBoardView";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 function Page() {
-  const [view, setView] = useState("card");
+  const [view, setView] = useState("board");
   const mutation = useTaskCreate();
   const { userId } = useAuth();
   const { data: tasks, isLoading: isTaskLoading } = useGetTasks(userId);
