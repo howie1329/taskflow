@@ -51,12 +51,9 @@ function Page() {
     */
     }
   };
-
-  const statsHeader = ["Total", "Completed", "Overdue"];
-
   /// TODO: STATS NEED TO BE CACHED IN REDIS ///
 
-  if (!userId || isTaskLoading) {
+  if (!userId) {
     return <p>Loading...</p>;
   }
 
@@ -118,12 +115,7 @@ function Page() {
         ) : view === "board" ? (
           <TaskBoardView />
         ) : (
-          <TaskDashboard
-            tasksData={tasks}
-            status={status}
-            priorityFilter={priorityFilter}
-            isLoading={isTaskLoading}
-          />
+          <TaskDashboard />
         )}
       </div>
     </div>
