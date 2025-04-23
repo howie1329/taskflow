@@ -20,6 +20,14 @@ function TaskBoardView() {
       let columnTasks = [];
 
       switch (column.id) {
+        case "overdue":
+          columnTasks = tasks.filter((task) => {
+            if (!task.date) return false;
+            const dueDate = new Date(task.date);
+            const today = new Date();
+            return dueDate < today && !task.isCompleted;
+          });
+          break;
         case "notStarted":
           columnTasks = tasks.filter(
             (task) => !task.status || task.status === "notStarted"
@@ -34,14 +42,7 @@ function TaskBoardView() {
         case "done":
           columnTasks = tasks.filter((task) => task.isCompleted);
           break;
-        case "overdue":
-          columnTasks = tasks.filter((task) => {
-            if (!task.dueDate) return false;
-            const dueDate = new Date(task.dueDate);
-            const today = new Date();
-            return dueDate < today && !task.isCompleted;
-          });
-          break;
+
         default:
           columnTasks = [];
       }
