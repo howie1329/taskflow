@@ -29,6 +29,7 @@ import { useAuth } from "@clerk/nextjs";
 import { getSocket } from "@/lib/socket/socketClient";
 import TaskDashboard from "@/features/tasks/components/TaskDashboard";
 import { TaskCreateDialog } from "@/features/tasks/TaskCreateDialog";
+import TaskBoardView from "@/features/tasks/components/TaskBoardView";
 function Page() {
   const [tableView, setTableView] = useState(false);
   const mutation = useTaskCreate();
@@ -88,6 +89,7 @@ function Page() {
         {tableView ? (
           <TaskTable />
         ) : (
+          //<TaskBoardView />
           <TaskDashboard
             tasksData={tasks}
             status={status}

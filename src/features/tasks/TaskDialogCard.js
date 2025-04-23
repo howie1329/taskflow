@@ -6,7 +6,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Files, Trash2 } from "lucide-react";
+import { Files, Trash2, CheckCircle2, Circle } from "lucide-react";
 import { useFetchSingleSubTask } from "@/features/subtasks/hooks/useFetchSingleSubTask";
 import { useFetchSingleNote } from "@/features/notes/hooks/useFetchSingleNote";
 import { useRouter } from "next/navigation";
@@ -45,83 +45,117 @@ const TaskDialogCard = ({ task }) => {
     Medium: "bg-yellow-600",
     High: "bg-red-600",
   };
+
   return (
-    <>
-      <DialogHeader>
-        <div className="flex gap-2">
-          {task.labels &&
-            task.labels.map((tag, key) => (
-              <Button size="status" variant="tag" key={key}>
+    <div className="space-y-6">
+      <DialogHeader className="space-y-4">
+        <div className="flex items-center space-x-2">
+          <div className="flex gap-2">
+            {task.labels?.map((tag, key) => (
+              <Button size="sm" variant="tag" key={key} className="text-xs">
                 {tag}
               </Button>
             ))}
+          </div>
           <Button
-            size="status"
+            size="sm"
             variant="priority"
-            className={statusButtonColor[task.priority]}
+            className={`${statusButtonColor[task.priority]} text-white`}
           >
             {task.priority}
           </Button>
         </div>
-        <DialogTitle>{task.title}</DialogTitle>
 
-        <DialogDescription>{task.description}</DialogDescription>
+        <div className="space-y-2">
+          <DialogTitle className="text-2xl font-semibold">
+            {task.title}
+          </DialogTitle>
+          <DialogDescription className="text-base">
+            {task.description}
+          </DialogDescription>
+        </div>
       </DialogHeader>
-      {notesLoading ? (
-        <p>Loading Notes...</p>
-      ) : (
-        <div className="flex gap-2">
-          {notes &&
-            notes.map((note, key) => (
-              <Button
-                variant="outline"
-                key={key}
-                onClick={() => noteRoute(note.id)}
-              >
-                <Files />
-                <p>{note.title}</p>
-              </Button>
-            ))}
-        </div>
-      )}
 
-      {subtaskLoading ? (
-        <p>Loading SubTask...</p>
-      ) : (
-        <div>
-          {subTasks &&
-            subTasks.map((task, key) => (
-              <SubtaskLineItem key={key} item={task} />
-            ))}
+      <div className="space-y-6">
+        {/* Notes Section */}
+        <div className="space-y-3">
+          <h3 className="text-sm font-medium text-gray-500">
+            Associated Notes
+          </h3>
+          {notesLoading ? (
+            <p className="text-sm text-gray-500">Loading Notes...</p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {notes?.map((note, key) => (
+                <Button
+                  variant="outline"
+                  key={key}
+                  onClick={() => noteRoute(note.id)}
+                  className="flex items-center gap-2 hover:bg-gray-50"
+                >
+                  <Files className="h-4 w-4" />
+                  <span className="text-sm">{note.title}</span>
+                </Button>
+              ))}
+              {(!notes || notes.length === 0) && (
+                <p className="text-sm text-gray-500">No notes attached</p>
+              )}
+            </div>
+          )}
         </div>
-      )}
+
+        {/* Subtasks Section */}
+        <div className="space-y-3">
+          <h3 className="text-sm font-medium text-gray-500">Subtasks</h3>
+          {subtaskLoading ? (
+            <p className="text-sm text-gray-500">Loading Subtasks...</p>
+          ) : (
+            <div className="space-y-2">
+              {subTasks?.map((task, key) => (
+                <SubtaskLineItem key={key} item={task} />
+              ))}
+              {(!subTasks || subTasks.length === 0) && (
+                <p className="text-sm text-gray-500">No subtasks added</p>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
 
       <DialogFooter>
-        <div className="flex gap-2 w-full justify-between items-center">
-          <Button size="icon" variant="status" onClick={deleteButtonClick}>
-            <Trash2 />
-          </Button>
-          {task.isCompleted ? (
+        <div className="flex w-full items-center justify-between border-t pt-4">
+          <div className="flex items-center gap-2">
             <Button
-              size="status"
-              variant="ghostComplete"
-              onClick={completeButtonClick}
+              size="icon"
+              variant="ghost"
+              onClick={deleteButtonClick}
+              className="hover:bg-red-50 hover:text-red-600"
             >
-              Completed
+              <Trash2 className="h-5 w-5" />
             </Button>
-          ) : (
             <Button
-              size="status"
-              variant="ghostIncomplete"
+              variant="ghost"
               onClick={completeButtonClick}
+              className={`flex items-center gap-2 ${
+                task.isCompleted
+                  ? "text-green-600 hover:bg-green-50"
+                  : "text-gray-600 hover:bg-gray-50"
+              }`}
             >
-              Not Completed
+              {task.isCompleted ? (
+                <CheckCircle2 className="h-5 w-5" />
+              ) : (
+                <Circle className="h-5 w-5" />
+              )}
+              <span className="text-sm">
+                {task.isCompleted ? "Completed" : "Mark as Complete"}
+              </span>
             </Button>
-          )}
-          <p>{task.date}</p>
+          </div>
+          <p className="text-sm text-gray-500">{task.date}</p>
         </div>
       </DialogFooter>
-    </>
+    </div>
   );
 };
 

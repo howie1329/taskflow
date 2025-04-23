@@ -27,31 +27,41 @@ import useIsComplete from "./hooks/useIsComplete";
 import useTaskUpdateField from "./hooks/useTaskUpdateField";
 
 const PositionControls = ({ position, onPositionChange }) => (
-  <div className="flex flex-col items-center">
-    <Button variant="ghost" size="xs" onClick={() => onPositionChange(1)}>
-      <ChevronUp className="h-2 w-2" />
+  <div className="flex flex-col items-center bg-muted/50 rounded-md p-1">
+    <Button
+      variant="ghost"
+      size="xs"
+      onClick={() => onPositionChange(1)}
+      className="hover:bg-muted"
+    >
+      <ChevronUp className="h-3 w-3" />
     </Button>
-    <p className="font-semibold text-xs">{position}</p>
-    <Button variant="ghost" size="xs" onClick={() => onPositionChange(-1)}>
-      <ChevronDown className="h-2 w-2" />
+    <p className="font-medium text-xs text-muted-foreground">{position}</p>
+    <Button
+      variant="ghost"
+      size="xs"
+      onClick={() => onPositionChange(-1)}
+      className="hover:bg-muted"
+    >
+      <ChevronDown className="h-3 w-3" />
     </Button>
   </div>
 );
 
 const StatusBadge = ({ priority }) => {
   const statusButtonColor = {
-    None: "bg-primary",
-    Low: "bg-blue-600",
-    Medium: "bg-yellow-600",
-    High: "bg-red-600",
+    None: "bg-muted text-muted-foreground",
+    Low: "bg-blue-200 text-blue-700",
+    Medium: "bg-yellow-200 text-yellow-700",
+    High: "bg-red-200 text-red-700",
   };
 
   return (
-    <p
-      className={`font-extralight text-xs shadow rounded-md px-2 text-primary-foreground ${statusButtonColor[priority]} hover:opacity-90`}
+    <span
+      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${statusButtonColor[priority]}`}
     >
       {priority}
-    </p>
+    </span>
   );
 };
 
@@ -62,21 +72,40 @@ const TaskContent = ({
   onUpdateFieldBlur,
   onCompleteChange,
 }) => (
-  <div className="flex flex-col truncate w-full gap-1">
-    <Input
-      className="text-3xl truncate border-none h-fit p-0"
-      placeholder={task.title}
-      value={updateField}
-      onChange={(e) => setUpdateField(e.target.value)}
-      onKeyUp={(e) => {
-        if (e.key === "Enter") {
-          onUpdateFieldBlur("title", updateField);
-        }
-      }}
-    />
-    <div className="flex flex-row justify-between">
-      <StatusBadge priority={task.priority} />
-      <p className="font-extralight text-xs">{task.date}</p>
+  <div className="flex flex-col w-full gap-2">
+    <div className="flex items-center gap-2">
+      <Checkbox
+        checked={task.isCompleted}
+        onCheckedChange={onCompleteChange}
+        className="data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
+      />
+      <Input
+        className={`text-base font-medium border-none h-fit p-0 bg-transparent focus-visible:ring-0 ${
+          task.isCompleted ? "line-through text-muted-foreground" : ""
+        }`}
+        placeholder={task.title}
+        value={updateField}
+        onChange={(e) => setUpdateField(e.target.value)}
+        onKeyUp={(e) => {
+          if (e.key === "Enter") {
+            onUpdateFieldBlur("title", updateField);
+          }
+        }}
+      />
+    </div>
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-2">
+        <StatusBadge priority={task.priority} />
+        {task.labels?.map((label, index) => (
+          <span
+            key={index}
+            className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-muted text-muted-foreground"
+          >
+            {label}
+          </span>
+        ))}
+      </div>
+      <p className="text-xs text-muted-foreground">{task.date}</p>
     </div>
   </div>
 );
@@ -128,22 +157,19 @@ export const TaskModal = ({ task }) => {
   };
 
   return (
-    <Card className="w-full" onMouseEnter={preFetchData}>
-      <Dialog className="flex flex-row">
-        <Collapsible className="flex flex-col">
-          <div className="flex flex-row justify-between items-center space-x-1 mx-1">
-            <div className="flex truncate items-center w-full">
+    <Card
+      className="w-full transition-all duration-200 hover:shadow-md border-border/50"
+      onMouseEnter={preFetchData}
+    >
+      <Dialog>
+        <Collapsible>
+          <div className="p-3">
+            <div className="flex items-start gap-3">
               <PositionControls
                 position={task.position}
                 onPositionChange={handlePositionChange}
               />
-              <div className="flex flex-row justify-center truncate w-full">
-                <div className="flex mr-1 items-center">
-                  <Checkbox
-                    checked={task.isCompleted}
-                    onCheckedChange={handleCompleteChange}
-                  />
-                </div>
+              <div className="flex-1 min-w-0">
                 <TaskContent
                   task={task}
                   updateField={updateField}
@@ -152,25 +178,33 @@ export const TaskModal = ({ task }) => {
                   onCompleteChange={handleCompleteChange}
                 />
               </div>
-            </div>
-            <div className="flex flex-row space-x-1">
-              <CollapsibleTrigger>
-                <Button variant="ghost" size="xs">
-                  <SeparatorHorizontal className="h-2 w-2" />
-                </Button>
-              </CollapsibleTrigger>
-              <DialogTrigger>
-                <Button variant="ghost" size="xs">
-                  <MoveDiagonal className="h-2 w-2" />
-                </Button>
-              </DialogTrigger>
+              <div className="flex items-center gap-1">
+                <CollapsibleTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0 hover:bg-muted"
+                  >
+                    <SeparatorHorizontal className="h-4 w-4" />
+                  </Button>
+                </CollapsibleTrigger>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0 hover:bg-muted"
+                  >
+                    <MoveDiagonal className="h-4 w-4" />
+                  </Button>
+                </DialogTrigger>
+              </div>
             </div>
           </div>
-          <CollapsibleContent>
+          <CollapsibleContent className="px-3 pb-3">
             <TaskCollapsibleButton task={task} />
           </CollapsibleContent>
         </Collapsible>
-        <DialogContent>
+        <DialogContent className="max-w-2xl">
           <TaskDialogCard task={task} />
         </DialogContent>
       </Dialog>

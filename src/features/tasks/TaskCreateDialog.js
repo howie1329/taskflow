@@ -25,7 +25,7 @@ export const TaskCreateDialog = ({ small = false }) => {
           </p>
         )}
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-w-4xl">
         <DialogHeader>
           <DialogTitle>Create Task</DialogTitle>
         </DialogHeader>
