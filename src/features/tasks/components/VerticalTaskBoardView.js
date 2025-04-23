@@ -2,7 +2,6 @@
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { TaskCreateModal } from "@/features/tasks/TaskCreateModal";
 import { TaskModal } from "@/features/tasks/TaskModal";
 
 const VerticalTaskBoardView = ({ newTimeGroup }) => {
