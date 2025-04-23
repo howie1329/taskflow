@@ -22,7 +22,6 @@ const VerticalTaskBoardView = ({ newTimeGroup }) => {
                 {newTimeGroup[dayHeader].length}
               </span>
             </div>
-            <TaskCreateModal />
           </div>
           <Separator className="mb-4" />
           <div className="h-full">
