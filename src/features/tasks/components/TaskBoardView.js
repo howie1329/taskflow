@@ -1,6 +1,10 @@
 import React, { useState } from "react";
+import useGetTasks from "../hooks/useGetTasks";
+import { useAuth } from "@clerk/nextjs";
 
 function TaskBoardView() {
+  const { userId } = useAuth();
+  const { data: tasks, isLoading: isTaskLoading } = useGetTasks(userId);
   const [columns] = useState([
     { id: "notStarted", title: "Not Started", tasks: [] },
     { id: "todo", title: "To Do", tasks: [] },
@@ -8,6 +12,35 @@ function TaskBoardView() {
     { id: "done", title: "Done", tasks: [] },
     { id: "overdue", title: "Overdue", tasks: [] },
   ]);
+
+  if (isTaskLoading) {
+    return (
+      <div className="flex gap-4 p-6 h-[calc(100vh-64px)] overflow-x-auto bg-gray-50 w-full">
+        {columns.map((column) => (
+          <div
+            key={column.id}
+            className="bg-white rounded-lg flex-1 min-w-[300px] h-fit max-h-full flex flex-col shadow-sm"
+          >
+            <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+              <div className="h-5 w-24 bg-gray-200 rounded animate-pulse"></div>
+              <div className="h-6 w-8 bg-gray-200 rounded-full animate-pulse"></div>
+            </div>
+            <div className="p-2 flex-1 overflow-y-auto">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="bg-white border border-gray-200 rounded-md p-4 mb-2"
+                >
+                  <div className="h-4 w-3/4 bg-gray-200 rounded animate-pulse mb-2"></div>
+                  <div className="h-3 w-1/2 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="flex gap-4 p-6 h-[calc(100vh-64px)] overflow-x-auto bg-gray-50 w-full">
