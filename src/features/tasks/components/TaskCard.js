@@ -2,8 +2,19 @@ import React from "react";
 import { format } from "date-fns";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import TaskDialogCard from "../TaskDialogCard";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useAuth } from "@clerk/nextjs";
+import useIsComplete from "../hooks/useIsComplete";
 
 const TaskCard = ({ task }) => {
+  const { getToken } = useAuth();
+  const updateMutation = useIsComplete(getToken);
+
+  const handleCompleteChange = () => {
+    const data = { isCompleted: !task.isCompleted };
+    updateMutation.mutate({ id: task.id, data: data });
+  };
+
   const getPriorityColor = (priority) => {
     switch (priority?.toLowerCase()) {
       case "high":
@@ -22,9 +33,21 @@ const TaskCard = ({ task }) => {
       <DialogTrigger className="w-full">
         <div className="bg-white border border-gray-200 rounded-lg p-4 mb-2 cursor-pointer transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 w-full">
           <div className="flex items-start justify-between mb-2">
-            <h4 className="text-sm font-medium text-gray-900 m-0 line-clamp-2">
-              {task.title}
-            </h4>
+            <div className="flex items-start gap-2 flex-1">
+              <Checkbox
+                checked={task.isCompleted}
+                onCheckedChange={handleCompleteChange}
+                onClick={(e) => e.stopPropagation()}
+                className="mt-1"
+              />
+              <h4
+                className={`text-sm font-medium text-gray-900 m-0 line-clamp-2 ${
+                  task.isCompleted ? "line-through text-gray-500" : ""
+                }`}
+              >
+                {task.title}
+              </h4>
+            </div>
             {task.priority && (
               <span
                 className={`${getPriorityColor(
