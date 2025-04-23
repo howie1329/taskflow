@@ -1,6 +1,8 @@
 import React, { useState, useMemo } from "react";
 import useGetTasks from "../hooks/useGetTasks";
 import { useAuth } from "@clerk/nextjs";
+import { TaskCreateModal } from "../TaskCreateModal";
+import { TaskCreateDialog } from "../TaskCreateDialog";
 
 function TaskBoardView() {
   const { userId } = useAuth();
@@ -111,7 +113,7 @@ function TaskBoardView() {
               </div>
             ))}
             <button className="w-full p-3 border-2 border-dashed border-gray-300 rounded-md text-gray-600 cursor-pointer transition-all duration-200 hover:border-gray-400 hover:text-gray-700">
-              + Add Task
+              <TaskCreateDialog plain={true} />
             </button>
           </div>
         </div>
