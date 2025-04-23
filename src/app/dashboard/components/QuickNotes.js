@@ -23,10 +23,9 @@ export const QuickNotes = () => {
 
   return (
     <div className="w-full h-full ">
-      <div className="flex justify-between items-center p-2">
-        <h2>Quick Notes</h2>
+      <div className="flex justify-end p-2 ">
         <Button onClick={onClick}>
-          <PlusIcon />
+          <p>Create New Note</p>
         </Button>
       </div>
       <Separator />
