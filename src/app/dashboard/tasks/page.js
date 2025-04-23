@@ -17,7 +17,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { SlidersIcon } from "lucide-react";
+import { SlidersIcon, LayoutGrid, Table } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -30,8 +30,10 @@ import { getSocket } from "@/lib/socket/socketClient";
 import TaskDashboard from "@/features/tasks/components/TaskDashboard";
 import { TaskCreateDialog } from "@/features/tasks/TaskCreateDialog";
 import TaskBoardView from "@/features/tasks/components/TaskBoardView";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+
 function Page() {
-  const [tableView, setTableView] = useState(false);
+  const [view, setView] = useState("card");
   const mutation = useTaskCreate();
   const { userId } = useAuth();
   const { data: tasks, isLoading: isTaskLoading } = useGetTasks(userId);
@@ -74,19 +76,38 @@ function Page() {
           <AIDialogChat />
           <TaskCreateDialog />
           <Button onClick={onClick}>Upload JSON</Button>
-          <Switch
-            checked={tableView}
-            onCheckedChange={() => setTableView(!tableView)}
-          />
-          {tableView ? (
-            <Label className="font-semibold">Table View</Label>
-          ) : (
-            <Label className="font-semibold">Card View</Label>
-          )}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="icon">
+                {view === "table" ? (
+                  <Table className="h-4 w-4" />
+                ) : (
+                  <LayoutGrid className="h-4 w-4" />
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-48">
+              <RadioGroup
+                defaultValue="card"
+                value={view}
+                onValueChange={setView}
+                className="flex flex-col space-y-2"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="card" id="card" />
+                  <Label htmlFor="card">Card View</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="table" id="table" />
+                  <Label htmlFor="table">Table View</Label>
+                </div>
+              </RadioGroup>
+            </PopoverContent>
+          </Popover>
         </Card>
       </div>
       <div>
-        {tableView ? (
+        {view === "table" ? (
           <TaskTable />
         ) : (
           //<TaskBoardView />
