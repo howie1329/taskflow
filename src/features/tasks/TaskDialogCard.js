@@ -7,13 +7,13 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Files, Trash2 } from "lucide-react";
-import useIsComplete from "@/hooks/useIsComplete";
-import useDeleteTask from "@/hooks/useDeleteTask";
 import { useFetchSingleSubTask } from "@/hooks/useFetchSingleSubTask";
 import { useFetchSingleNote } from "@/hooks/useFetchSingleNote";
 import { useRouter } from "next/navigation";
 import SubtaskLineItem from "@/features/subtasks/SubtaskLineItem";
 import { useAuth } from "@clerk/nextjs";
+import useDeleteTask from "./hooks/useDeleteTask";
+import useIsComplete from "./hooks/useIsComplete";
 
 const TaskDialogCard = ({ task }) => {
   const { getToken } = useAuth();

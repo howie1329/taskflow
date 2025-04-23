@@ -20,12 +20,12 @@ import { useAuth } from "@clerk/nextjs";
 import { useQueryClient } from "@tanstack/react-query";
 
 import useTaskPositionUpdate from "@/features/tasks/hooks/useTaskPositionUpdate";
-import useIsComplete from "@/hooks/useIsComplete";
 import useTaskUpdateField from "@/hooks/useTaskUpdateField";
 import { singleSubTask } from "@/hooks/useFetchSingleSubTask";
 import { singleNote } from "@/hooks/useFetchSingleNote";
 import { TaskCollapsibleButton } from "./TaskCollapsibleButton";
 import TaskDialogCard from "./TaskDialogCard";
+import useIsComplete from "./hooks/useIsComplete";
 
 const PositionControls = ({ position, onPositionChange }) => (
   <div className="flex flex-col items-center">

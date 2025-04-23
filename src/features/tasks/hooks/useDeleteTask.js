@@ -1,7 +1,7 @@
 "use client";
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useToast } from "./use-toast";
+import { useToast } from "../../../hooks/use-toast";
 import { clearTasksFromIndexedDB } from "@/lib/DexieDB";
 import axiosClient from "@/lib/axiosClient";
 
