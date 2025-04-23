@@ -7,7 +7,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useFetchFilterTask } from "@/hooks/useFetchFilterTask";
 import React, { useState } from "react";
 import { TaskModal } from "@/features/tasks/TaskModal";
 import { Separator } from "@/components/ui/separator";
@@ -19,7 +18,6 @@ import { useAuth } from "@clerk/nextjs";
 import { TaskCreateDialog } from "@/features/tasks/TaskCreateDialog";
 const Page = () => {
   const [filter, setFilter] = useState("None");
-  const { data: filteredTask, isLoading, isError } = useFetchFilterTask(filter);
   const { getToken } = useAuth();
   const onClick = async () => {
     const token = await getToken();
@@ -59,14 +57,7 @@ const Page = () => {
             </SelectContent>
           </Select>
           <CardContent className="flex flex-col gap-2 overflow-scroll items-center my-1">
-            {isLoading ? (
-              <p>Loading Task...</p>
-            ) : (
-              filteredTask.map((task) => (
-                <TaskModal className="mx-0" key={task.id} task={task} />
-              ))
-            )}
-            {filter === "None" ? <p>Select A Filter To Start</p> : ""}
+            <p>No Tasks</p>
           </CardContent>
         </Card>
 
