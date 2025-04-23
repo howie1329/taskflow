@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import useGetTasks from "../hooks/useGetTasks";
 import { useAuth } from "@clerk/nextjs";
 
@@ -12,6 +12,46 @@ function TaskBoardView() {
     { id: "done", title: "Done", tasks: [] },
     { id: "overdue", title: "Overdue", tasks: [] },
   ]);
+
+  const columnsWithTasks = useMemo(() => {
+    if (!tasks) return columns;
+
+    return columns.map((column) => {
+      let columnTasks = [];
+
+      switch (column.id) {
+        case "notStarted":
+          columnTasks = tasks.filter(
+            (task) => !task.status || task.status === "notStarted"
+          );
+          break;
+        case "todo":
+          columnTasks = tasks.filter((task) => task.status === "todo");
+          break;
+        case "inProgress":
+          columnTasks = tasks.filter((task) => task.status === "inProgress");
+          break;
+        case "done":
+          columnTasks = tasks.filter((task) => task.isCompleted);
+          break;
+        case "overdue":
+          columnTasks = tasks.filter((task) => {
+            if (!task.dueDate) return false;
+            const dueDate = new Date(task.dueDate);
+            const today = new Date();
+            return dueDate < today && !task.isCompleted;
+          });
+          break;
+        default:
+          columnTasks = [];
+      }
+
+      return {
+        ...column,
+        tasks: columnTasks,
+      };
+    });
+  }, [tasks, columns]);
 
   if (isTaskLoading) {
     return (
@@ -44,7 +84,7 @@ function TaskBoardView() {
 
   return (
     <div className="flex gap-4 p-6 h-[calc(100vh-64px)] overflow-x-auto bg-gray-50 w-full">
-      {columns.map((column) => (
+      {columnsWithTasks.map((column) => (
         <div
           key={column.id}
           className="bg-white rounded-lg flex-1 min-w-[300px] h-fit max-h-full flex flex-col shadow-sm"
