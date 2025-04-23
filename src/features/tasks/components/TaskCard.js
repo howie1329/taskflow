@@ -19,8 +19,8 @@ const TaskCard = ({ task }) => {
 
   return (
     <Dialog>
-      <DialogTrigger>
-        <div className="bg-white border border-gray-200 rounded-lg p-4 mb-2 cursor-pointer transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
+      <DialogTrigger className="w-full">
+        <div className="bg-white border border-gray-200 rounded-lg p-4 mb-2 cursor-pointer transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 w-full">
           <div className="flex items-start justify-between mb-2">
             <h4 className="text-sm font-medium text-gray-900 m-0 line-clamp-2">
               {task.title}
