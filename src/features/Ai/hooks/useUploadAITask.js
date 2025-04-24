@@ -20,6 +20,7 @@ const uploadAITask = async (data) => {
         withCredentials: true,
       }
     );
+    console.log("AiResponse:", AiResponse.data);
     if (AiResponse.data.subTasks) {
       subTasks = AiResponse.data.subTasks;
       delete AiResponse.data.subTasks;
@@ -38,15 +39,17 @@ const uploadAITask = async (data) => {
         withCredentials: true,
       }
     );
+    console.log("Subtask Array:", subTasks);
+    console.log("Response:", response.data.task[0]);
     if (subTasks) {
       subTasks.forEach(async (subTask) => {
-        subTask["task_id"] = response.data[0].id;
+        subTask["task_id"] = response.data.task[0].id;
         if (subTask.subTask_name == null) return;
         await uploadSubtask(subTask);
       });
     }
     if (note) {
-      note["task_id"] = response.data[0].id;
+      note["task_id"] = response.data.task[0].id;
       await uploadNote(note);
     }
     return AiResponse;
