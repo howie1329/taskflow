@@ -16,17 +16,22 @@ function TaskBoardView() {
     { id: "overdue", title: "Overdue", tasks: [] },
   ]);
 
-  const newColumns = useMemo(() => {
-    if (!tasks) return columns;
+  ///HUGE BUG HERE
+  ///WHEN LOGGING IN, THE TASKS ARE NOT UPDATED... TASK ARE NOT REFRESHED OR APPEARRING
+  ///NEED TO FIX THIS
+
+  const newColumns = (taskData) => {
+    if (!taskData) return columns;
 
     columns.forEach((item) => {
-      const data = tasks.filter((task) => task.status === item.id);
+      const data = taskData.filter((task) => task.status === item.id);
       item.tasks = data;
     });
 
-    console.log("Here", columns);
     return columns;
-  }, [tasks, columns]);
+  };
+
+  const newColumn = newColumns(tasks);
 
   if (isTaskLoading) {
     return (
@@ -59,7 +64,7 @@ function TaskBoardView() {
 
   return (
     <div className="flex gap-4 p-6 h-[calc(100vh-64px)] overflow-x-auto bg-gray-50 w-full">
-      {newColumns.map((column) => (
+      {newColumn.map((column) => (
         <div
           key={column.id}
           className="bg-white rounded-lg flex-1 min-w-[300px] h-fit max-h-full flex flex-col shadow-sm"
