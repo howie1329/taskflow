@@ -1,25 +1,43 @@
-import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { clearTasksFromIndexedDB } from "@/lib/DexieDB";
 import { uploadNote } from "@/features/notes/hooks/useUploadNote";
 import uploadSubtask from "@/features/subtasks/hooks/useUploadSubTask";
 import { useToast } from "@/hooks/use-toast";
+import axiosClient from "@/lib/axiosClient";
 
 const uploadAITask = async (data) => {
   try {
+    const token = await data.token;
+    const userId = await data.userId;
     let subTasks = null;
     let note = null;
-    const aiResponse = await axios.post("/api/ai", data);
-    if (aiResponse.data.subTasks) {
-      subTasks = aiResponse.data.subTasks;
-      delete aiResponse.data.subTasks;
+    console.log("Data:", data.prompt);
+    const AiResponse = await axiosClient.post(
+      "/api/ai/generate-task",
+      { prompt: data.prompt },
+      {
+        headers: { Authorization: token },
+        withCredentials: true,
+      }
+    );
+    if (AiResponse.data.subTasks) {
+      subTasks = AiResponse.data.subTasks;
+      delete AiResponse.data.subTasks;
     }
-    if (aiResponse.data.notes) {
-      note = aiResponse.data.notes;
-      delete aiResponse.data.notes;
+    if (AiResponse.data.notes) {
+      note = AiResponse.data.notes;
+      delete AiResponse.data.notes;
     }
-    console.log("ai DAta:", aiResponse.data);
-    const response = await axios.post("/api/task", aiResponse.data);
+    AiResponse.data["userId"] = userId;
+    console.log("ai Data:", AiResponse.data);
+    const response = await axiosClient.post(
+      "/api/tasks/create",
+      AiResponse.data,
+      {
+        headers: { Authorization: token },
+        withCredentials: true,
+      }
+    );
     if (subTasks) {
       subTasks.forEach(async (subTask) => {
         subTask["task_id"] = response.data[0].id;
@@ -31,7 +49,7 @@ const uploadAITask = async (data) => {
       note["task_id"] = response.data[0].id;
       await uploadNote(note);
     }
-    return aiResponse;
+    return AiResponse;
   } catch (error) {
     console.error(error);
   }
