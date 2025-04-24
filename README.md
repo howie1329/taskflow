@@ -1,206 +1,214 @@
-# 🚀 TaskFlow
+# TaskFlow
 
-An all-in-one productivity app for individuals, combining **task management, calendar integration, note-taking, and project management** with AI-powered optimizations. Designed to help users organize their tasks, schedule time effectively, and stay on top of their productivity goals.
+TaskFlow is a modern, all-in-one productivity application that combines task management, note-taking, and calendar functionality into a seamless experience. Built with Next.js, Node.js, and modern web technologies, TaskFlow helps individuals and teams stay organized and productive.
 
 ## 🌟 Features
 
-### **MVP Features (Current Development)**
+### Core Features
 
-- ✅ **Task Management**
+- **Task Management**
 
-  - Create, edit, prioritize, and categorize tasks
-  - Basic subtasks support
-  - Task filtering and sorting
-  - Priority levels and labels
-  - Due date management
+  - Create, organize, and track tasks
+  - Subtask support
+  - Priority levels and due dates
+  - Task status tracking
+  - Task categorization
 
-- ✅ **Calendar Integration**
+- **Note Taking**
 
-  - Basic calendar view
-  - Task synchronization
-  - Due date visualization
-  - Time blocking support
-
-- ✅ **Notes & Documentation**
-
-  - Basic note creation and editing
-  - Note organization with tags/folders
+  - Rich text editing
+  - Note organization
+  - Quick capture
   - Search functionality
-  - Quick access notes
+  - Note sharing
 
-- ✅ **Productivity Tools**
+- **Calendar Integration**
 
-  - Pomodoro timer
-  - Basic time tracking
-  - Task reminders and notifications
+  - Task visualization
+  - Event management
+  - Multiple calendar views
+  - Due date tracking
+  - Schedule management
 
-- ✅ **User Authentication & Data Sync**
+- **Dashboard**
+  - Task overview
+  - Quick actions
+  - Recent activity
+  - Calendar preview
+  - Productivity insights
 
-  - Email/password login via Clerk
-  - Social sign-in options
-  - Supabase backend integration
-  - Cross-device synchronization
+### Technical Features
 
-- ✅ **UI & Customization**
-  - Light & dark mode
-  - Modern UI with ShadCN and Tailwind CSS
-  - Mobile-optimized design
-  - Responsive layout
-
-### **Post-MVP Features (Planned)**
-
-#### Phase 1: Advanced Core Features & Collaboration
-
-- 🚀 **Advanced Task Management**
-
-  - Task dependencies
-  - Kanban board view
-  - Gantt chart visualization
-  - Drag & drop rescheduling
-
-- 🚀 **Enhanced Calendar**
-
-  - Advanced recurring tasks
-  - Two-way calendar sync
-  - AI-based scheduling
-
-- 🚀 **Rich Notes & Knowledge Management**
-
-  - Rich text editor with Markdown
-  - File and link attachments
-  - AI-generated summaries
-
-- 🚀 **Basic Collaboration**
-  - Task sharing
-  - Commenting system
-  - Basic team features
-
-#### Phase 2: AI Integration & Productivity Boosters
-
-- 🚀 **AI-Powered Features**
-
-  - Smart task prioritization
-  - AI-based scheduling
-  - Task suggestions
-  - Focus time recommendations
-  - Habit tracking assistance
-
-- 🚀 **Productivity Analytics**
-  - AI-powered insights
-  - Productivity reports
-  - Gamification elements
-
-#### Phase 3: Integrations & Premium Features
-
-- 🚀 **Advanced Integrations**
-
-  - Zapier/IFTTT automation
-  - Public REST API
-  - Slack/Teams integration
-  - Wellness app connections
-
-- 🚀 **Premium Features**
-  - Advanced AI capabilities
-  - Customizable notifications
-  - Premium integrations
-  - Offline mode
-  - Advanced collaboration tools
-
-## 🛠 Tech Stack
-
-- **Frontend:**
-
-  - Next.js
-  - Tailwind CSS
-  - ShadCN UI Components
-  - React Context API
-
-- **Backend:**
-
-  - Supabase (Database & Backend)
-  - Clerk (Authentication)
-  - Stripe (Payments)
-
-- **Development Tools:**
-  - TypeScript
-  - ESLint
-  - Prettier
-  - Git
+- Modern React with Next.js
+- Real-time updates with WebSocket
+- Responsive design
+- Progressive Web App (PWA)
+- Secure authentication with Clerk
+- Database with Supabase
 
 ## 🚀 Getting Started
 
-### **1. Clone the Repository**
+### Prerequisites
 
-```sh
-git clone https://github.com/your-username/taskflow.git
+- Node.js (v18 or higher)
+- npm or yarn
+- Git
+- Docker (optional)
+
+### Installation
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/yourusername/taskflow.git
 cd taskflow
 ```
 
-### **2. Install Dependencies**
+2. Install dependencies:
 
-```sh
+```bash
+# Frontend
+cd taskflow
 npm install
-# or
-yarn install
+
+# Backend
+cd ../taskflow-backend
+npm install
 ```
 
-### **3. Set Up Environment Variables**
+3. Set up environment variables:
 
-Create a `.env.local` file in the root directory with the following variables:
+```bash
+# Frontend (.env.local)
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_key
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_key
 
-```sh
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-key
-
-# Clerk
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your-clerk-key
-CLERK_SECRET_KEY=your-clerk-secret
-
-# Stripe
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your-stripe-key
-STRIPE_SECRET_KEY=your-stripe-secret
+# Backend (.env)
+PORT=3001
+DATABASE_URL=your_database_url
+JWT_SECRET=your_jwt_secret
 ```
 
-### **4. Run the Development Server**
+4. Start the development servers:
 
-```sh
+```bash
+# Frontend
+cd taskflow
 npm run dev
-# or
-yarn dev
+
+# Backend
+cd ../taskflow-backend
+npm run dev
 ```
 
-The application will be available at `http://localhost:3000`
+5. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## 📌 Development Status
+## 🏗️ Project Structure
 
-- [x] Project setup and configuration
-- [x] Basic task management implementation
-- [x] User authentication system
-- [x] Calendar integration
-- [x] Notes system
-- [ ] Advanced task features
-- [ ] AI integration
-- [ ] Premium features
-- [ ] Mobile app development
+```
+taskflow/
+├── src/
+│   ├── app/              # Next.js app directory
+│   ├── components/       # React components
+│   ├── lib/             # Utility functions
+│   ├── styles/          # Global styles
+│   └── types/           # TypeScript types
+├── public/              # Static assets
+└── package.json         # Frontend dependencies
+
+taskflow-backend/
+├── controllers/         # Route controllers
+├── middleware/          # Custom middleware
+├── routes/             # API routes
+├── services/           # Business logic
+├── utils/              # Utility functions
+└── package.json        # Backend dependencies
+```
+
+## 🛠️ Development
+
+### Code Style
+
+- ESLint for code linting
+- Prettier for code formatting
+- TypeScript for type safety
+
+### Git Workflow
+
+1. Create a new branch for each feature
+2. Write meaningful commit messages
+3. Submit a pull request for review
+4. Ensure all tests pass before merging
+
+### Testing
+
+```bash
+# Frontend
+npm run test
+
+# Backend
+npm run test
+```
+
+## 📦 Deployment
+
+### Frontend
+
+- Vercel (recommended)
+- Netlify
+- AWS Amplify
+
+### Backend
+
+- Docker
+- AWS EC2
+- Heroku
+
+## 🔒 Security
+
+- Authentication with Clerk
+- HTTPS encryption
+- Input validation
+- Rate limiting
+- CORS configuration
+- Security headers
+
+## 📈 Performance
+
+- Code splitting
+- Image optimization
+- Caching strategies
+- Lazy loading
+- Performance monitoring
 
 ## 🤝 Contributing
 
-We welcome contributions! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
-
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
-## 📜 License
+## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
----
+## 🙏 Acknowledgments
 
-**Built with ❤️ by Howard Thomas**
+- [Next.js](https://nextjs.org/)
+- [Clerk](https://clerk.dev/)
+- [Supabase](https://supabase.io/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Socket.io](https://socket.io/)
+
+## 📞 Support
+
+For support, email support@taskflow.com or join our [Discord community](https://discord.gg/taskflow).
+
+## 🔮 Roadmap
+
+See our [MVP Plan](src/app/docs/MVP.md) and [Post-MVP Plan](src/app/docs/PostMVP.md) for upcoming features and improvements.
 
 ```
 
