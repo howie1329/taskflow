@@ -45,12 +45,12 @@ const uploadAITask = async (data) => {
       subTasks.forEach(async (subTask) => {
         subTask["task_id"] = response.data.task[0].id;
         if (subTask.subTask_name == null) return;
-        await uploadSubtask(subTask);
+        await uploadSubtask(subTask, token);
       });
     }
     if (note) {
       note["task_id"] = response.data.task[0].id;
-      await uploadNote(note);
+      await uploadNote(note, token);
     }
     return AiResponse;
   } catch (error) {
