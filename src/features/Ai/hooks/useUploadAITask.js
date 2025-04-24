@@ -50,7 +50,8 @@ const uploadAITask = async (data) => {
     }
     if (note) {
       note["task_id"] = response.data.task[0].id;
-      await uploadNote(note, token);
+      note["token"] = token;
+      await uploadNote(note);
     }
     return AiResponse;
   } catch (error) {
