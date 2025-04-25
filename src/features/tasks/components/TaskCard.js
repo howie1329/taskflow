@@ -4,23 +4,32 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import TaskDialogCard from "../TaskDialogCard";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@clerk/nextjs";
-import useIsComplete from "../hooks/useIsComplete";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import useTaskUpdateField from "../hooks/useTaskUpdateField";
+import useTaskComplete from "../hooks/completehooks/useTaskComplete";
+import useTaskIncomplete from "../hooks/completehooks/useTaskIncomplete";
+import { useQueryClient } from "@tanstack/react-query";
+import { singleSubTask } from "@/features/subtasks/hooks/useFetchSingleSubTask";
+import { singleNote } from "@/features/notes/hooks/useFetchNote";
 
 const TaskCard = ({ task }) => {
   const { getToken } = useAuth();
-  const updateMutation = useIsComplete(getToken);
+  const completeMutation = useTaskComplete();
+  const incompleteMutation = useTaskIncomplete();
   const updateFieldMutation = useTaskUpdateField(getToken);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description);
+  const queryClient = useQueryClient();
 
   const handleCompleteChange = () => {
-    const data = { isCompleted: !task.isCompleted };
-    updateMutation.mutate({ id: task.id, data: data });
+    if (!task.isCompleted) {
+      completeMutation.mutate(task.id);
+    } else {
+      incompleteMutation.mutate(task.id);
+    }
   };
 
   const handleTitleUpdate = () => {
@@ -65,9 +74,22 @@ const TaskCard = ({ task }) => {
     }
   };
 
+  const preFetchData = () => {
+    queryClient.prefetchQuery({
+      queryKey: ["subtasks", task.id],
+      queryFn: () => singleSubTask(task.id, getToken),
+      staleTime: 300_000,
+    });
+    queryClient.prefetchQuery({
+      queryKey: ["notes", task.id],
+      queryFn: () => singleNote(task.id, getToken),
+      staleTime: 300_000,
+    });
+  };
+
   return (
     <Dialog>
-      <DialogTrigger className="w-full">
+      <DialogTrigger className="w-full" onMouseEnter={preFetchData}>
         <div className="bg-white border border-gray-200 rounded-lg p-4 mb-2 cursor-pointer transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 w-full">
           <div className="flex items-start justify-between mb-2">
             <div className="flex items-start gap-2 flex-1">

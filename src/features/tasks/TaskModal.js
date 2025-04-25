@@ -23,8 +23,9 @@ import { singleSubTask } from "@/features/subtasks/hooks/useFetchSingleSubTask";
 import { singleNote } from "@/features/notes/hooks/useFetchSingleNote";
 import { TaskCollapsibleButton } from "./TaskCollapsibleButton";
 import TaskDialogCard from "./TaskDialogCard";
-import useIsComplete from "./hooks/useIsComplete";
 import useTaskUpdateField from "./hooks/useTaskUpdateField";
+import useTaskIncomplete from "./hooks/completehooks/useTaskIncomplete";
+import useTaskComplete from "./hooks/completehooks/useTaskComplete";
 
 const PositionControls = ({ position, onPositionChange }) => (
   <div className="flex flex-col items-center bg-muted/50 rounded-md p-1">
@@ -114,7 +115,8 @@ export const TaskModal = ({ task }) => {
   const { getToken } = useAuth();
   const queryClient = useQueryClient();
   const changePosition = useTaskPositionUpdate(getToken);
-  const completeUpdateMutation = useIsComplete(getToken);
+  const completeUpdateMutation = useTaskComplete();
+  const incompleteUpdateMutation = useTaskIncomplete();
   const [updateField, setUpdateField] = useState(task.title);
   const updateFieldMutation = useTaskUpdateField(getToken);
 
@@ -129,10 +131,11 @@ export const TaskModal = ({ task }) => {
   };
 
   const handleCompleteChange = () => {
-    completeUpdateMutation.mutate({
-      id: task.id,
-      data: { isCompleted: !task.isCompleted },
-    });
+    if (task.isCompleted) {
+      incompleteUpdateMutation.mutate(task.id);
+    } else {
+      completeUpdateMutation.mutate(task.id);
+    }
   };
 
   const handleUpdateFieldBlur = (field, value) => {

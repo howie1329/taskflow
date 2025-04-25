@@ -13,11 +13,13 @@ import { useRouter } from "next/navigation";
 import SubtaskLineItem from "@/features/subtasks/SubtaskLineItem";
 import { useAuth } from "@clerk/nextjs";
 import useDeleteTask from "./hooks/useDeleteTask";
-import useIsComplete from "./hooks/useIsComplete";
+import useTaskComplete from "./hooks/completehooks/useTaskComplete";
+import useTaskIncomplete from "./hooks/completehooks/useTaskIncomplete";
 
 const TaskDialogCard = ({ task }) => {
   const { getToken } = useAuth();
-  const updateMutation = useIsComplete(getToken);
+  const completeMutation = useTaskComplete();
+  const incompleteMutation = useTaskIncomplete();
   const deleteMutation = useDeleteTask(getToken);
   const router = useRouter();
 
@@ -35,8 +37,11 @@ const TaskDialogCard = ({ task }) => {
   };
 
   const completeButtonClick = () => {
-    const data = { isCompleted: !task.isCompleted };
-    updateMutation.mutate({ id: task.id, data: data });
+    if (task.isCompleted) {
+      incompleteMutation.mutate(task.id);
+    } else {
+      completeMutation.mutate(task.id);
+    }
   };
 
   const statusButtonColor = {
