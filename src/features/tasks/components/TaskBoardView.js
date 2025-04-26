@@ -4,10 +4,18 @@ import { useAuth } from "@clerk/nextjs";
 import { TaskCreateModal } from "../TaskCreateModal";
 import { TaskCreateDialog } from "../TaskCreateDialog";
 import TaskCard from "./TaskCard";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 function TaskBoardView() {
   const { userId } = useAuth();
   const { data: tasks, isLoading: isTaskLoading } = useGetTasks(userId);
+  const [selectedPriority, setSelectedPriority] = useState("All");
   const [columns] = useState([
     { id: "notStarted", title: "Not Started", tasks: [] },
     { id: "todo", title: "To Do", tasks: [] },
@@ -16,15 +24,34 @@ function TaskBoardView() {
     { id: "overdue", title: "Overdue", tasks: [] },
   ]);
 
-  ///HUGE BUG HERE
-  ///WHEN LOGGING IN, THE TASKS ARE NOT UPDATED... TASK ARE NOT REFRESHED OR APPEARRING
-  ///NEED TO FIX THIS
+  const getPriorityWeight = (priority) => {
+    switch (priority) {
+      case "High":
+        return 3;
+      case "Medium":
+        return 2;
+      case "Low":
+        return 1;
+      default:
+        return 0;
+    }
+  };
 
   const newColumns = (taskData) => {
     if (!taskData) return columns;
 
     columns.forEach((item) => {
-      const data = taskData.filter((task) => task.status === item.id);
+      const data = taskData
+        .filter((task) => {
+          const matchesStatus = task.status === item.id;
+          const matchesPriority =
+            selectedPriority === "All" || task.priority === selectedPriority;
+          return matchesStatus && matchesPriority;
+        })
+        .sort(
+          (a, b) =>
+            getPriorityWeight(b.priority) - getPriorityWeight(a.priority)
+        );
       item.tasks = data;
     });
 
@@ -63,30 +90,51 @@ function TaskBoardView() {
   }
 
   return (
-    <div className="flex gap-4 p-6 h-[calc(100vh-64px)] overflow-x-auto bg-gray-50 w-full">
-      {newColumn.map((column) => (
-        <div
-          key={column.id}
-          className="bg-white rounded-lg flex-1 min-w-[300px] h-fit max-h-full flex flex-col shadow-sm"
-        >
-          <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-            <h3 className="text-base font-semibold text-gray-700 m-0">
-              {column.title}
-            </h3>
-            <span className="bg-gray-100 px-2 py-1 rounded-full text-sm text-gray-600">
-              {column.tasks.length}
-            </span>
-          </div>
-          <div className="p-2 flex-1 overflow-y-auto">
-            {column.tasks.map((task) => (
-              <TaskCard key={task.id} task={task} />
-            ))}
-            <button className="w-full p-3 border-2 border-dashed border-gray-300 rounded-md text-gray-600 cursor-pointer transition-all duration-200 hover:border-gray-400 hover:text-gray-700">
-              <TaskCreateDialog plain={true} />
-            </button>
-          </div>
+    <div className="flex flex-col h-[calc(100vh-64px)]">
+      <div className="p-4 bg-white border-b">
+        <div className="flex items-center gap-4">
+          <label className="text-sm font-medium text-gray-700">
+            Filter by Priority:
+          </label>
+          <Select value={selectedPriority} onValueChange={setSelectedPriority}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select priority" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="All">All Priorities</SelectItem>
+              <SelectItem value="High">High</SelectItem>
+              <SelectItem value="Medium">Medium</SelectItem>
+              <SelectItem value="Low">Low</SelectItem>
+              <SelectItem value="None">None</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-      ))}
+      </div>
+      <div className="flex gap-4 p-6 overflow-x-auto bg-gray-50 w-full">
+        {newColumn.map((column) => (
+          <div
+            key={column.id}
+            className="bg-white rounded-lg flex-1 min-w-[300px] h-fit max-h-full flex flex-col shadow-sm"
+          >
+            <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+              <h3 className="text-base font-semibold text-gray-700 m-0">
+                {column.title}
+              </h3>
+              <span className="bg-gray-100 px-2 py-1 rounded-full text-sm text-gray-600">
+                {column.tasks.length}
+              </span>
+            </div>
+            <div className="p-2 flex-1 overflow-y-auto">
+              {column.tasks.map((task) => (
+                <TaskCard key={task.id} task={task} />
+              ))}
+              <button className="w-full p-3 border-2 border-dashed border-gray-300 rounded-md text-gray-600 cursor-pointer transition-all duration-200 hover:border-gray-400 hover:text-gray-700">
+                <TaskCreateDialog plain={true} />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
