@@ -12,16 +12,12 @@ const useTaskComplete = () => {
 
   return useMutation({
     mutationFn: async (id) => {
+      console.log("User", token);
       try {
         const response = await axiosClient.patch(
           `/api/tasks/complete/${id}`,
           {},
-          {
-            headers: {
-              Authorization: token,
-            },
-            withCredentials: true,
-          }
+          { headers: { Authorization: token }, withCredentials: true }
         );
         return response.data.task[0];
       } catch (error) {
