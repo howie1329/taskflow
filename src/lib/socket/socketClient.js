@@ -5,7 +5,7 @@ let socket = null;
 
 export const startSocket = (userId) => {
   if (!socket) {
-    socket = io("http://localhost:3001", {
+    socket = io(process.env.NEXT_PUBLIC_API_BASE_URL, {
       auth: { userId },
       withCredentials: true,
     });
