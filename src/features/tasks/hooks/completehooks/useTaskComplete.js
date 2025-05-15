@@ -17,7 +17,13 @@ const useTaskComplete = () => {
         const response = await axiosClient.patch(
           `/api/tasks/complete/${id}`,
           {},
-          { headers: { Authorization: token }, withCredentials: true }
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            withCredentials: true,
+          }
         );
         return response.data.task[0];
       } catch (error) {
