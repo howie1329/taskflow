@@ -2,14 +2,10 @@
 import { useState } from "react";
 
 import { TaskTable } from "../components/TaskTable";
-import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-
 import AIDialogChat from "@/features/Ai/AIDialogChat";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import datas from "@/app/taskData.json";
-import useTaskCreate from "@/features/tasks/hooks/useTaskCreate";
 import { useFilteringTasks } from "@/features/tasks/hooks/useFilteringTasks";
 import useGetTasks from "@/features/tasks/hooks/useGetTasks";
 import {
@@ -34,7 +30,6 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 function Page() {
   const [view, setView] = useState("board");
-  const mutation = useTaskCreate();
   const { userId } = useAuth();
   const { data: tasks, isLoading: isTaskLoading } = useGetTasks(userId);
   const { setPriorityFilter, setStatus, priorityFilter, status } =
