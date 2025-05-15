@@ -7,12 +7,12 @@ import { clearTasksFromIndexedDB } from "@/lib/DexieDB";
 import axiosClient from "@/lib/axiosClient";
 
 const useTaskUpdateField = (getToken) => {
-  const token = getToken();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   return useMutation({
     mutationFn: async ({ id, changedField, updateData }) => {
+      const token = await getToken();
       try {
         const data = { [changedField]: updateData };
         const response = await axiosClient.patch(

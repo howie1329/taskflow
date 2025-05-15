@@ -5,12 +5,12 @@ import { useToast } from "../../../hooks/use-toast";
 import axiosClient from "@/lib/axiosClient";
 
 const useDeleteNote = (getToken) => {
-  const token = getToken();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   return useMutation({
     mutationFn: async ({ id, parent_id = "" }) => {
+      const token = await getToken();
       console.log("Deleting task with id: ", id);
       try {
         const response = await axiosClient.delete(`/api/notes/${id}`, {

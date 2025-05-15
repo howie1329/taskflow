@@ -6,12 +6,13 @@ import { useAuth } from "@clerk/nextjs";
 
 const useTaskIncomplete = () => {
   const { getToken } = useAuth();
-  const token = getToken();
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (id) => {
+      const token = await getToken();
       const response = await axiosClient.patch(
         `/api/tasks/incomplete/${id}`,
         {},

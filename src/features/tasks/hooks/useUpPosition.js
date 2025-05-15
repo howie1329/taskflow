@@ -6,11 +6,11 @@ import axiosClient from "@/lib/axiosClient";
 import { clearTasksFromIndexedDB } from "@/lib/DexieDB";
 
 const useTaskPositionUpdate = (getToken) => {
-  const token = getToken();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({ id, data }) => {
+      const token = await getToken();
       try {
         const response = await axiosClient.patch(
           `/api/tasks/update/${id}`,

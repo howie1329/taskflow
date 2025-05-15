@@ -6,12 +6,12 @@ import { useToast } from "../../../hooks/use-toast";
 import axiosClient from "@/lib/axiosClient";
 
 const useSubtaskUpdateField = (getToken) => {
-  const token = getToken();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   return useMutation({
     mutationFn: async ({ id, changedField, updateData, parent_id }) => {
+      const token = await getToken();
       try {
         const data = { [changedField]: updateData };
         const response = await axiosClient.patch(

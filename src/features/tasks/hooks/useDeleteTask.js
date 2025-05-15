@@ -6,12 +6,12 @@ import { clearTasksFromIndexedDB } from "@/lib/DexieDB";
 import axiosClient from "@/lib/axiosClient";
 
 const useDeleteTask = (getToken) => {
-  const token = getToken();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   return useMutation({
     mutationFn: async ({ id }) => {
+      const token = await getToken();
       try {
         const response = await axiosClient.delete(`/api/tasks/delete/${id}`, {
           headers: { Authorization: token },

@@ -6,14 +6,12 @@ import { useAuth } from "@clerk/nextjs";
 
 const useTaskComplete = () => {
   const { getToken } = useAuth();
-
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (id) => {
       const token = await getToken();
-      console.log("User", token);
       try {
         const response = await axiosClient.patch(
           `/api/tasks/complete/${id}`,
