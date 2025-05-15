@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
+import { Input } from "@/components/ui/input";
 function TaskBoardView() {
   const { userId } = useAuth();
   const { data: tasks, isLoading: isTaskLoading } = useGetTasks(userId);
@@ -23,6 +23,7 @@ function TaskBoardView() {
     { id: "done", title: "Done", tasks: [] },
     { id: "overdue", title: "Overdue", tasks: [] },
   ]);
+  const [userSearch, setUserSearch] = useState("");
 
   const getPriorityWeight = (priority) => {
     switch (priority) {
@@ -55,7 +56,14 @@ function TaskBoardView() {
       item.tasks = data;
     });
 
-    return columns;
+    const filteredColumns = columns.map((column) => ({
+      ...column,
+      tasks: column.tasks.filter((task) =>
+        task.title.toLowerCase().includes(userSearch.toLowerCase())
+      ),
+    }));
+
+    return filteredColumns;
   };
 
   const newColumn = newColumns(tasks);
@@ -108,6 +116,36 @@ function TaskBoardView() {
               <SelectItem value="None">None</SelectItem>
             </SelectContent>
           </Select>
+          <div className="relative flex-1">
+            <Input
+              type="text"
+              placeholder="Search"
+              value={userSearch}
+              onChange={(e) => setUserSearch(e.target.value)}
+              className="pr-8 focus:bg-gray-50 w-full"
+            />
+            {userSearch && (
+              <button
+                onClick={() => setUserSearch("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            )}
+          </div>
         </div>
       </div>
       <div className="flex gap-4 p-6 overflow-x-auto bg-gray-50 w-full">

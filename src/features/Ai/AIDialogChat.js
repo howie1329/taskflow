@@ -9,25 +9,24 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import useUploadAITask from "@/features/Ai/hooks/useUploadAITask";
 import { DialogTrigger } from "@radix-ui/react-dialog";
 import React, { useState } from "react";
 import { Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useCreateAiTask } from "./hooks/useUpdatedAiTask";
 import { useAuth } from "@clerk/nextjs";
-
+import { basicAiPrompt } from "@/lib/basicAiPrompt";
 const AIDialogChat = () => {
   const { getToken, userId } = useAuth();
-  const uploadAI = useUploadAITask();
+  const createAiTask = useCreateAiTask();
   const [userResponse, setUserResponse] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
   const sendToAI = () => {
-    const token = getToken();
-    const prompt = `The users is going to give you a prompt. I want you to break it down into subtask and add any notes you think might be helpful to complete the task. The user will also provide you with a priority level, a due date, and labels for the task. Also inside of note add the subtask and details you think the user might need to complete the subtask or task. Make sure priority is either Low, Medium, High and is capitlized as well. The current date is ${Date.now()}. Do not set due date before the current date. `;
-    const fullPrompt = prompt + userResponse;
-    const data = { prompt: prompt + fullPrompt, token: token, userId: userId };
-    uploadAI.mutate(data);
+    console.log("userResponse", userResponse);
+    const fullPrompt = basicAiPrompt + userResponse;
+    createAiTask.mutate({ getToken, prompt: fullPrompt, userId });
+    console.log("createAiTask", createAiTask);
     setUserResponse("");
     setIsOpen(false);
   };
@@ -67,13 +66,13 @@ const AIDialogChat = () => {
           <Button
             type="submit"
             onClick={sendToAI}
-            disabled={!userResponse.trim() || uploadAI.isLoading}
+            disabled={!userResponse.trim() || createAiTask.isLoading}
             className={cn(
               "w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white transition-all hover:scale-105 hover:shadow-lg",
-              uploadAI.isLoading && "opacity-70 cursor-not-allowed"
+              createAiTask.isLoading && "opacity-70 cursor-not-allowed"
             )}
           >
-            {uploadAI.isLoading ? (
+            {createAiTask.isLoading ? (
               <div className="flex items-center gap-2">
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
                 Processing...
