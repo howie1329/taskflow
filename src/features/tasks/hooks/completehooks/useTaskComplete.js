@@ -27,6 +27,12 @@ const useTaskComplete = () => {
         );
         return response.data.task[0];
       } catch (error) {
+        console.error("Full error:", error);
+        console.error("Request config:", {
+          url: error.config?.url,
+          headers: error.config?.headers,
+          method: error.config?.method,
+        });
         console.error(error);
       }
     },
