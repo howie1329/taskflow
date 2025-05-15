@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { useCreateAiTask } from "./hooks/useUpdatedAiTask";
 import { useAuth } from "@clerk/nextjs";
 import { basicAiPrompt } from "@/lib/basicAiPrompt";
+
 const AIDialogChat = () => {
   const { getToken, userId } = useAuth();
   const createAiTask = useCreateAiTask();
