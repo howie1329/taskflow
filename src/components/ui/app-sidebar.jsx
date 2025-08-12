@@ -24,6 +24,7 @@ import {
   ScrollTextIcon,
   SettingsIcon,
   UserIcon,
+  MessageCircleIcon,
 } from "lucide-react";
 
 export default function AppSidebar() {
@@ -143,5 +144,10 @@ const workspaceItems = [
     title: "Notes",
     icon: ScrollTextIcon,
     url: "/dashboard/notes",
+  },
+  {
+    title: "Chat",
+    icon: MessageCircleIcon,
+    url: "/dashboard/chat",
   },
 ];
