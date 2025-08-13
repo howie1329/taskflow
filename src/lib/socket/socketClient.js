@@ -7,6 +7,7 @@ export const startSocket = (userId) => {
   if (!socket) {
     socket = io(process.env.NEXT_PUBLIC_API_BASE_URL, {
       auth: { userId },
+      extraHeaders: { userid: userId },
       withCredentials: true,
     });
   }
