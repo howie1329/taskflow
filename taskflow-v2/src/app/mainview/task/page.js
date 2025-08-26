@@ -8,10 +8,12 @@ import { CardFooter } from "@/components/ui/card";
 
 function Page() {
   return (
-    <div className="border-2 border-black ">
-      <h1 className="text-xl font-bold">Task Board</h1>
+    <div className="h-full flex flex-col">
+      <h1 className="text-xl font-bold p-4">Task Board</h1>
       <Separator />
-      <GeneralKanbanTaskBoard />
+      <div className="flex-1 overflow-hidden">
+        <GeneralKanbanTaskBoard />
+      </div>
     </div>
   );
 }
@@ -39,17 +41,17 @@ const GeneralKanbanTaskBoard = () => {
   };
 
   return (
-    <div className="p-2">
-      <div className="grid grid-cols-5 grid-rows-6 gap-2">
+    <div className="h-full p-2">
+      <div className="grid grid-cols-5 h-full gap-2">
         {filteredBoardColumns(data).map((column) => (
           <div
             key={column.id}
-            className="flex flex-col bg-[#fafafa] rounded-lg shadow-sm gap-2"
+            className="flex flex-col bg-[#fafafa] rounded-lg shadow-sm gap-2 h-full"
           >
-            <h3 className="text-base font-semibold text-gray-700 text-center">
+            <h3 className="text-base font-semibold text-gray-700 text-center p-2">
               {column.title}
             </h3>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 flex-1 overflow-y-auto">
               {column.tasks.map((task) => (
                 <TaskCard key={task.id} task={task} />
               ))}
@@ -77,16 +79,23 @@ const TaskCard = ({ task }) => {
 
   return (
     <Card className="bg-white border-2 border-gray-200 rounded-lg p-2">
-      <CardContent className="p-2">
-        <div className="flex flex-row justify-between">
-          <h3 className="text-sm font-medium line-clamp-2">{task.title}</h3>
-          <p
+      <CardContent className="flex flex-col p-2 gap-2">
+        <div className="flex flex-row justify-between items-center">
+          <h3 className="text-xs font-medium line-clamp-2 flex-1 mr-2">
+            {task.title}
+          </h3>
+          <span
             className={`${getPriorityColor(
               task.priority
-            )} text-sm font-medium rounded-full px-2 text-center inline-block h-fit`}
+            )} text-xs font-medium rounded-full px-2 py-1 whitespace-nowrap`}
           >
             {task.priority}
-          </p>
+          </span>
+        </div>
+        <p className="text-xs text-gray-500">{task.description}</p>
+        <div className="flex flex-row justify-between items-center">
+          <p className="text-xs text-gray-500">{task.status}</p>
+          <p className="text-xs text-gray-500">{task.date}</p>
         </div>
       </CardContent>
     </Card>
