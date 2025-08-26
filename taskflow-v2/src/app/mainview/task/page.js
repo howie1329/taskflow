@@ -146,7 +146,7 @@ const FilterDropdownCard = ({ filterStatuses, onFilterChange }) => {
   ];
 
   return (
-    <Card className="absolute top-full right-2 mt-1 z-50 w-40 p-3 shadow-lg border bg-[#fafafa]">
+    <Card className="absolute top-full right-0 mt-1 z-70 w-30 p-3 shadow-2xl border bg-[#fafafa]">
       <div className="flex flex-col gap-2">
         {filterOptions.map((option) => (
           <div
@@ -157,7 +157,9 @@ const FilterDropdownCard = ({ filterStatuses, onFilterChange }) => {
               checked={filterStatuses.includes(option.value)}
               onCheckedChange={() => onFilterChange(option.value)}
             />
-            <Label className="cursor-pointer">{option.label}</Label>
+            <Label className="cursor-pointer text-xs font-medium">
+              {option.label}
+            </Label>
           </div>
         ))}
       </div>
