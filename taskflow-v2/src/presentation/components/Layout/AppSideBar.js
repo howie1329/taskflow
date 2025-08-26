@@ -18,27 +18,33 @@ import {
   FolderIcon,
 } from "lucide-react";
 import React from "react";
+import Link from "next/link";
 
 const SideBarItems = [
   {
     label: "Schedule",
     icon: <CalendarIcon />,
+    href: "/mainview/schedule",
   },
   {
     label: "Task",
     icon: <ListIcon />,
+    href: "/mainview/task",
   },
   {
     label: "Projects",
     icon: <FolderIcon />,
+    href: "/mainview/projects",
   },
   {
     label: "Notes",
     icon: <NotebookIcon />,
+    href: "/mainview/notes",
   },
   {
     label: "AI Chat",
     icon: <MessageCircleIcon />,
+    href: "/mainview/ai-chat",
   },
 ];
 
@@ -53,10 +59,10 @@ export default function AppSideBar() {
             {SideBarItems.map((item) => (
               <SidebarMenuItem key={item.label}>
                 <SidebarMenuButton asChild>
-                  <a>
+                  <Link href={item.href}>
                     {item.icon}
                     <span>{item.label}</span>
-                  </a>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             ))}
