@@ -9,17 +9,31 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { HomeIcon, UsersIcon } from "lucide-react";
+import {
+  HomeIcon,
+  MessageCircleIcon,
+  NotebookIcon,
+  SettingsIcon,
+  UsersIcon,
+} from "lucide-react";
 import React from "react";
 
 const SideBarItems = [
   {
-    label: "Home",
+    label: "Task",
     icon: <HomeIcon />,
   },
   {
-    label: "Team",
+    label: "Projects",
     icon: <UsersIcon />,
+  },
+  {
+    label: "Notes",
+    icon: <NotebookIcon />,
+  },
+  {
+    label: "AI Chat",
+    icon: <MessageCircleIcon />,
   },
 ];
 
@@ -28,23 +42,37 @@ export default function AppSideBar() {
     <Sidebar variant="inset">
       <SidebarHeader />
       <SidebarContent>
-        <SidebarGroup />
-        <SidebarGroupLabel>Core Features</SidebarGroupLabel>
-        <SidebarMenu>
-          {SideBarItems.map((item) => (
-            <SidebarMenuItem key={item.label}>
+        <SidebarGroup>
+          <SidebarGroupLabel>TaskFlow</SidebarGroupLabel>
+          <SidebarMenu>
+            {SideBarItems.map((item) => (
+              <SidebarMenuItem key={item.label}>
+                <SidebarMenuButton asChild>
+                  <a>
+                    {item.icon}
+                    <span>{item.label}</span>
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarFooter>
+        <SidebarGroup>
+          <SidebarGroupLabel>Account</SidebarGroupLabel>
+          <SidebarMenu>
+            <SidebarMenuItem>
               <SidebarMenuButton asChild>
                 <a>
-                  {item.icon}
-                  <span>{item.label}</span>
+                  <SettingsIcon />
+                  <span>Settings</span>
                 </a>
               </SidebarMenuButton>
             </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
-        <SidebarGroup />
-      </SidebarContent>
-      <SidebarFooter />
+          </SidebarMenu>
+        </SidebarGroup>
+      </SidebarFooter>
     </Sidebar>
   );
 }
