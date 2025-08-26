@@ -10,22 +10,27 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import {
-  HomeIcon,
   MessageCircleIcon,
   NotebookIcon,
   SettingsIcon,
-  UsersIcon,
+  CalendarIcon,
+  ListIcon,
+  FolderIcon,
 } from "lucide-react";
 import React from "react";
 
 const SideBarItems = [
   {
+    label: "Schedule",
+    icon: <CalendarIcon />,
+  },
+  {
     label: "Task",
-    icon: <HomeIcon />,
+    icon: <ListIcon />,
   },
   {
     label: "Projects",
-    icon: <UsersIcon />,
+    icon: <FolderIcon />,
   },
   {
     label: "Notes",
