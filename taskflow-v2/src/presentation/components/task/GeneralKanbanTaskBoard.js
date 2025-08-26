@@ -1,10 +1,8 @@
 "use client";
 import { TaskCard } from "./TaskCard";
 import { useState } from "react";
-import { testTaskData } from "../../../../docs/testData/testTaskData";
 
-export const GeneralKanbanTaskBoard = () => {
-  const data = testTaskData;
+export const GeneralKanbanTaskBoard = ({ data }) => {
   const [boardColumns] = useState([
     { id: "notStarted", title: "Not Started", tasks: [] },
     { id: "todo", title: "To Do", tasks: [] },

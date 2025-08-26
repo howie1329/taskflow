@@ -1,4 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export const TaskCard = ({ task }) => {
   const getPriorityColor = (priority) => {
@@ -17,7 +18,8 @@ export const TaskCard = ({ task }) => {
   return (
     <Card className="bg-white rounded-lg p-1 flex-shrink-0">
       <CardContent className="flex flex-col gap-1 p-1">
-        <div className="flex flex-row justify-between items-start">
+        <div className="flex flex-row justify-between gap-1 items-center">
+          <Checkbox checked={task.isCompleted} />
           <h3 className="text-xs font-medium line-clamp-1 flex-1 min-w-0">
             {task.title}
           </h3>
