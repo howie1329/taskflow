@@ -1,5 +1,6 @@
 import React from "react";
+import { redirect } from "next/navigation";
 
 export default function Page() {
-  return <div>MainViewPage</div>;
+  redirect("/mainview/schedule");
 }
