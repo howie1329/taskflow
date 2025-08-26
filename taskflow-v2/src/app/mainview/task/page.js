@@ -77,7 +77,7 @@ function Page() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         )}
-        <Card className="flex flex-row justify-between items-center p-1 gap-1 rounded-sm">
+        <Card className="flex flex-row justify-between items-center p-1 gap-1 rounded-sm relative">
           <Button variant="outline" className="p-1 h-6 w-6 rounded-full">
             <PlusIcon className="w-2 h-2" />
           </Button>
@@ -101,16 +101,15 @@ function Page() {
           >
             <FilterIcon className="w-2 h-2" />
           </Button>
-        </Card>
 
-        {/* Filter Dropdown Card - now with proper props */}
-        {isFilterOpen && (
-          <FilterDropdownCard
-            filterStatuses={filterStatuses}
-            onFilterChange={handleStatusFilterChange}
-            onClose={() => setFilterOpen(false)}
-          />
-        )}
+          {/* Filter Dropdown */}
+          {isFilterOpen && (
+            <FilterDropdownCard
+              filterStatuses={filterStatuses}
+              onFilterChange={handleStatusFilterChange}
+            />
+          )}
+        </Card>
       </div>
       <Separator />
       <div className="flex-1 overflow-hidden">
@@ -147,7 +146,7 @@ const FilterDropdownCard = ({ filterStatuses, onFilterChange }) => {
   ];
 
   return (
-    <Card className="absolute top-10 right-10 z-50 w-40 p-3 shadow-lg">
+    <Card className="absolute top-full right-2 mt-1 z-50 w-40 p-3 shadow-lg border bg-[#fafafa]">
       <div className="flex flex-col gap-2">
         {filterOptions.map((option) => (
           <div
