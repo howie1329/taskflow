@@ -8,9 +8,11 @@ import { CardFooter } from "@/components/ui/card";
 
 function Page() {
   return (
-    <div className="h-full flex flex-col">
-      <h1 className="text-xl font-bold p-4">Task Board</h1>
-      <Separator />
+    <div className="h-screen flex flex-col overflow-hidden">
+      <div className="flex-shrink-0 p-4">
+        <h1 className="text-xl font-bold">Task Board</h1>
+        <Separator />
+      </div>
       <div className="flex-1 overflow-hidden">
         <GeneralKanbanTaskBoard />
       </div>
@@ -41,17 +43,17 @@ const GeneralKanbanTaskBoard = () => {
   };
 
   return (
-    <div className="h-full p-2">
-      <div className="grid grid-cols-5 h-full gap-2">
+    <div className="h-full p-1">
+      <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 h-full gap-2">
         {filteredBoardColumns(data).map((column) => (
           <div
             key={column.id}
-            className="flex flex-col bg-[#fafafa] rounded-lg shadow-sm gap-2 h-full"
+            className="flex flex-col bg-[#fafafa] rounded-lg shadow-sm h-full min-h-0"
           >
-            <h3 className="text-base font-semibold text-gray-700 text-center p-2">
+            <h3 className="text-sm font-semibold text-gray-700 text-center py-1 flex-shrink-0">
               {column.title}
             </h3>
-            <div className="flex flex-col gap-2 flex-1 overflow-y-auto">
+            <div className="flex flex-col gap-1 flex-1 overflow-y-auto min-h-0 p-1">
               {column.tasks.map((task) => (
                 <TaskCard key={task.id} task={task} />
               ))}
@@ -78,24 +80,24 @@ const TaskCard = ({ task }) => {
   };
 
   return (
-    <Card className="bg-white border-2 border-gray-200 rounded-lg p-2">
-      <CardContent className="flex flex-col p-2 gap-2">
-        <div className="flex flex-row justify-between items-center">
-          <h3 className="text-xs font-medium line-clamp-2 flex-1 mr-2">
+    <Card className="bg-white border-2 border-gray-200 rounded-lg p-1 flex-shrink-0">
+      <CardContent className="flex flex-col gap-1 p-1">
+        <div className="flex flex-row justify-between items-start">
+          <h3 className="text-xs font-medium line-clamp-1 flex-1 min-w-0">
             {task.title}
           </h3>
           <span
             className={`${getPriorityColor(
               task.priority
-            )} text-xs font-medium rounded-full px-2 py-1 whitespace-nowrap`}
+            )} text-xs font-medium rounded-full px-2 py-1 whitespace-nowrap flex-shrink-0`}
           >
             {task.priority}
           </span>
         </div>
-        <p className="text-xs text-gray-500">{task.description}</p>
-        <div className="flex flex-row justify-between items-center">
-          <p className="text-xs text-gray-500">{task.status}</p>
-          <p className="text-xs text-gray-500">{task.date}</p>
+        <p className="text-xs text-gray-500 line-clamp-2">{task.description}</p>
+        <div className="flex flex-row justify-between items-center text-xs text-gray-500">
+          <span className="truncate">{task.status}</span>
+          <span className="truncate">{task.date}</span>
         </div>
       </CardContent>
     </Card>
