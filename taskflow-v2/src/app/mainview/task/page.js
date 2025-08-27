@@ -151,12 +151,12 @@ const CreateTaskDialog = ({ isOpen, onOpenChange }) => {
   const [date, setDate] = useState(new Date());
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="!w-[50vw] !max-w-[60vw]">
         <DialogHeader>
           <DialogTitle>Create Task</DialogTitle>
         </DialogHeader>
         <Separator />
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-3 gap-2 ">
           <div className="col-span-2 gap-2 flex flex-col">
             <Input placeholder="Task Title" />
             <Textarea placeholder="Task Description" />
@@ -184,6 +184,8 @@ const CreateTaskDialog = ({ isOpen, onOpenChange }) => {
     </Dialog>
   );
 };
+
+const TaskFormSubTaskArea = () => {};
 
 const TaskFormDateInput = ({ date, setDate }) => {
   return (
