@@ -18,6 +18,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 function Page() {
   const data = testTaskData;
@@ -140,6 +146,7 @@ function Page() {
 export default Page;
 
 const CreateTaskDialog = ({ isOpen, onOpenChange }) => {
+  const [status, setStatus] = useState("notStarted");
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -151,12 +158,17 @@ const CreateTaskDialog = ({ isOpen, onOpenChange }) => {
           <div className="col-span-2 gap-2 flex flex-col">
             <Input placeholder="Task Title" />
             <Textarea placeholder="Task Description" />
-            <Input type="date" placeholder="Task Due Date" />
+            <Input
+              className="col-span-1"
+              type="date"
+              placeholder="Task Due Date"
+            />
+            <TaskFormStatusDropdown status={status} setStatus={setStatus} />
           </div>
 
           <div className="col-span-1 gap-2 flex flex-col">
             <Input placeholder="Task Priority" />
-            <Input placeholder="Task Status" />
+
             <Input placeholder="Task Assignee" />
             <Input placeholder="Task Labels" />
           </div>
@@ -166,6 +178,46 @@ const CreateTaskDialog = ({ isOpen, onOpenChange }) => {
         </div>
       </DialogContent>
     </Dialog>
+  );
+};
+
+const TaskFormStatusDropdown = ({ status, setStatus }) => {
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case "notStarted":
+        return "Not Started";
+      case "inProgress":
+        return "In Progress";
+      case "overdue":
+        return "Overdue";
+      case "completed":
+        return "Completed";
+      default:
+        return "Not Started";
+    }
+  };
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger className="w-full">
+        <p className="border-1 border-black rounded-sm p-1">
+          {getStatusLabel(status)}
+        </p>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        <DropdownMenuItem onClick={() => setStatus("notStarted")}>
+          Not Started
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setStatus("inProgress")}>
+          In Progress
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setStatus("overdue")}>
+          Overdue
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setStatus("completed")}>
+          Completed
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 
