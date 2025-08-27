@@ -149,6 +149,26 @@ const CreateTaskDialog = ({ isOpen, onOpenChange }) => {
   const [status, setStatus] = useState("notStarted");
   const [priority, setPriority] = useState("low");
   const [date, setDate] = useState(new Date());
+  const [subtasks, setSubtasks] = useState([""]); // Start with one empty subtask
+
+  // Add new subtask input when user types in the last one
+  const handleSubtaskChange = (index, value) => {
+    const newSubtasks = [...subtasks];
+    newSubtasks[index] = value;
+
+    // If user types in the last subtask, add a new empty one
+    if (index === subtasks.length - 1 && value.trim() !== "") {
+      newSubtasks.push("");
+    }
+
+    // Remove empty subtasks (except the last one)
+    const filteredSubtasks = newSubtasks.filter(
+      (subtask, i) => subtask.trim() !== "" || i === newSubtasks.length - 1
+    );
+
+    setSubtasks(filteredSubtasks);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="!w-[50vw] !max-w-[60vw]">
@@ -171,10 +191,15 @@ const CreateTaskDialog = ({ isOpen, onOpenChange }) => {
             </div>
 
             <Input placeholder="Task Labels" />
+
+            {/* Subtask Area */}
           </div>
 
           <div className="col-span-1 gap-2 flex flex-col">
-            <Input placeholder="Task Assignee" />
+            <TaskFormSubTaskArea
+              subtasks={subtasks}
+              onSubtaskChange={handleSubtaskChange}
+            />
           </div>
           <div className="col-span-3 ">
             <Button className="w-full">Create Task</Button>
@@ -185,7 +210,23 @@ const CreateTaskDialog = ({ isOpen, onOpenChange }) => {
   );
 };
 
-const TaskFormSubTaskArea = () => {};
+const TaskFormSubTaskArea = ({ subtasks, onSubtaskChange }) => {
+  return (
+    <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-2">
+        {subtasks.map((subtask, index) => (
+          <Input
+            key={index}
+            placeholder={`Subtask ${index + 1}`}
+            value={subtask}
+            onChange={(e) => onSubtaskChange(index, e.target.value)}
+            className="text-sm"
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
 
 const TaskFormDateInput = ({ date, setDate }) => {
   return (
