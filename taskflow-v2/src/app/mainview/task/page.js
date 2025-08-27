@@ -147,6 +147,7 @@ export default Page;
 
 const CreateTaskDialog = ({ isOpen, onOpenChange }) => {
   const [status, setStatus] = useState("notStarted");
+  const [priority, setPriority] = useState("low");
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -167,7 +168,10 @@ const CreateTaskDialog = ({ isOpen, onOpenChange }) => {
           </div>
 
           <div className="col-span-1 gap-2 flex flex-col">
-            <Input placeholder="Task Priority" />
+            <TaskFormPriorityDropdown
+              priority={priority}
+              setPriority={setPriority}
+            />
 
             <Input placeholder="Task Assignee" />
             <Input placeholder="Task Labels" />
@@ -178,6 +182,39 @@ const CreateTaskDialog = ({ isOpen, onOpenChange }) => {
         </div>
       </DialogContent>
     </Dialog>
+  );
+};
+
+const TaskFormPriorityDropdown = ({ priority, setPriority }) => {
+  const getPriorityLabel = (priority) => {
+    switch (priority) {
+      case "low":
+        return "Low";
+      case "medium":
+        return "Medium";
+      case "high":
+        return "High";
+    }
+  };
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger>
+        <p className="border border-input bg-background hover:bg-accent hover:text-accent-foreground py-1 text-sm font-medium rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+          {getPriorityLabel(priority)}
+        </p>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        <DropdownMenuItem onClick={() => setPriority("low")}>
+          Low
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setPriority("medium")}>
+          Medium
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setPriority("high")}>
+          High
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 
@@ -199,7 +236,7 @@ const TaskFormStatusDropdown = ({ status, setStatus }) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="w-full">
-        <p className="border-1 border-black rounded-sm p-1">
+        <p className="border border-input bg-background hover:bg-accent hover:text-accent-foreground py-1 text-sm font-medium rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
           {getStatusLabel(status)}
         </p>
       </DropdownMenuTrigger>
