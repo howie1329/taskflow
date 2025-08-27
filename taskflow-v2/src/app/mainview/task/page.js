@@ -197,24 +197,27 @@ const TaskFormPriorityDropdown = ({ priority, setPriority }) => {
     }
   };
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger>
-        <p className="border border-input bg-background hover:bg-accent hover:text-accent-foreground py-1 text-sm font-medium rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
-          {getPriorityLabel(priority)}
-        </p>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent>
-        <DropdownMenuItem onClick={() => setPriority("low")}>
-          Low
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setPriority("medium")}>
-          Medium
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setPriority("high")}>
-          High
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div className="flex flex-col gap-1">
+      <p className="text-xs font-medium">Priority</p>
+      <DropdownMenu>
+        <DropdownMenuTrigger>
+          <p className="border border-input bg-background hover:bg-accent hover:text-accent-foreground py-1 text-xs font-medium rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+            {getPriorityLabel(priority)}
+          </p>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem onClick={() => setPriority("low")}>
+            Low
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setPriority("medium")}>
+            Medium
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setPriority("high")}>
+            High
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 };
 
@@ -234,27 +237,30 @@ const TaskFormStatusDropdown = ({ status, setStatus }) => {
     }
   };
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger className="w-full">
-        <p className="border border-input bg-background hover:bg-accent hover:text-accent-foreground py-1 text-sm font-medium rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
-          {getStatusLabel(status)}
-        </p>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent>
-        <DropdownMenuItem onClick={() => setStatus("notStarted")}>
-          Not Started
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setStatus("inProgress")}>
-          In Progress
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setStatus("overdue")}>
-          Overdue
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setStatus("completed")}>
-          Completed
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div className="flex flex-col gap-1">
+      <p className="text-xs font-medium">Status</p>
+      <DropdownMenu>
+        <DropdownMenuTrigger className="w-full">
+          <p className="border border-input bg-background hover:bg-accent hover:text-accent-foreground py-1 text-xs font-medium rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+            {getStatusLabel(status)}
+          </p>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem onClick={() => setStatus("notStarted")}>
+            Not Started
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setStatus("inProgress")}>
+            In Progress
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setStatus("overdue")}>
+            Overdue
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setStatus("completed")}>
+            Completed
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 };
 
