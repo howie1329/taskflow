@@ -10,6 +10,14 @@ import { FilterIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 function Page() {
   const data = testTaskData;
@@ -18,6 +26,7 @@ function Page() {
   const [filteredData, setFilteredData] = useState(data);
   const [filterStatuses, setFilterStatuses] = useState(["all"]);
   const [isFilterOpen, setFilterOpen] = useState(false);
+  const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false);
 
   // Updated filtering logic for multiple statuses
   useEffect(() => {
@@ -78,7 +87,11 @@ function Page() {
           />
         )}
         <Card className="flex flex-row justify-between items-center p-1 gap-1 rounded-sm relative">
-          <Button variant="outline" className="p-1 h-6 w-6 rounded-full">
+          <Button
+            variant="outline"
+            className="p-1 h-6 w-6 rounded-full"
+            onClick={() => setIsCreateTaskOpen(true)}
+          >
             <PlusIcon className="w-2 h-2" />
           </Button>
           <Button
@@ -115,11 +128,46 @@ function Page() {
       <div className="flex-1 overflow-hidden">
         <GeneralKanbanTaskBoard data={filteredData} />
       </div>
+      {/* Create Task Dialog - Modal */}
+      <CreateTaskDialog
+        isOpen={isCreateTaskOpen}
+        onOpenChange={setIsCreateTaskOpen}
+      />
     </div>
   );
 }
 
 export default Page;
+
+const CreateTaskDialog = ({ isOpen, onOpenChange }) => {
+  return (
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Create Task</DialogTitle>
+        </DialogHeader>
+        <Separator />
+        <div className="grid grid-cols-3 gap-2">
+          <div className="col-span-2 gap-2 flex flex-col">
+            <Input placeholder="Task Title" />
+            <Textarea placeholder="Task Description" />
+            <Input type="date" placeholder="Task Due Date" />
+          </div>
+
+          <div className="col-span-1 gap-2 flex flex-col">
+            <Input placeholder="Task Priority" />
+            <Input placeholder="Task Status" />
+            <Input placeholder="Task Assignee" />
+            <Input placeholder="Task Labels" />
+          </div>
+          <div className="col-span-3 ">
+            <Button className="w-full">Create Task</Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
 
 const FilterDropdownCard = ({ filterStatuses, onFilterChange }) => {
   const filterOptions = [
