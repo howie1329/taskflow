@@ -159,20 +159,18 @@ const CreateTaskDialog = ({ isOpen, onOpenChange }) => {
           <div className="col-span-2 gap-2 flex flex-col">
             <Input placeholder="Task Title" />
             <Textarea placeholder="Task Description" />
-            <Input
-              className="col-span-1"
-              type="date"
-              placeholder="Task Due Date"
-            />
-            <TaskFormStatusDropdown status={status} setStatus={setStatus} />
+
+            <div className="grid grid-cols-2 gap-2">
+              <TaskFormStatusDropdown status={status} setStatus={setStatus} />
+              <TaskFormPriorityDropdown
+                priority={priority}
+                setPriority={setPriority}
+              />
+              <Input type="date" placeholder="Task Due Date" />
+            </div>
           </div>
 
           <div className="col-span-1 gap-2 flex flex-col">
-            <TaskFormPriorityDropdown
-              priority={priority}
-              setPriority={setPriority}
-            />
-
             <Input placeholder="Task Assignee" />
             <Input placeholder="Task Labels" />
           </div>
