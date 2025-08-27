@@ -2,6 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TaskCardDialog } from "./TaskCardDialog";
 import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
 
 export const TaskCard = ({ task }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -48,13 +49,14 @@ export const TaskCard = ({ task }) => {
             <h3 className="text-xs font-medium line-clamp-1 flex-1 min-w-0">
               {task.title}
             </h3>
-            <span
-              className={`${getPriorityColor(
-                task.priority
-              )} text-xs font-medium rounded-full px-2 py-1 whitespace-nowrap flex-shrink-0`}
-            >
-              {task.priority}
-            </span>
+            {task.priority && (
+              <Badge
+                variant="outline"
+                className={`${getPriorityColor(task.priority)}`}
+              >
+                {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+              </Badge>
+            )}
           </div>
           <p className="text-xs text-gray-500 line-clamp-2">
             {task.description}
