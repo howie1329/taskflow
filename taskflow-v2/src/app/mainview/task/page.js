@@ -148,6 +148,7 @@ export default Page;
 const CreateTaskDialog = ({ isOpen, onOpenChange }) => {
   const [status, setStatus] = useState("notStarted");
   const [priority, setPriority] = useState("low");
+  const [date, setDate] = useState(new Date());
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -160,19 +161,20 @@ const CreateTaskDialog = ({ isOpen, onOpenChange }) => {
             <Input placeholder="Task Title" />
             <Textarea placeholder="Task Description" />
 
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-3 gap-2">
               <TaskFormStatusDropdown status={status} setStatus={setStatus} />
               <TaskFormPriorityDropdown
                 priority={priority}
                 setPriority={setPriority}
               />
-              <Input type="date" placeholder="Task Due Date" />
+              <TaskFormDateInput date={date} setDate={setDate} />
             </div>
+
+            <Input placeholder="Task Labels" />
           </div>
 
           <div className="col-span-1 gap-2 flex flex-col">
             <Input placeholder="Task Assignee" />
-            <Input placeholder="Task Labels" />
           </div>
           <div className="col-span-3 ">
             <Button className="w-full">Create Task</Button>
@@ -180,6 +182,23 @@ const CreateTaskDialog = ({ isOpen, onOpenChange }) => {
         </div>
       </DialogContent>
     </Dialog>
+  );
+};
+
+const TaskFormDateInput = ({ date, setDate }) => {
+  return (
+    <div className="flex flex-col gap-1">
+      <p className="text-xs font-medium">Due Date</p>
+      <Input
+        className="border border-input bg-background hover:bg-accent hover:text-accent-foreground py-1 text-xs font-medium rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+        type="date"
+        placeholder="MM/DD/YYYY"
+        value={date ? date.toLocaleDateString() : ""}
+        onChange={(e) => {
+          setDate(e.target.value);
+        }}
+      />
+    </div>
   );
 };
 
