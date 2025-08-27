@@ -15,6 +15,23 @@ export const TaskCard = ({ task }) => {
     }
   };
 
+  const getCorrectedStatus = (status) => {
+    switch (status) {
+      case "notStarted":
+        return "Not Started";
+      case "todo":
+        return "Todo";
+      case "inProgress":
+        return "In Progress";
+      case "done":
+        return "Done";
+      case "overdue":
+        return "Overdue";
+      default:
+        return status;
+    }
+  };
+
   return (
     <Card className="bg-white rounded-lg p-1 flex-shrink-0">
       <CardContent className="flex flex-col gap-1 p-1">
@@ -33,7 +50,7 @@ export const TaskCard = ({ task }) => {
         </div>
         <p className="text-xs text-gray-500 line-clamp-2">{task.description}</p>
         <div className="flex flex-row justify-between items-center text-xs text-gray-500">
-          <span className="truncate">{task.status}</span>
+          <span className="truncate">{getCorrectedStatus(task.status)}</span>
           <span className="truncate">{task.date}</span>
         </div>
       </CardContent>
