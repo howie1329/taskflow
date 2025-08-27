@@ -9,20 +9,20 @@ export const FilterDropdownCard = ({ filterStatuses, onFilterChange }) => {
       value: "all",
     },
     {
-      label: "Not Started",
-      value: "notStarted",
+      label: "To Do",
+      value: "todo",
     },
     {
       label: "In Progress",
       value: "inProgress",
     },
     {
-      label: "Overdue",
-      value: "overdue",
+      label: "Done",
+      value: "done",
     },
     {
-      label: "Completed",
-      value: "completed",
+      label: "Overdue",
+      value: "overdue",
     },
   ];
 
