@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { TaskCard } from "@/presentation/components/task/TaskCard";
+import { DndContext, useDroppable } from "@dnd-kit/core";
 
 const updateColumns = (newButtonIndex, showBrainDump) => {
   const data = testTaskData;
@@ -45,6 +46,7 @@ function Page() {
   const [showBrainDump, setShowBrainDump] = useState(true);
   const [buttonIndex, setButtonIndex] = useState(0);
   const [activeColumn, setActiveColumn] = useState([]);
+  const [eventData, setEventData] = useState([]);
 
   useEffect(() => {
     const newColumns = updateColumns(buttonIndex, showBrainDump);
@@ -53,6 +55,21 @@ function Page() {
 
   const toggleBrainDump = () => {
     setShowBrainDump(!showBrainDump);
+  };
+
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+    if (over) {
+      const { id: overId } = over;
+      const { id: activeId } = active;
+      const newData = data.filter((task) => task.id === activeId);
+      const newEventData = {
+        id: newData[0].id,
+        date: overId,
+        task: newData[0],
+      };
+      setEventData([...eventData, newEventData]);
+    }
   };
 
   return (
@@ -95,39 +112,66 @@ function Page() {
         </Card>
       </div>
       <Separator />
+      <DndContext onDragEnd={handleDragEnd}>
+        <div className="grid grid-cols-5 flex-1 gap-2 p-1">
+          {/* Brain Dump Column - Conditionally Rendered */}
+          {showBrainDump && <BrainDumpColumn data={data} />}
 
-      <div className="grid grid-cols-5 flex-1  gap-2  p-1">
-        {/* Brain Dump Column - Conditionally Rendered */}
-        {showBrainDump && (
-          <div className="col-span-1 bg-[#fafafa] shadow-md rounded-lg p-1">
-            <h2 className="text-sm font-semibold text-gray-700 text-center">
-              Brain Dump
-            </h2>
-            <div className="flex flex-col gap-1 flex-1 overflow-y-auto min-h-0 p-1">
-              {data.map((task) => (
-                <TaskCard key={task.id} task={task} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Date Columns */}
-        {activeColumn.map((column) => (
-          <div
-            key={column.id}
-            className="col-span-1 bg-[#fafafa] shadow-md rounded-lg p-1"
-          >
-            <h2 className="text-sm font-semibold text-gray-700 text-center">
-              {column.title}
-            </h2>
-            <div className="flex flex-col gap-1 flex-1 overflow-y-auto min-h-0 p-1">
-              {/* Task content will go here */}
-            </div>
-          </div>
-        ))}
-      </div>
+          {/* Date Columns */}
+          {activeColumn.map((column) => (
+            <ScheduleColumn
+              key={column.id}
+              column={column}
+              eventData={eventData}
+            />
+          ))}
+        </div>
+      </DndContext>
     </div>
   );
 }
 
+const BrainDumpColumn = ({ data }) => {
+  return (
+    <div className="col-span-1 bg-[#fafafa] shadow-md rounded-lg p-1">
+      <h2 className="text-sm font-semibold text-gray-700 text-center">
+        Brain Dump
+      </h2>
+      <div className="flex flex-col gap-1 flex-1 overflow-y-auto min-h-0 p-1">
+        {data.map((task) => (
+          <TaskCard key={task.id} task={task} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const ScheduleColumn = ({ column, eventData }) => {
+  const { isOver, setNodeRef } = useDroppable({
+    id: column.id,
+  });
+
+  const style = {
+    backgroundColor: isOver ? "lightgreen" : undefined,
+  };
+  return (
+    <div
+      key={column.id}
+      className="col-span-1 bg-[#fafafa] shadow-md rounded-lg p-1"
+      ref={setNodeRef}
+      style={style}
+    >
+      <h2 className="text-sm font-semibold text-gray-700 text-center">
+        {column.title}
+      </h2>
+      <div className="flex flex-col gap-1 flex-1 overflow-y-auto min-h-0 p-1">
+        {eventData
+          .filter((event) => event.date === column.id)
+          .map((event) => (
+            <TaskCard key={event.id} task={event.task} />
+          ))}
+      </div>
+    </div>
+  );
+};
 export default Page;
