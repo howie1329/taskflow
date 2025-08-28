@@ -18,8 +18,9 @@ function Page() {
     []
   );
 
+  // Keep getTestColumns for initialization
   const getTestColumns = (size) => {
-    const columns = [];
+    const columns = [...initialColumns];
     const currentDate = new Date();
     currentDate.setDate(currentDate.getDate() + buttonIndex);
     for (let i = 0; i < size; i++) {
@@ -35,11 +36,33 @@ function Page() {
     return columns;
   };
 
+  // Separate function for updates
+  const updateColumns = (newButtonIndex) => {
+    const columns = [];
+    const currentDate = new Date();
+    currentDate.setDate(currentDate.getDate() + newButtonIndex);
+    for (let i = 0; i < 4; i++) {
+      const date = new Date(currentDate);
+      date.setDate(currentDate.getDate() + i);
+      const day = date.toISOString().split("T")[0];
+      columns.push({
+        id: day,
+        title: day,
+        tasks: [],
+      });
+    }
+    return columns;
+  };
+
   const [buttonIndex, setButtonIndex] = useState(0);
   const [activeColumn, setActiveColumn] = useState([
-    ...initialColumns,
-    ...getTestColumns(4),
+    ...getTestColumns(4), // Used only for initialization
   ]);
+
+  useEffect(() => {
+    const newColumns = updateColumns(buttonIndex); // Separate function for updates
+    setActiveColumn(newColumns);
+  }, [buttonIndex]);
 
   const handleRemoveBrainDump = () => {
     const newActiveColumn = activeColumn.filter(
