@@ -23,9 +23,15 @@ const updateColumns = (newButtonIndex, showBrainDump) => {
     const date = new Date(currentDate);
     date.setDate(currentDate.getDate() + i);
     const day = date.toISOString().split("T")[0];
+    const dayString = date.toLocaleDateString("en-US", {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+    });
+    console.log(dayString);
     columns.push({
       id: day,
-      title: day,
+      title: dayString,
       tasks: [],
     });
   }
