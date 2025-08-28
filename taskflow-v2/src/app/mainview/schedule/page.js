@@ -3,7 +3,14 @@ import { Separator } from "@/components/ui/separator";
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { testTaskData } from "../../../../docs/testData/testTaskData";
 import { Button } from "@/components/ui/button";
-import { MinusIcon, PlusIcon } from "lucide-react";
+import {
+  EyeIcon,
+  EyeOffIcon,
+  MinusIcon,
+  PlusIcon,
+  TimerResetIcon,
+} from "lucide-react";
+import { Card } from "@/components/ui/card";
 
 const updateColumns = (newButtonIndex, showBrainDump) => {
   const columns = [];
@@ -44,26 +51,40 @@ function Page() {
     <div className="h-screen flex flex-col overflow-hidden">
       <div className="flex-shrink-0 p-1 flex flex-row justify-between items-center gap-1 ">
         <h1 className="text-lg font-bold ">Schedule</h1>
-        <Button variant="outline" size="icon" onClick={toggleBrainDump}>
-          <p>{showBrainDump ? "Hide" : "Show"} Brain Dump</p>
-        </Button>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => setButtonIndex(buttonIndex - 1)}
-        >
-          <MinusIcon />
-        </Button>
-        <Button variant="outline" size="icon" onClick={() => setButtonIndex(0)}>
-          <p className="text-sm">Current</p>
-        </Button>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => setButtonIndex(buttonIndex + 1)}
-        >
-          <PlusIcon />
-        </Button>
+        <Card className="flex flex-row justify-between items-center p-1 gap-1 rounded-sm relative">
+          <Button
+            variant="outline"
+            className="p-1 h-6 w-6 rounded-full"
+            onClick={toggleBrainDump}
+          >
+            {showBrainDump ? (
+              <EyeOffIcon className="w-2 h-2" />
+            ) : (
+              <EyeIcon className="w-2 h-2" />
+            )}
+          </Button>
+          <Button
+            variant="outline"
+            className="p-1 h-6 w-6 rounded-full"
+            onClick={() => setButtonIndex(buttonIndex - 1)}
+          >
+            <MinusIcon className="w-2 h-2" />
+          </Button>
+          <Button
+            variant="outline"
+            className="p-1 h-6 w-6 rounded-full"
+            onClick={() => setButtonIndex(0)}
+          >
+            <TimerResetIcon className="w-2 h-2" />
+          </Button>
+          <Button
+            variant="outline"
+            className="p-1 h-6 w-6 rounded-full"
+            onClick={() => setButtonIndex(buttonIndex + 1)}
+          >
+            <PlusIcon className="w-2 h-2" />
+          </Button>
+        </Card>
       </div>
       <Separator />
 
