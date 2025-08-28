@@ -240,3 +240,43 @@ export const testTaskData = [
     labels: "backup,recovery,security",
   },
 ];
+
+// Add this new dataset for scheduled events
+export const scheduledEvents = [
+  {
+    id: "event_1",
+    taskId: "1", // References the task from testTaskData
+    scheduledDate: "2025-08-27", // The date it's scheduled for
+    scheduledTime: "09:00", // Optional: specific time
+    duration: 120, // Optional: duration in minutes
+    columnId: "today", // Maps to your column IDs
+    notes: "Focus on design tokens first",
+  },
+  {
+    id: "event_2",
+    taskId: "2",
+    scheduledDate: "2024-02-15",
+    scheduledTime: "14:00",
+    duration: 90,
+    columnId: "today",
+    notes: "Setup Clerk dashboard",
+  },
+  {
+    id: "event_3",
+    taskId: "4",
+    scheduledDate: "2024-02-16",
+    scheduledTime: "10:00",
+    duration: 180,
+    columnId: "tomorrow",
+    notes: "Test on mobile devices",
+  },
+  {
+    id: "event_4",
+    taskId: "8",
+    scheduledDate: "2024-02-17",
+    scheduledTime: "13:00",
+    duration: 120,
+    columnId: "dayAfterTomorrow",
+    notes: "Review OWASP guidelines",
+  },
+];
