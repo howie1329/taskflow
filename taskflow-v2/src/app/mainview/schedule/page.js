@@ -41,7 +41,7 @@ function Page() {
   };
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-[#fafafa] shadow-xl rounded-lg p-1">
+    <div className="h-screen flex flex-col overflow-hidden">
       <div className="flex-shrink-0 p-1 flex flex-row justify-between items-center gap-1 ">
         <h1 className="text-lg font-bold ">Schedule</h1>
         <Button variant="outline" size="icon" onClick={toggleBrainDump}>
@@ -67,12 +67,13 @@ function Page() {
       </div>
       <Separator />
 
-      <div className={`grid grid-cols-5 flex-1  gap-2`}>
+      <div className="grid grid-cols-5 flex-1  gap-2  p-1">
         {/* Brain Dump Column - Conditionally Rendered */}
         {showBrainDump && (
-          <div className="col-span-1 bg-white shadow-xl rounded-lg p-1">
-            <h2 className="text-sm font-semibold text-center">Brain Dump</h2>
-            <Separator />
+          <div className="col-span-1 bg-[#fafafa] shadow-md rounded-lg p-1">
+            <h2 className="text-sm font-semibold text-gray-700 text-center">
+              Brain Dump
+            </h2>
             <div className="p-2 min-h-[200px]">{/* Brain dump content */}</div>
           </div>
         )}
@@ -81,12 +82,11 @@ function Page() {
         {activeColumn.map((column) => (
           <div
             key={column.id}
-            className="col-span-1 bg-white shadow-xl rounded-lg p-1"
+            className="col-span-1 bg-[#fafafa] shadow-md rounded-lg p-1"
           >
-            <h2 className="text-sm font-semibold text-center">
+            <h2 className="text-sm font-semibold text-gray-700 text-center">
               {column.title}
             </h2>
-            <Separator />
             <div className="p-2 min-h-[200px]">
               {/* Task content will go here */}
             </div>
