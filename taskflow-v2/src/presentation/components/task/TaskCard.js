@@ -1,3 +1,4 @@
+"use client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TaskCardDialog } from "./TaskCardDialog";
@@ -6,26 +7,20 @@ import { Badge } from "@/components/ui/badge";
 import { useDraggable } from "@dnd-kit/core";
 
 export const TaskCard = ({ task }) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transition,
-    transform,
-    isDragging,
-  } = useDraggable({
-    id: task.id,
-  });
+  const { attributes, listeners, setNodeRef, transition, transform } =
+    useDraggable({
+      id: task.id,
+    });
 
   const style = transform
     ? {
         transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-        zIndex: isDragging ? 9999 : "auto",
-        position: isDragging ? "fixed" : "relative",
-        pointerEvents: isDragging ? "none" : "auto",
-        opacity: isDragging ? 0.5 : 1,
-        width: isDragging ? "20vw" : "auto",
-        minWidth: isDragging ? "20vw" : "auto",
+        zIndex: 9999,
+        position: "fixed",
+        pointerEvents: "auto",
+        opacity: 0.5,
+        width: "30vw",
+        minWidth: "30vw",
       }
     : undefined;
 
@@ -65,7 +60,8 @@ export const TaskCard = ({ task }) => {
     <>
       <Card
         className="bg-white rounded-lg p-1 flex-shrink-0 cursor-pointer hover:bg-gray-50"
-        onClick={() => setIsOpen(true)}
+        //onClick={() => setIsOpen(true)}
+        onDoubleClick={() => setIsOpen(true)}
         style={style}
         ref={setNodeRef}
         {...attributes}
