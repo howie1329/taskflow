@@ -6,14 +6,26 @@ import { Badge } from "@/components/ui/badge";
 import { useDraggable } from "@dnd-kit/core";
 
 export const TaskCard = ({ task }) => {
-  const { attributes, listeners, setNodeRef, transition, transform } =
-    useDraggable({
-      id: task.id,
-    });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transition,
+    transform,
+    isDragging,
+  } = useDraggable({
+    id: task.id,
+  });
 
   const style = transform
     ? {
         transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+        zIndex: isDragging ? 9999 : "auto",
+        position: isDragging ? "fixed" : "relative",
+        pointerEvents: isDragging ? "none" : "auto",
+        opacity: isDragging ? 0.5 : 1,
+        width: isDragging ? "20vw" : "auto",
+        minWidth: isDragging ? "20vw" : "auto",
       }
     : undefined;
 
