@@ -17,6 +17,7 @@ export const useTaskUIStore = create((set, get) => ({
   setFilterStatuses: (statuses) => set({ filterStatuses: statuses }),
   setIsFilterOpen: (open) => set({ isFilterOpen: open }),
   setIsCreateTaskOpen: (open) => set({ isCreateTaskOpen: open }),
+  setFilteredData: (data) => set({ filteredData: data }),
 
   // Complex Actions
   handleStatusFilterChange: (status) => {

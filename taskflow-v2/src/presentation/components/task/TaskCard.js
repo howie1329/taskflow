@@ -3,8 +3,20 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { TaskCardDialog } from "./TaskCardDialog";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { useDraggable } from "@dnd-kit/core";
 
 export const TaskCard = ({ task }) => {
+  const { attributes, listeners, setNodeRef, transition, transform } =
+    useDraggable({
+      id: task.id,
+    });
+
+  const style = transform
+    ? {
+        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+      }
+    : undefined;
+
   const [isOpen, setIsOpen] = useState(false);
 
   const getPriorityColor = (priority) => {
@@ -42,6 +54,10 @@ export const TaskCard = ({ task }) => {
       <Card
         className="bg-white rounded-lg p-1 flex-shrink-0 cursor-pointer hover:bg-gray-50"
         onClick={() => setIsOpen(true)}
+        style={style}
+        ref={setNodeRef}
+        {...attributes}
+        {...listeners}
       >
         <CardContent className="flex flex-col gap-1 p-1">
           <div className="flex flex-row justify-between gap-1 items-center">
