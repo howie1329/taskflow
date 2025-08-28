@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { useDraggable } from "@dnd-kit/core";
 
 export const TaskCard = ({ task }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
   const { attributes, listeners, setNodeRef, transition, transform } =
     useDraggable({
       id: task.id,
@@ -23,8 +25,6 @@ export const TaskCard = ({ task }) => {
         minWidth: "30vw",
       }
     : undefined;
-
-  const [isOpen, setIsOpen] = useState(false);
 
   const getPriorityColor = (priority) => {
     switch (priority?.toLowerCase()) {
@@ -60,14 +60,19 @@ export const TaskCard = ({ task }) => {
     <>
       <Card
         className="bg-white rounded-lg p-1 flex-shrink-0 cursor-pointer hover:bg-gray-50"
-        //onClick={() => setIsOpen(true)}
-        onDoubleClick={() => setIsOpen(true)}
+        onClick={() => setIsOpen(true)}
         style={style}
         ref={setNodeRef}
-        {...attributes}
-        {...listeners}
       >
         <CardContent className="flex flex-col gap-1 p-1">
+          {/* Drag handle at the top */}
+          <div
+            className="h-1 bg-gray-200 rounded cursor-grab active:cursor-grabbing hover:bg-gray-300"
+            {...attributes}
+            {...listeners}
+          />
+
+          {/* Rest of your card content */}
           <div className="flex flex-row justify-between gap-1 items-center">
             <Checkbox checked={task.isCompleted} />
             <h3 className="text-xs font-medium line-clamp-1 flex-1 min-w-0">
