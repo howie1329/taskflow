@@ -11,8 +11,10 @@ import {
   TimerResetIcon,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { TaskCard } from "@/presentation/components/task/TaskCard";
 
 const updateColumns = (newButtonIndex, showBrainDump) => {
+  const data = testTaskData;
   const columns = [];
   const currentDate = new Date();
   currentDate.setDate(currentDate.getDate() + newButtonIndex);
@@ -101,7 +103,11 @@ function Page() {
             <h2 className="text-sm font-semibold text-gray-700 text-center">
               Brain Dump
             </h2>
-            <div className="p-2 min-h-[200px]">{/* Brain dump content */}</div>
+            <div className="flex flex-col gap-1 flex-1 overflow-y-auto min-h-0 p-1">
+              {data.map((task) => (
+                <TaskCard key={task.id} task={task} />
+              ))}
+            </div>
           </div>
         )}
 
@@ -114,7 +120,7 @@ function Page() {
             <h2 className="text-sm font-semibold text-gray-700 text-center">
               {column.title}
             </h2>
-            <div className="p-2 min-h-[200px]">
+            <div className="flex flex-col gap-1 flex-1 overflow-y-auto min-h-0 p-1">
               {/* Task content will go here */}
             </div>
           </div>
