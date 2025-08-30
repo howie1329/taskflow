@@ -72,6 +72,8 @@ function Page() {
       const newEventData = {
         id: newData[0].id,
         date: overId,
+        estimatedTime: 120,
+        actualTime: 80,
         time: new Date().toLocaleTimeString("en-US", {
           hour: "2-digit",
           minute: "2-digit",
@@ -196,7 +198,17 @@ const EventCard = ({ event }) => {
         <p className="text-xs text-gray-500 line-clamp-2">
           {event.task.description}
         </p>
-        <p className="text-xs text-gray-500 line-clamp-2">Time: {event.time}</p>
+        <div className="flex flex-row gap-1">
+          <p className="text-xs text-gray-500 line-clamp-1">
+            Time: {event.time}
+          </p>
+          <p className="text-xs text-gray-500 line-clamp-1">
+            Estimated Time: {event.estimatedTime} minutes
+          </p>
+          <p className="text-xs text-gray-500 line-clamp-1">
+            Actual Time: {event.actualTime} minutes
+          </p>
+        </div>
       </CardContent>
     </Card>
   );
