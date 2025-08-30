@@ -10,7 +10,13 @@ import {
   PlusIcon,
   TimerResetIcon,
 } from "lucide-react";
-import { Card } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { TaskCard } from "@/presentation/components/task/TaskCard";
 import { DndContext, useDroppable } from "@dnd-kit/core";
 
@@ -66,6 +72,10 @@ function Page() {
       const newEventData = {
         id: newData[0].id,
         date: overId,
+        time: new Date().toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
         task: newData[0],
       };
       setEventData([...eventData, newEventData]);
@@ -168,10 +178,26 @@ const ScheduleColumn = ({ column, eventData }) => {
         {eventData
           .filter((event) => event.date === column.id)
           .map((event) => (
-            <TaskCard key={event.id} task={event.task} />
+            <EventCard key={event.id} event={event} />
           ))}
       </div>
     </div>
   );
 };
 export default Page;
+
+const EventCard = ({ event }) => {
+  return (
+    <Card className="bg-white rounded-lg p-1 flex-shrink-0 cursor-pointer hover:bg-gray-50">
+      <CardContent className="flex flex-col gap-1 p-1">
+        <h3 className="text-xs font-medium line-clamp-1 flex-1 min-w-0">
+          {event.task.title}
+        </h3>
+        <p className="text-xs text-gray-500 line-clamp-2">
+          {event.task.description}
+        </p>
+        <p className="text-xs text-gray-500 line-clamp-2">Time: {event.time}</p>
+      </CardContent>
+    </Card>
+  );
+};
