@@ -1,8 +1,3 @@
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
 import NotesSideBar from "@/presentation/components/notes/layout/NotesSideBar";
 import React from "react";
 
