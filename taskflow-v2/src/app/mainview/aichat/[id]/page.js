@@ -3,6 +3,7 @@ import React from "react";
 import { useParams } from "next/navigation";
 import { mockChatData } from "../../../../../docs/testData/aiChatMockData";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
 
 function Page() {
   const { id } = useParams();
@@ -12,59 +13,52 @@ function Page() {
     return <div>Chat not found</div>;
   }
 
-  const renderMessageContent = (content) => {
-    const { tasks, notes, projects, events, aiResponse } = content;
-
-    return (
-      <div>
-        {aiResponse && <p>{aiResponse}</p>}
-        {tasks?.length > 0 && <div>Tasks: {tasks.length}</div>}
-        {notes?.length > 0 && <div>Notes: {notes.length}</div>}
-        {projects?.length > 0 && <div>Projects: {projects.length}</div>}
-        {events?.length > 0 && <div>Events: {events.length}</div>}
-      </div>
-    );
-  };
-
   return (
-    <div>
-      <h1 className="text-xl font-medium text-center">{chat.title}</h1>
-      <Separator />
-      <div className="flex flex-col gap-2 scroll-y-auto h-full border-black border-2 ">
+    <div className="grid grid-rows-[1fr_13fr_2fr] border-black border-2 w-[50vw] h-full text-sm self-center items-center justify-center">
+      <div className="">
+        <h1 className="text-xl font-medium text-center">{chat.title}</h1>
+        <Separator />
+      </div>
+      <div className="flex flex-col gap-2 scroll-y-auto h-full overflow-y-auto  ">
         {chat.messages.map((message) => (
           <div key={message.id}>
             {message.role === "user" ? (
-              <RenderUserMessageContent userContent={message.content} />
+              <RenderUserMessageContent userContent={message} />
             ) : (
-              <RenderAssistantMessageContent
-                assistantContent={message.content}
-              />
+              <RenderAssistantMessageContent assistantContent={message} />
             )}
           </div>
         ))}
+      </div>
+      <div className="flex justify-center">
+        <Input placeholder="Add new message" />
       </div>
     </div>
   );
 }
 
 const RenderUserMessageContent = ({ userContent }) => {
+  const timestamp = new Date(userContent.timestamp).toLocaleString();
   return (
     <div className="flex flex-col gap-1 items-end">
       <p>You</p>
       <div className="text-black bg-gray-300 p-2 rounded-md w-fit">
-        {userContent.aiResponse}
+        {userContent.content.aiResponse}
       </div>
+      <p className="text-gray-500 text-xs">{timestamp}</p>
     </div>
   );
 };
 
 const RenderAssistantMessageContent = ({ assistantContent }) => {
+  const timestamp = new Date(assistantContent.timestamp).toLocaleString();
   return (
     <div className="flex flex-col gap-1 items-start">
       <p>Assistant</p>
       <div className="text-black bg-gray-100 p-2 rounded-md w-fit">
-        {assistantContent.aiResponse}
+        {assistantContent.content.aiResponse}
       </div>
+      <p className="text-gray-500 text-xs">{timestamp}</p>
     </div>
   );
 };
