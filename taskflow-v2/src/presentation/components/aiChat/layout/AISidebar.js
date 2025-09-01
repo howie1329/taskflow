@@ -10,20 +10,32 @@ import {
 
 import React from "react";
 import Link from "next/link";
-import { notes } from "../../../../../docs/testData/notesTestData";
+import { mockChatData } from "../../../../../docs/testData/aiChatMockData";
 
-export default function NotesSideBar() {
+export default function AISidebar() {
   return (
     <div className="bg-[#f5f5f5] rounded-lg shadow-md ">
       <SidebarHeader />
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Notes</SidebarGroupLabel>
+          <SidebarGroupLabel>New Chat</SidebarGroupLabel>
           <SidebarMenu>
-            {notes.map((item) => (
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <Link href={`/mainview/aichat`}>
+                  <span>New Chat</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Chats</SidebarGroupLabel>
+          <SidebarMenu>
+            {mockChatData.conversations.map((item) => (
               <SidebarMenuItem key={item.id}>
                 <SidebarMenuButton asChild>
-                  <Link href={`/mainview/notes/${item.id}`}>
+                  <Link href={`/mainview/aichat/${item.id}`}>
                     <span>{item.title}</span>
                   </Link>
                 </SidebarMenuButton>
