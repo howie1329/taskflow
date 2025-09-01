@@ -2,6 +2,7 @@
 import React from "react";
 import { useParams } from "next/navigation";
 import { mockChatData } from "../../../../../docs/testData/aiChatMockData";
+import { Separator } from "@/components/ui/separator";
 
 function Page() {
   const { id } = useParams();
@@ -27,12 +28,18 @@ function Page() {
 
   return (
     <div>
-      <h1>{chat.title}</h1>
-      <div>
+      <h1 className="text-xl font-medium text-center">{chat.title}</h1>
+      <Separator />
+      <div className="flex flex-col gap-2 scroll-y-auto h-full border-black border-2 ">
         {chat.messages.map((message) => (
           <div key={message.id}>
-            <strong>{message.role}:</strong>
-            {renderMessageContent(message.content)}
+            {message.role === "user" ? (
+              <RenderUserMessageContent userContent={message.content} />
+            ) : (
+              <RenderAssistantMessageContent
+                assistantContent={message.content}
+              />
+            )}
           </div>
         ))}
       </div>
@@ -40,4 +47,25 @@ function Page() {
   );
 }
 
+const RenderUserMessageContent = ({ userContent }) => {
+  return (
+    <div className="flex flex-col gap-1 items-end">
+      <p>You</p>
+      <div className="text-black bg-gray-300 p-2 rounded-md w-fit">
+        {userContent.aiResponse}
+      </div>
+    </div>
+  );
+};
+
+const RenderAssistantMessageContent = ({ assistantContent }) => {
+  return (
+    <div className="flex flex-col gap-1 items-start">
+      <p>Assistant</p>
+      <div className="text-black bg-gray-100 p-2 rounded-md w-fit">
+        {assistantContent.aiResponse}
+      </div>
+    </div>
+  );
+};
 export default Page;
