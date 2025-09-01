@@ -1,9 +1,11 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { useParams } from "next/navigation";
 import { mockChatData } from "../../../../../docs/testData/aiChatMockData";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { SendIcon } from "lucide-react";
 
 function Page() {
   const { id } = useParams();
@@ -14,7 +16,7 @@ function Page() {
   }
 
   return (
-    <div className="grid grid-rows-[1fr_13fr_2fr] border-black border-2 w-[50vw] h-full text-sm self-center items-center justify-center">
+    <div className="grid grid-rows-[1fr_12fr_1fr] shadow-lg rounded-lg w-[85%] h-full text-sm px-2">
       <div className="">
         <h1 className="text-xl font-medium text-center">{chat.title}</h1>
         <Separator />
@@ -30,9 +32,7 @@ function Page() {
           </div>
         ))}
       </div>
-      <div className="flex justify-center">
-        <Input placeholder="Add new message" />
-      </div>
+      <ChatInputArea />
     </div>
   );
 }
@@ -42,7 +42,7 @@ const RenderUserMessageContent = ({ userContent }) => {
   return (
     <div className="flex flex-col gap-1 items-end">
       <p>You</p>
-      <div className="text-black bg-gray-300 p-2 rounded-md w-fit">
+      <div className="text-black bg-gray-300 rounded-md w-fit p-2">
         {userContent.content.aiResponse}
       </div>
       <p className="text-gray-500 text-xs">{timestamp}</p>
@@ -55,10 +55,32 @@ const RenderAssistantMessageContent = ({ assistantContent }) => {
   return (
     <div className="flex flex-col gap-1 items-start">
       <p>Assistant</p>
-      <div className="text-black bg-gray-100 p-2 rounded-md w-fit">
+      <div className="text-black bg-gray-100 rounded-md w-fit p-2">
         {assistantContent.content.aiResponse}
       </div>
       <p className="text-gray-500 text-xs">{timestamp}</p>
+    </div>
+  );
+};
+
+const ChatInputArea = () => {
+  const [input, setInput] = useState("");
+  const buttonActive = input.trim() !== "";
+  return (
+    <div className="flex h-9 w-full rounded-md border gap-2 items-center">
+      <input
+        className=" h-full w-full px-2 border-none outline-none focus:border-none focus:outline-none"
+        placeholder="Add new message"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+      />
+      <Button
+        className="h-6 w-6 rounded-full"
+        variant="ghost"
+        disabled={!buttonActive}
+      >
+        <SendIcon />
+      </Button>
     </div>
   );
 };
