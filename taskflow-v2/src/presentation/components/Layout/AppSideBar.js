@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import React from "react";
 import Link from "next/link";
+import { SignedIn, UserButton } from "@clerk/nextjs";
 
 const SideBarItems = [
   {
@@ -53,6 +54,9 @@ export default function AppSideBar() {
     <Sidebar variant="inset">
       <SidebarHeader />
       <SidebarContent>
+        <SignedIn>
+          <UserButton afterSignedOutUrl="/" />
+        </SignedIn>
         <SidebarGroup>
           <SidebarGroupLabel>TaskFlow</SidebarGroupLabel>
           <SidebarMenu>
