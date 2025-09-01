@@ -85,7 +85,7 @@ function Page() {
   };
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
+    <div className="flex flex-col overflow-hidden h-[93vh]">
       <div className="flex-shrink-0 p-1 flex flex-row justify-between items-center gap-1 ">
         <h1 className="text-lg font-bold ">Schedule</h1>
         <Card className="flex flex-row justify-between items-center p-1 gap-1 rounded-sm relative">

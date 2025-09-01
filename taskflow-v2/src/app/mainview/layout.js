@@ -10,7 +10,7 @@ export default function Layout({ children }) {
     <SidebarProvider>
       <AppSideBar />
       <SidebarInset>
-        <main className="p-2 shadow-md">
+        <main className=" h-[98vh] p-2">
           <SidebarTrigger />
           {children}
         </main>

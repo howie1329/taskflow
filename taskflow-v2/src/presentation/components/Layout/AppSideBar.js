@@ -44,7 +44,7 @@ const SideBarItems = [
   {
     label: "AI Chat",
     icon: <MessageCircleIcon />,
-    href: "/mainview/ai-chat",
+    href: "/mainview/aichat",
   },
 ];
 
