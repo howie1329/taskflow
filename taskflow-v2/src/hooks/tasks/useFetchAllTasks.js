@@ -2,6 +2,7 @@
 import axiosClient from "@/lib/axios/axiosClient";
 import { useAuth } from "@clerk/nextjs";
 import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 const fetchAllTasks = async (getToken) => {
   const token = await getToken();
@@ -10,10 +11,16 @@ const fetchAllTasks = async (getToken) => {
       headers: { Authorization: token },
       withCredentials: true,
     });
+    toast.success("Tasks Fetched Successfully", {
+      description: new Date().toLocaleString(),
+    });
     console.log(response.data.data);
     return response.data.data;
   } catch (error) {
     console.error(error);
+    toast.error("Tasks Fetched Failed", {
+      description: `${error.message} - ${new Date().toLocaleString()}`,
+    });
   }
 };
 
