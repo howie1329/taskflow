@@ -14,7 +14,6 @@ const fetchAllTasks = async (getToken) => {
     toast.success("Tasks Fetched Successfully", {
       description: new Date().toLocaleString(),
     });
-    console.log(response.data.data);
     return response.data.data;
   } catch (error) {
     console.error(error);

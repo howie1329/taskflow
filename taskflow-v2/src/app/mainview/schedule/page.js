@@ -19,9 +19,9 @@ import {
 } from "@/components/ui/card";
 import { TaskCard } from "@/presentation/components/task/TaskCard";
 import { DndContext, useDroppable } from "@dnd-kit/core";
+import useFetchAllTasks from "@/hooks/tasks/useFetchAllTasks";
 
 const updateColumns = (newButtonIndex, showBrainDump) => {
-  const data = testTaskData;
   const columns = [];
   const currentDate = new Date();
   currentDate.setDate(currentDate.getDate() + newButtonIndex);
@@ -48,7 +48,7 @@ const updateColumns = (newButtonIndex, showBrainDump) => {
 };
 
 function Page() {
-  const data = testTaskData;
+  const { data: tasks } = useFetchAllTasks();
   const [showBrainDump, setShowBrainDump] = useState(true);
   const [buttonIndex, setButtonIndex] = useState(0);
   const [activeColumn, setActiveColumn] = useState([]);
@@ -57,7 +57,7 @@ function Page() {
   useEffect(() => {
     const newColumns = updateColumns(buttonIndex, showBrainDump);
     setActiveColumn(newColumns);
-  }, [buttonIndex, showBrainDump]);
+  }, [buttonIndex, showBrainDump, tasks]);
 
   const toggleBrainDump = () => {
     setShowBrainDump(!showBrainDump);
@@ -68,7 +68,7 @@ function Page() {
     if (over) {
       const { id: overId } = over;
       const { id: activeId } = active;
-      const newData = data.filter((task) => task.id === activeId);
+      const newData = tasks.filter((task) => task.id === activeId);
       const newEventData = {
         id: newData[0].id,
         date: overId,
@@ -127,7 +127,7 @@ function Page() {
       <DndContext onDragEnd={handleDragEnd}>
         <div className="grid grid-cols-5 flex-1 gap-2 p-1">
           {/* Brain Dump Column - Conditionally Rendered */}
-          {showBrainDump && <BrainDumpColumn data={data} />}
+          {showBrainDump && <BrainDumpColumn data={tasks} />}
 
           {/* Date Columns */}
           {activeColumn.map((column) => (
@@ -144,6 +144,20 @@ function Page() {
 }
 
 const BrainDumpColumn = ({ data }) => {
+  // Loading State If No Data
+  if (!data) {
+    return (
+      <div className="col-span-1 bg-[#fafafa] shadow-md rounded-lg p-1">
+        <h2 className="text-sm font-semibold text-gray-700 text-center">
+          Brain Dump
+        </h2>
+        <div className="flex flex-col gap-1 flex-1 overflow-y-auto min-h-0 p-1">
+          <p className="text-xs text-gray-500 text-center">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="col-span-1 bg-[#fafafa] shadow-md rounded-lg p-1">
       <h2 className="text-sm font-semibold text-gray-700 text-center">
