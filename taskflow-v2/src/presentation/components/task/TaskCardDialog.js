@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -53,9 +54,15 @@ export const TaskCardDialog = ({ selectedTask, isOpen, onOpenChange }) => {
             <div className="flex flex-col gap-2">
               {subtasks &&
                 subtasks.map((subTask) => (
-                  <p className="text-sm text-gray-500" key={subTask.id}>
-                    {subTask.subtask_name}
-                  </p>
+                  <div
+                    className="flex flex-row items-center gap-2"
+                    key={subTask.id}
+                  >
+                    <Checkbox key={subTask.id} checked={subTask.is_complete} />
+                    <p className="text-sm text-gray-500" key={subTask.id}>
+                      {subTask.subtask_name}
+                    </p>
+                  </div>
                 ))}
             </div>
           </div>
