@@ -30,11 +30,12 @@ export const TaskCardDialog = ({ selectedTask, isOpen, onOpenChange }) => {
           <div className="flex flex-row items-center col-span-1 gap-2">
             <h3 className="text-sm font-medium">Labels:</h3>
             <div className="flex flex-row items-center gap-2 line-clamp-2">
-              {getLabels(selectedTask.labels).map((label) => (
-                <Badge key={label} variant="outline">
-                  {label.charAt(0).toUpperCase() + label.slice(1)}
-                </Badge>
-              ))}
+              {selectedTask.labels &&
+                selectedTask.labels.map((label) => (
+                  <Badge key={label} variant="outline">
+                    {label.charAt(0).toUpperCase() + label.slice(1)}
+                  </Badge>
+                ))}
             </div>
           </div>
 
@@ -66,6 +67,8 @@ const getCorrectedStatus = (status) => {
 };
 
 const getLabels = (stringLabels) => {
-  const labels = stringLabels.split(",");
+  //const labels = stringLabels.split(",");
+  console.log("STRING LABELS", stringLabels);
+  const labels = stringLabels;
   return labels.map((label) => label.trim());
 };

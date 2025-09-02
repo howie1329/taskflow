@@ -12,8 +12,9 @@ import { Input } from "@/components/ui/input";
 import { CreateTaskDialog } from "@/presentation/components/task/CreateTaskDialog";
 import { FilterDropdownCard } from "@/presentation/components/task/FilterDropDownCard";
 import { useTaskUIStore } from "@/presentation/hooks/useTaskUIStore";
+import useFetchAllTasks from "@/hooks/tasks/useFetchAllTasks";
 function Page() {
-  const data = testTaskData;
+  const { data: tasks } = useFetchAllTasks();
   const {
     activeSearch,
     searchQuery,
@@ -30,8 +31,8 @@ function Page() {
   } = useTaskUIStore();
 
   useEffect(() => {
-    getFilteredData(data);
-  }, [searchQuery, data, activeSearch, filterStatuses, getFilteredData]);
+    getFilteredData(tasks);
+  }, [searchQuery, tasks, activeSearch, filterStatuses, getFilteredData]);
 
   return (
     <div className="flex flex-col overflow-hidden h-[93vh]">
