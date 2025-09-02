@@ -3,8 +3,10 @@ import { TaskCard } from "./TaskCard";
 import { useState } from "react";
 import { useTaskUIStore } from "@/presentation/hooks/useTaskUIStore";
 import { DndContext, useDroppable } from "@dnd-kit/core";
+import { usePrefetchSubtasks } from "@/hooks/tasks/subtasks/usePrefetchSubtasks";
 
 export const GeneralKanbanTaskBoard = ({ data }) => {
+  const prefetchSubtasks = usePrefetchSubtasks();
   const { setFilteredData, filteredData } = useTaskUIStore();
   const [boardColumns] = useState([
     { id: "notStarted", title: "Not Started", tasks: [] },
@@ -42,7 +44,11 @@ export const GeneralKanbanTaskBoard = ({ data }) => {
       <DndContext onDragEnd={handleDragEnd}>
         <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 h-full gap-2">
           {filteredBoardColumns(data).map((column) => (
-            <Column key={column.id} column={column} />
+            <Column
+              key={column.id}
+              column={column}
+              prefetchHover={prefetchSubtasks}
+            />
           ))}
         </div>
       </DndContext>
@@ -50,7 +56,7 @@ export const GeneralKanbanTaskBoard = ({ data }) => {
   );
 };
 
-const Column = ({ column }) => {
+const Column = ({ column, prefetchHover }) => {
   const { isOver, setNodeRef } = useDroppable({
     id: column.id,
   });
@@ -69,7 +75,7 @@ const Column = ({ column }) => {
       </h3>
       <div className="flex flex-col gap-1 flex-1 overflow-y-auto min-h-0 p-1">
         {column.tasks.map((task) => (
-          <TaskCard key={task.id} task={task} />
+          <TaskCard key={task.id} task={task} prefetchHover={prefetchHover} />
         ))}
       </div>
     </div>

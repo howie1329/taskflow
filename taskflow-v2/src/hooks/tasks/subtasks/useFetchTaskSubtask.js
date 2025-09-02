@@ -17,12 +17,12 @@ const fetchTaskSubtask = async (taskId) => {
   }
 };
 
-const useFetchTaskSubtask = (taskId) => {
+const useFetchTaskSubtask = (taskId, isOpen = true) => {
   return useQuery({
     queryKey: ["subtasks", taskId],
     queryFn: () => fetchTaskSubtask(taskId),
     staleTime: 60 * 10000,
-    enabled: !!taskId,
+    enabled: !!taskId && isOpen,
   });
 };
 

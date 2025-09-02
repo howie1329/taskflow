@@ -10,7 +10,8 @@ import { useFetchTaskSubtask } from "@/hooks/tasks/subtasks/useFetchTaskSubtask"
 
 export const TaskCardDialog = ({ selectedTask, isOpen, onOpenChange }) => {
   const { data: subtasks, isLoading: subtaskLoading } = useFetchTaskSubtask(
-    selectedTask.id
+    selectedTask.id,
+    isOpen
   );
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
