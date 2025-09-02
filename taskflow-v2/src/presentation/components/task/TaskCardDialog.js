@@ -6,8 +6,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
+import { useFetchTaskSubtask } from "@/hooks/tasks/subtasks/useFetchTaskSubtask";
 
 export const TaskCardDialog = ({ selectedTask, isOpen, onOpenChange }) => {
+  const { data: subtasks, isLoading: subtaskLoading } = useFetchTaskSubtask(
+    selectedTask.id
+  );
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="!w-[50vw] !max-w-[60vw] ">
@@ -42,6 +46,17 @@ export const TaskCardDialog = ({ selectedTask, isOpen, onOpenChange }) => {
           <div className="flex flex-col col-span-1">
             <h3 className="text-sm font-medium">Description:</h3>
             <p className="text-sm text-gray-500">{selectedTask.description}</p>
+          </div>
+          <div>
+            <h3 className="text-sm font-medium">Subtasks:</h3>
+            <div className="flex flex-col gap-2">
+              {subtasks &&
+                subtasks.map((subTask) => (
+                  <p className="text-sm text-gray-500" key={subTask.id}>
+                    {subTask.subtask_name}
+                  </p>
+                ))}
+            </div>
           </div>
         </div>
       </DialogContent>
