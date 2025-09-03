@@ -5,6 +5,7 @@ import { TaskCardDialog } from "./TaskCardDialog";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { useDraggable } from "@dnd-kit/core";
+import { motion } from "motion/react";
 
 export const TaskCard = ({ task, prefetchHover }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -56,7 +57,13 @@ export const TaskCard = ({ task, prefetchHover }) => {
   };
 
   return (
-    <div onMouseEnter={() => prefetchHover(task.id)}>
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.9 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      onMouseEnter={() => prefetchHover(task.id)}
+    >
       <Card
         className="bg-white rounded-lg p-1 flex-shrink-0 cursor-pointer hover:bg-gray-50"
         onClick={() => setIsOpen(true)}
@@ -101,6 +108,6 @@ export const TaskCard = ({ task, prefetchHover }) => {
         isOpen={isOpen}
         onOpenChange={setIsOpen}
       />
-    </div>
+    </motion.div>
   );
 };

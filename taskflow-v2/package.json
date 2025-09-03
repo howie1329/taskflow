@@ -25,6 +25,7 @@
     "dexie": "^4.2.0",
     "lodash": "^4.17.21",
     "lucide-react": "^0.541.0",
+    "motion": "^12.23.12",
     "next": "15.5.0",
     "next-themes": "^0.4.6",
     "postcss": "^8.5.6",
