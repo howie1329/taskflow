@@ -7,7 +7,6 @@ import { toast } from "sonner";
 
 const sendAIMessage = async (message, getToken) => {
   const token = await getToken();
-  console.log("message in sendAIMessage", message);
 
   const response = await axiosClient.post(
     "/api/ai/traditional-ai",
@@ -21,9 +20,7 @@ const sendAIMessage = async (message, getToken) => {
     }
   );
 
-  console.log("response in sendAIMessage", response);
-
-  return response.data;
+  return response.data.data;
 };
 
 const useSendAIMessage = () => {
@@ -37,14 +34,11 @@ const useSendAIMessage = () => {
       return sendAIMessage(variables, getToken);
     },
     onSuccess: (data, variables) => {
-      console.log("data in onSuccess", data.data.conversation_id);
-      console.log("variables in onSuccess", variables);
-
       if (!variables.conversationId) {
         queryClient.invalidateQueries({
           queryKey: ["conversations"],
         });
-        router.push(`/mainview/aichat/${data.data.conversation_id}`);
+        router.push(`/mainview/aichat/${data.conversation_id}`);
       } else {
         queryClient.invalidateQueries({
           queryKey: ["conversation", variables.conversationId],
