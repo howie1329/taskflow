@@ -69,6 +69,11 @@ const ChatInputArea = ({ id }) => {
   const sendAIMessage = useSendAIMessage();
   const [input, setInput] = useState("");
   const buttonActive = input.trim() !== "";
+
+  const handleSend = () => {
+    sendAIMessage.mutate({ newMessage: input, conversationId: id });
+    setInput("");
+  };
   return (
     <div className="flex h-9 w-full rounded-md border gap-2 items-center">
       <input
@@ -81,9 +86,7 @@ const ChatInputArea = ({ id }) => {
         className="h-6 w-6 rounded-full"
         variant="ghost"
         disabled={!buttonActive}
-        onClick={() =>
-          sendAIMessage.mutate({ newMessage: input, conversationId: id })
-        }
+        onClick={handleSend}
       >
         <SendIcon />
       </Button>

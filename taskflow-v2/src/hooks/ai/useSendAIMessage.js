@@ -2,6 +2,7 @@
 import axiosClient from "@/lib/axios/axiosClient";
 import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 const sendAIMessage = async (message, getToken) => {
@@ -20,26 +21,35 @@ const sendAIMessage = async (message, getToken) => {
     }
   );
 
+  console.log("response in sendAIMessage", response);
+
   return response.data;
 };
 
 const useSendAIMessage = () => {
   const { getToken } = useAuth();
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   return useMutation({
     mutationFn: async (variables) => {
-      console.log("message in useSendAIMessage", variables.newMessage);
-      console.log("id", variables.conversationId);
+      // TODO: Append the new message to the chat history... optimistic update
       return sendAIMessage(variables, getToken);
     },
     onSuccess: (data, variables) => {
-      console.log("onSuccess fired with data:", data);
-      console.log("onSuccess fired with variables:", variables);
+      console.log("data in onSuccess", data.data.conversation_id);
+      console.log("variables in onSuccess", variables);
 
-      queryClient.invalidateQueries({
-        queryKey: ["conversation", variables.conversationId],
-      });
+      if (!variables.conversationId) {
+        queryClient.invalidateQueries({
+          queryKey: ["conversations"],
+        });
+        router.push(`/mainview/aichat/${data.data.conversation_id}`);
+      } else {
+        queryClient.invalidateQueries({
+          queryKey: ["conversation", variables.conversationId],
+        });
+      }
 
       toast.success("Message sent successfully", {
         description: new Date().toLocaleString(),
