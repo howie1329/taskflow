@@ -1,28 +1,30 @@
 "use client";
 import React, { useState } from "react";
 import { useParams } from "next/navigation";
-import { mockChatData } from "../../../../../docs/testData/aiChatMockData";
 import { Separator } from "@/components/ui/separator";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { SendIcon } from "lucide-react";
+import useFetchSingleConversation from "@/hooks/ai/useFetchSingleConversation";
+import useSendAIMessage from "@/hooks/ai/useSendAIMessage";
 
 function Page() {
   const { id } = useParams();
-  const chat = mockChatData.conversations.find((chat) => chat.id === id);
+  const { data: conversation } = useFetchSingleConversation(id);
 
-  if (!chat) {
+  if (!conversation) {
     return <div>Chat not found</div>;
   }
 
   return (
     <div className="grid grid-rows-[1fr_12fr_1fr] shadow-lg rounded-lg w-[85%] h-full text-sm px-2">
       <div className="">
-        <h1 className="text-xl font-medium text-center">{chat.title}</h1>
+        <h1 className="text-xl font-medium text-center">
+          {conversation.title || "Test Conversation"}
+        </h1>
         <Separator />
       </div>
       <div className="flex flex-col gap-2 scroll-y-auto h-full overflow-y-auto  ">
-        {chat.messages.map((message) => (
+        {conversation?.map((message) => (
           <div key={message.id}>
             {message.role === "user" ? (
               <RenderUserMessageContent userContent={message} />
@@ -32,18 +34,18 @@ function Page() {
           </div>
         ))}
       </div>
-      <ChatInputArea />
+      <ChatInputArea id={id} />
     </div>
   );
 }
 
 const RenderUserMessageContent = ({ userContent }) => {
-  const timestamp = new Date(userContent.timestamp).toLocaleString();
+  const timestamp = new Date(userContent.created_at).toLocaleString();
   return (
     <div className="flex flex-col gap-1 items-end">
       <p>You</p>
       <div className="text-black bg-gray-300 rounded-md w-fit p-2">
-        {userContent.content.aiResponse}
+        {userContent.content}
       </div>
       <p className="text-gray-500 text-xs">{timestamp}</p>
     </div>
@@ -51,19 +53,20 @@ const RenderUserMessageContent = ({ userContent }) => {
 };
 
 const RenderAssistantMessageContent = ({ assistantContent }) => {
-  const timestamp = new Date(assistantContent.timestamp).toLocaleString();
+  const timestamp = new Date(assistantContent.created_at).toLocaleString();
   return (
     <div className="flex flex-col gap-1 items-start">
       <p>Assistant</p>
       <div className="text-black bg-gray-100 rounded-md w-fit p-2">
-        {assistantContent.content.aiResponse}
+        {assistantContent.content}
       </div>
       <p className="text-gray-500 text-xs">{timestamp}</p>
     </div>
   );
 };
 
-const ChatInputArea = () => {
+const ChatInputArea = ({ id }) => {
+  const sendAIMessage = useSendAIMessage();
   const [input, setInput] = useState("");
   const buttonActive = input.trim() !== "";
   return (
@@ -78,6 +81,9 @@ const ChatInputArea = () => {
         className="h-6 w-6 rounded-full"
         variant="ghost"
         disabled={!buttonActive}
+        onClick={() =>
+          sendAIMessage.mutate({ newMessage: input, conversationId: id })
+        }
       >
         <SendIcon />
       </Button>

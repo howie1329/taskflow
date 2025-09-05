@@ -11,8 +11,10 @@ import {
 import React from "react";
 import Link from "next/link";
 import { mockChatData } from "../../../../../docs/testData/aiChatMockData";
+import useFetchConversations from "@/hooks/ai/useFetchConversations";
 
 export default function AISidebar() {
+  const { data: conversations } = useFetchConversations();
   return (
     <div className="bg-[#f5f5f5] rounded-lg shadow-md ">
       <SidebarHeader />
@@ -32,7 +34,7 @@ export default function AISidebar() {
         <SidebarGroup>
           <SidebarGroupLabel>Chats</SidebarGroupLabel>
           <SidebarMenu>
-            {mockChatData.conversations.map((item) => (
+            {conversations?.map((item) => (
               <SidebarMenuItem key={item.id}>
                 <SidebarMenuButton asChild>
                   <Link href={`/mainview/aichat/${item.id}`}>

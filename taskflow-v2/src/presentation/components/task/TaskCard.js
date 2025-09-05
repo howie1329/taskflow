@@ -78,7 +78,7 @@ export const TaskCard = ({ task, prefetchHover }) => {
             {...listeners}
           />
 
-          {/* Rest of your card content */}
+          {/* Rest of the card content */}
           <div className="flex flex-row justify-between gap-1 items-center">
             <Checkbox checked={task.isCompleted} />
             <h3 className="text-xs font-medium line-clamp-1 flex-1 min-w-0">
