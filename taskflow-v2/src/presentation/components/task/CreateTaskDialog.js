@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import useCreateTask from "@/hooks/tasks/useCreateTask";
 import { useAuth } from "@clerk/nextjs";
+import { format } from "date-fns";
 
 export const CreateTaskDialog = ({ isOpen, onOpenChange }) => {
   const mutation = useCreateTask();
@@ -55,10 +56,9 @@ export const CreateTaskDialog = ({ isOpen, onOpenChange }) => {
       labels: testLabel,
       status,
       priority,
-      date,
+      date: format(date, "P"),
       user_id: userId,
     };
-    formattedTask.date = date.toLocaleDateString();
     mutation.mutate(formattedTask);
     onOpenChange(false);
   };
