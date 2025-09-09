@@ -1,19 +1,29 @@
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { useFetchTaskSubtask } from "@/hooks/tasks/subtasks/useFetchTaskSubtask";
+import useDeleteTask from "@/hooks/tasks/useDeleteTask";
+import { Trash2Icon } from "lucide-react";
 
 export const TaskCardDialog = ({ selectedTask, isOpen, onOpenChange }) => {
   const { data: subtasks, isLoading: subtaskLoading } = useFetchTaskSubtask(
     selectedTask.id,
     isOpen
   );
+  const { mutate: deleteTask } = useDeleteTask();
+
+  const deleteButtonClick = () => {
+    deleteTask(selectedTask.id);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="!w-[50vw] !max-w-[60vw] ">
@@ -67,6 +77,12 @@ export const TaskCardDialog = ({ selectedTask, isOpen, onOpenChange }) => {
             </div>
           </div>
         </div>
+        <Separator />
+        <DialogFooter>
+          <Button variant="outline" size="sm" onClick={deleteButtonClick}>
+            <Trash2Icon className="h-2 w-2" />
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
