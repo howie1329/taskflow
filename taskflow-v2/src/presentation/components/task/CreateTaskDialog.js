@@ -1,3 +1,4 @@
+"use client";
 import {
   Dialog,
   DialogContent,
@@ -15,13 +16,20 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import useCreateTask from "@/hooks/tasks/useCreateTask";
+import { useAuth } from "@clerk/nextjs";
 
 export const CreateTaskDialog = ({ isOpen, onOpenChange }) => {
+  const mutation = useCreateTask();
+  const { userId } = useAuth();
   const [status, setStatus] = useState("notStarted");
-  const [priority, setPriority] = useState("low");
+  const [priority, setPriority] = useState("Low");
   const [date, setDate] = useState(new Date());
   const [subtasks, setSubtasks] = useState([""]); // Start with one empty subtask
-
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [labels, setLabels] = useState("");
+  const [testLabel, setTestLabel] = useState([]);
   // Add new subtask input when user types in the last one
   const handleSubtaskChange = (index, value) => {
     const newSubtasks = [...subtasks];
@@ -40,6 +48,21 @@ export const CreateTaskDialog = ({ isOpen, onOpenChange }) => {
     setSubtasks(filteredSubtasks);
   };
 
+  const handleCreateTask = () => {
+    const formattedTask = {
+      title,
+      description,
+      labels: testLabel,
+      status,
+      priority,
+      date,
+      user_id: userId,
+    };
+    formattedTask.date = date.toLocaleDateString();
+    mutation.mutate(formattedTask);
+    onOpenChange(false);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="!w-[50vw] !max-w-[60vw]">
@@ -49,8 +72,16 @@ export const CreateTaskDialog = ({ isOpen, onOpenChange }) => {
         <Separator />
         <div className="grid grid-cols-3 gap-2 ">
           <div className="col-span-2 gap-2 flex flex-col">
-            <Input placeholder="Task Title" />
-            <Textarea placeholder="Task Description" />
+            <Input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Task Title"
+            />
+            <Textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Task Description"
+            />
 
             <div className="grid grid-cols-3 gap-2">
               <TaskFormStatusDropdown status={status} setStatus={setStatus} />
@@ -61,7 +92,11 @@ export const CreateTaskDialog = ({ isOpen, onOpenChange }) => {
               <TaskFormDateInput date={date} setDate={setDate} />
             </div>
 
-            <Input placeholder="Task Labels" />
+            <Input
+              value={labels}
+              onChange={(e) => setLabels(e.target.value)}
+              placeholder="Task Labels"
+            />
 
             {/* Subtask Area */}
           </div>
@@ -73,7 +108,9 @@ export const CreateTaskDialog = ({ isOpen, onOpenChange }) => {
             />
           </div>
           <div className="col-span-3 ">
-            <Button className="w-full">Create Task</Button>
+            <Button className="w-full" onClick={handleCreateTask}>
+              Create Task
+            </Button>
           </div>
         </div>
       </DialogContent>
@@ -107,7 +144,7 @@ const TaskFormDateInput = ({ date, setDate }) => {
         className="border border-input bg-background hover:bg-accent hover:text-accent-foreground py-1 text-xs font-medium rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
         type="date"
         placeholder="MM/DD/YYYY"
-        value={date ? date.toLocaleDateString() : ""}
+        value={date}
         onChange={(e) => {
           setDate(e.target.value);
         }}
@@ -119,11 +156,11 @@ const TaskFormDateInput = ({ date, setDate }) => {
 const TaskFormPriorityDropdown = ({ priority, setPriority }) => {
   const getPriorityLabel = (priority) => {
     switch (priority) {
-      case "low":
+      case "Low":
         return "Low";
-      case "medium":
+      case "Medium":
         return "Medium";
-      case "high":
+      case "High":
         return "High";
     }
   };
@@ -137,13 +174,13 @@ const TaskFormPriorityDropdown = ({ priority, setPriority }) => {
           </p>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuItem onClick={() => setPriority("low")}>
+          <DropdownMenuItem onClick={() => setPriority("Low")}>
             Low
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setPriority("medium")}>
+          <DropdownMenuItem onClick={() => setPriority("Medium")}>
             Medium
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setPriority("high")}>
+          <DropdownMenuItem onClick={() => setPriority("High")}>
             High
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -157,6 +194,8 @@ const TaskFormStatusDropdown = ({ status, setStatus }) => {
     switch (status) {
       case "notStarted":
         return "Not Started";
+      case "todo":
+        return "Todo";
       case "inProgress":
         return "In Progress";
       case "overdue":
@@ -179,6 +218,9 @@ const TaskFormStatusDropdown = ({ status, setStatus }) => {
         <DropdownMenuContent>
           <DropdownMenuItem onClick={() => setStatus("notStarted")}>
             Not Started
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setStatus("todo")}>
+            Todo
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setStatus("inProgress")}>
             In Progress
