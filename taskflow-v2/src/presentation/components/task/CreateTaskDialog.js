@@ -200,8 +200,8 @@ const TaskFormStatusDropdown = ({ status, setStatus }) => {
         return "In Progress";
       case "overdue":
         return "Overdue";
-      case "completed":
-        return "Completed";
+      case "done":
+        return "Done";
       default:
         return "Not Started";
     }
@@ -226,10 +226,10 @@ const TaskFormStatusDropdown = ({ status, setStatus }) => {
             In Progress
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setStatus("overdue")}>
-            Overdue
+            OverDue
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setStatus("completed")}>
-            Completed
+          <DropdownMenuItem onClick={() => setStatus("done")}>
+            Done
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
