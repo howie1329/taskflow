@@ -1,5 +1,13 @@
 "use client";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import useSendAIMessage from "@/hooks/ai/useSendAIMessage";
 import React, { useState } from "react";
 
@@ -15,13 +23,18 @@ export default function Page() {
 }
 
 const AIChatInputArea = () => {
+  const [aiModel, setAiModel] = useState("gemini-2.5-flash");
   const sendAIMessage = useSendAIMessage();
   const [input, setInput] = useState("");
   const buttonActive = input.trim() !== "";
 
   const handleSend = () => {
     setInput("");
-    sendAIMessage.mutate({ newMessage: input, conversationId: null });
+    sendAIMessage.mutate({
+      newMessage: input,
+      conversationId: null,
+      model: aiModel,
+    });
   };
 
   return (
@@ -33,14 +46,26 @@ const AIChatInputArea = () => {
         value={input}
         onChange={(e) => setInput(e.target.value)}
       />
-      <Button
-        className="self-end"
-        variant="default"
-        disabled={!buttonActive}
-        onClick={handleSend}
-      >
-        Send
-      </Button>
+      <Separator />
+      <div className="flex flex-row gap-2 items-center ">
+        <Select value={aiModel} onValueChange={setAiModel}>
+          <SelectTrigger className="text-xs ">
+            <SelectValue placeholder="AI Model" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="gemini-2.5-flash">Gemini 2.5 Flash</SelectItem>
+            <SelectItem value="gemini-2.5-pro">Gemini 2.5 Pro</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button
+          className="self-end"
+          variant="default"
+          disabled={!buttonActive}
+          onClick={handleSend}
+        >
+          Send
+        </Button>
+      </div>
     </div>
   );
 };
