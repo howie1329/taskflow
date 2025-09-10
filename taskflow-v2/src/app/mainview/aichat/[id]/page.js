@@ -1,26 +1,38 @@
 "use client";
 import React, { useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { SendIcon } from "lucide-react";
+import { SendIcon, Trash2Icon } from "lucide-react";
 import useFetchSingleConversation from "@/hooks/ai/useFetchSingleConversation";
 import useSendAIMessage from "@/hooks/ai/useSendAIMessage";
+import useDeleteConversation from "@/hooks/ai/useDeleteConversation";
 
 function Page() {
   const { id } = useParams();
   const { data: conversation } = useFetchSingleConversation(id);
-
+  const { mutate: deleteConversation } = useDeleteConversation();
+  const router = useRouter();
   if (!conversation) {
     return <div>Chat not found</div>;
   }
 
+  const deleteButtonClick = () => {
+    router.push("/mainview/aichat");
+    deleteConversation(id);
+  };
+
   return (
     <div className="grid grid-rows-[1fr_12fr_1fr] shadow-lg rounded-lg w-[85%] h-full text-sm px-2">
       <div className="">
-        <h1 className="text-xl font-medium text-center">
-          {conversation.title || "Test Conversation"}
-        </h1>
+        <div className="flex flex-row items-center justify-between">
+          <h1 className="text-xl font-medium text-center">
+            {conversation.title || "Test Conversation"}
+          </h1>
+          <Button variant="destructive" size="icon" onClick={deleteButtonClick}>
+            <Trash2Icon className="h-5 w-5" />
+          </Button>
+        </div>
         <Separator />
       </div>
       <div className="flex flex-col gap-2 scroll-y-auto h-full overflow-y-auto  ">
