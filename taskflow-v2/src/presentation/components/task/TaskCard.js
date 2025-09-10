@@ -6,6 +6,8 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { useDraggable } from "@dnd-kit/core";
 import { motion } from "motion/react";
+import useCompleteTask from "@/hooks/tasks/useCompleteTask";
+import useIncompleteTask from "@/hooks/tasks/useIncompleteTask";
 
 export const TaskCard = ({ task, prefetchHover }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -56,6 +58,17 @@ export const TaskCard = ({ task, prefetchHover }) => {
     }
   };
 
+  const { mutate: completeTask } = useCompleteTask();
+  const { mutate: incompleteTask } = useIncompleteTask();
+
+  const handleCompleteToggle = () => {
+    if (task.isCompleted) {
+      incompleteTask(task.id);
+    } else {
+      completeTask(task.id);
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
@@ -80,7 +93,10 @@ export const TaskCard = ({ task, prefetchHover }) => {
 
           {/* Rest of the card content */}
           <div className="flex flex-row justify-between gap-1 items-center">
-            <Checkbox checked={task.isCompleted} />
+            <Checkbox
+              checked={task.isCompleted}
+              onClick={handleCompleteToggle}
+            />
             <h3 className="text-xs font-medium line-clamp-1 flex-1 min-w-0">
               {task.title}
             </h3>
