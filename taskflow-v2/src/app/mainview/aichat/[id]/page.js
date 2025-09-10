@@ -7,6 +7,7 @@ import { SendIcon, Trash2Icon } from "lucide-react";
 import useFetchSingleConversation from "@/hooks/ai/useFetchSingleConversation";
 import useSendAIMessage from "@/hooks/ai/useSendAIMessage";
 import useDeleteConversation from "@/hooks/ai/useDeleteConversation";
+import { TaskCard } from "@/presentation/components/task/TaskCard";
 
 function Page() {
   const { id } = useParams();
@@ -71,6 +72,9 @@ const RenderAssistantMessageContent = ({ assistantContent }) => {
       <p>Assistant</p>
       <div className="text-black bg-gray-100 rounded-md w-fit p-2">
         {assistantContent.content}
+        {assistantContent.metadata?.tasks.map((task) => (
+          <TaskCard task={task} key={task.id} />
+        ))}
       </div>
       <p className="text-gray-500 text-xs">{timestamp}</p>
     </div>
