@@ -7,7 +7,7 @@ import { SendIcon, Trash2Icon } from "lucide-react";
 import useFetchSingleConversation from "@/hooks/ai/useFetchSingleConversation";
 import useSendAIMessage from "@/hooks/ai/useSendAIMessage";
 import useDeleteConversation from "@/hooks/ai/useDeleteConversation";
-import { TaskCard } from "@/presentation/components/task/TaskCard";
+import { AITaskCard } from "@/presentation/components/aiChat/tasks/AITaskCard";
 
 function Page() {
   const { id } = useParams();
@@ -72,9 +72,11 @@ const RenderAssistantMessageContent = ({ assistantContent }) => {
       <p>Assistant</p>
       <div className="text-black bg-gray-100 rounded-md w-fit p-2">
         {assistantContent.content}
-        {assistantContent.metadata?.tasks.map((task) => (
-          <TaskCard task={task} key={task.id} />
-        ))}
+        <div className="flex flex-row gap-2 overflow-x-auto">
+          {assistantContent.metadata?.tasks.map((task) => (
+            <AITaskCard task={task} key={task.id} />
+          ))}
+        </div>
       </div>
       <p className="text-gray-500 text-xs">{timestamp}</p>
     </div>
