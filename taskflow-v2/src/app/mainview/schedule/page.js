@@ -163,7 +163,7 @@ const BrainDumpColumn = ({ data }) => {
       <h2 className="text-sm font-semibold text-gray-700 text-center">
         Brain Dump
       </h2>
-      <div className="flex flex-col gap-1 flex-1 overflow-y-auto h-[83vh] p-1">
+      <div className="flex flex-col gap-1 flex-1 overflow-y-auto h-[83vh]">
         {data.map((task) => (
           <TaskCard key={task.id} task={task} />
         ))}
@@ -190,7 +190,7 @@ const ScheduleColumn = ({ column, eventData }) => {
       <h2 className="text-sm font-semibold text-gray-700 text-center">
         {column.title}
       </h2>
-      <div className="flex flex-col gap-1 flex-1 overflow-y-auto h-[83vh] p-1">
+      <div className="flex flex-col gap-1 flex-1 overflow-y-auto h-[83vh]">
         {eventData
           .filter((event) => event.date === column.id)
           .map((event) => (
