@@ -16,8 +16,6 @@ function Page() {
   const router = useRouter();
   if (!conversation) {
     return <div>Chat not found</div>;
-  } else {
-    console.log("Conversation:", conversation);
   }
 
   const deleteButtonClick = () => {
