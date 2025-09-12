@@ -16,6 +16,8 @@ function Page() {
   const router = useRouter();
   if (!conversation) {
     return <div>Chat not found</div>;
+  } else {
+    console.log("Conversation:", conversation);
   }
 
   const deleteButtonClick = () => {
@@ -28,7 +30,8 @@ function Page() {
       <div className="">
         <div className="flex flex-row items-center justify-between pb-2">
           <h1 className="text-xl font-medium text-center">
-            {conversation.title || "Test Conversation"}
+            {/* Find way to connect actual title not first message of conversation array */}
+            {conversation[0].content || "Missing Title of Conversation"}
           </h1>
           <Button variant="destructive" size="icon" onClick={deleteButtonClick}>
             <Trash2Icon className="h-5 w-5" />
