@@ -9,7 +9,7 @@ const sendAIMessage = async (message, getToken) => {
   const token = await getToken();
 
   const response = await axiosClient.post(
-    "/api/ai/traditional-ai",
+    "/api/ai/ai-chat",
     {
       NewMessage: message.newMessage,
       conversationId: message.conversationId,
