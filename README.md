@@ -1,215 +1,36 @@
-# TaskFlow
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-TaskFlow is a modern, all-in-one productivity application that combines task management, note-taking, and calendar functionality into a seamless experience. Built with Next.js, Node.js, and modern web technologies, TaskFlow helps individuals and teams stay organized and productive.
+## Getting Started
 
-## 🌟 Features
-
-### Core Features
-
-- **Task Management**
-
-  - Create, organize, and track tasks
-  - Subtask support
-  - Priority levels and due dates
-  - Task status tracking
-  - Task categorization
-
-- **Note Taking**
-
-  - Rich text editing
-  - Note organization
-  - Quick capture
-  - Search functionality
-  - Note sharing
-
-- **Calendar Integration**
-
-  - Task visualization
-  - Event management
-  - Multiple calendar views
-  - Due date tracking
-  - Schedule management
-
-- **Dashboard**
-  - Task overview
-  - Quick actions
-  - Recent activity
-  - Calendar preview
-  - Productivity insights
-
-### Technical Features
-
-- Modern React with Next.js
-- Real-time updates with WebSocket
-- Responsive design
-- Progressive Web App (PWA)
-- Secure authentication with Clerk
-- Database with Supabase
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js (v18 or higher)
-- npm or yarn
-- Git
-- Docker (optional)
-
-### Installation
-
-1. Clone the repository:
+First, run the development server:
 
 ```bash
-git clone https://github.com/yourusername/taskflow.git
-cd taskflow
-```
-
-2. Install dependencies:
-
-```bash
-# Frontend
-cd taskflow
-npm install
-
-# Backend
-cd ../taskflow-backend
-npm install
-```
-
-3. Set up environment variables:
-
-```bash
-# Frontend (.env.local)
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_key
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_key
-
-# Backend (.env)
-PORT=3001
-DATABASE_URL=your_database_url
-JWT_SECRET=your_jwt_secret
-```
-
-4. Start the development servers:
-
-```bash
-# Frontend
-cd taskflow
 npm run dev
-
-# Backend
-cd ../taskflow-backend
-npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## 🏗️ Project Structure
+You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
 
-```
-taskflow/
-├── src/
-│   ├── app/              # Next.js app directory
-│   ├── components/       # React components
-│   ├── lib/             # Utility functions
-│   ├── styles/          # Global styles
-│   └── types/           # TypeScript types
-├── public/              # Static assets
-└── package.json         # Frontend dependencies
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-taskflow-backend/
-├── controllers/         # Route controllers
-├── middleware/          # Custom middleware
-├── routes/             # API routes
-├── services/           # Business logic
-├── utils/              # Utility functions
-└── package.json        # Backend dependencies
-```
+## Learn More
 
-## 🛠️ Development
+To learn more about Next.js, take a look at the following resources:
 
-### Code Style
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-- ESLint for code linting
-- Prettier for code formatting
-- TypeScript for type safety
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-### Git Workflow
+## Deploy on Vercel
 
-1. Create a new branch for each feature
-2. Write meaningful commit messages
-3. Submit a pull request for review
-4. Ensure all tests pass before merging
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-### Testing
-
-```bash
-# Frontend
-npm run test
-
-# Backend
-npm run test
-```
-
-## 📦 Deployment
-
-### Frontend
-
-- Vercel (recommended)
-- Netlify
-- AWS Amplify
-
-### Backend
-
-- Docker
-- AWS EC2
-- Heroku
-
-## 🔒 Security
-
-- Authentication with Clerk
-- HTTPS encryption
-- Input validation
-- Rate limiting
-- CORS configuration
-- Security headers
-
-## 📈 Performance
-
-- Code splitting
-- Image optimization
-- Caching strategies
-- Lazy loading
-- Performance monitoring
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- [Next.js](https://nextjs.org/)
-- [Clerk](https://clerk.dev/)
-- [Supabase](https://supabase.io/)
-- [Tailwind CSS](https://tailwindcss.com/)
-- [Socket.io](https://socket.io/)
-
-## 📞 Support
-
-For support, email support@taskflow.com or join our [Discord community](https://discord.gg/taskflow).
-
-## 🔮 Roadmap
-
-See our [MVP Plan](src/app/docs/MVP.md) and [Post-MVP Plan](src/app/docs/PostMVP.md) for upcoming features and improvements.
-
-```
-
-```
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
