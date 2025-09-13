@@ -8,8 +8,10 @@ import { useDraggable } from "@dnd-kit/core";
 import { motion } from "motion/react";
 import useCompleteTask from "@/hooks/tasks/useCompleteTask";
 import useIncompleteTask from "@/hooks/tasks/useIncompleteTask";
+import { usePrefetchSubtasks } from "@/hooks/tasks/subtasks/usePrefetchSubtasks";
 
-export const TaskCard = ({ task, prefetchHover }) => {
+export const TaskCard = ({ task }) => {
+  const prefetchHover = usePrefetchSubtasks();
   const [isOpen, setIsOpen] = useState(false);
   const { attributes, listeners, setNodeRef, transition, transform } =
     useDraggable({
