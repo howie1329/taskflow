@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { SendIcon, Trash2Icon } from "lucide-react";
+import { Loader2Icon, SendIcon, Trash2Icon } from "lucide-react";
 import useFetchSingleConversation from "@/hooks/ai/useFetchSingleConversation";
 import useSendAIMessage from "@/hooks/ai/useSendAIMessage";
 import useDeleteConversation from "@/hooks/ai/useDeleteConversation";
@@ -104,10 +104,14 @@ const ChatInputArea = ({ id }) => {
       <Button
         className="h-6 w-6 rounded-full"
         variant="ghost"
-        disabled={!buttonActive}
+        disabled={!buttonActive || sendAIMessage.isPending}
         onClick={handleSend}
       >
-        <SendIcon />
+        {sendAIMessage.isPending ? (
+          <Loader2Icon className="h-4 w-4 animate-spin" />
+        ) : (
+          <SendIcon />
+        )}
       </Button>
     </div>
   );

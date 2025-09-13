@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import useSendAIMessage from "@/hooks/ai/useSendAIMessage";
+import { Loader2Icon } from "lucide-react";
 import React, { useState } from "react";
 
 export default function Page() {
@@ -64,10 +65,14 @@ const AIChatInputArea = () => {
         <Button
           variant="default"
           size="sm"
-          disabled={!buttonActive}
+          disabled={!buttonActive || sendAIMessage.isPending}
           onClick={handleSend}
         >
-          Send
+          {sendAIMessage.isPending ? (
+            <Loader2Icon className="h-4 w-4 animate-spin" />
+          ) : (
+            "Send"
+          )}
         </Button>
       </div>
     </div>

@@ -6,12 +6,13 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarSeparator,
 } from "@/components/ui/sidebar";
 
-import React from "react";
+import React, { Suspense } from "react";
 import Link from "next/link";
-import { mockChatData } from "../../../../../docs/testData/aiChatMockData";
 import useFetchConversations from "@/hooks/ai/useFetchConversations";
+import { MessageCircleIcon } from "lucide-react";
 
 export default function AISidebar() {
   const { data: conversations } = useFetchConversations();
@@ -31,20 +32,27 @@ export default function AISidebar() {
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
-        <SidebarGroup>
-          <SidebarGroupLabel>Chats</SidebarGroupLabel>
-          <SidebarMenu>
-            {conversations?.map((item) => (
-              <SidebarMenuItem key={item.id}>
-                <SidebarMenuButton asChild>
-                  <Link href={`/mainview/aichat/${item.id}`}>
-                    <span>{item.title}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarGroup>
+        <SidebarSeparator />
+        <Suspense fallback={<div>Loading...</div>}>
+          <SidebarGroup>
+            <SidebarGroupLabel>Chats</SidebarGroupLabel>
+            <SidebarMenu>
+              {conversations?.map((item) => (
+                <SidebarMenuItem key={item.id}>
+                  <SidebarMenuButton asChild>
+                    <Link href={`/mainview/aichat/${item.id}`}>
+                      <MessageCircleIcon />
+                      <span>
+                        {item.title.charAt(0).toUpperCase() +
+                          item.title.slice(1)}
+                      </span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroup>
+        </Suspense>
       </SidebarContent>
     </div>
   );
