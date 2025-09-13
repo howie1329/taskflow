@@ -13,7 +13,7 @@ import {
 import React, { Suspense } from "react";
 import Link from "next/link";
 import useFetchConversations from "@/hooks/ai/useFetchConversations";
-import { MessageCircleIcon } from "lucide-react";
+import { MessageCircleIcon, PlusIcon } from "lucide-react";
 
 export default function AISidebar() {
   const { data: conversations } = useFetchConversations();
@@ -26,24 +26,24 @@ export default function AISidebar() {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild>
-                <Link href={`/mainview/aichat`}>
-                  <span>New Chat</span>
+                <Link className="flex justify-center" href={`/mainview/aichat`}>
+                  <PlusIcon className="w-4 h-4" />
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
-        <SidebarSeparator />
+        <SidebarSeparator className=" max-w-[88%]" />
         <Suspense fallback={<div>Loading...</div>}>
           <SidebarGroup>
             <SidebarGroupLabel>Chats</SidebarGroupLabel>
-            <SidebarMenu>
+            <SidebarMenu className="flex flex-col gap-1 h-[73vh] overflow-y-auto">
               {conversations?.map((item) => (
                 <SidebarMenuItem key={item.id}>
                   <SidebarMenuButton asChild>
                     <Link href={`/mainview/aichat/${item.id}`}>
                       <MessageCircleIcon />
-                      <span>
+                      <span className="line-clamp-1 text-ellipsis text-xs">
                         {item.title.charAt(0).toUpperCase() +
                           item.title.slice(1)}
                       </span>
