@@ -7,9 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import { motion } from "motion/react";
 import useCompleteTask from "@/hooks/tasks/useCompleteTask";
 import useIncompleteTask from "@/hooks/tasks/useIncompleteTask";
+import { usePrefetchSubtasks } from "@/hooks/tasks/subtasks/usePrefetchSubtasks";
 
 export const AITaskCard = ({ task }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const prefetchHover = usePrefetchSubtasks();
 
   const getPriorityColor = (priority) => {
     switch (priority?.toLowerCase()) {
@@ -62,6 +64,7 @@ export const AITaskCard = ({ task }) => {
       <Card
         className="bg-white rounded-lg p-1 flex-shrink-0 cursor-pointer hover:bg-gray-50"
         onClick={() => setIsOpen(true)}
+        onMouseEnter={() => prefetchHover(task.id)}
       >
         <CardContent className="flex flex-col gap-1 p-1">
           {/* Rest of the card content */}
