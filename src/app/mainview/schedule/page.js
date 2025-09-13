@@ -1,7 +1,6 @@
 "use client";
 import { Separator } from "@/components/ui/separator";
 import React, { useEffect, useState } from "react";
-import { testTaskData } from "../../../../docs/testData/testTaskData";
 import { Button } from "@/components/ui/button";
 import {
   EyeIcon,
@@ -10,16 +9,11 @@ import {
   PlusIcon,
   TimerResetIcon,
 } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { TaskCard } from "@/presentation/components/task/TaskCard";
-import { DndContext, useDroppable } from "@dnd-kit/core";
+import { Card } from "@/components/ui/card";
+import { DndContext } from "@dnd-kit/core";
 import useFetchAllTasks from "@/hooks/tasks/useFetchAllTasks";
+import { ScheduleColumn } from "@/presentation/components/schedule/ScheduleColumn";
+import { BrainDumpColumn } from "@/presentation/components/schedule/BrainDumpColumn";
 
 const updateColumns = (newButtonIndex, showBrainDump) => {
   const columns = [];
@@ -88,6 +82,7 @@ function Page() {
     <div className="flex flex-col overflow-hidden h-[93vh]">
       <div className="flex-shrink-0 p-1 flex flex-row justify-between items-center gap-1 ">
         <h1 className="text-lg font-bold ">Schedule</h1>
+        {/* Button Group for Brain Dump and Date Columns */}
         <Card className="flex flex-row justify-between items-center p-1 gap-1 rounded-sm relative">
           <Button
             variant="outline"
@@ -143,87 +138,4 @@ function Page() {
   );
 }
 
-const BrainDumpColumn = ({ data }) => {
-  // Loading State If No Data
-  if (!data) {
-    return (
-      <div className="col-span-1 bg-[#fafafa] shadow-md rounded-lg p-1">
-        <h2 className="text-sm font-semibold text-gray-700 text-center">
-          Brain Dump
-        </h2>
-        <div className="flex flex-col gap-1 flex-1 overflow-y-auto min-h-0 p-1">
-          <p className="text-xs text-gray-500 text-center">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="col-span-1 bg-[#fafafa] shadow-md rounded-lg p-1">
-      <h2 className="text-sm font-semibold text-gray-700 text-center">
-        Brain Dump
-      </h2>
-      <div className="flex flex-col gap-1 flex-1 overflow-y-auto h-[83vh]">
-        {data.map((task) => (
-          <TaskCard key={task.id} task={task} />
-        ))}
-      </div>
-    </div>
-  );
-};
-
-const ScheduleColumn = ({ column, eventData }) => {
-  const { isOver, setNodeRef } = useDroppable({
-    id: column.id,
-  });
-
-  const style = {
-    backgroundColor: isOver ? "lightgreen" : undefined,
-  };
-  return (
-    <div
-      key={column.id}
-      className="col-span-1 bg-[#fafafa] shadow-md rounded-lg p-1"
-      ref={setNodeRef}
-      style={style}
-    >
-      <h2 className="text-sm font-semibold text-gray-700 text-center">
-        {column.title}
-      </h2>
-      <div className="flex flex-col gap-1 flex-1 overflow-y-auto h-[83vh]">
-        {eventData
-          .filter((event) => event.date === column.id)
-          .map((event) => (
-            <EventCard key={event.id} event={event} />
-          ))}
-      </div>
-    </div>
-  );
-};
 export default Page;
-
-const EventCard = ({ event }) => {
-  return (
-    <Card className="bg-white rounded-lg p-1 flex-shrink-0 cursor-pointer hover:bg-gray-50">
-      <CardContent className="flex flex-col gap-1 p-1">
-        <h3 className="text-xs font-medium line-clamp-1 flex-1 min-w-0">
-          {event.task.title}
-        </h3>
-        <p className="text-xs text-gray-500 line-clamp-2">
-          {event.task.description}
-        </p>
-        <div className="flex flex-row gap-1">
-          <p className="text-xs text-gray-500 line-clamp-1">
-            Time: {event.time}
-          </p>
-          <p className="text-xs text-gray-500 line-clamp-1">
-            Estimated Time: {event.estimatedTime} minutes
-          </p>
-          <p className="text-xs text-gray-500 line-clamp-1">
-            Actual Time: {event.actualTime} minutes
-          </p>
-        </div>
-      </CardContent>
-    </Card>
-  );
-};

@@ -2,7 +2,6 @@
 import { Separator } from "@/components/ui/separator";
 import React, { useEffect } from "react";
 import { GeneralKanbanTaskBoard } from "@/presentation/components/task/GeneralKanbanTaskBoard";
-import { testTaskData } from "../../../../docs/testData/testTaskData";
 import { Button } from "@/components/ui/button";
 import { PlusIcon, SearchIcon } from "lucide-react";
 import { Card } from "@/components/ui/card";
