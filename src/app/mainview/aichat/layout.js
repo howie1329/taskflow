@@ -1,4 +1,3 @@
-"use client";
 import React from "react";
 import AISidebar from "@/presentation/components/aiChat/layout/AISidebar";
 
