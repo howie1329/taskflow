@@ -24,12 +24,14 @@ function Page() {
   };
 
   return (
-    <div className="grid grid-rows-[1fr_12fr_1fr] shadow-lg rounded-lg w-[98%] h-full text-sm px-2">
+    <div className="grid grid-rows-[1fr_12fr_1fr] bg-white shadow-lg rounded-lg w-[98%] h-full text-sm p-2">
       <div className="">
         <div className="flex flex-row items-center justify-between pb-2">
           <h1 className="text-xl font-medium text-center">
             {/* Find way to connect actual title not first message of conversation array */}
-            {conversation[0].content || "Missing Title of Conversation"}
+            {conversation[0].content.charAt(0).toUpperCase() +
+              conversation[0].content.slice(1) ||
+              "Missing Title of Conversation"}
           </h1>
           <Button variant="destructive" size="icon" onClick={deleteButtonClick}>
             <Trash2Icon className="h-5 w-5" />
