@@ -35,7 +35,7 @@ function Page() {
   };
 
   return (
-    <div className="grid grid-rows-[1fr_12fr_1fr] bg-white shadow-lg rounded-lg w-[98%] h-full text-sm p-2">
+    <div className="grid grid-rows-[1fr_12fr_1fr] w-[98%] h-full text-sm p-2">
       <div className="">
         <div className="flex flex-row items-center justify-between pb-2">
           <h1 className="text-xl font-medium text-center">
@@ -79,7 +79,7 @@ const RenderUserMessageContent = ({ userContent }) => {
   return (
     <div className="flex flex-col gap-1 items-end">
       <p className="text-xs font-medium">You</p>
-      <div className="text-black bg-gray-300 rounded-md w-fit px-2 py-1 text-sm">
+      <div className="text-black bg-white rounded-md w-fit px-2 py-1 text-sm">
         {userContent.content}
       </div>
       <p className="text-gray-500 text-xs">{timestamp}</p>
@@ -92,7 +92,7 @@ const RenderAssistantMessageContent = ({ assistantContent }) => {
   return (
     <div className="flex flex-col gap-1 items-start">
       <p className="text-xs font-medium">Assistant</p>
-      <div className="text-black bg-gray-100 rounded-md w-fit px-2 py-1 text-sm">
+      <div className="text-black w-fit px-2 py-1 text-sm">
         {assistantContent.content}
         <div className="flex flex-row gap-2 overflow-x-auto">
           {assistantContent.metadata?.tasks.map((task) => (
@@ -115,7 +115,7 @@ const ChatInputArea = ({ id }) => {
     setInput("");
   };
   return (
-    <div className="flex h-9 w-full rounded-md border gap-2 items-center">
+    <div className="flex h-9 w-full rounded-md border gap-2 items-center bg-white">
       <input
         className=" h-full w-full px-2 border-none outline-none focus:border-none focus:outline-none"
         placeholder="Add new message"
