@@ -9,7 +9,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
+import useCompleteSubtask from "@/hooks/tasks/subtasks/useCompleteSubtask";
 import { useFetchTaskSubtask } from "@/hooks/tasks/subtasks/useFetchTaskSubtask";
+import useIncompleteSubtask from "@/hooks/tasks/subtasks/useIncompleteSubtask";
 import useDeleteTask from "@/hooks/tasks/useDeleteTask";
 import { Trash2Icon } from "lucide-react";
 
@@ -19,6 +21,16 @@ export const TaskCardDialog = ({ selectedTask, isOpen, onOpenChange }) => {
     isOpen
   );
   const { mutate: deleteTask } = useDeleteTask();
+  const { mutate: completeSubtask } = useCompleteSubtask();
+  const { mutate: incompleteSubtask } = useIncompleteSubtask();
+
+  const handleCheckedChange = (subtaskId, isComplete) => {
+    if (isComplete) {
+      incompleteSubtask({ id: subtaskId, taskId: selectedTask.id });
+    } else {
+      completeSubtask({ id: subtaskId, taskId: selectedTask.id });
+    }
+  };
 
   const deleteButtonClick = () => {
     deleteTask(selectedTask.id);
@@ -68,7 +80,16 @@ export const TaskCardDialog = ({ selectedTask, isOpen, onOpenChange }) => {
                     className="flex flex-row items-center gap-2"
                     key={subTask.id}
                   >
-                    <Checkbox key={subTask.id} checked={subTask.is_complete} />
+                    <Checkbox
+                      key={subTask.id}
+                      checked={subTask.is_complete}
+                      onCheckedChange={(e) => {
+                        handleCheckedChange(subTask.id, subTask.is_complete);
+                      }}
+                      onClick={(e) =>
+                        handleCheckedChange(subTask.id, subTask.is_complete)
+                      }
+                    />
                     <p className="text-sm text-gray-500" key={subTask.id}>
                       {subTask.subtask_name}
                     </p>
