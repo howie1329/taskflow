@@ -16,7 +16,7 @@ const sendAIMessage = async (message, getToken) => {
       model: message.model,
     },
     {
-      headers: { Authorization: "Bearer " + token },
+      headers: { Authorization: token },
       withCredentials: true,
     }
   );
