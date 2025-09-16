@@ -3,7 +3,12 @@ import React, { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { EllipsisIcon, Loader2Icon, SendIcon, Trash2Icon } from "lucide-react";
+import {
+  ArrowUpIcon,
+  EllipsisIcon,
+  Loader2Icon,
+  Trash2Icon,
+} from "lucide-react";
 import useFetchSingleConversation from "@/hooks/ai/useFetchSingleConversation";
 import useSendAIMessage from "@/hooks/ai/useSendAIMessage";
 import useDeleteConversation from "@/hooks/ai/useDeleteConversation";
@@ -73,8 +78,8 @@ const RenderUserMessageContent = ({ userContent }) => {
   const timestamp = new Date(userContent.created_at).toLocaleString();
   return (
     <div className="flex flex-col gap-1 items-end">
-      <p>You</p>
-      <div className="text-black bg-gray-300 rounded-md w-fit p-2">
+      <p className="text-xs font-medium">You</p>
+      <div className="text-black bg-gray-300 rounded-md w-fit px-2 py-1 text-sm">
         {userContent.content}
       </div>
       <p className="text-gray-500 text-xs">{timestamp}</p>
@@ -86,8 +91,8 @@ const RenderAssistantMessageContent = ({ assistantContent }) => {
   const timestamp = new Date(assistantContent.created_at).toLocaleString();
   return (
     <div className="flex flex-col gap-1 items-start">
-      <p>Assistant</p>
-      <div className="text-black bg-gray-100 rounded-md w-fit p-2">
+      <p className="text-xs font-medium">Assistant</p>
+      <div className="text-black bg-gray-100 rounded-md w-fit px-2 py-1 text-sm">
         {assistantContent.content}
         <div className="flex flex-row gap-2 overflow-x-auto">
           {assistantContent.metadata?.tasks.map((task) => (
@@ -126,7 +131,7 @@ const ChatInputArea = ({ id }) => {
         {sendAIMessage.isPending ? (
           <Loader2Icon className="h-4 w-4 animate-spin" />
         ) : (
-          <SendIcon />
+          <ArrowUpIcon className="h-4 w-4" />
         )}
       </Button>
     </div>

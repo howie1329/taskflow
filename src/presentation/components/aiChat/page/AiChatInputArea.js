@@ -8,7 +8,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Loader2Icon } from "lucide-react";
+import { ArrowUpIcon, Loader2Icon } from "lucide-react";
 import { useState } from "react";
 import useSendAIMessage from "@/hooks/ai/useSendAIMessage";
 
@@ -60,7 +60,7 @@ export const AIChatInputArea = () => {
           {sendAIMessage.isPending ? (
             <Loader2Icon className="h-4 w-4 animate-spin" />
           ) : (
-            "Send"
+            <ArrowUpIcon className="h-4 w-4" />
           )}
         </Button>
       </div>
