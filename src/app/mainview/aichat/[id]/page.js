@@ -3,11 +3,17 @@ import React, { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { Loader2Icon, SendIcon, Trash2Icon } from "lucide-react";
+import { EllipsisIcon, Loader2Icon, SendIcon, Trash2Icon } from "lucide-react";
 import useFetchSingleConversation from "@/hooks/ai/useFetchSingleConversation";
 import useSendAIMessage from "@/hooks/ai/useSendAIMessage";
 import useDeleteConversation from "@/hooks/ai/useDeleteConversation";
 import { AITaskCard } from "@/presentation/components/aiChat/tasks/AITaskCard";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 function Page() {
   const { id } = useParams();
@@ -33,9 +39,17 @@ function Page() {
               conversation[0].content.slice(1) ||
               "Missing Title of Conversation"}
           </h1>
-          <Button variant="destructive" size="icon" onClick={deleteButtonClick}>
-            <Trash2Icon className="h-5 w-5" />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger>
+              <EllipsisIcon className="h-5 w-5" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={deleteButtonClick}>
+                <Trash2Icon className="h-5 w-5" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
         <Separator />
       </div>
