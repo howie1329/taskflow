@@ -1,9 +1,9 @@
 "use client";
 import { Separator } from "@/components/ui/separator";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { GeneralKanbanTaskBoard } from "@/presentation/components/task/GeneralKanbanTaskBoard";
 import { Button } from "@/components/ui/button";
-import { PlusIcon, SearchIcon } from "lucide-react";
+import { PlusIcon, SearchIcon, SparklesIcon, XIcon } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { FilterIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,7 @@ import { useTaskUIStore } from "@/presentation/hooks/useTaskUIStore";
 import useFetchAllTasks from "@/hooks/tasks/useFetchAllTasks";
 function Page() {
   const { data: tasks } = useFetchAllTasks();
+  const [isMiniAIChatOpen, setIsMiniAIChatOpen] = useState(false);
   const {
     activeSearch,
     searchQuery,
@@ -81,6 +82,14 @@ function Page() {
               onFilterChange={handleStatusFilterChange}
             />
           )}
+          {/* Mini AI Chat Feature Button */}
+          <Button
+            variant="outline"
+            className="p-1 h-6 w-6 rounded-full"
+            onClick={() => setIsMiniAIChatOpen(!isMiniAIChatOpen)}
+          >
+            <SparklesIcon className="w-2 h-2" />
+          </Button>
         </Card>
       </div>
       <Separator />
@@ -92,8 +101,33 @@ function Page() {
         isOpen={isCreateTaskOpen}
         onOpenChange={setIsCreateTaskOpen}
       />
+      {isMiniAIChatOpen && (
+        <div className="">
+          <MiniAIChat onClose={() => setIsMiniAIChatOpen(false)} />
+        </div>
+      )}
     </div>
   );
 }
+
+const MiniAIChat = ({ onClose }) => {
+  return (
+    <div className="absolute bottom-5 right-5 z-50 flex flex-col h-[50vh] w-[20vw] bg-card rounded-2xl border shadow-2xl p-2">
+      <div className="flex flex-row justify-between items-center sticky top-0 border-b border-border">
+        <p className="text-sm font-medium">TaskFlow Chat Agent</p>
+        <Button
+          variant="outline"
+          className="p-1 h-6 w-6 rounded-full"
+          onClick={onClose}
+        >
+          <XIcon className="w-2 h-2" />
+        </Button>
+      </div>
+      <div className="flex-1 overflow-y-auto">
+        <p>Hello, how can I help you today?</p>
+      </div>
+    </div>
+  );
+};
 
 export default Page;
