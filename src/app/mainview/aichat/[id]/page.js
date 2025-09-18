@@ -99,18 +99,18 @@ const RenderAssistantMessageContent = ({ assistantContent }) => {
     <div className="flex flex-col gap-1 items-start">
       <div className="flex flex-row gap-2 items-center">
         <p className="text-xs font-medium">Assistant</p>
-        {assistantContent?.metadata?.analysis && (
+        {assistantContent?.ui?.analysis && (
           <Tooltip key={"analysis"}>
             <TooltipTrigger>
               <InfoIcon className="w-4 h-4" />
             </TooltipTrigger>
             <TooltipContent className="max-w-[300px]">
               <p className="text-xs font-medium">Analysis</p>
-              <p className="text-xs">{assistantContent?.metadata?.analysis}</p>
+              <p className="text-xs">{assistantContent?.ui?.analysis}</p>
             </TooltipContent>
           </Tooltip>
         )}
-        {assistantContent?.metadata?.suggestions && (
+        {assistantContent?.ui?.suggestions && (
           <Tooltip key={"suggestions"}>
             <TooltipTrigger>
               <InfoIcon className="w-4 h-4" />
@@ -118,7 +118,7 @@ const RenderAssistantMessageContent = ({ assistantContent }) => {
             <TooltipContent className="max-w-[300px]">
               <p className="text-xs font-medium">Suggestions</p>
               <p className="text-xs">
-                {assistantContent?.metadata?.suggestions.map((suggestion) => (
+                {assistantContent?.ui?.suggestions.map((suggestion) => (
                   <p key={suggestion}>{suggestion}</p>
                 ))}
               </p>
@@ -129,7 +129,7 @@ const RenderAssistantMessageContent = ({ assistantContent }) => {
       <div className="text-black w-fit px-2 py-1 text-sm">
         {assistantContent.content}
         <div className="flex flex-row gap-2 overflow-x-auto">
-          {assistantContent.metadata?.tasks.map((task) => (
+          {assistantContent.ui?.tasks.map((task) => (
             <AITaskCard task={task} key={task.id} />
           ))}
         </div>
