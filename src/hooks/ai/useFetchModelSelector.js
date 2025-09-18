@@ -2,7 +2,7 @@ import axiosClient from "@/lib/axios/axiosClient";
 import { useQuery } from "@tanstack/react-query";
 
 const fetchModelSelector = async () => {
-  const response = await axiosClient.get("https://openrouter.ai/api/v1/models");
+  const response = await axiosClient.get("/api/ai/models");
   return response.data.data;
 };
 

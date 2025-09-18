@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { ArrowUpIcon, Loader2Icon } from "lucide-react";
 import { useState } from "react";
 import useSendAIMessage from "@/hooks/ai/useSendAIMessage";
+import { AIModelSelector } from "../AIModelSelector";
 
 export const AIChatInputArea = () => {
   const [aiModel, setAiModel] = useState("gemini-2.5-flash");
@@ -64,6 +65,7 @@ export const AIChatInputArea = () => {
           )}
         </Button>
       </div>
+      <AIModelSelector />
     </div>
   );
 };
