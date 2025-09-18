@@ -43,6 +43,10 @@ function Page() {
     deleteConversation(id);
   };
 
+  const lastUserMessage = conversation
+    .filter((message) => message.role === "user")
+    .at(-1);
+
   return (
     <div className="grid grid-rows-[1fr_12fr_1fr] w-[98%] h-[93vh] text-sm ">
       <div className="">
@@ -78,7 +82,7 @@ function Page() {
           </div>
         ))}
       </div>
-      <ChatInputArea id={id} />
+      <ChatInputArea id={id} model={lastUserMessage?.model} />
     </div>
   );
 }
@@ -144,8 +148,8 @@ const RenderAssistantMessageContent = ({ assistantContent }) => {
   );
 };
 
-const ChatInputArea = ({ id }) => {
-  const [aiModel, setAiModel] = useState();
+const ChatInputArea = ({ id, model }) => {
+  const [aiModel, setAiModel] = useState(model);
   const sendAIMessage = useSendAIMessage();
   const [input, setInput] = useState("");
   const buttonActive = input.trim() !== "";
