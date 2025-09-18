@@ -3,7 +3,13 @@ import { Separator } from "@/components/ui/separator";
 import React, { useEffect, useState } from "react";
 import { GeneralKanbanTaskBoard } from "@/presentation/components/task/GeneralKanbanTaskBoard";
 import { Button } from "@/components/ui/button";
-import { PlusIcon, SearchIcon, SparklesIcon, XIcon } from "lucide-react";
+import {
+  PlusIcon,
+  SearchIcon,
+  SendIcon,
+  SparklesIcon,
+  XIcon,
+} from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { FilterIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -13,6 +19,9 @@ import { FilterDropdownCard } from "@/presentation/components/task/FilterDropDow
 import { useTaskUIStore } from "@/presentation/hooks/useTaskUIStore";
 import useFetchAllTasks from "@/hooks/tasks/useFetchAllTasks";
 import { motion } from "motion/react";
+import useFetchSingleConversation from "@/hooks/ai/useFetchSingleConversation";
+import { useAuth } from "@clerk/nextjs";
+import useSendAIMessage from "@/hooks/ai/useSendAIMessage";
 function Page() {
   const { data: tasks } = useFetchAllTasks();
   const [isMiniAIChatOpen, setIsMiniAIChatOpen] = useState(false);
@@ -110,13 +119,26 @@ function Page() {
 }
 
 const MiniAIChat = ({ onClose }) => {
+  const { userId } = useAuth();
+  const { data: messages } = useFetchSingleConversation(`task-agent-${userId}`);
+  const { mutate: sendMessage } = useSendAIMessage();
+  const [message, setMessage] = useState("");
+  const handleSendMessage = (message) => {
+    sendMessage({
+      newMessage: message,
+      conversationId: `task-agent-${userId}`,
+      model: "gpt-4o-mini",
+    });
+    setMessage("");
+  };
+  console.log(messages);
   return (
     <motion.div
       initial={{ opacity: 0, x: 100 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 100 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
-      className="absolute bottom-5 right-5 z-50 flex flex-col h-[50vh] w-[20vw] bg-card rounded-2xl border shadow-2xl p-2"
+      className="absolute bottom-50 right-5 z-50 flex flex-col h-[50vh] w-[25vw] bg-card rounded-2xl border shadow-2xl p-2 gap-2"
     >
       <div className="flex flex-row justify-between items-center sticky top-0 border-b border-border">
         <p className="text-sm font-medium">TaskFlow Chat Agent</p>
@@ -129,7 +151,29 @@ const MiniAIChat = ({ onClose }) => {
         </Button>
       </div>
       <div className="flex-1 overflow-y-auto">
-        <p>Hello, how can I help you today?</p>
+        {messages?.map((message) => (
+          <div key={message.id}>
+            <p>{message.content}</p>
+          </div>
+        ))}
+      </div>
+      <Separator />
+      <div className="flex flex-row justify-between items-center gap-2 rounded-lg shadow-lg bg-gray-100 ">
+        <input
+          className="w-full h-10 p-2 text-sm focus:outline-none focus:ring-0 "
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          placeholder="Ask me anything"
+        />
+
+        <Button
+          variant="default"
+          className="p-1 h-6 w-6 rounded-full"
+          onClick={() => handleSendMessage(message)}
+          disabled={message.length === 0}
+        >
+          <SendIcon className="w-2 h-2" />
+        </Button>
       </div>
     </motion.div>
   );

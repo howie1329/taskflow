@@ -21,8 +21,6 @@ const sendAIMessage = async (message, getToken) => {
     }
   );
 
-  console.log("AI Response", response.data.data);
-
   return response.data.data;
 };
 
