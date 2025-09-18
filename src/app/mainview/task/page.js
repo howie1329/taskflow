@@ -143,7 +143,7 @@ const MiniAIChat = ({ onClose }) => {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 100 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
-      className="absolute bottom-50 right-5 z-50 flex flex-col h-[50vh] w-[25vw] bg-card rounded-2xl border shadow-2xl p-2 gap-2"
+      className="absolute bottom-10 right-5 z-50 flex flex-col h-[50vh] w-[25vw] bg-card rounded-2xl border shadow-2xl p-2 gap-2"
     >
       <div className="flex flex-row justify-between items-center sticky top-0 border-b border-border">
         <p className="text-sm font-medium">TaskFlow Chat Agent</p>
