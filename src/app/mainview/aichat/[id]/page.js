@@ -44,7 +44,7 @@ function Page() {
   };
 
   return (
-    <div className="grid grid-rows-[1fr_12fr_1fr] w-[98%] h-full text-sm p-2">
+    <div className="grid grid-rows-[1fr_12fr_1fr] w-[98%] h-[93vh] text-sm ">
       <div className="">
         <div className="flex flex-row items-center justify-between pb-2">
           <h1 className="text-xl font-medium text-center">
@@ -67,7 +67,7 @@ function Page() {
         </div>
         <Separator />
       </div>
-      <div className="flex flex-col gap-2 h-[78vh] overflow-y-auto">
+      <div className="flex flex-col gap-2 max-h-[78vh] overflow-y-auto">
         {conversation?.map((message) => (
           <div key={message.id}>
             {message.role === "user" ? (
