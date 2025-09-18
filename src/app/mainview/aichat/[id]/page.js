@@ -48,7 +48,7 @@ function Page() {
     .at(-1);
 
   return (
-    <div className="grid grid-rows-[1fr_12fr_1fr] w-[98%] h-[93vh] text-sm ">
+    <div className="grid grid-rows-[1fr_12fr_1fr] w-[98%] h-[93vh] text-sm bg-white rounded-md border shadow-sm p-2">
       <div className="">
         <div className="flex flex-row items-center justify-between pb-2">
           <h1 className="text-xl font-medium text-center">
@@ -93,17 +93,19 @@ const RenderUserMessageContent = ({ userContent }) => {
     <div className="flex flex-col gap-1 items-end">
       <div className="flex flex-row gap-2 items-center">
         <p className="text-xs font-medium">You </p>
-        <Tooltip key={"model"}>
-          <TooltipTrigger>
-            <InfoIcon className="w-4 h-4" />
-          </TooltipTrigger>
-          <TooltipContent className="max-w-[300px]">
-            <p className="text-xs font-medium">Model</p>
-            <p className="text-xs">{userContent?.model}</p>
-          </TooltipContent>
-        </Tooltip>
+        {userContent?.model && (
+          <Tooltip key={"model"}>
+            <TooltipTrigger>
+              <InfoIcon className="w-4 h-4" />
+            </TooltipTrigger>
+            <TooltipContent className="max-w-[300px]">
+              <p className="text-xs font-medium">Model</p>
+              <p className="text-xs">{userContent.model}</p>
+            </TooltipContent>
+          </Tooltip>
+        )}
       </div>
-      <div className="text-black bg-white rounded-md w-fit px-2 py-1 text-sm">
+      <div className="text-black bg-gray-300 rounded-md w-fit px-2 py-1 text-sm">
         {userContent.content}
       </div>
       <p className="text-gray-500 text-xs">{timestamp}</p>
@@ -174,7 +176,7 @@ const ChatInputArea = ({ id, model }) => {
     setInput("");
   };
   return (
-    <div className="flex flex-col h-fit w-full rounded-md border bg-white">
+    <div className="flex flex-col h-fit w-full rounded-md border bg-gray-50">
       <div className="flex flex-row pt-2">
         <input
           className=" h-full w-full px-2 border-none outline-none focus:border-none focus:outline-none"
