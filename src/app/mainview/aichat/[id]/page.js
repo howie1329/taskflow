@@ -91,7 +91,18 @@ const RenderUserMessageContent = ({ userContent }) => {
   const timestamp = new Date(userContent.created_at).toLocaleString();
   return (
     <div className="flex flex-col gap-1 items-end">
-      <p className="text-xs font-medium">You</p>
+      <div className="flex flex-row gap-2 items-center">
+        <p className="text-xs font-medium">You </p>
+        <Tooltip key={"model"}>
+          <TooltipTrigger>
+            <InfoIcon className="w-4 h-4" />
+          </TooltipTrigger>
+          <TooltipContent className="max-w-[300px]">
+            <p className="text-xs font-medium">Model</p>
+            <p className="text-xs">{userContent?.model}</p>
+          </TooltipContent>
+        </Tooltip>
+      </div>
       <div className="text-black bg-white rounded-md w-fit px-2 py-1 text-sm">
         {userContent.content}
       </div>
