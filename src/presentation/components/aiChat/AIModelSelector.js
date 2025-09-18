@@ -29,7 +29,7 @@ export const AIModelSelector = ({ value, setValue }) => {
       <div>
         <Popover open={isOpen} onOpenChange={setIsOpen}>
           <PopoverTrigger asChild>
-            <Button variant="outline" role="combobox">
+            <Button variant="outline" role="combobox" className="h-6">
               {value ? value : "Select Model"}{" "}
               <ChevronDownIcon className="w-4 h-4" />
             </Button>

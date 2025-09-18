@@ -1,12 +1,5 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { ArrowUpIcon, Loader2Icon } from "lucide-react";
 import { useState } from "react";
@@ -38,7 +31,7 @@ export const AIChatInputArea = () => {
         onChange={(e) => setInput(e.target.value)}
       />
       <Separator />
-      <div className="flex flex-row gap-2 items-center justify-end ">
+      <div className="flex flex-row gap-2 justify-between items-center ">
         <AIModelSelector value={aiModel} setValue={setAiModel} />
         <Button
           variant="default"

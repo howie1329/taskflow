@@ -176,17 +176,19 @@ const ChatInputArea = ({ id, model }) => {
     setInput("");
   };
   return (
-    <div className="flex flex-col h-fit w-full rounded-md border bg-gray-100">
-      <div className="flex flex-row pt-2">
-        <input
-          className=" h-full w-full px-2 border-none outline-none focus:border-none focus:outline-none"
-          placeholder="Add new message"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-        />
+    <div className="flex flex-col h-[8vh] w-full rounded-md border bg-gray-100 px-2">
+      <input
+        className=" h-full w-full px-2 border-none outline-none focus:border-none focus:outline-none"
+        placeholder="Add new message"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+      />
+      <Separator />
+      <div className="flex flex-row gap-2 justify-between items-center ">
+        <AIModelSelector value={aiModel} setValue={setAiModel} />
         <Button
-          className="h-6 w-6 rounded-full"
-          variant="ghost"
+          variant="default"
+          size="sm"
           disabled={!buttonActive || sendAIMessage.isPending}
           onClick={handleSend}
         >
@@ -196,9 +198,6 @@ const ChatInputArea = ({ id, model }) => {
             <ArrowUpIcon className="h-4 w-4" />
           )}
         </Button>
-      </div>
-      <div className="self-end">
-        <AIModelSelector value={aiModel} setValue={setAiModel} />
       </div>
     </div>
   );
