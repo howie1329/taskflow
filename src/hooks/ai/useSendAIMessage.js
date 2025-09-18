@@ -60,7 +60,7 @@ const useSendAIMessage = () => {
       }
     },
     onSuccess: (data, variables) => {
-      if (!variables.conversationId) {
+      if (!variables.conversationId && variables.status !== "inline-chat") {
         router.push(`/mainview/aichat/${data.conversation_id}`);
       }
 

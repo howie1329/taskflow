@@ -20,8 +20,8 @@ import { useTaskUIStore } from "@/presentation/hooks/useTaskUIStore";
 import useFetchAllTasks from "@/hooks/tasks/useFetchAllTasks";
 import { motion } from "motion/react";
 import useFetchSingleConversation from "@/hooks/ai/useFetchSingleConversation";
-import { useAuth } from "@clerk/nextjs";
 import useSendAIMessage from "@/hooks/ai/useSendAIMessage";
+import useDeleteConversation from "@/hooks/ai/useDeleteConversation";
 function Page() {
   const { data: tasks } = useFetchAllTasks();
   const [isMiniAIChatOpen, setIsMiniAIChatOpen] = useState(false);
@@ -119,19 +119,24 @@ function Page() {
 }
 
 const MiniAIChat = ({ onClose }) => {
-  const { userId } = useAuth();
-  const { data: messages } = useFetchSingleConversation(`task-agent-${userId}`);
+  const [conversationId, setConversationId] = useState(crypto.randomUUID());
   const { mutate: sendMessage } = useSendAIMessage();
+  const { data: messages } = useFetchSingleConversation(conversationId);
+  const { mutate: deleteConversation } = useDeleteConversation();
   const [message, setMessage] = useState("");
   const handleSendMessage = (message) => {
+    setMessage("");
     sendMessage({
       newMessage: message,
-      conversationId: `task-agent-${userId}`,
+      conversationId: conversationId,
       model: "gpt-4o-mini",
+      status: "inline-chat",
     });
-    setMessage("");
   };
-  console.log(messages);
+  const handleDeleteConversation = () => {
+    deleteConversation(conversationId);
+    onClose();
+  };
   return (
     <motion.div
       initial={{ opacity: 0, x: 100 }}
@@ -145,7 +150,7 @@ const MiniAIChat = ({ onClose }) => {
         <Button
           variant="outline"
           className="p-1 h-6 w-6 rounded-full"
-          onClick={onClose}
+          onClick={handleDeleteConversation}
         >
           <XIcon className="w-2 h-2" />
         </Button>
@@ -153,7 +158,17 @@ const MiniAIChat = ({ onClose }) => {
       <div className="flex-1 overflow-y-auto">
         {messages?.map((message) => (
           <div key={message.id}>
-            <p>{message.content}</p>
+            <div
+              className={`${
+                message.role === "user" ? "text-right" : "text-left"
+              }`}
+            >
+              <span className="text-xs text-gray-500">
+                {message.role === "user" ? "You" : "Assistant"}
+              </span>
+
+              <span className="text-sm">{message.content}</span>
+            </div>
           </div>
         ))}
       </div>
