@@ -39,19 +39,7 @@ export const AIChatInputArea = () => {
       />
       <Separator />
       <div className="flex flex-row gap-2 items-center justify-end ">
-        <Select value={aiModel} onValueChange={setAiModel}>
-          <SelectTrigger className="text-xs ">
-            <SelectValue placeholder="AI Model" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="gemini-2.0-flash">Gemini 2.0 Flash</SelectItem>
-            <SelectItem value="gemini-2.0-flash-lite">
-              Gemini 2.0 Flash Lite
-            </SelectItem>
-            <SelectItem value="gemini-2.5-flash">Gemini 2.5 Flash</SelectItem>
-            <SelectItem value="gemini-2.5-pro">Gemini 2.5 Pro</SelectItem>
-          </SelectContent>
-        </Select>
+        <AIModelSelector value={aiModel} setValue={setAiModel} />
         <Button
           variant="default"
           size="sm"
@@ -65,7 +53,6 @@ export const AIChatInputArea = () => {
           )}
         </Button>
       </div>
-      <AIModelSelector />
     </div>
   );
 };

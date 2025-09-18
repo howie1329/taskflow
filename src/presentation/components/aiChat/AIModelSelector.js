@@ -12,26 +12,30 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import useFetchModelSelector from "@/hooks/ai/useFetchModelSelector";
-import { CheckIcon, ChevronDownIcon } from "lucide-react";
+import { CheckIcon, ChevronDownIcon, InfoIcon } from "lucide-react";
 import React, { Suspense, useState } from "react";
 
-export const AIModelSelector = () => {
+export const AIModelSelector = ({ value, setValue }) => {
   const { data: modelSelector } = useFetchModelSelector();
   const [selectedModel, setSelectedModel] = useState();
   const [isOpen, setIsOpen] = useState(false);
-  const [value, setValue] = useState();
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <div>
         <Popover open={isOpen} onOpenChange={setIsOpen}>
           <PopoverTrigger asChild>
             <Button variant="outline" role="combobox">
-              {value ? value : "Select Model"}{" "}
+              {selectedModel ? selectedModel : "Select Model"}{" "}
               <ChevronDownIcon className="w-4 h-4" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-[200px] p-0">
+          <PopoverContent className="w-[225px] p-0">
             <Command>
               <CommandInput placeholder="Search Model..." />
               <CommandList>
@@ -47,7 +51,24 @@ export const AIModelSelector = () => {
                         setValue(currentValue);
                       }}
                     >
-                      {model.name}{" "}
+                      {model.name}
+                      <Tooltip key={"description"}>
+                        <TooltipTrigger>
+                          <InfoIcon className="w-4 h-4" />
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-[175px]">
+                          {model.description}
+                        </TooltipContent>
+                      </Tooltip>
+                      <Tooltip key={"pricing"}>
+                        <TooltipTrigger>
+                          <InfoIcon className="w-4 h-4" />
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-[175px]">
+                          Pricing: {model.pricing.prompt} Context Length:
+                          {model.context_length} Tokens
+                        </TooltipContent>
+                      </Tooltip>
                       {model.id === selectedModel && (
                         <CheckIcon className="w-4 h-4" />
                       )}
