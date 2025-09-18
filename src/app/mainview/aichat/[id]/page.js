@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/tooltip";
 import remarkGfm from "remark-gfm";
 import ReactMarkdown from "react-markdown";
+import { AIModelSelector } from "@/presentation/components/aiChat/AIModelSelector";
 
 function Page() {
   const { id } = useParams();
@@ -144,34 +145,44 @@ const RenderAssistantMessageContent = ({ assistantContent }) => {
 };
 
 const ChatInputArea = ({ id }) => {
+  const [aiModel, setAiModel] = useState();
   const sendAIMessage = useSendAIMessage();
   const [input, setInput] = useState("");
   const buttonActive = input.trim() !== "";
 
   const handleSend = () => {
-    sendAIMessage.mutate({ newMessage: input, conversationId: id });
+    sendAIMessage.mutate({
+      newMessage: input,
+      conversationId: id,
+      model: aiModel,
+    });
     setInput("");
   };
   return (
-    <div className="flex h-9 w-full rounded-md border gap-2 items-center bg-white">
-      <input
-        className=" h-full w-full px-2 border-none outline-none focus:border-none focus:outline-none"
-        placeholder="Add new message"
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-      />
-      <Button
-        className="h-6 w-6 rounded-full"
-        variant="ghost"
-        disabled={!buttonActive || sendAIMessage.isPending}
-        onClick={handleSend}
-      >
-        {sendAIMessage.isPending ? (
-          <Loader2Icon className="h-4 w-4 animate-spin" />
-        ) : (
-          <ArrowUpIcon className="h-4 w-4" />
-        )}
-      </Button>
+    <div className="flex flex-col h-fit w-full rounded-md border bg-white">
+      <div className="flex flex-row pt-2">
+        <input
+          className=" h-full w-full px-2 border-none outline-none focus:border-none focus:outline-none"
+          placeholder="Add new message"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+        />
+        <Button
+          className="h-6 w-6 rounded-full"
+          variant="ghost"
+          disabled={!buttonActive || sendAIMessage.isPending}
+          onClick={handleSend}
+        >
+          {sendAIMessage.isPending ? (
+            <Loader2Icon className="h-4 w-4 animate-spin" />
+          ) : (
+            <ArrowUpIcon className="h-4 w-4" />
+          )}
+        </Button>
+      </div>
+      <div className="self-end">
+        <AIModelSelector value={aiModel} setValue={setAiModel} />
+      </div>
     </div>
   );
 };
