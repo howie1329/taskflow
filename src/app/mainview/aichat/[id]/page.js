@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import {
   ArrowUpIcon,
   EllipsisIcon,
+  InfoIcon,
   Loader2Icon,
   Trash2Icon,
 } from "lucide-react";
@@ -19,6 +20,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 function Page() {
   const { id } = useParams();
@@ -91,7 +97,35 @@ const RenderAssistantMessageContent = ({ assistantContent }) => {
   const timestamp = new Date(assistantContent.created_at).toLocaleString();
   return (
     <div className="flex flex-col gap-1 items-start">
-      <p className="text-xs font-medium">Assistant</p>
+      <div className="flex flex-row gap-2 items-center">
+        <p className="text-xs font-medium">Assistant</p>
+        {assistantContent?.metadata?.analysis && (
+          <Tooltip key={"analysis"}>
+            <TooltipTrigger>
+              <InfoIcon className="w-4 h-4" />
+            </TooltipTrigger>
+            <TooltipContent className="max-w-[300px]">
+              <p className="text-xs font-medium">Analysis</p>
+              <p className="text-xs">{assistantContent?.metadata?.analysis}</p>
+            </TooltipContent>
+          </Tooltip>
+        )}
+        {assistantContent?.metadata?.suggestions && (
+          <Tooltip key={"suggestions"}>
+            <TooltipTrigger>
+              <InfoIcon className="w-4 h-4" />
+            </TooltipTrigger>
+            <TooltipContent className="max-w-[300px]">
+              <p className="text-xs font-medium">Suggestions</p>
+              <p className="text-xs">
+                {assistantContent?.metadata?.suggestions.map((suggestion) => (
+                  <p key={suggestion}>{suggestion}</p>
+                ))}
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        )}
+      </div>
       <div className="text-black w-fit px-2 py-1 text-sm">
         {assistantContent.content}
         <div className="flex flex-row gap-2 overflow-x-auto">
