@@ -14,7 +14,7 @@ import useSendAIMessage from "@/hooks/ai/useSendAIMessage";
 import { AIModelSelector } from "../AIModelSelector";
 
 export const AIChatInputArea = () => {
-  const [aiModel, setAiModel] = useState("gemini-2.5-flash");
+  const [aiModel, setAiModel] = useState("deepseek/deepseek-chat-v3.1:free");
   const sendAIMessage = useSendAIMessage();
   const [input, setInput] = useState("");
   const buttonActive = input.trim() !== "";

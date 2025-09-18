@@ -23,7 +23,6 @@ import React, { Suspense, useState } from "react";
 
 export const AIModelSelector = ({ value, setValue }) => {
   const { data: modelSelector } = useFetchModelSelector();
-  const [selectedModel, setSelectedModel] = useState();
   const [isOpen, setIsOpen] = useState(false);
   return (
     <Suspense fallback={<div>Loading...</div>}>
@@ -31,7 +30,7 @@ export const AIModelSelector = ({ value, setValue }) => {
         <Popover open={isOpen} onOpenChange={setIsOpen}>
           <PopoverTrigger asChild>
             <Button variant="outline" role="combobox">
-              {selectedModel ? selectedModel : "Select Model"}{" "}
+              {value ? value : "Select Model"}{" "}
               <ChevronDownIcon className="w-4 h-4" />
             </Button>
           </PopoverTrigger>
@@ -46,7 +45,6 @@ export const AIModelSelector = ({ value, setValue }) => {
                       key={model.id}
                       value={model.id}
                       onSelect={(currentValue) => {
-                        setSelectedModel(currentValue);
                         setIsOpen(false);
                         setValue(currentValue);
                       }}
@@ -69,9 +67,7 @@ export const AIModelSelector = ({ value, setValue }) => {
                           {model.context_length} Tokens
                         </TooltipContent>
                       </Tooltip>
-                      {model.id === selectedModel && (
-                        <CheckIcon className="w-4 h-4" />
-                      )}
+                      {model.id === value && <CheckIcon className="w-4 h-4" />}
                     </CommandItem>
                   ))}
                 </CommandGroup>
