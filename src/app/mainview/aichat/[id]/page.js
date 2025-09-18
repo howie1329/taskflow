@@ -25,6 +25,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import remarkGfm from "remark-gfm";
+import ReactMarkdown from "react-markdown";
 
 function Page() {
   const { id } = useParams();
@@ -127,7 +129,9 @@ const RenderAssistantMessageContent = ({ assistantContent }) => {
         )}
       </div>
       <div className="text-black w-fit px-2 py-1 text-sm">
-        {assistantContent.content}
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+          {assistantContent.content}
+        </ReactMarkdown>
         <div className="flex flex-row gap-2 overflow-x-auto">
           {assistantContent.ui?.tasks.map((task) => (
             <AITaskCard task={task} key={task.id} />
