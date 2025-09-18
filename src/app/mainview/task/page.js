@@ -12,6 +12,7 @@ import { CreateTaskDialog } from "@/presentation/components/task/CreateTaskDialo
 import { FilterDropdownCard } from "@/presentation/components/task/FilterDropDownCard";
 import { useTaskUIStore } from "@/presentation/hooks/useTaskUIStore";
 import useFetchAllTasks from "@/hooks/tasks/useFetchAllTasks";
+import { motion } from "motion/react";
 function Page() {
   const { data: tasks } = useFetchAllTasks();
   const [isMiniAIChatOpen, setIsMiniAIChatOpen] = useState(false);
@@ -102,9 +103,7 @@ function Page() {
         onOpenChange={setIsCreateTaskOpen}
       />
       {isMiniAIChatOpen && (
-        <div className="">
-          <MiniAIChat onClose={() => setIsMiniAIChatOpen(false)} />
-        </div>
+        <MiniAIChat onClose={() => setIsMiniAIChatOpen(false)} />
       )}
     </div>
   );
@@ -112,7 +111,13 @@ function Page() {
 
 const MiniAIChat = ({ onClose }) => {
   return (
-    <div className="absolute bottom-5 right-5 z-50 flex flex-col h-[50vh] w-[20vw] bg-card rounded-2xl border shadow-2xl p-2">
+    <motion.div
+      initial={{ opacity: 0, x: 100 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 100 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className="absolute bottom-5 right-5 z-50 flex flex-col h-[50vh] w-[20vw] bg-card rounded-2xl border shadow-2xl p-2"
+    >
       <div className="flex flex-row justify-between items-center sticky top-0 border-b border-border">
         <p className="text-sm font-medium">TaskFlow Chat Agent</p>
         <Button
@@ -126,7 +131,7 @@ const MiniAIChat = ({ onClose }) => {
       <div className="flex-1 overflow-y-auto">
         <p>Hello, how can I help you today?</p>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
