@@ -31,7 +31,7 @@ export const AIChatInputArea = () => {
   return (
     <div className="flex flex-col w-full h-full">
       <input
-        className="w-full h-full rounded-md p-2 focus:outline-none focus:ring-0"
+        className="w-full h-full rounded-md p-2 focus:outline-none focus:ring-0 "
         type="text"
         placeholder="Ask me anything"
         value={input}

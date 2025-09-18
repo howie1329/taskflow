@@ -48,7 +48,7 @@ function Page() {
     .at(-1);
 
   return (
-    <div className="grid grid-rows-[1fr_12fr_1fr] w-[98%] h-[93vh] text-sm bg-white rounded-md border shadow-sm p-2">
+    <div className="grid grid-rows-[1fr_12fr_1fr] w-[98%] h-[93vh] text-sm bg-card rounded-md border shadow-sm p-2">
       <div className="">
         <div className="flex flex-row items-center justify-between pb-2">
           <h1 className="text-xl font-medium text-center">
@@ -176,7 +176,7 @@ const ChatInputArea = ({ id, model }) => {
     setInput("");
   };
   return (
-    <div className="flex flex-col h-fit w-full rounded-md border bg-gray-50">
+    <div className="flex flex-col h-fit w-full rounded-md border bg-gray-100">
       <div className="flex flex-row pt-2">
         <input
           className=" h-full w-full px-2 border-none outline-none focus:border-none focus:outline-none"
