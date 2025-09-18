@@ -182,6 +182,14 @@ const ChatInputArea = ({ id, model }) => {
         placeholder="Add new message"
         value={input}
         onChange={(e) => setInput(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            if (buttonActive && !sendAIMessage.isPending) {
+              handleSend();
+            }
+          }
+        }}
       />
       <Separator />
       <div className="flex flex-row gap-2 justify-between items-center ">
