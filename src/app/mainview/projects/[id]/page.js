@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import useFetchAllProjectTasks from "@/hooks/projects/useFetchAllProjectTasks";
 import useFetchSingleProject from "@/hooks/projects/useFetchSingleProject";
 import { ArrowBigLeftIcon, PlusIcon } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
@@ -10,6 +11,7 @@ export default function Page() {
   const { id } = useParams();
   const router = useRouter();
   const { data: project } = useFetchSingleProject(id);
+  const { data: tasks } = useFetchAllProjectTasks(id);
   return (
     <div>
       <div className="flex flex-col justify-between items-center">
@@ -30,7 +32,11 @@ export default function Page() {
       </div>
 
       <div>
-        <h1>Tasks</h1>
+        {tasks?.map((task) => (
+          <div key={task.id}>
+            <p>{task.title}</p>
+          </div>
+        ))}
       </div>
     </div>
   );
