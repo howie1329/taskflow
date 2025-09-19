@@ -24,7 +24,7 @@ export default function Page() {
     getFilteredData(tasks);
   }, [searchQuery, tasks, activeSearch, filterStatuses, getFilteredData]);
   return (
-    <div>
+    <div className="flex flex-col overflow-hidden h-[93vh]">
       <div className="flex flex-col justify-between items-center">
         <div className="flex flex-row justify-between items-center w-full p-2">
           <Button onClick={() => router.back()}>
@@ -42,7 +42,7 @@ export default function Page() {
         <Separator />
       </div>
 
-      <div>
+      <div className="flex-1 overflow-hidden h-full ">
         <GeneralKanbanTaskBoard data={filteredData} />
       </div>
     </div>
