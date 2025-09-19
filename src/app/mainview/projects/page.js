@@ -14,11 +14,13 @@ import { PlusIcon } from "lucide-react";
 import React, { useState } from "react";
 import useCreateProject from "@/hooks/projects/useCreateProject";
 import { useAuth } from "@clerk/nextjs";
+import { Card, CardContent } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
 
 export default function Page() {
   const { data: projects } = useFetchAllProjects();
   const [isOpen, setIsOpen] = useState(false);
-
+  const router = useRouter();
   return (
     <div className="flex flex-col bg-card rounded-md border shadow-sm p-2 overflow-hidden h-[93vh] gap-2">
       <div className="flex flex-col justify-between items-center">
@@ -36,9 +38,16 @@ export default function Page() {
       </div>
       <div className="grid grid-cols-12 grid-rows-12 p-2 gap-2">
         {projects?.map((project) => (
-          <div key={project.id} className="col-span-4 row-span-4">
-            <h2 className="text-sm font-medium">{project.title}</h2>
-          </div>
+          <Card
+            key={project.id}
+            className="bg-white rounded-lg p-1 flex-shrink-0 cursor-pointer hover:bg-gray-50 col-span-4"
+            onClick={() => router.push(`/mainview/projects/${project.id}`)}
+          >
+            <CardContent className="flex flex-col gap-1 p-1">
+              <p className="text-sm font-medium">{project.title}</p>
+              <p className="text-sm text-gray-500">{project.description}</p>
+            </CardContent>
+          </Card>
         ))}
       </div>
       <CreateProjectDialog isOpen={isOpen} onOpenChange={setIsOpen} />
