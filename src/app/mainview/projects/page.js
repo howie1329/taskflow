@@ -22,7 +22,7 @@ export default function Page() {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   return (
-    <div className="flex flex-col bg-card rounded-md border shadow-sm p-2 overflow-hidden h-[93vh] gap-2">
+    <div className="flex flex-col h-full w-full">
       <div className="flex flex-col justify-between items-center">
         <div className="flex flex-row justify-between items-center w-full p-2">
           <h1 className="text-lg font-medium text-center">Projects</h1>
