@@ -12,6 +12,8 @@ import useFetchAllProjects from "@/hooks/projects/useFetchAllProjects";
 import { Button } from "@/components/ui/button";
 import { PlusIcon } from "lucide-react";
 import React, { useState } from "react";
+import useCreateProject from "@/hooks/projects/useCreateProject";
+import { useAuth } from "@clerk/nextjs";
 
 export default function Page() {
   const { data: projects } = useFetchAllProjects();
@@ -47,6 +49,17 @@ export default function Page() {
 const CreateProjectDialog = ({ isOpen, onOpenChange }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const { mutate: createProject } = useCreateProject();
+  const { userId } = useAuth();
+  const handleCreateProject = () => {
+    const formattedProject = {
+      title,
+      description,
+      userId: userId,
+    };
+    createProject(formattedProject);
+    onOpenChange(false);
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -69,7 +82,9 @@ const CreateProjectDialog = ({ isOpen, onOpenChange }) => {
             />
           </div>
           <div className="col-span-3 gap-2 flex flex-col">
-            <Button className="w-full">Create Project</Button>
+            <Button className="w-full" onClick={handleCreateProject}>
+              Create Project
+            </Button>
           </div>
         </div>
       </DialogContent>
