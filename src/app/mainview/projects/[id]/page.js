@@ -3,15 +3,26 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import useFetchAllProjectTasks from "@/hooks/projects/useFetchAllProjectTasks";
 import useFetchSingleProject from "@/hooks/projects/useFetchSingleProject";
+import { GeneralKanbanTaskBoard } from "@/presentation/components/projects/GeneralKanbanTaskBoard";
 import { ArrowBigLeftIcon, PlusIcon } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import React from "react";
-
+import React, { useEffect } from "react";
+import { useProjectUIStore } from "@/presentation/hooks/useProjectUIStore";
 export default function Page() {
   const { id } = useParams();
   const router = useRouter();
   const { data: project } = useFetchSingleProject(id);
   const { data: tasks } = useFetchAllProjectTasks(id);
+  const {
+    activeSearch,
+    searchQuery,
+    filteredData,
+    filterStatuses,
+    getFilteredData,
+  } = useProjectUIStore();
+  useEffect(() => {
+    getFilteredData(tasks);
+  }, [searchQuery, tasks, activeSearch, filterStatuses, getFilteredData]);
   return (
     <div>
       <div className="flex flex-col justify-between items-center">
@@ -32,11 +43,7 @@ export default function Page() {
       </div>
 
       <div>
-        {tasks?.map((task) => (
-          <div key={task.id}>
-            <p>{task.title}</p>
-          </div>
-        ))}
+        <GeneralKanbanTaskBoard data={filteredData} />
       </div>
     </div>
   );
