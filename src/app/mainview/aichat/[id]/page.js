@@ -176,9 +176,9 @@ const ChatInputArea = ({ id, model }) => {
     setInput("");
   };
   return (
-    <div className="flex flex-col h-[8vh] w-full rounded-md border bg-gray-100 px-2">
-      <input
-        className=" h-full w-full px-2 border-none outline-none focus:border-none focus:outline-none"
+    <div className="flex flex-col h-[10vh] w-full rounded-md border bg-gray-100 px-2">
+      <textarea
+        className="h-full w-full px-2 border-none outline-none focus:border-none focus:outline-none overflow-y-auto resize-none"
         placeholder="Add new message"
         value={input}
         onChange={(e) => setInput(e.target.value)}
