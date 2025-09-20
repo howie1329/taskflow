@@ -24,14 +24,10 @@ export default function Page() {
     getFilteredData(tasks);
   }, [searchQuery, tasks, activeSearch, filterStatuses, getFilteredData]);
   return (
-    <div className="flex flex-col overflow-hidden h-[93vh]">
+    <div className="flex flex-col flex-1 overflow-hidden h-[96vh]  border-r border-y p-2 rounded-tr-xl rounded-br-xl bg-white">
       <div className="flex flex-col justify-between items-center">
         <div className="flex flex-row justify-between items-center w-full p-2">
-          <Button onClick={() => router.back()}>
-            <ArrowBigLeftIcon className="w-2 h-2" />
-          </Button>
           <div className="flex flex-col">
-            <p className="text-lg font-medium text-center">{project?.title}</p>
             <p className="text-sm text-gray-500">{project?.description}</p>
           </div>
 

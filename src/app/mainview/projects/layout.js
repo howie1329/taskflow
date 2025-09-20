@@ -1,9 +1,11 @@
+import ProjectSidebar from "@/presentation/components/projects/layout/ProjectSidebar";
 import React from "react";
 
 export default function Layout({ children }) {
   return (
-    <div className="flex flex-col bg-card rounded-md border shadow-sm p-2 overflow-hidden h-[93vh] gap-2">
-      {children}
+    <div className="grid grid-cols-[200px_1fr] h-full">
+      <ProjectSidebar />
+      <main className="flex items-center justify-center  ">{children}</main>
     </div>
   );
 }

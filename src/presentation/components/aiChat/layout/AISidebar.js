@@ -2,20 +2,15 @@
 import {
   SidebarContent,
   SidebarGroup,
-  SidebarGroupLabel,
-  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarSeparator,
 } from "@/components/ui/sidebar";
 
-import React, { Suspense, useState } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import useFetchConversations from "@/hooks/ai/useFetchConversations";
-import { MessageCircleIcon, PlusIcon, SearchIcon, XIcon } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { MessageCircleIcon, PlusIcon, XIcon } from "lucide-react";
 
 export default function AISidebar() {
   const { data: conversations } = useFetchConversations();
