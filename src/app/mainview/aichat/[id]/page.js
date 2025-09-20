@@ -156,7 +156,14 @@ const RenderAssistantMessageContent = ({ assistantContent }) => {
           ))}
         </div>
       </div>
-      <p className="text-gray-500 text-xs">{timestamp}</p>
+      <div className="flex flex-row gap-2">
+        <p className="text-gray-400 text-xs">{timestamp}</p>
+        {assistantContent.total_tokens && (
+          <p className="text-gray-400 text-xs">
+            {assistantContent.total_tokens} Total Tokens
+          </p>
+        )}
+      </div>
     </div>
   );
 };
