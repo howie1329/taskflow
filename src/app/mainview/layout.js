@@ -14,10 +14,7 @@ export default function Layout({ children }) {
       <SidebarProvider>
         <AppSideBar />
         <SidebarInset>
-          <main className=" h-[98vh] p-2">
-            <SidebarTrigger />
-            {children}
-          </main>
+          <main className=" h-[98vh] p-2">{children}</main>
         </SidebarInset>
       </SidebarProvider>
     </QueryClientProvider>

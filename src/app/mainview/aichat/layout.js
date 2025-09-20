@@ -3,7 +3,7 @@ import AISidebar from "@/presentation/components/aiChat/layout/AISidebar";
 
 export default function Layout({ children }) {
   return (
-    <div className="grid grid-cols-[200px_1fr] h-[93vh]">
+    <div className="grid grid-cols-[200px_1fr] h-full">
       <AISidebar />
       <main className="flex items-center justify-center ">{children}</main>
     </div>

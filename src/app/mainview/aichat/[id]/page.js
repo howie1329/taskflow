@@ -48,7 +48,7 @@ function Page() {
     .at(-1);
 
   return (
-    <div className="grid grid-rows-[1fr_12fr_1fr] h-[93vh] text-sm bg-card border-r border-y p-2 rounded-tr-xl rounded-br-xl">
+    <div className="grid grid-rows-[1fr_12fr_1fr] h-[96vh] text-sm bg-card border-r border-y p-2 rounded-tr-xl rounded-br-xl">
       <div className="">
         <div className="flex flex-row items-center justify-between pb-2">
           <h1 className="text-xl font-medium text-center">
