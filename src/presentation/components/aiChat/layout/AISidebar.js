@@ -13,7 +13,7 @@ import {
 import React, { Suspense, useState } from "react";
 import Link from "next/link";
 import useFetchConversations from "@/hooks/ai/useFetchConversations";
-import { MessageCircleIcon, PlusIcon, SearchIcon } from "lucide-react";
+import { MessageCircleIcon, PlusIcon, SearchIcon, XIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -37,12 +37,21 @@ export default function AISidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <Input
-                className="w-full h-6"
-                placeholder="Search"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
+              <div className="flex flex-row items-center w-full h-6 border rounded-md p-2 text-xs font-medium">
+                <input
+                  type="text"
+                  className="w-full h-6 outline-none"
+                  placeholder="Search"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+                {search.length > 0 && (
+                  <XIcon
+                    className="w-4 h-4 cursor-pointer"
+                    onClick={() => setSearch("")}
+                  />
+                )}
+              </div>
             </SidebarMenuItem>
           </SidebarMenu>
           <SidebarMenu>
