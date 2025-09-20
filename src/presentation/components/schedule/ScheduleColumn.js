@@ -12,14 +12,14 @@ export const ScheduleColumn = ({ column, eventData }) => {
   return (
     <div
       key={column.id}
-      className="col-span-1 bg-[#fafafa] shadow-md rounded-lg p-1"
+      className="flex flex-col bg-[#fafafa] rounded-md border p-1 h-[89vh]"
       ref={setNodeRef}
       style={style}
     >
       <h2 className="text-sm font-semibold text-gray-700 text-center">
         {column.title}
       </h2>
-      <div className="flex flex-col gap-1 flex-1 overflow-y-auto h-[83vh]">
+      <div className="flex flex-col gap-1 flex-1 overflow-y-auto h-full">
         {eventData
           .filter((event) => event.date === column.id)
           .map((event) => (
