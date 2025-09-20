@@ -32,4 +32,5 @@ const modelNames = [
   "anthropic/claude-3-haiku",
   "x-ai/grok-3-mini",
   "x-ai/grok-code-fast-1",
+  "x-ai/grok-4-fast:free",
 ];
