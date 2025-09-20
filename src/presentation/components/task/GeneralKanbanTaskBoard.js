@@ -60,7 +60,7 @@ const Column = ({ column }) => {
   };
   return (
     <div
-      className="flex flex-col bg-[#fafafa] rounded-lg shadow-sm h-full min-h-0"
+      className="flex flex-col bg-[#fafafa] rounded-md border h-full min-h-0"
       ref={setNodeRef}
       style={style}
     >
