@@ -48,7 +48,7 @@ function Page() {
     .at(-1);
 
   return (
-    <div className="grid grid-rows-[1fr_12fr_1fr] h-[96vh] text-sm bg-card border-r border-y p-2 rounded-tr-xl rounded-br-xl">
+    <div className="grid grid-rows-[auto_1fr_auto] h-[96vh] text-sm bg-card border-r border-y p-2 rounded-tr-xl rounded-br-xl">
       <div className="">
         <div className="flex flex-row items-center justify-between pb-2">
           <h1 className="text-xl font-medium text-center">
@@ -71,16 +71,18 @@ function Page() {
         </div>
         <Separator />
       </div>
-      <div className="flex flex-col gap-2 max-h-[78vh] overflow-y-auto">
-        {conversation?.map((message) => (
-          <div key={message.id}>
-            {message.role === "user" ? (
-              <RenderUserMessageContent userContent={message} />
-            ) : (
-              <RenderAssistantMessageContent assistantContent={message} />
-            )}
-          </div>
-        ))}
+      <div className="min-h-0 overflow-y-auto flex-1">
+        <div className="flex flex-col gap-2 ">
+          {conversation?.map((message) => (
+            <div key={message.id}>
+              {message.role === "user" ? (
+                <RenderUserMessageContent userContent={message} />
+              ) : (
+                <RenderAssistantMessageContent assistantContent={message} />
+              )}
+            </div>
+          ))}
+        </div>
       </div>
       <ChatInputArea id={id} model={lastUserMessage?.model} />
     </div>
@@ -183,7 +185,7 @@ const ChatInputArea = ({ id, model }) => {
     setInput("");
   };
   return (
-    <div className="flex flex-col h-[10vh] w-full rounded-md border bg-gray-100 px-2">
+    <div className="flex flex-col w-full rounded-md border bg-gray-100 px-2">
       <textarea
         className="h-full w-full px-2 border-none outline-none focus:border-none focus:outline-none overflow-y-auto resize-none"
         placeholder="Add new message"
