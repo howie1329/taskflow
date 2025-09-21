@@ -1,34 +1,72 @@
+"use client";
 import {
   SidebarContent,
   SidebarGroup,
-  SidebarGroupLabel,
-  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { notes } from "../../../../../docs/testData/notesTestData";
+import { NotebookIcon, PlusIcon, XIcon } from "lucide-react";
 
 export default function NotesSideBar() {
+  const [search, setSearch] = useState("");
   return (
-    <div className="bg-[#f5f5f5] rounded-lg shadow-md ">
-      <SidebarHeader />
+    <div className="bg-white rounded-tl-xl rounded-bl-xl border h-full">
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Notes</SidebarGroupLabel>
           <SidebarMenu>
-            {notes.map((item) => (
-              <SidebarMenuItem key={item.id}>
-                <SidebarMenuButton asChild>
-                  <Link href={`/mainview/notes/${item.id}`}>
-                    <span>{item.title}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <Link
+                  className="flex justify-center text-xs bg-black text-white"
+                  href={`/mainview/notes`}
+                >
+                  New Note
+                  <PlusIcon className="w-4 h-4" />
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <div className="flex flex-row items-center w-full h-6 border rounded-md p-2 text-xs font-medium">
+                <input
+                  type="text"
+                  className="w-full h-6 outline-none"
+                  placeholder="Search"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+                {search.length > 0 && (
+                  <XIcon
+                    className="w-4 h-4 cursor-pointer"
+                    onClick={() => setSearch("")}
+                  />
+                )}
+              </div>
+            </SidebarMenuItem>
+          </SidebarMenu>
+
+          <SidebarMenu>
+            {notes
+              ?.filter((item) =>
+                item.title.toLowerCase().includes(search.toLowerCase())
+              )
+              .map((item) => (
+                <SidebarMenuItem key={item.id}>
+                  <SidebarMenuButton asChild>
+                    <Link href={`/mainview/notes/${item.id}`}>
+                      <NotebookIcon className="w-4 h-4" />
+                      <span className="line-clamp-1 text-ellipsis text-xs">
+                        {item.title.charAt(0).toUpperCase() +
+                          item.title.slice(1)}
+                      </span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>

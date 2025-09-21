@@ -3,9 +3,9 @@ import React from "react";
 
 function Layout({ children }) {
   return (
-    <div className="grid grid-cols-[150px_1fr] h-[93vh] gap-2">
+    <div className="grid grid-cols-[200px_1fr] h-[96vh]">
       <NotesSideBar />
-      <main className="p-4">{children}</main>
+      <main className="flex items-center justify-center ">{children}</main>
     </div>
   );
 }
