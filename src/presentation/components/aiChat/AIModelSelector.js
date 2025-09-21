@@ -63,7 +63,14 @@ export const AIModelSelector = ({ value, setValue }) => {
                           <InfoIcon className="w-4 h-4" />
                         </TooltipTrigger>
                         <TooltipContent className="max-w-[175px]">
-                          Pricing: {model.pricing.prompt} Context Length:
+                          <p>
+                            Pricing:{" "}
+                            {model.pricing?.prompt
+                              ? (model.pricing.prompt * 1000000).toFixed(4)
+                              : "N/A"}
+                            /m tokens
+                          </p>{" "}
+                          Context Length:
                           {model.context_length} Tokens
                         </TooltipContent>
                       </Tooltip>
