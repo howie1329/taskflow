@@ -14,7 +14,7 @@ export default function Layout({ children }) {
       <SidebarProvider>
         <AppSideBar />
         <SidebarInset>
-          <main className=" h-[98vh] p-2">{children}</main>
+          <main className=" h-[98vh] p-1 border rounded-md">{children}</main>
         </SidebarInset>
       </SidebarProvider>
     </QueryClientProvider>
