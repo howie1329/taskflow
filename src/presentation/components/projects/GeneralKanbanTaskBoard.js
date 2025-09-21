@@ -1,11 +1,11 @@
 "use client";
-import { TaskCard } from "./TaskCard";
 import { useState } from "react";
-import { useTaskUIStore } from "@/presentation/hooks/useTaskUIStore";
 import { DndContext, useDroppable } from "@dnd-kit/core";
+import { useProjectUIStore } from "@/presentation/hooks/useProjectUIStore";
+import { TaskCard } from "../task/TaskCard";
 
 export const GeneralKanbanTaskBoard = ({ data }) => {
-  const { setFilteredData, filteredData } = useTaskUIStore();
+  const { setFilteredData, filteredData } = useProjectUIStore();
   const [boardColumns] = useState([
     { id: "notStarted", title: "Not Started", tasks: [] },
     { id: "todo", title: "To Do", tasks: [] },
@@ -38,7 +38,7 @@ export const GeneralKanbanTaskBoard = ({ data }) => {
   };
 
   return (
-    <div className="h-full p-1">
+    <div className="h-full pt-1">
       <DndContext onDragEnd={handleDragEnd}>
         <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 h-full gap-2">
           {filteredBoardColumns(data).map((column) => (
@@ -67,7 +67,7 @@ const Column = ({ column }) => {
       <h3 className="text-sm font-semibold text-gray-700 text-center py-1 flex-shrink-0">
         {column.title}
       </h3>
-      <div className="flex flex-col gap-1 flex-1 overflow-y-auto min-h-0 p-1">
+      <div className="flex flex-col gap-1 flex-1 overflow-y-auto h-full p-1">
         {column.tasks.map((task) => (
           <TaskCard key={task.id} task={task} />
         ))}

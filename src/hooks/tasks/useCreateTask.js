@@ -13,7 +13,6 @@ const createTask = async (task, getToken) => {
       },
       withCredentials: true,
     });
-    console.log("Response: ", response.data);
     return response.data.data;
   } catch (error) {
     console.error(error);

@@ -79,7 +79,7 @@ function Page() {
   };
 
   return (
-    <div className="flex flex-col overflow-hidden h-[93vh]">
+    <div className="flex flex-col overflow-hidden h-[96vh] border rounded-md bg-white">
       <div className="flex-shrink-0 p-1 flex flex-row justify-between items-center gap-1 ">
         <h1 className="text-lg font-bold ">Schedule</h1>
         {/* Button Group for Brain Dump and Date Columns */}

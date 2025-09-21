@@ -4,11 +4,11 @@ export const BrainDumpColumn = ({ data }) => {
   // Loading State If No Data
   if (!data) {
     return (
-      <div className="col-span-1 bg-[#fafafa] shadow-md rounded-lg p-1">
+      <div className="flex flex-col bg-[#fafafa] rounded-md border h-[89vh] p-1">
         <h2 className="text-sm font-semibold text-gray-700 text-center">
           Brain Dump
         </h2>
-        <div className="flex flex-col gap-1 flex-1 overflow-y-auto min-h-0 p-1">
+        <div className="flex flex-col gap-1 flex-1 overflow-y-auto h-full p-1">
           <p className="text-xs text-gray-500 text-center">Loading...</p>
         </div>
       </div>
@@ -16,11 +16,11 @@ export const BrainDumpColumn = ({ data }) => {
   }
 
   return (
-    <div className="col-span-1 bg-[#fafafa] shadow-md rounded-lg p-1">
+    <div className="flex flex-col bg-[#fafafa] rounded-md border p-1 h-[89vh]">
       <h2 className="text-sm font-semibold text-gray-700 text-center">
         Brain Dump
       </h2>
-      <div className="flex flex-col gap-1 flex-1 overflow-y-auto h-[83vh]">
+      <div className="flex flex-col flex-1 gap-1 overflow-y-auto h-full">
         {data.map((task) => (
           <TaskCard key={task.id} task={task} />
         ))}
