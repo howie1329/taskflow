@@ -4,32 +4,32 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@clerk/nextjs";
 import { toast } from "sonner";
 
-const fetchSingleConversation = async (id, getToken) => {
+const fetchConversationMessages = async (id, getToken) => {
   const token = await getToken();
   try {
-    const response = await axiosClient.get(`/api/ai/conversations/${id}`, {
+    const response = await axiosClient.get(`/api/ai/messages/${id}`, {
       headers: { Authorization: token },
       withCredentials: true,
     });
-    toast.success("Single conversation fetched successfully", {
+    toast.success("Conversation messages fetched successfully", {
       description: new Date().toLocaleString(),
     });
     return response.data.data;
   } catch (error) {
     console.error(error);
-    toast.error("Failed to fetch single conversation", {
+    toast.error("Failed to fetch conversation messages", {
       description: `${error.message} - ${new Date().toLocaleString()}`,
     });
   }
 };
 
-const useFetchSingleConversation = (id) => {
+const useFetchConversationMessages = (id) => {
   const { getToken } = useAuth();
   return useQuery({
-    queryKey: ["conversation", id],
-    queryFn: () => fetchSingleConversation(id, getToken),
+    queryKey: ["messages", id],
+    queryFn: () => fetchConversationMessages(id, getToken),
     staleTime: 2 * 60 * 1000,
   });
 };
 
-export default useFetchSingleConversation;
+export default useFetchConversationMessages;

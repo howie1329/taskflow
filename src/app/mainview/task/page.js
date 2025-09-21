@@ -13,15 +13,15 @@ import {
 import { Card } from "@/components/ui/card";
 import { FilterIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
-
 import { CreateTaskDialog } from "@/presentation/components/task/CreateTaskDialog";
 import { FilterDropdownCard } from "@/presentation/components/task/FilterDropDownCard";
 import { useTaskUIStore } from "@/presentation/hooks/useTaskUIStore";
 import useFetchAllTasks from "@/hooks/tasks/useFetchAllTasks";
 import { motion } from "motion/react";
-import useFetchSingleConversation from "@/hooks/ai/useFetchSingleConversation";
 import useSendAIMessage from "@/hooks/ai/useSendAIMessage";
 import useDeleteConversation from "@/hooks/ai/useDeleteConversation";
+import useFetchConversationMessages from "@/hooks/ai/useFetchConversationMessages";
+import useFetchConversation from "@/hooks/ai/useFetchConversation";
 function Page() {
   const { data: tasks } = useFetchAllTasks();
   const [isMiniAIChatOpen, setIsMiniAIChatOpen] = useState(false);
@@ -121,7 +121,8 @@ function Page() {
 const MiniAIChat = ({ onClose }) => {
   const [conversationId, setConversationId] = useState(crypto.randomUUID());
   const { mutate: sendMessage } = useSendAIMessage();
-  const { data: messages } = useFetchSingleConversation(conversationId);
+  const { data: messages } = useFetchConversationMessages(conversationId);
+  const { data: conversation } = useFetchConversation(conversationId);
   const { mutate: deleteConversation } = useDeleteConversation();
   const [message, setMessage] = useState("");
   const handleSendMessage = (message) => {

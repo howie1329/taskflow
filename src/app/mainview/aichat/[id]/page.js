@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,7 +10,6 @@ import {
   Loader2Icon,
   Trash2Icon,
 } from "lucide-react";
-import useFetchSingleConversation from "@/hooks/ai/useFetchSingleConversation";
 import useSendAIMessage from "@/hooks/ai/useSendAIMessage";
 import useDeleteConversation from "@/hooks/ai/useDeleteConversation";
 import { AITaskCard } from "@/presentation/components/aiChat/tasks/AITaskCard";
@@ -28,13 +27,16 @@ import {
 import remarkGfm from "remark-gfm";
 import ReactMarkdown from "react-markdown";
 import { AIModelSelector } from "@/presentation/components/aiChat/AIModelSelector";
+import useFetchConversationMessages from "@/hooks/ai/useFetchConversationMessages";
+import useFetchConversation from "@/hooks/ai/useFetchConversation";
 
 function Page() {
   const { id } = useParams();
-  const { data: conversation } = useFetchSingleConversation(id);
+  const { data: messages } = useFetchConversationMessages(id);
+  const { data: conversation } = useFetchConversation(id);
   const { mutate: deleteConversation } = useDeleteConversation();
   const router = useRouter();
-  if (!conversation) {
+  if (!messages) {
     return <div>Chat not found</div>;
   }
 
@@ -43,7 +45,7 @@ function Page() {
     deleteConversation(id);
   };
 
-  const lastUserMessage = conversation
+  const lastUserMessage = messages
     .filter((message) => message.role === "user")
     .at(-1);
 
@@ -52,10 +54,7 @@ function Page() {
       <div className="">
         <div className="flex flex-row items-center justify-between pb-2">
           <h1 className="text-xl font-medium text-center">
-            {/* Find way to connect actual title not first message of conversation array */}
-            {conversation[0].content.charAt(0).toUpperCase() +
-              conversation[0].content.slice(1) ||
-              "Missing Title of Conversation"}
+            {conversation?.title || "Untitled"}
           </h1>
           <DropdownMenu>
             <DropdownMenuTrigger>
@@ -73,7 +72,7 @@ function Page() {
       </div>
       <div className="min-h-0 overflow-y-auto flex-1">
         <div className="flex flex-col gap-2 ">
-          {conversation?.map((message) => (
+          {messages?.map((message) => (
             <div key={message.id}>
               {message.role === "user" ? (
                 <RenderUserMessageContent userContent={message} />
