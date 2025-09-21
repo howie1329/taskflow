@@ -22,25 +22,23 @@ const useDeleteConversation = () => {
     mutationFn: (id) => deleteConversation(id, getToken),
     onMutate: async (id) => {
       await queryClient.cancelQueries({
-        queryKey: ["conversation", id],
+        queryKey: ["messages", id],
       });
-      const previousConversation = queryClient.getQueryData([
-        "conversation",
-        id,
-      ]);
-      queryClient.setQueryData(["conversation", id], (old) =>
+      const previousConversation = queryClient.getQueryData(["messages", id]);
+      queryClient.setQueryData(["messages", id], (old) =>
         old.filter((conversation) => conversation.id !== id)
       );
       return { previousConversation };
     },
     onSuccess: (data, variables, context) => {
+      queryClient.invalidateQueries({ queryKey: ["messages", variables] });
       queryClient.invalidateQueries({ queryKey: ["conversation", variables] });
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
       toast.success("Conversation deleted successfully");
     },
     onError: (error, variables, context) => {
       queryClient.setQueryData(
-        ["conversation", variables],
+        ["messages", variables],
         context.previousConversation
       );
       toast.error("Conversation deletion failed");

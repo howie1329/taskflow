@@ -10,7 +10,6 @@ import {
   Loader2Icon,
   Trash2Icon,
 } from "lucide-react";
-import useSendAIMessage from "@/hooks/ai/useSendAIMessage";
 import useDeleteConversation from "@/hooks/ai/useDeleteConversation";
 import { AITaskCard } from "@/presentation/components/aiChat/tasks/AITaskCard";
 import {
@@ -29,6 +28,7 @@ import ReactMarkdown from "react-markdown";
 import { AIModelSelector } from "@/presentation/components/aiChat/AIModelSelector";
 import useFetchConversationMessages from "@/hooks/ai/useFetchConversationMessages";
 import useFetchConversation from "@/hooks/ai/useFetchConversation";
+import useSendAIMessage from "@/hooks/ai/useSendAIMessage";
 
 function Page() {
   const { id } = useParams();

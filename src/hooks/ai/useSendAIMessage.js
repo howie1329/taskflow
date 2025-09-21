@@ -7,7 +7,7 @@ import { toast } from "sonner";
 
 const sendAIMessage = async (message, getToken) => {
   const token = await getToken();
-
+  console.log("sendAIMessage", message);
   const response = await axiosClient.post(
     "/api/ai/ai-chat",
     {
@@ -37,15 +37,15 @@ const useSendAIMessage = () => {
     onMutate: async (variables) => {
       if (variables.conversationId) {
         await queryClient.cancelQueries({
-          queryKey: ["conversation", variables.conversationId],
+          queryKey: ["messages", variables.conversationId],
         });
 
         const previousConversations = queryClient.getQueryData([
-          "conversation",
+          "messages",
           variables.conversationId,
         ]);
         queryClient.setQueryData(
-          ["conversation", variables.conversationId],
+          ["messages", variables.conversationId],
           (old) => [
             ...old,
             {
@@ -71,11 +71,11 @@ const useSendAIMessage = () => {
     onSettled: (data, error, variables, context) => {
       if (variables.conversationId) {
         queryClient.invalidateQueries({
-          queryKey: ["conversation", variables.conversationId],
+          queryKey: ["messages", variables.conversationId],
         });
       } else {
         queryClient.invalidateQueries({
-          queryKey: ["conversations"],
+          queryKey: ["messages"],
         });
       }
     },
@@ -83,7 +83,7 @@ const useSendAIMessage = () => {
       if (context.previousConversations) {
         if (variables.conversationId) {
           queryClient.setQueryData(
-            ["conversation", variables.conversationId],
+            ["messages", variables.conversationId],
             context.previousConversations
           );
         }
