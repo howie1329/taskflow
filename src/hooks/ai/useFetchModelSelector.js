@@ -6,6 +6,8 @@ const fetchModelSelector = async () => {
   const filteredModels = response.data.data.filter((model) =>
     modelNames.includes(model.id)
   );
+
+  console.log(filteredModels);
   return filteredModels;
 };
 

@@ -16,13 +16,15 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
+import useFetchModelSelector from "@/hooks/ai/useFetchModelSelector";
 
 export const AIChatInputArea = () => {
-  const [aiModel, setAiModel] = useState("deepseek/deepseek-chat-v3.1:free");
+  const [aiModel, setAiModel] = useState("");
+  const [modelName, setModelName] = useState("");
   const sendAIMessage = useSendAIMessage();
   const [input, setInput] = useState("");
   const [isSmartContext, setIsSmartContext] = useState(false);
-  const buttonActive = input.trim() !== "";
+  const buttonActive = input.trim() !== "" && aiModel !== "";
 
   const handleSend = () => {
     setInput("");
@@ -51,28 +53,34 @@ export const AIChatInputArea = () => {
         }}
       />
       <Separator />
-      <div className="flex flex-row gap-2 justify-between items-center ">
-        <Popover>
-          <PopoverTrigger>
-            <Button variant="outline" size="sm">
-              <SettingsIcon className="h-4 w-4" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent>
-            <div className="flex flex-row gap-2 items-center text-sm font-medium">
-              <p>Smart Context</p>
-              <Switch
-                checked={isSmartContext}
-                onCheckedChange={setIsSmartContext}
-              />
-            </div>
-          </PopoverContent>
-        </Popover>
-        <NewModelSelector value={aiModel} setValue={setAiModel} />
-        {/* <AIModelSelector value={aiModel} setValue={setAiModel} /> */}
+      <div className="grid grid-cols-2 gap-2 justify-between items-center">
+        <div className="flex flex-row gap-2 items-center justify-start">
+          <Popover>
+            <PopoverTrigger>
+              <Button variant="outline" size="sm">
+                <SettingsIcon className="h-4 w-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="max-w-fit">
+              <div className="flex flex-row gap-2 items-center text-sm font-medium">
+                <p className="text-xs">Smart Context</p>
+                <Switch
+                  checked={isSmartContext}
+                  onCheckedChange={setIsSmartContext}
+                />
+              </div>
+            </PopoverContent>
+          </Popover>
+          <NewModelSelector
+            setValue={setAiModel}
+            modelName={modelName}
+            setModelName={setModelName}
+          />
+        </div>
         <Button
           variant="default"
           size="sm"
+          className="w-[42px] self-end justify-self-end"
           disabled={!buttonActive || sendAIMessage.isPending}
           onClick={handleSend}
         >
@@ -87,50 +95,54 @@ export const AIChatInputArea = () => {
   );
 };
 
-const NewModelSelector = ({ value, setValue }) => {
+const NewModelSelector = ({ setValue, modelName, setModelName }) => {
   const [open, setOpen] = useState(false);
-  const models = [
-    "openrouter/sonoma-dusk-alpha",
-    "openrouter/sonoma-sky-alpha",
-    "deepseek/deepseek-chat-v3.1:free",
-    "google/gemini-2.5-flash-lite",
-    "google/gemini-2.0-flash-001",
-    "openai/gpt-4.1-nano",
-    "openai/gpt-5",
-    "openai/gpt-5-mini",
-    "openai/gpt-4.1-mini",
-    "openai/gpt-4o-mini",
-    "google/gemini-2.5-flash",
-    "anthropic/claude-3-haiku",
-    "x-ai/grok-3-mini",
-    "x-ai/grok-code-fast-1",
-    "x-ai/grok-4-fast:free",
-    "google/gemini-flash-1.5",
-    "google/gemini-2.5-pro",
-    "",
-  ];
+  const [search, setSearch] = useState("");
+  const { data: modelSelector } = useFetchModelSelector();
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger className="w-[100px]">
-        <Button variant="ghost" onClick={() => setOpen(true)} size="sm">
-          {value ? value : "Select Model"}
+      <PopoverTrigger>
+        <Button
+          variant="ghost"
+          onClick={() => setOpen(true)}
+          className=" max-w-fit p-0"
+        >
+          <p className="truncate text-sm p-0">
+            {modelName ? modelName : "Select Model"}
+          </p>
           <ChevronDownIcon className="w-4 h-4" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[100px]">
-        {models.map((model) => (
-          <Button
-            key={model}
-            onClick={() => {
-              setValue(model);
-              setOpen(false);
-            }}
-            variant="ghost"
-            size="sm"
-          >
-            <p>{model}</p>
-          </Button>
-        ))}
+      <PopoverContent className="max-w-[250px] max-h-[250px] overflow-y-auto p-0">
+        <div className="p-2">
+          <input
+            type="text"
+            placeholder="Search Model..."
+            className="w-full"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        {modelSelector &&
+          modelSelector
+            .filter((model) =>
+              model.name.toLowerCase().includes(search.toLowerCase())
+            )
+            .map((model) => (
+              <Button
+                key={model.id}
+                onClick={() => {
+                  setValue(model.id);
+                  setModelName(model.name);
+                  setOpen(false);
+                }}
+                variant="ghost"
+                size="sm"
+              >
+                <p className="truncate ">{model.name}</p>
+              </Button>
+            ))}
       </PopoverContent>
     </Popover>
   );
