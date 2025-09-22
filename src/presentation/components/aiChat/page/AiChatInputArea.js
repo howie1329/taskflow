@@ -1,22 +1,11 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import {
-  ArrowUpIcon,
-  ChevronDownIcon,
-  Loader2Icon,
-  SettingsIcon,
-} from "lucide-react";
+import { ArrowUpIcon, Loader2Icon } from "lucide-react";
 import React, { useState } from "react";
 import useSendAIMessage from "@/hooks/ai/useSendAIMessage";
 import { AIModelSelector } from "../AIModelSelector";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Switch } from "@/components/ui/switch";
-import useFetchModelSelector from "@/hooks/ai/useFetchModelSelector";
+
 import SettingsPopover from "../SettingsPopover";
 
 export const AIChatInputArea = () => {
@@ -33,6 +22,9 @@ export const AIChatInputArea = () => {
       newMessage: input,
       conversationId: null,
       model: aiModel,
+      settings: {
+        isSmartContext: isSmartContext,
+      },
     });
   };
 

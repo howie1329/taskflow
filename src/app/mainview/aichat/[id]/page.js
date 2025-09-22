@@ -189,6 +189,9 @@ const ChatInputArea = ({ id, model }) => {
       newMessage: input,
       conversationId: id,
       model: aiModel,
+      settings: {
+        isSmartContext: isSmartContext,
+      },
     });
     setInput("");
   };

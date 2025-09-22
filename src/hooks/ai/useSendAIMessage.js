@@ -14,6 +14,7 @@ const sendAIMessage = async (message, getToken) => {
       NewMessage: message.newMessage,
       conversationId: message.conversationId,
       model: message.model,
+      settings: message.settings,
     },
     {
       headers: { Authorization: token },
