@@ -30,6 +30,7 @@ import useFetchConversationMessages from "@/hooks/ai/useFetchConversationMessage
 import useFetchConversation from "@/hooks/ai/useFetchConversation";
 import useSendAIMessage from "@/hooks/ai/useSendAIMessage";
 import useFetchModelSelector from "@/hooks/ai/useFetchModelSelector";
+import SettingsPopover from "@/presentation/components/aiChat/SettingsPopover";
 
 function Page() {
   const { id } = useParams();
@@ -178,6 +179,7 @@ const ChatInputArea = ({ id, model }) => {
   const [modelName, setModelName] = useState(
     modelSelector?.find((m) => m.id === model)?.name
   );
+  const [isSmartContext, setIsSmartContext] = useState(false);
   const sendAIMessage = useSendAIMessage();
   const [input, setInput] = useState("");
   const buttonActive = input.trim() !== "";
@@ -208,6 +210,10 @@ const ChatInputArea = ({ id, model }) => {
       />
       <Separator />
       <div className="flex flex-row gap-2 justify-between items-center ">
+        <SettingsPopover
+          isSmartContext={isSmartContext}
+          setIsSmartContext={setIsSmartContext}
+        />
         <AIModelSelector
           setValue={setAiModel}
           modelName={modelName}

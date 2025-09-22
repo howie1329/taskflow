@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
 import useFetchModelSelector from "@/hooks/ai/useFetchModelSelector";
+import SettingsPopover from "../SettingsPopover";
 
 export const AIChatInputArea = () => {
   const [aiModel, setAiModel] = useState("");
@@ -55,22 +56,10 @@ export const AIChatInputArea = () => {
       <Separator />
       <div className="grid grid-cols-2 gap-2 justify-between items-center">
         <div className="flex flex-row gap-2 items-center justify-start">
-          <Popover>
-            <PopoverTrigger>
-              <Button variant="outline" size="sm">
-                <SettingsIcon className="h-4 w-4" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="max-w-fit">
-              <div className="flex flex-row gap-2 items-center text-sm font-medium">
-                <p className="text-xs">Smart Context</p>
-                <Switch
-                  checked={isSmartContext}
-                  onCheckedChange={setIsSmartContext}
-                />
-              </div>
-            </PopoverContent>
-          </Popover>
+          <SettingsPopover
+            isSmartContext={isSmartContext}
+            setIsSmartContext={setIsSmartContext}
+          />
           <AIModelSelector
             setValue={setAiModel}
             modelName={modelName}
