@@ -50,7 +50,7 @@ function Page() {
     .at(-1);
 
   return (
-    <div className="grid grid-rows-[auto_1fr_auto] h-[96vh] text-sm bg-card border-r border-y p-2 rounded-tr-xl rounded-br-xl">
+    <div className="grid grid-rows-[auto_1fr_auto] h-[96vh] text-sm bg-card border-r border-y px-2 pt-2 rounded-tr-xl rounded-br-xl">
       <div className="">
         <div className="flex flex-row items-center justify-between pb-2">
           <h1 className="text-xl font-medium text-center">
@@ -83,7 +83,9 @@ function Page() {
           ))}
         </div>
       </div>
-      <ChatInputArea id={id} model={lastUserMessage?.model} />
+      <div className="flex flex-row justify-center">
+        <ChatInputArea id={id} model={lastUserMessage?.model} />
+      </div>
     </div>
   );
 }
@@ -184,7 +186,7 @@ const ChatInputArea = ({ id, model }) => {
     setInput("");
   };
   return (
-    <div className="flex flex-col w-full rounded-md border bg-gray-100 px-2">
+    <div className="flex flex-col w-[70%] rounded-t-md  border-x border-t bg-card shadow-sm px-2">
       <textarea
         className="h-full w-full px-2 border-none outline-none focus:border-none focus:outline-none overflow-y-auto resize-none"
         placeholder="Add new message"
