@@ -4,8 +4,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
 import useFetchModelSelector from "@/hooks/ai/useFetchModelSelector";
-import { ChevronDownIcon } from "lucide-react";
+import { ChevronDownIcon, XIcon } from "lucide-react";
 import React, { useState } from "react";
 
 export const AIModelSelector = ({ setValue, modelName, setModelName }) => {
@@ -28,14 +29,23 @@ export const AIModelSelector = ({ setValue, modelName, setModelName }) => {
         </Button>
       </PopoverTrigger>
       <PopoverContent className="max-w-[250px] max-h-[250px] overflow-y-auto p-0">
-        <div className="p-2">
-          <input
-            type="text"
-            placeholder="Search Model..."
-            className="w-full"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+        <div className="flex flex-col gap-2 p-2">
+          <div className="flex flex-row items-center border rounded-md text-sm">
+            <input
+              type="text"
+              placeholder="Search Model..."
+              className="w-full focus:outline-none focus:ring-0 text-sm"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            {search.length > 0 && (
+              <XIcon
+                className="w-4 h-4 cursor-pointer"
+                onClick={() => setSearch("")}
+              />
+            )}
+          </div>
+          <Separator />
         </div>
         {modelSelector &&
           modelSelector
