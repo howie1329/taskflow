@@ -14,6 +14,7 @@ export const AIChatInputArea = () => {
   const sendAIMessage = useSendAIMessage();
   const [input, setInput] = useState("");
   const [isSmartContext, setIsSmartContext] = useState(false);
+  const [contextWindow, setContextWindow] = useState(4);
   const buttonActive = input.trim() !== "" && aiModel !== "";
 
   const handleSend = () => {
@@ -24,6 +25,7 @@ export const AIChatInputArea = () => {
       model: aiModel,
       settings: {
         isSmartContext: isSmartContext,
+        contextWindow: contextWindow,
       },
     });
   };
@@ -51,6 +53,8 @@ export const AIChatInputArea = () => {
           <SettingsPopover
             isSmartContext={isSmartContext}
             setIsSmartContext={setIsSmartContext}
+            contextWindow={contextWindow}
+            setContextWindow={setContextWindow}
           />
           <AIModelSelector
             setValue={setAiModel}
