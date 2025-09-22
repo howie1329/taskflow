@@ -7,8 +7,11 @@ const fetchModelSelector = async () => {
     modelNames.includes(model.id)
   );
 
-  console.log(filteredModels);
-  return filteredModels;
+  const sortedModels = filteredModels.sort((a, b) => {
+    return modelNames.indexOf(a.id) - modelNames.indexOf(b.id);
+  });
+
+  return sortedModels;
 };
 
 const useFetchModelSelector = () => {
@@ -39,5 +42,4 @@ const modelNames = [
   "x-ai/grok-4-fast:free",
   "google/gemini-flash-1.5",
   "google/gemini-2.5-pro",
-  "",
 ];
