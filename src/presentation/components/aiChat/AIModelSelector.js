@@ -69,9 +69,16 @@ export const AIModelSelector = ({ value, setValue }) => {
                               ? (model.pricing.prompt * 1000000).toFixed(4)
                               : "N/A"}
                             /m tokens
-                          </p>{" "}
-                          Context Length:
-                          {model.context_length} Tokens
+                          </p>
+                          <p>
+                            Context Length:
+                            {model.context_length} Tokens
+                          </p>
+                          {model.architecture.output_modalities.map(
+                            (modality) => (
+                              <p key={modality}>Output: {modality}</p>
+                            )
+                          )}
                         </TooltipContent>
                       </Tooltip>
                       {model.id === value && <CheckIcon className="w-4 h-4" />}
