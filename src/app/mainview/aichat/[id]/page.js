@@ -51,7 +51,7 @@ function Page() {
     .at(-1);
 
   return (
-    <div className="grid grid-rows-[auto_1fr_auto] h-[96vh] text-sm bg-card border-r border-y px-2 pt-2 rounded-tr-xl rounded-br-xl">
+    <div className="grid grid-rows-[auto_1fr_auto] h-[96vh] w-full text-sm bg-card border-r border-y px-2 pt-2 rounded-tr-xl rounded-br-xl ">
       <div className="">
         <div className="flex flex-row items-center justify-between pb-2">
           <h1 className="text-xl font-medium text-center">
