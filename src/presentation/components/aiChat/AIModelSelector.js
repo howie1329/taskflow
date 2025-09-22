@@ -1,95 +1,62 @@
 import { Button } from "@/components/ui/button";
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import useFetchModelSelector from "@/hooks/ai/useFetchModelSelector";
-import { CheckIcon, ChevronDownIcon, InfoIcon } from "lucide-react";
-import React, { Suspense, useState } from "react";
+import { ChevronDownIcon } from "lucide-react";
+import React, { useState } from "react";
 
-export const AIModelSelector = ({ value, setValue }) => {
+export const AIModelSelector = ({ setValue, modelName, setModelName }) => {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
   const { data: modelSelector } = useFetchModelSelector();
-  const [isOpen, setIsOpen] = useState(false);
+
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <div>
-        <Popover open={isOpen} onOpenChange={setIsOpen}>
-          <PopoverTrigger asChild>
-            <Button variant="outline" role="combobox" className="h-6">
-              {value ? value : "Select Model"}{" "}
-              <ChevronDownIcon className="w-4 h-4" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-[225px] p-0">
-            <Command>
-              <CommandInput placeholder="Search Model..." />
-              <CommandList>
-                <CommandEmpty> No model Found.</CommandEmpty>
-                <CommandGroup>
-                  {modelSelector?.map((model) => (
-                    <CommandItem
-                      key={model.id}
-                      value={model.id}
-                      onSelect={(currentValue) => {
-                        setIsOpen(false);
-                        setValue(currentValue);
-                      }}
-                    >
-                      {model.name}
-                      <Tooltip key={"description"}>
-                        <TooltipTrigger>
-                          <InfoIcon className="w-4 h-4" />
-                        </TooltipTrigger>
-                        <TooltipContent className="max-w-[175px]">
-                          {model.description}
-                        </TooltipContent>
-                      </Tooltip>
-                      <Tooltip key={"pricing"}>
-                        <TooltipTrigger>
-                          <InfoIcon className="w-4 h-4" />
-                        </TooltipTrigger>
-                        <TooltipContent className="max-w-[175px]">
-                          <p>
-                            Pricing:{" "}
-                            {model.pricing?.prompt
-                              ? (model.pricing.prompt * 1000000).toFixed(4)
-                              : "N/A"}
-                            /m tokens
-                          </p>
-                          <p>
-                            Context Length:
-                            {model.context_length} Tokens
-                          </p>
-                          {model.architecture.output_modalities.map(
-                            (modality) => (
-                              <p key={modality}>Output: {modality}</p>
-                            )
-                          )}
-                        </TooltipContent>
-                      </Tooltip>
-                      {model.id === value && <CheckIcon className="w-4 h-4" />}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </Popover>
-      </div>
-    </Suspense>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger>
+        <Button
+          variant="ghost"
+          onClick={() => setOpen(true)}
+          className=" max-w-fit p-0"
+        >
+          <p className="truncate text-sm p-0">
+            {modelName ? modelName : "Select Model"}
+          </p>
+          <ChevronDownIcon className="w-4 h-4" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="max-w-[250px] max-h-[250px] overflow-y-auto p-0">
+        <div className="p-2">
+          <input
+            type="text"
+            placeholder="Search Model..."
+            className="w-full"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        {modelSelector &&
+          modelSelector
+            .filter((model) =>
+              model.name.toLowerCase().includes(search.toLowerCase())
+            )
+            .map((model) => (
+              <Button
+                key={model.id}
+                onClick={() => {
+                  setValue(model.id);
+                  setModelName(model.name);
+                  setOpen(false);
+                }}
+                variant="ghost"
+                size="sm"
+              >
+                <p className="truncate ">{model.name}</p>
+              </Button>
+            ))}
+      </PopoverContent>
+    </Popover>
   );
 };

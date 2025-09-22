@@ -71,7 +71,7 @@ export const AIChatInputArea = () => {
               </div>
             </PopoverContent>
           </Popover>
-          <NewModelSelector
+          <AIModelSelector
             setValue={setAiModel}
             modelName={modelName}
             setModelName={setModelName}
@@ -92,58 +92,5 @@ export const AIChatInputArea = () => {
         </Button>
       </div>
     </div>
-  );
-};
-
-const NewModelSelector = ({ setValue, modelName, setModelName }) => {
-  const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState("");
-  const { data: modelSelector } = useFetchModelSelector();
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger>
-        <Button
-          variant="ghost"
-          onClick={() => setOpen(true)}
-          className=" max-w-fit p-0"
-        >
-          <p className="truncate text-sm p-0">
-            {modelName ? modelName : "Select Model"}
-          </p>
-          <ChevronDownIcon className="w-4 h-4" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="max-w-[250px] max-h-[250px] overflow-y-auto p-0">
-        <div className="p-2">
-          <input
-            type="text"
-            placeholder="Search Model..."
-            className="w-full"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-        {modelSelector &&
-          modelSelector
-            .filter((model) =>
-              model.name.toLowerCase().includes(search.toLowerCase())
-            )
-            .map((model) => (
-              <Button
-                key={model.id}
-                onClick={() => {
-                  setValue(model.id);
-                  setModelName(model.name);
-                  setOpen(false);
-                }}
-                variant="ghost"
-                size="sm"
-              >
-                <p className="truncate ">{model.name}</p>
-              </Button>
-            ))}
-      </PopoverContent>
-    </Popover>
   );
 };

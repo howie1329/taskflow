@@ -29,6 +29,7 @@ import { AIModelSelector } from "@/presentation/components/aiChat/AIModelSelecto
 import useFetchConversationMessages from "@/hooks/ai/useFetchConversationMessages";
 import useFetchConversation from "@/hooks/ai/useFetchConversation";
 import useSendAIMessage from "@/hooks/ai/useSendAIMessage";
+import useFetchModelSelector from "@/hooks/ai/useFetchModelSelector";
 
 function Page() {
   const { id } = useParams();
@@ -172,7 +173,11 @@ const RenderAssistantMessageContent = ({ assistantContent }) => {
 };
 
 const ChatInputArea = ({ id, model }) => {
+  const { data: modelSelector } = useFetchModelSelector();
   const [aiModel, setAiModel] = useState(model);
+  const [modelName, setModelName] = useState(
+    modelSelector?.find((m) => m.id === model)?.name
+  );
   const sendAIMessage = useSendAIMessage();
   const [input, setInput] = useState("");
   const buttonActive = input.trim() !== "";
@@ -203,7 +208,11 @@ const ChatInputArea = ({ id, model }) => {
       />
       <Separator />
       <div className="flex flex-row gap-2 justify-between items-center ">
-        <AIModelSelector value={aiModel} setValue={setAiModel} />
+        <AIModelSelector
+          setValue={setAiModel}
+          modelName={modelName}
+          setModelName={setModelName}
+        />
         <Button
           variant="default"
           size="sm"

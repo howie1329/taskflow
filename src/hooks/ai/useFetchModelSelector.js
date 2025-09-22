@@ -15,6 +15,7 @@ const useFetchModelSelector = () => {
   return useQuery({
     queryKey: ["modelSelector"],
     queryFn: () => fetchModelSelector(),
+    staleTime: 1000 * 60 * 60 * 24,
   });
 };
 
