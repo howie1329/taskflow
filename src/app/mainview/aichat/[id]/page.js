@@ -150,6 +150,9 @@ const RenderAssistantMessageContent = ({ assistantContent }) => {
             </TooltipContent>
           </Tooltip>
         )}
+        {assistantContent?.settings?.isSmartContext && (
+          <span className="text-xs text-blue-500/70">🧠 Smart Context</span>
+        )}
       </div>
       <div className="text-black w-fit px-2 py-1 text-sm">
         <ReactMarkdown remarkPlugins={[remarkGfm]}>
