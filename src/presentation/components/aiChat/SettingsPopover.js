@@ -22,7 +22,7 @@ export default function SettingsPopover({
           <SettingsIcon className="h-4 w-4" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px]">
+      <PopoverContent className="max-w-fit">
         <div className="flex flex-row gap-2 items-center justify-between text-sm font-medium">
           <p className="text-xs">Smart Context</p>
           <Switch
@@ -30,16 +30,19 @@ export default function SettingsPopover({
             onCheckedChange={setIsSmartContext}
           />
         </div>
-        <div className="flex flex-row gap-2 items-center justify-between text-sm font-medium">
+        <div className="flex flex-col gap-1 text-sm font-medium">
           <p className="text-xs">Context Window</p>
-          <Slider
-            defaultValue={[4]}
-            max={12}
-            min={2}
-            value={[contextWindow]}
-            onValueChange={setContextWindow}
-          />
-          <p className="text-xs">{contextWindow}</p>
+          <p className="text-xs text-gray-500">Recent messages to include</p>
+          <span className="flex flex-row gap-2 items-center">
+            <Slider
+              defaultValue={[4]}
+              max={12}
+              min={2}
+              value={[contextWindow]}
+              onValueChange={setContextWindow}
+            />
+            <p className="text-xs">{contextWindow}</p>
+          </span>
         </div>
       </PopoverContent>
     </Popover>
