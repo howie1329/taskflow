@@ -210,15 +210,17 @@ const ChatInputArea = ({ id, model }) => {
       />
       <Separator />
       <div className="flex flex-row gap-2 justify-between items-center ">
-        <SettingsPopover
-          isSmartContext={isSmartContext}
-          setIsSmartContext={setIsSmartContext}
-        />
-        <AIModelSelector
-          setValue={setAiModel}
-          modelName={modelName}
-          setModelName={setModelName}
-        />
+        <div className="flex flex-row gap-2 items-center justify-start">
+          <SettingsPopover
+            isSmartContext={isSmartContext}
+            setIsSmartContext={setIsSmartContext}
+          />
+          <AIModelSelector
+            setValue={setAiModel}
+            modelName={modelName}
+            setModelName={setModelName}
+          />
+        </div>
         <Button
           variant="default"
           size="sm"
