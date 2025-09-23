@@ -9,11 +9,23 @@ import {
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { notes } from "../../../../../docs/testData/notesTestData";
 import { NotebookIcon, PlusIcon, XIcon } from "lucide-react";
+import useFetchNotes from "@/hooks/notes/useFetchNotes";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import useCreateNote from "@/hooks/notes/useCreateNote";
 
 export default function NotesSideBar() {
   const [search, setSearch] = useState("");
+  const { data: notes } = useFetchNotes();
+  const [isOpen, setIsOpen] = useState(false);
   return (
     <div className="bg-white rounded-tl-xl rounded-bl-xl border h-full">
       <SidebarContent>
@@ -21,13 +33,13 @@ export default function NotesSideBar() {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild>
-                <Link
+                <Button
+                  onClick={() => setIsOpen(true)}
                   className="flex justify-center text-xs bg-black text-white"
-                  href={`/mainview/notes`}
                 >
                   New Note
                   <PlusIcon className="w-4 h-4" />
-                </Link>
+                </Button>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
@@ -70,6 +82,46 @@ export default function NotesSideBar() {
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
+      <CreateNoteDialog isOpen={isOpen} onOpenChange={setIsOpen} />
     </div>
   );
 }
+
+const CreateNoteDialog = ({ isOpen, onOpenChange }) => {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const createNote = useCreateNote();
+  const handleCreateNote = () => {
+    setTitle("");
+    setDescription("");
+    onOpenChange(false);
+    createNote.mutate({ title, description });
+  };
+  return (
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Create Note</DialogTitle>
+        </DialogHeader>
+        <Separator />
+        <div className="grid grid-cols-3 gap-2 ">
+          <div className="col-span-3 gap-2 flex flex-col">
+            <Input
+              placeholder="Note Title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+            <Input
+              placeholder="Note Description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+            <Button className="w-full" onClick={handleCreateNote}>
+              Create Note
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
