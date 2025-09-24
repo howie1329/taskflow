@@ -62,10 +62,6 @@ const GlobalSmartSearch = ({
     setSearch(value);
   }, []);
 
-  console.log("Tasks:", results?.tasks?.length || 0);
-  console.log("Messages:", results?.messages?.length || 0);
-  console.log("Notes:", results?.notes?.length || 0);
-
   return (
     <CommandDialog
       open={isGlobalSmartSearchOpen}
