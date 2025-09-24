@@ -1,5 +1,6 @@
 "use client";
 import {
+  Command,
   CommandDialog,
   CommandEmpty,
   CommandGroup,
@@ -67,32 +68,34 @@ const GlobalSmartSearch = ({
       open={isGlobalSmartSearchOpen}
       onOpenChange={setIsGlobalSmartSearchOpen}
     >
-      <CommandInput
-        placeholder="Search..."
-        value={search}
-        onValueChange={handleSearchChange}
-      />
-      <CommandList>
-        <CommandEmpty>No results found.</CommandEmpty>
-        <CommandGroup heading="Notes">
-          {results &&
-            results.notes.map((note) => (
-              <CommandItem key={note.id}>{note.title}</CommandItem>
-            ))}
-        </CommandGroup>
-        <CommandGroup heading="Tasks">
-          {results &&
-            results.tasks.map((task) => (
-              <CommandItem key={task.id}>{task.title}</CommandItem>
-            ))}
-        </CommandGroup>
-        <CommandGroup heading="Messages">
-          {results &&
-            results.messages.map((message) => (
-              <CommandItem key={message.id}>{message.content}</CommandItem>
-            ))}
-        </CommandGroup>
-      </CommandList>
+      <Command shouldFilter={false}>
+        <CommandInput
+          placeholder="Search..."
+          value={search}
+          onValueChange={handleSearchChange}
+        />
+        <CommandList>
+          <CommandEmpty>No results found.</CommandEmpty>
+          <CommandGroup heading="Tasks">
+            {results &&
+              results.tasks.map((task) => (
+                <CommandItem key={task.id}>{task.title}</CommandItem>
+              ))}
+          </CommandGroup>
+          <CommandGroup heading="Notes">
+            {results &&
+              results.notes.map((note) => (
+                <CommandItem key={note.id}>{note.title}</CommandItem>
+              ))}
+          </CommandGroup>
+          <CommandGroup heading="Messages">
+            {results &&
+              results.messages.map((message) => (
+                <CommandItem key={message.id}>{message.content}</CommandItem>
+              ))}
+          </CommandGroup>
+        </CommandList>
+      </Command>
     </CommandDialog>
   );
 };
