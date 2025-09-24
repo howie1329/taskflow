@@ -54,13 +54,17 @@ const GlobalSmartSearch = ({
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
-    }, 200);
+    }, 500);
     return () => clearTimeout(timer);
   }, [search]);
 
   const handleSearchChange = useCallback((value) => {
     setSearch(value);
   }, []);
+
+  console.log("Tasks:", results?.tasks?.length || 0);
+  console.log("Messages:", results?.messages?.length || 0);
+  console.log("Notes:", results?.notes?.length || 0);
 
   return (
     <CommandDialog
@@ -74,10 +78,22 @@ const GlobalSmartSearch = ({
       />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
+        <CommandGroup heading="Notes">
+          {results &&
+            results.notes.map((note) => (
+              <CommandItem key={note.id}>{note.title}</CommandItem>
+            ))}
+        </CommandGroup>
         <CommandGroup heading="Tasks">
           {results &&
             results.tasks.map((task) => (
               <CommandItem key={task.id}>{task.title}</CommandItem>
+            ))}
+        </CommandGroup>
+        <CommandGroup heading="Messages">
+          {results &&
+            results.messages.map((message) => (
+              <CommandItem key={message.id}>{message.content}</CommandItem>
             ))}
         </CommandGroup>
       </CommandList>
