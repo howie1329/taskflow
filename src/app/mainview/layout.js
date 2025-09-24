@@ -1,12 +1,17 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import {
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import useSmartSearch from "@/hooks/search/useSmartSearch";
-import useFetchAllTasks from "@/hooks/tasks/useFetchAllTasks";
 import AppSideBar from "@/presentation/components/Layout/AppSideBar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export default function Layout({ children }) {
   const [isGlobalSmartSearchOpen, setIsGlobalSmartSearchOpen] = useState(false);
@@ -28,43 +33,54 @@ export default function Layout({ children }) {
       <SidebarProvider>
         <AppSideBar />
         <SidebarInset>
-          {isGlobalSmartSearchOpen && <GlobalSmartSearch />}
+          <GlobalSmartSearch
+            isGlobalSmartSearchOpen={isGlobalSmartSearchOpen}
+            setIsGlobalSmartSearchOpen={setIsGlobalSmartSearchOpen}
+          />
           <main className=" h-[98vh] p-1 border rounded-md">{children}</main>
         </SidebarInset>
       </SidebarProvider>
     </QueryClientProvider>
   );
 }
-const GlobalSmartSearch = () => {
+const GlobalSmartSearch = ({
+  isGlobalSmartSearchOpen,
+  setIsGlobalSmartSearchOpen,
+}) => {
   const [search, setSearch] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
-  const { data: results, isLoading } = useSmartSearch(searchQuery);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const { data: results } = useSmartSearch(debouncedSearch);
 
-  const handleSearch = () => {
-    setSearchQuery(search);
-  };
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const handleSearchChange = useCallback((value) => {
+    setSearch(value);
+  }, []);
+
   return (
-    <div className="absolute z-50 top-50 bottom-50 left-0 w-full h-[80vh] backdrop-blur-sm">
-      <Input
-        type="text"
+    <CommandDialog
+      open={isGlobalSmartSearchOpen}
+      onOpenChange={setIsGlobalSmartSearchOpen}
+    >
+      <CommandInput
         placeholder="Search..."
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onValueChange={handleSearchChange}
       />
-      <Button onClick={handleSearch}>Search</Button>
-      {isLoading && <div>Loading...</div>}
-      <div className="flex flex-col gap-1 overflow-y-auto h-full">
-        {results &&
-          results.tasks.map((task) => <div key={task.id}>{task.title}</div>)}
-
-        {results &&
-          results.messages.map((message) => (
-            <div key={message.id}>{message.content}</div>
-          ))}
-
-        {results &&
-          results.notes.map((note) => <div key={note.id}>{note.title}</div>)}
-      </div>
-    </div>
+      <CommandList>
+        <CommandEmpty>No results found.</CommandEmpty>
+        <CommandGroup heading="Tasks">
+          {results &&
+            results.tasks.map((task) => (
+              <CommandItem key={task.id}>{task.title}</CommandItem>
+            ))}
+        </CommandGroup>
+      </CommandList>
+    </CommandDialog>
   );
 };
