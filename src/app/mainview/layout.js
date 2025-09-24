@@ -54,7 +54,7 @@ const GlobalSmartSearch = ({
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
-    }, 300);
+    }, 200);
     return () => clearTimeout(timer);
   }, [search]);
 
