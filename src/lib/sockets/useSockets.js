@@ -30,6 +30,7 @@ export const useSockets = () => {
     newSocket.on("task-created", () => {
       queryClient.cancelQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
     });
     newSocket.on("task-updated", () => {
       queryClient.cancelQueries({ queryKey: ["tasks"] });

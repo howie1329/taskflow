@@ -86,7 +86,7 @@ export default function AppSideBar() {
             {notifications &&
               notifications.map((notification) => (
                 <div
-                  className="grid grid-cols-[10px_1fr] border rounded-md p-2 max-w-full truncate"
+                  className="grid grid-cols-[10px_1fr] border rounded-md px-2 py-1 max-w-full"
                   key={notification.id}
                 >
                   <div className=" rounded-full flex items-center justify-center ">
@@ -94,11 +94,11 @@ export default function AppSideBar() {
                       <CircleIcon className="w-2 h-2 bg-red-500 rounded-full p-0.5 text-red-500 " />
                     )}
                   </div>
-                  <div className="flex flex-col">
-                    <p className="text-sm font-medium">
+                  <div className="flex flex-col max-w-full truncate">
+                    <p className="text-sm font-medium max-w-full truncate">
                       {notification.title} - {notification.content}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-500 max-w-full truncate">
                       {notification.created_at}
                     </p>
                   </div>
