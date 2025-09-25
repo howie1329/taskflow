@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { io } from "socket.io-client";
 import { useAuth } from "@clerk/nextjs";
-import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 
 export const useSockets = () => {
@@ -32,9 +31,42 @@ export const useSockets = () => {
       queryClient.cancelQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
     });
+    newSocket.on("task-updated", () => {
+      queryClient.cancelQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    });
     newSocket.on("task-deleted", () => {
       queryClient.cancelQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    });
+
+    // Project Listener
+    newSocket.on("project-created", () => {
+      queryClient.cancelQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+    });
+    newSocket.on("project-updated", () => {
+      queryClient.cancelQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+    });
+    newSocket.on("project-deleted", () => {
+      queryClient.cancelQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+    });
+
+    // Note Listener
+    newSocket.on("note-created", () => {
+      queryClient.cancelQueries({ queryKey: ["notes"] });
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+    });
+    newSocket.on("note-updated", (noteId) => {
+      queryClient.cancelQueries({ queryKey: ["notes"] });
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      queryClient.invalidateQueries({ queryKey: ["note", noteId] });
+    });
+    newSocket.on("note-deleted", () => {
+      queryClient.cancelQueries({ queryKey: ["notes"] });
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
     });
 
     setSocket(newSocket);
