@@ -22,7 +22,11 @@ import useSendAIMessage from "@/hooks/ai/useSendAIMessage";
 import useDeleteConversation from "@/hooks/ai/useDeleteConversation";
 import useFetchConversationMessages from "@/hooks/ai/useFetchConversationMessages";
 import useFetchConversation from "@/hooks/ai/useFetchConversation";
+import { useSockets } from "@/lib/sockets/useSockets";
+import { useAuth } from "@clerk/nextjs";
 function Page() {
+  const { socket, isConnected } = useSockets();
+  const { userId } = useAuth();
   const { data: tasks } = useFetchAllTasks();
   const [isMiniAIChatOpen, setIsMiniAIChatOpen] = useState(false);
   const {
@@ -43,6 +47,12 @@ function Page() {
   useEffect(() => {
     getFilteredData(tasks);
   }, [searchQuery, tasks, activeSearch, filterStatuses, getFilteredData]);
+
+  useEffect(() => {
+    if (isConnected) {
+      socket.emit("join", { userId: userId });
+    }
+  }, [isConnected, socket, userId]);
 
   return (
     <div className="flex flex-col overflow-hidden h-[96vh] border rounded-md bg-white">

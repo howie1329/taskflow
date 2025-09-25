@@ -6,7 +6,9 @@ import {
   SignedOut,
   SignInButton,
   SignUpButton,
+  useAuth,
   UserButton,
+  useUser,
 } from "@clerk/nextjs";
 import { Toaster } from "sonner";
 
