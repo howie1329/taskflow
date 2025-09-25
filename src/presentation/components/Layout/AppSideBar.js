@@ -18,6 +18,8 @@ import {
   ListIcon,
   FolderIcon,
   BellIcon,
+  CheckIcon,
+  CircleIcon,
 } from "lucide-react";
 import React from "react";
 import Link from "next/link";
@@ -27,6 +29,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useFetchNotifications } from "@/hooks/notifications/useFetchNotifications";
+import { Badge } from "@/components/ui/badge";
 
 const SideBarItems = [
   {
@@ -57,6 +61,7 @@ const SideBarItems = [
 ];
 
 export default function AppSideBar() {
+  const { data: notifications } = useFetchNotifications();
   return (
     <Sidebar variant="inset">
       <SidebarHeader className="flex flex-row items-center justify-evenly gap-1 ">
@@ -66,10 +71,39 @@ export default function AppSideBar() {
         </SignedIn>
         <Popover>
           <PopoverTrigger>
-            <BellIcon className="w-5 h-5 cursor-pointer" />
+            {/* TODO: Take bell icon and badge and put into a div for better styling of the number of notifications */}
+            <BellIcon className=" cursor-pointer" />
+            {notifications && notifications.length > 0 && (
+              <Badge
+                variant="destructive"
+                className="absolute -top-0 -right-0.5 text-xs rounded-full w-4 h-4 flex items-center justify-center"
+              >
+                {notifications.length}
+              </Badge>
+            )}
           </PopoverTrigger>
-          <PopoverContent>
-            <p>Hello World</p>
+          <PopoverContent className="flex flex-col max-w-full gap-2 ">
+            {notifications &&
+              notifications.map((notification) => (
+                <div
+                  className="grid grid-cols-[10px_1fr] border rounded-md p-2 max-w-full truncate"
+                  key={notification.id}
+                >
+                  <div className=" rounded-full flex items-center justify-center ">
+                    {!notification.isRead && (
+                      <CircleIcon className="w-2 h-2 bg-red-500 rounded-full p-0.5 text-red-500 " />
+                    )}
+                  </div>
+                  <div className="flex flex-col">
+                    <p className="text-sm font-medium">
+                      {notification.title} - {notification.content}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {notification.created_at}
+                    </p>
+                  </div>
+                </div>
+              ))}
           </PopoverContent>
         </Popover>
       </SidebarHeader>
