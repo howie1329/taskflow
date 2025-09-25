@@ -58,6 +58,7 @@ export const CreateTaskDialog = ({ isOpen, onOpenChange }) => {
       priority,
       date: format(date, "P"),
       user_id: userId,
+      subtasks: subtasks,
     };
     mutation.mutate(formattedTask);
     onOpenChange(false);

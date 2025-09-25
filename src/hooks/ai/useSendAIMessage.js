@@ -7,7 +7,6 @@ import { toast } from "sonner";
 
 const sendAIMessage = async (message, getToken) => {
   const token = await getToken();
-  console.log("sendAIMessage", message);
   const response = await axiosClient.post(
     "/api/ai/ai-chat",
     {
