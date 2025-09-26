@@ -27,6 +27,7 @@ export const useSockets = () => {
     });
 
     // Task Listener
+    // IMPORTANT: Check to see how many http requests are being made to the server as we still use tanstack query to fetch data
     newSocket.on("task-created", () => {
       queryClient.cancelQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
