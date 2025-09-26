@@ -76,6 +76,11 @@ export const useSockets = () => {
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
     });
 
+    newSocket.on("notifications-clean-up", () => {
+      queryClient.cancelQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    });
+
     setSocket(newSocket);
 
     return () => {
