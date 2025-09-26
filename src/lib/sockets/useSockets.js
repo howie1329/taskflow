@@ -31,7 +31,6 @@ export const useSockets = () => {
     newSocket.on("task-created", () => {
       queryClient.cancelQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
-      queryClient.invalidateQueries({ queryKey: ["notifications"] });
     });
     newSocket.on("task-updated", () => {
       queryClient.cancelQueries({ queryKey: ["tasks"] });
@@ -69,6 +68,12 @@ export const useSockets = () => {
     newSocket.on("note-deleted", () => {
       queryClient.cancelQueries({ queryKey: ["notes"] });
       queryClient.invalidateQueries({ queryKey: ["notes"] });
+    });
+
+    // Notification Listener
+    newSocket.on("notification-created", () => {
+      queryClient.cancelQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
     });
 
     setSocket(newSocket);
