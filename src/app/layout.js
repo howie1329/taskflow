@@ -1,16 +1,8 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
-import {
-  ClerkProvider,
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  SignUpButton,
-  useAuth,
-  UserButton,
-  useUser,
-} from "@clerk/nextjs";
+import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "sonner";
+import ThemesProvider from "@/presentation/styles/ThemesProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -26,9 +18,9 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <ClerkProvider>
-      <html lang="en">
+      <html lang="en" suppressHydrationWarning>
         <body className={`${inter.variable} antialiased`}>
-          {children}
+          <ThemesProvider>{children}</ThemesProvider>
           <Toaster position="top-center" />
         </body>
       </html>

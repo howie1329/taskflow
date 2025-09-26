@@ -40,7 +40,7 @@ export const GeneralKanbanTaskBoard = ({ data }) => {
   return (
     <div className="h-full p-1">
       <DndContext onDragEnd={handleDragEnd}>
-        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 h-full gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 h-full gap-2 bg-card/50">
           {filteredBoardColumns(data).map((column) => (
             <Column key={column.id} column={column} />
           ))}
@@ -60,7 +60,7 @@ const Column = ({ column }) => {
   };
   return (
     <div
-      className="flex flex-col bg-[#fafafa] rounded-md border h-full min-h-0"
+      className="flex flex-col bg-card/50 rounded-md border h-full min-h-0"
       ref={setNodeRef}
       style={style}
     >

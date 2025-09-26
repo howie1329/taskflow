@@ -64,7 +64,7 @@ export const AITaskCard = ({ task }) => {
       transition={{ duration: 0.3, ease: "easeOut" }}
     >
       <Card
-        className="bg-white rounded-lg p-1 flex-shrink-0 cursor-pointer hover:bg-gray-50"
+        className="bg-card rounded-lg p-1 flex-shrink-0 cursor-pointer hover:bg-gray-50"
         onClick={() => setIsOpen(true)}
         onMouseEnter={() => prefetchHover(aiTask.id)}
       >

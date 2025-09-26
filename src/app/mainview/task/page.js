@@ -46,7 +46,7 @@ function Page() {
   }, [searchQuery, tasks, activeSearch, filterStatuses, getFilteredData]);
 
   return (
-    <div className="flex flex-col overflow-hidden h-[96vh] border rounded-md bg-white">
+    <div className="flex flex-col overflow-hidden h-[96vh] border rounded-md bg-card">
       <div className="flex-shrink-0 p-1 flex flex-row justify-between items-center gap-1">
         <h1 className="text-lg font-bold ">Task Board</h1>
         {activeSearch && (
@@ -175,7 +175,7 @@ const MiniAIChat = ({ onClose }) => {
         ))}
       </div>
       <Separator />
-      <div className="flex flex-row justify-between items-center gap-2 rounded-md border bg-gray-100 ">
+      <div className="flex flex-row justify-between items-center gap-2 rounded-md border bg-card/50 ">
         <input
           className="w-full h-6 p-2 text-sm focus:outline-none focus:ring-0 "
           value={message}
