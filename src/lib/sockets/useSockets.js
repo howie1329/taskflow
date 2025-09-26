@@ -63,6 +63,7 @@ export const useSockets = () => {
     newSocket.on("note-updated", (noteId) => {
       queryClient.cancelQueries({ queryKey: ["notes"] });
       queryClient.invalidateQueries({ queryKey: ["notes"] });
+      queryClient.cancelQueries({ queryKey: ["note", noteId] });
       queryClient.invalidateQueries({ queryKey: ["note", noteId] });
     });
     newSocket.on("note-deleted", () => {
