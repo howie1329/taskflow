@@ -20,6 +20,9 @@ import {
   BellIcon,
   CheckIcon,
   CircleIcon,
+  TrashIcon,
+  BookOpenIcon,
+  BookCheckIcon,
 } from "lucide-react";
 import React from "react";
 import Link from "next/link";
@@ -31,6 +34,9 @@ import {
 } from "@/components/ui/popover";
 import { useFetchNotifications } from "@/hooks/notifications/useFetchNotifications";
 import { Badge } from "@/components/ui/badge";
+import { useDeleteNotification } from "@/hooks/notifications/useDeleteNotification";
+import { Button } from "@/components/ui/button";
+import { useMarkNotificationAsRead } from "@/hooks/notifications/useMarkNotificationAsRead";
 
 const SideBarItems = [
   {
@@ -62,6 +68,8 @@ const SideBarItems = [
 
 export default function AppSideBar() {
   const { data: notifications } = useFetchNotifications();
+  const { mutate: deleteNotification } = useDeleteNotification();
+  const { mutate: markNotificationAsRead } = useMarkNotificationAsRead();
   return (
     <Sidebar variant="inset">
       <SidebarHeader className="flex flex-row items-center justify-evenly gap-1 ">
@@ -98,9 +106,33 @@ export default function AppSideBar() {
                     <p className="text-sm font-medium max-w-full truncate">
                       {notification.title} - {notification.content}
                     </p>
-                    <p className="text-xs text-gray-500 max-w-full truncate">
-                      {notification.created_at}
-                    </p>
+                    <div className="flex flex-row items-center justify-between">
+                      <p className="text-xs text-gray-500 max-w-full truncate">
+                        {notification.created_at
+                          ? new Date(notification.created_at).toLocaleString()
+                          : "N/A"}
+                      </p>
+                      <div className="flex flex-row items-center justify-center">
+                        {notification && !notification.isRead && (
+                          <Button
+                            variant="outline"
+                            className="w-4 h-4"
+                            onClick={() =>
+                              markNotificationAsRead(notification.id)
+                            }
+                          >
+                            <BookOpenIcon className="w-4 h-4" />
+                          </Button>
+                        )}
+                        <Button
+                          variant="outline"
+                          className="w-4 h-4"
+                          onClick={() => deleteNotification(notification.id)}
+                        >
+                          <TrashIcon className="w-4 h-4 text-red-500" />
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}
