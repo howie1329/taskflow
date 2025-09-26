@@ -23,6 +23,8 @@ import {
   TrashIcon,
   BookOpenIcon,
   BookCheckIcon,
+  MoonIcon,
+  SunIcon,
 } from "lucide-react";
 import React from "react";
 import Link from "next/link";
@@ -37,6 +39,7 @@ import { Badge } from "@/components/ui/badge";
 import { useDeleteNotification } from "@/hooks/notifications/useDeleteNotification";
 import { Button } from "@/components/ui/button";
 import { useMarkNotificationAsRead } from "@/hooks/notifications/useMarkNotificationAsRead";
+import { useTheme } from "next-themes";
 
 const SideBarItems = [
   {
@@ -67,6 +70,7 @@ const SideBarItems = [
 ];
 
 export default function AppSideBar() {
+  const { theme, setTheme } = useTheme();
   const { data: notifications } = useFetchNotifications();
   const { mutate: deleteNotification } = useDeleteNotification();
   const { mutate: markNotificationAsRead } = useMarkNotificationAsRead();
@@ -159,8 +163,22 @@ export default function AppSideBar() {
       </SidebarContent>
       <SidebarFooter>
         <SidebarGroup>
-          <SidebarGroupLabel>Account</SidebarGroupLabel>
+          <SidebarGroupLabel>Settings</SidebarGroupLabel>
           <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <Button
+                  variant="outline"
+                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                >
+                  {theme === "dark" ? (
+                    <MoonIcon className="w-4 h-4" />
+                  ) : (
+                    <SunIcon className="w-4 h-4" />
+                  )}
+                </Button>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton asChild>
                 <a>
