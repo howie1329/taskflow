@@ -88,7 +88,7 @@ export const TaskCard = ({ task }) => {
         <CardContent className="flex flex-col gap-1 p-1">
           {/* Drag handle at the top */}
           <div
-            className="h-1 bg-card/20 rounded cursor-grab active:cursor-grabbing hover:bg-card/70"
+            className="h-1 bg-card-foreground/20 rounded cursor-grab active:cursor-grabbing hover:bg-card-foreground/70"
             {...attributes}
             {...listeners}
           />
@@ -120,7 +120,7 @@ export const TaskCard = ({ task }) => {
           </div>
         </CardContent>
       </Card>
-
+      {/* Dialog version -- Look into using the sheet version or giving the option to toggle between the two */}
       <TaskCardDialog
         selectedTask={task}
         isOpen={isOpen}
