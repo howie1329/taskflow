@@ -120,7 +120,7 @@ export const TaskCard = ({ task }) => {
           </div>
         </CardContent>
       </Card>
-
+      {/* Dialog version -- Look into using the sheet version or giving the option to toggle between the two */}
       <TaskCardDialog
         selectedTask={task}
         isOpen={isOpen}
