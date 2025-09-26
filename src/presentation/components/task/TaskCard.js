@@ -80,7 +80,7 @@ export const TaskCard = ({ task }) => {
       onMouseEnter={() => prefetchHover(task.id)}
     >
       <Card
-        className="bg-white rounded-lg p-1 flex-shrink-0 cursor-pointer hover:bg-gray-50"
+        className="bg-card rounded-lg p-1 flex-shrink-0 cursor-pointer hover:bg-card/50"
         onClick={() => setIsOpen(true)}
         style={style}
         ref={setNodeRef}
@@ -88,7 +88,7 @@ export const TaskCard = ({ task }) => {
         <CardContent className="flex flex-col gap-1 p-1">
           {/* Drag handle at the top */}
           <div
-            className="h-1 bg-gray-200 rounded cursor-grab active:cursor-grabbing hover:bg-gray-300"
+            className="h-1 bg-card/20 rounded cursor-grab active:cursor-grabbing hover:bg-card/70"
             {...attributes}
             {...listeners}
           />

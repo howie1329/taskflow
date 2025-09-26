@@ -27,7 +27,7 @@ export const FilterDropdownCard = ({ filterStatuses, onFilterChange }) => {
   ];
 
   return (
-    <Card className="absolute top-full right-0 mt-1 z-70 w-30 p-3 shadow-2xl border bg-[#fafafa]">
+    <Card className="absolute top-full right-0 mt-1 z-70 w-30 p-3 shadow-2xl border bg-card/50">
       <div className="flex flex-col gap-2">
         {filterOptions.map((option) => (
           <div
