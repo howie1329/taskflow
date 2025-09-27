@@ -5,6 +5,7 @@ import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetFooter,
   SheetHeader,
   SheetTitle,
@@ -38,24 +39,25 @@ export const TaskCardSheet = ({ selectedTask, isOpen, onOpenChange }) => {
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent className="!w-[50vw] !max-w-[60vw] ">
-        <SheetHeader>
+      <SheetContent className="grid grid-rows-[auto_1fr_auto] !w-[30vw] !max-w-[30vw] gap-0 p-2">
+        <SheetHeader className="flex flex-col gap-0 p-0">
           <SheetTitle className="">{selectedTask.title}</SheetTitle>
+          <SheetDescription>{selectedTask.description}</SheetDescription>
+          <Separator />
         </SheetHeader>
-        <Separator />
-        <div className="grid grid-cols-1 gap-2">
-          <div className="flex flex-row items-center col-span-1 gap-2">
+        <div className="grid grid-rows-[auto_auto_auto_1fr] gap-3">
+          <div className="flex flex-row items-center ">
             <h3 className="text-sm font-medium">Status:</h3>
             <p className="text-sm text-gray-500">
               {getCorrectedStatus(selectedTask.status)}
             </p>
           </div>
-          <div className="flex flex-row items-center col-span-1 gap-2">
+          <div className="flex flex-row items-center">
             <h3 className="text-sm font-medium">Due Date:</h3>
             <p className="text-sm text-gray-500">{selectedTask.date}</p>
           </div>
 
-          <div className="flex flex-row items-center col-span-1 gap-2">
+          <div className="flex flex-row items-center">
             <h3 className="text-sm font-medium">Labels:</h3>
             <div className="flex flex-row items-center gap-2 line-clamp-2">
               {selectedTask.labels &&
@@ -67,10 +69,6 @@ export const TaskCardSheet = ({ selectedTask, isOpen, onOpenChange }) => {
             </div>
           </div>
 
-          <div className="flex flex-col col-span-1">
-            <h3 className="text-sm font-medium">Description:</h3>
-            <p className="text-sm text-gray-500">{selectedTask.description}</p>
-          </div>
           <div>
             <h3 className="text-sm font-medium">Subtasks:</h3>
             <div className="flex flex-col gap-2">
@@ -98,8 +96,8 @@ export const TaskCardSheet = ({ selectedTask, isOpen, onOpenChange }) => {
             </div>
           </div>
         </div>
-        <Separator />
         <SheetFooter>
+          <Separator />
           <Button variant="outline" size="sm" onClick={deleteButtonClick}>
             <Trash2Icon className="h-2 w-2" />
           </Button>

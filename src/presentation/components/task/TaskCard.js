@@ -9,6 +9,7 @@ import { motion } from "motion/react";
 import useCompleteTask from "@/hooks/tasks/useCompleteTask";
 import useIncompleteTask from "@/hooks/tasks/useIncompleteTask";
 import { usePrefetchSubtasks } from "@/hooks/tasks/subtasks/usePrefetchSubtasks";
+import { TaskCardSheet } from "./TaskCardSheet";
 
 export const TaskCard = ({ task }) => {
   const prefetchHover = usePrefetchSubtasks();
@@ -120,8 +121,13 @@ export const TaskCard = ({ task }) => {
           </div>
         </CardContent>
       </Card>
-      {/* Dialog version -- Look into using the sheet version or giving the option to toggle between the two */}
-      <TaskCardDialog
+      {/* Now using the sheet version... still look into giving the user the option to toggle the display they want */}
+      {/* <TaskCardDialog
+        selectedTask={task}
+        isOpen={isOpen}
+        onOpenChange={setIsOpen}
+      /> */}
+      <TaskCardSheet
         selectedTask={task}
         isOpen={isOpen}
         onOpenChange={setIsOpen}
