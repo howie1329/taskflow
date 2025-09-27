@@ -29,7 +29,7 @@ export default function ProjectSidebar() {
   const [search, setSearch] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   return (
-    <div className="bg-card rounded-tl-xl rounded-bl-xl border h-full">
+    <div className="bg-card rounded-tl-md rounded-bl-md border-r h-full">
       <SidebarContent>
         <SidebarGroup>
           <SidebarMenu>

@@ -52,7 +52,7 @@ function Page() {
     .at(-1);
 
   return (
-    <div className="grid grid-rows-[auto_1fr_auto] h-[96vh] w-full text-sm bg-background border-r border-y px-2 pt-2 rounded-tr-xl rounded-br-xl ">
+    <div className="grid grid-rows-[auto_1fr_auto] h-[98vh] w-full text-sm bg-background px-2 pt-2 rounded-tr-md rounded-br-md ">
       <div className="">
         <div className="flex flex-row items-center justify-between pb-2">
           <h1 className="text-xl font-medium text-center">
@@ -72,7 +72,7 @@ function Page() {
         </div>
         <Separator />
       </div>
-      <div className="min-h-0 overflow-y-auto flex-1">
+      <div className=" overflow-y-auto ">
         <div className="flex flex-col gap-2 ">
           {messages?.map((message) => (
             <div key={message.id}>

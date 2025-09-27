@@ -46,7 +46,7 @@ function Page() {
   }, [searchQuery, tasks, activeSearch, filterStatuses, getFilteredData]);
 
   return (
-    <div className="flex flex-col overflow-hidden h-[96vh] border rounded-md bg-card">
+    <div className="flex flex-col overflow-hidden h-full rounded-md">
       <div className="flex-shrink-0 p-1 flex flex-row justify-between items-center gap-1">
         <h1 className="text-lg font-bold ">Task Board</h1>
         {activeSearch && (
@@ -57,7 +57,7 @@ function Page() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         )}
-        <Card className="flex flex-row justify-between items-center p-1 gap-1 rounded-sm relative">
+        <Card className="flex flex-row justify-between items-center p-1 gap-1 rounded-sm relative shadow-none">
           <Button
             variant="outline"
             className="p-1 h-6 w-6 rounded-full"

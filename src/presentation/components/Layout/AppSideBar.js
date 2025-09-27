@@ -75,8 +75,8 @@ export default function AppSideBar() {
   const { mutate: deleteNotification } = useDeleteNotification();
   const { mutate: markNotificationAsRead } = useMarkNotificationAsRead();
   return (
-    <Sidebar variant="inset">
-      <SidebarHeader className="flex flex-row items-center justify-evenly gap-1 ">
+    <Sidebar variant="inset" collapsible="icon">
+      <SidebarHeader className="flex flex-row items-center justify-evenly gap-0  overflow-hidden">
         <p className="text-lg font-medium">TaskFlow</p>
         <SignedIn>
           <UserButton afterSignedOutUrl="/" />

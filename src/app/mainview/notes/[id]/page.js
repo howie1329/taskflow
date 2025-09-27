@@ -49,7 +49,7 @@ function Page() {
   }
 
   return (
-    <div className="grid grid-rows-[1fr_24fr] h-full text-sm px-2 bg-card border-r border-y rounded-tr-xl rounded-br-xl">
+    <div className="grid grid-rows-[1fr_24fr] h-full text-sm px-2 bg-card rounded-tr-md rounded-br-md">
       <div className="flex flex-row justify-between items-center">
         <h1 className="text-xl font-medium text-center">{note.title}</h1>
         <p>{note.description}</p>

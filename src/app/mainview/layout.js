@@ -40,7 +40,7 @@ export default function Layout({ children }) {
             setIsGlobalSmartSearchOpen={setIsGlobalSmartSearchOpen}
           />
           <SocketBridge />
-          <main className=" h-[98vh] p-1 border rounded-md">{children}</main>
+          <main className=" h-[98vh] rounded-md border">{children}</main>
         </SidebarInset>
       </SidebarProvider>
     </QueryClientProvider>

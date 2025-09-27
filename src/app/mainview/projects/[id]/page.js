@@ -24,7 +24,7 @@ export default function Page() {
     getFilteredData(tasks);
   }, [searchQuery, tasks, activeSearch, filterStatuses, getFilteredData]);
   return (
-    <div className="flex flex-col flex-1 overflow-hidden h-[96vh]  border-r border-y p-2 rounded-tr-xl rounded-br-xl bg-white">
+    <div className="flex flex-col flex-1 overflow-hidden h-full p-2 rounded-tr-md rounded-br-md bg-white">
       <div className="flex flex-col justify-between items-center">
         <div className="flex flex-row justify-between items-center w-full p-2">
           <div className="flex flex-col">
