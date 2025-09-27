@@ -145,21 +145,19 @@ export default function AppSideBar() {
       </SidebarHeader>
       <SidebarContent>
         <SidebarSeparator />
-        <SidebarGroup>
-          <SidebarGroupLabel>TaskFlow</SidebarGroupLabel>
-          <SidebarMenu>
-            {SideBarItems.map((item) => (
-              <SidebarMenuItem key={item.label}>
-                <SidebarMenuButton asChild>
-                  <Link href={item.href}>
-                    {item.icon}
-                    <span>{item.label}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarGroup>
+
+        <SidebarMenu>
+          {SideBarItems.map((item) => (
+            <SidebarMenuItem key={item.label}>
+              <SidebarMenuButton asChild>
+                <Link href={item.href}>
+                  {item.icon}
+                  <span>{item.label}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
       </SidebarContent>
       <SidebarFooter>
         <SidebarGroup>
