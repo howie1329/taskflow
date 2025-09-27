@@ -25,6 +25,7 @@ import {
   BookCheckIcon,
   MoonIcon,
   SunIcon,
+  InboxIcon,
 } from "lucide-react";
 import React from "react";
 import Link from "next/link";
@@ -42,6 +43,11 @@ import { useMarkNotificationAsRead } from "@/hooks/notifications/useMarkNotifica
 import { useTheme } from "next-themes";
 
 const SideBarItems = [
+  {
+    label: "Inbox",
+    icon: <InboxIcon />,
+    href: "/mainview/inbox",
+  },
   {
     label: "Schedule",
     icon: <CalendarIcon />,
