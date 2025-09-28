@@ -4,6 +4,7 @@ import { useUser } from "@clerk/nextjs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ArrowRightIcon, TrashIcon, XIcon } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 export default function Page() {
   const { user } = useUser();
   const [items, setItems] = useState([]);
@@ -29,7 +30,7 @@ export default function Page() {
       </div>
       {/* Inbox Content */}
       <div className="flex flex-col w-full h-full items-center">
-        <div className="flex flex-col w-[80%] h-full items-center">
+        <div className="flex flex-col w-[80%] h-full items-center gap-1">
           <h2 className="text-lg font-bold ">Inbox</h2>
           <div className="flex flex-row w-full gap-1">
             <Input
@@ -46,24 +47,28 @@ export default function Page() {
             )}
           </div>
 
-          <div className="flex flex-col w-full h-[85%] p-1 gap-1 overflow-auto">
+          <div className="flex flex-col w-full h-[85%] gap-1 overflow-auto">
             {items.map((item, index) => (
-              <div
+              <Card
                 key={index}
                 onMouseEnter={() => setHoverIndex(index)}
                 onMouseLeave={() => setHoverIndex(null)}
-                className="flex flex-row gap-1 items-center"
               >
-                <XIcon
-                  className={`w-4 h-4 cursor-pointer ${
-                    hoverIndex === index ? "text-red-500" : "text-transparent"
-                  }`}
-                  onClick={() => handleDelete(index)}
-                />
-                <p key={index}>
-                  {item.charAt(0).toUpperCase() + item.slice(1)}
-                </p>
-              </div>
+                <CardContent className="flex flex-row gap-1 items-center">
+                  <XIcon
+                    className={`w-4 h-4 cursor-pointer ${
+                      hoverIndex === index ? "text-red-500" : "text-transparent"
+                    }`}
+                    onClick={() => handleDelete(index)}
+                  />
+                  <div className="flex flex-col gap-1 ">
+                    <p key={index}>
+                      {item.charAt(0).toUpperCase() + item.slice(1)}
+                    </p>
+                    <p>This will be used for an AI suggestion</p>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
