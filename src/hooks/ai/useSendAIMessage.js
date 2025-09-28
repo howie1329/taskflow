@@ -1,38 +1,110 @@
 "use client";
-import axiosClient from "@/lib/axios/axiosClient";
+import { useSockets } from "@/lib/sockets/useSockets";
 import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { v4 as uuidv4 } from "uuid";
 
-const sendAIMessage = async (message, getToken) => {
-  const token = await getToken();
-  const response = await axiosClient.post(
-    "/api/ai/ai-chat",
-    {
-      NewMessage: message.newMessage,
+const sendAIMessage = async (message, queryClient, socket, userId) => {
+  console.log("Message: ", message);
+  return new Promise((resolve, reject) => {
+    let fullTextResponse = "";
+    let jsonResponse = null;
+    const handleChat = (data) => {
+      console.log("Data: ", data);
+      if (data.type === "start") {
+        toast.success("AI Chat Started", {
+          description: new Date().toLocaleString(),
+        });
+      }
+
+      if (data.type === "text") {
+        fullTextResponse += data.text;
+        queryClient.setQueryData(["messages", data.conversationId], (old) => {
+          const existingMessages = old || [];
+          const lastMessage = existingMessages[existingMessages.length - 1];
+          if (lastMessage && lastMessage.role === "assistant") {
+            return [
+              ...existingMessages.slice(0, -1),
+              {
+                ...lastMessage,
+                content: fullTextResponse,
+              },
+            ];
+          } else {
+            return [
+              ...existingMessages,
+              {
+                id: data.conversationId,
+                content: fullTextResponse,
+                role: "assistant",
+              },
+            ];
+          }
+        });
+      }
+
+      if (data.type === "done") {
+        toast.success("AI Chat Done", {
+          description: new Date().toLocaleString(),
+        });
+        queryClient.setQueryData(["messages", data.conversationId], (old) => {
+          const existingMessages = old || [];
+          const lastMessage = existingMessages[existingMessages.length - 1];
+          if (lastMessage && lastMessage.role === "assistant") {
+            return [
+              ...existingMessages.slice(0, -1),
+              {
+                ...lastMessage,
+                content: fullTextResponse,
+              },
+            ];
+          } else {
+            return [
+              ...existingMessages,
+              {
+                id: data.conversationId,
+                content: fullTextResponse,
+                role: "assistant",
+              },
+            ];
+          }
+        });
+
+        jsonResponse = data.response;
+        socket.off("ai-traditional-chat", handleChat);
+        resolve(jsonResponse);
+      }
+    };
+
+    socket.on("ai-traditional-chat", handleChat);
+
+    socket.emit("ai-traditional-chat", {
+      userId: userId,
       conversationId: message.conversationId,
       model: message.model,
+      message: message.newMessage,
       settings: message.settings,
-    },
-    {
-      headers: { Authorization: token },
-      withCredentials: true,
-    }
-  );
-
-  return response.data.data;
+    });
+  });
 };
 
 const useSendAIMessage = () => {
-  const { getToken } = useAuth();
+  const { userId } = useAuth();
   const queryClient = useQueryClient();
   const router = useRouter();
-
+  const { socket } = useSockets();
   return useMutation({
     mutationFn: async (variables) => {
+      console.log("Variables: ", variables);
+
+      if (variables.conversationId === null) {
+        variables.conversationId = uuidv4();
+      }
+
       // TODO: Append the new message to the chat history... optimistic update
-      return sendAIMessage(variables, getToken);
+      return sendAIMessage(variables, queryClient, socket, userId);
     },
     onMutate: async (variables) => {
       if (variables.conversationId) {
@@ -49,9 +121,10 @@ const useSendAIMessage = () => {
           (old) => [
             ...old,
             {
-              id: "temp-" + Date.now(),
+              id: variables.conversationId,
               content: variables.newMessage,
               role: "user",
+              model: variables.model,
               created_at: new Date().toISOString(),
             },
           ]
@@ -60,15 +133,12 @@ const useSendAIMessage = () => {
       }
     },
     onSuccess: (data, variables) => {
-      if (!variables.conversationId && variables.status !== "inline-chat") {
-        router.push(`/mainview/aichat/${data.conversation_id}`);
-      }
-
       toast.success("Message sent successfully", {
         description: new Date().toLocaleString(),
       });
     },
     onSettled: (data, error, variables, context) => {
+      router.push(`/mainview/aichat/${variables.conversationId}`);
       if (variables.conversationId) {
         queryClient.invalidateQueries({
           queryKey: ["messages", variables.conversationId],

@@ -8,6 +8,7 @@ export const SocketBridge = () => {
   const { userId } = useAuth();
   useEffect(() => {
     if (isConnected) {
+      // This is deprecated
       socket.emit("join", { userId: userId });
     }
   }, [isConnected, socket, userId]);

@@ -5,7 +5,6 @@ import { ArrowUpIcon, Loader2Icon } from "lucide-react";
 import React, { useState } from "react";
 import useSendAIMessage from "@/hooks/ai/useSendAIMessage";
 import { AIModelSelector } from "../AIModelSelector";
-
 import SettingsPopover from "../SettingsPopover";
 
 export const AIChatInputArea = () => {
