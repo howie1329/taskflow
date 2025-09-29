@@ -8,11 +8,15 @@ import { PlusIcon } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect } from "react";
 import { useProjectUIStore } from "@/presentation/hooks/useProjectUIStore";
+import useSocketStore from "@/lib/sockets/SocketStore";
+import { useQueryClient } from "@tanstack/react-query";
 export default function Page() {
   const { id } = useParams();
   const router = useRouter();
   const { data: project } = useFetchSingleProject(id);
   const { data: tasks } = useFetchAllProjectTasks(id);
+  const { socket } = useSocketStore();
+  const queryClient = useQueryClient();
   const {
     activeSearch,
     searchQuery,
@@ -21,8 +25,30 @@ export default function Page() {
     getFilteredData,
   } = useProjectUIStore();
   useEffect(() => {
+    if (socket) {
+      socket.on("project-created", () => {
+        queryClient.cancelQueries({ queryKey: ["projects"] });
+        queryClient.invalidateQueries({ queryKey: ["projects"] });
+      });
+      socket.on("project-updated", () => {
+        queryClient.cancelQueries({ queryKey: ["projects"] });
+        queryClient.invalidateQueries({ queryKey: ["projects"] });
+      });
+      socket.on("project-deleted", () => {
+        queryClient.cancelQueries({ queryKey: ["projects"] });
+        queryClient.invalidateQueries({ queryKey: ["projects"] });
+      });
+    }
     getFilteredData(tasks);
-  }, [searchQuery, tasks, activeSearch, filterStatuses, getFilteredData]);
+  }, [
+    searchQuery,
+    tasks,
+    activeSearch,
+    filterStatuses,
+    getFilteredData,
+    socket,
+    queryClient,
+  ]);
   return (
     <div className="flex flex-col flex-1 overflow-hidden h-full p-2 rounded-tr-md rounded-br-md bg-white">
       <div className="flex flex-col justify-between items-center">

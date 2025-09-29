@@ -1,10 +1,10 @@
 "use client";
-import { useSockets } from "@/lib/sockets/useSockets";
 import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { v4 as uuidv4 } from "uuid";
+import useSocketStore from "@/lib/sockets/SocketStore";
 
 const sendAIMessage = async (message, queryClient, socket, userId) => {
   console.log("Message: ", message);
@@ -92,7 +92,7 @@ const useSendAIMessage = () => {
   const { userId } = useAuth();
   const queryClient = useQueryClient();
   const router = useRouter();
-  const { socket } = useSockets();
+  const socket = useSocketStore((state) => state.socket);
   return useMutation({
     mutationFn: async (variables) => {
       console.log("Variables 1: ", variables);

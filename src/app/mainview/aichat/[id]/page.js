@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,7 @@ import useFetchConversation from "@/hooks/ai/useFetchConversation";
 import useSendAIMessage from "@/hooks/ai/useSendAIMessage";
 import useFetchModelSelector from "@/hooks/ai/useFetchModelSelector";
 import SettingsPopover from "@/presentation/components/aiChat/SettingsPopover";
+import useSocketStore from "@/lib/sockets/SocketStore";
 
 function Page() {
   const { id } = useParams();
@@ -38,6 +39,16 @@ function Page() {
   const { data: conversation } = useFetchConversation(id);
   const { mutate: deleteConversation } = useDeleteConversation();
   const router = useRouter();
+  const { socket } = useSocketStore();
+
+  useEffect(() => {
+    if (socket) {
+      socket.emit("join-chat", { conversationId: id });
+      socket.on("ai-traditional-chat", (data) => {
+        console.log("Ai Traditional Chat Data: ", data);
+      });
+    }
+  }, [socket, id]);
 
   if (!messages) {
     return <div>Chat not found</div>;

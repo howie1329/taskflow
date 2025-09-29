@@ -22,10 +22,14 @@ import useSendAIMessage from "@/hooks/ai/useSendAIMessage";
 import useDeleteConversation from "@/hooks/ai/useDeleteConversation";
 import useFetchConversationMessages from "@/hooks/ai/useFetchConversationMessages";
 import useFetchConversation from "@/hooks/ai/useFetchConversation";
+import useSocketStore from "@/lib/sockets/SocketStore";
+import { useQueryClient } from "@tanstack/react-query";
 
 function Page() {
   const { data: tasks } = useFetchAllTasks();
   const [isMiniAIChatOpen, setIsMiniAIChatOpen] = useState(false);
+  const { socket } = useSocketStore();
+  const queryClient = useQueryClient();
   const {
     activeSearch,
     searchQuery,
@@ -42,8 +46,31 @@ function Page() {
   } = useTaskUIStore();
 
   useEffect(() => {
+    if (socket) {
+      socket.on("task-created", () => {
+        queryClient.cancelQueries({ queryKey: ["tasks"] });
+        queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      });
+      socket.on("task-updated", () => {
+        queryClient.cancelQueries({ queryKey: ["tasks"] });
+        queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      });
+      socket.on("task-deleted", () => {
+        queryClient.cancelQueries({ queryKey: ["tasks"] });
+        queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      });
+    }
+
     getFilteredData(tasks);
-  }, [searchQuery, tasks, activeSearch, filterStatuses, getFilteredData]);
+  }, [
+    searchQuery,
+    tasks,
+    activeSearch,
+    filterStatuses,
+    getFilteredData,
+    socket,
+    queryClient,
+  ]);
 
   return (
     <div className="flex flex-col overflow-hidden h-full rounded-md">

@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/command";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import useSmartSearch from "@/hooks/search/useSmartSearch";
-import { SocketBridge } from "@/lib/sockets/SocketBridge";
+import useSocketConnection from "@/lib/sockets/useSocketConnection";
 import AppSideBar from "@/presentation/components/Layout/AppSideBar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useCallback, useEffect, useState } from "react";
@@ -39,13 +39,18 @@ export default function Layout({ children }) {
             isGlobalSmartSearchOpen={isGlobalSmartSearchOpen}
             setIsGlobalSmartSearchOpen={setIsGlobalSmartSearchOpen}
           />
-          <SocketBridge />
+          <SocketInitializer />
           <main className=" h-[98vh] rounded-md border">{children}</main>
         </SidebarInset>
       </SidebarProvider>
     </QueryClientProvider>
   );
 }
+
+const SocketInitializer = () => {
+  useSocketConnection();
+  return null;
+};
 const GlobalSmartSearch = ({
   isGlobalSmartSearchOpen,
   setIsGlobalSmartSearchOpen,
