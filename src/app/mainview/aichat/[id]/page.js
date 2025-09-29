@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,6 +38,7 @@ function Page() {
   const { data: conversation } = useFetchConversation(id);
   const { mutate: deleteConversation } = useDeleteConversation();
   const router = useRouter();
+
   if (!messages) {
     return <div>Chat not found</div>;
   }

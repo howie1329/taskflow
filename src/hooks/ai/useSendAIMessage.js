@@ -30,6 +30,7 @@ const sendAIMessage = async (message, queryClient, socket, userId) => {
               {
                 ...lastMessage,
                 content: fullTextResponse,
+                role: "assistant",
               },
             ];
           } else {
@@ -49,30 +50,27 @@ const sendAIMessage = async (message, queryClient, socket, userId) => {
         toast.success("AI Chat Done", {
           description: new Date().toLocaleString(),
         });
+        // TODO: Optimistic update the ai message json response
+
         queryClient.setQueryData(["messages", data.conversationId], (old) => {
           const existingMessages = old || [];
           const lastMessage = existingMessages[existingMessages.length - 1];
-          if (lastMessage && lastMessage.role === "assistant") {
-            return [
-              ...existingMessages.slice(0, -1),
-              {
-                ...lastMessage,
-                content: fullTextResponse,
-              },
-            ];
-          } else {
-            return [
-              ...existingMessages,
-              {
-                id: data.conversationId,
-                content: fullTextResponse,
-                role: "assistant",
-              },
-            ];
-          }
+          return [
+            ...existingMessages.slice(0, -1),
+            {
+              ...lastMessage,
+              data: data.response.response.data,
+              metadata: data.response.response.metadata,
+              role: "assistant",
+            },
+          ];
         });
 
-        jsonResponse = data.response;
+        // queryClient.invalidateQueries({
+        //   queryKey: ["messages", data.conversationId],
+        // });
+
+        jsonResponse = data.response.response;
         socket.off("ai-traditional-chat", handleChat);
         resolve(jsonResponse);
       }
@@ -97,16 +95,24 @@ const useSendAIMessage = () => {
   const { socket } = useSockets();
   return useMutation({
     mutationFn: async (variables) => {
-      console.log("Variables: ", variables);
+      console.log("Variables 1: ", variables);
 
-      if (variables.conversationId === null) {
+      if (variables.conversationId === null || !variables.conversationId) {
         variables.conversationId = uuidv4();
       }
 
+      socket.emit("join-chat", {
+        conversationId: variables.conversationId,
+      });
+
+      router.push(`/mainview/aichat/${variables.conversationId}`);
+
+      console.log("Variables 2: ", variables);
       // TODO: Append the new message to the chat history... optimistic update
       return sendAIMessage(variables, queryClient, socket, userId);
     },
     onMutate: async (variables) => {
+      console.log("On Mutate: ", variables);
       if (variables.conversationId) {
         await queryClient.cancelQueries({
           queryKey: ["messages", variables.conversationId],
@@ -138,15 +144,9 @@ const useSendAIMessage = () => {
       });
     },
     onSettled: (data, error, variables, context) => {
-      router.push(`/mainview/aichat/${variables.conversationId}`);
-      if (variables.conversationId) {
-        queryClient.invalidateQueries({
-          queryKey: ["messages", variables.conversationId],
-        });
-      } else {
-        queryClient.invalidateQueries({
-          queryKey: ["messages"],
-        });
+      if (!variables.conversationId || variables.conversationId === null) {
+        console.log("On Settled: ", data, error, variables, context);
+        //router.push(`/mainview/aichat/${variables.conversationId}`);
       }
     },
     onError: (error, variables, context) => {
