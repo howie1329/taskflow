@@ -14,6 +14,29 @@ export default function Page() {
       setResponse((prev) => prev + data);
     });
   };
+
+  const handlingSecondMessage = async () => {
+    const userMessage = { role: "user", content: message };
+
+    const res = fetch("http://localhost:3001/test", {
+      method: "POST",
+      body: JSON.stringify({ messages: [userMessage] }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const reader = (await res).body.getReader();
+    const decoder = new TextDecoder();
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const text = decoder.decode(value, { stream: true });
+      console.log("Text: ", text);
+      setResponse((prev) => prev + text);
+    }
+  };
   return (
     <div>
       <div>
@@ -22,7 +45,7 @@ export default function Page() {
           value={message}
           onChange={(e) => setMessage(e.target.value)}
         />
-        <button onClick={handleSendMessage}>Send</button>
+        <button onClick={handlingSecondMessage}>Send</button>
       </div>
 
       <div className="border-2 border-black">

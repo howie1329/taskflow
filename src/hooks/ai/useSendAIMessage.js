@@ -4,115 +4,162 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { v4 as uuidv4 } from "uuid";
-import useSocketStore from "@/lib/sockets/SocketStore";
 
-const sendAIMessage = async (message, queryClient, socket, userId) => {
-  console.log("Message: ", message);
-  return new Promise((resolve, reject) => {
-    let fullTextResponse = "";
-    let jsonResponse = null;
-    const handleChat = (data) => {
-      console.log("Data: ", data);
-      if (data.type === "start") {
-        toast.success("AI Chat Started", {
-          description: new Date().toLocaleString(),
-        });
-      }
-
-      if (data.type === "text") {
-        fullTextResponse += data.text;
-        queryClient.setQueryData(["messages", data.conversationId], (old) => {
-          const existingMessages = old || [];
-          const lastMessage = existingMessages[existingMessages.length - 1];
-          if (lastMessage && lastMessage.role === "assistant") {
-            return [
-              ...existingMessages.slice(0, -1),
-              {
-                ...lastMessage,
-                content: fullTextResponse,
-                role: "assistant",
-              },
-            ];
-          } else {
-            return [
-              ...existingMessages,
-              {
-                id: data.conversationId,
-                content: fullTextResponse,
-                role: "assistant",
-              },
-            ];
-          }
-        });
-      }
-
-      if (data.type === "done") {
-        toast.success("AI Chat Done", {
-          description: new Date().toLocaleString(),
-        });
-        // TODO: Optimistic update the ai message json response
-
-        queryClient.setQueryData(["messages", data.conversationId], (old) => {
-          const existingMessages = old || [];
-          const lastMessage = existingMessages[existingMessages.length - 1];
-          return [
-            ...existingMessages.slice(0, -1),
-            {
-              ...lastMessage,
-              data: data.response.response.data,
-              metadata: data.response.response.metadata,
-              role: "assistant",
-            },
-          ];
-        });
-
-        // queryClient.invalidateQueries({
-        //   queryKey: ["messages", data.conversationId],
-        // });
-
-        jsonResponse = data.response.response;
-        socket.off("ai-traditional-chat", handleChat);
-        resolve(jsonResponse);
-      }
+const sendAIMessage = async (variables, getToken, queryClient) => {
+  try {
+    const token = await getToken();
+    const requestBody = {
+      conversationId: variables.conversationId,
+      NewMessage: variables.newMessage,
+      model: variables.model,
+      settings: variables.settings,
     };
 
-    socket.on("ai-traditional-chat", handleChat);
-
-    socket.emit("ai-traditional-chat", {
-      userId: userId,
-      conversationId: message.conversationId,
-      model: message.model,
-      message: message.newMessage,
-      settings: message.settings,
+    const res = await fetch("http://localhost:3001/api/ai/ai-chat", {
+      method: "POST",
+      body: JSON.stringify(requestBody),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: token,
+      },
     });
-  });
+
+    // Add user message
+    queryClient.setQueryData(["messages", variables.conversationId], (old) => [
+      ...(old || []),
+      {
+        id: `user-${Date.now()}`,
+        content: variables.newMessage,
+        role: "user",
+        model: variables.model,
+        settings: variables.settings,
+        created_at: new Date().toISOString(),
+      },
+    ]);
+
+    // Add assistant placeholder
+    const assistantMessageId = `assistant-${Date.now()}`;
+    queryClient.setQueryData(["messages", variables.conversationId], (old) => [
+      ...(old || []),
+      { id: assistantMessageId, content: "", role: "assistant" },
+    ]);
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let accumulatedContent = "";
+    let jsonBuffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value, { stream: true });
+      console.log("Chunk: ", chunk);
+
+      // Split on newlines, since server may send structured "events"
+      const parts = chunk.split("\n");
+
+      for (const part of parts) {
+        if (part.startsWith("json:")) {
+          // Append JSON fragment to buffer
+          jsonBuffer += part.replace("json:", "").trim();
+
+          try {
+            // Try parse
+            const jsonResponse = JSON.parse(jsonBuffer);
+            console.log("✅ Parsed JSON Response:", jsonResponse.response);
+
+            // Update last assistant message with JSON response
+            queryClient.setQueryData(
+              ["messages", variables.conversationId],
+              (old) => {
+                if (!old) return [];
+
+                const messages = [...old];
+                const lastMessageIndex = messages.length - 1;
+
+                if (
+                  lastMessageIndex >= 0 &&
+                  messages[lastMessageIndex].role === "assistant"
+                ) {
+                  messages[lastMessageIndex] = {
+                    ...messages[lastMessageIndex],
+
+                    content: jsonResponse.response.message,
+                    // replace text with clean message
+                    ui: jsonResponse.response.data, // structured UI data
+                    metadata: jsonResponse.response.metadata, // adjust to your shape,
+                  };
+                }
+
+                return messages;
+              }
+            );
+
+            const newMessages = queryClient.getQueryData([
+              "messages",
+              variables.conversationId,
+            ]);
+            console.log("New Messages: ", newMessages);
+
+            // Reset buffer after successful parse
+            jsonBuffer = "";
+          } catch (err) {
+            // JSON not complete yet → keep buffering
+          }
+        } else {
+          // Normal text chunk
+          accumulatedContent += part;
+
+          queryClient.setQueryData(
+            ["messages", variables.conversationId],
+            (old) => {
+              if (!old) return [];
+              const messages = [...old];
+              const lastMessageIndex = messages.length - 1;
+
+              if (
+                lastMessageIndex >= 0 &&
+                messages[lastMessageIndex].role === "assistant"
+              ) {
+                messages[lastMessageIndex] = {
+                  ...messages[lastMessageIndex],
+                  content: accumulatedContent,
+                };
+              }
+
+              return messages;
+            }
+          );
+        }
+      }
+    }
+
+    console.log("Streaming complete");
+    return res;
+  } catch (error) {
+    console.error(error);
+    toast.error("Failed to send message", {
+      description: `${error.message} - ${new Date().toLocaleString()}`,
+    });
+    throw error;
+  }
 };
 
 const useSendAIMessage = () => {
-  const { userId } = useAuth();
+  const { getToken } = useAuth();
   const queryClient = useQueryClient();
   const router = useRouter();
-  const socket = useSocketStore((state) => state.socket);
+
   return useMutation({
     mutationFn: async (variables) => {
-      console.log("Variables 1: ", variables);
-
       if (variables.conversationId === null || !variables.conversationId) {
         variables.conversationId = uuidv4();
       }
-
-      socket.emit("join-chat", {
-        conversationId: variables.conversationId,
-      });
-
       router.push(`/mainview/aichat/${variables.conversationId}`);
-
-      console.log("Variables 2: ", variables);
-      // TODO: Append the new message to the chat history... optimistic update
-      return sendAIMessage(variables, queryClient, socket, userId);
+      return sendAIMessage(variables, getToken, queryClient);
     },
     onMutate: async (variables) => {
-      console.log("On Mutate: ", variables);
       if (variables.conversationId) {
         await queryClient.cancelQueries({
           queryKey: ["messages", variables.conversationId],
@@ -122,31 +169,8 @@ const useSendAIMessage = () => {
           "messages",
           variables.conversationId,
         ]);
-        queryClient.setQueryData(
-          ["messages", variables.conversationId],
-          (old) => [
-            ...old,
-            {
-              id: variables.conversationId,
-              content: variables.newMessage,
-              role: "user",
-              model: variables.model,
-              created_at: new Date().toISOString(),
-            },
-          ]
-        );
+
         return { previousConversations };
-      }
-    },
-    onSuccess: (data, variables) => {
-      toast.success("Message sent successfully", {
-        description: new Date().toLocaleString(),
-      });
-    },
-    onSettled: (data, error, variables, context) => {
-      if (!variables.conversationId || variables.conversationId === null) {
-        console.log("On Settled: ", data, error, variables, context);
-        //router.push(`/mainview/aichat/${variables.conversationId}`);
       }
     },
     onError: (error, variables, context) => {
