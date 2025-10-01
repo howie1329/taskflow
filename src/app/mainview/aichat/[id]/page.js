@@ -31,6 +31,9 @@ import useFetchConversation from "@/hooks/ai/useFetchConversation";
 import useSendAIMessage from "@/hooks/ai/useSendAIMessage";
 import useFetchModelSelector from "@/hooks/ai/useFetchModelSelector";
 import SettingsPopover from "@/presentation/components/aiChat/SettingsPopover";
+import { Popover, PopoverContent } from "@/components/ui/popover";
+import { PopoverTrigger } from "@radix-ui/react-popover";
+import { Input } from "@/components/ui/input";
 
 function Page() {
   const { id } = useParams();
@@ -59,17 +62,10 @@ function Page() {
           <h1 className="text-xl font-medium text-center">
             {conversation?.title || "Untitled"}
           </h1>
-          <DropdownMenu>
-            <DropdownMenuTrigger>
-              <EllipsisIcon className="h-5 w-5" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem onClick={deleteButtonClick}>
-                <Trash2Icon className="h-5 w-5" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <ChatOptionsPopover
+            chatName={conversation?.title}
+            handleDeleteChat={deleteButtonClick}
+          />
         </div>
         <Separator />
       </div>
@@ -246,6 +242,51 @@ const ChatInputArea = ({ id, model }) => {
         </Button>
       </div>
     </div>
+  );
+};
+
+const ChatOptionsPopover = ({ chatName, handleDeleteChat }) => {
+  return (
+    <Popover>
+      <PopoverTrigger>
+        <EllipsisIcon className="h-5 w-5" />
+      </PopoverTrigger>
+      <PopoverContent
+        side="left"
+        sideOffset={10}
+        align="start"
+        alignOffset={5}
+        className="grid grid-rows-[20px_25px_25px_1fr_25px] bg-card  h-[200px] p-0 shadow-md"
+      >
+        <div className="row-span-1 flex flex-col items-center justify-center ">
+          <p className="text-xs font-medium">Chat Options</p>
+          <Separator />
+        </div>
+        <div className="row-span-1  flex items-center justify-center ">
+          <Input
+            type="text"
+            className="text-xs h-[95%] w-full border-none shadow-none text-center "
+            value={chatName}
+          />
+        </div>
+        <div className="row-span-1">
+          {/* For linking tasks, projects, tags, etc. */}
+        </div>
+        <div className="row-span-1">{/* Default Chat Options */}</div>
+        <div className="row-span-1  flex items-center justify-evenly gap-2 ">
+          <Button
+            variant="outline"
+            className="text-xs h-2 w-[45%]"
+            onClick={handleDeleteChat}
+          >
+            Delete
+          </Button>
+          <Button variant="outline" className="text-xs h-2 w-[45%]">
+            Save
+          </Button>
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 };
 export default Page;
