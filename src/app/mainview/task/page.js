@@ -83,8 +83,12 @@ function Page() {
       <div className="flex-shrink-0 p-1 flex flex-row justify-between items-center gap-1">
         <h1 className="text-lg font-bold ">Task Board</h1>
         {activeSearch && (
-          <Input
-            className="flex-1 p-2 rounded-sm h-8"
+          <motion.Input
+            initial={{ opacity: 0, x: 100 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 100 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="flex-1 p-2 rounded-md h-8 bg-card border text-sm text-center"
             placeholder="Search tasks"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
