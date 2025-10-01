@@ -14,9 +14,6 @@ const fetchConversation = async (conversationId, getToken) => {
         withCredentials: true,
       }
     );
-    toast.success("Conversation fetched successfully", {
-      description: new Date().toLocaleString(),
-    });
     return response.data.data[0];
   } catch (error) {
     console.error(error);
