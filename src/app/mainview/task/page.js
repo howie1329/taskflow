@@ -73,7 +73,13 @@ function Page() {
   ]);
 
   return (
-    <div className="flex flex-col overflow-hidden h-full rounded-md">
+    <motion.div
+      initial={{ opacity: 0, x: 100 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 100 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className="flex flex-col overflow-hidden h-full rounded-md"
+    >
       <div className="flex-shrink-0 p-1 flex flex-row justify-between items-center gap-1">
         <h1 className="text-lg font-bold ">Task Board</h1>
         {activeSearch && (
@@ -142,7 +148,7 @@ function Page() {
       {isMiniAIChatOpen && (
         <MiniAIChat onClose={() => setIsMiniAIChatOpen(false)} />
       )}
-    </div>
+    </motion.div>
   );
 }
 
