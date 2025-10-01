@@ -3,21 +3,10 @@ import React, { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import {
-  ArrowUpIcon,
-  EllipsisIcon,
-  InfoIcon,
-  Loader2Icon,
-  Trash2Icon,
-} from "lucide-react";
+import { ArrowUpIcon, EllipsisIcon, InfoIcon, Loader2Icon } from "lucide-react";
 import useDeleteConversation from "@/hooks/ai/useDeleteConversation";
 import { AITaskCard } from "@/presentation/components/aiChat/tasks/AITaskCard";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
 import {
   Tooltip,
   TooltipContent,
@@ -32,8 +21,9 @@ import useSendAIMessage from "@/hooks/ai/useSendAIMessage";
 import useFetchModelSelector from "@/hooks/ai/useFetchModelSelector";
 import SettingsPopover from "@/presentation/components/aiChat/SettingsPopover";
 import { Popover, PopoverContent } from "@/components/ui/popover";
-import { PopoverTrigger } from "@radix-ui/react-popover";
+import { PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
+import { motion } from "motion/react";
 
 function Page() {
   const { id } = useParams();
@@ -92,7 +82,13 @@ function Page() {
 const RenderUserMessageContent = ({ userContent }) => {
   const timestamp = new Date(userContent.created_at).toLocaleString();
   return (
-    <div className="flex flex-col gap-1 items-end">
+    <motion.div
+      initial={{ opacity: 0, x: 100 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 100 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className="flex flex-col gap-1 items-end"
+    >
       <div className="flex flex-row gap-2 items-center">
         <p className="text-xs font-medium">You </p>
         {userContent?.model && (
@@ -111,14 +107,20 @@ const RenderUserMessageContent = ({ userContent }) => {
         {userContent.content}
       </div>
       <p className="text-gray-500 text-xs">{timestamp}</p>
-    </div>
+    </motion.div>
   );
 };
 
 const RenderAssistantMessageContent = ({ assistantContent }) => {
   const timestamp = new Date(assistantContent.created_at).toLocaleString();
   return (
-    <div className="flex flex-col gap-1 items-start">
+    <motion.div
+      initial={{ opacity: 0, x: -100 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -100 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className="flex flex-col gap-1 items-start"
+    >
       <div className="flex flex-row gap-2 items-center">
         <p className="text-xs font-medium">Assistant</p>
         {assistantContent?.ui?.analysis && (
@@ -169,7 +171,7 @@ const RenderAssistantMessageContent = ({ assistantContent }) => {
           </p>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };
 
