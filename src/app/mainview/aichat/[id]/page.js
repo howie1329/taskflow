@@ -103,7 +103,7 @@ const RenderUserMessageContent = ({ userContent }) => {
           </Tooltip>
         )}
       </div>
-      <div className="text-black bg-gray-300 rounded-md w-fit px-2 py-1 text-sm">
+      <div className="bg-primary text-primary-foreground rounded-md w-fit px-2 py-1 text-sm">
         {userContent.content}
       </div>
       <p className="text-gray-500 text-xs">{timestamp}</p>
@@ -153,7 +153,7 @@ const RenderAssistantMessageContent = ({ assistantContent }) => {
           <span className="text-xs text-blue-500/70">🧠 Smart Context</span>
         )}
       </div>
-      <div className="text-black w-fit px-2 py-1 text-sm">
+      <div className="text-black bg-muted-foreground/30 rounded-md w-fit px-2 py-1 text-sm">
         <ReactMarkdown remarkPlugins={[remarkGfm]}>
           {assistantContent.content}
         </ReactMarkdown>
