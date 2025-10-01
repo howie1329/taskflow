@@ -15,16 +15,6 @@ const sendAIMessage = async (variables, getToken, queryClient) => {
       settings: variables.settings,
     };
 
-    const res = await fetch("http://localhost:3001/api/ai/ai-chat", {
-      method: "POST",
-      body: JSON.stringify(requestBody),
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: token,
-      },
-    });
-
-    // Add user message
     queryClient.setQueryData(["messages", variables.conversationId], (old) => [
       ...(old || []),
       {
@@ -37,7 +27,15 @@ const sendAIMessage = async (variables, getToken, queryClient) => {
       },
     ]);
 
-    // Add assistant placeholder
+    const res = await fetch("http://localhost:3001/api/ai/ai-chat", {
+      method: "POST",
+      body: JSON.stringify(requestBody),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: token,
+      },
+    });
+
     const assistantMessageId = `assistant-${Date.now()}`;
     queryClient.setQueryData(["messages", variables.conversationId], (old) => [
       ...(old || []),
@@ -54,22 +52,16 @@ const sendAIMessage = async (variables, getToken, queryClient) => {
       if (done) break;
 
       const chunk = decoder.decode(value, { stream: true });
-      console.log("Chunk: ", chunk);
 
-      // Split on newlines, since server may send structured "events"
       const parts = chunk.split("\n");
 
       for (const part of parts) {
         if (part.startsWith("json:")) {
-          // Append JSON fragment to buffer
           jsonBuffer += part.replace("json:", "").trim();
 
           try {
-            // Try parse
             const jsonResponse = JSON.parse(jsonBuffer);
-            console.log("✅ Parsed JSON Response:", jsonResponse.response);
 
-            // Update last assistant message with JSON response
             queryClient.setQueryData(
               ["messages", variables.conversationId],
               (old) => {
@@ -86,9 +78,8 @@ const sendAIMessage = async (variables, getToken, queryClient) => {
                     ...messages[lastMessageIndex],
 
                     content: jsonResponse.response.message,
-                    // replace text with clean message
-                    ui: jsonResponse.response.data, // structured UI data
-                    metadata: jsonResponse.response.metadata, // adjust to your shape,
+                    ui: jsonResponse.response.data,
+                    metadata: jsonResponse.response.metadata,
                   };
                 }
 
@@ -100,15 +91,10 @@ const sendAIMessage = async (variables, getToken, queryClient) => {
               "messages",
               variables.conversationId,
             ]);
-            console.log("New Messages: ", newMessages);
 
-            // Reset buffer after successful parse
             jsonBuffer = "";
-          } catch (err) {
-            // JSON not complete yet → keep buffering
-          }
+          } catch (err) {}
         } else {
-          // Normal text chunk
           accumulatedContent += part;
 
           queryClient.setQueryData(
@@ -135,7 +121,6 @@ const sendAIMessage = async (variables, getToken, queryClient) => {
       }
     }
 
-    console.log("Streaming complete");
     return res;
   } catch (error) {
     console.error(error);
