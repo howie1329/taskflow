@@ -8,6 +8,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSubButton,
   SidebarSeparator,
 } from "@/components/ui/sidebar";
 import {
@@ -26,6 +27,7 @@ import {
   MoonIcon,
   SunIcon,
   InboxIcon,
+  ChevronDownIcon,
 } from "lucide-react";
 import React from "react";
 import Link from "next/link";
@@ -41,45 +43,53 @@ import { useDeleteNotification } from "@/hooks/notifications/useDeleteNotificati
 import { Button } from "@/components/ui/button";
 import { useMarkNotificationAsRead } from "@/hooks/notifications/useMarkNotificationAsRead";
 import { useTheme } from "next-themes";
-
-const SideBarItems = [
-  {
-    label: "Inbox",
-    icon: <InboxIcon />,
-    href: "/mainview/inbox",
-  },
-  {
-    label: "Schedule",
-    icon: <CalendarIcon />,
-    href: "/mainview/schedule",
-  },
-  {
-    label: "Task",
-    icon: <ListIcon />,
-    href: "/mainview/task",
-  },
-  {
-    label: "Projects",
-    icon: <FolderIcon />,
-    href: "/mainview/projects",
-  },
-  {
-    label: "Notes",
-    icon: <NotebookIcon />,
-    href: "/mainview/notes",
-  },
-  {
-    label: "AI Chat",
-    icon: <MessageCircleIcon />,
-    href: "/mainview/aichat",
-  },
-];
+import useFetchConversations from "@/hooks/ai/useFetchConversations";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 export default function AppSideBar() {
   const { theme, setTheme } = useTheme();
   const { data: notifications } = useFetchNotifications();
   const { mutate: deleteNotification } = useDeleteNotification();
   const { mutate: markNotificationAsRead } = useMarkNotificationAsRead();
+  const { data: conversations } = useFetchConversations();
+
+  const SideBarItems = [
+    {
+      label: "Inbox",
+      icon: <InboxIcon />,
+      href: "/mainview/inbox",
+    },
+    {
+      label: "Schedule",
+      icon: <CalendarIcon />,
+      href: "/mainview/schedule",
+    },
+    {
+      label: "Task",
+      icon: <ListIcon />,
+      href: "/mainview/task",
+    },
+    {
+      label: "Projects",
+      icon: <FolderIcon />,
+      href: "/mainview/projects",
+    },
+    {
+      label: "Notes",
+      icon: <NotebookIcon />,
+      href: "/mainview/notes",
+    },
+    {
+      label: "AI Chat",
+      icon: <MessageCircleIcon />,
+      href: "/mainview/aichat",
+      items: conversations && conversations.length > 0 ? conversations : null,
+    },
+  ];
   return (
     <Sidebar variant="inset">
       <SidebarHeader className="flex flex-row items-center justify-evenly gap-0  overflow-hidden">
@@ -150,6 +160,34 @@ export default function AppSideBar() {
         </Popover>
       </SidebarHeader>
       <SidebarContent>
+        {SideBarItems.map((item) => (
+          <Collapsible key={item.label}>
+            <CollapsibleTrigger>
+              <SidebarGroupLabel>
+                {item.label}
+                {item.items && item.items.length > 0 && (
+                  <ChevronDownIcon className="w-4 h-4" />
+                )}
+              </SidebarGroupLabel>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              {item.items &&
+                item.items.length > 0 &&
+                item.items.map((item) => (
+                  <SidebarMenuSubButton key={item.id} className="gap-2" asChild>
+                    <Link href={`/mainview/aichat/${item.id}`}>
+                      {item.icon}
+                      <span>
+                        {item.title.charAt(0).toUpperCase() +
+                          item.title.slice(1)}
+                      </span>
+                    </Link>
+                  </SidebarMenuSubButton>
+                ))}
+            </CollapsibleContent>
+          </Collapsible>
+        ))}
+
         <SidebarSeparator />
 
         <SidebarMenu>
