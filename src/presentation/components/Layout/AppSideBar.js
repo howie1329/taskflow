@@ -29,7 +29,7 @@ import {
 } from "lucide-react";
 import React from "react";
 import Link from "next/link";
-import { SignedIn, UserButton } from "@clerk/nextjs";
+import { SignedIn, UserButton, UserProfile } from "@clerk/nextjs";
 import {
   Popover,
   PopoverContent,
@@ -155,7 +155,7 @@ export default function AppSideBar() {
         <SidebarMenu>
           {SideBarItems.map((item) => (
             <SidebarMenuItem key={item.label}>
-              <SidebarMenuButton asChild>
+              <SidebarMenuButton className="gap-2" asChild>
                 <Link href={item.href}>
                   {item.icon}
                   <span>{item.label}</span>
@@ -185,10 +185,17 @@ export default function AppSideBar() {
             </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton asChild>
-                <a>
-                  <SettingsIcon />
-                  <span>Settings</span>
-                </a>
+                <Popover>
+                  <PopoverTrigger>
+                    <div className="flex flex-row items-center gap-2 text-sm font-normal">
+                      <SettingsIcon className="w-4 h-4" />
+                      <span>Account</span>
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent>
+                    <UserProfile />
+                  </PopoverContent>
+                </Popover>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
