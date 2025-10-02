@@ -35,11 +35,11 @@ export const AIModelSelector = ({ setValue, modelName, setModelName }) => {
       </PopoverTrigger>
       <PopoverContent className="max-w-[250px] max-h-[250px] overflow-y-auto p-0 w-full">
         <div className="flex flex-col gap-2 p-2">
-          <div className="flex flex-row items-center border rounded-md text-sm">
+          <div className="flex flex-row items-center border rounded-sm text-sm">
             <input
               type="text"
               placeholder="Search Model..."
-              className="w-full focus:outline-none focus:ring-0 text-sm"
+              className="w-full focus:outline-none focus:ring-0 text-sm text-center"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
