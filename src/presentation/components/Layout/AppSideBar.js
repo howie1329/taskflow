@@ -49,6 +49,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import useFetchNotes from "@/hooks/notes/useFetchNotes";
 
 export default function AppSideBar() {
   const { theme, setTheme } = useTheme();
@@ -56,6 +57,7 @@ export default function AppSideBar() {
   const { mutate: deleteNotification } = useDeleteNotification();
   const { mutate: markNotificationAsRead } = useMarkNotificationAsRead();
   const { data: conversations } = useFetchConversations();
+  const { data: notes } = useFetchNotes();
 
   const SideBarItems = [
     {
@@ -82,12 +84,13 @@ export default function AppSideBar() {
       label: "Notes",
       icon: <NotebookIcon />,
       href: "/mainview/notes",
+      items: notes && notes.length > 0 ? notes : [],
     },
     {
       label: "AI Chat",
       icon: <MessageCircleIcon />,
       href: "/mainview/aichat",
-      items: conversations && conversations.length > 0 ? conversations : null,
+      items: conversations && conversations.length > 0 ? conversations : [],
     },
   ];
   return (
@@ -160,48 +163,53 @@ export default function AppSideBar() {
         </Popover>
       </SidebarHeader>
       <SidebarContent>
-        {SideBarItems.map((item) => (
-          <Collapsible key={item.label}>
-            <CollapsibleTrigger>
-              <SidebarGroupLabel>
-                {item.label}
-                {item.items && item.items.length > 0 && (
-                  <ChevronDownIcon className="w-4 h-4" />
-                )}
-              </SidebarGroupLabel>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              {item.items &&
-                item.items.length > 0 &&
-                item.items.map((item) => (
-                  <SidebarMenuSubButton key={item.id} className="gap-2" asChild>
-                    <Link href={`/mainview/aichat/${item.id}`}>
-                      {item.icon}
-                      <span>
-                        {item.title.charAt(0).toUpperCase() +
-                          item.title.slice(1)}
-                      </span>
+        <SidebarGroup>
+          {SideBarItems.map((item) => (
+            <Collapsible key={item.label}>
+              <div className="flex flex-row items-center justify-between">
+                <SidebarGroupLabel>
+                  <Link className="text-xs font-semibold" href={item.href}>
+                    {item.label}
+                  </Link>
+                </SidebarGroupLabel>
+                <CollapsibleTrigger>
+                  {item.items && item.items.length > 0 && (
+                    <ChevronDownIcon className="w-4 h-4" />
+                  )}
+                </CollapsibleTrigger>
+              </div>
+              <CollapsibleContent>
+                {item.items &&
+                  item.items.length > 0 &&
+                  item.items.slice(0, 3).map((item) => (
+                    <SidebarMenuSubButton
+                      key={item.id}
+                      className="gap-2 justify-start"
+                      asChild
+                    >
+                      <Link href={`/mainview/aichat/${item.id}`}>
+                        {item.icon}
+                        <span className="text-xs truncate">
+                          {item.title.charAt(0).toUpperCase() +
+                            item.title.slice(1)}
+                        </span>
+                      </Link>
+                    </SidebarMenuSubButton>
+                  ))}
+                {item.items && item.items.length > 3 && (
+                  <SidebarMenuSubButton
+                    className="gap-2 text-xs justify-start"
+                    asChild
+                  >
+                    <Link href={item.href}>
+                      <p className="text-xs">More</p>
                     </Link>
                   </SidebarMenuSubButton>
-                ))}
-            </CollapsibleContent>
-          </Collapsible>
-        ))}
-
-        <SidebarSeparator />
-
-        <SidebarMenu>
-          {SideBarItems.map((item) => (
-            <SidebarMenuItem key={item.label}>
-              <SidebarMenuButton className="gap-2" asChild>
-                <Link href={item.href}>
-                  {item.icon}
-                  <span>{item.label}</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
+                )}
+              </CollapsibleContent>
+            </Collapsible>
           ))}
-        </SidebarMenu>
+        </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
         <SidebarGroup>
