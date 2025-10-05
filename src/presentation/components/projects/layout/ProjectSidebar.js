@@ -93,6 +93,7 @@ export default function ProjectSidebar() {
 }
 
 const CreateProjectDialog = ({ isOpen, onOpenChange }) => {
+  // TODO: - This is the create project dialog modal... extract out into a seperate component...
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const { mutate: createProject } = useCreateProject();
