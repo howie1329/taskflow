@@ -32,6 +32,7 @@ import { PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { motion } from "motion/react";
 import { useUser } from "@clerk/nextjs";
+import { AIChatInputArea } from "@/presentation/components/aiChat/page/AiChatInputArea";
 
 function Page() {
   const { id } = useParams();
@@ -80,8 +81,10 @@ function Page() {
           ))}
         </div>
       </div>
-      <div className="flex flex-row justify-center border-t pt-1">
-        <ChatInputArea id={id} model={lastUserMessage?.model} />
+
+      <div className="flex flex-col justify-center gap-1 py-1 mx-5">
+        <Separator />
+        <AIChatInputArea id={id} model={lastUserMessage?.model} />
       </div>
     </div>
   );
@@ -201,133 +204,6 @@ const RenderAssistantMessageContent = ({ assistantContent }) => {
             <CopyIcon className="w-4 h-4" />
           )}
         </Button>
-      </div>
-    </motion.div>
-  );
-};
-
-const ChatInputArea = ({ id, model }) => {
-  const { data: modelSelector } = useFetchModelSelector();
-  const [aiModel, setAiModel] = useState(model);
-  const [modelName, setModelName] = useState(
-    modelSelector?.find((m) => m.id === model)?.name
-  );
-  const [isSmartContext, setIsSmartContext] = useState(false);
-  const [contextWindow, setContextWindow] = useState(4);
-  const sendAIMessage = useSendAIMessage();
-  const [input, setInput] = useState("");
-  const [isFocused, setIsFocused] = useState(false);
-  const textareaRef = React.useRef(null);
-  const buttonActive = input.trim() !== "";
-
-  // Auto-resize textarea
-  React.useEffect(() => {
-    const textarea = textareaRef.current;
-    if (textarea) {
-      textarea.style.height = "auto";
-      textarea.style.height = Math.min(textarea.scrollHeight, 200) + "px";
-    }
-  }, [input]);
-
-  const handleSend = () => {
-    if (!buttonActive || sendAIMessage.isPending) return;
-
-    sendAIMessage.mutate({
-      newMessage: input,
-      conversationId: id,
-      model: aiModel,
-      settings: {
-        isSmartContext: isSmartContext,
-        contextWindow: contextWindow,
-      },
-    });
-    setInput("");
-
-    // Reset textarea height
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-    }
-  };
-
-  return (
-    <motion.div
-      className={`flex flex-col max-w-4xl w-full rounded-2xl border bg-card shadow-sm transition-all duration-200 mb-2 ${
-        isFocused ? "border-primary/50 shadow-xl" : "border-border "
-      }`}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-    >
-      <div className="px-4 pt-3 pb-2">
-        <textarea
-          ref={textareaRef}
-          className="w-full min-h-[44px] max-h-[200px] bg-transparent border-none outline-none focus:border-none focus:outline-none resize-none text-sm placeholder:text-muted-foreground/60"
-          placeholder="Message Assistant... (Shift + Enter for new line)"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              handleSend();
-            }
-          }}
-          rows={1}
-        />
-      </div>
-
-      <Separator />
-
-      <div className="flex flex-row gap-2 justify-between items-center px-4 py-2">
-        <div className="flex flex-row gap-2 items-center justify-start flex-1">
-          <SettingsPopover
-            isSmartContext={isSmartContext}
-            setIsSmartContext={setIsSmartContext}
-            contextWindow={contextWindow}
-            setContextWindow={setContextWindow}
-          />
-          <AIModelSelector
-            setValue={setAiModel}
-            modelName={modelName}
-            setModelName={setModelName}
-          />
-
-          {/* Character count - only show when typing */}
-          {input.length > 0 && (
-            <motion.span
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="text-xs text-muted-foreground/60 ml-auto"
-            >
-              {input.length} chars
-            </motion.span>
-          )}
-        </div>
-
-        <motion.div
-          initial={{ scale: 0.9 }}
-          animate={{ scale: buttonActive ? 1 : 0.9 }}
-          transition={{ type: "spring", stiffness: 300, damping: 20 }}
-        >
-          <Button
-            variant="default"
-            size="icon"
-            className={`h-9 w-9 rounded-full transition-all ${
-              buttonActive && !sendAIMessage.isPending
-                ? "bg-primary hover:bg-primary/90 shadow-md"
-                : "opacity-50"
-            }`}
-            disabled={!buttonActive || sendAIMessage.isPending}
-            onClick={handleSend}
-          >
-            {sendAIMessage.isPending ? (
-              <Loader2Icon className="h-4 w-4 animate-spin" />
-            ) : (
-              <ArrowUpIcon className="h-4 w-4" />
-            )}
-          </Button>
-        </motion.div>
       </div>
     </motion.div>
   );
