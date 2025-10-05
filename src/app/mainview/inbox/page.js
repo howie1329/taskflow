@@ -3,8 +3,20 @@ import React, { useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ArrowRightIcon, TrashIcon, XIcon } from "lucide-react";
+import {
+  ArrowRightIcon,
+  ArrowUpIcon,
+  PlusIcon,
+  TrashIcon,
+  XIcon,
+} from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupTextarea,
+} from "@/components/ui/input-group";
 export default function Page() {
   const { user } = useUser();
   const [items, setItems] = useState([]);
@@ -16,6 +28,10 @@ export default function Page() {
   };
   const handleDelete = (index) => {
     setItems(items.filter((i, iIndex) => iIndex !== index));
+  };
+
+  const handleClear = () => {
+    setInput("");
   };
   return (
     <div className="grid grid-rows-[auto_1fr] overflow-hidden h-full rounded-md p-1">
@@ -33,18 +49,25 @@ export default function Page() {
         <div className="flex flex-col w-[80%] h-full items-center gap-1">
           <h2 className="text-lg font-bold ">Inbox</h2>
           <div className="flex flex-row w-full gap-1">
-            <Input
-              className="w-full text-center border-2"
-              placeholder="Type Anything..."
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-            />
-
-            {input.trim() !== "" && (
-              <Button onClick={handleEnter} variant="outline">
-                <ArrowRightIcon className="w-4 h-4" />
-              </Button>
-            )}
+            <InputGroup>
+              <InputGroupTextarea
+                placeholder="Type Anything..."
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+              />
+              {input.trim() !== "" && (
+                <InputGroupAddon align="block-end">
+                  <InputGroupButton onClick={handleEnter} variant="outline">
+                    Add To Inbox
+                    <ArrowUpIcon className="w-3 h-3" />
+                  </InputGroupButton>
+                  <InputGroupButton onClick={handleClear} variant="outline">
+                    Clear
+                    <XIcon className="w-3 h-3" />
+                  </InputGroupButton>
+                </InputGroupAddon>
+              )}
+            </InputGroup>
           </div>
 
           <div className="flex flex-col w-full h-[85%] gap-1 overflow-auto">
