@@ -181,17 +181,17 @@ export default function AppSideBar() {
               <CollapsibleContent>
                 {item.items &&
                   item.items.length > 0 &&
-                  item.items.slice(0, 3).map((item) => (
+                  item.items.slice(0, 3).map((subItem) => (
                     <SidebarMenuSubButton
-                      key={item.id}
+                      key={subItem.id}
                       className="gap-2 justify-start"
                       asChild
                     >
-                      <Link href={`/mainview/aichat/${item.id}`}>
-                        {item.icon}
+                      <Link href={`${item.href}/${subItem.id}`}>
+                        {subItem.icon}
                         <span className="text-xs truncate">
-                          {item.title.charAt(0).toUpperCase() +
-                            item.title.slice(1)}
+                          {subItem.title.charAt(0).toUpperCase() +
+                            subItem.title.slice(1)}
                         </span>
                       </Link>
                     </SidebarMenuSubButton>
