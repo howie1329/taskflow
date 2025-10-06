@@ -3,17 +3,9 @@ import React, { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import {
-  ArrowUpIcon,
-  CheckIcon,
-  CopyIcon,
-  EllipsisIcon,
-  InfoIcon,
-  Loader2Icon,
-} from "lucide-react";
+import { CheckIcon, CopyIcon, EllipsisIcon, InfoIcon } from "lucide-react";
 import useDeleteConversation from "@/hooks/ai/useDeleteConversation";
 import { AITaskCard } from "@/presentation/components/aiChat/tasks/AITaskCard";
-
 import {
   Tooltip,
   TooltipContent,
@@ -21,18 +13,16 @@ import {
 } from "@/components/ui/tooltip";
 import remarkGfm from "remark-gfm";
 import ReactMarkdown from "react-markdown";
-import { AIModelSelector } from "@/presentation/components/aiChat/AIModelSelector";
 import useFetchConversationMessages from "@/hooks/ai/useFetchConversationMessages";
 import useFetchConversation from "@/hooks/ai/useFetchConversation";
-import useSendAIMessage from "@/hooks/ai/useSendAIMessage";
-import useFetchModelSelector from "@/hooks/ai/useFetchModelSelector";
-import SettingsPopover from "@/presentation/components/aiChat/SettingsPopover";
 import { Popover, PopoverContent } from "@/components/ui/popover";
 import { PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { motion } from "motion/react";
 import { useUser } from "@clerk/nextjs";
 import { AIChatInputArea } from "@/presentation/components/aiChat/page/AiChatInputArea";
+import { Empty, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
+import { Spinner } from "@/components/ui/spinner";
 
 function Page() {
   const { id } = useParams();
@@ -42,7 +32,14 @@ function Page() {
   const router = useRouter();
 
   if (!messages) {
-    return <div>Chat not found</div>;
+    return (
+      <Empty>
+        <EmptyHeader>
+          <Spinner />
+        </EmptyHeader>
+        <EmptyTitle> Loadiing Chat...</EmptyTitle>
+      </Empty>
+    );
   }
 
   const deleteButtonClick = () => {
