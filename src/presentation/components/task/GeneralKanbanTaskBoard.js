@@ -3,6 +3,7 @@ import { TaskCard } from "./TaskCard";
 import { useState } from "react";
 import { useTaskUIStore } from "@/presentation/hooks/useTaskUIStore";
 import { DndContext, useDroppable } from "@dnd-kit/core";
+import { Badge } from "@/components/ui/badge";
 
 export const GeneralKanbanTaskBoard = ({ data }) => {
   const { setFilteredData, filteredData } = useTaskUIStore();
@@ -64,8 +65,11 @@ const Column = ({ column }) => {
       ref={setNodeRef}
       style={style}
     >
-      <h3 className="text-sm font-semibold text-gray-700 text-center py-1 flex-shrink-0">
+      <h3 className="flex flex-row justify-center items-center gap-1 text-sm font-semibold text-gray-700 text-center py-1 flex-shrink-0">
         {column.title}
+        <Badge variant="outline" className="text-xs">
+          {column.tasks.length}
+        </Badge>
       </h3>
       <div className="flex flex-col gap-1 flex-1 overflow-y-auto min-h-0 p-1">
         {column.tasks.map((task) => (
