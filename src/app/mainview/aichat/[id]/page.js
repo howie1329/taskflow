@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,28 @@ function Page() {
   const { data: conversation } = useFetchConversation(id);
   const { mutate: deleteConversation } = useDeleteConversation();
   const router = useRouter();
+  const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    if (messages && messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      });
+    }
+  }, [messages]);
+
+  // Auto-scroll to bottom when component mounts
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      });
+    }
+  }, []);
 
   if (!messages) {
     return (
@@ -65,7 +87,10 @@ function Page() {
         </div>
         <Separator />
       </div>
-      <div className="overflow-y-auto scroll-smooth pb-4">
+      <div
+        ref={messagesContainerRef}
+        className="overflow-y-auto scroll-smooth pb-4"
+      >
         <div className="flex flex-col gap-0.5">
           {messages?.map((message) => (
             <div key={message.id}>
@@ -76,6 +101,8 @@ function Page() {
               )}
             </div>
           ))}
+          {/* Invisible element to scroll to */}
+          <div ref={messagesEndRef} />
         </div>
       </div>
 
