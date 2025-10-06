@@ -66,7 +66,7 @@ function Page() {
         <Separator />
       </div>
       <div className="overflow-y-auto scroll-smooth pb-4">
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-0.5">
           {messages?.map((message) => (
             <div key={message.id}>
               {message.role === "user" ? (
@@ -114,7 +114,7 @@ const RenderUserMessageContent = ({ userContent }) => {
           </Tooltip>
         )}
       </div>
-      <div className="bg-primary text-primary-foreground rounded-2xl max-w-[75%] px-4 py-3 text-sm shadow-sm">
+      <div className="bg-primary text-primary-foreground rounded-md max-w-[75%] px-3 py-2 text-sm border">
         {userContent.content}
       </div>
       <p className="text-muted-foreground/60 text-xs">{timestamp}</p>
@@ -172,7 +172,7 @@ const RenderAssistantMessageContent = ({ assistantContent }) => {
           <span className="text-xs text-blue-500/70">🧠 Smart Context</span>
         )}
       </div>
-      <div className="relative bg-muted text-foreground rounded-md max-w-[75%] px-4 py-3 text-sm">
+      <div className="relative bg-muted text-foreground rounded-md max-w-[75%] px-3 py-2 text-sm border">
         <ReactMarkdown remarkPlugins={[remarkGfm]}>
           {assistantContent.content}
         </ReactMarkdown>
