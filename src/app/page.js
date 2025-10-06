@@ -8,6 +8,20 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import {
   SignedOut,
   SignInButton,
   SignUpButton,
@@ -28,6 +42,17 @@ import {
   Clock,
   Target,
   Sparkles,
+  ChevronRight,
+  Play,
+  Download,
+  Github,
+  Twitter,
+  Linkedin,
+  Quote,
+  DollarSign,
+  Shield,
+  Smartphone,
+  Globe,
 } from "lucide-react";
 
 export default function Home() {
@@ -315,6 +340,380 @@ export default function Home() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-muted/30">
+        <div className="container mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
+              What Our Users Say
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Join thousands of satisfied users who have transformed their
+              productivity with TaskFlow
+            </p>
+          </div>
+
+          <Carousel className="w-full max-w-4xl mx-auto">
+            <CarouselContent>
+              <CarouselItem>
+                <Card className="p-8">
+                  <div className="flex items-start space-x-4">
+                    <Avatar className="w-12 h-12">
+                      <AvatarImage
+                        src="https://github.com/shadcn.png"
+                        alt="Sarah Chen"
+                      />
+                      <AvatarFallback>SC</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <div className="flex items-center mb-2">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className="w-4 h-4 fill-yellow-400 text-yellow-400"
+                          />
+                        ))}
+                      </div>
+                      <Quote className="w-6 h-6 text-primary mb-4" />
+                      <p className="text-muted-foreground mb-4">
+                        &ldquo;TaskFlow has completely transformed how I manage
+                        my projects. The AI assistant helps me prioritize tasks,
+                        and the calendar integration keeps everything perfectly
+                        organized. I&apos;ve never been more productive!&rdquo;
+                      </p>
+                      <div>
+                        <p className="font-semibold text-foreground">
+                          Sarah Chen
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          Product Manager at TechCorp
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              </CarouselItem>
+
+              <CarouselItem>
+                <Card className="p-8">
+                  <div className="flex items-start space-x-4">
+                    <Avatar className="w-12 h-12">
+                      <AvatarImage
+                        src="https://github.com/maxleiter.png"
+                        alt="Marcus Johnson"
+                      />
+                      <AvatarFallback>MJ</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <div className="flex items-center mb-2">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className="w-4 h-4 fill-yellow-400 text-yellow-400"
+                          />
+                        ))}
+                      </div>
+                      <Quote className="w-6 h-6 text-primary mb-4" />
+                      <p className="text-muted-foreground mb-4">
+                        &ldquo;The note-taking feature is incredible. I can
+                        capture ideas instantly and the AI helps me organize
+                        them into actionable tasks. It&apos;s like having a
+                        personal assistant that never sleeps!&rdquo;
+                      </p>
+                      <div>
+                        <p className="font-semibold text-foreground">
+                          Marcus Johnson
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          Freelance Designer
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              </CarouselItem>
+
+              <CarouselItem>
+                <Card className="p-8">
+                  <div className="flex items-start space-x-4">
+                    <Avatar className="w-12 h-12">
+                      <AvatarImage
+                        src="https://github.com/evilrabbit.png"
+                        alt="Emily Rodriguez"
+                      />
+                      <AvatarFallback>ER</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <div className="flex items-center mb-2">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className="w-4 h-4 fill-yellow-400 text-yellow-400"
+                          />
+                        ))}
+                      </div>
+                      <Quote className="w-6 h-6 text-primary mb-4" />
+                      <p className="text-muted-foreground mb-4">
+                        &ldquo;As a team lead, TaskFlow&apos;s collaboration
+                        features are game-changing. We can track project
+                        progress in real-time, and the automated notifications
+                        keep everyone aligned. Our productivity has increased by
+                        40%!&rdquo;
+                      </p>
+                      <div>
+                        <p className="font-semibold text-foreground">
+                          Emily Rodriguez
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          Engineering Team Lead
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              </CarouselItem>
+            </CarouselContent>
+            <CarouselPrevious />
+            <CarouselNext />
+          </Carousel>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="container mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
+              Frequently Asked Questions
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Everything you need to know about TaskFlow
+            </p>
+          </div>
+
+          <div className="max-w-3xl mx-auto">
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="item-1">
+                <AccordionTrigger>
+                  How does TaskFlow&apos;s AI assistant work?
+                </AccordionTrigger>
+                <AccordionContent className="flex flex-col gap-4 text-balance">
+                  <p>
+                    Our AI assistant uses advanced machine learning to analyze
+                    your tasks, priorities, and work patterns. It provides
+                    intelligent suggestions for task prioritization, helps break
+                    down complex projects into manageable steps, and offers
+                    productivity insights based on your usage patterns.
+                  </p>
+                  <p>
+                    The AI learns from your behavior and adapts its
+                    recommendations over time, becoming more personalized and
+                    effective the more you use TaskFlow.
+                  </p>
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="item-2">
+                <AccordionTrigger>
+                  Can I collaborate with my team on TaskFlow?
+                </AccordionTrigger>
+                <AccordionContent className="flex flex-col gap-4 text-balance">
+                  <p>
+                    Yes! TaskFlow offers comprehensive team collaboration
+                    features including shared projects, real-time updates, team
+                    workspaces, and intelligent notifications. You can assign
+                    tasks, track progress, and communicate seamlessly within the
+                    platform.
+                  </p>
+                  <p>
+                    Team members can see project status, leave comments, and
+                    receive automated updates when tasks are completed or
+                    deadlines approach.
+                  </p>
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="item-3">
+                <AccordionTrigger>
+                  Is my data secure with TaskFlow?
+                </AccordionTrigger>
+                <AccordionContent className="flex flex-col gap-4 text-balance">
+                  <p>
+                    Absolutely. We take data security seriously and use
+                    enterprise-grade encryption for all your data. Your
+                    information is encrypted both in transit and at rest, and we
+                    never share your data with third parties.
+                  </p>
+                  <p>
+                    We also offer advanced privacy controls, regular security
+                    audits, and compliance with major data protection
+                    regulations including GDPR and CCPA.
+                  </p>
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="item-4">
+                <AccordionTrigger>
+                  What platforms does TaskFlow support?
+                </AccordionTrigger>
+                <AccordionContent className="flex flex-col gap-4 text-balance">
+                  <p>
+                    TaskFlow is available as a web application that works on all
+                    modern browsers, and we offer native mobile apps for iOS and
+                    Android. Our responsive design ensures a seamless experience
+                    across desktop, tablet, and mobile devices.
+                  </p>
+                  <p>
+                    We also provide API access for developers who want to
+                    integrate TaskFlow with their existing tools and workflows.
+                  </p>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-muted/30">
+        <div className="container mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
+              Simple, Transparent Pricing
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Choose the plan that fits your needs. Upgrade or downgrade
+              anytime.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            <Card className="relative">
+              <CardHeader className="text-center">
+                <CardTitle>Free</CardTitle>
+                <div className="mt-4">
+                  <span className="text-4xl font-bold text-foreground">$0</span>
+                  <span className="text-muted-foreground">/month</span>
+                </div>
+                <CardDescription className="mt-4">
+                  Perfect for individuals getting started
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <CheckSquare className="w-4 h-4 text-primary" />
+                    <span className="text-sm">Up to 50 tasks</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <CheckSquare className="w-4 h-4 text-primary" />
+                    <span className="text-sm">Basic note-taking</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <CheckSquare className="w-4 h-4 text-primary" />
+                    <span className="text-sm">Calendar integration</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <CheckSquare className="w-4 h-4 text-primary" />
+                    <span className="text-sm">Email support</span>
+                  </div>
+                </div>
+                <Button className="w-full" variant="outline">
+                  Get Started
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="relative border-primary">
+              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                <Badge className="bg-primary text-primary-foreground">
+                  Most Popular
+                </Badge>
+              </div>
+              <CardHeader className="text-center">
+                <CardTitle>Pro</CardTitle>
+                <div className="mt-4">
+                  <span className="text-4xl font-bold text-foreground">
+                    $12
+                  </span>
+                  <span className="text-muted-foreground">/month</span>
+                </div>
+                <CardDescription className="mt-4">
+                  For professionals and small teams
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <CheckSquare className="w-4 h-4 text-primary" />
+                    <span className="text-sm">Unlimited tasks</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <CheckSquare className="w-4 h-4 text-primary" />
+                    <span className="text-sm">Advanced AI assistant</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <CheckSquare className="w-4 h-4 text-primary" />
+                    <span className="text-sm">Team collaboration</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <CheckSquare className="w-4 h-4 text-primary" />
+                    <span className="text-sm">Priority support</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <CheckSquare className="w-4 h-4 text-primary" />
+                    <span className="text-sm">Custom integrations</span>
+                  </div>
+                </div>
+                <Button className="w-full">Start Free Trial</Button>
+              </CardContent>
+            </Card>
+
+            <Card className="relative">
+              <CardHeader className="text-center">
+                <CardTitle>Enterprise</CardTitle>
+                <div className="mt-4">
+                  <span className="text-4xl font-bold text-foreground">
+                    $25
+                  </span>
+                  <span className="text-muted-foreground">/month</span>
+                </div>
+                <CardDescription className="mt-4">
+                  For large teams and organizations
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <CheckSquare className="w-4 h-4 text-primary" />
+                    <span className="text-sm">Everything in Pro</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <CheckSquare className="w-4 h-4 text-primary" />
+                    <span className="text-sm">Advanced analytics</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <CheckSquare className="w-4 h-4 text-primary" />
+                    <span className="text-sm">SSO integration</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <CheckSquare className="w-4 h-4 text-primary" />
+                    <span className="text-sm">Dedicated support</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <CheckSquare className="w-4 h-4 text-primary" />
+                    <span className="text-sm">Custom deployment</span>
+                  </div>
+                </div>
+                <Button className="w-full" variant="outline">
+                  Contact Sales
+                </Button>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
