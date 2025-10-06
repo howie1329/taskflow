@@ -16,6 +16,8 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import useSocketStore from "@/lib/sockets/SocketStore";
+import { Empty, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
+import { Spinner } from "@/components/ui/spinner";
 
 function Page() {
   const { id } = useParams();
@@ -59,7 +61,14 @@ function Page() {
   };
 
   if (isLoading) {
-    return <div>Loading note...</div>;
+    return (
+      <Empty>
+        <EmptyHeader>
+          <Spinner />
+        </EmptyHeader>
+        <EmptyTitle>Loading note...</EmptyTitle>
+      </Empty>
+    );
   }
   if (error) {
     return <div>Error: {error.message}</div>;
