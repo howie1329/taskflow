@@ -94,7 +94,60 @@ const sendAIMessage = async (variables, getToken, queryClient) => {
 
             jsonBuffer = "";
           } catch (err) {}
-        } else {
+        } else if (part.startsWith("ToolCallStart:")) {
+          console.log("ToolCallStart: ", part);
+          const toolCall = JSON.parse(
+            part.replace("ToolCallStart:", "").trim()
+          );
+
+          const tool_call_start_message = {
+            id: toolCall.call_id,
+            content: `${toolCall.name} has started`,
+            role: "tool",
+            status: "started",
+          };
+
+          queryClient.setQueryData(
+            ["messages", variables.conversationId],
+            (old) => {
+              if (!old) return [];
+              const old_messages = [...old];
+              const last_message_index = old_messages.length - 1;
+              const last_message = old_messages[last_message_index];
+
+              const sliced_messages = old_messages.slice(0, last_message_index);
+              sliced_messages.push(tool_call_start_message);
+              sliced_messages.push(last_message);
+              return sliced_messages;
+            }
+          );
+        } else if (part.startsWith("ToolCallEnd:")) {
+          console.log("ToolCallEnd: ", part);
+          const toolCall = JSON.parse(part.replace("ToolCallEnd:", "").trim());
+
+          const tool_call_end_message = {
+            id: toolCall.call_id,
+            content: `${toolCall.name} has ended`,
+            role: "tool",
+            status: "completed",
+          };
+
+          queryClient.setQueryData(
+            ["messages", variables.conversationId],
+            (old) => {
+              if (!old) return [];
+              const old_messages = [...old];
+              const tool_call_message = old_messages.find(
+                (message) => message.id === tool_call_end_message.id
+              );
+              if (tool_call_message) {
+                tool_call_message.status = tool_call_end_message.status;
+                tool_call_message.content = tool_call_end_message.content;
+              }
+              return old_messages;
+            }
+          );
+        } else if (!part.startsWith("json:")) {
           accumulatedContent += part;
 
           queryClient.setQueryData(

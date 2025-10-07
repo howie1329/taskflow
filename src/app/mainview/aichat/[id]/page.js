@@ -96,9 +96,11 @@ function Page() {
             <div key={message.id}>
               {message.role === "user" ? (
                 <RenderUserMessageContent userContent={message} />
-              ) : (
+              ) : message.role === "assistant" ? (
                 <RenderAssistantMessageContent assistantContent={message} />
-              )}
+              ) : message.role === "tool" ? (
+                <RenderToolMessageContent toolContent={message} />
+              ) : null}
             </div>
           ))}
           {/* Invisible element to scroll to */}
@@ -228,6 +230,36 @@ const RenderAssistantMessageContent = ({ assistantContent }) => {
             <CopyIcon className="w-4 h-4" />
           )}
         </Button>
+      </div>
+    </motion.div>
+  );
+};
+
+const RenderToolMessageContent = ({ toolContent }) => {
+  const isStarted = toolContent.status === "started";
+  const isCompleted = toolContent.status === "completed";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.9 }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
+      className="flex flex-col gap-1 items-start my-2"
+    >
+      <div className="flex flex-row gap-2 items-center bg-muted/50 rounded-md px-3 py-1.5 text-xs border border-dashed">
+        {isStarted && (
+          <>
+            <Spinner className="w-3 h-3" />
+            <span className="text-muted-foreground">{toolContent.content}</span>
+          </>
+        )}
+        {isCompleted && (
+          <>
+            <CheckIcon className="w-3 h-3 text-green-500" />
+            <span className="text-muted-foreground">{toolContent.content}</span>
+          </>
+        )}
       </div>
     </motion.div>
   );
