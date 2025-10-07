@@ -1,23 +1,11 @@
 "use client";
-import React, { useState } from "react";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import React, { useState, useEffect, useRef } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import {
-  ArrowUpIcon,
-  EllipsisIcon,
-  InfoIcon,
-  Loader2Icon,
-  Trash2Icon,
-} from "lucide-react";
+import { CheckIcon, CopyIcon, EllipsisIcon, InfoIcon } from "lucide-react";
 import useDeleteConversation from "@/hooks/ai/useDeleteConversation";
 import { AITaskCard } from "@/presentation/components/aiChat/tasks/AITaskCard";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Tooltip,
   TooltipContent,
@@ -25,12 +13,16 @@ import {
 } from "@/components/ui/tooltip";
 import remarkGfm from "remark-gfm";
 import ReactMarkdown from "react-markdown";
-import { AIModelSelector } from "@/presentation/components/aiChat/AIModelSelector";
 import useFetchConversationMessages from "@/hooks/ai/useFetchConversationMessages";
 import useFetchConversation from "@/hooks/ai/useFetchConversation";
-import useSendAIMessage from "@/hooks/ai/useSendAIMessage";
-import useFetchModelSelector from "@/hooks/ai/useFetchModelSelector";
-import SettingsPopover from "@/presentation/components/aiChat/SettingsPopover";
+import { Popover, PopoverContent } from "@/components/ui/popover";
+import { PopoverTrigger } from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
+import { motion } from "motion/react";
+import { useUser } from "@clerk/nextjs";
+import { AIChatInputArea } from "@/presentation/components/aiChat/page/AiChatInputArea";
+import { Empty, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
+import { Spinner } from "@/components/ui/spinner";
 
 function Page() {
   const { id } = useParams();
@@ -38,8 +30,38 @@ function Page() {
   const { data: conversation } = useFetchConversation(id);
   const { mutate: deleteConversation } = useDeleteConversation();
   const router = useRouter();
+  const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    if (messages && messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      });
+    }
+  }, [messages]);
+
+  // Auto-scroll to bottom when component mounts
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      });
+    }
+  }, []);
+
   if (!messages) {
-    return <div>Chat not found</div>;
+    return (
+      <Empty>
+        <EmptyHeader>
+          <Spinner />
+        </EmptyHeader>
+        <EmptyTitle> Loadiing Chat...</EmptyTitle>
+      </Empty>
+    );
   }
 
   const deleteButtonClick = () => {
@@ -52,28 +74,24 @@ function Page() {
     .at(-1);
 
   return (
-    <div className="grid grid-rows-[auto_1fr_auto] h-[98vh] w-full text-sm bg-background px-2 pt-2 rounded-tr-md rounded-br-md ">
+    <div className="grid grid-rows-[auto_1fr_auto] h-[98vh] w-full text-sm bg-background px-2 pt-2 rounded-tr-md rounded-br-md">
       <div className="">
         <div className="flex flex-row items-center justify-between pb-2">
           <h1 className="text-xl font-medium text-center">
             {conversation?.title || "Untitled"}
           </h1>
-          <DropdownMenu>
-            <DropdownMenuTrigger>
-              <EllipsisIcon className="h-5 w-5" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem onClick={deleteButtonClick}>
-                <Trash2Icon className="h-5 w-5" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <ChatOptionsPopover
+            chatName={conversation?.title}
+            handleDeleteChat={deleteButtonClick}
+          />
         </div>
         <Separator />
       </div>
-      <div className=" overflow-y-auto ">
-        <div className="flex flex-col gap-2 ">
+      <div
+        ref={messagesContainerRef}
+        className="overflow-y-auto scroll-smooth pb-4"
+      >
+        <div className="flex flex-col gap-0.5">
           {messages?.map((message) => (
             <div key={message.id}>
               {message.role === "user" ? (
@@ -83,21 +101,34 @@ function Page() {
               )}
             </div>
           ))}
+          {/* Invisible element to scroll to */}
+          <div ref={messagesEndRef} />
         </div>
       </div>
-      <div className="flex flex-row justify-center">
-        <ChatInputArea id={id} model={lastUserMessage?.model} />
+
+      <div className="flex flex-col justify-center gap-1 py-1 mx-5">
+        <Separator />
+        <AIChatInputArea id={id} model={lastUserMessage?.model} />
       </div>
     </div>
   );
 }
 
 const RenderUserMessageContent = ({ userContent }) => {
+  const { user } = useUser();
   const timestamp = new Date(userContent.created_at).toLocaleString();
   return (
-    <div className="flex flex-col gap-1 items-end">
+    <motion.div
+      initial={{ opacity: 0, x: 100 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 100 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className="flex flex-col gap-1 items-end"
+    >
       <div className="flex flex-row gap-2 items-center">
-        <p className="text-xs font-medium">You </p>
+        <p className="text-xs font-medium">
+          {user?.firstName?.charAt(0).toUpperCase() + user?.firstName?.slice(1)}{" "}
+        </p>
         {userContent?.model && (
           <Tooltip key={"model"}>
             <TooltipTrigger>
@@ -110,18 +141,32 @@ const RenderUserMessageContent = ({ userContent }) => {
           </Tooltip>
         )}
       </div>
-      <div className="text-black bg-gray-300 rounded-md w-fit px-2 py-1 text-sm">
+      <div className="bg-primary text-primary-foreground rounded-md max-w-[75%] px-3 py-2 text-sm border">
         {userContent.content}
       </div>
-      <p className="text-gray-500 text-xs">{timestamp}</p>
-    </div>
+      <p className="text-muted-foreground/60 text-xs">{timestamp}</p>
+    </motion.div>
   );
 };
 
 const RenderAssistantMessageContent = ({ assistantContent }) => {
   const timestamp = new Date(assistantContent.created_at).toLocaleString();
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(assistantContent.content);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
-    <div className="flex flex-col gap-1 items-start">
+    <motion.div
+      initial={{ opacity: 0, x: -100 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -100 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className="flex flex-col gap-1 items-start group"
+    >
       <div className="flex flex-row gap-2 items-center">
         <p className="text-xs font-medium">Assistant</p>
         {assistantContent?.ui?.analysis && (
@@ -154,97 +199,82 @@ const RenderAssistantMessageContent = ({ assistantContent }) => {
           <span className="text-xs text-blue-500/70">🧠 Smart Context</span>
         )}
       </div>
-      <div className="text-black w-fit px-2 py-1 text-sm">
+      <div className="relative bg-muted text-foreground rounded-md max-w-[75%] px-3 py-2 text-sm border">
         <ReactMarkdown remarkPlugins={[remarkGfm]}>
           {assistantContent.content}
         </ReactMarkdown>
-        <div className="flex flex-row gap-2 overflow-x-auto">
+        <div className="flex flex-row gap-2 overflow-x-auto mt-2">
           {assistantContent.ui?.tasks.map((task) => (
             <AITaskCard task={task} key={task.id} />
           ))}
         </div>
       </div>
-      <div className="flex flex-row gap-2">
-        <p className="text-gray-400 text-xs">{timestamp}</p>
+      <div className="flex flex-row gap-2 items-center">
+        <p className="text-muted-foreground/60 text-xs">{timestamp}</p>
         {assistantContent.total_tokens && (
-          <p className="text-gray-400 text-xs">
+          <p className="text-muted-foreground/60 text-xs">
             {assistantContent.total_tokens} Total Tokens
           </p>
         )}
-      </div>
-    </div>
-  );
-};
-
-const ChatInputArea = ({ id, model }) => {
-  const { data: modelSelector } = useFetchModelSelector();
-  const [aiModel, setAiModel] = useState(model);
-  const [modelName, setModelName] = useState(
-    modelSelector?.find((m) => m.id === model)?.name
-  );
-  const [isSmartContext, setIsSmartContext] = useState(false);
-  const [contextWindow, setContextWindow] = useState(4);
-  const sendAIMessage = useSendAIMessage();
-  const [input, setInput] = useState("");
-  const buttonActive = input.trim() !== "";
-
-  const handleSend = () => {
-    sendAIMessage.mutate({
-      newMessage: input,
-      conversationId: id,
-      model: aiModel,
-      settings: {
-        isSmartContext: isSmartContext,
-        contextWindow: contextWindow,
-      },
-    });
-    setInput("");
-  };
-  return (
-    <div className="flex flex-col w-[70%] rounded-t-md  border-x border-t bg-card shadow-sm px-2">
-      <textarea
-        className="h-full w-full px-2 border-none outline-none focus:border-none focus:outline-none overflow-y-auto resize-none"
-        placeholder="Add new message"
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault();
-            if (buttonActive && !sendAIMessage.isPending) {
-              handleSend();
-            }
-          }
-        }}
-      />
-      <Separator />
-      <div className="flex flex-row gap-2 justify-between items-center ">
-        <div className="flex flex-row gap-2 items-center justify-start">
-          <SettingsPopover
-            isSmartContext={isSmartContext}
-            setIsSmartContext={setIsSmartContext}
-            contextWindow={contextWindow}
-            setContextWindow={setContextWindow}
-          />
-          <AIModelSelector
-            setValue={setAiModel}
-            modelName={modelName}
-            setModelName={setModelName}
-          />
-        </div>
         <Button
-          variant="default"
+          variant="ghost"
           size="sm"
-          disabled={!buttonActive || sendAIMessage.isPending}
-          onClick={handleSend}
+          className="h-6 w-6 p-0 hover:bg-muted"
+          onClick={handleCopy}
         >
-          {sendAIMessage.isPending ? (
-            <Loader2Icon className="h-4 w-4 animate-spin" />
+          {copied ? (
+            <CheckIcon className="w-4 h-4" />
           ) : (
-            <ArrowUpIcon className="h-4 w-4" />
+            <CopyIcon className="w-4 h-4" />
           )}
         </Button>
       </div>
-    </div>
+    </motion.div>
+  );
+};
+
+const ChatOptionsPopover = ({ chatName, handleDeleteChat }) => {
+  return (
+    <Popover>
+      <PopoverTrigger>
+        <EllipsisIcon className="h-5 w-5" />
+      </PopoverTrigger>
+      <PopoverContent
+        side="left"
+        sideOffset={10}
+        align="start"
+        alignOffset={5}
+        className="grid grid-rows-[20px_25px_25px_1fr_25px] bg-card  h-[200px] p-0 shadow-md"
+      >
+        <div className="row-span-1 flex flex-col items-center justify-center ">
+          <p className="text-xs font-medium">Chat Options</p>
+          <Separator />
+        </div>
+        <div className="row-span-1  flex items-center justify-center ">
+          <Input
+            type="text"
+            className="text-xs h-[95%] w-full border-none shadow-none text-center "
+            value={chatName}
+          />
+        </div>
+        <div className="row-span-1">
+          {/* For linking tasks, projects, tags, etc. */}
+        </div>
+        <div className="row-span-1">{/* Default Chat Options */}</div>
+        <div className="row-span-1  flex items-center justify-evenly gap-2 ">
+          <Button
+            variant="outline"
+            className="text-xs h-2 w-[45%]"
+            onClick={handleDeleteChat}
+          >
+            Delete
+          </Button>
+          <Button variant="outline" className="text-xs h-2 w-[45%]">
+            Save
+          </Button>
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 };
 export default Page;

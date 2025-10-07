@@ -22,10 +22,14 @@ import useSendAIMessage from "@/hooks/ai/useSendAIMessage";
 import useDeleteConversation from "@/hooks/ai/useDeleteConversation";
 import useFetchConversationMessages from "@/hooks/ai/useFetchConversationMessages";
 import useFetchConversation from "@/hooks/ai/useFetchConversation";
+import useSocketStore from "@/lib/sockets/SocketStore";
+import { useQueryClient } from "@tanstack/react-query";
 
 function Page() {
   const { data: tasks } = useFetchAllTasks();
   const [isMiniAIChatOpen, setIsMiniAIChatOpen] = useState(false);
+  const { socket } = useSocketStore();
+  const queryClient = useQueryClient();
   const {
     activeSearch,
     searchQuery,
@@ -42,16 +46,49 @@ function Page() {
   } = useTaskUIStore();
 
   useEffect(() => {
+    if (socket) {
+      socket.on("task-created", () => {
+        queryClient.cancelQueries({ queryKey: ["tasks"] });
+        queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      });
+      socket.on("task-updated", () => {
+        queryClient.cancelQueries({ queryKey: ["tasks"] });
+        queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      });
+      socket.on("task-deleted", () => {
+        queryClient.cancelQueries({ queryKey: ["tasks"] });
+        queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      });
+    }
+
     getFilteredData(tasks);
-  }, [searchQuery, tasks, activeSearch, filterStatuses, getFilteredData]);
+  }, [
+    searchQuery,
+    tasks,
+    activeSearch,
+    filterStatuses,
+    getFilteredData,
+    socket,
+    queryClient,
+  ]);
 
   return (
-    <div className="flex flex-col overflow-hidden h-full rounded-md">
+    <motion.div
+      initial={{ opacity: 0, x: 100 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 100 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className="flex flex-col overflow-hidden h-full rounded-md"
+    >
       <div className="flex-shrink-0 p-1 flex flex-row justify-between items-center gap-1">
         <h1 className="text-lg font-bold ">Task Board</h1>
         {activeSearch && (
-          <Input
-            className="flex-1 p-2 rounded-sm h-8"
+          <motion.Input
+            initial={{ opacity: 0, x: 100 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 100 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="flex-1 p-2 rounded-md h-8 bg-card border text-sm text-center"
             placeholder="Search tasks"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -115,7 +152,7 @@ function Page() {
       {isMiniAIChatOpen && (
         <MiniAIChat onClose={() => setIsMiniAIChatOpen(false)} />
       )}
-    </div>
+    </motion.div>
   );
 }
 

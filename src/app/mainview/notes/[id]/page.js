@@ -1,17 +1,12 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import useFetchSingleNote from "@/hooks/notes/useFetchSingleNote";
 import BlockEditor from "@/presentation/components/notes/BlockEditor";
 import useSaveNote from "@/hooks/notes/useSaveNote";
 import useDeleteNote from "@/hooks/notes/useDeleteNote";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { EllipsisIcon, SaveIcon, Trash2Icon } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { EllipsisIcon } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -20,13 +15,37 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
+import useSocketStore from "@/lib/sockets/SocketStore";
+import { Empty, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
+import { Spinner } from "@/components/ui/spinner";
 
 function Page() {
   const { id } = useParams();
   const { data: note, isLoading, error } = useFetchSingleNote(id);
   const { mutate: saveNote } = useSaveNote();
   const deleteNote = useDeleteNote();
+  const { socket } = useSocketStore();
+  const queryClient = useQueryClient();
   const [blocks, setBlocks] = useState([]);
+
+  useEffect(() => {
+    if (socket) {
+      socket.on("note-created", () => {
+        queryClient.cancelQueries({ queryKey: ["notes"] });
+        queryClient.invalidateQueries({ queryKey: ["notes"] });
+      });
+      socket.on("note-updated", (noteId) => {
+        queryClient.cancelQueries({ queryKey: ["notes"] });
+        queryClient.invalidateQueries({ queryKey: ["notes"] });
+        queryClient.cancelQueries({ queryKey: ["note", noteId] });
+        queryClient.invalidateQueries({ queryKey: ["note", noteId] });
+      });
+      socket.on("note-deleted", () => {
+        queryClient.cancelQueries({ queryKey: ["notes"] });
+        queryClient.invalidateQueries({ queryKey: ["notes"] });
+      });
+    }
+  }, [socket, queryClient]);
 
   const handleSaveNote = () => {
     saveNote({
@@ -42,7 +61,14 @@ function Page() {
   };
 
   if (isLoading) {
-    return <div>Loading note...</div>;
+    return (
+      <Empty>
+        <EmptyHeader>
+          <Spinner />
+        </EmptyHeader>
+        <EmptyTitle>Loading note...</EmptyTitle>
+      </Empty>
+    );
   }
   if (error) {
     return <div>Error: {error.message}</div>;

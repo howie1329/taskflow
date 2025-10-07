@@ -4,100 +4,143 @@
 @custom-variant dark (&:is(.dark *));
 
 
+/* Light Mode (Apple-inspired) */
 :root {
-  --background: #f8fafc;
-  --foreground: #1e293b;
+  --background: #f9f9f9;
+  --foreground: #1c1c1e;
+
   --card: #ffffff;
-  --card-foreground: #1e293b;
+  --card-foreground: #1c1c1e;
+
   --popover: #ffffff;
-  --popover-foreground: #1e293b;
-  --primary: #6366f1;
+  --popover-foreground: #1c1c1e;
+
+  --primary: #007aff;
   --primary-foreground: #ffffff;
-  --secondary: #e5e7eb;
-  --secondary-foreground: #374151;
-  --muted: #f3f4f6;
-  --muted-foreground: #6b7280;
-  --accent: #e0e7ff;
-  --accent-foreground: #374151;
-  --destructive: #ef4444;
+
+  --secondary: #e5e5ea;
+  /* systemGray5 */
+  --secondary-foreground: #3a3a3c;
+
+  --muted: #f2f2f7;
+  /* systemGray6 */
+  --muted-foreground: #6c6c70;
+
+  --accent: #d1e3ff;
+  --accent-foreground: #1c1c1e;
+
+  --destructive: #ff3b30;
   --destructive-foreground: #ffffff;
-  --border: #d1d5db;
-  --input: #d1d5db;
-  --ring: #6366f1;
-  --chart-1: #6366f1;
-  --chart-2: #4f46e5;
-  --chart-3: #4338ca;
-  --chart-4: #3730a3;
-  --chart-5: #312e81;
-  --sidebar: #f3f4f6;
-  --sidebar-foreground: #1e293b;
-  --sidebar-primary: #6366f1;
+
+  --border: #d1d1d6;
+  /* systemGray4 */
+  --input: #d1d1d6;
+  --ring: #007aff;
+
+  --chart-1: #007aff;
+  --chart-2: #34c759;
+  --chart-3: #ff9500;
+  --chart-4: #ff2d55;
+  --chart-5: #af52de;
+
+  --sidebar: #f2f2f7;
+  --sidebar-foreground: #1c1c1e;
+  --sidebar-primary: #007aff;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #e0e7ff;
-  --sidebar-accent-foreground: #374151;
-  --sidebar-border: #d1d5db;
-  --sidebar-ring: #6366f1;
-  --font-sans: Inter, sans-serif;
-  --font-serif: Merriweather, serif;
-  --font-mono: JetBrains Mono, monospace;
-  --radius: 0.5rem;
-  --shadow-2xs: 0px 4px 8px -1px hsl(0 0% 0% / 0.05);
-  --shadow-xs: 0px 4px 8px -1px hsl(0 0% 0% / 0.05);
-  --shadow-sm: 0px 4px 8px -1px hsl(0 0% 0% / 0.10), 0px 1px 2px -2px hsl(0 0% 0% / 0.10);
-  --shadow: 0px 4px 8px -1px hsl(0 0% 0% / 0.10), 0px 1px 2px -2px hsl(0 0% 0% / 0.10);
-  --shadow-md: 0px 4px 8px -1px hsl(0 0% 0% / 0.10), 0px 2px 4px -2px hsl(0 0% 0% / 0.10);
-  --shadow-lg: 0px 4px 8px -1px hsl(0 0% 0% / 0.10), 0px 4px 6px -2px hsl(0 0% 0% / 0.10);
-  --shadow-xl: 0px 4px 8px -1px hsl(0 0% 0% / 0.10), 0px 8px 10px -2px hsl(0 0% 0% / 0.10);
-  --shadow-2xl: 0px 4px 8px -1px hsl(0 0% 0% / 0.25);
+  --sidebar-accent: #d1e3ff;
+  --sidebar-accent-foreground: #1c1c1e;
+  --sidebar-border: #d1d1d6;
+  --sidebar-ring: #007aff;
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, sans-serif;
+  --font-serif: "New York", Georgia, serif;
+  --font-mono: "SF Mono", Menlo, monospace;
+
+  --radius: 0.75rem;
+  --shadow-sm: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  --shadow: 0px 6px 12px rgba(0, 0, 0, 0.12);
+  --shadow-md: 0px 8px 16px rgba(0, 0, 0, 0.14);
+  --shadow-lg: 0px 10px 20px rgba(0, 0, 0, 0.15);
+  --shadow-xl: 0px 12px 24px rgba(0, 0, 0, 0.18);
+  --shadow-2xl: 0px 16px 32px rgba(0, 0, 0, 0.25);
+
   --tracking-normal: 0em;
   --spacing: 0.25rem;
 }
 
+/* Dark Mode (Apple-inspired) */
 .dark {
-  --background: #0f172a;
-  --foreground: #e2e8f0;
-  --card: #1e293b;
-  --card-foreground: #e2e8f0;
-  --popover: #1e293b;
-  --popover-foreground: #e2e8f0;
-  --primary: #818cf8;
-  --primary-foreground: #0f172a;
-  --secondary: #2d3748;
-  --secondary-foreground: #d1d5db;
-  --muted: #1e293b;
-  --muted-foreground: #9ca3af;
-  --accent: #374151;
-  --accent-foreground: #d1d5db;
-  --destructive: #ef4444;
-  --destructive-foreground: #0f172a;
-  --border: #4b5563;
-  --input: #4b5563;
-  --ring: #818cf8;
-  --chart-1: #818cf8;
-  --chart-2: #6366f1;
-  --chart-3: #4f46e5;
-  --chart-4: #4338ca;
-  --chart-5: #3730a3;
-  --sidebar: #1e293b;
-  --sidebar-foreground: #e2e8f0;
-  --sidebar-primary: #818cf8;
-  --sidebar-primary-foreground: #0f172a;
-  --sidebar-accent: #374151;
-  --sidebar-accent-foreground: #d1d5db;
-  --sidebar-border: #4b5563;
-  --sidebar-ring: #818cf8;
-  --font-sans: Inter, sans-serif;
-  --font-serif: Merriweather, serif;
-  --font-mono: JetBrains Mono, monospace;
-  --radius: 0.5rem;
-  --shadow-2xs: 0px 4px 8px -1px hsl(0 0% 0% / 0.05);
-  --shadow-xs: 0px 4px 8px -1px hsl(0 0% 0% / 0.05);
-  --shadow-sm: 0px 4px 8px -1px hsl(0 0% 0% / 0.10), 0px 1px 2px -2px hsl(0 0% 0% / 0.10);
-  --shadow: 0px 4px 8px -1px hsl(0 0% 0% / 0.10), 0px 1px 2px -2px hsl(0 0% 0% / 0.10);
-  --shadow-md: 0px 4px 8px -1px hsl(0 0% 0% / 0.10), 0px 2px 4px -2px hsl(0 0% 0% / 0.10);
-  --shadow-lg: 0px 4px 8px -1px hsl(0 0% 0% / 0.10), 0px 4px 6px -2px hsl(0 0% 0% / 0.10);
-  --shadow-xl: 0px 4px 8px -1px hsl(0 0% 0% / 0.10), 0px 8px 10px -2px hsl(0 0% 0% / 0.10);
-  --shadow-2xl: 0px 4px 8px -1px hsl(0 0% 0% / 0.25);
+  --background: #1c1c1e;
+  /* systemBackground dark */
+  --foreground: #f5f5f7;
+  /* label primary light */
+
+  --card: #2c2c2e;
+  /* secondary systemBackground dark */
+  --card-foreground: #f5f5f7;
+
+  --popover: #2c2c2e;
+  --popover-foreground: #f5f5f7;
+
+  --primary: #0a84ff;
+  /* systemBlue dark */
+  --primary-foreground: #ffffff;
+
+  --secondary: #3a3a3c;
+  /* systemGray5 dark */
+  --secondary-foreground: #ebebf5;
+
+  --muted: #2c2c2e;
+  /* systemGray6 dark */
+  --muted-foreground: #98989d;
+
+  --accent: #0a84ff33;
+  /* subtle translucent accent */
+  --accent-foreground: #ffffff;
+
+  --destructive: #ff453a;
+  /* systemRed dark */
+  --destructive-foreground: #ffffff;
+
+  --border: #3a3a3c;
+  /* systemGray4 dark */
+  --input: #3a3a3c;
+  --ring: #0a84ff;
+
+  --chart-1: #0a84ff;
+  /* blue */
+  --chart-2: #32d74b;
+  /* green */
+  --chart-3: #ff9f0a;
+  /* orange */
+  --chart-4: #ff375f;
+  /* pink/red */
+  --chart-5: #bf5af2;
+  /* purple */
+
+  --sidebar: #2c2c2e;
+  --sidebar-foreground: #f5f5f7;
+  --sidebar-primary: #0a84ff;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #0a84ff33;
+  --sidebar-accent-foreground: #f5f5f7;
+  --sidebar-border: #3a3a3c;
+  --sidebar-ring: #0a84ff;
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, sans-serif;
+  --font-serif: "New York", Georgia, serif;
+  --font-mono: "SF Mono", Menlo, monospace;
+
+  --radius: 0.75rem;
+  --shadow-sm: 0px 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow: 0px 4px 8px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0px 6px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0px 8px 16px rgba(0, 0, 0, 0.45);
+  --shadow-xl: 0px 10px 20px rgba(0, 0, 0, 0.5);
+  --shadow-2xl: 0px 12px 24px rgba(0, 0, 0, 0.55);
+
+  --tracking-normal: 0em;
+  --spacing: 0.25rem;
 }
 
 @theme inline {

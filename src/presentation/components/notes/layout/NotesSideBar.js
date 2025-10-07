@@ -88,6 +88,7 @@ export default function NotesSideBar() {
 }
 
 const CreateNoteDialog = ({ isOpen, onOpenChange }) => {
+  // TODO: - This is the create note dialog modal... extract out into a seperate component...
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const createNote = useCreateNote();

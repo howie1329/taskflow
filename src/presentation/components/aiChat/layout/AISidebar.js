@@ -23,7 +23,7 @@ export default function AISidebar() {
             <SidebarMenuItem>
               <SidebarMenuButton asChild>
                 <Link
-                  className="flex justify-center text-xs bg-black text-white"
+                  className="flex justify-center text-xs bg-primary text-white"
                   href={`/mainview/aichat`}
                 >
                   New Chat
@@ -57,7 +57,10 @@ export default function AISidebar() {
               .map((item) => (
                 <SidebarMenuItem key={item.id}>
                   <SidebarMenuButton asChild>
-                    <Link href={`/mainview/aichat/${item.id}`}>
+                    <Link
+                      className="gap-2"
+                      href={`/mainview/aichat/${item.id}`}
+                    >
                       <MessageCircleIcon />
                       <span className="line-clamp-1 text-ellipsis text-xs">
                         {item.title.charAt(0).toUpperCase() +

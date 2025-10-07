@@ -1,27 +1,134 @@
 "use client";
-import axiosClient from "@/lib/axios/axiosClient";
 import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { v4 as uuidv4 } from "uuid";
 
-const sendAIMessage = async (message, getToken) => {
-  const token = await getToken();
-  const response = await axiosClient.post(
-    "/api/ai/ai-chat",
-    {
-      NewMessage: message.newMessage,
-      conversationId: message.conversationId,
-      model: message.model,
-      settings: message.settings,
-    },
-    {
-      headers: { Authorization: token },
-      withCredentials: true,
+const sendAIMessage = async (variables, getToken, queryClient) => {
+  try {
+    const token = await getToken();
+    const requestBody = {
+      conversationId: variables.conversationId,
+      NewMessage: variables.newMessage,
+      model: variables.model,
+      settings: variables.settings,
+    };
+
+    queryClient.setQueryData(["messages", variables.conversationId], (old) => [
+      ...(old || []),
+      {
+        id: `user-${Date.now()}`,
+        content: variables.newMessage,
+        role: "user",
+        model: variables.model,
+        settings: variables.settings,
+        created_at: new Date().toISOString(),
+      },
+    ]);
+
+    const res = await fetch("http://localhost:3001/api/ai/ai-chat", {
+      method: "POST",
+      body: JSON.stringify(requestBody),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: token,
+      },
+    });
+
+    const assistantMessageId = `assistant-${Date.now()}`;
+    queryClient.setQueryData(["messages", variables.conversationId], (old) => [
+      ...(old || []),
+      { id: assistantMessageId, content: "", role: "assistant" },
+    ]);
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let accumulatedContent = "";
+    let jsonBuffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value, { stream: true });
+
+      const parts = chunk.split("\n");
+
+      for (const part of parts) {
+        if (part.startsWith("json:")) {
+          jsonBuffer += part.replace("json:", "").trim();
+
+          try {
+            const jsonResponse = JSON.parse(jsonBuffer);
+
+            queryClient.setQueryData(
+              ["messages", variables.conversationId],
+              (old) => {
+                if (!old) return [];
+
+                const messages = [...old];
+                const lastMessageIndex = messages.length - 1;
+
+                if (
+                  lastMessageIndex >= 0 &&
+                  messages[lastMessageIndex].role === "assistant"
+                ) {
+                  messages[lastMessageIndex] = {
+                    ...messages[lastMessageIndex],
+
+                    content: jsonResponse.response.message,
+                    ui: jsonResponse.response.data,
+                    metadata: jsonResponse.response.metadata,
+                  };
+                }
+
+                return messages;
+              }
+            );
+
+            const newMessages = queryClient.getQueryData([
+              "messages",
+              variables.conversationId,
+            ]);
+
+            jsonBuffer = "";
+          } catch (err) {}
+        } else {
+          accumulatedContent += part;
+
+          queryClient.setQueryData(
+            ["messages", variables.conversationId],
+            (old) => {
+              if (!old) return [];
+              const messages = [...old];
+              const lastMessageIndex = messages.length - 1;
+
+              if (
+                lastMessageIndex >= 0 &&
+                messages[lastMessageIndex].role === "assistant"
+              ) {
+                messages[lastMessageIndex] = {
+                  ...messages[lastMessageIndex],
+                  content: accumulatedContent,
+                };
+              }
+
+              return messages;
+            }
+          );
+        }
+      }
     }
-  );
 
-  return response.data.data;
+    return res;
+  } catch (error) {
+    console.error(error);
+    toast.error("Failed to send message", {
+      description: `${error.message} - ${new Date().toLocaleString()}`,
+    });
+    throw error;
+  }
 };
 
 const useSendAIMessage = () => {
@@ -31,8 +138,11 @@ const useSendAIMessage = () => {
 
   return useMutation({
     mutationFn: async (variables) => {
-      // TODO: Append the new message to the chat history... optimistic update
-      return sendAIMessage(variables, getToken);
+      if (variables.conversationId === null || !variables.conversationId) {
+        variables.conversationId = uuidv4();
+      }
+      router.push(`/mainview/aichat/${variables.conversationId}`);
+      return sendAIMessage(variables, getToken, queryClient);
     },
     onMutate: async (variables) => {
       if (variables.conversationId) {
@@ -44,39 +154,8 @@ const useSendAIMessage = () => {
           "messages",
           variables.conversationId,
         ]);
-        queryClient.setQueryData(
-          ["messages", variables.conversationId],
-          (old) => [
-            ...old,
-            {
-              id: "temp-" + Date.now(),
-              content: variables.newMessage,
-              role: "user",
-              created_at: new Date().toISOString(),
-            },
-          ]
-        );
-        return { previousConversations };
-      }
-    },
-    onSuccess: (data, variables) => {
-      if (!variables.conversationId && variables.status !== "inline-chat") {
-        router.push(`/mainview/aichat/${data.conversation_id}`);
-      }
 
-      toast.success("Message sent successfully", {
-        description: new Date().toLocaleString(),
-      });
-    },
-    onSettled: (data, error, variables, context) => {
-      if (variables.conversationId) {
-        queryClient.invalidateQueries({
-          queryKey: ["messages", variables.conversationId],
-        });
-      } else {
-        queryClient.invalidateQueries({
-          queryKey: ["messages"],
-        });
+        return { previousConversations };
       }
     },
     onError: (error, variables, context) => {
