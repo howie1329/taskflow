@@ -109,11 +109,6 @@ const sendAIMessage = async (variables, getToken, queryClient) => {
               }
             );
 
-            const newMessages = queryClient.getQueryData([
-              "messages",
-              variables.conversationId,
-            ]);
-
             jsonBuffer = "";
           } catch (err) {}
         } else if (part.startsWith("ToolCallStart:")) {
