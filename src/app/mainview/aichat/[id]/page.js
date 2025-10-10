@@ -59,7 +59,7 @@ function Page() {
         <EmptyHeader>
           <Spinner />
         </EmptyHeader>
-        <EmptyTitle> Loadiing Chat...</EmptyTitle>
+        <EmptyTitle> Loading Chat...</EmptyTitle>
       </Empty>
     );
   }
