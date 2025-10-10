@@ -23,7 +23,17 @@ const sendAIMessage = async (variables, getToken, queryClient) => {
         role: "user",
         model: variables.model,
         settings: variables.settings,
-        created_at: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+      },
+    ]);
+
+    queryClient.setQueryData(["messages", variables.conversationId], (old) => [
+      ...(old || []),
+      {
+        id: `assistant-thinking`,
+        content: "Thinking...",
+        role: "Thinking",
+        status: "thinking",
       },
     ]);
 
@@ -70,7 +80,11 @@ const sendAIMessage = async (variables, getToken, queryClient) => {
               (old) => {
                 if (!old) return [];
 
-                const messages = [...old];
+                const filteredMessages = old.filter(
+                  (message) => message.id !== `assistant-thinking`
+                );
+
+                const messages = [...filteredMessages];
                 const lastMessageIndex = messages.length - 1;
 
                 if (

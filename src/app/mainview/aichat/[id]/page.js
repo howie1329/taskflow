@@ -100,6 +100,8 @@ function Page() {
                 <RenderAssistantMessageContent assistantContent={message} />
               ) : message.role === "tool" ? (
                 <RenderToolMessageContent toolContent={message} />
+              ) : message.role === "Thinking" ? (
+                <RenderThinkingMessageContent />
               ) : null}
             </div>
           ))}
@@ -115,6 +117,21 @@ function Page() {
     </div>
   );
 }
+
+const RenderThinkingMessageContent = () => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 100 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 100 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className="flex flex-col gap-1 items-start"
+    >
+      <p className="text-xs font-medium">Thinking...</p>
+      <Spinner className="w-3 h-3" />
+    </motion.div>
+  );
+};
 
 const RenderUserMessageContent = ({ userContent }) => {
   const { user } = useUser();
