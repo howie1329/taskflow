@@ -9,34 +9,10 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSubButton,
-  SidebarSeparator,
 } from "@/components/ui/sidebar";
-import {
-  MessageCircleIcon,
-  NotebookIcon,
-  SettingsIcon,
-  CalendarIcon,
-  ListIcon,
-  FolderIcon,
-  BellIcon,
-  CheckIcon,
-  CircleIcon,
-  TrashIcon,
-  BookOpenIcon,
-  BookCheckIcon,
-  MoonIcon,
-  SunIcon,
-  InboxIcon,
-  ChevronDownIcon,
-  MoreHorizontalIcon,
-  PaletteIcon,
-  LogOutIcon,
-  UserIcon,
-  SettingsIcon as SettingsIconLucide,
-} from "lucide-react";
 import React from "react";
 import Link from "next/link";
-import { SignedIn, UserButton, UserProfile } from "@clerk/nextjs";
+import { SignedIn, UserProfile } from "@clerk/nextjs";
 import {
   Popover,
   PopoverContent,
@@ -58,7 +34,6 @@ import { Button } from "@/components/ui/button";
 import { useMarkNotificationAsRead } from "@/hooks/notifications/useMarkNotificationAsRead";
 import { useTheme } from "next-themes";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
 import useFetchConversations from "@/hooks/ai/useFetchConversations";
 import {
   Collapsible,
@@ -66,6 +41,26 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import useFetchNotes from "@/hooks/notes/useFetchNotes";
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  AiChat02Icon,
+  BookOpen02Icon,
+  Calendar02Icon,
+  CheckListIcon,
+  ColorsIcon,
+  Folder02Icon,
+  InboxIcon,
+  Logout02Icon,
+  Moon02Icon,
+  Notebook02Icon,
+  Notification02Icon,
+  Settings02Icon,
+  Sun02Icon,
+  User02Icon,
+  Delete01Icon,
+  Settings05Icon,
+  ArrowDown01Icon,
+} from "@hugeicons/core-free-icons/index";
 
 export default function AppSideBar() {
   const { theme, setTheme } = useTheme();
@@ -78,33 +73,33 @@ export default function AppSideBar() {
   const SideBarItems = [
     {
       label: "Inbox",
-      icon: <InboxIcon />,
+      icon: <HugeiconsIcon icon={InboxIcon} size={20} strokeWidth={2} />,
       href: "/mainview/inbox",
     },
     {
       label: "Schedule",
-      icon: <CalendarIcon />,
+      icon: <HugeiconsIcon icon={Calendar02Icon} size={20} strokeWidth={2} />,
       href: "/mainview/schedule",
     },
     {
       label: "Task",
-      icon: <ListIcon />,
+      icon: <HugeiconsIcon icon={CheckListIcon} size={20} strokeWidth={2} />,
       href: "/mainview/task",
     },
     {
       label: "Projects",
-      icon: <FolderIcon />,
+      icon: <HugeiconsIcon icon={Folder02Icon} size={20} strokeWidth={2} />,
       href: "/mainview/projects",
     },
     {
       label: "Notes",
-      icon: <NotebookIcon />,
+      icon: <HugeiconsIcon icon={Notebook02Icon} size={20} strokeWidth={2} />,
       href: "/mainview/notes",
       items: notes && notes.length > 0 ? notes : [],
     },
     {
       label: "AI Chat",
-      icon: <MessageCircleIcon />,
+      icon: <HugeiconsIcon icon={AiChat02Icon} size={20} strokeWidth={2} />,
       href: "/mainview/aichat",
       items: conversations && conversations.length > 0 ? conversations : [],
     },
@@ -132,9 +127,13 @@ export default function AppSideBar() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                   {theme === "dark" ? (
-                    <SunIcon className="h-4 w-4" />
+                    <HugeiconsIcon icon={Sun02Icon} size={20} strokeWidth={2} />
                   ) : (
-                    <MoonIcon className="h-4 w-4" />
+                    <HugeiconsIcon
+                      icon={Moon02Icon}
+                      size={20}
+                      strokeWidth={2}
+                    />
                   )}
                 </Button>
               </DropdownMenuTrigger>
@@ -142,15 +141,15 @@ export default function AppSideBar() {
                 <DropdownMenuLabel>Theme</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => setTheme("light")}>
-                  <SunIcon className="mr-2 h-4 w-4" />
+                  <HugeiconsIcon icon={Sun02Icon} size={20} strokeWidth={2} />
                   Light
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setTheme("dark")}>
-                  <MoonIcon className="mr-2 h-4 w-4" />
+                  <HugeiconsIcon icon={Moon02Icon} size={20} strokeWidth={2} />
                   Dark
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setTheme("system")}>
-                  <PaletteIcon className="mr-2 h-4 w-4" />
+                  <HugeiconsIcon icon={ColorsIcon} size={20} strokeWidth={2} />
                   System
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -164,7 +163,11 @@ export default function AppSideBar() {
                   size="sm"
                   className="h-8 w-8 p-0 relative"
                 >
-                  <BellIcon className="h-4 w-4" />
+                  <HugeiconsIcon
+                    icon={Notification02Icon}
+                    size={20}
+                    strokeWidth={2}
+                  />
                   {notifications && notifications.length > 0 && (
                     <Badge
                       variant="destructive"
@@ -221,7 +224,11 @@ export default function AppSideBar() {
                                     markNotificationAsRead(notification.id)
                                   }
                                 >
-                                  <BookOpenIcon className="h-3 w-3" />
+                                  <HugeiconsIcon
+                                    icon={BookOpen02Icon}
+                                    size={20}
+                                    strokeWidth={2}
+                                  />
                                 </Button>
                               )}
                               <Button
@@ -232,7 +239,11 @@ export default function AppSideBar() {
                                   deleteNotification(notification.id)
                                 }
                               >
-                                <TrashIcon className="h-3 w-3" />
+                                <HugeiconsIcon
+                                  icon={Delete01Icon}
+                                  size={20}
+                                  strokeWidth={2}
+                                />
                               </Button>
                             </div>
                           </div>
@@ -241,7 +252,12 @@ export default function AppSideBar() {
                     ))
                   ) : (
                     <div className="p-8 text-center">
-                      <BellIcon className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                      <HugeiconsIcon
+                        icon={Notification02Icon}
+                        size={20}
+                        strokeWidth={2}
+                        className="text-muted-foreground mx-auto mb-2"
+                      />
                       <p className="text-sm text-muted-foreground">
                         No notifications
                       </p>
@@ -259,7 +275,11 @@ export default function AppSideBar() {
                     <Avatar className="h-8 w-8">
                       <AvatarImage src="" alt="User" />
                       <AvatarFallback className="text-xs">
-                        <UserIcon className="h-4 w-4" />
+                        <HugeiconsIcon
+                          icon={User02Icon}
+                          size={20}
+                          strokeWidth={2}
+                        />
                       </AvatarFallback>
                     </Avatar>
                   </Button>
@@ -269,17 +289,29 @@ export default function AppSideBar() {
                   <DropdownMenuSeparator />
                   <DropdownMenuGroup>
                     <DropdownMenuItem>
-                      <UserIcon className="mr-2 h-4 w-4" />
+                      <HugeiconsIcon
+                        icon={User02Icon}
+                        size={20}
+                        strokeWidth={2}
+                      />
                       Profile
                     </DropdownMenuItem>
                     <DropdownMenuItem>
-                      <SettingsIconLucide className="mr-2 h-4 w-4" />
+                      <HugeiconsIcon
+                        icon={Settings02Icon}
+                        size={20}
+                        strokeWidth={2}
+                      />
                       Settings
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem>
-                    <LogOutIcon className="mr-2 h-4 w-4" />
+                    <HugeiconsIcon
+                      icon={Logout02Icon}
+                      size={20}
+                      strokeWidth={2}
+                    />
                     Sign Out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -294,13 +326,21 @@ export default function AppSideBar() {
             <Collapsible key={item.label}>
               <div className="flex flex-row items-center justify-between">
                 <SidebarGroupLabel>
-                  <Link className="text-xs font-semibold" href={item.href}>
+                  <Link
+                    className="flex flex-row items-center gap-2 text-xs font-semibold"
+                    href={item.href}
+                  >
+                    {item.icon}
                     {item.label}
                   </Link>
                 </SidebarGroupLabel>
                 <CollapsibleTrigger>
                   {item.items && item.items.length > 0 && (
-                    <ChevronDownIcon className="w-4 h-4" />
+                    <HugeiconsIcon
+                      icon={ArrowDown01Icon}
+                      size={20}
+                      strokeWidth={2}
+                    />
                   )}
                 </CollapsibleTrigger>
               </div>
@@ -348,9 +388,13 @@ export default function AppSideBar() {
                   onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
                 >
                   {theme === "dark" ? (
-                    <MoonIcon className="w-4 h-4" />
+                    <HugeiconsIcon
+                      icon={Moon02Icon}
+                      size={20}
+                      strokeWidth={2}
+                    />
                   ) : (
-                    <SunIcon className="w-4 h-4" />
+                    <HugeiconsIcon icon={Sun02Icon} size={20} strokeWidth={2} />
                   )}
                 </Button>
               </SidebarMenuButton>
@@ -360,7 +404,11 @@ export default function AppSideBar() {
                 <Popover>
                   <PopoverTrigger>
                     <div className="flex flex-row items-center gap-2 text-sm font-normal">
-                      <SettingsIcon className="w-4 h-4" />
+                      <HugeiconsIcon
+                        icon={Settings05Icon}
+                        size={20}
+                        strokeWidth={2}
+                      />
                       <span>Account</span>
                     </div>
                   </PopoverTrigger>
