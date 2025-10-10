@@ -118,7 +118,7 @@ function Page() {
 
 const RenderUserMessageContent = ({ userContent }) => {
   const { user } = useUser();
-  const timestamp = new Date(userContent.created_at).toLocaleString();
+  const timestamp = new Date(userContent.createdAt).toLocaleString();
   return (
     <motion.div
       initial={{ opacity: 0, x: 100 }}
@@ -152,7 +152,7 @@ const RenderUserMessageContent = ({ userContent }) => {
 };
 
 const RenderAssistantMessageContent = ({ assistantContent }) => {
-  const timestamp = new Date(assistantContent.created_at).toLocaleString();
+  const timestamp = new Date(assistantContent.createdAt).toLocaleString();
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -206,18 +206,14 @@ const RenderAssistantMessageContent = ({ assistantContent }) => {
           {assistantContent.content}
         </ReactMarkdown>
         <div className="flex flex-row gap-2 overflow-x-auto mt-2">
-          {assistantContent.ui?.tasks.map((task) => (
+          {assistantContent.ui?.tasks?.map((task) => (
             <AITaskCard task={task} key={task.id} />
           ))}
         </div>
       </div>
       <div className="flex flex-row gap-2 items-center">
         <p className="text-muted-foreground/60 text-xs">{timestamp}</p>
-        {assistantContent.total_tokens && (
-          <p className="text-muted-foreground/60 text-xs">
-            {assistantContent.total_tokens} Total Tokens
-          </p>
-        )}
+
         <Button
           variant="ghost"
           size="sm"
