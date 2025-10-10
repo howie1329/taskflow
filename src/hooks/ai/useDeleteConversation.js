@@ -5,10 +5,13 @@ import { toast } from "sonner";
 const deleteConversation = async (id, getToken) => {
   const token = await getToken();
   try {
-    const response = await axiosClient.delete(`/api/ai/conversations/${id}`, {
-      headers: { Authorization: token },
-      withCredentials: true,
-    });
+    const response = await axiosClient.delete(
+      `/api/v1/ai/conversations/${id}`,
+      {
+        headers: { Authorization: token },
+        withCredentials: true,
+      }
+    );
     return response.data.message;
   } catch (error) {
     console.error(error);

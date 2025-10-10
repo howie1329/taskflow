@@ -27,14 +27,17 @@ const sendAIMessage = async (variables, getToken, queryClient) => {
       },
     ]);
 
-    const res = await fetch("http://localhost:3001/api/ai/ai-chat", {
-      method: "POST",
-      body: JSON.stringify(requestBody),
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: token,
-      },
-    });
+    const res = await fetch(
+      process.env.NEXT_PUBLIC_API_BASE_URL + "/api/v1/ai/ai-chat",
+      {
+        method: "POST",
+        body: JSON.stringify(requestBody),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token,
+        },
+      }
+    );
 
     const assistantMessageId = `assistant-${Date.now()}`;
     queryClient.setQueryData(["messages", variables.conversationId], (old) => [

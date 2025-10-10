@@ -2,7 +2,7 @@ import axiosClient from "@/lib/axios/axiosClient";
 import { useQuery } from "@tanstack/react-query";
 
 const fetchModelSelector = async () => {
-  const response = await axiosClient.get("/api/ai/models");
+  const response = await axiosClient.get("/api/v1/ai/models");
   const filteredModels = response.data.data.filter((model) =>
     modelNames.includes(model.id)
   );

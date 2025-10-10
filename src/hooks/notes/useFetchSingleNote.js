@@ -7,7 +7,7 @@ import { toast } from "sonner";
 const fetchSingleNote = async (noteId, getToken) => {
   const token = await getToken();
   try {
-    const response = await axiosClient.get(`/api/notes/${noteId}`, {
+    const response = await axiosClient.get(`/api/v1/notes/${noteId}`, {
       headers: { Authorization: token },
       withCredentials: true,
     });

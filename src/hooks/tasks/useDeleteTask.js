@@ -6,7 +6,7 @@ import { toast } from "sonner";
 const deleteTask = async (id, getToken) => {
   const token = await getToken();
   try {
-    const response = await axiosClient.delete(`/api/tasks/delete/${id}`, {
+    const response = await axiosClient.delete(`/api/v1/tasks/delete/${id}`, {
       headers: {
         Authorization: token,
       },

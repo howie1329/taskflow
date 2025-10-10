@@ -7,7 +7,7 @@ const fetchSmartSearch = async (search, getToken) => {
   const token = await getToken();
   console.log(search);
   const response = await axiosClient.post(
-    "/api/smart-search/search",
+    "/api/v1/smart-search/search",
     { search: search },
     {
       headers: { Authorization: token },

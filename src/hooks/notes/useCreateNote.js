@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 const createNote = async (data, getToken) => {
   const token = await getToken();
-  const response = await axiosClient.post("/api/notes/create", data, {
+  const response = await axiosClient.post("/api/v1/notes/create", data, {
     headers: { Authorization: token },
     withCredentials: true,
   });

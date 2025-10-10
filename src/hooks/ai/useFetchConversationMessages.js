@@ -7,7 +7,7 @@ import { toast } from "sonner";
 const fetchConversationMessages = async (id, getToken) => {
   const token = await getToken();
   try {
-    const response = await axiosClient.get(`/api/ai/messages/${id}`, {
+    const response = await axiosClient.get(`/api/v1/ai/messages/${id}`, {
       headers: { Authorization: token },
       withCredentials: true,
     });

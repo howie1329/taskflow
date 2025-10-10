@@ -5,7 +5,7 @@ import axiosClient from "@/lib/axios/axiosClient";
 
 const fetchAiTaskCard = async (taskId, getToken) => {
   const token = await getToken();
-  const response = await axiosClient.get(`/api/tasks/user/${taskId}`, {
+  const response = await axiosClient.get(`/api/v1/tasks/user/${taskId}`, {
     headers: { Authorization: token },
     withCredentials: true,
   });

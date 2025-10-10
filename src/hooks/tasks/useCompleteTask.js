@@ -6,7 +6,7 @@ import { toast } from "sonner";
 const completeTask = async (id, getToken) => {
   try {
     const token = await getToken();
-    const response = await axiosClient.patch(`/api/tasks/complete/${id}`, {
+    const response = await axiosClient.patch(`/api/v1/tasks/complete/${id}`, {
       headers: { Authorization: token },
       withCredentials: true,
     });

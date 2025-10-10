@@ -7,7 +7,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 const createTask = async (task, getToken) => {
   const token = await getToken();
   try {
-    const response = await axiosClient.post("/api/tasks/create", task, {
+    const response = await axiosClient.post("/api/v1/tasks/create", task, {
       headers: {
         Authorization: token,
       },

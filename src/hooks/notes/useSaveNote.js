@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 const saveNote = async (data, getToken) => {
   try {
     const token = await getToken();
-    const response = await axiosClient.patch(`/api/notes/${data.id}`, data, {
+    const response = await axiosClient.patch(`/api/v1/notes/${data.id}`, data, {
       headers: { Authorization: token },
       withCredentials: true,
     });

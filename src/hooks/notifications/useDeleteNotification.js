@@ -6,7 +6,7 @@ import { useQueryClient, useMutation } from "@tanstack/react-query";
 const deleteNotification = async (id, getToken) => {
   const token = await getToken();
   try {
-    const response = await axiosClient.delete(`/api/notifications/${id}`, {
+    const response = await axiosClient.delete(`/api/v1/notifications/${id}`, {
       headers: { Authorization: token },
       withCredentials: true,
     });

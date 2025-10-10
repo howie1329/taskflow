@@ -80,16 +80,16 @@ export const TaskCardSheet = ({ selectedTask, isOpen, onOpenChange }) => {
                   >
                     <Checkbox
                       key={subTask.id}
-                      checked={subTask.is_complete}
+                      checked={subTask.isComplete}
                       onCheckedChange={(e) => {
-                        handleCheckedChange(subTask.id, subTask.is_complete);
+                        handleCheckedChange(subTask.id, subTask.isComplete);
                       }}
                       onClick={(e) =>
-                        handleCheckedChange(subTask.id, subTask.is_complete)
+                        handleCheckedChange(subTask.id, subTask.isComplete)
                       }
                     />
                     <p className="text-sm text-gray-500" key={subTask.id}>
-                      {subTask.subtask_name}
+                      {subTask.subtaskName}
                     </p>
                   </div>
                 ))}

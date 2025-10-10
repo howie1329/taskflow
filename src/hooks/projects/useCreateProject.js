@@ -7,12 +7,16 @@ import axiosClient from "@/lib/axios/axiosClient";
 const createProject = async (project, getToken) => {
   try {
     const token = await getToken();
-    const response = await axiosClient.post("/api/projects/create", project, {
-      headers: {
-        Authorization: token,
-      },
-      withCredentials: true,
-    });
+    const response = await axiosClient.post(
+      "/api/v1/projects/create",
+      project,
+      {
+        headers: {
+          Authorization: token,
+        },
+        withCredentials: true,
+      }
+    );
     return response.data.data;
   } catch (error) {
     console.error(error);

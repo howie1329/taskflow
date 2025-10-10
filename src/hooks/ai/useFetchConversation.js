@@ -8,7 +8,7 @@ const fetchConversation = async (conversationId, getToken) => {
   const token = await getToken();
   try {
     const response = await axiosClient.get(
-      `/api/ai/conversation/${conversationId}`,
+      `/api/v1/ai/conversation/${conversationId}`,
       {
         headers: { Authorization: token },
         withCredentials: true,

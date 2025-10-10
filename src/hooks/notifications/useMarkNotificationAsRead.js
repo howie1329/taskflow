@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 const markNotificationAsRead = async (id, getToken) => {
   const token = await getToken();
   try {
-    const response = await axiosClient.patch(`/api/notifications/${id}`, {
+    const response = await axiosClient.patch(`/api/v1/notifications/${id}`, {
       headers: { Authorization: token },
       withCredentials: true,
     });

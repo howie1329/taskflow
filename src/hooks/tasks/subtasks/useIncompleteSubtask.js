@@ -5,10 +5,13 @@ import { toast } from "sonner";
 
 const incompleteSubtask = async (id, taskId, getToken) => {
   const token = await getToken();
-  const response = await axiosClient.patch(`/api/subtasks/incomplete/${id}`, {
-    headers: { Authorization: token },
-    withCredentials: true,
-  });
+  const response = await axiosClient.patch(
+    `/api/v1/subtasks/incomplete/${id}`,
+    {
+      headers: { Authorization: token },
+      withCredentials: true,
+    }
+  );
   return response.data.data;
 };
 

@@ -7,7 +7,7 @@ import { toast } from "sonner";
 const fetchNotifications = async (getToken) => {
   try {
     const token = await getToken();
-    const response = await axiosClient.get("/api/notifications/user", {
+    const response = await axiosClient.get("/api/v1/notifications/user", {
       headers: { Authorization: token },
       withCredentials: true,
     });

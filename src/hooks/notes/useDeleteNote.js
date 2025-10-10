@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 
 const deleteNote = async (id, getToken) => {
   const token = await getToken();
-  const response = await axiosClient.delete(`/api/notes/${id}`, {
+  const response = await axiosClient.delete(`/api/v1/notes/${id}`, {
     headers: { Authorization: token },
     withCredentials: true,
   });

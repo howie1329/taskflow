@@ -7,10 +7,13 @@ import { toast } from "sonner";
 const fetchAllProjectTasks = async (projectId, getToken) => {
   const token = await getToken();
   try {
-    const response = await axiosClient.get(`/api/tasks/project/${projectId}`, {
-      headers: { Authorization: token },
-      withCredentials: true,
-    });
+    const response = await axiosClient.get(
+      `/api/v1/tasks/project/${projectId}`,
+      {
+        headers: { Authorization: token },
+        withCredentials: true,
+      }
+    );
     toast.success("All project tasks fetched successfully", {
       description: new Date().toLocaleString(),
     });

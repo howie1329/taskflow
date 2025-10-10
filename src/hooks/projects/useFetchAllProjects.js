@@ -7,7 +7,7 @@ import { toast } from "sonner";
 const fetchAllProjects = async (getToken) => {
   const token = await getToken();
   try {
-    const response = await axiosClient.get("/api/projects/user", {
+    const response = await axiosClient.get("/api/v1/projects/user", {
       headers: { Authorization: token },
       withCredentials: true,
     });
