@@ -3,16 +3,7 @@ import { Separator } from "@/components/ui/separator";
 import React, { useEffect, useState } from "react";
 import { GeneralKanbanTaskBoard } from "@/presentation/components/task/GeneralKanbanTaskBoard";
 import { Button } from "@/components/ui/button";
-import {
-  PlusIcon,
-  SearchIcon,
-  SendIcon,
-  SparklesIcon,
-  XIcon,
-} from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { FilterIcon } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import { CreateTaskDialog } from "@/presentation/components/task/CreateTaskDialog";
 import { FilterDropdownCard } from "@/presentation/components/task/FilterDropDownCard";
 import { useTaskUIStore } from "@/presentation/hooks/useTaskUIStore";
@@ -24,6 +15,15 @@ import useFetchConversationMessages from "@/hooks/ai/useFetchConversationMessage
 import useFetchConversation from "@/hooks/ai/useFetchConversation";
 import useSocketStore from "@/lib/sockets/SocketStore";
 import { useQueryClient } from "@tanstack/react-query";
+import {
+  PlusSignIcon,
+  Search02Icon,
+  FilterIcon,
+  AiEditingIcon,
+  SentIcon,
+  Cancel01Icon,
+} from "@hugeicons/core-free-icons/index";
+import { HugeiconsIcon } from "@hugeicons/react";
 
 function Page() {
   const { data: tasks } = useFetchAllTasks();
@@ -100,7 +100,7 @@ function Page() {
             className="p-1 h-6 w-6 rounded-full"
             onClick={() => setIsCreateTaskOpen(true)}
           >
-            <PlusIcon className="w-2 h-2" />
+            <HugeiconsIcon icon={PlusSignIcon} size={20} strokeWidth={2} />
           </Button>
           <Button
             variant="outline"
@@ -109,7 +109,7 @@ function Page() {
             }`}
             onClick={() => setActiveSearch(!activeSearch)}
           >
-            <SearchIcon className="w-2 h-2" />
+            <HugeiconsIcon icon={Search02Icon} size={20} strokeWidth={2} />
           </Button>
           <Button
             variant="outline"
@@ -120,7 +120,7 @@ function Page() {
             }`}
             onClick={() => setIsFilterOpen(!isFilterOpen)}
           >
-            <FilterIcon className="w-2 h-2" />
+            <HugeiconsIcon icon={FilterIcon} size={20} strokeWidth={2} />
           </Button>
 
           {/* Filter Dropdown */}
@@ -136,7 +136,7 @@ function Page() {
             className="p-1 h-6 w-6 rounded-full"
             onClick={() => setIsMiniAIChatOpen(!isMiniAIChatOpen)}
           >
-            <SparklesIcon className="w-2 h-2" />
+            <HugeiconsIcon icon={AiEditingIcon} size={20} strokeWidth={2} />
           </Button>
         </Card>
       </div>
@@ -191,7 +191,7 @@ const MiniAIChat = ({ onClose }) => {
           className="p-1 h-6 w-6 rounded-full"
           onClick={handleDeleteConversation}
         >
-          <XIcon className="w-2 h-2" />
+          <HugeiconsIcon icon={Cancel01Icon} size={20} strokeWidth={2} />
         </Button>
       </div>
       <div className="flex-1 overflow-y-auto">
@@ -226,7 +226,7 @@ const MiniAIChat = ({ onClose }) => {
           onClick={() => handleSendMessage(message)}
           disabled={message.length === 0}
         >
-          <SendIcon className="w-2 h-2" />
+          <HugeiconsIcon icon={SentIcon} size={20} strokeWidth={2} />
         </Button>
       </div>
     </motion.div>

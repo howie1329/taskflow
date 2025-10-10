@@ -6,11 +6,15 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-
 import React, { useState } from "react";
 import Link from "next/link";
 import useFetchConversations from "@/hooks/ai/useFetchConversations";
-import { MessageCircleIcon, PlusIcon, XIcon } from "lucide-react";
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  Cancel01Icon,
+  Message01Icon,
+  PlusSignIcon,
+} from "@hugeicons/core-free-icons/index";
 
 export default function AISidebar() {
   const { data: conversations } = useFetchConversations();
@@ -27,7 +31,11 @@ export default function AISidebar() {
                   href={`/mainview/aichat`}
                 >
                   New Chat
-                  <PlusIcon className="w-4 h-4" />
+                  <HugeiconsIcon
+                    icon={PlusSignIcon}
+                    size={20}
+                    strokeWidth={2}
+                  />
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -41,8 +49,11 @@ export default function AISidebar() {
                   onChange={(e) => setSearch(e.target.value)}
                 />
                 {search.length > 0 && (
-                  <XIcon
-                    className="w-4 h-4 cursor-pointer"
+                  <HugeiconsIcon
+                    icon={Cancel01Icon}
+                    size={20}
+                    strokeWidth={2}
+                    className="cursor-pointer"
                     onClick={() => setSearch("")}
                   />
                 )}
@@ -61,7 +72,11 @@ export default function AISidebar() {
                       className="gap-2"
                       href={`/mainview/aichat/${item.id}`}
                     >
-                      <MessageCircleIcon />
+                      <HugeiconsIcon
+                        icon={Message01Icon}
+                        size={20}
+                        strokeWidth={2}
+                      />
                       <span className="line-clamp-1 text-ellipsis text-xs">
                         {item.title.charAt(0).toUpperCase() +
                           item.title.slice(1)}
