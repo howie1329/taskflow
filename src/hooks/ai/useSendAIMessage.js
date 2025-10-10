@@ -52,7 +52,12 @@ const sendAIMessage = async (variables, getToken, queryClient) => {
     const assistantMessageId = `assistant-${Date.now()}`;
     queryClient.setQueryData(["messages", variables.conversationId], (old) => [
       ...(old || []),
-      { id: assistantMessageId, content: "", role: "assistant" },
+      {
+        id: assistantMessageId,
+        content: "",
+        role: "assistant",
+        metadata: { timestamp: new Date().toISOString() },
+      },
     ]);
 
     const reader = res.body.getReader();
@@ -171,7 +176,11 @@ const sendAIMessage = async (variables, getToken, queryClient) => {
             ["messages", variables.conversationId],
             (old) => {
               if (!old) return [];
-              const messages = [...old];
+
+              const filteredMessages = old.filter(
+                (message) => message.id !== `assistant-thinking`
+              );
+              const messages = [...filteredMessages];
               const lastMessageIndex = messages.length - 1;
 
               if (
@@ -227,6 +236,11 @@ const useSendAIMessage = () => {
 
         return { previousConversations };
       }
+    },
+    onSuccess: (data, variables, context) => {
+      queryClient.invalidateQueries({
+        queryKey: ["conversations"],
+      });
     },
     onError: (error, variables, context) => {
       if (context.previousConversations) {
