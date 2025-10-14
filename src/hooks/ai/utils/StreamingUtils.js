@@ -27,8 +27,10 @@ export const processStreamResponse = async (
 ) => {
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
-  let accumulatedContent = "";
-  let jsonBuffer = "";
+  let state = {
+    accumulatedContent: "",
+    jsonBuffer: "",
+  };
 
   while (true) {
     const { done, value } = await reader.read();
@@ -36,10 +38,8 @@ export const processStreamResponse = async (
     const chunk = decoder.decode(value, { stream: true });
     const parts = chunk.split("\n");
     for (const part of parts) {
-      await processStreamPart(part, queryClient, conversationId, {
-        accumulatedContent,
-        jsonBuffer,
-      });
+      console.log("Part", part);
+      await processStreamPart(part, queryClient, conversationId, state);
     }
   }
 };
@@ -50,13 +50,18 @@ export const processStreamPart = async (
   conversationId,
   state
 ) => {
+  console.log("Part In Process Stream Part", part);
   if (part.startsWith("json:")) {
+    console.log("Part In Process Stream Part Starts With Json", part);
     await handleJsonPart(part, queryClient, conversationId, state);
   } else if (part.startsWith("ToolCallStart:")) {
+    console.log("Part In Process Stream Part Starts With ToolCallStart", part);
     await handleToolCallStartPart(part, queryClient, conversationId, state);
   } else if (part.startsWith("ToolCallEnd:")) {
+    console.log("Part In Process Stream Part Starts With ToolCallEnd", part);
     await handleToolCallEndPart(part, queryClient, conversationId, state);
   } else {
+    console.log("Part In Process Stream Part Starts With Text", part);
     await handleTextPart(part, queryClient, conversationId, state);
   }
 };
@@ -67,6 +72,7 @@ export const handleJsonPart = async (
   conversationId,
   state
 ) => {
+  console.log("Part In Handle Json Part", part);
   state.jsonBuffer += part.replace("json:", "").trim();
 
   try {
@@ -89,7 +95,6 @@ export const handleJsonPart = async (
         messages[lastMessageIndex] = {
           ...messages[lastMessageIndex],
 
-          content: jsonResponse.response.message,
           ui: jsonResponse.response.data,
           metadata: jsonResponse.response.metadata,
         };
@@ -99,6 +104,7 @@ export const handleJsonPart = async (
     });
 
     state.jsonBuffer = "";
+    state.accumulatedContent = "";
   } catch (err) {
     console.error(err);
   }
