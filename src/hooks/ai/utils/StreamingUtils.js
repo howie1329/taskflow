@@ -38,7 +38,6 @@ export const processStreamResponse = async (
     const chunk = decoder.decode(value, { stream: true });
     const parts = chunk.split("\n");
     for (const part of parts) {
-      console.log("Part", part);
       await processStreamPart(part, queryClient, conversationId, state);
     }
   }
@@ -50,18 +49,13 @@ export const processStreamPart = async (
   conversationId,
   state
 ) => {
-  console.log("Part In Process Stream Part", part);
   if (part.startsWith("json:")) {
-    console.log("Part In Process Stream Part Starts With Json", part);
     await handleJsonPart(part, queryClient, conversationId, state);
   } else if (part.startsWith("ToolCallStart:")) {
-    console.log("Part In Process Stream Part Starts With ToolCallStart", part);
     await handleToolCallStartPart(part, queryClient, conversationId, state);
   } else if (part.startsWith("ToolCallEnd:")) {
-    console.log("Part In Process Stream Part Starts With ToolCallEnd", part);
     await handleToolCallEndPart(part, queryClient, conversationId, state);
   } else {
-    console.log("Part In Process Stream Part Starts With Text", part);
     await handleTextPart(part, queryClient, conversationId, state);
   }
 };
@@ -72,7 +66,6 @@ export const handleJsonPart = async (
   conversationId,
   state
 ) => {
-  console.log("Part In Handle Json Part", part);
   state.jsonBuffer += part.replace("json:", "").trim();
 
   try {
