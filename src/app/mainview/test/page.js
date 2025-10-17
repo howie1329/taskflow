@@ -1,56 +1,49 @@
 "use client";
-import { useSockets } from "@/lib/sockets/useSockets";
-import React, { useState } from "react";
+
+import { Spinner } from "@/components/ui/spinner";
+import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
+import { useState } from "react";
 
 export default function Page() {
-  const { socket } = useSockets();
-  const [message, setMessage] = useState("");
-  const [response, setResponse] = useState("");
-  const handleSendMessage = () => {
-    socket.emit("ai-chat", { message, chatId: "test" });
-    socket.on("ai-chat", (data) => {
-      console.log("Ai Streaming Data: ", data);
+  const { messages, sendMessage, status } = useChat({
+    transport: new DefaultChatTransport({
+      api: "http://localhost:3001/chat",
+    }),
+  });
+  const [input, setInput] = useState("");
 
-      setResponse((prev) => prev + data);
-    });
-  };
-
-  const handlingSecondMessage = async () => {
-    const userMessage = { role: "user", content: message };
-
-    const res = fetch("http://localhost:3001/test", {
-      method: "POST",
-      body: JSON.stringify({ messages: [userMessage] }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    const reader = (await res).body.getReader();
-    const decoder = new TextDecoder();
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      const text = decoder.decode(value, { stream: true });
-      console.log("Text: ", text);
-      setResponse((prev) => prev + text);
-    }
-  };
   return (
-    <div>
-      <div>
-        <input
-          type="text"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-        />
-        <button onClick={handlingSecondMessage}>Send</button>
-      </div>
+    <>
+      {status === "streaming" ? <Spinner /> : null}
+      {messages.map((message) => (
+        <div key={message.id}>
+          {message.role === "user" ? "User: " : "AI: "}
+          {message.parts.map((part, index) =>
+            part.type === "text" ? <span key={index}>{part.text}</span> : null
+          )}
+        </div>
+      ))}
 
-      <div className="border-2 border-black">
-        <p>Response: {response}</p>
-      </div>
-    </div>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (input.trim()) {
+            sendMessage({ text: input });
+            setInput("");
+          }
+        }}
+      >
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          disabled={status !== "ready"}
+          placeholder="Say something..."
+        />
+        <button type="submit" disabled={status !== "ready"}>
+          Submit
+        </button>
+      </form>
+    </>
   );
 }

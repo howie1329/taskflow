@@ -30,6 +30,7 @@ export const processStreamResponse = async (
   let state = {
     accumulatedContent: "",
     jsonBuffer: "",
+    textBuffer: "",
   };
 
   while (true) {
@@ -55,7 +56,7 @@ export const processStreamPart = async (
     await handleToolCallStartPart(part, queryClient, conversationId, state);
   } else if (part.startsWith("ToolCallEnd:")) {
     await handleToolCallEndPart(part, queryClient, conversationId, state);
-  } else {
+  } else if (part.startsWith("text:")) {
     await handleTextPart(part, queryClient, conversationId, state);
   }
 };
@@ -166,36 +167,45 @@ export const handleToolCallEndPart = async (
   }
 };
 
+// Handling text part
+// backend now send id of the message in the text part
+// so i can now update the message with the id not the index
 export const handleTextPart = async (
   part,
   queryClient,
   conversationId,
   state
 ) => {
-  try {
-    state.accumulatedContent += part;
-    queryClient.setQueryData(["messages", conversationId], (old) => {
-      if (!old) return [];
+  // Split by "text:" to handle multiple concatenated messages
+  const jsonStrings = part.split("text:").filter((s) => s.trim());
 
-      const filteredMessages = old.filter(
-        (message) => message.id !== `assistant-thinking`
-      );
-      const messages = [...filteredMessages];
-      const lastMessageIndex = messages.length - 1;
+  for (const jsonString of jsonStrings) {
+    try {
+      const textChunk = JSON.parse(jsonString.trim());
 
-      if (
-        lastMessageIndex >= 0 &&
-        messages[lastMessageIndex].role === "assistant"
-      ) {
-        messages[lastMessageIndex] = {
-          ...messages[lastMessageIndex],
-          content: state.accumulatedContent,
+      queryClient.setQueryData(["messages", conversationId], (old) => {
+        if (!old) return [];
+
+        const old_message = [...old];
+        const existing_message = old_message.find(
+          (message) => message.id === textChunk.id
+        );
+        if (existing_message) {
+          existing_message.content += textChunk.text; // Accumulate!
+          return old_message;
+        }
+
+        const new_message = {
+          id: textChunk.id,
+          content: textChunk.text,
+          role: "assistant",
+          metadata: { timestamp: new Date().toISOString() },
         };
-      }
-
-      return messages;
-    });
-  } catch (err) {
-    console.error(err);
+        old_message.push(new_message);
+        return old_message;
+      });
+    } catch (parseErr) {
+      console.error("Failed to parse JSON:", jsonString, parseErr);
+    }
   }
 };

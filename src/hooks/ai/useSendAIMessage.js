@@ -3,20 +3,38 @@ import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { v4 as uuidv4 } from "uuid";
 import {
   createUserMessage,
   createThinkingMessage,
   createAssistantMessage,
   processStreamResponse,
 } from "./utils/StreamingUtils";
+import axiosClient from "@/lib/axios/axiosClient";
 
-const sendAIMessage = async (variables, getToken, queryClient) => {
+const sendAIMessage = async (variables, getToken, queryClient, router) => {
+  // Checking if conversationId is provided
+  if (variables.conversationId === null || !variables.conversationId) {
+    const token = await getToken();
+    const response = await axiosClient.post(
+      "/api/v1/conversations/create",
+      {
+        message: variables.newMessage,
+      },
+      {
+        headers: {
+          Authorization: token,
+        },
+        withCredentials: true,
+      }
+    );
+    variables.conversationId = response.data.data.id;
+    router.push(`/mainview/aichat/${variables.conversationId}`);
+  }
+  // Send message to backend
   try {
     const token = await getToken();
     const requestBody = {
-      conversationId: variables.conversationId,
-      NewMessage: variables.newMessage,
+      message: variables.newMessage,
       model: variables.model,
       settings: variables.settings,
     };
@@ -32,22 +50,22 @@ const sendAIMessage = async (variables, getToken, queryClient) => {
     ]);
 
     const res = await fetch(
-      process.env.NEXT_PUBLIC_API_BASE_URL + "/api/v1/ai/ai-chat",
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/conversations/${variables.conversationId}/messages`,
       {
         method: "POST",
         body: JSON.stringify(requestBody),
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: token,
-        },
+        headers: { Authorization: token, "Content-Type": "application/json" },
+        withCredentials: true,
       }
     );
 
-    queryClient.setQueryData(["messages", variables.conversationId], (old) => [
-      ...(old || []),
-      createAssistantMessage(variables),
-    ]);
+    // i will not use this because i will update the message with the id not the index
+    // queryClient.setQueryData(["messages", variables.conversationId], (old) => [
+    //   ...(old || []),
+    //   createAssistantMessage(variables),
+    // ]);
 
+    // Processing stream response
     await processStreamResponse(res, queryClient, variables.conversationId);
 
     return res;
@@ -64,14 +82,9 @@ const useSendAIMessage = () => {
   const { getToken } = useAuth();
   const queryClient = useQueryClient();
   const router = useRouter();
-
   return useMutation({
     mutationFn: async (variables) => {
-      if (variables.conversationId === null || !variables.conversationId) {
-        variables.conversationId = uuidv4();
-      }
-      router.push(`/mainview/aichat/${variables.conversationId}`);
-      return sendAIMessage(variables, getToken, queryClient);
+      return sendAIMessage(variables, getToken, queryClient, router);
     },
     onMutate: async (variables) => {
       if (variables.conversationId) {

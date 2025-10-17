@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@ai-sdk/react": "^2.0.75",
     "@blocknote/core": "^0.39.1",
     "@blocknote/mantine": "^0.39.1",
     "@blocknote/react": "^0.39.1",
@@ -31,6 +32,7 @@
     "@radix-ui/react-switch": "^1.2.6",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@tanstack/react-query": "^5.85.6",
+    "ai": "^5.0.75",
     "axios": "^1.11.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
