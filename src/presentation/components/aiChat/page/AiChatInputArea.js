@@ -1,7 +1,6 @@
 "use client";
 import { ArrowUpIcon, PlusIcon } from "lucide-react";
 import React, { useState } from "react";
-import useSendAIMessage from "@/hooks/ai/useSendAIMessage";
 import { AIModelSelector } from "../AIModelSelector";
 import SettingsPopover from "../SettingsPopover";
 import {
@@ -13,13 +12,12 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import useFetchModelSelector from "@/hooks/ai/useFetchModelSelector";
 
-export const AIChatInputArea = ({ id, model }) => {
+export const AIChatInputArea = ({ id, model, handleSendMessage, status }) => {
   const { data: modelSelector } = useFetchModelSelector();
   const [aiModel, setAiModel] = useState(model || "");
   const [modelName, setModelName] = useState(
     id ? modelSelector?.find((m) => m.id === model)?.name : ""
   );
-  const sendAIMessage = useSendAIMessage();
   const [input, setInput] = useState("");
   const [isSmartContext, setIsSmartContext] = useState(false);
   const [contextWindow, setContextWindow] = useState(4);
@@ -27,15 +25,7 @@ export const AIChatInputArea = ({ id, model }) => {
 
   const handleSend = () => {
     setInput("");
-    sendAIMessage.mutate({
-      newMessage: input,
-      conversationId: id || null,
-      model: aiModel,
-      settings: {
-        isSmartContext: isSmartContext,
-        contextWindow: contextWindow,
-      },
-    });
+    handleSendMessage(input, aiModel, isSmartContext, contextWindow);
   };
 
   return (
@@ -47,7 +37,7 @@ export const AIChatInputArea = ({ id, model }) => {
         onKeyDown={(e) => {
           if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
-            if (buttonActive && !sendAIMessage.isPending) {
+            if (buttonActive && status !== "streaming") {
               handleSend();
             }
           }
@@ -58,10 +48,10 @@ export const AIChatInputArea = ({ id, model }) => {
           variant="default"
           className="rounded-full"
           size="icon-xs"
-          disabled={!buttonActive || sendAIMessage.isPending}
+          disabled={!buttonActive || status === "streaming"}
           onClick={handleSend}
         >
-          {sendAIMessage.isPending ? <Spinner /> : <ArrowUpIcon />}
+          {status === "streaming" ? <Spinner /> : <ArrowUpIcon />}
         </InputGroupButton>
 
         <InputGroupAddon align="block-start">

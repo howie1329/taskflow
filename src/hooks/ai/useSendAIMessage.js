@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import {
   createUserMessage,
   createThinkingMessage,
-  createAssistantMessage,
   processStreamResponse,
 } from "./utils/StreamingUtils";
 import axiosClient from "@/lib/axios/axiosClient";
@@ -58,12 +57,6 @@ const sendAIMessage = async (variables, getToken, queryClient, router) => {
         withCredentials: true,
       }
     );
-
-    // i will not use this because i will update the message with the id not the index
-    // queryClient.setQueryData(["messages", variables.conversationId], (old) => [
-    //   ...(old || []),
-    //   createAssistantMessage(variables),
-    // ]);
 
     // Processing stream response
     await processStreamResponse(res, queryClient, variables.conversationId);

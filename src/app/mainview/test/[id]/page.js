@@ -1,23 +1,21 @@
 "use client";
+
 import { Spinner } from "@/components/ui/spinner";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useState } from "react";
 
 export default function Page() {
-  const router = useRouter();
+  const { id } = useParams();
   const { messages, sendMessage, status } = useChat({
-    id: "1",
+    id: id,
     transport: new DefaultChatTransport({
       api: "http://localhost:3001/chat",
       body: {
-        conversationId: "1",
+        conversationId: id,
       },
     }),
-    onFinish: async () => {
-      router.push("/mainview/test/1");
-    },
   });
   const [input, setInput] = useState("");
 

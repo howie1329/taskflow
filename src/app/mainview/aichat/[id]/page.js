@@ -19,15 +19,42 @@ import { Popover, PopoverContent } from "@/components/ui/popover";
 import { PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { motion } from "motion/react";
-import { useUser } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
 import { AIChatInputArea } from "@/presentation/components/aiChat/page/AiChatInputArea";
 import { Empty, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 import { Spinner } from "@/components/ui/spinner";
+import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
 
 function Page() {
   const { id } = useParams();
-  const { data: messages } = useFetchConversationMessages(id);
+  const { getToken } = useAuth();
+  const { data: fetchedMessages } = useFetchConversationMessages(id);
   const { data: conversation } = useFetchConversation(id);
+  const { messages, sendMessage, status, setMessages } = useChat({
+    id: id,
+    transport: new DefaultChatTransport({
+      api: `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/conversations/${id}/messages`,
+      headers: async () => {
+        const token = await getToken();
+        return {
+          Authorization: token,
+        };
+      },
+      body: {
+        conversationId: id,
+      },
+    }),
+    messages: fetchedMessages,
+  });
+
+  useEffect(() => {
+    if (fetchedMessages) {
+      setMessages(fetchedMessages);
+    }
+    console.log("Fetched Messages", fetchedMessages);
+  }, [fetchedMessages, setMessages]);
+
   const { mutate: deleteConversation } = useDeleteConversation();
   const router = useRouter();
   const messagesEndRef = useRef(null);
@@ -73,6 +100,17 @@ function Page() {
     .filter((message) => message.role === "user")
     .at(-1);
 
+  const handleSendMessage = (message, model, isSmartContext, contextWindow) => {
+    sendMessage({
+      text: message,
+      metadata: {
+        conversationId: id,
+        model: model,
+        isSmartContext: isSmartContext,
+        contextWindow: contextWindow,
+      },
+    });
+  };
   return (
     <div className="grid grid-rows-[auto_1fr_auto] h-[98vh] w-full text-sm bg-background px-2 pt-2 rounded-tr-md rounded-br-md">
       <div className="">
@@ -95,13 +133,31 @@ function Page() {
           {messages?.map((message) => (
             <div key={message.id}>
               {message.role === "user" ? (
-                <RenderUserMessageContent userContent={message} />
+                <div>
+                  {message.parts.map(
+                    (part, index) =>
+                      part.type === "text" && (
+                        <RenderUserMessageContent
+                          messageContent={message}
+                          partContent={part}
+                          key={index}
+                        />
+                      )
+                  )}
+                </div>
               ) : message.role === "assistant" ? (
-                <RenderAssistantMessageContent assistantContent={message} />
-              ) : message.role === "tool" ? (
-                <RenderToolMessageContent toolContent={message} />
-              ) : message.role === "Thinking" ? (
-                <RenderThinkingMessageContent />
+                <div>
+                  {message.parts.map(
+                    (part, index) =>
+                      part.type === "text" && (
+                        <RenderAssistantMessageContent
+                          messageContent={message}
+                          partContent={part}
+                          key={index}
+                        />
+                      )
+                  )}
+                </div>
               ) : null}
             </div>
           ))}
@@ -112,7 +168,12 @@ function Page() {
 
       <div className="flex flex-col justify-center gap-1 py-1 mx-5">
         <Separator />
-        <AIChatInputArea id={id} model={lastUserMessage?.model} />
+        <AIChatInputArea
+          id={id}
+          model={lastUserMessage?.model}
+          handleSendMessage={handleSendMessage}
+          status={status}
+        />
       </div>
     </div>
   );
@@ -133,9 +194,9 @@ const RenderThinkingMessageContent = () => {
   );
 };
 
-const RenderUserMessageContent = ({ userContent }) => {
+const RenderUserMessageContent = ({ messageContent, partContent }) => {
   const { user } = useUser();
-  const timestamp = new Date(userContent.createdAt).toLocaleString();
+  const timestamp = new Date(messageContent.createdAt).toLocaleString();
   return (
     <motion.div
       initial={{ opacity: 0, x: 100 }}
@@ -148,34 +209,32 @@ const RenderUserMessageContent = ({ userContent }) => {
         <p className="text-xs font-medium">
           {user?.firstName?.charAt(0).toUpperCase() + user?.firstName?.slice(1)}{" "}
         </p>
-        {userContent?.model && (
+        {messageContent?.model && (
           <Tooltip key={"model"}>
             <TooltipTrigger>
               <InfoIcon className="w-4 h-4" />
             </TooltipTrigger>
             <TooltipContent className="max-w-[300px]">
               <p className="text-xs font-medium">Model</p>
-              <p className="text-xs">{userContent.model}</p>
+              <p className="text-xs">{messageContent.model}</p>
             </TooltipContent>
           </Tooltip>
         )}
       </div>
       <div className="bg-primary text-primary-foreground rounded-md max-w-[75%] px-3 py-2 text-sm border">
-        {userContent.content}
+        {partContent.text}
       </div>
       <p className="text-muted-foreground/60 text-xs">{timestamp}</p>
     </motion.div>
   );
 };
 
-const RenderAssistantMessageContent = ({ assistantContent }) => {
-  const timestamp = new Date(
-    assistantContent.metadata.timestamp
-  ).toLocaleString();
+const RenderAssistantMessageContent = ({ messageContent, partContent }) => {
+  const timestamp = new Date(messageContent.createdAt).toLocaleString();
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(assistantContent.content);
+    navigator.clipboard.writeText(partContent.text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -190,18 +249,18 @@ const RenderAssistantMessageContent = ({ assistantContent }) => {
     >
       <div className="flex flex-row gap-2 items-center">
         <p className="text-xs font-medium">Assistant</p>
-        {assistantContent?.ui?.analysis && (
+        {messageContent?.ui?.analysis && (
           <Tooltip key={"analysis"}>
             <TooltipTrigger>
               <InfoIcon className="w-4 h-4" />
             </TooltipTrigger>
             <TooltipContent className="max-w-[300px]">
               <p className="text-xs font-medium">Analysis</p>
-              <p className="text-xs">{assistantContent?.ui?.analysis}</p>
+              <p className="text-xs">{messageContent?.ui?.analysis}</p>
             </TooltipContent>
           </Tooltip>
         )}
-        {assistantContent?.ui?.suggestions && (
+        {messageContent?.ui?.suggestions && (
           <Tooltip key={"suggestions"}>
             <TooltipTrigger>
               <InfoIcon className="w-4 h-4" />
@@ -209,23 +268,23 @@ const RenderAssistantMessageContent = ({ assistantContent }) => {
             <TooltipContent className="max-w-[300px]">
               <p className="text-xs font-medium">Suggestions</p>
               <p className="text-xs">
-                {assistantContent?.ui?.suggestions.map((suggestion) => (
+                {messageContent?.ui?.suggestions.map((suggestion) => (
                   <p key={suggestion}>{suggestion}</p>
                 ))}
               </p>
             </TooltipContent>
           </Tooltip>
         )}
-        {assistantContent?.settings?.isSmartContext && (
+        {messageContent?.settings?.isSmartContext && (
           <span className="text-xs text-blue-500/70">🧠 Smart Context</span>
         )}
       </div>
       <div className="relative bg-muted text-foreground rounded-md max-w-[75%] px-3 py-2 text-sm border">
         <ReactMarkdown remarkPlugins={[remarkGfm]}>
-          {assistantContent.content}
+          {partContent.text}
         </ReactMarkdown>
         <div className="flex flex-row gap-2 overflow-x-auto mt-2">
-          {assistantContent.ui?.tasks?.map((task) => (
+          {messageContent?.ui?.tasks?.map((task) => (
             <AITaskCard task={task} key={task.id} />
           ))}
         </div>
