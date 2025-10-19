@@ -25,6 +25,7 @@ import { Empty, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 import { Spinner } from "@/components/ui/spinner";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
+import { AlertCircleFreeIcons } from "@hugeicons/core-free-icons/index";
 
 function Page() {
   const { id } = useParams();
@@ -130,35 +131,48 @@ function Page() {
         className="overflow-y-auto scroll-smooth pb-4"
       >
         <div className="flex flex-col gap-0.5">
-          {messages?.map((message) => (
+          {messages.map((message) => (
             <div key={message.id}>
-              {message.role === "user" ? (
-                <div>
-                  {message.parts.map(
-                    (part, index) =>
-                      part.type === "text" && (
+              {message.parts.map((part) => {
+                switch (part.type) {
+                  case "tool-TaskAgent":
+                    return (
+                      <RenderToolMessageContent
+                        toolStatus={part.state}
+                        key={part.id}
+                        toolName={"TaskAgent"}
+                      />
+                    );
+                  case "tool-NoteAgent":
+                    return (
+                      <RenderToolMessageContent
+                        toolStatus={part.state}
+                        key={part.id}
+                        toolName={"NoteAgent"}
+                      />
+                    );
+                  case "text":
+                    if (message.role === "user") {
+                      return (
                         <RenderUserMessageContent
                           messageContent={message}
                           partContent={part}
-                          key={index}
+                          key={part.id}
                         />
-                      )
-                  )}
-                </div>
-              ) : message.role === "assistant" ? (
-                <div>
-                  {message.parts.map(
-                    (part, index) =>
-                      part.type === "text" && (
+                      );
+                    } else {
+                      return (
                         <RenderAssistantMessageContent
                           messageContent={message}
                           partContent={part}
-                          key={index}
+                          key={part.id}
                         />
-                      )
-                  )}
-                </div>
-              ) : null}
+                      );
+                    }
+                  default:
+                    return null;
+                }
+              })}
             </div>
           ))}
           {/* Invisible element to scroll to */}
@@ -309,10 +323,7 @@ const RenderAssistantMessageContent = ({ messageContent, partContent }) => {
   );
 };
 
-const RenderToolMessageContent = ({ toolContent }) => {
-  const isStarted = toolContent.status === "started";
-  const isCompleted = toolContent.status === "completed";
-
+const RenderToolMessageContent = ({ toolStatus, toolName }) => {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
@@ -322,16 +333,28 @@ const RenderToolMessageContent = ({ toolContent }) => {
       className="flex flex-col gap-1 items-start my-2"
     >
       <div className="flex flex-row gap-2 items-center bg-muted/50 rounded-md px-3 py-1.5 text-xs border border-dashed">
-        {isStarted && (
+        {toolStatus === "input-streaming" && (
           <>
             <Spinner className="w-3 h-3" />
-            <span className="text-muted-foreground">{toolContent.content}</span>
+            <span className="text-muted-foreground">{toolName}</span>
           </>
         )}
-        {isCompleted && (
+        {toolStatus === "input-available" && (
+          <>
+            <Spinner className="w-3 h-3" />
+            <span className="text-muted-foreground">{toolName}</span>
+          </>
+        )}
+        {toolStatus === "output-available" && (
           <>
             <CheckIcon className="w-3 h-3 text-green-500" />
-            <span className="text-muted-foreground">{toolContent.content}</span>
+            <span className="text-muted-foreground">{toolName}</span>
+          </>
+        )}
+        {toolStatus === "output-error" && (
+          <>
+            <AlertCircleFreeIcons className="w-3 h-3" />
+            <span className="text-muted-foreground">{toolName} Error</span>
           </>
         )}
       </div>
