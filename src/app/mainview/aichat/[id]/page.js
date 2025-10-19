@@ -244,7 +244,9 @@ const RenderUserMessageContent = ({ messageContent, partContent }) => {
 };
 
 const RenderAssistantMessageContent = ({ messageContent, partContent }) => {
-  const timestamp = new Date(messageContent.createdAt).toLocaleString();
+  const timestamp = new Date(
+    messageContent?.metadata?.createdAt
+  ).toLocaleString();
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
