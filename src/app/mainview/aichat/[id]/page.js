@@ -25,13 +25,24 @@ import { Empty, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 import { Spinner } from "@/components/ui/spinner";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { AlertCircleFreeIcons } from "@hugeicons/core-free-icons/index";
+import {
+  AlertCircleFreeIcons,
+  ArrowDown01FreeIcons,
+  ArrowDown01Icon,
+} from "@hugeicons/core-free-icons/index";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { HugeiconsIcon } from "@hugeicons/react";
 
 function Page() {
   const { id } = useParams();
   const { getToken } = useAuth();
   const { data: fetchedMessages } = useFetchConversationMessages(id);
   const { data: conversation } = useFetchConversation(id);
+  const [defualtModel, setDefualtModel] = useState(null);
   const { messages, sendMessage, status, setMessages } = useChat({
     id: id,
     transport: new DefaultChatTransport({
@@ -52,9 +63,10 @@ function Page() {
   useEffect(() => {
     if (fetchedMessages) {
       setMessages(fetchedMessages);
+      setDefualtModel(fetchedMessages.at(-1).metadata?.model);
+      console.log("Default Model", defualtModel);
     }
-    console.log("Fetched Messages", fetchedMessages);
-  }, [fetchedMessages, setMessages]);
+  }, [fetchedMessages, setMessages, defualtModel]);
 
   const { mutate: deleteConversation } = useDeleteConversation();
   const router = useRouter();
@@ -71,16 +83,6 @@ function Page() {
     }
   }, [messages]);
 
-  // Auto-scroll to bottom when component mounts
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "end",
-      });
-    }
-  }, []);
-
   if (!messages) {
     return (
       <Empty>
@@ -96,10 +98,6 @@ function Page() {
     router.push("/mainview/aichat");
     deleteConversation(id);
   };
-
-  const lastUserMessage = messages
-    .filter((message) => message.role === "user")
-    .at(-1);
 
   const handleSendMessage = (message, model, isSmartContext, contextWindow) => {
     sendMessage({
@@ -184,7 +182,7 @@ function Page() {
         <Separator />
         <AIChatInputArea
           id={id}
-          model={lastUserMessage?.model}
+          model={defualtModel}
           handleSendMessage={handleSendMessage}
           status={status}
         />
@@ -248,6 +246,9 @@ const RenderAssistantMessageContent = ({ messageContent, partContent }) => {
     messageContent?.metadata?.createdAt
   ).toLocaleString();
   const [copied, setCopied] = useState(false);
+  const [reasoning, setReasoning] = useState(
+    messageContent.parts.find((part) => part.type === "reasoning")?.text
+  );
 
   const handleCopy = () => {
     navigator.clipboard.writeText(partContent.text);
@@ -264,33 +265,18 @@ const RenderAssistantMessageContent = ({ messageContent, partContent }) => {
       className="flex flex-col gap-1 items-start group"
     >
       <div className="flex flex-row gap-2 items-center">
-        <p className="text-xs font-medium">Assistant</p>
-        {messageContent?.ui?.analysis && (
-          <Tooltip key={"analysis"}>
-            <TooltipTrigger>
-              <InfoIcon className="w-4 h-4" />
-            </TooltipTrigger>
-            <TooltipContent className="max-w-[300px]">
-              <p className="text-xs font-medium">Analysis</p>
-              <p className="text-xs">{messageContent?.ui?.analysis}</p>
-            </TooltipContent>
-          </Tooltip>
-        )}
-        {messageContent?.ui?.suggestions && (
-          <Tooltip key={"suggestions"}>
-            <TooltipTrigger>
-              <InfoIcon className="w-4 h-4" />
-            </TooltipTrigger>
-            <TooltipContent className="max-w-[300px]">
-              <p className="text-xs font-medium">Suggestions</p>
-              <p className="text-xs">
-                {messageContent?.ui?.suggestions.map((suggestion) => (
-                  <p key={suggestion}>{suggestion}</p>
-                ))}
-              </p>
-            </TooltipContent>
-          </Tooltip>
-        )}
+        <Collapsible>
+          <div className="flex flex-row gap-2 items-center">
+            <p className="text-xs font-medium">Assistant</p>
+            <CollapsibleTrigger>
+              <HugeiconsIcon icon={ArrowDown01Icon} size={20} strokeWidth={2} />
+            </CollapsibleTrigger>
+          </div>
+          <CollapsibleContent>
+            <p className="text-xs ">{reasoning}</p>
+          </CollapsibleContent>
+        </Collapsible>
+
         {messageContent?.settings?.isSmartContext && (
           <span className="text-xs text-blue-500/70">🧠 Smart Context</span>
         )}

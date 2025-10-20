@@ -1,6 +1,6 @@
 "use client";
 import { ArrowUpIcon, PlusIcon } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AIModelSelector } from "../AIModelSelector";
 import SettingsPopover from "../SettingsPopover";
 import {
@@ -22,6 +22,12 @@ export const AIChatInputArea = ({ id, model, handleSendMessage, status }) => {
   const [isSmartContext, setIsSmartContext] = useState(false);
   const [contextWindow, setContextWindow] = useState(4);
   const buttonActive = input.trim() !== "" && aiModel !== "";
+
+  useEffect(() => {
+    if (modelSelector && model) {
+      setModelName(modelSelector?.find((m) => m.id === model)?.name);
+    }
+  }, [modelSelector, model]);
 
   const handleSend = () => {
     setInput("");
