@@ -36,6 +36,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 function Page() {
   const { id } = useParams();
@@ -273,7 +274,9 @@ const RenderAssistantMessageContent = ({ messageContent, partContent }) => {
             </CollapsibleTrigger>
           </div>
           <CollapsibleContent>
-            <p className="text-xs ">{reasoning}</p>
+            <ScrollArea className="h-[100px] w-[75%]">
+              <p className="text-xs ">{reasoning}</p>
+            </ScrollArea>
           </CollapsibleContent>
         </Collapsible>
 
