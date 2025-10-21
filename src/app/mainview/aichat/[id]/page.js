@@ -27,8 +27,8 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import {
   AlertCircleFreeIcons,
-  ArrowDown01FreeIcons,
   ArrowDown01Icon,
+  NoteAddIcon,
 } from "@hugeicons/core-free-icons/index";
 import {
   Collapsible,
@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/collapsible";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import axiosClient from "@/lib/axios/axiosClient";
 
 function Page() {
   const { id } = useParams();
@@ -243,6 +244,7 @@ const RenderUserMessageContent = ({ messageContent, partContent }) => {
 };
 
 const RenderAssistantMessageContent = ({ messageContent, partContent }) => {
+  const { getToken } = useAuth();
   const timestamp = new Date(
     messageContent?.metadata?.createdAt
   ).toLocaleString();
@@ -255,6 +257,21 @@ const RenderAssistantMessageContent = ({ messageContent, partContent }) => {
     navigator.clipboard.writeText(partContent.text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleCreateNote = async () => {
+    const token = await getToken();
+    const response = await axiosClient.post(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/ai/create-note`,
+      { message: partContent.text, model: messageContent.model },
+      {
+        headers: {
+          Authorization: token,
+        },
+        withCredentials: true,
+      }
+    );
+    console.log("RESPONSE", response.data.data);
   };
 
   return (
@@ -308,6 +325,14 @@ const RenderAssistantMessageContent = ({ messageContent, partContent }) => {
           ) : (
             <CopyIcon className="w-4 h-4" />
           )}
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-6 w-6 p-0 hover:bg-muted"
+          onClick={handleCreateNote}
+        >
+          <HugeiconsIcon icon={NoteAddIcon} />
         </Button>
       </div>
     </motion.div>

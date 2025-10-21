@@ -68,9 +68,11 @@ function Page() {
 
   return (
     <div className="grid grid-rows-[1fr_24fr] h-full text-sm px-2 bg-card rounded-tr-md rounded-br-md">
-      <div className="flex flex-row justify-between items-center">
-        <h1 className="text-xl font-medium text-center">{note.title}</h1>
-        <p>{note.description}</p>
+      <div className="flex flex-row justify-between items-center gap-2">
+        <h1 className="text-lg font-medium text-center line-clamp-1">
+          {note.title}
+        </h1>
+        <p className="line-clamp-2">{note.description}</p>
         <NoteOptionsPopover
           title={note.title}
           description={note.description}
