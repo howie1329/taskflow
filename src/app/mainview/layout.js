@@ -1,19 +1,15 @@
 "use client";
-import {
-  Command,
-  CommandDialog,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import useSmartSearch from "@/hooks/search/useSmartSearch";
+import { GlobalSmartSearch } from "@/presentation/components/Layout/GlobalSearch";
 import useSocketConnection from "@/lib/sockets/useSocketConnection";
 import AppSideBar from "@/presentation/components/Layout/AppSideBar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+
+const SocketInitializer = () => {
+  useSocketConnection();
+  return null;
+};
 
 export default function Layout({ children }) {
   const [isGlobalSmartSearchOpen, setIsGlobalSmartSearchOpen] = useState(false);
@@ -46,63 +42,3 @@ export default function Layout({ children }) {
     </QueryClientProvider>
   );
 }
-
-const SocketInitializer = () => {
-  useSocketConnection();
-  return null;
-};
-const GlobalSmartSearch = ({
-  isGlobalSmartSearchOpen,
-  setIsGlobalSmartSearchOpen,
-}) => {
-  const [search, setSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  const { data: results } = useSmartSearch(debouncedSearch);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(search);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [search]);
-
-  const handleSearchChange = useCallback((value) => {
-    setSearch(value);
-  }, []);
-
-  return (
-    <CommandDialog
-      open={isGlobalSmartSearchOpen}
-      onOpenChange={setIsGlobalSmartSearchOpen}
-    >
-      <Command shouldFilter={false}>
-        <CommandInput
-          placeholder="Search..."
-          value={search}
-          onValueChange={handleSearchChange}
-        />
-        <CommandList>
-          <CommandEmpty>No results found.</CommandEmpty>
-          <CommandGroup heading="Tasks">
-            {results &&
-              results.tasks.map((task) => (
-                <CommandItem key={task.id}>{task.title}</CommandItem>
-              ))}
-          </CommandGroup>
-          <CommandGroup heading="Notes">
-            {results &&
-              results.notes.map((note) => (
-                <CommandItem key={note.id}>{note.title}</CommandItem>
-              ))}
-          </CommandGroup>
-          <CommandGroup heading="Messages">
-            {results &&
-              results.messages.map((message) => (
-                <CommandItem key={message.id}>{message.content}</CommandItem>
-              ))}
-          </CommandGroup>
-        </CommandList>
-      </Command>
-    </CommandDialog>
-  );
-};
