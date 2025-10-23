@@ -135,6 +135,8 @@ function Page() {
             <div key={message.id}>
               {message.parts.map((part) => {
                 switch (part.type) {
+                  case "data-get-tasks":
+                    return <p key={part.id}>{part.data.message}</p>;
                   case "tool-TaskAgent":
                     return (
                       <RenderToolMessageContent

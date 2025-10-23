@@ -26,6 +26,11 @@ export default function Page() {
         <div key={message.id}>
           {message.role === "user" ? "User: " : "AI: "}
           {message.parts.map((part, index) =>
+            part.type === "data-notification" ? (
+              <span key={index}>{part.data.message}</span>
+            ) : null
+          )}
+          {message.parts.map((part, index) =>
             part.type === "text" ? <span key={index}>{part.text}</span> : null
           )}
         </div>
