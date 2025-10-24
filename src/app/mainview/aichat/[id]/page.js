@@ -37,7 +37,7 @@ import {
 } from "@/components/ui/collapsible";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import axiosClient from "@/lib/axios/axiosClient";
+import useHandleCreateNote from "@/hooks/ai/useHandleCreateNote";
 
 function Page() {
   const { id } = useParams();
@@ -176,6 +176,7 @@ function Page() {
               })}
             </div>
           ))}
+          {status === "streaming" && <RenderThinkingMessageContent />}
           {/* Invisible element to scroll to */}
           <div ref={messagesEndRef} />
         </div>
@@ -245,7 +246,7 @@ const RenderUserMessageContent = ({ messageContent, partContent }) => {
 };
 
 const RenderAssistantMessageContent = ({ messageContent, partContent }) => {
-  const { getToken } = useAuth();
+  const { createNote } = useHandleCreateNote();
   const timestamp = new Date(
     messageContent?.metadata?.createdAt
   ).toLocaleString();
@@ -261,18 +262,8 @@ const RenderAssistantMessageContent = ({ messageContent, partContent }) => {
   };
 
   const handleCreateNote = async () => {
-    const token = await getToken();
-    const response = await axiosClient.post(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/ai/create-note`,
-      { message: partContent.text, model: messageContent.model },
-      {
-        headers: {
-          Authorization: token,
-        },
-        withCredentials: true,
-      }
-    );
-    console.log("RESPONSE", response.data.data);
+    const response = await createNote(partContent.text, messageContent.model);
+    console.log("RESPONSE", response);
   };
 
   return (
