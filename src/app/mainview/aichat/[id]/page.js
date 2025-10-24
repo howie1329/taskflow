@@ -66,7 +66,6 @@ function Page() {
     if (fetchedMessages) {
       setMessages(fetchedMessages);
       setDefualtModel(fetchedMessages.at(-1).metadata?.model);
-      console.log("Default Model", defualtModel);
     }
   }, [fetchedMessages, setMessages, defualtModel]);
 
@@ -285,19 +284,27 @@ const RenderAssistantMessageContent = ({ messageContent, partContent }) => {
       className="flex flex-col gap-1 items-start group"
     >
       <div className="flex flex-row gap-2 items-center">
-        <Collapsible>
-          <div className="flex flex-row gap-2 items-center">
-            <p className="text-xs font-medium">Assistant</p>
-            <CollapsibleTrigger>
-              <HugeiconsIcon icon={ArrowDown01Icon} size={20} strokeWidth={2} />
-            </CollapsibleTrigger>
-          </div>
-          <CollapsibleContent>
-            <ScrollArea className="h-[100px] w-[75%]">
-              <p className="text-xs ">{reasoning}</p>
-            </ScrollArea>
-          </CollapsibleContent>
-        </Collapsible>
+        {reasoning ? (
+          <Collapsible>
+            <div className="flex flex-row gap-2 items-center">
+              <p className="text-xs font-medium">Assistant</p>
+              <CollapsibleTrigger>
+                <HugeiconsIcon
+                  icon={ArrowDown01Icon}
+                  size={20}
+                  strokeWidth={2}
+                />
+              </CollapsibleTrigger>
+            </div>
+            <CollapsibleContent>
+              <ScrollArea className="h-[100px] w-[75%]">
+                <p className="text-xs ">{reasoning}</p>
+              </ScrollArea>
+            </CollapsibleContent>
+          </Collapsible>
+        ) : (
+          <p className="text-xs font-medium">Assistant</p>
+        )}
 
         {messageContent?.settings?.isSmartContext && (
           <span className="text-xs text-blue-500/70">🧠 Smart Context</span>

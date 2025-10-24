@@ -1,5 +1,6 @@
 import axiosClient from "@/lib/axios/axiosClient";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 
 const fetchModelSelector = async () => {
   const response = await axiosClient.get("/api/v1/ai/models");
@@ -22,7 +23,21 @@ const useFetchModelSelector = () => {
   });
 };
 
-export default useFetchModelSelector;
+const useModelConverter = (modelId) => {
+  const [modelName, setModelName] = useState("");
+  const { data: modelSelector } = useFetchModelSelector();
+
+  useEffect(() => {
+    if (modelSelector && modelId) {
+      const model = modelSelector.find((m) => m.id === modelId);
+      setModelName(model.name);
+    }
+  }, [modelSelector, modelId]);
+
+  return { modelName };
+};
+
+export { useFetchModelSelector, useModelConverter };
 
 const modelNames = [
   "openrouter/sonoma-dusk-alpha",

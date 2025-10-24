@@ -10,11 +10,15 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import useFetchModelSelector from "@/hooks/ai/useFetchModelSelector";
+import {
+  useFetchModelSelector,
+  useModelConverter,
+} from "@/hooks/ai/useFetchModelSelector";
 import { ChevronDownIcon, InfoIcon, XIcon } from "lucide-react";
 import React, { useState } from "react";
 
-export const AIModelSelector = ({ setValue, modelName, setModelName }) => {
+export const AIModelSelector = ({ setValue, value }) => {
+  const { modelName } = useModelConverter(value);
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const { data: modelSelector } = useFetchModelSelector();
@@ -63,7 +67,6 @@ export const AIModelSelector = ({ setValue, modelName, setModelName }) => {
                   key={model.id}
                   onClick={() => {
                     setValue(model.id);
-                    setModelName(model.name);
                     setOpen(false);
                   }}
                   variant="outline"

@@ -10,29 +10,22 @@ import {
   InputGroupTextarea,
 } from "@/components/ui/input-group";
 import { Spinner } from "@/components/ui/spinner";
-import useFetchModelSelector from "@/hooks/ai/useFetchModelSelector";
 
 export const AIChatInputArea = ({ id, model, handleSendMessage, status }) => {
-  const { data: modelSelector } = useFetchModelSelector();
   const [aiModel, setAiModel] = useState(model || "");
-  const [modelName, setModelName] = useState(
-    id ? modelSelector?.find((m) => m.id === model)?.name : ""
-  );
   const [input, setInput] = useState("");
   const [isSmartContext, setIsSmartContext] = useState(false);
   const [contextWindow, setContextWindow] = useState(4);
   const buttonActive = input.trim() !== "" && aiModel !== "";
 
-  useEffect(() => {
-    if (modelSelector && model) {
-      setModelName(modelSelector?.find((m) => m.id === model)?.name);
-    }
-  }, [modelSelector, model]);
-
   const handleSend = () => {
     setInput("");
     handleSendMessage(input, aiModel, isSmartContext, contextWindow);
   };
+
+  useEffect(() => {
+    setAiModel(model);
+  }, [model]);
 
   return (
     <InputGroup className="bg-card">
@@ -67,11 +60,7 @@ export const AIChatInputArea = ({ id, model, handleSendMessage, status }) => {
             contextWindow={contextWindow}
             setContextWindow={setContextWindow}
           />
-          <AIModelSelector
-            setValue={setAiModel}
-            modelName={modelName}
-            setModelName={setModelName}
-          />
+          <AIModelSelector setValue={setAiModel} value={aiModel} />
           <InputGroupButton
             variant="outline"
             className="rounded-full"
