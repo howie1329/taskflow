@@ -38,10 +38,16 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import useHandleCreateNote from "@/hooks/ai/useHandleCreateNote";
+import useInitalChatStore from "@/hooks/ai/store/initalChatStore";
 
 function Page() {
   const { id } = useParams();
   const { getToken } = useAuth();
+  const {
+    messages: initialMessages,
+    firstMessage,
+    toogleFirstMessage,
+  } = useInitalChatStore();
   const { data: fetchedMessages } = useFetchConversationMessages(id);
   const { data: conversation } = useFetchConversation(id);
   const [defualtModel, setDefualtModel] = useState(null);
@@ -59,15 +65,61 @@ function Page() {
         conversationId: id,
       },
     }),
-    messages: fetchedMessages,
+    onData: (data) => {
+      console.log("Data", data);
+    },
   });
 
+  const hasSentInitialMessageRef = useRef(false);
+  const lastConversationIdRef = useRef(null);
+
+  // Reset ref when conversation ID changes
   useEffect(() => {
-    if (fetchedMessages) {
-      setMessages(fetchedMessages);
-      setDefualtModel(fetchedMessages.at(-1).metadata?.model);
+    if (id !== lastConversationIdRef.current) {
+      hasSentInitialMessageRef.current = false;
+      lastConversationIdRef.current = id;
     }
-  }, [fetchedMessages, setMessages, defualtModel]);
+  }, [id]);
+
+  // Handle sending initial message - only once per conversation
+  useEffect(() => {
+    if (!sendMessage || !firstMessage) return;
+    if (!initialMessages?.text) return;
+    if (hasSentInitialMessageRef.current) return;
+    if (status === "streaming") return;
+
+    console.log("Sending initial message");
+    hasSentInitialMessageRef.current = true;
+    toogleFirstMessage();
+    sendMessage({
+      text: initialMessages.text,
+      metadata: {
+        conversationId: id,
+        model: initialMessages.metadata?.model || "gpt-4o",
+        isSmartContext: initialMessages.metadata?.isSmartContext || false,
+        contextWindow: initialMessages.metadata?.contextWindow || 4,
+      },
+    });
+  }, [
+    id,
+    firstMessage,
+    initialMessages,
+    sendMessage,
+    toogleFirstMessage,
+    status,
+  ]);
+
+  // Handle loading fetched messages - separate effect
+  useEffect(() => {
+    if (!fetchedMessages || fetchedMessages.length === 0) return;
+    if (hasSentInitialMessageRef.current) return; // Don't override if we just sent a message
+    if (status === "streaming") return;
+
+    console.log("Setting fetched messages");
+    setMessages([]);
+    setMessages(fetchedMessages);
+    setDefualtModel(fetchedMessages.at(-1).metadata?.model);
+  }, [fetchedMessages, setMessages, status]);
 
   const { mutate: deleteConversation } = useDeleteConversation();
   const router = useRouter();
@@ -84,7 +136,7 @@ function Page() {
     }
   }, [messages]);
 
-  if (!messages) {
+  if (!messages || !status) {
     return (
       <Empty>
         <EmptyHeader>
@@ -130,52 +182,53 @@ function Page() {
         className="overflow-y-auto scroll-smooth pb-4"
       >
         <div className="flex flex-col gap-0.5">
-          {messages.map((message) => (
-            <div key={message.id}>
-              {message.parts.map((part) => {
-                switch (part.type) {
-                  case "data-get-tasks":
-                    return <p key={part.id}>{part.data.message}</p>;
-                  case "tool-TaskAgent":
-                    return (
-                      <RenderToolMessageContent
-                        toolStatus={part.state}
-                        key={part.id}
-                        toolName={"TaskAgent"}
-                      />
-                    );
-                  case "tool-NoteAgent":
-                    return (
-                      <RenderToolMessageContent
-                        toolStatus={part.state}
-                        key={part.id}
-                        toolName={"NoteAgent"}
-                      />
-                    );
-                  case "text":
-                    if (message.role === "user") {
+          {messages &&
+            messages.map((message) => (
+              <div key={message.id}>
+                {message.parts.map((part) => {
+                  switch (part.type) {
+                    case "data-get-tasks":
+                      return <p key={part.id}>{part.data.message}</p>;
+                    case "tool-TaskAgent":
                       return (
-                        <RenderUserMessageContent
-                          messageContent={message}
-                          partContent={part}
+                        <RenderToolMessageContent
+                          toolStatus={part.state}
                           key={part.id}
+                          toolName={"TaskAgent"}
                         />
                       );
-                    } else {
+                    case "tool-NoteAgent":
                       return (
-                        <RenderAssistantMessageContent
-                          messageContent={message}
-                          partContent={part}
+                        <RenderToolMessageContent
+                          toolStatus={part.state}
                           key={part.id}
+                          toolName={"NoteAgent"}
                         />
                       );
-                    }
-                  default:
-                    return null;
-                }
-              })}
-            </div>
-          ))}
+                    case "text":
+                      if (message.role === "user") {
+                        return (
+                          <RenderUserMessageContent
+                            messageContent={message}
+                            partContent={part}
+                            key={part.id}
+                          />
+                        );
+                      } else {
+                        return (
+                          <RenderAssistantMessageContent
+                            messageContent={message}
+                            partContent={part}
+                            key={part.id}
+                          />
+                        );
+                      }
+                    default:
+                      return null;
+                  }
+                })}
+              </div>
+            ))}
           {status === "streaming" && <RenderThinkingMessageContent />}
           {/* Invisible element to scroll to */}
           <div ref={messagesEndRef} />

@@ -4,6 +4,7 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 export default function Page() {
   const router = useRouter();
@@ -23,6 +24,9 @@ export default function Page() {
 
   return (
     <>
+      <Button variant="outline" onClick={() => router.push("/mainview/test/1")}>
+        New Chat
+      </Button>
       {status === "streaming" ? <Spinner /> : null}
       {messages.map((message) => (
         <div key={message.id}>
