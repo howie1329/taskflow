@@ -1,9 +1,6 @@
 "use client";
 import { AIChatInputArea } from "@/presentation/components/aiChat/page/AiChatInputArea";
 import React, { useState } from "react";
-import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
-import { Spinner } from "@/components/ui/spinner";
 import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import axiosClient from "@/lib/axios/axiosClient";
@@ -15,26 +12,7 @@ export default function Page() {
   const queryClient = useQueryClient();
   const { getToken } = useAuth();
   const router = useRouter();
-  const { messages, setMessages, toogleFirstMessage } = useInitalChatStore();
-  // const { sendMessage, status, messages } = useChat({
-  //   id: conversationId,
-  //   transport: new DefaultChatTransport({
-  //     api: `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/conversations/${conversationId}/messages`,
-  //     headers: async () => {
-  //       const token = await getToken();
-  //       return {
-  //         Authorization: token,
-  //       };
-  //     },
-  //     body: {
-  //       conversationId: conversationId,
-  //     },
-  //   }),
-  //   onFinish: async () => {
-  //     queryClient.invalidateQueries({ queryKey: ["conversations"] });
-  //     router.push(`/mainview/aichat/${conversationId}`);
-  //   },
-  // });
+  const { setMessages, toogleFirstMessage } = useInitalChatStore();
 
   const handleSendMessage = async (
     message,
@@ -69,19 +47,6 @@ export default function Page() {
     );
     queryClient.invalidateQueries({ queryKey: ["conversations"] });
     router.push(`/mainview/aichat/${newConversationId}`);
-
-    // setTimeout(() => {
-    //   console.log("conversationId", conversationId);
-    //   sendMessage({
-    //     text: message,
-    //     metadata: {
-    //       conversationId: newConversationId,
-    //       model: model,
-    //       isSmartContext: isSmartContext,
-    //       contextWindow: contextWindow,
-    //     },
-    //   });
-    // }, 1000);
   };
   return (
     <div className="flex flex-col gap-2 items-center justify-center h-[25vh] w-[85%]">
