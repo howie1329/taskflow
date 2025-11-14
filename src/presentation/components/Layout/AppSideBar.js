@@ -8,10 +8,8 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSubButton,
 } from "@/components/ui/sidebar";
 import React from "react";
-import Link from "next/link";
 import { SignedIn, UserProfile } from "@clerk/nextjs";
 import {
   Popover,
@@ -35,11 +33,6 @@ import { useMarkNotificationAsRead } from "@/hooks/notifications/useMarkNotifica
 import { useTheme } from "next-themes";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import useFetchConversations from "@/hooks/ai/useFetchConversations";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import useFetchNotes from "@/hooks/notes/useFetchNotes";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
@@ -59,8 +52,8 @@ import {
   User02Icon,
   Delete01Icon,
   Settings05Icon,
-  ArrowDown01Icon,
 } from "@hugeicons/core-free-icons/index";
+import { MenuItem } from "./components/MenuItem";
 
 export default function AppSideBar() {
   const { theme, setTheme } = useTheme();
@@ -323,57 +316,7 @@ export default function AppSideBar() {
       <SidebarContent>
         <SidebarGroup>
           {SideBarItems.map((item) => (
-            <Collapsible key={item.label}>
-              <div className="flex flex-row items-center justify-between">
-                <SidebarGroupLabel>
-                  <Link
-                    className="flex flex-row items-center gap-2 text-xs font-semibold"
-                    href={item.href}
-                  >
-                    {item.icon}
-                    {item.label}
-                  </Link>
-                </SidebarGroupLabel>
-                <CollapsibleTrigger>
-                  {item.items && item.items.length > 0 && (
-                    <HugeiconsIcon
-                      icon={ArrowDown01Icon}
-                      size={20}
-                      strokeWidth={2}
-                    />
-                  )}
-                </CollapsibleTrigger>
-              </div>
-              <CollapsibleContent>
-                {item.items &&
-                  item.items.length > 0 &&
-                  item.items.slice(0, 3).map((subItem) => (
-                    <SidebarMenuSubButton
-                      key={subItem.id}
-                      className="gap-2 justify-start"
-                      asChild
-                    >
-                      <Link href={`${item.href}/${subItem.id}`}>
-                        {subItem.icon}
-                        <span className="text-xs truncate">
-                          {subItem.title.charAt(0).toUpperCase() +
-                            subItem.title.slice(1)}
-                        </span>
-                      </Link>
-                    </SidebarMenuSubButton>
-                  ))}
-                {item.items && item.items.length > 3 && (
-                  <SidebarMenuSubButton
-                    className="gap-2 text-xs justify-start"
-                    asChild
-                  >
-                    <Link href={item.href}>
-                      <p className="text-xs">More</p>
-                    </Link>
-                  </SidebarMenuSubButton>
-                )}
-              </CollapsibleContent>
-            </Collapsible>
+            <MenuItem key={item.id} {...item} />
           ))}
         </SidebarGroup>
       </SidebarContent>

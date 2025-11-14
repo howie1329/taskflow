@@ -24,9 +24,15 @@ import {
   Cancel01Icon,
 } from "@hugeicons/core-free-icons/index";
 import { HugeiconsIcon } from "@hugeicons/react";
+import useLiveFetchTasks from "@/hooks/tasks/useLiveFetchTasks";
+import { useLiveQuery } from "@tanstack/react-db";
+import { useAuth } from "@clerk/nextjs";
 
 function Page() {
   const { data: tasks } = useFetchAllTasks();
+  const tasksCollection = useLiveFetchTasks();
+  const { data: task } = useLiveQuery((q) => q.from({ todo: tasksCollection }));
+  const [baseTasks, setBaseTasks] = useState([]);
   const [isMiniAIChatOpen, setIsMiniAIChatOpen] = useState(false);
   const { socket } = useSocketStore();
   const queryClient = useQueryClient();
@@ -46,6 +52,10 @@ function Page() {
   } = useTaskUIStore();
 
   useEffect(() => {
+    console.log("Testing Live Fetch", task);
+  }, [task]);
+
+  useEffect(() => {
     if (socket) {
       socket.on("task-created", () => {
         queryClient.cancelQueries({ queryKey: ["tasks"] });
@@ -60,7 +70,6 @@ function Page() {
         queryClient.invalidateQueries({ queryKey: ["tasks"] });
       });
     }
-
     getFilteredData(tasks);
   }, [
     searchQuery,
