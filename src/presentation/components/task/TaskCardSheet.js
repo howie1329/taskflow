@@ -10,6 +10,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { Textarea } from "@/components/ui/textarea";
 import useCompleteSubtask from "@/hooks/tasks/subtasks/useCompleteSubtask";
 import { useFetchTaskSubtask } from "@/hooks/tasks/subtasks/useFetchTaskSubtask";
 import useIncompleteSubtask from "@/hooks/tasks/subtasks/useIncompleteSubtask";
@@ -39,7 +40,7 @@ export const TaskCardSheet = ({ selectedTask, isOpen, onOpenChange }) => {
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent className="grid grid-rows-[auto_1fr_auto] !w-[30vw] !max-w-[30vw] gap-0 p-2">
+      <SheetContent className="grid grid-rows-[auto_1fr_1fr_auto] !w-[30vw] !max-w-[30vw] gap-0 p-2">
         <SheetHeader className="flex flex-col gap-0 p-0">
           <SheetTitle className="">{selectedTask.title}</SheetTitle>
           <SheetDescription>{selectedTask.description}</SheetDescription>
@@ -47,13 +48,13 @@ export const TaskCardSheet = ({ selectedTask, isOpen, onOpenChange }) => {
         </SheetHeader>
         <div className="grid grid-rows-[auto_auto_auto_1fr] gap-3">
           <div className="flex flex-row items-center ">
-            <h3 className="text-sm font-medium">Status:</h3>
+            <h3 className="text-sm font-medium"> Status:</h3>
             <p className="text-sm text-gray-500">
               {getCorrectedStatus(selectedTask.status)}
             </p>
           </div>
           <div className="flex flex-row items-center">
-            <h3 className="text-sm font-medium">Due Date:</h3>
+            <h3 className="text-sm font-medium">Due Date: </h3>
             <p className="text-sm text-gray-500">{selectedTask.date}</p>
           </div>
 
@@ -93,6 +94,11 @@ export const TaskCardSheet = ({ selectedTask, isOpen, onOpenChange }) => {
                     </p>
                   </div>
                 ))}
+              <h3 className="text-sm font-medium">Notes:</h3>
+              <Textarea
+                className="h-full"
+                placeholder="Add notes to this task"
+              />
             </div>
           </div>
         </div>
