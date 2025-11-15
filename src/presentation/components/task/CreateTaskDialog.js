@@ -138,11 +138,12 @@ const TaskFormSubTaskArea = ({ subtasks, onSubtaskChange }) => {
 };
 
 const TaskFormDateInput = ({ date, setDate }) => {
+  // Need to look into shadcn/ui input component to make it work with the date picker
   return (
     <div className="flex flex-col gap-1">
       <p className="text-xs font-medium">Due Date</p>
       <Input
-        className="border border-input bg-background hover:bg-accent hover:text-accent-foreground py-1 text-xs font-medium rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+        className="border border-input bg-background hover:bg-accent hover:text-accent-foreground h-6 text-xs font-medium rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
         type="date"
         placeholder="MM/DD/YYYY"
         value={date}
