@@ -99,6 +99,9 @@ export const CreateTaskDialog = ({ isOpen, onOpenChange }) => {
               placeholder="Task Labels"
             />
 
+            <p>Project Placeholder</p>
+            <p>Phases Placeholder</p>
+
             {/* Subtask Area */}
           </div>
 
