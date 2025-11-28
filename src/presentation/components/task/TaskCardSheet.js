@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
@@ -16,12 +17,16 @@ import { useFetchTaskSubtask } from "@/hooks/tasks/subtasks/useFetchTaskSubtask"
 import useIncompleteSubtask from "@/hooks/tasks/subtasks/useIncompleteSubtask";
 import useDeleteTask from "@/hooks/tasks/useDeleteTask";
 import { Trash2Icon } from "lucide-react";
+import { useState } from "react";
 
 export const TaskCardSheet = ({ selectedTask, isOpen, onOpenChange }) => {
   const { data: subtasks, isLoading: subtaskLoading } = useFetchTaskSubtask(
     selectedTask.id,
     isOpen
   );
+  const [title, setTitle] = useState(selectedTask.title);
+  const [description, setDescription] = useState(selectedTask.description);
+  const [notes, setNotes] = useState(selectedTask.notes);
   const { mutate: deleteTask } = useDeleteTask();
   const { mutate: completeSubtask } = useCompleteSubtask();
   const { mutate: incompleteSubtask } = useIncompleteSubtask();
@@ -42,7 +47,13 @@ export const TaskCardSheet = ({ selectedTask, isOpen, onOpenChange }) => {
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent className="grid grid-rows-[auto_1fr_1fr_auto] !w-[30vw] !max-w-[30vw] gap-0 p-2">
         <SheetHeader className="flex flex-col gap-0 p-0">
-          <SheetTitle className="">{selectedTask.title}</SheetTitle>
+          <SheetTitle className="">
+            <Input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Task Title"
+            />
+          </SheetTitle>
           <SheetDescription>{selectedTask.description}</SheetDescription>
           <Separator />
         </SheetHeader>
