@@ -19,6 +19,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { ProjectStats } from "@/presentation/components/projects/ProjectStats";
+import { dummyProjectStats } from "@/presentation/components/projects/dummyProjectData";
 
 export default function Page() {
   const { id } = useParams();
@@ -50,6 +52,7 @@ export default function Page() {
     []
   );
 
+  // Keep calculating real stats, but use dummyStats for display as requested
   const counts = useMemo(() => {
     const total = tasks.length || 0;
     const by = (key) => tasks.filter((t) => t.status === key).length;
@@ -88,10 +91,10 @@ export default function Page() {
 
   return (
     <div className="flex flex-col flex-1 overflow-hidden h-full p-2 rounded-tr-md rounded-br-md bg-white">
-      <div className="flex flex-col gap-2 mb-2">
+      <div className="flex flex-col gap-4 mb-4">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <h1 className="text-base font-semibold truncate">
+            <h1 className="text-xl font-bold truncate">
               {project?.title ?? "Project"}
             </h1>
             <p className="text-sm text-muted-foreground line-clamp-2">
@@ -117,7 +120,7 @@ export default function Page() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">
-                  <FilterIcon />
+                  <FilterIcon className="w-4 h-4 mr-2" />
                   Filters
                 </Button>
               </DropdownMenuTrigger>
@@ -163,15 +166,14 @@ export default function Page() {
           </div>
         </div>
 
-        <div className="text-xs text-muted-foreground">
-          {counts.total} tasks · {counts.done} done · {counts.overdue} overdue
-        </div>
+        {/* Dashboard Stats */}
+        <ProjectStats stats={dummyProjectStats} />
       </div>
 
-      <Separator />
+      <Separator className="my-2" />
 
-      <div className="flex-1 overflow-hidden h-full ">
-        <GeneralKanbanTaskBoard data={filteredData} />
+      <div className="flex-1 overflow-hidden h-full">
+        {/* <GeneralKanbanTaskBoard data={filteredData} /> */}
       </div>
     </div>
   );
