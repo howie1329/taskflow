@@ -98,7 +98,7 @@ export default function AppSideBar() {
     },
   ];
   return (
-    <Sidebar variant="inset">
+    <Sidebar>
       <SidebarHeader className="px-4 py-3 border-b border-sidebar-border">
         <div className="flex flex-col items-center justify-between w-full gap-1.5">
           {/* Logo Section */}

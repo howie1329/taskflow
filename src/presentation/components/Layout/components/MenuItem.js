@@ -30,7 +30,7 @@ export const MenuItem = ({ label, icon, href, items = [] }) => {
           <SidebarMenuButton asChild>
             <Link href={href}>
               {icon}
-              <span className="line-clamp-1 text-ellipsis text-xs">
+              <span className="line-clamp-1 text-ellipsis text-xs font-medium">
                 {label}
               </span>
             </Link>
@@ -57,7 +57,7 @@ export const MenuItem = ({ label, icon, href, items = [] }) => {
                 <SidebarMenuSubButton key={subitem.id} asChild>
                   <Link href={`${href}/${subitem.id}`}>
                     {subitem.icon}
-                    <span className="line-clamp-1 text-ellipsis text-xs">
+                    <span className="line-clamp-1 text-ellipsis text-xs font-medium">
                       {subitem.title}
                     </span>
                   </Link>

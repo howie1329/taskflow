@@ -100,7 +100,7 @@ function Page() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         )}
-        <Card className="flex flex-row justify-between items-center p-1 gap-1 rounded-sm relative shadow-none">
+        <Card className="flex flex-row justify-between items-center p-1 gap-1 rounded-none relative shadow-none">
           <Button
             variant="outline"
             className="p-1 h-6 w-6 rounded-full"

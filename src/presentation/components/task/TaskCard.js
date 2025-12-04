@@ -81,7 +81,7 @@ export const TaskCard = ({ task }) => {
       onMouseEnter={() => prefetchHover(task.id)}
     >
       <Card
-        className="bg-card rounded-lg p-1 flex-shrink-0 cursor-pointer hover:bg-card/50 "
+        className="bg-card rounded-none p-1 flex-shrink-0 cursor-pointer hover:bg-card/50 "
         onClick={() => setIsOpen(true)}
         style={style}
         ref={setNodeRef}

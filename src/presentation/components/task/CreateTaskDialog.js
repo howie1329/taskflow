@@ -66,7 +66,7 @@ export const CreateTaskDialog = ({ isOpen, onOpenChange }) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="!w-[50vw] !max-w-[60vw]">
+      <DialogContent className="!w-[50vw] !max-w-[60vw] rounded-none">
         <DialogHeader>
           <DialogTitle>Create Task</DialogTitle>
         </DialogHeader>
@@ -100,7 +100,6 @@ export const CreateTaskDialog = ({ isOpen, onOpenChange }) => {
             />
 
             <p>Project Placeholder</p>
-            <p>Phases Placeholder</p>
 
             {/* Subtask Area */}
           </div>

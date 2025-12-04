@@ -36,7 +36,7 @@ export default function Layout({ children }) {
             setIsGlobalSmartSearchOpen={setIsGlobalSmartSearchOpen}
           />
           <SocketInitializer />
-          <main className=" h-[98vh] rounded-md border">{children}</main>
+          <main className=" h-[100vh]">{children}</main>
         </SidebarInset>
       </SidebarProvider>
     </QueryClientProvider>
