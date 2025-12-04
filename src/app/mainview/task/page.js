@@ -27,11 +27,12 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import useLiveFetchTasks from "@/hooks/tasks/useLiveFetchTasks";
 import { useLiveQuery } from "@tanstack/react-db";
 import { useAuth } from "@clerk/nextjs";
+import useRealTimeTask from "@/hooks/tasks/useRealTimeTask";
 
 function Page() {
   const { data: tasks } = useFetchAllTasks();
+  const { isLoading, error, tasks: realTimeTasks } = useRealTimeTask();
   const tasksCollection = useLiveFetchTasks();
-  const { data: task } = useLiveQuery((q) => q.from({ todo: tasksCollection }));
   const [baseTasks, setBaseTasks] = useState([]);
   const [isMiniAIChatOpen, setIsMiniAIChatOpen] = useState(false);
   const { socket } = useSocketStore();
@@ -52,10 +53,6 @@ function Page() {
   } = useTaskUIStore();
 
   useEffect(() => {
-    console.log("Testing Live Fetch", task);
-  }, [task]);
-
-  useEffect(() => {
     if (socket) {
       socket.on("task-created", () => {
         queryClient.cancelQueries({ queryKey: ["tasks"] });
@@ -70,15 +67,15 @@ function Page() {
         queryClient.invalidateQueries({ queryKey: ["tasks"] });
       });
     }
-    getFilteredData(tasks);
   }, [
     searchQuery,
     tasks,
     activeSearch,
     filterStatuses,
-    getFilteredData,
     socket,
     queryClient,
+    realTimeTasks,
+    isLoading,
   ]);
 
   return (
@@ -151,7 +148,7 @@ function Page() {
       </div>
       <Separator />
       <div className="flex-1 overflow-hidden">
-        <GeneralKanbanTaskBoard data={filteredData} />
+        <GeneralKanbanTaskBoard data={realTimeTasks || []} />
       </div>
       {/* Create Task Dialog - Modal */}
       <CreateTaskDialog

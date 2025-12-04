@@ -316,7 +316,7 @@ export default function AppSideBar() {
       <SidebarContent>
         <SidebarGroup>
           {SideBarItems.map((item) => (
-            <MenuItem key={item.id} {...item} />
+            <MenuItem key={item.href} {...item} />
           ))}
         </SidebarGroup>
       </SidebarContent>
