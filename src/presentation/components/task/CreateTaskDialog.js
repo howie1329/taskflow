@@ -19,6 +19,7 @@ import {
 import useCreateTask from "@/hooks/tasks/useCreateTask";
 import { useAuth } from "@clerk/nextjs";
 import { format } from "date-fns";
+import { PlusIcon } from "lucide-react";
 
 export const CreateTaskDialog = ({ isOpen, onOpenChange }) => {
   const mutation = useCreateTask();
@@ -26,27 +27,23 @@ export const CreateTaskDialog = ({ isOpen, onOpenChange }) => {
   const [status, setStatus] = useState("notStarted");
   const [priority, setPriority] = useState("Low");
   const [date, setDate] = useState(new Date());
-  const [subtasks, setSubtasks] = useState([""]); // Start with one empty subtask
+  const [subtasks, setSubtasks] = useState([]); // Start with one empty subtask
+  const [subtaskInput, setSubtaskInput] = useState(""); // Input for new subtask
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [labels, setLabels] = useState("");
   const [testLabel, setTestLabel] = useState([]);
   // Add new subtask input when user types in the last one
   const handleSubtaskChange = (index, value) => {
+    if (value === "") {
+      const newSubtasks = [...subtasks];
+      newSubtasks.splice(index, 1);
+      setSubtasks(newSubtasks);
+      return;
+    }
     const newSubtasks = [...subtasks];
     newSubtasks[index] = value;
-
-    // If user types in the last subtask, add a new empty one
-    if (index === subtasks.length - 1 && value.trim() !== "") {
-      newSubtasks.push("");
-    }
-
-    // Remove empty subtasks (except the last one)
-    const filteredSubtasks = newSubtasks.filter(
-      (subtask, i) => subtask.trim() !== "" || i === newSubtasks.length - 1
-    );
-
-    setSubtasks(filteredSubtasks);
+    setSubtasks(newSubtasks);
   };
 
   const handleCreateTask = () => {
@@ -62,6 +59,13 @@ export const CreateTaskDialog = ({ isOpen, onOpenChange }) => {
     };
     mutation.mutate(formattedTask);
     onOpenChange(false);
+  };
+
+  const handleAddSubtask = () => {
+    if (subtaskInput.trim() !== "") {
+      setSubtasks([...subtasks, subtaskInput]);
+      setSubtaskInput("");
+    }
   };
 
   return (
@@ -110,6 +114,9 @@ export const CreateTaskDialog = ({ isOpen, onOpenChange }) => {
             <TaskFormSubTaskArea
               subtasks={subtasks}
               onSubtaskChange={handleSubtaskChange}
+              subtaskInput={subtaskInput}
+              setSubtaskInput={setSubtaskInput}
+              handleAddSubtask={handleAddSubtask}
             />
           </div>
           <div className="col-span-3 ">
@@ -123,19 +130,42 @@ export const CreateTaskDialog = ({ isOpen, onOpenChange }) => {
   );
 };
 
-const TaskFormSubTaskArea = ({ subtasks, onSubtaskChange }) => {
+const TaskFormSubTaskArea = ({
+  subtasks,
+  onSubtaskChange,
+  subtaskInput,
+  setSubtaskInput,
+  handleAddSubtask,
+}) => {
   return (
     <div className="flex flex-col gap-1">
       <div className="flex flex-col gap-2">
-        {subtasks.map((subtask, index) => (
+        {subtasks &&
+          subtasks.length > 0 &&
+          subtasks.map((subtask, index) => (
+            <Input
+              key={index}
+              value={subtask}
+              onChange={(e) => onSubtaskChange(index, e.target.value)}
+              className="text-sm rounded-none"
+            />
+          ))}
+        <div className="flex flex-row items-center gap-2">
           <Input
-            key={index}
-            placeholder={`Subtask ${index + 1}`}
-            value={subtask}
-            onChange={(e) => onSubtaskChange(index, e.target.value)}
+            placeholder="Add Subtask"
+            value={subtaskInput}
+            onChange={(e) => setSubtaskInput(e.target.value)}
             className="text-sm rounded-none"
           />
-        ))}
+          <Button
+            onClick={handleAddSubtask}
+            size="sm"
+            variant="outline"
+            className="rounded-none"
+          >
+            <PlusIcon className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </div>
   );
