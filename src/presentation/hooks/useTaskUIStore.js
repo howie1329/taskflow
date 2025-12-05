@@ -42,7 +42,9 @@ export const useTaskUIStore = create((set, get) => ({
   },
 
   getFilteredData: (data) => {
-    const { filteredData, activeSearch, searchQuery, filterStatuses } = get();
+    const { activeSearch, searchQuery, filterStatuses } = get();
+
+    if (!data || data.length === 0) return [];
 
     let filtered = data;
 
@@ -58,7 +60,7 @@ export const useTaskUIStore = create((set, get) => ({
       );
     }
 
-    set({ filteredData: filtered });
+    return filtered;
   },
 
   resetFilters: () => {

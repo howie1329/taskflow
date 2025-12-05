@@ -15,8 +15,17 @@ const useSocketStore = create((set, get) => ({
       auth: { userId },
     });
 
-    socket.on("connect", () => set({ isConnected: true }));
-    socket.on("disconnect", () => set({ isConnected: false }));
+    socket.on("connect", () => {
+      console.log("Socket connected:", socket.id);
+      set({ isConnected: true });
+    });
+    socket.on("disconnect", () => {
+      console.log("Socket disconnected");
+      set({ isConnected: false });
+    });
+    socket.on("connect_error", (error) => {
+      console.error("Socket connection error:", error);
+    });
 
     socket.on("notification-created", () => {
       queryClient.invalidateQueries({ queryKey: ["notifications"] });

@@ -1,6 +1,6 @@
 "use client";
 import { Separator } from "@/components/ui/separator";
-import React, { useEffect, useState } from "react";
+import React, { useState, useMemo } from "react";
 import { GeneralKanbanTaskBoard } from "@/presentation/components/task/GeneralKanbanTaskBoard";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -13,8 +13,6 @@ import useSendAIMessage from "@/hooks/ai/useSendAIMessage";
 import useDeleteConversation from "@/hooks/ai/useDeleteConversation";
 import useFetchConversationMessages from "@/hooks/ai/useFetchConversationMessages";
 import useFetchConversation from "@/hooks/ai/useFetchConversation";
-import useSocketStore from "@/lib/sockets/SocketStore";
-import { useQueryClient } from "@tanstack/react-query";
 import {
   PlusSignIcon,
   Search02Icon,
@@ -35,12 +33,9 @@ function Page() {
   const tasksCollection = useLiveFetchTasks();
   const [baseTasks, setBaseTasks] = useState([]);
   const [isMiniAIChatOpen, setIsMiniAIChatOpen] = useState(false);
-  const { socket } = useSocketStore();
-  const queryClient = useQueryClient();
   const {
     activeSearch,
     searchQuery,
-    filteredData,
     filterStatuses,
     isFilterOpen,
     isCreateTaskOpen,
@@ -52,30 +47,16 @@ function Page() {
     getFilteredData,
   } = useTaskUIStore();
 
-  useEffect(() => {
-    if (socket) {
-      socket.on("task-created", () => {
-        queryClient.cancelQueries({ queryKey: ["tasks"] });
-        queryClient.invalidateQueries({ queryKey: ["tasks"] });
-      });
-      socket.on("task-updated", () => {
-        queryClient.cancelQueries({ queryKey: ["tasks"] });
-        queryClient.invalidateQueries({ queryKey: ["tasks"] });
-      });
-      socket.on("task-deleted", () => {
-        queryClient.cancelQueries({ queryKey: ["tasks"] });
-        queryClient.invalidateQueries({ queryKey: ["tasks"] });
-      });
-    }
+  // Compute filtered data using useMemo with Zustand store function
+  const filteredData = useMemo(() => {
+    if (!realTimeTasks || realTimeTasks.length === 0) return [];
+    return getFilteredData(realTimeTasks);
   }, [
+    realTimeTasks,
     searchQuery,
-    tasks,
     activeSearch,
     filterStatuses,
-    socket,
-    queryClient,
-    realTimeTasks,
-    isLoading,
+    getFilteredData,
   ]);
 
   return (
@@ -148,7 +129,7 @@ function Page() {
       </div>
       <Separator />
       <div className="flex-1 overflow-hidden">
-        <GeneralKanbanTaskBoard data={realTimeTasks || []} />
+        <GeneralKanbanTaskBoard data={filteredData || []} />
       </div>
       {/* Create Task Dialog - Modal */}
       <CreateTaskDialog
