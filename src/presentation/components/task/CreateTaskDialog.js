@@ -76,12 +76,14 @@ export const CreateTaskDialog = ({ isOpen, onOpenChange }) => {
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
+              className="rounded-none"
               placeholder="Task Title"
             />
             <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Task Description"
+              className="rounded-none"
             />
 
             <div className="grid grid-cols-3 gap-2">
@@ -131,7 +133,7 @@ const TaskFormSubTaskArea = ({ subtasks, onSubtaskChange }) => {
             placeholder={`Subtask ${index + 1}`}
             value={subtask}
             onChange={(e) => onSubtaskChange(index, e.target.value)}
-            className="text-sm"
+            className="text-sm rounded-none"
           />
         ))}
       </div>
@@ -145,7 +147,7 @@ const TaskFormDateInput = ({ date, setDate }) => {
     <div className="flex flex-col gap-1">
       <p className="text-xs font-medium">Due Date</p>
       <Input
-        className="border border-input bg-background hover:bg-accent hover:text-accent-foreground h-6 text-xs font-medium rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+        className="border border-input bg-background hover:bg-accent hover:text-accent-foreground h-6 text-xs font-medium rounded-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
         type="date"
         placeholder="MM/DD/YYYY"
         value={date}
@@ -173,7 +175,7 @@ const TaskFormPriorityDropdown = ({ priority, setPriority }) => {
       <p className="text-xs font-medium">Priority</p>
       <DropdownMenu>
         <DropdownMenuTrigger>
-          <p className="border border-input bg-background hover:bg-accent hover:text-accent-foreground py-1 text-xs font-medium rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+          <p className="border border-input bg-background hover:bg-accent hover:text-accent-foreground py-1 text-xs font-medium rounded-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
             {getPriorityLabel(priority)}
           </p>
         </DropdownMenuTrigger>
