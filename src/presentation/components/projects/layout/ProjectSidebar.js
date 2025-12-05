@@ -36,7 +36,7 @@ export default function ProjectSidebar() {
             <SidebarMenuItem>
               <SidebarMenuButton asChild>
                 <Link
-                  className="flex justify-center text-xs bg-black text-white"
+                  className="flex justify-center text-xs bg-primary text-accent"
                   href={`/mainview/projects`}
                   onClick={(e) => {
                     e.preventDefault();

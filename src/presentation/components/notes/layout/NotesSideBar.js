@@ -35,7 +35,7 @@ export default function NotesSideBar() {
               <SidebarMenuButton asChild>
                 <Button
                   onClick={() => setIsOpen(true)}
-                  className="flex justify-center text-xs bg-black text-white"
+                  className="flex justify-center text-xs bg-primary text-accent"
                 >
                   New Note
                   <PlusIcon className="w-4 h-4" />

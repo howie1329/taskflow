@@ -27,7 +27,7 @@ export default function AISidebar() {
             <SidebarMenuItem>
               <SidebarMenuButton asChild>
                 <Link
-                  className="flex justify-center text-xs bg-primary text-white"
+                  className="flex justify-center text-xs bg-primary text-accent"
                   href={`/mainview/aichat`}
                 >
                   New Chat
