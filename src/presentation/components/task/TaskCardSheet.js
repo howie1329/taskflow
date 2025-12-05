@@ -155,13 +155,14 @@ export const TaskCardSheet = ({ selectedTask, isOpen, onOpenChange }) => {
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent className="grid grid-rows-[auto_1fr_1fr_auto] !w-[30vw] !max-w-[30vw] gap-0 p-2">
-        <SheetHeader className="flex flex-col gap-0 p-0">
+      <SheetContent className="grid grid-rows-[auto_1fr_1fr_auto] !w-[30vw] !max-w-[30vw] gap-2 p-2">
+        <SheetHeader className="flex flex-col gap-2 p-0">
           <SheetTitle className="">
             <Input
               value={title}
               onChange={handleTitleChange}
               placeholder="Task Title"
+              className="border-none"
             />
           </SheetTitle>
           <SheetDescription>
@@ -169,7 +170,7 @@ export const TaskCardSheet = ({ selectedTask, isOpen, onOpenChange }) => {
               value={description}
               onChange={handleDescriptionChange}
               placeholder="Task Description"
-              className="min-h-[60px] resize-none"
+              className="min-h-[60px] resize-none border-none"
             />
           </SheetDescription>
           <Separator />
@@ -178,7 +179,7 @@ export const TaskCardSheet = ({ selectedTask, isOpen, onOpenChange }) => {
           <div className="flex flex-row items-center gap-2">
             <h3 className="text-sm font-medium"> Status:</h3>
             <Select value={status} onValueChange={handleStatusChange}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-[180px] rounded-none">
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
               <SelectContent>
@@ -233,8 +234,8 @@ export const TaskCardSheet = ({ selectedTask, isOpen, onOpenChange }) => {
                 ))}
               <h3 className="text-sm font-medium">Notes:</h3>
               <Textarea
-                className="h-full"
-                placeholder="Add notes to this task"
+                className="h-full rounded-none"
+                placeholder="Add notes to this task..."
               />
             </div>
           </div>
