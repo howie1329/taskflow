@@ -263,12 +263,14 @@ export const TaskCardSheet = ({ selectedTask, isOpen, onOpenChange }) => {
   };
 
   const handleCreateSubtask = () => {
-    if (newSubtaskName.trim()) {
-      createSubtask({
+    if (newSubtaskName.trim() && selectedTask?.id) {
+      const subtaskData = {
         taskId: selectedTask.id,
         subtaskName: newSubtaskName.trim(),
         isComplete: false,
-      });
+      };
+      console.log("Creating subtask with data:", subtaskData);
+      createSubtask(subtaskData);
       setNewSubtaskName("");
     }
   };
