@@ -10,6 +10,7 @@ import {
   ChatHistoryProvider,
   useChatHistoryContext,
 } from "@/presentation/components/aiChat/providers/ChatHistoryProvider";
+import { ChatPageClient } from "@/presentation/components/aiChat/providers/ChatPageClient";
 
 export default function Page() {
   const router = useRouter();
@@ -17,7 +18,7 @@ export default function Page() {
   return (
     <ChatHistoryProvider>
       <ChatMessageProvider conversationId={null}>
-        <ChatHistory />
+        <ChatPageClient />
       </ChatMessageProvider>
     </ChatHistoryProvider>
   );
