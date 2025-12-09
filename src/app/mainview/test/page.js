@@ -5,57 +5,16 @@ import { DefaultChatTransport } from "ai";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { ChatMessageProvider } from "@/presentation/components/aiChat/providers/ChatMessageProvider";
 
 export default function Page() {
   const router = useRouter();
-  const { messages, sendMessage, status } = useChat({
-    id: "1",
-    transport: new DefaultChatTransport({
-      api: "http://localhost:3001/chat",
-      body: {
-        conversationId: "1",
-      },
-    }),
-    onFinish: async () => {
-      router.push("/mainview/test/1");
-    },
-  });
-  const [input, setInput] = useState("");
 
   return (
-    <>
-      <Button variant="outline" onClick={() => router.push("/mainview/test/1")}>
-        New Chat
-      </Button>
-      {status === "streaming" ? <Spinner /> : null}
-      {messages.map((message) => (
-        <div key={message.id}>
-          {message.role === "user" ? "User: " : "AI: "}
-          {message.parts.map((part, index) =>
-            part.type === "text" ? <span key={index}>{part.text}</span> : null
-          )}
-        </div>
-      ))}
-
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (input.trim()) {
-            sendMessage({ text: input });
-            setInput("");
-          }
-        }}
-      >
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          disabled={status !== "ready"}
-          placeholder="Say something..."
-        />
-        <button type="submit" disabled={status !== "ready"}>
-          Submit
-        </button>
-      </form>
-    </>
+    <ChatMessageProvider conversationId={null}>
+      <div>
+        <h1>Chat Messages</h1>
+      </div>
+    </ChatMessageProvider>
   );
 }

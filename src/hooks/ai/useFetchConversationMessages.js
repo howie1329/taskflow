@@ -23,12 +23,14 @@ const fetchConversationMessages = async (id, getToken) => {
   }
 };
 
-const useFetchConversationMessages = (id) => {
+const useFetchConversationMessages = (id, options = {}) => {
   const { getToken } = useAuth();
+  const { enabled = true } = options;
   return useQuery({
     queryKey: ["messages", id],
     queryFn: () => fetchConversationMessages(id, getToken),
     staleTime: 2 * 60 * 1000,
+    enabled: !!id && enabled,
   });
 };
 
