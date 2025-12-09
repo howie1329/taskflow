@@ -1,6 +1,6 @@
-import { TaskFilterProvider } from "@/presentation/components/task/home/TaskFilterProvider";
-import { TaskDataProvider } from "@/presentation/components/task/home/TaskDataProvider";
-import { TaskPageClient } from "@/presentation/components/task/home/TaskPageClient";
+import { TaskFilterProvider } from "@/presentation/components/task/Providers/TaskFilterProvider";
+import { TaskDataProvider } from "@/presentation/components/task/Providers/TaskDataProvider";
+import { TaskPageClient } from "@/presentation/components/task/Providers/TaskPageClient";
 
 function Page() {
   return (
