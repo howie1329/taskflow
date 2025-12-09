@@ -1,11 +1,11 @@
 "use client";
 import { Separator } from "@/components/ui/separator";
-import React, { useMemo } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CreateTaskDialog } from "./CreateTaskDialog";
 import { FilterDropdownCard } from "./FilterDropDownCard";
-import { useTaskUIStore } from "@/presentation/hooks/useTaskUIStore";
+import { useTaskFilters } from "./TaskFilterContext";
 import { motion } from "motion/react";
 import useSendAIMessage from "@/hooks/ai/useSendAIMessage";
 import useDeleteConversation from "@/hooks/ai/useDeleteConversation";
@@ -29,15 +29,17 @@ import { getBoardComponent } from "./boards/BoardRegistry";
  * 
  * This component is separated from the page to allow the page to be a server component.
  * It handles:
- * - UI state management (search, filters, dialogs)
- * - Data filtering
+ * - UI state management (search, filters, dialogs) - now via TaskFilterContext
  * - Board rendering with configurable board types
+ * 
+ * Note: Data filtering is handled in TaskDataProvider
  */
 export const TaskPageClient = ({ boardType = "kanban", boardConfig = {} }) => {
   // Get filtered data directly from provider - filtering logic is now in TaskDataProvider
   const { filteredTasks } = useTaskData();
   const [isMiniAIChatOpen, setIsMiniAIChatOpen] = useState(false);
   
+  // Get filter state from TaskFilterContext (replaces Zustand)
   const {
     activeSearch,
     searchQuery,
@@ -49,7 +51,7 @@ export const TaskPageClient = ({ boardType = "kanban", boardConfig = {} }) => {
     setIsFilterOpen,
     setIsCreateTaskOpen,
     handleStatusFilterChange,
-  } = useTaskUIStore();
+  } = useTaskFilters();
 
   // Get the board component based on type
   const BoardComponent = getBoardComponent(boardType);

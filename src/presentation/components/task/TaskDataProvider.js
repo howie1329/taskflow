@@ -1,7 +1,8 @@
 "use client";
 import { createContext, useContext, useMemo } from "react";
 import useRealTimeTask from "@/hooks/tasks/useRealTimeTask";
-import { useTaskUIStore } from "@/presentation/hooks/useTaskUIStore";
+import { useTaskFilters } from "./TaskFilterContext";
+import { filterTasks } from "./utils/taskFilters";
 
 const TaskDataContext = createContext(null);
 
@@ -10,7 +11,7 @@ const TaskDataContext = createContext(null);
  * 
  * This component handles:
  * - Data fetching (via useRealTimeTask)
- * - Data filtering (based on UI state from Zustand)
+ * - Data filtering (based on filter state from TaskFilterContext)
  * 
  * Why filtering is here:
  * - Filtering is a data transformation concern, not UI rendering
@@ -21,19 +22,21 @@ const TaskDataContext = createContext(null);
 export const TaskDataProvider = ({ children }) => {
   const { isLoading, error, tasks: realTimeTasks } = useRealTimeTask();
   
-  // Get filter state from Zustand store
+  // Get filter state from TaskFilterContext (replaces Zustand)
   const {
     activeSearch,
     searchQuery,
     filterStatuses,
-    getFilteredData,
-  } = useTaskUIStore();
+  } = useTaskFilters();
 
-  // Compute filtered data inside the provider
+  // Compute filtered data using pure function
   const filteredTasks = useMemo(() => {
-    if (!realTimeTasks || realTimeTasks.length === 0) return [];
-    return getFilteredData(realTimeTasks);
-  }, [realTimeTasks, searchQuery, activeSearch, filterStatuses, getFilteredData]);
+    return filterTasks(realTimeTasks || [], {
+      filterStatuses,
+      searchQuery,
+      activeSearch,
+    });
+  }, [realTimeTasks, searchQuery, activeSearch, filterStatuses]);
 
   const value = useMemo(() => ({
     // Raw data (for cases where you need unfiltered data)
