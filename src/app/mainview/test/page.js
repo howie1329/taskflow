@@ -6,15 +6,35 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChatMessageProvider } from "@/presentation/components/aiChat/providers/ChatMessageProvider";
+import {
+  ChatHistoryProvider,
+  useChatHistoryContext,
+} from "@/presentation/components/aiChat/providers/ChatHistoryProvider";
 
 export default function Page() {
   const router = useRouter();
 
   return (
-    <ChatMessageProvider conversationId={null}>
-      <div>
-        <h1>Chat Messages</h1>
-      </div>
-    </ChatMessageProvider>
+    <ChatHistoryProvider>
+      <ChatMessageProvider conversationId={null}>
+        <ChatHistory />
+      </ChatMessageProvider>
+    </ChatHistoryProvider>
   );
 }
+
+const ChatHistory = () => {
+  const { conversations, conversationsLoading } = useChatHistoryContext();
+  return (
+    <div className="flex flex-col gap-2">
+      <h1>Chat History</h1>
+
+      {conversations &&
+        conversations.map((conversation) => (
+          <div key={conversation.id}>
+            <h2>{conversation.id}</h2>
+          </div>
+        ))}
+    </div>
+  );
+};
