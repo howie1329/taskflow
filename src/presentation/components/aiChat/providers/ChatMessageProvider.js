@@ -18,7 +18,7 @@ export const ChatMessageProvider = ({ conversationId, children }) => {
 
   // Use the useChat hook to send messages to the backend
   const { messages, sendMessage, status, setMessages } = useChat({
-    id: conversationId,
+    id: conversationId || null, // If no conversationId is provided, use null might need to set to a default value
     transport: new DefaultChatTransport({
       api: `${process.env.NEXT_PUBLIC_API_BASE_URL}/chat`,
     }),
