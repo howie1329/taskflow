@@ -34,7 +34,8 @@ import { getBoardComponent } from "./boards/BoardRegistry";
  * - Board rendering with configurable board types
  */
 export const TaskPageClient = ({ boardType = "kanban", boardConfig = {} }) => {
-  const { tasks } = useTaskData();
+  // Get filtered data directly from provider - filtering logic is now in TaskDataProvider
+  const { filteredTasks } = useTaskData();
   const [isMiniAIChatOpen, setIsMiniAIChatOpen] = useState(false);
   
   const {
@@ -48,14 +49,7 @@ export const TaskPageClient = ({ boardType = "kanban", boardConfig = {} }) => {
     setIsFilterOpen,
     setIsCreateTaskOpen,
     handleStatusFilterChange,
-    getFilteredData,
   } = useTaskUIStore();
-
-  // Compute filtered data using useMemo with Zustand store function
-  const filteredData = useMemo(() => {
-    if (!tasks || tasks.length === 0) return [];
-    return getFilteredData(tasks);
-  }, [tasks, searchQuery, activeSearch, filterStatuses, getFilteredData]);
 
   // Get the board component based on type
   const BoardComponent = getBoardComponent(boardType);
@@ -137,7 +131,7 @@ export const TaskPageClient = ({ boardType = "kanban", boardConfig = {} }) => {
       <Separator />
       <div className="flex-1 overflow-hidden">
         <BoardComponent 
-          data={filteredData || []} 
+          data={filteredTasks || []} 
           onTaskUpdate={handleTaskUpdate}
           config={boardConfig}
         />
