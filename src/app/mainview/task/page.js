@@ -6,9 +6,7 @@ function Page() {
   return (
     <TaskFilterProvider>
       <TaskDataProvider>
-        <div className="flex flex-col h-[96vh] p-2 ">
-          <TaskPageClient />
-        </div>
+        <TaskPageClient />
       </TaskDataProvider>
     </TaskFilterProvider>
   );
