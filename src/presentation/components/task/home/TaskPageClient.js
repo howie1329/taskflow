@@ -2,6 +2,7 @@
 import { GeneralKanbanTaskBoard } from "../../projects/GeneralKanbanTaskBoard";
 import { useTaskData } from "./TaskDataProvider";
 import { motion } from "motion/react";
+import { TaskHeader } from "./TaskHeader";
 
 export const TaskPageClient = () => {
   const { filteredTasks, isLoading, error } = useTaskData();
@@ -14,6 +15,7 @@ export const TaskPageClient = () => {
       transition={{ duration: 0.3, ease: "easeOut" }}
       className="flex flex-col h-full"
     >
+      <TaskHeader />
       <GeneralKanbanTaskBoard data={filteredTasks} />
     </motion.div>
   );
