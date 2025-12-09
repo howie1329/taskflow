@@ -61,7 +61,7 @@ const Column = ({ column }) => {
   };
   return (
     <div
-      className="flex flex-col bg-card/50 border h-full min-h-0"
+      className="flex flex-col bg-card/50 h-full min-h-0 border-2 border-black"
       ref={setNodeRef}
       style={style}
     >
