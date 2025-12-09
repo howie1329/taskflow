@@ -1,26 +1,17 @@
 "use client";
-import axiosClient from "@/lib/axios/axiosClient";
+import { makeAuthenticatedRequest } from "@/lib/axios/axiosClient";
 import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 const createSubtask = async (subtaskData, getToken) => {
-  console.log("Subtask data: ", subtaskData);
-  const token = await getToken();
-  try {
-    const response = await axiosClient.post(
-      "/api/v1/subtasks/create",
-      subtaskData,
-      {
-        headers: { Authorization: token },
-        withCredentials: true,
-      }
-    );
-    return response.data.data;
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
+  const response = await makeAuthenticatedRequest(
+    getToken,
+    "post",
+    "/api/v1/subtasks/create",
+    subtaskData
+  );
+  return response.data.data;
 };
 
 const useCreateSubtask = () => {
@@ -41,13 +32,15 @@ const useCreateSubtask = () => {
       toast.success("Subtask created successfully");
     },
     onError: (error, variables, context) => {
-      toast.error("Failed to create subtask");
       if (context?.previousSubtasks) {
         queryClient.setQueryData(
           ["subtasks", variables.taskId],
           context.previousSubtasks
         );
       }
+      toast.error("Failed to create subtask", {
+        description: error.message || "Failed to create subtask",
+      });
     },
   });
 };

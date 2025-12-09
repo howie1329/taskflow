@@ -1,13 +1,14 @@
-import axiosClient from "@/lib/axios/axiosClient";
+import { makeAuthenticatedRequest } from "@/lib/axios/axiosClient";
 import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+
 const completeSubtask = async (id, taskId, getToken) => {
-  const token = await getToken();
-  const response = await axiosClient.patch(`/api/v1/subtasks/complete/${id}`, {
-    headers: { Authorization: token },
-    withCredentials: true,
-  });
+  const response = await makeAuthenticatedRequest(
+    getToken,
+    "patch",
+    `/api/v1/subtasks/complete/${id}`
+  );
   return response.data.data;
 };
 
@@ -34,11 +35,13 @@ const useCompleteSubtask = () => {
       toast.success("Subtask completed successfully");
     },
     onError: (error, variables, context) => {
-      toast.error("Failed to complete subtask");
       queryClient.setQueryData(
         ["subtasks", variables.taskId],
         context.previousSubtasks
       );
+      toast.error("Failed to complete subtask", {
+        description: error.message || "Failed to complete subtask",
+      });
     },
   });
 };

@@ -1,17 +1,16 @@
 "use client";
-import axiosClient from "@/lib/axios/axiosClient";
+import { makeAuthenticatedRequest } from "@/lib/axios/axiosClient";
 import { useAuth } from "@clerk/nextjs";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 const deleteNote = async (id, getToken) => {
-  const token = await getToken();
-  const response = await axiosClient.delete(`/api/v1/notes/${id}`, {
-    headers: { Authorization: token },
-    withCredentials: true,
-  });
-
+  const response = await makeAuthenticatedRequest(
+    getToken,
+    "delete",
+    `/api/v1/notes/${id}`
+  );
   return response.data.data;
 };
 
@@ -37,7 +36,9 @@ const useDeleteNote = () => {
     },
     onError: (error, variables, context) => {
       queryClient.setQueryData(["notes"], context.previousNotes);
-      toast.error("Note deletion failed");
+      toast.error("Note deletion failed", {
+        description: error.message || "Failed to delete note",
+      });
     },
   });
 };

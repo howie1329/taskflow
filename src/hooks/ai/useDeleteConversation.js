@@ -1,18 +1,15 @@
 import { useQueryClient, useMutation } from "@tanstack/react-query";
-import axiosClient from "@/lib/axios/axiosClient";
+import { makeAuthenticatedRequest } from "@/lib/axios/axiosClient";
 import { useAuth } from "@clerk/nextjs";
 import { toast } from "sonner";
+
 const deleteConversation = async (id, getToken) => {
-  const token = await getToken();
-  try {
-    const response = await axiosClient.delete(`/api/v1/conversations/${id}`, {
-      headers: { Authorization: token },
-      withCredentials: true,
-    });
-    return response.data.message;
-  } catch (error) {
-    console.error(error);
-  }
+  const response = await makeAuthenticatedRequest(
+    getToken,
+    "delete",
+    `/api/v1/conversations/${id}`
+  );
+  return response.data.message;
 };
 
 const useDeleteConversation = () => {
@@ -41,7 +38,9 @@ const useDeleteConversation = () => {
         ["messages", variables],
         context.previousConversation
       );
-      toast.error("Conversation deletion failed");
+      toast.error("Conversation deletion failed", {
+        description: error.message || "Failed to delete conversation",
+      });
     },
   });
 };

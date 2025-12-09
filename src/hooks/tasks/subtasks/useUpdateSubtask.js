@@ -1,25 +1,17 @@
 "use client";
-import axiosClient from "@/lib/axios/axiosClient";
+import { makeAuthenticatedRequest } from "@/lib/axios/axiosClient";
 import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 const updateSubtask = async (subtaskId, subtaskData, getToken) => {
-  const token = await getToken();
-  try {
-    const response = await axiosClient.patch(
-      `/api/v1/subtasks/update/${subtaskId}`,
-      subtaskData,
-      {
-        headers: { Authorization: token },
-        withCredentials: true,
-      }
-    );
-    return response.data.data;
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
+  const response = await makeAuthenticatedRequest(
+    getToken,
+    "patch",
+    `/api/v1/subtasks/update/${subtaskId}`,
+    subtaskData
+  );
+  return response.data.data;
 };
 
 const useUpdateSubtask = () => {
@@ -46,13 +38,15 @@ const useUpdateSubtask = () => {
       toast.success("Subtask updated successfully");
     },
     onError: (error, variables, context) => {
-      toast.error("Failed to update subtask");
       if (context?.previousSubtasks) {
         queryClient.setQueryData(
           ["subtasks", variables.taskId],
           context.previousSubtasks
         );
       }
+      toast.error("Failed to update subtask", {
+        description: error.message || "Failed to update subtask",
+      });
     },
   });
 };

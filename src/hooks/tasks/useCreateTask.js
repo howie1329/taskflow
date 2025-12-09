@@ -1,25 +1,17 @@
 "use client";
-import axiosClient from "@/lib/axios/axiosClient";
+import { makeAuthenticatedRequest } from "@/lib/axios/axiosClient";
 import { toast } from "sonner";
 import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const createTask = async (task, getToken) => {
-  const token = await getToken();
-  try {
-    const response = await axiosClient.post("/api/v1/tasks/create", task, {
-      headers: {
-        Authorization: token,
-      },
-      withCredentials: true,
-    });
-    return response.data.data;
-  } catch (error) {
-    console.error(error);
-    toast.error("Task creation failed", {
-      description: `${error.message} - ${new Date().toLocaleString()}`,
-    });
-  }
+  const response = await makeAuthenticatedRequest(
+    getToken,
+    "post",
+    "/api/v1/tasks/create",
+    task
+  );
+  return response.data.data;
 };
 
 const useCreateTask = () => {
@@ -39,13 +31,11 @@ const useCreateTask = () => {
         description: new Date().toLocaleString(),
       });
     },
-    onError: (context) => {
-      toast.error("Task creation failed", {
-        description: `${
-          context.error.message
-        } - ${new Date().toLocaleString()}`,
-      });
+    onError: (error, variables, context) => {
       queryClient.setQueryData(["tasks"], context.previousTasks);
+      toast.error("Task creation failed", {
+        description: error.message || "Failed to create task",
+      });
     },
   });
 };

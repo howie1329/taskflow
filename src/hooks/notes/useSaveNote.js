@@ -1,19 +1,17 @@
-import axiosClient from "@/lib/axios/axiosClient";
+import { makeAuthenticatedRequest } from "@/lib/axios/axiosClient";
 import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+
 const saveNote = async (data, getToken) => {
-  try {
-    const token = await getToken();
-    const response = await axiosClient.patch(`/api/v1/notes/${data.id}`, data, {
-      headers: { Authorization: token },
-      withCredentials: true,
-    });
-    return response.data.data;
-  } catch (error) {
-    console.error(error);
-  }
+  const response = await makeAuthenticatedRequest(
+    getToken,
+    "patch",
+    `/api/v1/notes/${data.id}`,
+    data
+  );
+  return response.data.data;
 };
 
 const useSaveNote = () => {
@@ -30,8 +28,9 @@ const useSaveNote = () => {
       toast.success("Note saved successfully");
     },
     onError: (error) => {
-      console.error(error);
-      toast.error("Note saving failed");
+      toast.error("Note saving failed", {
+        description: error.message || "Failed to save note",
+      });
     },
   });
 };

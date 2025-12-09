@@ -2,28 +2,16 @@
 import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import axiosClient from "@/lib/axios/axiosClient";
+import { makeAuthenticatedRequest } from "@/lib/axios/axiosClient";
 
 const createProject = async (project, getToken) => {
-  try {
-    const token = await getToken();
-    const response = await axiosClient.post(
-      "/api/v1/projects/create",
-      project,
-      {
-        headers: {
-          Authorization: token,
-        },
-        withCredentials: true,
-      }
-    );
-    return response.data.data;
-  } catch (error) {
-    console.error(error);
-    toast.error("Project creation failed", {
-      description: `${error.message} - ${new Date().toLocaleString()}`,
-    });
-  }
+  const response = await makeAuthenticatedRequest(
+    getToken,
+    "post",
+    "/api/v1/projects/create",
+    project
+  );
+  return response.data.data;
 };
 
 const useCreateProject = () => {
@@ -46,9 +34,7 @@ const useCreateProject = () => {
     onError: (error, variables, context) => {
       queryClient.setQueryData(["projects"], context.previousProjects);
       toast.error("Project creation failed", {
-        description: `${
-          context.error.message
-        } - ${new Date().toLocaleString()}`,
+        description: error.message || "Failed to create project",
       });
     },
   });

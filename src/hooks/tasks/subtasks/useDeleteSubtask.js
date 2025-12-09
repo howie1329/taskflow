@@ -1,24 +1,16 @@
 "use client";
-import axiosClient from "@/lib/axios/axiosClient";
+import { makeAuthenticatedRequest } from "@/lib/axios/axiosClient";
 import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 const deleteSubtask = async (subtaskId, getToken) => {
-  const token = await getToken();
-  try {
-    const response = await axiosClient.delete(
-      `/api/v1/subtasks/delete/${subtaskId}`,
-      {
-        headers: { Authorization: token },
-        withCredentials: true,
-      }
-    );
-    return response.data.data;
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
+  const response = await makeAuthenticatedRequest(
+    getToken,
+    "delete",
+    `/api/v1/subtasks/delete/${subtaskId}`
+  );
+  return response.data.data;
 };
 
 const useDeleteSubtask = () => {
@@ -42,13 +34,15 @@ const useDeleteSubtask = () => {
       toast.success("Subtask deleted successfully");
     },
     onError: (error, variables, context) => {
-      toast.error("Failed to delete subtask");
       if (context?.previousSubtasks) {
         queryClient.setQueryData(
           ["subtasks", variables.taskId],
           context.previousSubtasks
         );
       }
+      toast.error("Failed to delete subtask", {
+        description: error.message || "Failed to delete subtask",
+      });
     },
   });
 };

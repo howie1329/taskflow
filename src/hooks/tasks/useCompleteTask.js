@@ -1,19 +1,15 @@
-import axiosClient from "@/lib/axios/axiosClient";
+import { makeAuthenticatedRequest } from "@/lib/axios/axiosClient";
 import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 const completeTask = async (id, getToken) => {
-  try {
-    const token = await getToken();
-    const response = await axiosClient.patch(`/api/v1/tasks/complete/${id}`, {
-      headers: { Authorization: token },
-      withCredentials: true,
-    });
-    return response.data.data;
-  } catch (error) {
-    console.error(error);
-  }
+  const response = await makeAuthenticatedRequest(
+    getToken,
+    "patch",
+    `/api/v1/tasks/complete/${id}`
+  );
+  return response.data.data;
 };
 
 const useCompleteTask = () => {
@@ -37,9 +33,11 @@ const useCompleteTask = () => {
       queryClient.invalidateQueries({ queryKey: ["subtasks", variables] });
       toast.success("Task Completed Successfully");
     },
-    onError: (context) => {
+    onError: (error, variables, context) => {
       queryClient.setQueryData(["tasks"], context.previousTasks);
-      toast.error("Task Completion Failed");
+      toast.error("Task Completion Failed", {
+        description: error.message || "Failed to complete task",
+      });
     },
   });
 };

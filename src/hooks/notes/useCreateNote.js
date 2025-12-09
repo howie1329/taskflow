@@ -1,16 +1,17 @@
 "use client";
-import axiosClient from "@/lib/axios/axiosClient";
+import { makeAuthenticatedRequest } from "@/lib/axios/axiosClient";
 import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 const createNote = async (data, getToken) => {
-  const token = await getToken();
-  const response = await axiosClient.post("/api/v1/notes/create", data, {
-    headers: { Authorization: token },
-    withCredentials: true,
-  });
+  const response = await makeAuthenticatedRequest(
+    getToken,
+    "post",
+    "/api/v1/notes/create",
+    data
+  );
   return response.data.data;
 };
 

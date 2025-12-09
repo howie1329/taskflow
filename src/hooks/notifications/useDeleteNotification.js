@@ -1,19 +1,15 @@
 "use client";
-import axiosClient from "@/lib/axios/axiosClient";
+import { makeAuthenticatedRequest } from "@/lib/axios/axiosClient";
 import { useAuth } from "@clerk/nextjs";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 
 const deleteNotification = async (id, getToken) => {
-  const token = await getToken();
-  try {
-    const response = await axiosClient.delete(`/api/v1/notifications/${id}`, {
-      headers: { Authorization: token },
-      withCredentials: true,
-    });
-    return response.data.data;
-  } catch (error) {
-    console.error(error);
-  }
+  const response = await makeAuthenticatedRequest(
+    getToken,
+    "delete",
+    `/api/v1/notifications/${id}`
+  );
+  return response.data.data;
 };
 
 export const useDeleteNotification = () => {

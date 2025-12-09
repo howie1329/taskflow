@@ -1,27 +1,17 @@
 "use client";
-import axiosClient from "@/lib/axios/axiosClient";
+import { makeAuthenticatedRequest } from "@/lib/axios/axiosClient";
 import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 const updateTask = async (taskId, taskData, getToken) => {
-  const token = await getToken();
-  try {
-    const response = await axiosClient.patch(
-      `/api/v1/tasks/update/${taskId}`,
-      taskData,
-      {
-        headers: {
-          Authorization: token,
-        },
-        withCredentials: true,
-      }
-    );
-    return response.data.data;
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
+  const response = await makeAuthenticatedRequest(
+    getToken,
+    "patch",
+    `/api/v1/tasks/update/${taskId}`,
+    taskData
+  );
+  return response.data.data;
 };
 
 const useUpdateTask = () => {

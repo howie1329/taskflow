@@ -8,22 +8,17 @@ import {
   createThinkingMessage,
   processStreamResponse,
 } from "./utils/StreamingUtils";
-import axiosClient from "@/lib/axios/axiosClient";
+import { makeAuthenticatedRequest } from "@/lib/axios/axiosClient";
 
 const sendAIMessage = async (variables, getToken, queryClient, router) => {
   // Checking if conversationId is provided
   if (variables.conversationId === null || !variables.conversationId) {
-    const token = await getToken();
-    const response = await axiosClient.post(
+    const response = await makeAuthenticatedRequest(
+      getToken,
+      "post",
       "/api/v1/conversations/create",
       {
         message: variables.newMessage,
-      },
-      {
-        headers: {
-          Authorization: token,
-        },
-        withCredentials: true,
       }
     );
     variables.conversationId = response.data.data.id;

@@ -1,21 +1,15 @@
-import axiosClient from "@/lib/axios/axiosClient";
+import { makeAuthenticatedRequest } from "@/lib/axios/axiosClient";
 import { useAuth } from "@clerk/nextjs";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 const deleteTask = async (id, getToken) => {
-  const token = await getToken();
-  try {
-    const response = await axiosClient.delete(`/api/v1/tasks/delete/${id}`, {
-      headers: {
-        Authorization: token,
-      },
-      withCredentials: true,
-    });
-    return response.data.message;
-  } catch (error) {
-    console.error(error);
-  }
+  const response = await makeAuthenticatedRequest(
+    getToken,
+    "delete",
+    `/api/v1/tasks/delete/${id}`
+  );
+  return response.data.message;
 };
 
 const useDeleteTask = () => {
@@ -36,9 +30,11 @@ const useDeleteTask = () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       toast.success("Task deleted successfully");
     },
-    onError: (context) => {
+    onError: (error, variables, context) => {
       queryClient.setQueryData(["tasks"], context.previousTasks);
-      toast.error("Task deletion failed");
+      toast.error("Task deletion failed", {
+        description: error.message || "Failed to delete task",
+      });
     },
   });
 };

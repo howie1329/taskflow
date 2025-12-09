@@ -1,19 +1,15 @@
-import axiosClient from "@/lib/axios/axiosClient";
+import { makeAuthenticatedRequest } from "@/lib/axios/axiosClient";
 import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-const incompleteTask = async (id, getToken) => {
-  const token = await getToken();
-  try {
-    const response = await axiosClient.patch(`/api/v1/tasks/incomplete/${id}`, {
-      headers: { Authorization: token },
-      withCredentials: true,
-    });
 
-    return response.data.data;
-  } catch (error) {
-    console.error(error);
-  }
+const incompleteTask = async (id, getToken) => {
+  const response = await makeAuthenticatedRequest(
+    getToken,
+    "patch",
+    `/api/v1/tasks/incomplete/${id}`
+  );
+  return response.data.data;
 };
 
 const useIncompleteTask = () => {
@@ -39,9 +35,11 @@ const useIncompleteTask = () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       toast.success("Task Incompleted Successfully");
     },
-    onError: (context) => {
+    onError: (error, variables, context) => {
       queryClient.setQueryData(["tasks"], context.previousTasks);
-      toast.error("Task Incompletion Failed");
+      toast.error("Task Incompletion Failed", {
+        description: error.message || "Failed to incomplete task",
+      });
     },
   });
 };
