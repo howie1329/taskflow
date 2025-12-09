@@ -10,17 +10,23 @@ import {
   ChatHistoryProvider,
   useChatHistoryContext,
 } from "@/presentation/components/aiChat/providers/ChatHistoryProvider";
+import { ChatSettingsProvider } from "@/presentation/components/aiChat/providers/ChatSettingsProvider";
+import { ModelProvider } from "@/presentation/components/aiChat/providers/ModelProvider";
 import { ChatPageClient } from "@/presentation/components/aiChat/providers/ChatPageClient";
 
 export default function Page() {
   const router = useRouter();
 
   return (
-    <ChatHistoryProvider>
-      <ChatMessageProvider conversationId={null}>
-        <ChatPageClient />
-      </ChatMessageProvider>
-    </ChatHistoryProvider>
+    <ModelProvider>
+      <ChatHistoryProvider>
+        <ChatSettingsProvider>
+          <ChatMessageProvider conversationId={null}>
+            <ChatPageClient />
+          </ChatMessageProvider>
+        </ChatSettingsProvider>
+      </ChatHistoryProvider>
+    </ModelProvider>
   );
 }
 

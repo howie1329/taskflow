@@ -1,6 +1,6 @@
 "use client";
 import { ArrowUpIcon, PlusIcon } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { AIModelSelector } from "../AIModelSelector";
 import SettingsPopover from "../SettingsPopover";
 import {
@@ -10,22 +10,28 @@ import {
   InputGroupTextarea,
 } from "@/components/ui/input-group";
 import { Spinner } from "@/components/ui/spinner";
+import { useChatSettingsContext } from "../providers/ChatSettingsProvider";
 
-export const AIChatInputArea = ({ id, model, handleSendMessage, status }) => {
-  const [aiModel, setAiModel] = useState(model || "");
+export const AIChatInputArea = ({ id, handleSendMessage, status }) => {
+  // Get settings from context instead of managing locally
+  const {
+    model: aiModel,
+    setModel: setAiModel,
+    isSmartContext,
+    setIsSmartContext,
+    contextWindow,
+    setContextWindow,
+  } = useChatSettingsContext();
+
   const [input, setInput] = useState("");
-  const [isSmartContext, setIsSmartContext] = useState(false);
-  const [contextWindow, setContextWindow] = useState(4);
   const buttonActive = input.trim() !== "" && aiModel !== "";
 
   const handleSend = () => {
+    if (!buttonActive || status === "streaming") return;
+    const messageToSend = input;
     setInput("");
-    handleSendMessage(input, aiModel, isSmartContext, contextWindow);
+    handleSendMessage(messageToSend, aiModel, isSmartContext, contextWindow);
   };
-
-  useEffect(() => {
-    setAiModel(model);
-  }, [model]);
 
   return (
     <InputGroup className="bg-card">

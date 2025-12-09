@@ -21,6 +21,8 @@ export const AIModelSelector = ({ setValue, value }) => {
   const { modelName } = useModelConverter(value);
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+  // Use the hook directly - ModelProvider is optional and mainly for sharing loading/error states
+  // The hook will still work fine on its own
   const { data: modelSelector } = useFetchModelSelector();
 
   return (
