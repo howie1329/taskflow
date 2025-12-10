@@ -248,7 +248,7 @@ function Page() {
   );
 }
 
-const RenderThinkingMessageContent = () => {
+export const RenderThinkingMessageContent = () => {
   return (
     <motion.div
       initial={{ opacity: 0, x: 100 }}
@@ -263,7 +263,7 @@ const RenderThinkingMessageContent = () => {
   );
 };
 
-const RenderUserMessageContent = ({ messageContent, partContent }) => {
+export const RenderUserMessageContent = ({ messageContent, partContent }) => {
   const { user } = useUser();
   const timestamp = new Date(messageContent.createdAt).toLocaleString();
   return (
@@ -298,7 +298,10 @@ const RenderUserMessageContent = ({ messageContent, partContent }) => {
   );
 };
 
-const RenderAssistantMessageContent = ({ messageContent, partContent }) => {
+export const RenderAssistantMessageContent = ({
+  messageContent,
+  partContent,
+}) => {
   const { createNote } = useHandleCreateNote();
   const timestamp = new Date(
     messageContent?.metadata?.createdAt
@@ -392,7 +395,7 @@ const RenderAssistantMessageContent = ({ messageContent, partContent }) => {
   );
 };
 
-const RenderToolMessageContent = ({ toolStatus, toolName }) => {
+export const RenderToolMessageContent = ({ toolStatus, toolName }) => {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
@@ -431,7 +434,7 @@ const RenderToolMessageContent = ({ toolStatus, toolName }) => {
   );
 };
 
-const ChatOptionsPopover = ({ chatName, handleDeleteChat }) => {
+export const ChatOptionsPopover = ({ chatName, handleDeleteChat }) => {
   return (
     <Popover>
       <PopoverTrigger>

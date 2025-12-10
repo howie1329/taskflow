@@ -1,14 +1,14 @@
-"use client";
-
-import { useChatMessageContext } from "./ChatMessageProvider";
-import { useChatHistoryContext } from "./ChatHistoryProvider";
+import { ChatInput } from "./ChatInput";
+import { ChatMessagesClient } from "./ChatMessagesClient";
 
 export const ChatPageClient = () => {
-  const { messages, messagesLoading } = useChatMessageContext();
-  const { conversations, conversationsLoading } = useChatHistoryContext();
   return (
-    <div className="flex flex-col gap-2 border-black border-2 ">
-      <h1>Chat Page Client</h1>
+    <div className="flex flex-col gap-2 border-black border-2 h-full w-full ">
+      <div className="border-red-500 border-2 flex flex-col gap-2 items-center justify-center h-full w-full">
+        <h1>Welcome To TaskFlow Chat Agent</h1>
+        <ChatMessagesClient />
+        <ChatInput />
+      </div>
     </div>
   );
 };

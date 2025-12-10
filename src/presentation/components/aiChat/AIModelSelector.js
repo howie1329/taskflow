@@ -10,31 +10,35 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-  useFetchModelSelector,
-  useModelConverter,
-} from "@/hooks/ai/useFetchModelSelector";
-import { ChevronDownIcon, InfoIcon, XIcon } from "lucide-react";
 import React, { useState } from "react";
+import { useChatModelContext } from "./providers/ChatModelProvider";
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  AlertCircleIcon,
+  ArrowDown01Icon,
+  CancelCircleIcon,
+} from "@hugeicons/core-free-icons/index";
 
-export const AIModelSelector = ({ setValue, value }) => {
-  const { modelName } = useModelConverter(value);
+export const AIModelSelector = () => {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const { data: modelSelector } = useFetchModelSelector();
+
+  const { availableModels, isLoading, error, selectedModel, setSelectedModel } =
+    useChatModelContext();
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger>
         <Button
           variant="ghost"
+          disabled={isLoading || error}
           onClick={() => setOpen(true)}
           className=" max-w-fit p-0"
         >
           <p className="truncate text-sm p-0">
-            {modelName ? modelName : "Select Model"}
+            {selectedModel ? selectedModel : "Select Model"}
           </p>
-          <ChevronDownIcon className="w-4 h-4" />
+          <HugeiconsIcon icon={ArrowDown01Icon} size={20} strokeWidth={2} />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="max-w-[500px] max-h-[300px] overflow-y-auto p-2 w-full">
@@ -48,7 +52,10 @@ export const AIModelSelector = ({ setValue, value }) => {
               onChange={(e) => setSearch(e.target.value)}
             />
             {search.length > 0 && (
-              <XIcon
+              <HugeiconsIcon
+                icon={CancelCircleIcon}
+                size={20}
+                strokeWidth={2}
                 className="w-4 h-4 cursor-pointer"
                 onClick={() => setSearch("")}
               />
@@ -57,8 +64,8 @@ export const AIModelSelector = ({ setValue, value }) => {
           <Separator />
         </div>
         <div className="flex flex-col gap-1.5">
-          {modelSelector &&
-            modelSelector
+          {availableModels &&
+            availableModels
               .filter((model) =>
                 model.name.toLowerCase().includes(search.toLowerCase())
               )
@@ -66,7 +73,7 @@ export const AIModelSelector = ({ setValue, value }) => {
                 <Button
                   key={model.id}
                   onClick={() => {
-                    setValue(model.id);
+                    setSelectedModel(model.name);
                     setOpen(false);
                   }}
                   variant="outline"
@@ -82,7 +89,11 @@ export const AIModelSelector = ({ setValue, value }) => {
                       </p>
                       <Tooltip>
                         <TooltipTrigger>
-                          <InfoIcon className="w-4 h-4" />
+                          <HugeiconsIcon
+                            icon={AlertCircleIcon}
+                            size={20}
+                            strokeWidth={2}
+                          />
                         </TooltipTrigger>
                         <TooltipContent>
                           <div className="flex flex-row gap-1 items-center justify-start">
