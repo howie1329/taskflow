@@ -10,13 +10,14 @@ import { Button } from "@/components/ui/button";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { TransactionHistoryIcon } from "@hugeicons/core-free-icons/index";
 import Link from "next/link";
+import { Separator } from "@/components/ui/separator";
 
 export const ChatHistoryPopup = () => {
-  const { conversations, conversationsLoading } = useChatHistoryContext();
+  const { conversations } = useChatHistoryContext();
   return (
     <Popover>
       <PopoverTrigger>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="icon">
           <HugeiconsIcon
             icon={TransactionHistoryIcon}
             size={20}
@@ -24,21 +25,29 @@ export const ChatHistoryPopup = () => {
           />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="max-w-fit">
-        {conversations &&
-          conversations.map((conversation) => (
-            <div
-              key={conversation.id}
-              className="flex flex-row items-center justify-between"
-            >
-              <Link
-                className="border rounded-md w-full"
-                href={`/mainview/aichat/${conversation.id}`}
+      <PopoverContent
+        side="top"
+        sideOffset={20}
+        className="w-[50vw] h-[15vh] overflow-y-auto rounded-none"
+      >
+        <p className="text-sm font-medium text-center">Chat History</p>
+        <Separator />
+        <div>
+          {conversations &&
+            conversations.map((conversation) => (
+              <div
+                key={conversation.id}
+                className="flex flex-row items-center justify-between"
               >
-                <p className="text-sm">{conversation.title}</p>
-              </Link>
-            </div>
-          ))}
+                <Link
+                  className="border rounded-md w-full"
+                  href={`/mainview/aichat/${conversation.id}`}
+                >
+                  <p className="text-sm">{conversation.title}</p>
+                </Link>
+              </div>
+            ))}
+        </div>
       </PopoverContent>
     </Popover>
   );
