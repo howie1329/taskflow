@@ -28,7 +28,7 @@ export const ChatHistoryPopup = () => {
       <PopoverContent
         side="top"
         sideOffset={20}
-        className="w-[50vw] h-[15vh] overflow-y-auto rounded-none"
+        className="w-[50vw] h-[20vh] overflow-y-auto rounded-none"
       >
         <p className="text-sm font-medium text-center">Chat History</p>
         <Separator />
