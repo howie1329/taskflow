@@ -34,11 +34,19 @@ export const ChatMessagesClient = () => {
               switch (part.type) {
                 case "data-get-tasks":
                   return <p key={part.id}>{part.data.message}</p>;
+                case "tool-WebSearchAgent":
+                  return (
+                    <RenderToolMessageContent
+                      toolStatus={part.state}
+                      key={part.toolCallId}
+                      toolName={"Web Search Tool"}
+                    />
+                  );
                 case "tool-TaskAgent":
                   return (
                     <RenderToolMessageContent
                       toolStatus={part.state}
-                      key={part.id}
+                      key={part.toolCallId}
                       toolName={"TaskAgent"}
                     />
                   );

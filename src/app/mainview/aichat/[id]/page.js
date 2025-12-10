@@ -1,10 +1,9 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
-import { useParams, useRouter } from "next/navigation";
+import React, { useState } from "react";
+import { useParams } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { CheckIcon, CopyIcon, EllipsisIcon, InfoIcon } from "lucide-react";
-import useDeleteConversation from "@/hooks/ai/useDeleteConversation";
 import { AITaskCard } from "@/presentation/components/aiChat/tasks/AITaskCard";
 import {
   Tooltip,
@@ -13,18 +12,12 @@ import {
 } from "@/components/ui/tooltip";
 import remarkGfm from "remark-gfm";
 import ReactMarkdown from "react-markdown";
-import useFetchConversationMessages from "@/hooks/ai/useFetchConversationMessages";
-import useFetchConversation from "@/hooks/ai/useFetchConversation";
 import { Popover, PopoverContent } from "@/components/ui/popover";
 import { PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { motion } from "motion/react";
-import { useAuth, useUser } from "@clerk/nextjs";
-import { AIChatInputArea } from "@/presentation/components/aiChat/page/AiChatInputArea";
-import { Empty, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
+import { useUser } from "@clerk/nextjs";
 import { Spinner } from "@/components/ui/spinner";
-import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
 import {
   AlertCircleFreeIcons,
   ArrowDown01Icon,
@@ -38,7 +31,6 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import useHandleCreateNote from "@/hooks/ai/useHandleCreateNote";
-import useInitalChatStore from "@/hooks/ai/store/initalChatStore";
 import { ChatModelProvider } from "@/presentation/components/aiChat/providers/ChatModelProvider";
 import { ChatHistoryProvider } from "@/presentation/components/aiChat/providers/ChatHistoryProvider";
 import { ChatMessageProvider } from "@/presentation/components/aiChat/providers/ChatMessageProvider";
@@ -205,6 +197,7 @@ export const RenderAssistantMessageContent = ({
 };
 
 export const RenderToolMessageContent = ({ toolStatus, toolName }) => {
+  console.log("Tool Status", toolStatus, toolName);
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
@@ -234,7 +227,11 @@ export const RenderToolMessageContent = ({ toolStatus, toolName }) => {
         )}
         {toolStatus === "output-error" && (
           <>
-            <AlertCircleFreeIcons className="w-3 h-3" />
+            <HugeiconsIcon
+              icon={AlertCircleFreeIcons}
+              size={20}
+              strokeWidth={2}
+            />
             <span className="text-muted-foreground">{toolName} Error</span>
           </>
         )}
