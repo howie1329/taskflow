@@ -8,6 +8,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { ChatArtifactClient } from "./ChatArtifactClient";
 
 export const ChatPageClient = () => {
   const { messages, toolArtifacts } = useChatMessageContext();
@@ -32,9 +33,7 @@ export const ChatPageClient = () => {
             <>
               <ResizableHandle />
               <ResizablePanel>
-                <div>
-                  <h1>Tool Artifacts</h1>
-                </div>
+                <ChatArtifactClient />
               </ResizablePanel>
             </>
           )}
