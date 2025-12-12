@@ -3,7 +3,11 @@ import { useChatMessageContext } from "./ChatMessageProvider";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Delete03Icon, TaskEdit01Icon } from "@hugeicons/core-free-icons/index";
+import {
+  ConnectIcon,
+  Delete03Icon,
+  TaskEdit01Icon,
+} from "@hugeicons/core-free-icons/index";
 import { Separator } from "@/components/ui/separator";
 
 export const ChatHeaderClient = () => {
@@ -40,6 +44,14 @@ export const ChatHeaderClient = () => {
             className="hover:bg-foreground hover:text-white rounded-none hover:cursor-pointer"
           >
             <HugeiconsIcon icon={TaskEdit01Icon} strokeWidth={2} />
+          </Button>
+          {/* Will be used to show tool artifacts in a sheet*/}
+          <Button
+            variant="outline"
+            size="icon"
+            className="hover:bg-foreground hover:text-white rounded-none hover:cursor-pointer"
+          >
+            <HugeiconsIcon icon={ConnectIcon} strokeWidth={2} />
           </Button>
         </div>
       </div>
