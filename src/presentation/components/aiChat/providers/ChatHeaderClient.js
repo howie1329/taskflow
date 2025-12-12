@@ -11,7 +11,8 @@ import {
 import { Separator } from "@/components/ui/separator";
 
 export const ChatHeaderClient = () => {
-  const { conversation, defaultConversationId } = useChatMessageContext();
+  const { conversation, defaultConversationId, toolArtifacts } =
+    useChatMessageContext();
   const { mutate: deleteConversation } = useDeleteConversation();
   const router = useRouter();
 
@@ -46,13 +47,15 @@ export const ChatHeaderClient = () => {
             <HugeiconsIcon icon={TaskEdit01Icon} strokeWidth={2} />
           </Button>
           {/* Will be used to show tool artifacts in a sheet*/}
-          <Button
-            variant="outline"
-            size="icon"
-            className="hover:bg-foreground hover:text-white rounded-none hover:cursor-pointer"
-          >
-            <HugeiconsIcon icon={ConnectIcon} strokeWidth={2} />
-          </Button>
+          {toolArtifacts.length > 0 && (
+            <Button
+              variant="outline"
+              size="icon"
+              className="hover:bg-foreground hover:text-white rounded-none hover:cursor-pointer"
+            >
+              <HugeiconsIcon icon={ConnectIcon} strokeWidth={2} />
+            </Button>
+          )}
         </div>
       </div>
       <Separator />

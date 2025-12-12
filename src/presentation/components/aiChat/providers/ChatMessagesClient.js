@@ -8,7 +8,6 @@ import { useChatHistoryContext } from "./ChatHistoryProvider";
 import { useChatMessageContext } from "./ChatMessageProvider";
 import { Empty, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 import { Spinner } from "@/components/ui/spinner";
-import { useState } from "react";
 
 export const ChatMessagesClient = () => {
   const { messages, messagesLoading } = useChatMessageContext();

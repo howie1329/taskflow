@@ -22,6 +22,8 @@ export const ChatMessageProvider = ({ conversationId, children }) => {
   const { data: fetchedMessages, isLoading: messagesLoading } =
     useFetchConversationMessages(conversationId);
 
+  const [toolArtifacts, setToolArtifacts] = useState([]);
+
   // Use the useChat hook to send messages to the backend
   const { messages, sendMessage, status, setMessages } = useChat({
     id: defaultConversationId, // If no conversationId is provided, use null might need to set to a default value
@@ -37,6 +39,12 @@ export const ChatMessageProvider = ({ conversationId, children }) => {
         conversationId: defaultConversationId,
       },
     }),
+    onToolCall: (toolCall) => {
+      console.log("Inside useChat onToolCallHook", toolCall);
+    },
+    onData: (data) => {
+      console.log("Inside useChat onDataHook", data);
+    },
   });
 
   // Set the messages from the database to the useChat hook
@@ -45,6 +53,21 @@ export const ChatMessageProvider = ({ conversationId, children }) => {
       setMessages(fetchedMessages);
     }
   }, [fetchedMessages, setMessages]);
+
+  // Collect Tool Artifacts from the useChat Hook
+  useEffect(() => {
+    console.log("Messages", messages);
+    const tempToolArtifacts = [];
+    messages.forEach((message) => {
+      message.parts.forEach((part) => {
+        if (part.type?.startsWith("data-artifact-")) {
+          tempToolArtifacts.push(part.data);
+        }
+      });
+    });
+    setToolArtifacts(tempToolArtifacts);
+    console.log("Temp Tool Artifacts", tempToolArtifacts);
+  }, [messages]);
 
   // Update the conversation title on messsages receive
   useEffect(() => {
@@ -64,6 +87,7 @@ export const ChatMessageProvider = ({ conversationId, children }) => {
     status,
     conversationLoading,
     messagesLoading,
+    toolArtifacts,
   };
   return (
     <ChatMessageContext.Provider value={values}>
