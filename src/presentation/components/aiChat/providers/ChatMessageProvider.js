@@ -5,21 +5,22 @@ import { useChat } from "@ai-sdk/react";
 import { createContext, useContext, useEffect, useState } from "react";
 import { DefaultChatTransport } from "ai";
 import { useAuth } from "@clerk/nextjs";
+import { useQueryClient } from "@tanstack/react-query";
 
 // Create the context
 const ChatMessageContext = createContext();
 
 export const ChatMessageProvider = ({ conversationId, children }) => {
   const { getToken } = useAuth();
+  const queryClient = useQueryClient();
   // Fetch conversation and messages from the database
+  const [defaultConversationId] = useState(
+    conversationId || crypto.randomUUID().toString()
+  );
   const { data: conversation, isLoading: conversationLoading } =
     useFetchConversation(conversationId);
   const { data: fetchedMessages, isLoading: messagesLoading } =
     useFetchConversationMessages(conversationId);
-
-  const [defaultConversationId] = useState(
-    conversationId || crypto.randomUUID().toString()
-  );
 
   // Use the useChat hook to send messages to the backend
   const { messages, sendMessage, status, setMessages } = useChat({
@@ -44,6 +45,15 @@ export const ChatMessageProvider = ({ conversationId, children }) => {
       setMessages(fetchedMessages);
     }
   }, [fetchedMessages, setMessages]);
+
+  // Update the conversation title on messsages receive
+  useEffect(() => {
+    if (!conversation?.title && messages.length > 0) {
+      queryClient.refetchQueries({
+        queryKey: ["conversation", defaultConversationId],
+      });
+    }
+  }, [messages, queryClient, defaultConversationId, conversation]);
 
   // Return the values to the context
   const values = {

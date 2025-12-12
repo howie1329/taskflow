@@ -7,12 +7,13 @@ import { Delete03Icon, TaskEdit01Icon } from "@hugeicons/core-free-icons/index";
 import { Separator } from "@/components/ui/separator";
 
 export const ChatHeaderClient = () => {
-  const { conversation } = useChatMessageContext();
+  const { conversation, defaultConversationId } = useChatMessageContext();
   const { mutate: deleteConversation } = useDeleteConversation();
   const router = useRouter();
 
   const handleDeleteConversation = () => {
-    deleteConversation(conversation?.id);
+    console.log("Deleting conversation for id: ", defaultConversationId);
+    deleteConversation(defaultConversationId);
     router.push("/mainview/aichat");
   };
 

@@ -31,8 +31,6 @@ const useDeleteConversation = () => {
       return { previousConversation };
     },
     onSuccess: (data, variables, context) => {
-      queryClient.invalidateQueries({ queryKey: ["messages", variables] });
-      queryClient.invalidateQueries({ queryKey: ["conversation", variables] });
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
       toast.success("Conversation deleted successfully");
     },
