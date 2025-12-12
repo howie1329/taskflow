@@ -16,10 +16,14 @@ import {
 import { AIModelSelector } from "../AIModelSelector";
 import { useChatModelContext } from "./ChatModelProvider";
 import { ChatHistoryPopup } from "./ChatHistoryPopup";
+import { useChatSuggestionContext } from "./ChatSuggestionProvider";
+import { ChatSuggestionClient } from "./ChatSuggestionClient";
 
 export const ChatInput = () => {
   const { sendMessage, status, defaultConversationId } =
     useChatMessageContext();
+  const { suggestedMessages, suggestedMessagesLoading } =
+    useChatSuggestionContext();
   const { selectedModelId } = useChatModelContext();
   const [userInput, setUserInput] = useState("");
 
@@ -45,40 +49,43 @@ export const ChatInput = () => {
   };
 
   return (
-    <InputGroup className="w-[80vw]">
-      <InputGroupTextarea
-        placeholder="Ask, Search, or Chat With Your Agent..."
-        value={userInput}
-        onChange={(e) => setUserInput(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault();
-            if (status !== "streaming") {
-              handleSendMessage();
+    <div className="flex flex-col gap-2">
+      <ChatSuggestionClient setUserInput={setUserInput} />
+      <InputGroup className="w-[80vw]">
+        <InputGroupTextarea
+          placeholder="Ask, Search, or Chat With Your Agent..."
+          value={userInput}
+          onChange={(e) => setUserInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              if (status !== "streaming") {
+                handleSendMessage();
+              }
             }
-          }
-        }}
-      />
-
-      {/* Chat Input Addons -- Might Need to be a separate component */}
-      <InputGroupAddon align="block-end" className="pb-0 pt-0">
-        <InputGroupButton
-          variant="outline"
-          className="rounded-full"
-          size="icon-xs"
-          disabled={status === "streaming" || userInput.trim() === ""}
-          onClick={() => {
-            handleSendMessage();
           }}
-        >
-          <SendButtonIcon />
-        </InputGroupButton>
+        />
 
-        <InputGroupAddon align="block-start">
-          <AIModelSelector />
-          <ChatHistoryPopup />
+        {/* Chat Input Addons -- Might Need to be a separate component */}
+        <InputGroupAddon align="block-end" className="pb-0 pt-0">
+          <InputGroupButton
+            variant="outline"
+            className="rounded-full"
+            size="icon-xs"
+            disabled={status === "streaming" || userInput.trim() === ""}
+            onClick={() => {
+              handleSendMessage();
+            }}
+          >
+            <SendButtonIcon />
+          </InputGroupButton>
+
+          <InputGroupAddon align="block-start">
+            <AIModelSelector />
+            <ChatHistoryPopup />
+          </InputGroupAddon>
         </InputGroupAddon>
-      </InputGroupAddon>
-    </InputGroup>
+      </InputGroup>
+    </div>
   );
 };

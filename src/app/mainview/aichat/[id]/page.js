@@ -35,6 +35,7 @@ import { ChatModelProvider } from "@/presentation/components/aiChat/providers/Ch
 import { ChatHistoryProvider } from "@/presentation/components/aiChat/providers/ChatHistoryProvider";
 import { ChatMessageProvider } from "@/presentation/components/aiChat/providers/ChatMessageProvider";
 import { ChatPageClient } from "@/presentation/components/aiChat/providers/ChatPageClient";
+import { ChatSuggestionProvider } from "@/presentation/components/aiChat/providers/ChatSuggestionProvider";
 
 function Page() {
   const { id } = useParams();
@@ -42,7 +43,9 @@ function Page() {
     <ChatModelProvider defaultModel="OpenAI: GPT-5">
       <ChatHistoryProvider>
         <ChatMessageProvider conversationId={id}>
-          <ChatPageClient />
+          <ChatSuggestionProvider>
+            <ChatPageClient />
+          </ChatSuggestionProvider>
         </ChatMessageProvider>
       </ChatHistoryProvider>
     </ChatModelProvider>

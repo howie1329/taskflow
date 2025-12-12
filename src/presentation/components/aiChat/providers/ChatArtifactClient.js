@@ -1,11 +1,11 @@
 "use client";
-import { useChatMessageContext } from "./ChatMessageProvider";
+import { ChatSingleArtifactClient } from "./ChatSingleArtifactClient";
 
 export const ChatArtifactClient = () => {
-  const { toolArtifacts } = useChatMessageContext();
   return (
     <div>
       <h1>Chat Artifacts</h1>
+      <ChatSingleArtifactClient />
     </div>
   );
 };
