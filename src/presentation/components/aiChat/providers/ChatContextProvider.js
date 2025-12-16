@@ -4,11 +4,11 @@ import { createContext, useContext, useState } from "react";
 const ChatContext = createContext();
 
 export const ChatContextProvider = ({ children }) => {
-  const [systemPromptTokens, setSystemPromptTokens] = useState(0);
-  const [recentChatsTokens, setRecentChatsTokens] = useState(0);
-  const [currentChatTokens, setCurrentChatTokens] = useState(0);
-  const [userInfoTokens, setUserInfoTokens] = useState(0);
-  const [sessionInfoTokens, setSessionInfoTokens] = useState(0);
+  const [systemPromptTokens, setSystemPromptTokens] = useState(100);
+  const [recentChatsTokens, setRecentChatsTokens] = useState(200);
+  const [currentChatTokens, setCurrentChatTokens] = useState(300);
+  const [userInfoTokens, setUserInfoTokens] = useState(300);
+  const [sessionInfoTokens, setSessionInfoTokens] = useState(400);
 
   const values = {
     systemPromptTokens,
