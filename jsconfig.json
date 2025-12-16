@@ -1,11 +1,8 @@
 {
   "compilerOptions": {
     "paths": {
-      "@/*": ["./src/*"],
-      "@/core/*": ["./src/core/*"],
-      "@/infrastructure/*": ["./src/infrastructure/*"],
+      "@/*": ["./src/*"], 
       "@/presentation/*": ["./src/presentation/*"],
-      "@/shared/*": ["./src/shared/*"]
     }
   }
 }
