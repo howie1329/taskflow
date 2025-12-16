@@ -21,6 +21,15 @@ export const ChatContextPopup = () => {
     sessionInfoTokens,
   } = useChatContext();
 
+  const maxTokens = 4000;
+  const totalTokens =
+    (systemPromptTokens ?? 0) +
+    (recentChatsTokens ?? 0) +
+    (currentChatTokens ?? 0) +
+    (userInfoTokens ?? 0) +
+    (sessionInfoTokens ?? 0);
+  const remainingTokens = Math.max(0, maxTokens - totalTokens);
+
   const chartData = [
     {
       name: "Tokens",
@@ -29,7 +38,7 @@ export const ChatContextPopup = () => {
       currentChatTokens: currentChatTokens ?? 0,
       userInfoTokens: userInfoTokens ?? 0,
       sessionInfoTokens: sessionInfoTokens ?? 0,
-      maxTokens: 1000,
+      remainingTokens,
     },
   ];
 
@@ -39,7 +48,7 @@ export const ChatContextPopup = () => {
     currentChatTokens: { label: "Current Chat Tokens", color: "#3b82f6" },
     userInfoTokens: { label: "User Info Tokens", color: "#eab308" },
     sessionInfoTokens: { label: "Session Info Tokens", color: "#a855f7" },
-    maxTokens: { label: "Max Tokens", color: "#000000" },
+    remainingTokens: { label: "Remaining", color: "hsl(var(--muted))" },
   };
 
   return (
@@ -51,7 +60,11 @@ export const ChatContextPopup = () => {
       </PopoverTrigger>
       <PopoverContent side="top" className="w-[360px] p-3">
         <div className="flex flex-col gap-2">
-          <ChatContextChart chartConfig={chartConfig} chartData={chartData} />
+          <ChatContextChart
+            chartConfig={chartConfig}
+            chartData={chartData}
+            maxTokens={maxTokens}
+          />
           <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
             <p className="text-muted-foreground">System Prompt</p>
             <p className="text-right font-mono tabular-nums">
@@ -73,6 +86,12 @@ export const ChatContextPopup = () => {
             <p className="text-right font-mono tabular-nums">
               {sessionInfoTokens ?? 0}
             </p>
+            <p className="text-muted-foreground">Remaining</p>
+            <p className="text-right font-mono tabular-nums">
+              {remainingTokens}
+            </p>
+            <p className="text-muted-foreground">Max</p>
+            <p className="text-right font-mono tabular-nums">{maxTokens}</p>
           </div>
         </div>
       </PopoverContent>
@@ -80,7 +99,8 @@ export const ChatContextPopup = () => {
   );
 };
 
-const ChatContextChart = ({ chartConfig, chartData }) => {
+const ChatContextChart = ({ chartConfig, chartData, maxTokens }) => {
+  const hasRemaining = (chartData?.[0]?.remainingTokens ?? 0) > 0;
   return (
     <ChartContainer config={chartConfig} className="h-10 w-[320px] aspect-auto">
       <BarChart
@@ -90,7 +110,7 @@ const ChatContextChart = ({ chartConfig, chartData }) => {
         barSize={16}
       >
         <CartesianGrid vertical={false} horizontal={false} />
-        <XAxis type="number" />
+        <XAxis type="number" domain={[0, maxTokens]} hide />
         <YAxis type="category" dataKey="name" hide />
 
         <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
@@ -128,7 +148,15 @@ const ChatContextChart = ({ chartConfig, chartData }) => {
           dataKey="sessionInfoTokens"
           stackId="tokens"
           fill={chartConfig.sessionInfoTokens.color}
-          radius={[0, 8, 8, 0]}
+          radius={hasRemaining ? 0 : [0, 8, 8, 0]}
+          stroke="hsl(var(--background))"
+          strokeWidth={2}
+        />
+        <Bar
+          dataKey="remainingTokens"
+          stackId="tokens"
+          fill={chartConfig.remainingTokens.color}
+          radius={hasRemaining ? [0, 8, 8, 0] : 0}
           stroke="hsl(var(--background))"
           strokeWidth={2}
         />
