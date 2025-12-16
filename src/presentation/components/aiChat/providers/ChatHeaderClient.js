@@ -11,8 +11,13 @@ import {
 import { Separator } from "@/components/ui/separator";
 
 export const ChatHeaderClient = () => {
-  const { conversation, defaultConversationId, toolArtifacts } =
-    useChatMessageContext();
+  const {
+    conversation,
+    defaultConversationId,
+    toolArtifacts,
+    isToolArtifactsOpen,
+    setIsToolArtifactsOpen,
+  } = useChatMessageContext();
   const { mutate: deleteConversation } = useDeleteConversation();
   const router = useRouter();
 
@@ -52,6 +57,7 @@ export const ChatHeaderClient = () => {
               variant="outline"
               size="icon"
               className="hover:bg-foreground hover:text-white rounded-none hover:cursor-pointer"
+              onClick={() => setIsToolArtifactsOpen(!isToolArtifactsOpen)}
             >
               <HugeiconsIcon icon={ConnectIcon} strokeWidth={2} />
             </Button>

@@ -18,9 +18,10 @@ import { useChatModelContext } from "./ChatModelProvider";
 import { ChatHistoryPopup } from "./ChatHistoryPopup";
 import { useChatSuggestionContext } from "./ChatSuggestionProvider";
 import { ChatSuggestionClient } from "./ChatSuggestionClient";
+import { ChatContextPopup } from "./ChatContextPopup";
 
 export const ChatInput = () => {
-  const { sendMessage, status, defaultConversationId } =
+  const { sendMessage, status, defaultConversationId, messages } =
     useChatMessageContext();
   const { suggestedMessages, suggestedMessagesLoading } =
     useChatSuggestionContext();
@@ -81,6 +82,7 @@ export const ChatInput = () => {
           </InputGroupButton>
 
           <InputGroupAddon align="block-start">
+            {messages.length > 0 && <ChatContextPopup />}
             <AIModelSelector />
             <ChatHistoryPopup />
           </InputGroupAddon>

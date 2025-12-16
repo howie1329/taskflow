@@ -254,6 +254,10 @@ export const toolArtifactsDummyData = [
 export const ChatMessageProvider = ({ conversationId, children }) => {
   const { getToken } = useAuth();
   const queryClient = useQueryClient();
+
+  // UI States
+  const [isToolArtifactsOpen, setIsToolArtifactsOpen] = useState(false);
+
   // Fetch conversation and messages from the database
   const [defaultConversationId] = useState(
     conversationId || crypto.randomUUID().toString()
@@ -330,6 +334,8 @@ export const ChatMessageProvider = ({ conversationId, children }) => {
     conversationLoading,
     messagesLoading,
     toolArtifacts,
+    isToolArtifactsOpen,
+    setIsToolArtifactsOpen,
   };
   return (
     <ChatMessageContext.Provider value={values}>

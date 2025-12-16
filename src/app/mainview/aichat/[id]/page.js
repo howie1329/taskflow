@@ -36,6 +36,7 @@ import { ChatHistoryProvider } from "@/presentation/components/aiChat/providers/
 import { ChatMessageProvider } from "@/presentation/components/aiChat/providers/ChatMessageProvider";
 import { ChatPageClient } from "@/presentation/components/aiChat/providers/ChatPageClient";
 import { ChatSuggestionProvider } from "@/presentation/components/aiChat/providers/ChatSuggestionProvider";
+import { ChatContextProvider } from "@/presentation/components/aiChat/providers/ChatContextProvider";
 
 function Page() {
   const { id } = useParams();
@@ -44,7 +45,9 @@ function Page() {
       <ChatHistoryProvider>
         <ChatMessageProvider conversationId={id}>
           <ChatSuggestionProvider>
-            <ChatPageClient />
+            <ChatContextProvider>
+              <ChatPageClient />
+            </ChatContextProvider>
           </ChatSuggestionProvider>
         </ChatMessageProvider>
       </ChatHistoryProvider>
