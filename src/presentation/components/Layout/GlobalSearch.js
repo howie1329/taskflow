@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import {
   Command,
   CommandDialog,
@@ -7,6 +8,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { Spinner } from "@/components/ui/spinner";
 import useSmartSearch from "@/hooks/search/useSmartSearch";
 import { useCallback, useEffect, useState } from "react";
 
@@ -16,7 +18,7 @@ export const GlobalSmartSearch = ({
 }) => {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const { data: results } = useSmartSearch(debouncedSearch);
+  const { data: results, isLoading, isError } = useSmartSearch(debouncedSearch);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -42,7 +44,17 @@ export const GlobalSmartSearch = ({
           onValueChange={handleSearchChange}
         />
         <CommandList>
-          <CommandEmpty>No results found.</CommandEmpty>
+          <div className="flex flex-col gap-2 items-center justify-center py-2">
+            {isLoading && (
+              <Badge variant="outline">
+                <Spinner /> Loading...
+              </Badge>
+            )}
+            {isError && <Badge variant="outline">Error loading results.</Badge>}
+            {!isLoading && !isError && results === undefined && (
+              <Badge variant="outline">No results found.</Badge>
+            )}
+          </div>
           <CommandGroup heading="Tasks">
             {results &&
               results.tasks.map((task) => (
