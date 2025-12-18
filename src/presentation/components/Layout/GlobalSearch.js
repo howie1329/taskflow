@@ -2,7 +2,6 @@ import { Badge } from "@/components/ui/badge";
 import {
   Command,
   CommandDialog,
-  CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
