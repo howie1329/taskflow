@@ -22,11 +22,8 @@ export const ChatSuggestionClient = ({ setUserInput }) => {
             onClick={() => setUserInput(suggestedMessage.message)}
           >
             <div className="flex flex-col text-left text-sm font-normal gap-0">
-              <h1 className="text-sm font-normal">
-                {suggestedMessage.message}
-              </h1>
-              <p className="text-xs font-normal text-muted-foreground">
-                {suggestedMessage.reason}
+              <p className="text-xs font-normal text-muted-foreground text-wrap line-clamp-2">
+                {suggestedMessage.question}
               </p>
             </div>
           </Button>

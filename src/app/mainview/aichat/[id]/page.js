@@ -44,7 +44,7 @@ function Page() {
     <ChatModelProvider defaultModel="OpenAI: GPT-5">
       <ChatHistoryProvider>
         <ChatMessageProvider conversationId={id}>
-          <ChatSuggestionProvider>
+          <ChatSuggestionProvider conversationId={id}>
             <ChatContextProvider>
               <ChatPageClient />
             </ChatContextProvider>

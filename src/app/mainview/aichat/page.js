@@ -9,7 +9,7 @@ export default function Page() {
     <ChatModelProvider defaultModel="OpenAI: GPT-5">
       <ChatHistoryProvider>
         <ChatMessageProvider conversationId={null}>
-          <ChatSuggestionProvider>
+          <ChatSuggestionProvider conversationId={null}>
             <ChatContextProvider>
               <ChatPageClient />
             </ChatContextProvider>

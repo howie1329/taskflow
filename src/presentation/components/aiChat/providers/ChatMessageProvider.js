@@ -302,16 +302,8 @@ export const ChatMessageProvider = ({ conversationId, children }) => {
   // Collect Tool Artifacts from the useChat Hook
   useEffect(() => {
     console.log("Messages", messages);
-    const tempToolArtifacts = [];
-    messages.forEach((message) => {
-      message.parts.forEach((part) => {
-        if (part.type?.startsWith("data-artifact-")) {
-          tempToolArtifacts.push(part.data);
-        }
-      });
-    });
+    const tempToolArtifacts = toolArtifactsCollector(messages);
     setToolArtifacts(tempToolArtifacts);
-    setToolArtifacts(toolArtifactsDummyData);
     console.log("Temp Tool Artifacts", tempToolArtifacts);
   }, [messages]);
 
@@ -353,4 +345,16 @@ export const useChatMessageContext = () => {
     );
   }
   return context;
+};
+
+export const toolArtifactsCollector = (messages) => {
+  const tempToolArtifacts = [];
+  messages.forEach((message) => {
+    message.parts.forEach((part) => {
+      if (part.type?.startsWith("data-artifact-")) {
+        tempToolArtifacts.push(part.data);
+      }
+    });
+  });
+  return tempToolArtifacts;
 };

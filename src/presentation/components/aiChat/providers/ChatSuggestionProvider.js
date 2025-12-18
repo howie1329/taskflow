@@ -5,9 +5,9 @@ import { createContext, useContext } from "react";
 const ChatSuggestionContext = createContext();
 
 // Provider for the chat suggestion context
-export const ChatSuggestionProvider = ({ children }) => {
+export const ChatSuggestionProvider = ({ children, conversationId }) => {
   const { data: suggestedMessages, isLoading: suggestedMessagesLoading } =
-    useSuggestionMessages();
+    useSuggestionMessages(conversationId);
   const values = {
     suggestedMessages,
     suggestedMessagesLoading,
