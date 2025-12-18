@@ -1,15 +1,28 @@
 import { Spinner } from "@/components/ui/spinner";
 import { useChatSuggestionContext } from "./ChatSuggestionProvider";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 export const ChatSuggestionClient = ({ setUserInput }) => {
   const { suggestedMessages, suggestedMessagesLoading } =
     useChatSuggestionContext();
+
   if (suggestedMessagesLoading) {
-    return <Spinner />;
+    return (
+      <div className="flex justify-center items-center">
+        <Badge variant="outline">
+          <Spinner />
+          Loading Suggested Messages...
+        </Badge>
+      </div>
+    );
   }
-  if (suggestedMessages.length === 0) {
-    return null;
+  if (!suggestedMessages || suggestedMessages.length === 0) {
+    return (
+      <div className="flex justify-center items-center">
+        <Badge variant="outline"> No Suggested Messages</Badge>
+      </div>
+    );
   }
   return (
     <div className="flex flex-row gap-2 w-[80vw] min-h-[40px] max-h-[200px] overflow-y-auto">
