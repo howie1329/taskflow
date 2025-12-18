@@ -8,17 +8,13 @@ import {
 import { useState } from "react";
 import { useChatMessageContext } from "./ChatMessageProvider";
 import { HugeiconsIcon } from "@hugeicons/react";
-import {
-  Loading03Icon,
-  Navigation03Icon,
-} from "@hugeicons/core-free-icons/index";
+import { ArrowUp02Icon, Loading03Icon } from "@hugeicons/core-free-icons/index";
 import { AIModelSelector } from "../AIModelSelector";
 import { useChatModelContext } from "./ChatModelProvider";
 import { ChatHistoryPopup } from "./ChatHistoryPopup";
 import { ChatSuggestionClient } from "./ChatSuggestionClient";
 import { ChatContextPopup } from "./ChatContextPopup";
 import {
-  Label,
   PolarAngleAxis,
   PolarGrid,
   PolarRadiusAxis,
@@ -46,7 +42,7 @@ export const ChatInput = () => {
     if (status === "streaming") {
       return <HugeiconsIcon icon={Loading03Icon} size={20} strokeWidth={2} />;
     }
-    return <HugeiconsIcon icon={Navigation03Icon} size={20} strokeWidth={2} />;
+    return <HugeiconsIcon icon={ArrowUp02Icon} size={20} strokeWidth={3} />;
   };
 
   const handleSendMessage = (isSmartContext = false, contextWindow = 4) => {
