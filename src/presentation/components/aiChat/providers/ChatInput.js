@@ -8,7 +8,10 @@ import {
 import { useState } from "react";
 import { useChatMessageContext } from "./ChatMessageProvider";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { ArrowUp02Icon, Loading03Icon } from "@hugeicons/core-free-icons/index";
+import {
+  ArrowUp02Icon,
+  StopCircleIcon,
+} from "@hugeicons/core-free-icons/index";
 import { AIModelSelector } from "../AIModelSelector";
 import { useChatModelContext } from "./ChatModelProvider";
 import { ChatHistoryPopup } from "./ChatHistoryPopup";
@@ -29,7 +32,7 @@ const estimatedInputTokens = (inputString = "") => {
 };
 
 export const ChatInput = () => {
-  const { sendMessage, status, defaultConversationId, messages } =
+  const { sendMessage, status, defaultConversationId, messages, stop } =
     useChatMessageContext();
   const { selectedModelId } = useChatModelContext();
   const [userInput, setUserInput] = useState("");
@@ -40,7 +43,7 @@ export const ChatInput = () => {
   // Send Button Icon
   const SendButtonIcon = () => {
     if (status === "streaming") {
-      return <HugeiconsIcon icon={Loading03Icon} size={20} strokeWidth={2} />;
+      return <HugeiconsIcon icon={StopCircleIcon} size={20} strokeWidth={2} />;
     }
     return <HugeiconsIcon icon={ArrowUp02Icon} size={20} strokeWidth={3} />;
   };
@@ -90,17 +93,30 @@ export const ChatInput = () => {
               maxTokens={MAX_INPUT_TOKENS}
             />
           </InputGroupButton>
-          <InputGroupButton
-            variant="outline"
-            className="rounded-none"
-            size="icon-sm"
-            disabled={status === "streaming" || userInput.trim() === ""}
-            onClick={() => {
-              handleSendMessage();
-            }}
-          >
-            <SendButtonIcon />
-          </InputGroupButton>
+          {status === "streaming" ? (
+            <InputGroupButton
+              variant="outline"
+              className="rounded-none"
+              size="icon-sm"
+              onClick={() => {
+                stop();
+              }}
+            >
+              <SendButtonIcon />
+            </InputGroupButton>
+          ) : (
+            <InputGroupButton
+              variant="outline"
+              className="rounded-none"
+              size="icon-sm"
+              disabled={status === "streaming" || userInput.trim() === ""}
+              onClick={() => {
+                handleSendMessage();
+              }}
+            >
+              <SendButtonIcon />
+            </InputGroupButton>
+          )}
 
           <InputGroupAddon align="block-start">
             {messages.length > 0 && <ChatContextPopup />}
