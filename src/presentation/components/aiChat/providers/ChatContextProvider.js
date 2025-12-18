@@ -47,7 +47,7 @@ export const contextTokensCollector = (messages) => {
     RecentChatsTokens: 0,
     CurrentChatTokens: 0,
     UserInfoTokens: 0,
-    SessionInfoTokens: 0,
+    SummaryTokens: 0,
   };
 
   messages.forEach((message) => {
@@ -57,7 +57,7 @@ export const contextTokensCollector = (messages) => {
       tempContextTokens.RecentChatsTokens = tempData.RecentChatsTokens;
       tempContextTokens.CurrentChatTokens = tempData.CurrentChatTokens;
       tempContextTokens.UserInfoTokens = tempData.UserInfoTokens;
-      tempContextTokens.SessionInfoTokens = tempData.SessionInfoTokens;
+      tempContextTokens.SummaryTokens = tempData.SummaryTokens;
     }
   });
   console.log("Temp Context Tokens", tempContextTokens);

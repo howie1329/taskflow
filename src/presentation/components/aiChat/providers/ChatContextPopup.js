@@ -18,16 +18,16 @@ export const ChatContextPopup = () => {
     recentChatsTokens,
     currentChatTokens,
     userInfoTokens,
-    sessionInfoTokens,
+    summaryTokens,
   } = useChatContext();
 
-  const maxTokens = 4000;
+  const maxTokens = 5200;
   const totalTokens =
     (systemPromptTokens ?? 0) +
     (recentChatsTokens ?? 0) +
     (currentChatTokens ?? 0) +
     (userInfoTokens ?? 0) +
-    (sessionInfoTokens ?? 0);
+    (summaryTokens ?? 0);
   const remainingTokens = Math.max(0, maxTokens - totalTokens);
 
   const chartData = [
@@ -37,7 +37,7 @@ export const ChatContextPopup = () => {
       recentChatsTokens: recentChatsTokens ?? 0,
       currentChatTokens: currentChatTokens ?? 0,
       userInfoTokens: userInfoTokens ?? 0,
-      sessionInfoTokens: sessionInfoTokens ?? 0,
+      summaryTokens: summaryTokens ?? 0,
       remainingTokens,
     },
   ];
@@ -47,7 +47,7 @@ export const ChatContextPopup = () => {
     recentChatsTokens: { label: "Recent Chats Tokens", color: "#ef4444" },
     currentChatTokens: { label: "Current Chat Tokens", color: "#3b82f6" },
     userInfoTokens: { label: "User Info Tokens", color: "#eab308" },
-    sessionInfoTokens: { label: "Session Info Tokens", color: "#a855f7" },
+    summaryTokens: { label: "Summary Tokens", color: "#a855f7" },
     remainingTokens: { label: "Remaining", color: "hsl(var(--muted))" },
   };
 
@@ -68,30 +68,28 @@ export const ChatContextPopup = () => {
           <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
             <p className="text-muted-foreground">System Prompt</p>
             <p className="text-right font-mono tabular-nums">
-              {systemPromptTokens ?? 0}
+              {systemPromptTokens ?? 0} / {700} tokens
             </p>
             <p className="text-muted-foreground">Recent Chats</p>
             <p className="text-right font-mono tabular-nums">
-              {recentChatsTokens ?? 0}
+              {recentChatsTokens ?? 0} / {1000} tokens
             </p>
             <p className="text-muted-foreground">Current Chat</p>
             <p className="text-right font-mono tabular-nums">
-              {currentChatTokens ?? 0}
+              {currentChatTokens ?? 0} / {2000} tokens
             </p>
             <p className="text-muted-foreground">User Info</p>
             <p className="text-right font-mono tabular-nums">
-              {userInfoTokens ?? 0}
+              {userInfoTokens ?? 0} / {500} tokens
             </p>
-            <p className="text-muted-foreground">Session Info</p>
+            <p className="text-muted-foreground">Summary</p>
             <p className="text-right font-mono tabular-nums">
-              {sessionInfoTokens ?? 0}
+              {summaryTokens ?? 0} / {1000} tokens
             </p>
             <p className="text-muted-foreground">Remaining</p>
             <p className="text-right font-mono tabular-nums">
-              {remainingTokens}
+              {remainingTokens} / {maxTokens} tokens
             </p>
-            <p className="text-muted-foreground">Max</p>
-            <p className="text-right font-mono tabular-nums">{maxTokens}</p>
           </div>
         </div>
       </PopoverContent>
@@ -145,9 +143,9 @@ const ChatContextChart = ({ chartConfig, chartData, maxTokens }) => {
           strokeWidth={2}
         />
         <Bar
-          dataKey="sessionInfoTokens"
+          dataKey="summaryTokens"
           stackId="tokens"
-          fill={chartConfig.sessionInfoTokens.color}
+          fill={chartConfig.summaryTokens.color}
           radius={hasRemaining ? 0 : [0, 8, 8, 0]}
           stroke="hsl(var(--background))"
           strokeWidth={2}
