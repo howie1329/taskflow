@@ -99,7 +99,7 @@ export default function AppSideBar() {
   ];
   return (
     <Sidebar>
-      <SidebarHeader className="px-4 py-3 border-b border-sidebar-border">
+      <SidebarHeader className="px-3 py-2 border-b border-sidebar-border">
         <div className="flex flex-col items-center justify-between w-full gap-1.5">
           {/* Logo Section */}
           <div className="flex items-center space-x-3">
@@ -120,13 +120,13 @@ export default function AppSideBar() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                   {theme === "dark" ? (
-                    <HugeiconsIcon icon={Sun02Icon} size={20} strokeWidth={2} />
-                  ) : (
                     <HugeiconsIcon
                       icon={Moon02Icon}
                       size={20}
                       strokeWidth={2}
                     />
+                  ) : (
+                    <HugeiconsIcon icon={Sun02Icon} size={20} strokeWidth={2} />
                   )}
                 </Button>
               </DropdownMenuTrigger>

@@ -6,7 +6,7 @@ import { ChatSuggestionProvider } from "@/presentation/components/aiChat/provide
 import { ChatContextProvider } from "@/presentation/components/aiChat/providers/ChatContextProvider";
 export default function Page() {
   return (
-    <ChatModelProvider defaultModel="OpenAI: GPT-5">
+    <ChatModelProvider defaultModel="xAI: Grok 4.1 Fast">
       <ChatHistoryProvider>
         <ChatMessageProvider conversationId={null}>
           <ChatSuggestionProvider conversationId={null}>

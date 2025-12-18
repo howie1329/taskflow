@@ -8,9 +8,10 @@ import { useChatHistoryContext } from "./ChatHistoryProvider";
 import { useChatMessageContext } from "./ChatMessageProvider";
 import { Empty, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 import { Spinner } from "@/components/ui/spinner";
+import { Badge } from "@/components/ui/badge";
 
 export const ChatMessagesClient = () => {
-  const { messages, messagesLoading } = useChatMessageContext();
+  const { messages, messagesLoading, status } = useChatMessageContext();
   const { conversations, conversationsLoading } = useChatHistoryContext();
 
   if (messagesLoading || conversationsLoading) {
@@ -81,6 +82,12 @@ export const ChatMessagesClient = () => {
             })}
           </div>
         ))}
+      {status === "streaming" && (
+        <Badge variant="outline" className="flex flex-row gap-2 items-center">
+          <Spinner />
+          Thinking...
+        </Badge>
+      )}
     </div>
   );
 };

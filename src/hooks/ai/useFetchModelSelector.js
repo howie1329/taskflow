@@ -42,8 +42,9 @@ export { useFetchModelSelector, useModelConverter };
 const modelNames = [
   "openrouter/sonoma-dusk-alpha",
   "openrouter/sonoma-sky-alpha",
-  "deepseek/deepseek-chat-v3-0324:free",
+  "mistralai/mistral-small-3.1-24b-instruct:free",
   "deepseek/deepseek-chat-v3.1",
+  "deepseek/deepseek-v3.2",
   "google/gemini-2.5-flash-lite",
   "google/gemini-2.0-flash-001",
   "openai/gpt-4.1-nano",
@@ -54,9 +55,12 @@ const modelNames = [
   "openai/gpt-4o-mini",
   "google/gemini-2.5-flash",
   "anthropic/claude-3-haiku",
+  "anthropic/claude-3.5-haiku",
   "x-ai/grok-3-mini",
   "x-ai/grok-code-fast-1",
   "x-ai/grok-4-fast:free",
   "google/gemini-flash-1.5",
   "google/gemini-2.5-pro",
+  "google/gemini-3-pro-preview",
+  "moonshotai/kimi-k2-0905",
 ];
