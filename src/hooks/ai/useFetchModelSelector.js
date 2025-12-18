@@ -1,9 +1,14 @@
 import axiosClient from "@/lib/axios/axiosClient";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { useAuth } from "@clerk/nextjs";
 
-const fetchModelSelector = async () => {
-  const response = await axiosClient.get("/api/v1/ai/models");
+const fetchModelSelector = async (getToken) => {
+  const token = await getToken();
+  const response = await axiosClient.get("/api/v1/ai/models", {
+    headers: { Authorization: token },
+    withCredentials: true,
+  });
   const filteredModels = response.data.data.filter((model) =>
     modelNames.includes(model.id)
   );
@@ -16,9 +21,10 @@ const fetchModelSelector = async () => {
 };
 
 const useFetchModelSelector = () => {
+  const { getToken } = useAuth();
   return useQuery({
     queryKey: ["modelSelector"],
-    queryFn: () => fetchModelSelector(),
+    queryFn: () => fetchModelSelector(getToken),
     staleTime: 1000 * 60 * 60 * 24,
   });
 };
