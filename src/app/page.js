@@ -42,17 +42,7 @@ import {
   Clock,
   Target,
   Sparkles,
-  ChevronRight,
-  Play,
-  Download,
-  Github,
-  Twitter,
-  Linkedin,
   Quote,
-  DollarSign,
-  Shield,
-  Smartphone,
-  Globe,
 } from "lucide-react";
 
 export default function Home() {
