@@ -14,7 +14,6 @@ const fetchSmartSearch = async (search, getToken) => {
       withCredentials: true,
     }
   );
-  console.log(response.data.data);
   return response.data.data;
 };
 

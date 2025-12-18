@@ -33,6 +33,7 @@ export const GlobalSmartSearch = ({
     <CommandDialog
       open={isGlobalSmartSearchOpen}
       onOpenChange={setIsGlobalSmartSearchOpen}
+      className="rounded-none"
     >
       <Command shouldFilter={false}>
         <CommandInput
