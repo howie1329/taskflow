@@ -10,7 +10,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import React from "react";
-import { SignedIn, UserProfile } from "@clerk/nextjs";
+import { SignedIn, SignOutButton, UserProfile } from "@clerk/nextjs";
 import {
   Popover,
   PopoverContent,
@@ -300,12 +300,19 @@ export default function AppSideBar() {
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem>
-                    <HugeiconsIcon
-                      icon={Logout02Icon}
-                      size={20}
-                      strokeWidth={2}
-                    />
-                    Sign Out
+                    <SignOutButton>
+                      <Button
+                        variant="outline"
+                        className="flex items-center justify-start h-8 w-full"
+                      >
+                        <HugeiconsIcon
+                          icon={Logout02Icon}
+                          size={20}
+                          strokeWidth={2}
+                        />
+                        Sign Out
+                      </Button>
+                    </SignOutButton>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
