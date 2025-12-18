@@ -16,15 +16,12 @@ import {
 import { AIModelSelector } from "../AIModelSelector";
 import { useChatModelContext } from "./ChatModelProvider";
 import { ChatHistoryPopup } from "./ChatHistoryPopup";
-import { useChatSuggestionContext } from "./ChatSuggestionProvider";
 import { ChatSuggestionClient } from "./ChatSuggestionClient";
 import { ChatContextPopup } from "./ChatContextPopup";
 
 export const ChatInput = () => {
   const { sendMessage, status, defaultConversationId, messages } =
     useChatMessageContext();
-  const { suggestedMessages, suggestedMessagesLoading } =
-    useChatSuggestionContext();
   const { selectedModelId } = useChatModelContext();
   const [userInput, setUserInput] = useState("");
 
