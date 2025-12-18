@@ -11,9 +11,6 @@ const fetchNotes = async (getToken) => {
       headers: { Authorization: token },
       withCredentials: true,
     });
-    toast.success("Notes fetched successfully", {
-      description: new Date().toLocaleString(),
-    });
     return response.data.data;
   } catch (error) {
     console.error(error);
