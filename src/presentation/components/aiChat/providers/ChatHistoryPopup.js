@@ -13,18 +13,22 @@ import {
   TransactionHistoryIcon,
 } from "@hugeicons/core-free-icons/index";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export const ChatHistoryPopup = () => {
   const { conversations } = useChatHistoryContext();
   const [searchQuery, setSearchQuery] = useState("");
-  const filteredConversations = () => {
-    if (!conversations) return [];
+  const [filteredConversations, setFilteredConversations] = useState([]);
 
-    return conversations.filter((conversation) =>
-      conversation.title.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  };
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const filteredConversations = conversations.filter((conversation) =>
+        conversation.title.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredConversations(filteredConversations);
+    }, 350); // 350ms debounce time
+    return () => clearTimeout(timer);
+  }, [searchQuery, conversations]);
 
   return (
     <Popover>
@@ -67,8 +71,8 @@ export const ChatHistoryPopup = () => {
           )}
         </div>
         <div className="flex flex-col h-full gap-2 overflow-y-auto ">
-          {filteredConversations() &&
-            filteredConversations().map((conversation) => (
+          {filteredConversations &&
+            filteredConversations.map((conversation) => (
               <div
                 key={conversation.id}
                 className="flex flex-row items-center justify-between border px-2"
