@@ -70,7 +70,7 @@ const SignInSignUpComponent = () => {
                 },
               },
             }}
-            forceRedirectUrl="/mainview/schedule"
+            forceRedirectUrl="/mainview/inbox"
           />
           <p className="text-xs text-muted-foreground">
             Dont Have an Account?{" "}
@@ -91,7 +91,7 @@ const SignInSignUpComponent = () => {
                 },
               },
             }}
-            forceRedirectUrl="/mainview/schedule"
+            forceRedirectUrl="/mainview/inbox"
           />
           <p className="text-xs text-muted-foreground">
             Already Have an Account?
@@ -107,8 +107,81 @@ const SignInSignUpComponent = () => {
 
 const InfoSection = () => {
   return (
-    <div className="flex justify-center items-center w-full h-full">
-      <p>This is the info section</p>
+    <div className="flex flex-col justify-center items-start w-full h-full px-8 md:px-12 lg:px-16 max-w-4xl mx-auto">
+      {/* Main Heading */}
+      <div className="mb-8 space-y-4">
+        <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-foreground">
+          TaskFlow
+        </h1>
+        <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed">
+          Your AI-powered productivity workspace. Manage tasks, capture notes,
+          and stay organized—all in one place.
+        </p>
+      </div>
+
+      {/* Feature Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full mb-8">
+        <div className="flex items-start gap-3 p-4 rounded-lg bg-card border border-border hover:bg-accent/50 transition-colors">
+          <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0" />
+          <div>
+            <h3 className="font-semibold text-foreground mb-1">
+              Smart Task Management
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              Kanban boards with drag-and-drop, priorities, and project
+              organization
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-start gap-3 p-4 rounded-lg bg-card border border-border hover:bg-accent/50 transition-colors">
+          <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0" />
+          <div>
+            <h3 className="font-semibold text-foreground mb-1">AI Assistant</h3>
+            <p className="text-sm text-muted-foreground">
+              Natural language interactions to create and manage your work
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-start gap-3 p-4 rounded-lg bg-card border border-border hover:bg-accent/50 transition-colors">
+          <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0" />
+          <div>
+            <h3 className="font-semibold text-foreground mb-1">Rich Notes</h3>
+            <p className="text-sm text-muted-foreground">
+              Block-based editor with markdown support and powerful search
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-start gap-3 p-4 rounded-lg bg-card border border-border hover:bg-accent/50 transition-colors">
+          <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0" />
+          <div>
+            <h3 className="font-semibold text-foreground mb-1">
+              Real-Time Sync
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              Live updates across all your devices instantly
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Key Benefits */}
+      <div className="flex flex-wrap gap-2">
+        <span className="px-3 py-1 text-xs font-medium rounded-full bg-primary/10 text-primary border border-primary/20">
+          AI-Powered
+        </span>
+        <span className="px-3 py-1 text-xs font-medium rounded-full bg-secondary text-secondary-foreground border border-border">
+          Real-Time
+        </span>
+        <span className="px-3 py-1 text-xs font-medium rounded-full bg-accent text-accent-foreground border border-border">
+          Organized
+        </span>
+        <span className="px-3 py-1 text-xs font-medium rounded-full bg-muted text-muted-foreground border border-border">
+          Collaborative
+        </span>
+      </div>
     </div>
   );
 };
