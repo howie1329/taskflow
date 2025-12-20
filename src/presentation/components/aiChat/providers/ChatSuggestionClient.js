@@ -32,7 +32,7 @@ export const ChatSuggestionClient = ({ setUserInput }) => {
             variant="outline"
             size="lg"
             key={suggestedMessage.id}
-            onClick={() => setUserInput(suggestedMessage.message)}
+            onClick={() => setUserInput(suggestedMessage.question)}
           >
             <div className="flex flex-col text-left text-sm font-normal gap-0">
               <p className="text-xs font-normal text-muted-foreground text-wrap line-clamp-2">

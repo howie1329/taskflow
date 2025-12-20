@@ -5,7 +5,7 @@ import {
   InputGroupButton,
   InputGroupTextarea,
 } from "@/components/ui/input-group";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useChatMessageContext } from "./ChatMessageProvider";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
@@ -25,6 +25,7 @@ import {
   RadialBarChart,
 } from "recharts";
 import { ChartContainer } from "@/components/ui/chart";
+import { AnimatePresence, motion } from "motion/react";
 
 const MAX_INPUT_TOKENS = 150;
 const estimatedInputTokens = (inputString = "") => {
@@ -36,6 +37,9 @@ export const ChatInput = () => {
     useChatMessageContext();
   const { selectedModelId } = useChatModelContext();
   const [userInput, setUserInput] = useState("");
+  const [debouncedHoveredOverInput, setDebouncedHoveredOverInput] =
+    useState(false);
+  const [hoveredOverInput, setHoveredOverInput] = useState(false);
 
   const estimatedInputTokensValue = estimatedInputTokens(userInput);
 
@@ -61,10 +65,39 @@ export const ChatInput = () => {
     setUserInput("");
   };
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedHoveredOverInput(hoveredOverInput);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [hoveredOverInput]);
+
+  useEffect(() => {
+    if (userInput.trim() !== "") {
+      setHoveredOverInput(true);
+    }
+  }, [userInput, hoveredOverInput]);
+
   return (
     <div className="flex flex-col items-center justify-center gap-1 lg:gap-2 w-full">
-      <ChatSuggestionClient setUserInput={setUserInput} />
-      <InputGroup className="w-full lg:w-[80vw] ">
+      <AnimatePresence>
+        {debouncedHoveredOverInput && (
+          <motion.div
+            key="chat-suggestion-client"
+            initial={{ opacity: 0, y: 2 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 2 }}
+            transition={{ duration: 0.2, ease: "backInOut" }}
+          >
+            <ChatSuggestionClient setUserInput={setUserInput} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <InputGroup
+        className="w-full lg:w-[80vw] "
+        onFocus={() => setHoveredOverInput(true)}
+        onBlur={() => setHoveredOverInput(false)}
+      >
         <InputGroupTextarea
           className="w-full"
           placeholder="Ask, Search, or Chat With Your Agent..."
