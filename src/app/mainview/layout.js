@@ -1,5 +1,9 @@
 "use client";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 import { GlobalSmartSearch } from "@/presentation/components/Layout/GlobalSearch";
 import useSocketConnection from "@/lib/sockets/useSocketConnection";
 import AppSideBar from "@/presentation/components/Layout/AppSideBar";
@@ -36,7 +40,11 @@ export default function Layout({ children }) {
             setIsGlobalSmartSearchOpen={setIsGlobalSmartSearchOpen}
           />
           <SocketInitializer />
-          <main className=" h-[100vh]">{children}</main>
+          <main className=" h-[100vh]">
+            {/* Mobile-only content to trigger the sidebar... Need to come up with a better solution*/}
+            <SidebarTrigger className="lg:hidden" />
+            {children}
+          </main>
         </SidebarInset>
       </SidebarProvider>
     </QueryClientProvider>
