@@ -9,6 +9,7 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { ChatArtifactClient } from "./ChatArtifactClient";
+import { motion } from "motion/react";
 
 export const ChatPageClient = () => {
   const { messages, toolArtifacts, isToolArtifactsOpen } =
@@ -16,7 +17,12 @@ export const ChatPageClient = () => {
   const hasMessages = messages && messages.length > 0;
 
   return (
-    <div className="flex flex-col gap-2 h-full w-full ">
+    <motion.div
+      initial={{ opacity: 0, x: 100 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
+      className="flex flex-col gap-2 h-full w-full "
+    >
       <div className="grid grid-rows-[auto_1fr_auto] items-center justify-center h-[96vh] w-full p-2 overflow-hidden lg:h-full lg:flex lg:flex-col lg:items-center lg:justify-center  ">
         {!hasMessages && <h1>Welcome To TaskFlow Chat Agent</h1>}
         {hasMessages && <ChatHeaderClient />}
@@ -45,6 +51,6 @@ export const ChatPageClient = () => {
         )}
         <ChatInput />
       </div>
-    </div>
+    </motion.div>
   );
 };
