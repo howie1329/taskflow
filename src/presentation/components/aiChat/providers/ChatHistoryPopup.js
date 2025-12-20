@@ -14,6 +14,7 @@ import {
 } from "@hugeicons/core-free-icons/index";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
 
 export const ChatHistoryPopup = () => {
   const { conversations } = useChatHistoryContext();
@@ -71,27 +72,33 @@ export const ChatHistoryPopup = () => {
           )}
         </div>
         <div className="flex flex-col h-full gap-2 overflow-y-auto ">
-          {filteredConversations &&
-            filteredConversations.map((conversation) => (
-              <div
-                key={conversation.id}
-                className="flex flex-row items-center justify-between border px-2"
-              >
-                <Link
-                  className="w-full"
-                  href={`/mainview/aichat/${conversation.id}`}
+          <AnimatePresence>
+            {filteredConversations &&
+              filteredConversations.map((conversation) => (
+                <motion.div
+                  initial={{ opacity: 0, x: 50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 50 }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
+                  key={conversation.id}
+                  className="flex flex-row items-center justify-between border px-2"
                 >
-                  <div className="flex flex-col lg:flex-row lg:justify-between ">
-                    <p className="text-sm text-ellipsis ">
-                      {conversation.title}
-                    </p>
-                    <p className="text-xs text-muted-foreground text-right ">
-                      {new Date(conversation.updatedAt).toLocaleString()}
-                    </p>
-                  </div>
-                </Link>
-              </div>
-            ))}
+                  <Link
+                    className="w-full"
+                    href={`/mainview/aichat/${conversation.id}`}
+                  >
+                    <div className="flex flex-col lg:flex-row lg:justify-between ">
+                      <p className="text-sm text-ellipsis ">
+                        {conversation.title}
+                      </p>
+                      <p className="text-xs text-muted-foreground text-right ">
+                        {new Date(conversation.updatedAt).toLocaleString()}
+                      </p>
+                    </div>
+                  </Link>
+                </motion.div>
+              ))}
+          </AnimatePresence>
         </div>
       </PopoverContent>
     </Popover>
