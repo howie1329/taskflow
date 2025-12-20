@@ -42,7 +42,6 @@ export default function Layout({ children }) {
           <SocketInitializer />
           <main className=" h-[100vh]">
             {/* Mobile-only content to trigger the sidebar... Need to come up with a better solution*/}
-            <SidebarTrigger className="lg:hidden" />
             {children}
           </main>
         </SidebarInset>

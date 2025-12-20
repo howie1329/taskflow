@@ -9,6 +9,7 @@ import {
   TaskEdit01Icon,
 } from "@hugeicons/core-free-icons/index";
 import { Separator } from "@/components/ui/separator";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 export const ChatHeaderClient = () => {
   const {
@@ -33,7 +34,10 @@ export const ChatHeaderClient = () => {
   return (
     <div className="flex flex-col gap-2 justify-between items-center w-full">
       <div className="flex flex-row justify-between items-center w-full">
-        <h1>{conversation?.title}</h1>
+        <SidebarTrigger className="lg:hidden" />
+        <h1 className="text-lg font-bold text-ellipsis line-clamp-1">
+          {conversation?.title}
+        </h1>
         <div className="flex flex-row gap-2">
           <Button
             onClick={handleDeleteConversation}

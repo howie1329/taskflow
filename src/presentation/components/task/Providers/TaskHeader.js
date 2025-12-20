@@ -2,7 +2,7 @@
 
 import { Card } from "@/components/ui/card";
 import { useTaskFilter } from "./TaskFilterProvider";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
@@ -13,6 +13,7 @@ import {
 import { FilterDropdownCard } from "../FilterDropDownCard";
 import { CreateTaskDialog } from "../CreateTaskDialog";
 import { Separator } from "@/components/ui/separator";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 export const TaskHeader = () => {
   const {
@@ -30,19 +31,25 @@ export const TaskHeader = () => {
   return (
     <div className="flex flex-col gap-1">
       <div className="flex flex-row justify-between items-center gap-1">
-        <h1 className="text-lg font-bold ">Task Board</h1>
-        {isSearchBarOpen && (
-          <motion.Input
-            initial={{ opacity: 0, x: 100 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 100 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-            className="flex-1 p-2 rounded-md h-8 bg-card border text-sm text-center"
-            placeholder="Search tasks"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        )}
+        <SidebarTrigger className="lg:hidden" />
+        <h1 className="text-lg font-bold text-ellipsis line-clamp-1 ">
+          Task Board
+        </h1>
+        <AnimatePresence>
+          {isSearchBarOpen && (
+            <motion.Input
+              key="search-bar"
+              initial={{ opacity: 0, x: 100 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 100 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="flex-1 p-2 rounded-md h-8 bg-card border text-sm text-center"
+              placeholder="Search tasks"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          )}
+        </AnimatePresence>
         <Card className="flex flex-row justify-between items-center p-1 gap-1 rounded-none relative shadow-none">
           <Button
             variant="outline"
