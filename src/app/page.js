@@ -59,11 +59,17 @@ const MainPageHeader = () => {
 const SignInSignUpComponent = () => {
   const [signIn, setSignIn] = useState(true);
   return (
-    <div className="flex flex-col justify-center items-center w-full h-full gap-2">
-      <div className="lg:hidden flex flex-col items-center justify-center ">
-        <p className="text-lg font-bold text-primary">
-          The Future of Productivity is Here
-        </p>
+    <div className="flex flex-col justify-center items-center w-full h-full gap-2 px-4">
+      {/* Mobile-only content */}
+      <div className="lg:hidden flex flex-col items-center w-full max-w-md space-y-6 mb-4">
+        <div className="text-center space-y-3">
+          <h1 className="text-4xl font-bold tracking-tight text-foreground">
+            TaskFlow
+          </h1>
+          <p className="text-base text-muted-foreground leading-relaxed">
+            Your AI-powered productivity workspace
+          </p>
+        </div>
       </div>
       {signIn ? (
         <div className="flex flex-col items-center justify-center border shadow-sm bg-accent/70">
