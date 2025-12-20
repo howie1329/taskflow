@@ -11,7 +11,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useChatModelContext } from "./providers/ChatModelProvider";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
@@ -23,7 +23,7 @@ import {
 export const AIModelSelector = () => {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
-
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const {
     availableModels,
     isLoading,
@@ -31,6 +31,13 @@ export const AIModelSelector = () => {
     selectedModelName,
     setSelectedModelId,
   } = useChatModelContext();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -73,7 +80,7 @@ export const AIModelSelector = () => {
           {availableModels &&
             availableModels
               .filter((model) =>
-                model.name.toLowerCase().includes(search.toLowerCase())
+                model.name.toLowerCase().includes(debouncedSearch.toLowerCase())
               )
               .map((model) => (
                 <Button
