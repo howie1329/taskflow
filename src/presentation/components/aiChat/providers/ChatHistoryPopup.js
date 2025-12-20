@@ -40,7 +40,7 @@ export const ChatHistoryPopup = () => {
       <PopoverContent
         side="top"
         sideOffset={10}
-        className="flex flex-col w-[80vw] h-[30vh] overflow-y-auto rounded-none gap-2 "
+        className="flex flex-col w-screen lg:w-[80vw] h-[35h] overflow-y-auto rounded-none gap-2 "
       >
         <div className="flex flex-row items-center justify-between border px-1">
           <HugeiconsIcon
@@ -77,8 +77,10 @@ export const ChatHistoryPopup = () => {
                   className="w-full"
                   href={`/mainview/aichat/${conversation.id}`}
                 >
-                  <div className="flex flex-row items-center">
-                    <p className="flex-1 text-sm ">{conversation.title}</p>
+                  <div className="flex flex-col lg:flex-row lg:justify-between ">
+                    <p className="text-sm text-ellipsis ">
+                      {conversation.title}
+                    </p>
                     <p className="text-xs text-muted-foreground text-right ">
                       {new Date(conversation.updatedAt).toLocaleString()}
                     </p>

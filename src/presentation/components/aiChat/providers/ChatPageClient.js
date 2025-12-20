@@ -17,8 +17,8 @@ export const ChatPageClient = () => {
 
   return (
     <div className="flex flex-col gap-2 h-full w-full ">
-      <div className="flex flex-col gap-2 items-center justify-center h-full w-full p-2">
-        {!hasMessages && <h1>Welcome To TaskFlow Chat Agent</h1>}{" "}
+      <div className="grid grid-rows-[auto_1fr_auto] items-center justify-center h-[96vh] w-full p-2 overflow-hidden lg:h-full lg:flex lg:flex-col lg:items-center lg:justify-center  ">
+        {!hasMessages && <h1>Welcome To TaskFlow Chat Agent</h1>}
         {hasMessages && <ChatHeaderClient />}
         {hasMessages && (
           <ResizablePanelGroup direction="horizontal">

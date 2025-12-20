@@ -62,10 +62,11 @@ export const ChatInput = () => {
   };
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col items-center justify-center gap-1 lg:gap-2 w-full">
       <ChatSuggestionClient setUserInput={setUserInput} />
-      <InputGroup className="w-[80vw]">
+      <InputGroup className="w-full lg:w-[80vw] ">
         <InputGroupTextarea
+          className="w-full"
           placeholder="Ask, Search, or Chat With Your Agent..."
           value={userInput}
           onChange={(e) => setUserInput(e.target.value)}

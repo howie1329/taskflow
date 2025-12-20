@@ -47,7 +47,7 @@ export const AIModelSelector = () => {
           <HugeiconsIcon icon={ArrowDown01Icon} size={20} strokeWidth={2} />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="max-w-[500px] max-h-[300px] overflow-y-auto p-2 w-full">
+      <PopoverContent className="w-screen lg:max-w-[500px] max-h-[300px] overflow-y-auto p-2">
         <div className="flex flex-col gap-2 p-2">
           <div className="flex flex-row items-center border rounded-sm text-sm">
             <input
@@ -84,14 +84,13 @@ export const AIModelSelector = () => {
                   }}
                   variant="outline"
                   size="lg"
-                  className="w-full flex flex-row items-center justify-between pl-2"
+                  className="w-full flex flex-row items-center justify-between px-2"
                 >
-                  <div className="flex flex-col items-start justify-between ">
-                    <p className="truncate">{model.name}</p>
-                    <div className="flex flex-row space-x-2">
+                  <div className="flex w-full flex-row gap-1  items-center justify-between">
+                    <p className="truncate text-left ">{model.name}</p>
+                    <div className="flex flex-row items-end justify-end ">
                       <p className="text-xs">
-                        {(model.pricing.prompt * 1000000).toFixed(3)}
-                        USD / 1M tokens
+                        ${(model.pricing.prompt * 1000000).toFixed(2)}/1M tokens
                       </p>
                       <Tooltip>
                         <TooltipTrigger>
