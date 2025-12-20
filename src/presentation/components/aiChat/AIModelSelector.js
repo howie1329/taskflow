@@ -24,8 +24,13 @@ export const AIModelSelector = () => {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
 
-  const { availableModels, isLoading, error, selectedModel, setSelectedModel } =
-    useChatModelContext();
+  const {
+    availableModels,
+    isLoading,
+    error,
+    selectedModelName,
+    setSelectedModelId,
+  } = useChatModelContext();
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -37,7 +42,7 @@ export const AIModelSelector = () => {
           className=" max-w-fit p-0"
         >
           <p className="truncate text-sm p-0">
-            {selectedModel ? selectedModel : "Select Model"}
+            {selectedModelName ? selectedModelName : "Select Model"}
           </p>
           <HugeiconsIcon icon={ArrowDown01Icon} size={20} strokeWidth={2} />
         </Button>
@@ -74,7 +79,7 @@ export const AIModelSelector = () => {
                 <Button
                   key={model.id}
                   onClick={() => {
-                    setSelectedModel(model.name);
+                    setSelectedModelId(model.id);
                     setOpen(false);
                   }}
                   variant="outline"

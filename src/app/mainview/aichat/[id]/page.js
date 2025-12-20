@@ -41,7 +41,7 @@ import { ChatContextProvider } from "@/presentation/components/aiChat/providers/
 function Page() {
   const { id } = useParams();
   return (
-    <ChatModelProvider defaultModel="xAI: Grok 4.1 Fast">
+    <ChatModelProvider defaultModel="x-ai/grok-4.1-fast">
       <ChatHistoryProvider>
         <ChatMessageProvider conversationId={id}>
           <ChatSuggestionProvider conversationId={id}>

@@ -1,25 +1,28 @@
 "use client";
-
 import { useFetchModelSelector } from "@/hooks/ai/useFetchModelSelector";
 import { createContext, useContext, useEffect, useState } from "react";
 
 const ChatModelContext = createContext();
 
 export const ChatModelProvider = ({ children, defaultModel }) => {
-  const [selectedModel, setSelectedModel] = useState(defaultModel);
+  const [selectedModelId, setSelectedModelId] = useState(defaultModel);
+  const [selectedModelName, setSelectedModelName] = useState(null);
   const { isLoading, error, data: availableModels } = useFetchModelSelector();
 
-  const selectedModelId = availableModels
-    ? availableModels.find((model) => model.name === selectedModel)?.id
-    : null;
+  useEffect(() => {
+    const selectedModelName = availableModels
+      ? availableModels.find((model) => model.id === selectedModelId)?.name
+      : null;
+    setSelectedModelName(selectedModelName);
+  }, [selectedModelId, availableModels]);
 
   const values = {
     availableModels,
     isLoading,
     error,
     selectedModelId,
-    selectedModel,
-    setSelectedModel,
+    selectedModelName,
+    setSelectedModelId,
   };
 
   return (
