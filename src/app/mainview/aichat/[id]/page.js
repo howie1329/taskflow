@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/tooltip";
 import remarkGfm from "remark-gfm";
 import ReactMarkdown from "react-markdown";
+import Markdown from "react-markdown";
 import { Popover, PopoverContent } from "@/components/ui/popover";
 import { PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
@@ -164,15 +165,16 @@ export const RenderAssistantMessageContent = ({
           <span className="text-xs text-blue-500/70">🧠 Smart Context</span>
         )}
       </div>
-      <div className="relative bg-muted text-foreground rounded-md max-w-[75%] px-3 py-2 text-sm border">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-          {partContent.text}
-        </ReactMarkdown>
+      <div className="relative bg-muted/50 text-foreground rounded-none max-w-[95%] px-2 py-2 text-sm border">
+        <Markdown remarkPlugins={[remarkGfm]}>{partContent.text}</Markdown>
+
+        {/* This is DEPRECATED for now
         <div className="flex flex-row gap-2 overflow-x-auto mt-2">
           {messageContent?.ui?.tasks?.map((task) => (
             <AITaskCard task={task} key={task.id} />
           ))}
         </div>
+        */}
       </div>
       <div className="flex flex-row gap-2 items-center">
         <p className="text-muted-foreground/60 text-xs">{timestamp}</p>
