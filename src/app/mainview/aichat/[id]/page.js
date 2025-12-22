@@ -165,7 +165,7 @@ export const RenderAssistantMessageContent = ({
           <span className="text-xs text-blue-500/70">🧠 Smart Context</span>
         )}
       </div>
-      <div className="relative bg-muted/50 text-foreground rounded-none max-w-[95%] px-2 py-2 text-sm border">
+      <div className="relative bg-muted/50 text-foreground rounded-none max-w-[85%] px-2 py-2 border prose prose-sm">
         <Markdown remarkPlugins={[remarkGfm]}>{partContent.text}</Markdown>
 
         {/* This is DEPRECATED for now
