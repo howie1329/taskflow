@@ -45,7 +45,10 @@ export const ChatHeaderClient = () => {
           {conversation?.title}
         </h1>
         <div className="flex flex-row gap-2">
-          <ChatHeaderOptionsPopover />
+          <ChatHeaderOptionsPopover
+            handleDeleteConversation={handleDeleteConversation}
+            handleNewConversation={handleNewConversation}
+          />
 
           {/* Will be used to show tool artifacts in a sheet*/}
           {toolArtifacts.length > 0 && (
