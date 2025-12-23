@@ -21,13 +21,10 @@
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.0",
-    "@ai-sdk/openai": "^2.0.23",
     "@clerk/express": "^1.7.28",
     "@exalabs/ai-sdk": "^1.0.5",
     "@google/genai": "^1.16.0",
     "@modelcontextprotocol/sdk": "^1.19.1",
-    "@openai/agents": "^0.1.9",
-    "@openai/agents-extensions": "^0.1.5",
     "@openrouter/ai-sdk-provider": "^1.2.0",
     "@supabase/supabase-js": "^2.57.0",
     "@taskflow/rag": "*",
