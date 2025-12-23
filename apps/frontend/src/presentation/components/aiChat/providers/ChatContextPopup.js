@@ -10,7 +10,7 @@ import { Popover } from "@/components/ui/popover";
 import { PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { ChartIcon } from "@hugeicons/core-free-icons/index";
+import { Chart01Icon } from "@hugeicons/core-free-icons/index";
 
 export const ChatContextPopup = () => {
   const {
@@ -55,7 +55,7 @@ export const ChatContextPopup = () => {
     <Popover>
       <PopoverTrigger>
         <Button variant="outline" size="icon">
-          <HugeiconsIcon icon={ChartIcon} size={20} strokeWidth={2} />
+          <HugeiconsIcon icon={Chart01Icon} size={20} strokeWidth={2} />
         </Button>
       </PopoverTrigger>
       <PopoverContent side="top" className="w-[360px] p-3">
