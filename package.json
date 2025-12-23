@@ -19,7 +19,7 @@
     "test": "turbo run test"
   },
   "engines": {
-    "node": ">=20.9.0"
+    "node": ">=25.0.0"
   },
   "devDependencies": {
     "prettier": "^3.0.0",
