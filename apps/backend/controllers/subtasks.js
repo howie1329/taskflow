@@ -22,10 +22,7 @@ export const createSubtask = async (req, res) => {
     });
   } catch (error) {
     console.error("Create subtask error:", error);
-    return res.status(500).json({
-      error: "Failed to create subtask",
-      details: error.message,
-    });
+    return res.status(500).json({ error: "Failed to create subtask" });
   }
 };
 

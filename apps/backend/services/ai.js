@@ -22,6 +22,8 @@ import { conversationService } from "./conversations.js";
 import { VercelAITools } from "../utils/AiTools/VercelAITools.js";
 
 // AI Providers
+// Imports from Google AI SDK to create an embedding model
+// look into moving this to openrouter
 const google = createGoogleGenerativeAI({
   apiKey: process.env.GOOGLE_AI_KEY,
 });
@@ -32,7 +34,7 @@ const openRouter = createOpenRouter({
 
 // Embedding Service
 export const embeddingService = {
-  embeddingModel: google.textEmbedding("gemini-embedding-001"),
+  embeddingModel: google.embedding("gemini-embedding-001"),
 
   async createEmbedding(inputData) {
     const { embedding } = await embed({
