@@ -85,6 +85,7 @@ export const RenderUserMessageContent = ({ messageContent, partContent }) => {
           {user?.firstName?.charAt(0).toUpperCase() +
             user?.firstName?.slice(1)}{" "}
         </p>
+        {/* Might be deprecated in the future */}
         {messageContent?.model && (
           <Tooltip key={"model"}>
             <TooltipTrigger>
@@ -97,7 +98,7 @@ export const RenderUserMessageContent = ({ messageContent, partContent }) => {
           </Tooltip>
         )}
       </div>
-      <div className="bg-primary text-primary-foreground rounded-md max-w-[75%] px-3 py-2 text-sm border">
+      <div className="bg-primary text-primary-foreground rounded-none max-w-[75%] px-3 py-2 text-sm border">
         {partContent.text}
       </div>
       <p className="text-muted-foreground/60 text-xs">{timestamp}</p>
@@ -160,11 +161,12 @@ export const RenderAssistantMessageContent = ({
           <p className="text-xs font-medium">Assistant</p>
         )}
 
+        {/* Might be deprecated  */}
         {messageContent?.settings?.isSmartContext && (
           <span className="text-xs text-blue-500/70">🧠 Smart Context</span>
         )}
       </div>
-      <div className="relative bg-muted/50 text-foreground rounded-none max-w-[85%] px-2 py-2 border prose prose-sm">
+      <div className="relative text-foreground rounded-none max-w-[65%] px-2 py-2 prose prose-sm border-r">
         <Markdown remarkPlugins={[remarkGfm]}>{partContent.text}</Markdown>
       </div>
       <div className="flex flex-row gap-2 items-center">
