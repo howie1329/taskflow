@@ -35,12 +35,18 @@ import {
   CheckIcon,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
+import { Spinner } from "@/components/ui/spinner";
+import {
+  AlertCircleIcon,
+  HugeiconsFreeIcons,
+} from "@hugeicons/core-free-icons/index";
 
 export const TaskCardSheet = ({ selectedTask, isOpen, onOpenChange }) => {
-  const { data: subtasks, isLoading: subtaskLoading } = useFetchTaskSubtask(
-    selectedTask.id,
-    isOpen
-  );
+  const {
+    data: subtasks,
+    isLoading,
+    error,
+  } = useFetchTaskSubtask(selectedTask.id, isOpen);
   const [title, setTitle] = useState(selectedTask.title);
   const [description, setDescription] = useState(selectedTask.description);
   const [status, setStatus] = useState(selectedTask.status);
@@ -286,6 +292,27 @@ export const TaskCardSheet = ({ selectedTask, isOpen, onOpenChange }) => {
     deleteTask(selectedTask.id);
   };
 
+  const LoadingSubtasks = () => {
+    return (
+      <div className="flex flex-col items-center justify-center h-full">
+        <Badge variant="outline">
+          <Spinner />
+          Loading Subtasks...
+        </Badge>
+      </div>
+    );
+  };
+  const ErrorSubtasks = () => {
+    return (
+      <div className="flex flex-col items-center justify-center h-full">
+        <Badge variant="outline">
+          <HugeiconsFreeIcons icon={<AlertCircleIcon />} />
+          Error Loading Subtasks...
+        </Badge>
+      </div>
+    );
+  };
+
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent className="grid grid-rows-[auto_1fr_1fr_auto] !w-[30vw] !max-w-[30vw] gap-2 p-2">
@@ -377,99 +404,105 @@ export const TaskCardSheet = ({ selectedTask, isOpen, onOpenChange }) => {
 
           <div>
             <h3 className="text-sm font-medium mb-2">Subtasks:</h3>
-            <div className="flex flex-col gap-2">
-              {subtasks &&
-                subtasks.map((subTask) => (
-                  <div
-                    className="flex flex-row items-center gap-2"
-                    key={subTask.id}
-                  >
-                    <Checkbox
-                      checked={subTask.isComplete}
-                      onCheckedChange={() => {
-                        handleCheckedChange(subTask.id, subTask.isComplete);
-                      }}
-                    />
-                    {editingSubtaskId === subTask.id ? (
-                      <div className="flex flex-row items-center gap-1 flex-1">
-                        <Input
-                          value={editingSubtaskName}
-                          onChange={(e) =>
-                            setEditingSubtaskName(e.target.value)
-                          }
-                          onKeyPress={(e) => {
-                            if (e.key === "Enter") {
-                              handleSaveSubtask(subTask.id);
-                            } else if (e.key === "Escape") {
-                              handleCancelEditSubtask();
+            {isLoading && <LoadingSubtasks />}
+            {error && <ErrorSubtasks />}
+            {subtasks && (
+              <div className="flex flex-col gap-2">
+                {subtasks &&
+                  subtasks.map((subTask) => (
+                    <div
+                      className="flex flex-row items-center gap-2"
+                      key={subTask.id}
+                    >
+                      <Checkbox
+                        checked={subTask.isComplete}
+                        onCheckedChange={() => {
+                          handleCheckedChange(subTask.id, subTask.isComplete);
+                        }}
+                      />
+                      {editingSubtaskId === subTask.id ? (
+                        <div className="flex flex-row items-center gap-1 flex-1">
+                          <Input
+                            value={editingSubtaskName}
+                            onChange={(e) =>
+                              setEditingSubtaskName(e.target.value)
                             }
-                          }}
-                          className="flex-1 rounded-none text-sm"
-                          autoFocus
-                        />
-                        <Button
-                          onClick={() => handleSaveSubtask(subTask.id)}
-                          size="sm"
-                          variant="ghost"
-                          className="h-6 w-6 p-0"
-                        >
-                          <CheckIcon className="h-3 w-3" />
-                        </Button>
-                        <Button
-                          onClick={handleCancelEditSubtask}
-                          size="sm"
-                          variant="ghost"
-                          className="h-6 w-6 p-0"
-                        >
-                          <XIcon className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="flex flex-row items-center gap-2 flex-1">
-                        <p
-                          className="text-sm text-gray-500 flex-1 cursor-pointer"
-                          onDoubleClick={() => handleStartEditSubtask(subTask)}
-                        >
-                          {subTask.subtaskName}
-                        </p>
-                        <Button
-                          onClick={() => handleStartEditSubtask(subTask)}
-                          size="sm"
-                          variant="ghost"
-                          className="h-6 w-6 p-0"
-                        >
-                          <PencilIcon className="h-3 w-3" />
-                        </Button>
-                        <Button
-                          onClick={() => handleDeleteSubtask(subTask.id)}
-                          size="sm"
-                          variant="ghost"
-                          className="h-6 w-6 p-0 text-destructive"
-                        >
-                          <Trash2Icon className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              <div className="flex flex-row items-center gap-2">
-                <Input
-                  value={newSubtaskName}
-                  onChange={(e) => setNewSubtaskName(e.target.value)}
-                  onKeyPress={handleSubtaskKeyPress}
-                  placeholder="Add subtask..."
-                  className="flex-1 rounded-none"
-                />
-                <Button
-                  onClick={handleCreateSubtask}
-                  size="sm"
-                  variant="outline"
-                  className="rounded-none"
-                >
-                  <PlusIcon className="h-4 w-4" />
-                </Button>
+                            onKeyPress={(e) => {
+                              if (e.key === "Enter") {
+                                handleSaveSubtask(subTask.id);
+                              } else if (e.key === "Escape") {
+                                handleCancelEditSubtask();
+                              }
+                            }}
+                            className="flex-1 rounded-none text-sm"
+                            autoFocus
+                          />
+                          <Button
+                            onClick={() => handleSaveSubtask(subTask.id)}
+                            size="sm"
+                            variant="ghost"
+                            className="h-6 w-6 p-0"
+                          >
+                            <CheckIcon className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            onClick={handleCancelEditSubtask}
+                            size="sm"
+                            variant="ghost"
+                            className="h-6 w-6 p-0"
+                          >
+                            <XIcon className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex flex-row items-center gap-2 flex-1">
+                          <p
+                            className="text-sm text-gray-500 flex-1 cursor-pointer"
+                            onDoubleClick={() =>
+                              handleStartEditSubtask(subTask)
+                            }
+                          >
+                            {subTask.subtaskName}
+                          </p>
+                          <Button
+                            onClick={() => handleStartEditSubtask(subTask)}
+                            size="sm"
+                            variant="ghost"
+                            className="h-6 w-6 p-0"
+                          >
+                            <PencilIcon className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            onClick={() => handleDeleteSubtask(subTask.id)}
+                            size="sm"
+                            variant="ghost"
+                            className="h-6 w-6 p-0 text-destructive"
+                          >
+                            <Trash2Icon className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                <div className="flex flex-row items-center gap-2">
+                  <Input
+                    value={newSubtaskName}
+                    onChange={(e) => setNewSubtaskName(e.target.value)}
+                    onKeyPress={handleSubtaskKeyPress}
+                    placeholder="Add subtask..."
+                    className="flex-1 rounded-none"
+                  />
+                  <Button
+                    onClick={handleCreateSubtask}
+                    size="sm"
+                    variant="outline"
+                    className="rounded-none"
+                  >
+                    <PlusIcon className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
-            </div>
+            )}
             <h3 className="text-sm font-medium mt-4">Notes:</h3>
             <Textarea
               className="h-full rounded-none"

@@ -6,20 +6,15 @@ import { toast } from "sonner";
 
 const updateSubtask = async (subtaskId, subtaskData, getToken) => {
   const token = await getToken();
-  try {
-    const response = await axiosClient.patch(
-      `/api/v1/subtasks/update/${subtaskId}`,
-      subtaskData,
-      {
-        headers: { Authorization: token },
-        withCredentials: true,
-      }
-    );
-    return response.data.data;
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
+  const response = await axiosClient.patch(
+    `/api/v1/subtasks/update/${subtaskId}`,
+    subtaskData,
+    {
+      headers: { Authorization: token },
+      withCredentials: true,
+    }
+  );
+  return response.data.data;
 };
 
 const useUpdateSubtask = () => {

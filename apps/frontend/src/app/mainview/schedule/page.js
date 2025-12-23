@@ -11,9 +11,9 @@ import {
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { DndContext } from "@dnd-kit/core";
-import useFetchAllTasks from "@/hooks/tasks/useFetchAllTasks";
 import { ScheduleColumn } from "@/presentation/components/schedule/ScheduleColumn";
 import { BrainDumpColumn } from "@/presentation/components/schedule/BrainDumpColumn";
+import useRealTimeTask from "@/hooks/tasks/useRealTimeTask";
 
 const updateColumns = (newButtonIndex, showBrainDump) => {
   const columns = [];
@@ -42,7 +42,7 @@ const updateColumns = (newButtonIndex, showBrainDump) => {
 };
 
 function Page() {
-  const { data: tasks } = useFetchAllTasks();
+  const { tasks, isLoading, error } = useRealTimeTask();
   const [showBrainDump, setShowBrainDump] = useState(true);
   const [buttonIndex, setButtonIndex] = useState(0);
   const [activeColumn, setActiveColumn] = useState([]);

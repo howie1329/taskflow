@@ -4,14 +4,12 @@ import { useParams } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { CheckIcon, CopyIcon, EllipsisIcon, InfoIcon } from "lucide-react";
-import { AITaskCard } from "@/presentation/components/aiChat/tasks/AITaskCard";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import remarkGfm from "remark-gfm";
-import ReactMarkdown from "react-markdown";
 import Markdown from "react-markdown";
 import { Popover, PopoverContent } from "@/components/ui/popover";
 import { PopoverTrigger } from "@/components/ui/popover";
@@ -84,8 +82,10 @@ export const RenderUserMessageContent = ({ messageContent, partContent }) => {
     >
       <div className="flex flex-row gap-2 items-center">
         <p className="text-xs font-medium">
-          {user?.firstName?.charAt(0).toUpperCase() + user?.firstName?.slice(1)}{" "}
+          {user?.firstName?.charAt(0).toUpperCase() +
+            user?.firstName?.slice(1)}{" "}
         </p>
+        {/* Might be deprecated in the future */}
         {messageContent?.model && (
           <Tooltip key={"model"}>
             <TooltipTrigger>
@@ -98,7 +98,7 @@ export const RenderUserMessageContent = ({ messageContent, partContent }) => {
           </Tooltip>
         )}
       </div>
-      <div className="bg-primary text-primary-foreground rounded-md max-w-[75%] px-3 py-2 text-sm border">
+      <div className="bg-primary text-primary-foreground rounded-none max-w-[75%] px-3 py-2 text-sm border">
         {partContent.text}
       </div>
       <p className="text-muted-foreground/60 text-xs">{timestamp}</p>
@@ -161,20 +161,13 @@ export const RenderAssistantMessageContent = ({
           <p className="text-xs font-medium">Assistant</p>
         )}
 
+        {/* Might be deprecated  */}
         {messageContent?.settings?.isSmartContext && (
           <span className="text-xs text-blue-500/70">🧠 Smart Context</span>
         )}
       </div>
-      <div className="relative bg-muted/50 text-foreground rounded-none max-w-[85%] px-2 py-2 border prose prose-sm">
+      <div className="relative text-foreground rounded-none max-w-[65%] px-2 py-2 prose prose-sm border-r">
         <Markdown remarkPlugins={[remarkGfm]}>{partContent.text}</Markdown>
-
-        {/* This is DEPRECATED for now
-        <div className="flex flex-row gap-2 overflow-x-auto mt-2">
-          {messageContent?.ui?.tasks?.map((task) => (
-            <AITaskCard task={task} key={task.id} />
-          ))}
-        </div>
-        */}
       </div>
       <div className="flex flex-row gap-2 items-center">
         <p className="text-muted-foreground/60 text-xs">{timestamp}</p>

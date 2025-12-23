@@ -1,7 +1,6 @@
 "use client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { TaskCardDialog } from "./TaskCardDialog";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { useDraggable } from "@dnd-kit/core";

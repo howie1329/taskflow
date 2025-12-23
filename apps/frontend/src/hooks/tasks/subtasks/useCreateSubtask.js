@@ -5,22 +5,16 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 const createSubtask = async (subtaskData, getToken) => {
-  console.log("Subtask data: ", subtaskData);
   const token = await getToken();
-  try {
-    const response = await axiosClient.post(
-      "/api/v1/subtasks/create",
-      subtaskData,
-      {
-        headers: { Authorization: token },
-        withCredentials: true,
-      }
-    );
-    return response.data.data;
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
+  const response = await axiosClient.post(
+    "/api/v1/subtasks/create",
+    subtaskData,
+    {
+      headers: { Authorization: token },
+      withCredentials: true,
+    }
+  );
+  return response.data.data;
 };
 
 const useCreateSubtask = () => {
