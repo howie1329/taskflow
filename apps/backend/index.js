@@ -24,6 +24,7 @@ const allowedOrigins = [
   "http://localhost:3001",
   "https://taskflow-git-dev-howie1329s-projects.vercel.app",
   "http://localhost:3000",
+  "https://taskflow-git-chore-mono-howie1329s-projects.vercel.app",
 ];
 
 const corsOptions = {
