@@ -38,7 +38,6 @@
     "@tanstack/query-db-collection": "^1.0.11",
     "@tanstack/react-db": "^0.1.59",
     "@tanstack/react-query": "^5.90.12",
-    "ai": "^5.0.75",
     "axios": "^1.13.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
