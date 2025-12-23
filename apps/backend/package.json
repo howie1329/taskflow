@@ -20,7 +20,7 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
-    "@ai-sdk/google": "^2.0.11",
+    "@ai-sdk/google": "^3.0.0",
     "@ai-sdk/openai": "^2.0.23",
     "@clerk/express": "^1.7.28",
     "@exalabs/ai-sdk": "^1.0.5",
