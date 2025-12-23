@@ -4,16 +4,12 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 const completeTask = async (id, getToken) => {
-  try {
-    const token = await getToken();
-    const response = await axiosClient.patch(`/api/v1/tasks/complete/${id}`, {
-      headers: { Authorization: token },
-      withCredentials: true,
-    });
-    return response.data.data;
-  } catch (error) {
-    console.error(error);
-  }
+  const token = await getToken();
+  const response = await axiosClient.patch(`/api/v1/tasks/complete/${id}`, {
+    headers: { Authorization: token },
+    withCredentials: true,
+  });
+  return response.data.data;
 };
 
 const useCompleteTask = () => {

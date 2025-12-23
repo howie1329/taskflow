@@ -4,14 +4,12 @@ import { useParams } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { CheckIcon, CopyIcon, EllipsisIcon, InfoIcon } from "lucide-react";
-import { AITaskCard } from "@/presentation/components/aiChat/tasks/AITaskCard";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import remarkGfm from "remark-gfm";
-import ReactMarkdown from "react-markdown";
 import Markdown from "react-markdown";
 import { Popover, PopoverContent } from "@/components/ui/popover";
 import { PopoverTrigger } from "@/components/ui/popover";
@@ -84,7 +82,8 @@ export const RenderUserMessageContent = ({ messageContent, partContent }) => {
     >
       <div className="flex flex-row gap-2 items-center">
         <p className="text-xs font-medium">
-          {user?.firstName?.charAt(0).toUpperCase() + user?.firstName?.slice(1)}{" "}
+          {user?.firstName?.charAt(0).toUpperCase() +
+            user?.firstName?.slice(1)}{" "}
         </p>
         {messageContent?.model && (
           <Tooltip key={"model"}>
@@ -167,14 +166,6 @@ export const RenderAssistantMessageContent = ({
       </div>
       <div className="relative bg-muted/50 text-foreground rounded-none max-w-[85%] px-2 py-2 border prose prose-sm">
         <Markdown remarkPlugins={[remarkGfm]}>{partContent.text}</Markdown>
-
-        {/* This is DEPRECATED for now
-        <div className="flex flex-row gap-2 overflow-x-auto mt-2">
-          {messageContent?.ui?.tasks?.map((task) => (
-            <AITaskCard task={task} key={task.id} />
-          ))}
-        </div>
-        */}
       </div>
       <div className="flex flex-row gap-2 items-center">
         <p className="text-muted-foreground/60 text-xs">{timestamp}</p>

@@ -1,24 +1,15 @@
 "use client";
 import axiosClient from "@/lib/axios/axiosClient";
 import { useQuery } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { useAuth } from "@clerk/nextjs";
+
 const fetchTaskSubtask = async (taskId, getToken) => {
   const token = await getToken();
-  try {
-    const response = await axiosClient.get(`/api/v1/tasks/subtasks/${taskId}`, {
-      headers: { Authorization: token },
-      withCredentials: true,
-    });
-    console.log("Response: ", response.data.data);
-    return response.data.data;
-  } catch (error) {
-    toast.error("Failed to fetch task subtasks", {
-      description: `${error.message} - ${new Date().toLocaleString()}`,
-    });
-    console.error(error);
-    return [];
-  }
+  const response = await axiosClient.get(`/api/v1/tasks/subtasks/${taskId}`, {
+    headers: { Authorization: token },
+    withCredentials: true,
+  });
+  return response.data.data;
 };
 
 const useFetchTaskSubtask = (taskId, isOpen = true) => {
@@ -31,4 +22,4 @@ const useFetchTaskSubtask = (taskId, isOpen = true) => {
   });
 };
 
-export { fetchTaskSubtask, useFetchTaskSubtask };
+export { useFetchTaskSubtask, fetchTaskSubtask };
