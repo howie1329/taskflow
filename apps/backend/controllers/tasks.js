@@ -131,9 +131,7 @@ export const markTaskAsComplete = async (req, res) => {
     });
   } catch (error) {
     console.error("Mark task complete error:", error);
-    return res
-      .status(500)
-      .json({ error: error.message || "Failed to mark task as complete" });
+    return res.status(500).json({ error: "Failed to mark task as complete" });
   }
 };
 
@@ -151,9 +149,7 @@ export const markTaskAsIncomplete = async (req, res) => {
     });
   } catch (error) {
     console.error("Mark task incomplete error:", error);
-    return res
-      .status(500)
-      .json({ error: error.message || "Failed to mark task as incomplete" });
+    return res.status(500).json({ error: "Failed to mark task as incomplete" });
   }
 };
 
