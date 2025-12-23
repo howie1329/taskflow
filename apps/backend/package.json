@@ -1,0 +1,49 @@
+{
+  "name": "@taskflow/backend",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Taskflow Backend API",
+  "license": "MIT",
+  "author": "Howard Thomas",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "docker": "docker compose build & docker compose up",
+    "docker:up": "docker compose up --build",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "db:push": "drizzle-kit push",
+    "db:generate": "drizzle-kit generate",
+    "db:studio": "drizzle-kit studio"
+  },
+  "dependencies": {
+    "@ai-sdk/google": "^2.0.11",
+    "@ai-sdk/openai": "^2.0.23",
+    "@clerk/express": "^1.7.28",
+    "@exalabs/ai-sdk": "^1.0.5",
+    "@google/genai": "^1.16.0",
+    "@modelcontextprotocol/sdk": "^1.19.1",
+    "@openai/agents": "^0.1.9",
+    "@openai/agents-extensions": "^0.1.5",
+    "@openrouter/ai-sdk-provider": "^1.2.0",
+    "@supabase/supabase-js": "^2.57.0",
+    "@taskflow/rag": "*",
+    "ai": "^5.0.60",
+    "bullmq": "^5.58.7",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
+    "drizzle-orm": "^0.44.5",
+    "exa-js": "^2.0.12",
+    "express": "^5.1.0",
+    "ioredis": "^5.7.0",
+    "nodemon": "^3.1.10",
+    "postgres": "^3.4.7",
+    "redis": "^5.8.2",
+    "socket.io": "^4.8.1",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.31.4"
+  }
+}
