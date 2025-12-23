@@ -34,7 +34,7 @@
     "dotenv": "^17.2.0",
     "drizzle-orm": "^0.45.1",
     "exa-js": "^2.0.12",
-    "express": "^5.1.0",
+    "express": "^5.2.1",
     "ioredis": "^5.7.0",
     "nodemon": "^3.1.10",
     "postgres": "^3.4.7",
