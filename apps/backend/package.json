@@ -8,11 +8,13 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
+    "build": "echo 'Backend has no build step'",
     "start": "node index.js",
     "dev": "nodemon index.js",
     "docker": "docker compose build & docker compose up",
     "docker:up": "docker compose up --build",
     "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "echo 'No lint configured'",
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
     "db:studio": "drizzle-kit studio"
@@ -32,7 +34,7 @@
     "ai": "^5.0.60",
     "bullmq": "^5.58.7",
     "cors": "^2.8.5",
-    "dotenv": "^17.2.2",
+    "dotenv": "^17.2.0",
     "drizzle-orm": "^0.44.5",
     "exa-js": "^2.0.12",
     "express": "^5.1.0",

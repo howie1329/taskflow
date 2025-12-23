@@ -7,19 +7,21 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "npm run dev --workspace=@taskflow/frontend & npm run dev --workspace=@taskflow/backend",
-    "dev:frontend": "npm run dev --workspace=@taskflow/frontend",
-    "dev:backend": "npm run dev --workspace=@taskflow/backend",
-    "build": "npm run build --workspace=@taskflow/frontend && npm run build --workspace=@taskflow/backend",
-    "build:frontend": "npm run build --workspace=@taskflow/frontend",
-    "build:backend": "npm run build --workspace=@taskflow/backend",
-    "lint": "npm run lint --workspaces",
-    "install:all": "npm install"
+    "dev": "turbo run dev",
+    "dev:frontend": "turbo run dev --filter=@taskflow/frontend",
+    "dev:backend": "turbo run dev --filter=@taskflow/backend",
+    "build": "turbo run build",
+    "build:frontend": "turbo run build --filter=@taskflow/frontend",
+    "build:backend": "turbo run build --filter=@taskflow/backend",
+    "start:backend": "turbo run start --filter=@taskflow/backend",
+    "lint": "turbo run lint",
+    "test": "turbo run test"
   },
   "engines": {
     "node": ">=18.0.0"
   },
   "devDependencies": {
-    "prettier": "^3.0.0"
+    "prettier": "^3.0.0",
+    "turbo": "^2.0.0"
   }
 }

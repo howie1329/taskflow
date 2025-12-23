@@ -10,6 +10,9 @@ dist/
 build/
 *.tsbuildinfo
 
+# Turborepo
+.turbo
+
 # Environment variables
 .env*
 .env*.local
@@ -38,5 +41,5 @@ coverage/
 # Vercel
 .vercel
 
-# Clerk (should be in apps/frontend, but ignore at root too)
+# Clerk
 .clerk/
