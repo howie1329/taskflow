@@ -142,6 +142,12 @@ taskflow-backend/
    # Supabase (optional, if using Supabase)
    SUPABASE_URL=your_supabase_url
    SUPABASE_ANON_KEY=your_supabase_anon_key
+
+   # CORS Configuration
+   # Comma-separated list of allowed origins
+   # Supports wildcard patterns for subdomains (e.g., *.vercel.app)
+   # If not set, defaults to development origins
+   ALLOWED_ORIGINS=https://taskflow-git-dev-howie1329s-projects.vercel.app,http://localhost:3000,http://localhost:3001
    ```
 
 4. **Set up the database**
