@@ -15,6 +15,7 @@ import "./services/bullmq/jobs.js";
 /**
  * Get allowed origins from environment variables
  * Supports comma-separated list: ALLOWED_ORIGINS=https://example.com,https://app.example.com
+ * Supports wildcard patterns: *.vercel.app or taskflow-git-*-howie1329s-projects.vercel.app
  * Falls back to default origins if not set
  */
 const getAllowedOrigins = () => {
@@ -26,10 +27,17 @@ const getAllowedOrigins = () => {
   }
   
   // Default origins for development
+  // Includes wildcard pattern for Vercel preview deployments
+  // The wildcard pattern matches all branch preview deployments like:
+  // - https://taskflow-git-cursor-backend-domain-r-9c47ec-howie1329s-projects.vercel.app
+  // - https://taskflow-git-feature-branch-abc123-howie1329s-projects.vercel.app
   return [
     "http://localhost:3001",
-    "https://taskflow-git-dev-howie1329s-projects.vercel.app",
     "http://localhost:3000",
+    "https://taskflow-git-dev-howie1329s-projects.vercel.app",
+    // Wildcard pattern matches all Vercel preview deployments:
+    // Matches: taskflow-git-{any-branch-name}-howie1329s-projects.vercel.app
+    "https://taskflow-git-*-howie1329s-projects.vercel.app",
   ];
 };
 
@@ -38,21 +46,43 @@ const allowedOrigins = getAllowedOrigins();
 /**
  * Check if an origin is allowed
  * Supports exact matches and wildcard patterns for subdomains
+ * Examples:
+ * - Exact: https://example.com
+ * - Wildcard: https://*.vercel.app matches any-subdomain.vercel.app
+ * - Pattern: https://taskflow-git-*-howie1329s-projects.vercel.app matches preview deployments
  */
 const isOriginAllowed = (origin) => {
   if (!origin) return false;
   
+  // Normalize origin (remove trailing slash if present)
+  const normalizedOrigin = origin.replace(/\/$/, "");
+  
   // Exact match
-  if (allowedOrigins.includes(origin)) {
+  if (allowedOrigins.includes(normalizedOrigin)) {
     return true;
   }
   
-  // Check for wildcard patterns (e.g., *.vercel.app)
+  // Check for wildcard patterns (e.g., https://*.vercel.app or https://taskflow-git-*-howie1329s-projects.vercel.app)
   return allowedOrigins.some((allowedOrigin) => {
     if (allowedOrigin.includes("*")) {
-      const pattern = allowedOrigin.replace(/\./g, "\\.").replace(/\*/g, ".*");
-      const regex = new RegExp(`^${pattern}$`);
-      return regex.test(origin);
+      // Normalize allowed origin (remove trailing slash)
+      const normalizedAllowed = allowedOrigin.replace(/\/$/, "");
+      
+      // If the pattern already includes protocol, use it as-is
+      // Otherwise, assume it's a domain pattern and add protocol
+      let patternToMatch = normalizedAllowed;
+      if (!normalizedAllowed.startsWith("http")) {
+        patternToMatch = `https://${normalizedAllowed}`;
+      }
+      
+      // Escape dots and convert * to regex pattern
+      // https://taskflow-git-*-howie1329s-projects.vercel.app becomes
+      // ^https://taskflow-git-.*-howie1329s-projects\.vercel\.app$
+      const regexPattern = patternToMatch
+        .replace(/\./g, "\\.")
+        .replace(/\*/g, ".*");
+      const regex = new RegExp(`^${regexPattern}$`);
+      return regex.test(normalizedOrigin);
     }
     return false;
   });
