@@ -27,17 +27,18 @@ const getAllowedOrigins = () => {
   }
   
   // Default origins for development
-  // Includes wildcard pattern for Vercel preview deployments
-  // The wildcard pattern matches all branch preview deployments like:
+  // Includes wildcard pattern for all Vercel deployments starting with taskflow-
+  // The wildcard pattern matches all deployments like:
+  // - https://taskflow-git-dev-howie1329s-projects.vercel.app
   // - https://taskflow-git-cursor-backend-domain-r-9c47ec-howie1329s-projects.vercel.app
-  // - https://taskflow-git-feature-branch-abc123-howie1329s-projects.vercel.app
+  // - https://taskflow-production-howie1329s-projects.vercel.app
+  // - Any other taskflow-* deployment
   return [
     "http://localhost:3001",
     "http://localhost:3000",
-    "https://taskflow-git-dev-howie1329s-projects.vercel.app",
-    // Wildcard pattern matches all Vercel preview deployments:
-    // Matches: taskflow-git-{any-branch-name}-howie1329s-projects.vercel.app
-    "https://taskflow-git-*-howie1329s-projects.vercel.app",
+    // Wildcard pattern matches all Vercel deployments starting with taskflow-
+    // Matches: https://taskflow-*.vercel.app (any subdomain pattern)
+    "https://taskflow-*.vercel.app",
   ];
 };
 

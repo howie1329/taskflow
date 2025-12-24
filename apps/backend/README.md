@@ -146,10 +146,10 @@ taskflow-backend/
    # CORS Configuration
    # Comma-separated list of allowed origins
    # Supports wildcard patterns for subdomains (e.g., https://*.vercel.app)
-   # Wildcard pattern automatically matches all Vercel preview deployments:
-   # https://taskflow-git-*-howie1329s-projects.vercel.app
-   # If not set, defaults include localhost and Vercel preview deployments
-   ALLOWED_ORIGINS=https://taskflow-git-dev-howie1329s-projects.vercel.app,https://taskflow-git-*-howie1329s-projects.vercel.app,http://localhost:3000,http://localhost:3001
+   # Wildcard pattern automatically matches all Vercel deployments starting with taskflow-:
+   # https://taskflow-*.vercel.app matches all taskflow deployments
+   # If not set, defaults include localhost and all taskflow-* Vercel deployments
+   ALLOWED_ORIGINS=https://taskflow-*.vercel.app,http://localhost:3000,http://localhost:3001
    ```
 
 4. **Set up the database**
