@@ -270,29 +270,36 @@ export const ChatMessageProvider = ({ conversationId, children }) => {
   const [toolArtifacts, setToolArtifacts] = useState(toolArtifactsDummyData);
 
   // Use the useChat hook to send messages to the backend
-  const { messages, sendMessage, status, setMessages, stop, regenerate } =
-    useChat({
-      id: defaultConversationId, // If no conversationId is provided, use null might need to set to a default value
-      transport: new DefaultChatTransport({
-        api: `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/conversations/${defaultConversationId}/messages`,
-        headers: async () => {
-          const token = await getToken();
-          return {
-            Authorization: token,
-          };
-        },
-        body: {
-          conversationId: defaultConversationId,
-        },
-      }),
-      onToolCall: (toolCall) => {
-        console.log("Inside useChat onToolCallHook", toolCall);
+  const {
+    messages,
+    sendMessage,
+    status,
+    setMessages,
+    stop,
+    regenerate,
+    error,
+  } = useChat({
+    id: defaultConversationId, // If no conversationId is provided, use null might need to set to a default value
+    transport: new DefaultChatTransport({
+      api: `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/conversations/${defaultConversationId}/messages`,
+      headers: async () => {
+        const token = await getToken();
+        return {
+          Authorization: token,
+        };
       },
-      onData: (data) => {
-        console.log("Inside useChat onDataHook", data);
+      body: {
+        conversationId: defaultConversationId,
       },
-      experimental_throttle: 30, // 30ms throttle trying to improve the apperance of the chat of messages streaming in
-    });
+    }),
+    onToolCall: (toolCall) => {
+      console.log("Inside useChat onToolCallHook", toolCall);
+    },
+    onData: (data) => {
+      console.log("Inside useChat onDataHook", data);
+    },
+    experimental_throttle: 30, // 30ms throttle trying to improve the apperance of the chat of messages streaming in
+  });
 
   // Set the messages from the database to the useChat hook
   useEffect(() => {
@@ -332,6 +339,7 @@ export const ChatMessageProvider = ({ conversationId, children }) => {
     setIsToolArtifactsOpen,
     stop,
     regenerate,
+    error,
   };
   return (
     <ChatMessageContext.Provider value={values}>

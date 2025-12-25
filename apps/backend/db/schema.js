@@ -227,3 +227,32 @@ export const tag_relations = pgTable("tag_relations", {
     .defaultNow()
     .notNull(),
 });
+
+export const message_history_summary = pgTable(
+  "message_history_summary",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    conversationId: uuid("conversation_id"),
+    userId: text("user_id"),
+    summary: text(),
+    tags: text().array(),
+    intent: text(),
+    messageCount: integer("message_count").default(0).notNull(),
+    messageStartTokens: integer("message_start_tokens").default(0).notNull(),
+    messageEndTokens: integer("message_end_tokens").default(0).notNull(),
+    messageIndex: integer("message_index").default(0).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.conversationId],
+      foreignColumns: [conversations.id],
+      name: "message_history_summary_conversation_id_fkey",
+    }).onDelete("cascade"),
+  ]
+);

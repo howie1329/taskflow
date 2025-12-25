@@ -13,8 +13,11 @@ import { initSocket } from "./sockets/index.js";
 import "./services/bullmq/jobs.js";
 
 const allowedOrigins = [
+  "https://thetaskflow.app",
+  "https://dev.thetaskflow.app",
   "http://localhost:3001",
   "https://taskflow-git-dev-howie1329s-projects.vercel.app",
+  "https://taskflow-*-howie1329s-projects.vercel.app",
   "http://localhost:3000",
 ];
 

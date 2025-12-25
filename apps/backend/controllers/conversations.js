@@ -9,6 +9,7 @@ import {
 } from "@taskflow/rag";
 import { VercelMainAgentPrompt } from "../utils/AIPrompts/VercelMainAgentPrompt.js";
 import { addMessageSummarizationJob } from "../services/bullmq/queues.js";
+import { messageHistorySummaryOps } from "../db/operations/message_summaries.js";
 
 export const createConversation = async (req, res) => {
   try {
@@ -39,7 +40,9 @@ export const sendMessage = async (req, res) => {
     const { id } = req.params;
     const { messages } = req.body;
     const message = messages[messages.length - 1];
-    const settings = messages[messages.length - 1].metadata;
+
+    // Deprecated
+    //const settings = messages[messages.length - 1].metadata;
 
     // Ensuring Conversation Exists or Creating a New One
     const conversation = await conversationService.ensureConversationExists(
@@ -59,16 +62,20 @@ export const sendMessage = async (req, res) => {
     await conversationService.addUserMessageToConversation(userId, message);
 
     // Getting Related Context if Smart Context is Enabled
-    let relatedContext = null;
-    if (settings?.isSmartContext) {
-      relatedContext = await smartContextService.smartContext(message, userId);
-    }
-
-    console.log("Related Context: ", relatedContext);
-
+    // Deprecated
+    // let relatedContext = null;
+    // if (settings?.isSmartContext) {
+    //   relatedContext = await smartContextService.smartContext(message, userId);
+    // }
     // Getting Current Message History
     const currentMessageHistory =
       await conversationService.getConversationHistory(userId, conversation.id);
+
+    const messageHistorySummaries =
+      await messageHistorySummaryOps.findByConversationId(
+        conversation.id,
+        userId
+      );
 
     console.log(
       "Current Message History Length: ",
@@ -76,9 +83,15 @@ export const sendMessage = async (req, res) => {
     );
 
     let slicedCurrentMessageHistory = currentMessageHistory;
-    if (conversation.summaryMessageIndex > 6) {
+    if (
+      messageHistorySummaries.length > 0 &&
+      messageHistorySummaries[messageHistorySummaries.length - 1].messageIndex >
+        6
+    ) {
+      const lastMessageSummary =
+        messageHistorySummaries[messageHistorySummaries.length - 1];
       slicedCurrentMessageHistory = currentMessageHistory.slice(
-        conversation.summaryMessageIndex - 2
+        lastMessageSummary.messageIndex - 2
       );
     }
 
@@ -105,21 +118,40 @@ export const sendMessage = async (req, res) => {
       "Is Within Limit: ",
       isCurrentMessageHistoryWithinLimit
     );
+
     // Estimating Tokens for conversation summary
-    const { tokenCount: conversationSummaryTokens } = estimateTokens(
-      conversation.summary || ""
-    );
+    let conversationSummaryTokens = 0;
+    let formattedMessageHistory = "";
+    if (messageHistorySummaries.length > 0) {
+      for (const messageHistorySummary of messageHistorySummaries) {
+        console.log("Message History Summary: ", messageHistorySummary);
+        conversationSummaryTokens += messageHistorySummary.messageEndTokens;
+      }
+      formattedMessageHistory = messageHistorySummaries
+        .map((messageHistorySummary) => {
+          return `Conversation ID: ${messageHistorySummary.conversationId}\nSummary: ${messageHistorySummary.summary}\nTags: ${messageHistorySummary.tags}\nIntent: ${messageHistorySummary.intent}`;
+        })
+        .join("\n");
+    }
 
     console.log("Conversation Summary Tokens: ", conversationSummaryTokens);
 
     // Checking If Summary is Needed
     if (!isCurrentMessageHistoryWithinLimit) {
       console.log("Summarizing Conversation");
+      const lastSummaryIndex =
+        messageHistorySummaries.length > 0
+          ? messageHistorySummaries[messageHistorySummaries.length - 1]
+              .messageIndex
+          : 0;
+      const messagesToSummarize = currentMessageHistory.slice(lastSummaryIndex);
+
       // Adding Message Summarization Job
       await addMessageSummarizationJob({
-        conversationHistory: currentMessageHistory,
+        conversationHistory: messagesToSummarize,
         userId,
         conversationId: conversation.id,
+        lastSummaryIndex: lastSummaryIndex,
       });
       console.log("Message Summarization Job Added");
     }
@@ -143,9 +175,8 @@ export const sendMessage = async (req, res) => {
     // AI Response
     await vercelChatService.chatAgent({
       userId,
-      relatedContext,
       userQuestion: message.parts[0].text,
-      conversationSummary: conversation.summary,
+      conversationSummary: formattedMessageHistory,
       model: message.metadata.model,
       recentMessages: prunedCurrentMessageHistory,
       conversationId: conversation.id,

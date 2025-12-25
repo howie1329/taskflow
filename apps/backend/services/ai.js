@@ -159,7 +159,8 @@ export const aiChatService = {
       emptyMessages: "remove",
     });
     console.log("Pruned Messages: ", prunedFormattedMessages);
-    const { object } = await generateObject({
+
+    const result = await generateObject({
       model: openRouter("openai/gpt-4.1-nano"),
       system:
         "You are a summarization agent. You are tasked with summarizing the messages into a concise summary.",
@@ -174,12 +175,14 @@ export const aiChatService = {
       maxOutputTokens: 1000,
       maxRetries: 3,
     });
-    console.log("Summary Object: ", object);
+    console.log("Summary Object: ", result.object);
     return {
-      summary: object.summary,
-      tags: object.tags,
-      intent: object.intent,
+      summary: result.object.summary,
+      tags: result.object.tags,
+      intent: result.object.intent,
       messageCount: prunedFormattedMessages.length,
+      messageStartTokens: result.usage.inputTokens,
+      messageEndTokens: result.usage.outputTokens,
     };
   },
 
@@ -264,7 +267,6 @@ export const vercelChatService = {
    */
   async chatAgent({
     userId,
-    relatedContext,
     userQuestion,
     conversationSummary,
     model = "openai/gpt-4o-mini",
@@ -278,9 +280,14 @@ export const vercelChatService = {
         const miniAgent = VercelMiniAgents(writer);
 
         const agent = new VercelAgent({
-          model: openRouter(model),
+          model: openRouter(model, {
+            extraBody: {
+              models: ["openai/gpt-4o-mini"], // testing for fallback model,
+            },
+          }),
+
           system: VercelMainAgentPrompt({
-            userContext: relatedContext,
+            userContext: "No related context provided",
             userId,
             userQuestion,
             conversationSummary,
