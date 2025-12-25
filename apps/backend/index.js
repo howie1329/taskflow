@@ -47,10 +47,11 @@ app.use("/api/v1", router);
 
 initSocket(httpServer, corsOptions);
 
-httpServer.listen(port, () => {
+httpServer.listen(port, async () => {
   console.log(`Server is running at http://localhost:${port}`);
   // Start the notifications cron jobs
-  cacheService.connect();
+  console.log("Env Variables: " + JSON.stringify(process.env));
+  await cacheService.connect();
   initWorkers();
   startNotificationCleanupCron();
   cleanupPastJobs();
