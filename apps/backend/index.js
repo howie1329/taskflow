@@ -11,6 +11,7 @@ import {
 import router from "./routes/v1/index.js";
 import { initSocket } from "./sockets/index.js";
 import "./services/bullmq/jobs.js";
+import { cacheService } from "./services/cache.js";
 
 const allowedOrigins = [
   "https://thetaskflow.app",
@@ -49,6 +50,7 @@ initSocket(httpServer, corsOptions);
 httpServer.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
   // Start the notifications cron jobs
+  cacheService.connect();
   initWorkers();
   startNotificationCleanupCron();
   cleanupPastJobs();
