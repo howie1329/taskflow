@@ -101,7 +101,6 @@ export const RenderUserMessageContent = ({ messageContent, partContent }) => {
       <div className="bg-primary text-primary-foreground rounded-sm max-w-[75%] px-3 py-2 text-sm border">
         {partContent.text}
       </div>
-      <p className="text-muted-foreground/60 text-xs">{timestamp}</p>
     </motion.div>
   );
 };
@@ -166,7 +165,7 @@ export const RenderAssistantMessageContent = ({
           <span className="text-xs text-blue-500/70">🧠 Smart Context</span>
         )}
       </div>
-      <div className="relative text-foreground rounded-none max-w-[65%] px-2 py-2 prose prose-sm border-r">
+      <div className="relative text-foreground rounded-none w-full max-w-[65%] px-2 py-2 prose prose-sm border-r">
         <Markdown remarkPlugins={[remarkGfm]}>{partContent.text}</Markdown>
       </div>
       <div className="flex flex-row gap-2 items-center">
