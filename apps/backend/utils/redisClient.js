@@ -4,7 +4,8 @@ dotenv.config();
 
 const redisUrl = process.env.REDIS_URL || process.env.REDIS_PUBLIC_URL;
 if (!redisUrl) {
-  console.error("REDIS_URL is not set");
+  console.error("REDIS_URL is not set: " + redisUrl);
+  console.error("REDIS_PUBLIC_URL is not set: " + process.env.REDIS_PUBLIC_URL);
   throw new Error("REDIS_URL is not set");
 }
 
