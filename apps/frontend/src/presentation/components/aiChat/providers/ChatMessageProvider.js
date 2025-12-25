@@ -323,6 +323,7 @@ export const ChatMessageProvider = ({ conversationId, children }) => {
   // Update the conversation title on messsages receive
   useEffect(() => {
     if (!conversation?.title && messages.length > 0) {
+      console.log("Refetching conversation", defaultConversationId);
       queryClient.refetchQueries({
         queryKey: ["conversation", defaultConversationId],
       });

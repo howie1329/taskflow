@@ -399,7 +399,10 @@ export const suggestedMessageService = {
    * @param {string} model - The model to use for the suggested messages.
    * @returns {Array} - The suggested messages.
    */
-  async generateSuggestedMessages(context, model = "x-ai/grok-4-fast") {
+  async generateSuggestedMessages(
+    context,
+    model = "mistralai/devstral-2512:free"
+  ) {
     let systemPrompt = "";
     let recentMessagesPrompt = "";
     if (context.isContext) {
