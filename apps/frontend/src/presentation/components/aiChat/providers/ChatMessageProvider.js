@@ -286,10 +286,10 @@ export const ChatMessageProvider = ({ conversationId, children }) => {
         },
       }),
       onToolCall: (toolCall) => {
-        //console.log("Inside useChat onToolCallHook", toolCall);
+        console.log("Inside useChat onToolCallHook", toolCall);
       },
       onData: (data) => {
-        //console.log("Inside useChat onDataHook", data);
+        console.log("Inside useChat onDataHook", data);
       },
       onFinish: () => {
         const expectedPath = "/mainview/aichat/" + defaultConversationId;
@@ -304,12 +304,6 @@ export const ChatMessageProvider = ({ conversationId, children }) => {
       },
       experimental_throttle: 100, // 100ms throttle trying to improve the apperance of the chat of messages streaming in
     });
-
-  useEffect(() => {
-    if (error) {
-      console.error("Chat error:", error);
-    }
-  }, [error]);
 
   // Set the messages from the database to the useChat hook
   useEffect(() => {
