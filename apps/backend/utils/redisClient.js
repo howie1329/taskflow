@@ -2,7 +2,7 @@ import { createClient } from "redis";
 import dotenv from "dotenv";
 dotenv.config();
 
-const redisUrl = process.env.REDIS_URL;
+const redisUrl = process.env.REDIS_URL || process.env.REDIS_PUBLIC_URL;
 if (!redisUrl) {
   console.error("REDIS_URL is not set");
   throw new Error("REDIS_URL is not set");
