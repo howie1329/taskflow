@@ -144,7 +144,7 @@ export const generateSuggestedMessages = async (req, res) => {
       const prunedFormattedMessages = pruneMessages({
         messages: formattedMessages,
         reasoning: "before-last-message",
-        toolCalls: "before-last-message",
+        toolCalls: "all",
         emptyMessages: "remove",
       });
       context = {
