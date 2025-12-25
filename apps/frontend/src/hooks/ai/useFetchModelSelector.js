@@ -49,6 +49,8 @@ const modelNames = [
   "openrouter/sonoma-dusk-alpha",
   "openrouter/sonoma-sky-alpha",
   "mistralai/mistral-small-3.1-24b-instruct:free",
+  "mistralai/devstral-2512:free",
+  "moonshotai/kimi-k2:free",
   "deepseek/deepseek-chat-v3.1",
   "deepseek/deepseek-v3.2",
   "google/gemini-2.5-flash-lite",

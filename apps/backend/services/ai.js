@@ -412,9 +412,16 @@ export const suggestedMessageService = {
       The conversation intent is: ${context.intent}`;
     }
     if (context.recentMessages && context.recentMessages.length > 0) {
-      recentMessagesPrompt = `The recent messages are: ${context.recentMessages
-        .map((message) => message.role + ": " + message.content)
-        .join("\n")}`;
+      let baseMessage = "The recent messages are: \n";
+
+      context.recentMessages.forEach((message) => {
+        baseMessage +=
+          message.role +
+          ": " +
+          JSON.stringify([...message.content][0].text) +
+          "\n";
+      });
+      recentMessagesPrompt = baseMessage;
     }
     try {
       const { object: suggestedMessages } = await generateObject({
@@ -422,13 +429,13 @@ export const suggestedMessageService = {
         prompt:
           "Generate a array of suggested 3-4 questions from the users perspective to continue the conversation. " +
           "The questions should be no more then 2 sentences each." +
-          "The questions should be relevant to the conversation and the context of the conversation." +
+          "The questions should be relevant to the conversation, recent messages, and the intent of the conversation." +
           "They should be something the user can ask the main agent to continue the conversation." +
           systemPrompt +
           recentMessagesPrompt,
         system:
           "You are a suggested question generation agent. You are tasked with generating a array of suggested 3-4 questions for the user. " +
-          "You are apart of Taskflow, a task management tool / research tool / knowledge base tool. ",
+          "You are apart of Taskflow, a task management tool / research tool / knowledge base tool / General Chat Agent.",
         schema: z.object({
           questions: z
             .array(
