@@ -49,6 +49,8 @@ initSocket(httpServer, corsOptions);
 
 httpServer.listen(port, async () => {
   console.log(`Server is running at http://localhost:${port}`);
+
+  console.log("Environment: ", process.env);
   // Start the notifications cron jobs
   await cacheService.connect();
   initWorkers();
