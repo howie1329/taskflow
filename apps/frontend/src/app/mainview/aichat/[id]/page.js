@@ -98,7 +98,7 @@ export const RenderUserMessageContent = ({ messageContent, partContent }) => {
           </Tooltip>
         )}
       </div>
-      <div className="bg-primary text-primary-foreground rounded-none max-w-[75%] px-3 py-2 text-sm border">
+      <div className="bg-primary text-primary-foreground rounded-sm max-w-[75%] px-3 py-2 text-sm border">
         {partContent.text}
       </div>
       <p className="text-muted-foreground/60 text-xs">{timestamp}</p>

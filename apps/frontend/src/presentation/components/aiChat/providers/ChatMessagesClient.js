@@ -14,7 +14,7 @@ import { AlertCircleIcon } from "@hugeicons/core-free-icons/index";
 import { Button } from "@/components/ui/button";
 
 export const ChatMessagesClient = () => {
-  const { messages, messagesLoading, status, error, regenerate } =
+  const { messages, messagesLoading, status, regenerate } =
     useChatMessageContext();
   const { conversations, conversationsLoading } = useChatHistoryContext();
 
@@ -96,33 +96,10 @@ export const ChatMessagesClient = () => {
                     return null;
                 }
               })}
-
-              {error && (
-                <Badge
-                  variant="outline"
-                  className="flex flex-row gap-2 items-center"
-                >
-                  <HugeiconsIcon
-                    icon={AlertCircleIcon}
-                    size={20}
-                    strokeWidth={2}
-                  />
-                  <span className="text-muted-foreground">
-                    Something went wrong, click to Retry
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-muted-foreground"
-                    onClick={regenerate}
-                  >
-                    Retry
-                  </Button>
-                </Badge>
-              )}
             </div>
           );
         })}
+
       {status === "streaming" && (
         <Badge variant="outline" className="flex flex-row gap-2 items-center">
           <Spinner />
