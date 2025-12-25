@@ -20,6 +20,11 @@
         "*"
       ]
     },
+     "@taskflow/backend#start": {
+      "cache": false,
+      "persistent": true,
+      "env": ["*"]
+    },
     "dev": {
       "cache": false,
       "persistent": true
