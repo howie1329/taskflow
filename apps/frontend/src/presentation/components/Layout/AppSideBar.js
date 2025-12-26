@@ -40,7 +40,7 @@ import {
   BookOpen02Icon,
   Calendar02Icon,
   CheckListIcon,
-  Clipboard02Icon,
+  ClipboardIcon,
   ColorsIcon,
   Folder02Icon,
   InboxIcon,
@@ -82,7 +82,7 @@ export default function AppSideBar() {
     },
     {
       label: "Todo",
-      icon: <HugeiconsIcon icon={Clipboard02Icon} size={20} strokeWidth={2} />,
+      icon: <HugeiconsIcon icon={ClipboardIcon} size={20} strokeWidth={2} />,
       href: "/mainview/todo",
     },
     {
