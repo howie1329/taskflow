@@ -12,9 +12,15 @@ export default function Layout({ children }) {
 
   useEffect(() => {
     const handleKeyDown = (event) => {
+      // Cmd/Ctrl + K to toggle search
       if (event.key.toLowerCase() === "k" && (event.metaKey || event.ctrlKey)) {
         event.preventDefault();
-        setIsGlobalSmartSearchOpen(!isGlobalSmartSearchOpen);
+        setIsGlobalSmartSearchOpen((prev) => !prev);
+      }
+      // Escape to close search
+      if (event.key === "Escape" && isGlobalSmartSearchOpen) {
+        event.preventDefault();
+        setIsGlobalSmartSearchOpen(false);
       }
     };
     window.addEventListener("keydown", handleKeyDown);
