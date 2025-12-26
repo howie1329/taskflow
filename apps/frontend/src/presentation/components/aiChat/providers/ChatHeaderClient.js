@@ -16,6 +16,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useEffect, useState } from "react";
+import useSocketConnection from "@/lib/sockets/useSocketConnection";
 
 export const ChatHeaderClient = () => {
   const {
@@ -27,7 +29,8 @@ export const ChatHeaderClient = () => {
   } = useChatMessageContext();
   const { mutate: deleteConversation } = useDeleteConversation();
   const router = useRouter();
-
+  const { socket, isConnected } = useSocketConnection();
+  const [title, setTitle] = useState(conversation?.title || "");
   const handleDeleteConversation = () => {
     console.log("Deleting conversation for id: ", defaultConversationId);
     deleteConversation(defaultConversationId);
@@ -37,12 +40,25 @@ export const ChatHeaderClient = () => {
   const handleNewConversation = () => {
     router.push("/mainview/aichat");
   };
+
+  useEffect(() => {
+    if (socket && isConnected) {
+      console.log("Listening for conversation title updates");
+      socket.on("conversation-title-updated", (data) => {
+        const { conversationId, title } = data;
+        if (conversationId === defaultConversationId) {
+          setTitle(title);
+          console.log("Conversation title updated:", title);
+        }
+      });
+    }
+  }, [socket, isConnected, defaultConversationId]);
   return (
     <div className="flex flex-col gap-2 justify-between items-center w-full">
       <div className="flex flex-row justify-between items-center w-full">
         <SidebarTrigger className="lg:hidden" />
         <h1 className="text-lg font-bold text-ellipsis line-clamp-1">
-          {conversation?.title}
+          {title}
         </h1>
         <div className="flex flex-row gap-2">
           <ChatHeaderOptionsPopover

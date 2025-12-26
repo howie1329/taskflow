@@ -4,6 +4,7 @@ import { messageOps } from "../db/operations/messages.js";
 import { aiChatService } from "./ai.js";
 import { estimateTokensFromPrunedMessages } from "@taskflow/rag";
 import { convertToModelMessages, pruneMessages } from "ai";
+import { emitToRoom } from "../sockets/index.js";
 
 export const conversationService = {
   async createConversation(userId, title, id) {
@@ -33,6 +34,10 @@ export const conversationService = {
         "Inside ensureConversationExists Creating New Conversation",
         newConversation
       );
+      emitToRoom(userId, "conversation-title-updated", {
+        conversationId: conversationId,
+        title: title,
+      });
       return newConversation;
     }
 

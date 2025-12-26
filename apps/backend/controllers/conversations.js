@@ -10,7 +10,9 @@ import {
 import { VercelMainAgentPrompt } from "../utils/AIPrompts/VercelMainAgentPrompt.js";
 import { addMessageSummarizationJob } from "../services/bullmq/queues.js";
 import { messageHistorySummaryOps } from "../db/operations/message_summaries.js";
+import { emitToRoom } from "../sockets/index.js";
 
+// Create Conversation is Deprecated
 export const createConversation = async (req, res) => {
   try {
     const userId = req.userId;
@@ -18,6 +20,10 @@ export const createConversation = async (req, res) => {
     console.log("Inside Create Conversation Message: ", message);
     const title = await aiChatService.createTitle(message);
     console.log("Inside Create Conversation Title: ", title);
+    emitToRoom(userId, "conversation-title-updated", {
+      conversationId: id,
+      title: title,
+    });
     const created_conversation = await conversationService.createConversation(
       userId,
       title,
