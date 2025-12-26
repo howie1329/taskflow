@@ -2,6 +2,7 @@ import { Worker } from "bullmq";
 import { aiChatService } from "../ai.js";
 import { redisConnection } from "./queues.js";
 import { messageHistorySummaryOps } from "../../db/operations/message_summaries.js";
+import { conversationService } from "../conversations.js";
 
 // New BullMQ Implementation
 
@@ -20,6 +21,12 @@ const messageSummarizationWorker = new Worker(
       ...summaryObject,
       messageIndex: lastSummaryIndex + summaryObject.messageCount,
     });
+
+    await conversationService.updateConversationTitleFromSummary(
+      userId,
+      conversationId,
+      summaryObject.summary
+    );
 
     console.log("Message History Summary Created");
     return summaryObject;

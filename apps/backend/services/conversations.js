@@ -30,10 +30,7 @@ export const conversationService = {
         userId,
         title,
       });
-      console.log(
-        "Inside ensureConversationExists Creating New Conversation",
-        newConversation
-      );
+
       emitToRoom(userId, "conversation-title-updated", {
         conversationId: conversationId,
         title: title,
@@ -44,6 +41,31 @@ export const conversationService = {
     return conversation;
   },
 
+  async updateConversationTitleFromSummary(userId, conversationId, summary) {
+    try {
+      // Generate a new title from the summary using AI
+      const newTitle = await aiChatService.titleConversation(summary);
+
+      // Update the conversation with the new title
+      const updatedConversation = await conversationOps.update(
+        conversationId,
+        userId,
+        {
+          title: newTitle,
+        }
+      );
+
+      // Emit socket event to notify clients about the title update
+      emitToRoom(userId, "conversation-title-updated", {
+        conversationId: conversationId,
+        title: newTitle,
+      });
+      return updatedConversation;
+    } catch (error) {
+      console.error("Error updating conversation title from summary:", error);
+      return null;
+    }
+  },
   async addUserMessageToConversation(userId, message) {
     const properMessages = convertToModelMessages([message]);
     const prunedMessage = pruneMessages({ messages: properMessages });
