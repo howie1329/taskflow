@@ -5,6 +5,8 @@ export {
   tokenService,
   summarizeConversation,
   MessageContextSlicer,
+  formatSummarizedMessageHistory,
+  getMessagesToSummarize,
 } from "./core/index.js";
 
 export type {
@@ -17,4 +19,5 @@ export type {
   TokenService,
   ChatMessageFromDB,
   MessageSummary,
+  GetMessagesToSummarizeResult,
 } from "./types.js";

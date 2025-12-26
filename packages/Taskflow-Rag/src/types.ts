@@ -79,3 +79,8 @@ export type TokenService = {
     tokenLimit?: number
   ) => EstimateTokensFromPrunedMessagesResult;
 };
+
+export type GetMessagesToSummarizeResult = {
+  messagesToSummarize: ChatMessageFromDB[];
+  lastSummaryIndex: number;
+};

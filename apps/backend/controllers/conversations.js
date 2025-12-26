@@ -5,10 +5,13 @@ import {
   estimateTokensFromPrunedMessages,
   estimateTokens,
   MessageContextSlicer,
+  formatSummarizedMessageHistory,
+  getMessagesToSummarize,
 } from "@taskflow/rag";
 import { VercelMainAgentPrompt } from "../utils/AIPrompts/VercelMainAgentPrompt.js";
 import { addMessageSummarizationJob } from "../services/bullmq/queues.js";
 import { messageHistorySummaryOps } from "../db/operations/message_summaries.js";
+import { CONTEXT_WINDOW_SIZE } from "../Constants.js";
 
 export const sendMessage = async (req, res) => {
   try {
@@ -48,10 +51,11 @@ export const sendMessage = async (req, res) => {
       "Current Message History Length: ",
       currentMessageHistory.length
     );
+    // Slicing Current Message History to the last 6 messages
     const slicedCurrentMessageHistory = MessageContextSlicer(
       messageHistorySummaries,
       currentMessageHistory,
-      2
+      CONTEXT_WINDOW_SIZE
     );
 
     // Converting Messages to Model Messages
@@ -79,31 +83,18 @@ export const sendMessage = async (req, res) => {
     );
 
     // Estimating Tokens for conversation summary
-    let conversationSummaryTokens = 0;
-    let formattedMessageHistory = "";
-    if (messageHistorySummaries.length > 0) {
-      for (const messageHistorySummary of messageHistorySummaries) {
-        console.log("Message History Summary: ", messageHistorySummary);
-        conversationSummaryTokens += messageHistorySummary.messageEndTokens;
-      }
-      formattedMessageHistory = messageHistorySummaries
-        .map((messageHistorySummary) => {
-          return `Conversation ID: ${messageHistorySummary.conversationId}\nSummary: ${messageHistorySummary.summary}\nTags: ${messageHistorySummary.tags}\nIntent: ${messageHistorySummary.intent}`;
-        })
-        .join("\n");
-    }
+    const { formattedMessageHistory, conversationSummaryTokens } =
+      formatSummarizedMessageHistory(messageHistorySummaries);
 
     console.log("Conversation Summary Tokens: ", conversationSummaryTokens);
 
     // Checking If Summary is Needed
     if (!isCurrentMessageHistoryWithinLimit) {
       console.log("Summarizing Conversation");
-      const lastSummaryIndex =
-        messageHistorySummaries.length > 0
-          ? messageHistorySummaries[messageHistorySummaries.length - 1]
-              .messageIndex
-          : 0;
-      const messagesToSummarize = currentMessageHistory.slice(lastSummaryIndex);
+      const { messagesToSummarize, lastSummaryIndex } = getMessagesToSummarize(
+        messageHistorySummaries,
+        currentMessageHistory
+      );
 
       // Adding Message Summarization Job
       await addMessageSummarizationJob({
