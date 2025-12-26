@@ -98,7 +98,7 @@ export default function AppSideBar() {
     },
   ];
   return (
-    <Sidebar>
+    <Sidebar className="[&_[data-sidebar=sidebar]]:!bg-background">
       <SidebarHeader className="px-3 py-2 border-b border-sidebar-border">
         <div className="flex flex-col items-center justify-between w-full gap-1.5">
           {/* Logo Section */}
