@@ -113,42 +113,6 @@ export const embeddingService = {
 
 // AI Chat Service
 export const aiChatService = {
-  async decidingModel(recentMessages, userContext, userQuestion) {
-    const formattedRecentMessages = recentMessages.map((message) => ({
-      role: message.role,
-      content: message.content,
-    }));
-    console.log("Formatted Recent Messages", formattedRecentMessages);
-    const decidingModelSchema = z.object({
-      model: z.string().describe("The model to use"),
-      toolGroup: z.string().describe("The tool group to use"),
-      confidenceLevel: z.number().describe("The confidence level"),
-      reasoning: z.string().describe("The reasoning"),
-      relatedContext: z
-        .array(
-          z.object({
-            id: z.string().describe("The id"),
-            title: z.string().describe("The title"),
-            description: z.string().describe("The description"),
-          })
-        )
-        .describe("The related context")
-        .nullable(),
-    });
-
-    const { object } = await generateObject({
-      model: openRouter("openai/gpt-oss-20b:free"),
-      messages: formattedRecentMessages,
-      schema: decidingModelSchema,
-      maxOutputTokens: 800,
-      temperature: 0.1,
-      maxRetries: 2,
-      system: createDecidingModelPrompt(userContext, userQuestion),
-    });
-
-    return object;
-  },
-
   async newSummarization(messages) {
     console.log("Inside New Summarization Job ");
     const formattedMessages = convertToModelMessages(messages);
@@ -186,53 +150,34 @@ export const aiChatService = {
     };
   },
 
-  async summarization(deltaMessages) {
-    console.log("Summarizing Messages");
-    const formattedDeltaMessages = convertToModelMessages(deltaMessages);
-    const { text } = await generateText({
+  async createTitleFromInitalMessage(message) {
+    const initialMessage = message.parts[0].text;
+    const { text: title } = await generateText({
       model: openRouter("openai/gpt-oss-20b:free"),
       system:
-        "You are a summarization agent. You are tasked with summarizing the messages into a concise summary.",
-      prompt: createSummaryPrompt(formattedDeltaMessages),
-      maxOutputTokens: 500,
-      temperature: 0.1,
+        "You are a title generation agent. You are tasked with generating a title for a conversation based on the initial message.",
+      prompt: `Generate a title for a conversation based on the initial message: ${initialMessage}. 
+      The title should be a single sentence and should be no more than 100 characters.
+      You must return text.`,
+      maxOutputTokens: 100,
+      temperature: 0.7,
       maxRetries: 2,
     });
-    return text;
+
+    return title;
   },
 
-  async createTitle(message) {
-    const initialMessage = message.parts[0].text;
-    console.log("Creating Title for conversation. Message: ", initialMessage);
+  async titleConversation(summary) {
     const { text: title } = await generateText({
       model: openRouter("openai/gpt-oss-20b:free"),
       system:
         "You are a title generation agent. You are tasked with generating a title for a conversation based on the content.",
-      prompt: `Generate a title for a conversation based on the content: ${initialMessage}. You must return text. The title should be a single sentence and should be no more than 100 characters.`,
-      maxRetries: 3,
-    });
-    console.log(
-      "Creating Title for conversation. Message: ",
-      initialMessage,
-      "Title: ",
-      title
-    );
-    return title;
-  },
-
-  async titleConversation(content, pastMessages = "") {
-    console.log("Title Content", content, "Past Messages", pastMessages);
-    const result = await generateText({
-      model: openRouter("openai/gpt-oss-20b:free"),
-      system:
-        "You are a title generation agent. You are tasked with generating a title for a conversation based on the content.",
-      prompt: `Generate a title for a conversation based on the content: ${content} and the past messages: ${pastMessages}. You must return text.`,
+      prompt: `Generate a title for a conversation based on the content: ${summary}. You must return text.`,
       maxOutputTokens: 100,
-      temperature: 0.1,
+      temperature: 0.7,
       maxRetries: 2,
     });
-    console.log("Title", result.text);
-    return result.text;
+    return title;
   },
 
   async fetchModels() {
