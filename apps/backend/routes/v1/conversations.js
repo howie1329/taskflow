@@ -1,8 +1,5 @@
 import express from "express";
-import {
-  createConversation,
-  sendMessage,
-} from "../../controllers/conversations.js";
+import { sendMessage } from "../../controllers/conversations.js";
 import {
   deleteConversation,
   fetchConversation,
@@ -11,7 +8,6 @@ import {
 } from "../../controllers/ai.js";
 const router = express.Router();
 
-router.post("/create", createConversation);
 router.get("/", fetchConversations);
 router.get("/:id", fetchConversation);
 router.delete("/:id", deleteConversation);

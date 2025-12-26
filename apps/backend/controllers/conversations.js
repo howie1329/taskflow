@@ -1,5 +1,3 @@
-import { aiChatService } from "../services/ai.js";
-import { smartContextService } from "../services/chat/SmartContextService.js";
 import { conversationService } from "../services/conversations.js";
 import { vercelChatService } from "../services/ai.js";
 import { convertToModelMessages, pruneMessages } from "ai";
@@ -10,35 +8,6 @@ import {
 import { VercelMainAgentPrompt } from "../utils/AIPrompts/VercelMainAgentPrompt.js";
 import { addMessageSummarizationJob } from "../services/bullmq/queues.js";
 import { messageHistorySummaryOps } from "../db/operations/message_summaries.js";
-import { emitToRoom } from "../sockets/index.js";
-
-// Create Conversation is Deprecated
-export const createConversation = async (req, res) => {
-  try {
-    const userId = req.userId;
-    const { id, message } = req.body;
-    console.log("Inside Create Conversation Message: ", message);
-    const title = await aiChatService.createTitle(message);
-    console.log("Inside Create Conversation Title: ", title);
-    emitToRoom(userId, "conversation-title-updated", {
-      conversationId: id,
-      title: title,
-    });
-    const created_conversation = await conversationService.createConversation(
-      userId,
-      title,
-      id
-    );
-    return res.status(201).json({
-      success: true,
-      message: "Conversation created successfully",
-      data: created_conversation,
-    });
-  } catch (error) {
-    console.error("Create conversation error:", error);
-    return res.status(500).json({ error: "Failed to create conversation" });
-  }
-};
 
 export const sendMessage = async (req, res) => {
   try {
