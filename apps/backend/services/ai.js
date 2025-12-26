@@ -122,7 +122,6 @@ export const aiChatService = {
       toolCalls: "before-last-message",
       emptyMessages: "remove",
     });
-    console.log("Pruned Messages: ", prunedFormattedMessages);
 
     const { object: summaryObject } = await generateObject({
       model: openRouter("openai/gpt-oss-20b:free"),
