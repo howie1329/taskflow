@@ -124,10 +124,11 @@ export const aiChatService = {
     });
     console.log("Pruned Messages: ", prunedFormattedMessages);
 
-    const result = await generateObject({
-      model: openRouter("openai/gpt-4.1-nano"),
+    const { object: summaryObject } = await generateObject({
+      model: openRouter("openai/gpt-oss-20b:free"),
       system:
-        "You are a summarization agent. You are tasked with summarizing the messages into a concise summary.",
+        "You are a summarization agent. You are tasked with summarizing the messages into a concise summary." +
+        "This summary will be used in other llms and agents to help them continue the conversation.",
       prompt: createSummaryPrompt({ messages: prunedFormattedMessages }),
       schema: z.object({
         summary: z.string().describe("The summary of the messages"),
@@ -137,16 +138,17 @@ export const aiChatService = {
         intent: z.string().describe("The intent of the summary"),
       }),
       maxOutputTokens: 1000,
-      maxRetries: 3,
+      maxRetries: 2,
+      temperature: 0.7,
     });
-    console.log("Summary Object: ", result.object);
+    console.log("Summary Object: ", summaryObject);
     return {
-      summary: result.object.summary,
-      tags: result.object.tags,
-      intent: result.object.intent,
+      summary: summaryObject.summary,
+      tags: summaryObject.tags,
+      intent: summaryObject.intent,
       messageCount: prunedFormattedMessages.length,
-      messageStartTokens: result.usage.inputTokens,
-      messageEndTokens: result.usage.outputTokens,
+      messageStartTokens: summaryObject.usage.inputTokens,
+      messageEndTokens: summaryObject.usage.outputTokens,
     };
   },
 
