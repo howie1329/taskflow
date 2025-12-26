@@ -17,8 +17,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useEffect, useState } from "react";
-import useSocketConnection from "@/lib/sockets/useSocketConnection";
-
+import { useSocket } from "@/lib/sockets/SocketProvider";
 export const ChatHeaderClient = () => {
   const {
     conversation,
@@ -29,7 +28,7 @@ export const ChatHeaderClient = () => {
   } = useChatMessageContext();
   const { mutate: deleteConversation } = useDeleteConversation();
   const router = useRouter();
-  const { socket, isConnected } = useSocketConnection();
+  const { socket, isConnected } = useSocket();
   const [title, setTitle] = useState(conversation?.title || "");
   const handleDeleteConversation = () => {
     console.log("Deleting conversation for id: ", defaultConversationId);
