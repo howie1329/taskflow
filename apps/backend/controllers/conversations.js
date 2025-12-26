@@ -4,6 +4,7 @@ import { convertToModelMessages, pruneMessages } from "ai";
 import {
   estimateTokensFromPrunedMessages,
   estimateTokens,
+  MessageContextSlicer,
 } from "@taskflow/rag";
 import { VercelMainAgentPrompt } from "../utils/AIPrompts/VercelMainAgentPrompt.js";
 import { addMessageSummarizationJob } from "../services/bullmq/queues.js";
@@ -15,9 +16,6 @@ export const sendMessage = async (req, res) => {
     const { id } = req.params;
     const { messages } = req.body;
     const message = messages[messages.length - 1];
-
-    // Deprecated
-    //const settings = messages[messages.length - 1].metadata;
 
     // Ensuring Conversation Exists or Creating a New One
     const conversation = await conversationService.ensureConversationExists(
@@ -36,12 +34,6 @@ export const sendMessage = async (req, res) => {
     // Adding User Message to Conversation
     await conversationService.addUserMessageToConversation(userId, message);
 
-    // Getting Related Context if Smart Context is Enabled
-    // Deprecated
-    // let relatedContext = null;
-    // if (settings?.isSmartContext) {
-    //   relatedContext = await smartContextService.smartContext(message, userId);
-    // }
     // Getting Current Message History
     const currentMessageHistory =
       await conversationService.getConversationHistory(userId, conversation.id);
@@ -56,19 +48,11 @@ export const sendMessage = async (req, res) => {
       "Current Message History Length: ",
       currentMessageHistory.length
     );
-
-    let slicedCurrentMessageHistory = currentMessageHistory;
-    if (
-      messageHistorySummaries.length > 0 &&
-      messageHistorySummaries[messageHistorySummaries.length - 1].messageIndex >
-        6
-    ) {
-      const lastMessageSummary =
-        messageHistorySummaries[messageHistorySummaries.length - 1];
-      slicedCurrentMessageHistory = currentMessageHistory.slice(
-        lastMessageSummary.messageIndex - 2
-      );
-    }
+    const slicedCurrentMessageHistory = MessageContextSlicer(
+      messageHistorySummaries,
+      currentMessageHistory,
+      2
+    );
 
     // Converting Messages to Model Messages
     const convertedMessages = convertToModelMessages(

@@ -5,7 +5,7 @@ import {
   isWithinTokenLimit,
 } from "gpt-tokenizer";
 
-import type { ChatMessage,PrunedMessage, TokenEstimate, EstimateTokensFromPrunedMessagesResult, SummarizeConversationResult, TokenService } from "../types.js";
+import type { ChatMessage,PrunedMessage,MessageSummary, TokenEstimate, EstimateTokensFromPrunedMessagesResult, SummarizeConversationResult, TokenService, ChatMessageFromDB } from "../types.js";
 /**
  * Token Service
  * Estimates tokens for content and messages
@@ -118,7 +118,7 @@ export const tokenService: TokenService = {
  * @param {number} tokenLimit - The token limit to check against
  * @returns {Object} - The estimated tokens and whether the messages should be summarized
  */
-export const summarizeConversation = (messages: ChatMessage[], tokenLimit = 2000): SummarizeConversationResult=> {
+export const summarizeConversation = (messages: ChatMessage[], tokenLimit: number = 2000): SummarizeConversationResult=> {
   try {
     const estimatedTokens = countTokens(messages);
     const shouldSummarize = isWithinTokenLimit(messages, tokenLimit);
@@ -134,3 +134,16 @@ export const summarizeConversation = (messages: ChatMessage[], tokenLimit = 2000
     };
   }
 };
+
+
+export const MessageContextSlicer = (messageSummaries: MessageSummary[], currentMessages: ChatMessageFromDB[],sliceIndex: number) => {
+  try {
+    if (messageSummaries.length > 0 && messageSummaries[messageSummaries.length - 1].messageIndex > 6) {
+      const lastSummary = messageSummaries[messageSummaries.length - 1];
+      return currentMessages.slice(lastSummary.messageIndex - sliceIndex);
+    }
+  } catch (error) {
+    console.error("Error slicing message context:", error);
+    return currentMessages;
+  }
+}

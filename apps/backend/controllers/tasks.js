@@ -16,8 +16,8 @@ export const createTask = async (req, res) => {
       const subtasksWithTaskId = subtasks
         .filter((subtask) => subtask !== "")
         .map((subtask) => ({
-          subtask_name: subtask,
-          task_id: task.id,
+          subtaskName: subtask,
+          taskId: task.id,
         }));
 
       if (subtasksWithTaskId.length > 0) {
