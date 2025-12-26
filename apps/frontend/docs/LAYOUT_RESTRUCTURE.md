@@ -7,7 +7,6 @@ The base layout has been restructured to provide a more modern and flexible appl
 1. **Persistent Header** (Top)
 2. **Left Sidebar** (Collapsible Navigation)
 3. **Main Content Area** (Center)
-4. **Right Sidebar** (Contextual Information)
 
 ## Layout Structure
 
@@ -15,16 +14,16 @@ The base layout has been restructured to provide a more modern and flexible appl
 ┌─────────────────────────────────────────────────────────────┐
 │                     Header (AppHeader)                       │
 │  [Menu] TaskFlow    [Theme] [Notifications] [User Menu]     │
-├──────────┬──────────────────────────────────┬───────────────┤
-│          │                                  │               │
-│  Left    │                                  │    Right      │
-│ Sidebar  │      Main Content Area           │   Sidebar     │
-│          │                                  │               │
-│  Nav     │      (Page Content)              │   Context     │
-│  Items   │                                  │   Info        │
-│          │                                  │               │
-│          │                                  │               │
-└──────────┴──────────────────────────────────┴───────────────┘
+├──────────┬──────────────────────────────────────────────────┤
+│          │                                                   │
+│  Left    │                                                   │
+│ Sidebar  │           Main Content Area                       │
+│          │                                                   │
+│  Nav     │           (Page Content)                          │
+│  Items   │                                                   │
+│          │                                                   │
+│          │                                                   │
+└──────────┴───────────────────────────────────────────────────┘
 ```
 
 ## Components
@@ -61,20 +60,6 @@ The left navigation sidebar with collapsible functionality.
 - Desktop: Fixed left sidebar, collapsible to icon mode
 - Mobile: Sheet overlay that slides in from the left
 
-### 3. RightSidebar (`/presentation/components/Layout/RightSidebar.js`)
-
-A contextual sidebar on the right side showing relevant information.
-
-**Features:**
-- Today's Overview (tasks due, events, notes)
-- Quick Stats (completion progress)
-- Recent Activity feed
-- Customizable per page (pass `children` prop)
-
-**Behavior:**
-- Desktop (lg+): Always visible at 320px width
-- Mobile/Tablet: Hidden on screens smaller than `lg` breakpoint
-
 ## Implementation
 
 ### Layout File (`/app/mainview/layout.js`)
@@ -86,12 +71,9 @@ The main layout structure uses the following hierarchy:
   <AppSideBar />
   <div className="flex-1 flex flex-col min-h-screen">
     <AppHeader />
-    <div className="flex flex-1 overflow-hidden">
-      <main className="flex-1 overflow-auto">
-        {children}
-      </main>
-      <RightSidebar />
-    </div>
+    <main className="flex-1 overflow-auto">
+      {children}
+    </main>
   </div>
 </SidebarProvider>
 ```
@@ -99,7 +81,6 @@ The main layout structure uses the following hierarchy:
 ### Key Classes
 
 - Main container: `flex-1 flex flex-col min-h-screen`
-- Content area: `flex flex-1 overflow-hidden`
 - Main content: `flex-1 overflow-auto`
 
 ### Height Management
@@ -115,17 +96,14 @@ The main layout structure uses the following hierarchy:
 
 - **Mobile** (`< 768px`): 
   - Left sidebar as overlay sheet
-  - Right sidebar hidden
   - Header always visible
 
 - **Tablet** (`768px - 1024px`):
   - Left sidebar collapsible
-  - Right sidebar hidden
   - Header always visible
 
 - **Desktop** (`> 1024px`):
   - Left sidebar collapsible
-  - Right sidebar visible
   - Header always visible
 
 ## Migration Notes
@@ -146,21 +124,6 @@ The main layout structure uses the following hierarchy:
 
 None - the layout is backwards compatible with existing pages.
 
-## Customizing the Right Sidebar
-
-To customize the right sidebar content for a specific page, you can:
-
-1. Import the component in your layout
-2. Pass custom content as children
-3. Set `defaultContent={false}` to disable default content
-
-Example:
-```jsx
-<RightSidebar defaultContent={false}>
-  <YourCustomContent />
-</RightSidebar>
-```
-
 ## Keyboard Shortcuts
 
 - `Cmd/Ctrl + B` - Toggle left sidebar collapse
@@ -169,8 +132,7 @@ Example:
 ## Future Enhancements
 
 Potential improvements:
-1. Make right sidebar collapsible
-2. Add page-specific right sidebar content
-3. Persist sidebar state in localStorage
-4. Add transition animations
-5. Support for split-view modes
+1. Persist sidebar state in localStorage
+2. Add transition animations
+3. Support for split-view modes
+4. Add breadcrumb navigation to header
