@@ -1,0 +1,38 @@
+{
+  "name": "@taskflow/rag",
+  "version": "1.0.0",
+  "description": "A package for the Taskflow RAG module. With a focus on the RAG and Context Retrieval Service.",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "clean": "rm -rf dist",
+    "build": "tsc -p tsconfig.json",
+    "prepack": "npm run clean && npm run build"
+  },
+  "keywords": [
+    "taskflow",
+    "rag",
+    "context retrieval",
+    "context retrieval service"
+  ],
+  "author": "Howard Thomas",
+  "license": "MIT",
+  "type": "module",
+  "files": [
+    "dist",
+    "README.md",
+    "package.json"
+  ],
+  "dependencies": {
+    "gpt-tokenizer": "^3.4.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}
