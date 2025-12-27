@@ -35,37 +35,7 @@ export const MenuItem = ({ label, icon, href, items = [] }) => {
               </span>
             </Link>
           </SidebarMenuButton>
-          {items && items.length > 0 && open && (
-            <CollapsibleTrigger className="ml-auto">
-              <HugeiconsIcon icon={ArrowDown01Icon} size={16} strokeWidth={2} />
-            </CollapsibleTrigger>
-          )}
-          {items && items.length > 0 && !open && (
-            <CollapsibleTrigger className="ml-auto">
-              <HugeiconsIcon
-                icon={ArrowRight01Icon}
-                size={16}
-                strokeWidth={2}
-              />
-            </CollapsibleTrigger>
-          )}
         </div>
-        {items && items.length > 0 && open && (
-          <CollapsibleContent>
-            <SidebarMenuSub>
-              {items.slice(0, 3).map((subitem) => (
-                <SidebarMenuSubButton key={subitem.id} asChild>
-                  <Link href={`${href}/${subitem.id}`}>
-                    {subitem.icon}
-                    <span className="line-clamp-1 text-ellipsis text-xs font-medium">
-                      {subitem.title}
-                    </span>
-                  </Link>
-                </SidebarMenuSubButton>
-              ))}
-            </SidebarMenuSub>
-          </CollapsibleContent>
-        )}
       </SidebarMenuItem>
     </Collapsible>
   );

@@ -24,7 +24,7 @@ export const NoteOptionsPopover = ({
         sideOffset={10}
         align="start"
         alignOffset={5}
-        className="grid grid-rows-[20px_25px_25px_1fr_25px] bg-card  h-[200px] p-0 shadow-md"
+        className="grid grid-rows-[20px_25px_25px_1fr_25px] bg-card h-[200px] p-0 shadow-md"
       >
         <div className="row-span-1 flex flex-col items-center justify-center ">
           <p className="text-xs font-medium">Note Options</p>

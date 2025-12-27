@@ -67,12 +67,14 @@ function Page() {
   }
 
   return (
-    <div className="grid grid-rows-[1fr_24fr] h-full text-sm px-2 bg-card rounded-tr-md rounded-br-md">
-      <div className="flex flex-row justify-between items-center gap-2">
-        <h1 className="text-lg font-medium text-center line-clamp-1">
-          {note.title}
-        </h1>
-        <p className="line-clamp-2">{note.description}</p>
+    <div className="grid grid-rows-[auto_1fr] h-full text-sm px-2 bg-background overflow-hidden rounded-none">
+      <div className="flex flex-row h-fit justify-between items-center gap-2 border-b">
+        <div className="flex flex-col h-fit justify-center items-start">
+          <h1 className="text-lg font-medium text-center line-clamp-1">
+            {note.title}
+          </h1>
+          <p className="line-clamp-1 text-xs">{note.description}</p>
+        </div>
         <NoteOptionsPopover
           title={note.title}
           description={note.description}
@@ -80,7 +82,7 @@ function Page() {
           handleSaveNote={handleSaveNote}
         />
       </div>
-      <div className="flex-1 h-[91vh] overflow-y-auto">
+      <div className="flex-1 overflow-y-auto">
         <BlockEditor noteId={id} setBlocks={setBlocks} />
       </div>
     </div>
