@@ -1,5 +1,9 @@
 "use client";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import {
+  SidebarInput,
+  SidebarInset,
+  SidebarProvider,
+} from "@/components/ui/sidebar";
 import { GlobalSmartSearch } from "@/presentation/components/Layout/GlobalSearch";
 import AppSideBar from "@/presentation/components/Layout/AppSideBar";
 import AppHeader from "@/presentation/components/Layout/AppHeader";
@@ -26,22 +30,25 @@ export default function Layout({ children }) {
     <SocketProvider>
       <QueryClientProvider client={queryClient}>
         <SidebarProvider>
-          {/* Left Sidebar */}
-          <AppSideBar />
-
-          {/* Main Content Area with Header */}
-          <div className="flex-1 flex flex-col min-h-screen">
-            {/* Persistent Header */}
-            <AppHeader />
-
-            {/* Main Content */}
-            <main className="flex-1 overflow-auto">
-              <GlobalSmartSearch
+          <div className="h-screen w-screen flex flex-row">
+            {/* Left Sidebar */}
+            <AppSideBar />
+            {/* Main Content Area with Header */}
+            <div className=" flex flex-col h-full w-full overflow-hidden">
+              {/* Persistent Header */}
+              <AppHeader
                 isGlobalSmartSearchOpen={isGlobalSmartSearchOpen}
                 setIsGlobalSmartSearchOpen={setIsGlobalSmartSearchOpen}
               />
-              {children}
-            </main>
+              {/* Main Content */}
+              <main className="flex flex-col h-full w-full overflow-hidden">
+                <GlobalSmartSearch
+                  isGlobalSmartSearchOpen={isGlobalSmartSearchOpen}
+                  setIsGlobalSmartSearchOpen={setIsGlobalSmartSearchOpen}
+                />
+                {children}
+              </main>
+            </div>
           </div>
         </SidebarProvider>
       </QueryClientProvider>

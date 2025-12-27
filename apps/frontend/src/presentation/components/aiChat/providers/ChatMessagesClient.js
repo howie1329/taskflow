@@ -27,7 +27,7 @@ export const ChatMessagesClient = () => {
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 h-full w-full ">
       {messages &&
         messages.map((message) => {
           const parts = message.parts ?? [];

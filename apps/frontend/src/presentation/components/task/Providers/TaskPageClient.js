@@ -14,10 +14,12 @@ export const TaskPageClient = () => {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 100 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
-      className="flex flex-col h-full p-2"
+      className="flex flex-col h-full p-2 overflow-hidden"
     >
       <TaskHeader />
-      <GeneralKanbanTaskBoard data={filteredTasks} />
+      <div className="flex-1 min-h-0 overflow-hidden">
+        <GeneralKanbanTaskBoard data={filteredTasks} />
+      </div>
     </motion.div>
   );
 };

@@ -38,9 +38,9 @@ export const GeneralKanbanTaskBoard = ({ data }) => {
   };
 
   return (
-    <div className="h-full pt-1">
+    <div className="flex flex-col h-full pt-1 overflow-hidden">
       <DndContext onDragEnd={handleDragEnd}>
-        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 h-full gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 h-full gap-2 overflow-hidden">
           {filteredBoardColumns(data).map((column) => (
             <Column key={column.id} column={column} />
           ))}

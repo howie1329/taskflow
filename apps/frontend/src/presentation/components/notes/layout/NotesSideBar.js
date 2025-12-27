@@ -27,7 +27,7 @@ export default function NotesSideBar() {
   const { data: notes } = useFetchNotes();
   const [isOpen, setIsOpen] = useState(false);
   return (
-    <div className="bg-card rounded-tl-md rounded-bl-md border-r h-full">
+    <div className="bg-background border-r h-full rounded-none">
       <SidebarContent>
         <SidebarGroup>
           <SidebarMenu>

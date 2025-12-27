@@ -31,19 +31,24 @@ import {
   BookOpen02Icon,
   Delete01Icon,
   Menu01Icon,
+  Search02Icon,
 } from "@hugeicons/core-free-icons/index";
 import { useFetchNotifications } from "@/hooks/notifications/useFetchNotifications";
 import { useDeleteNotification } from "@/hooks/notifications/useDeleteNotification";
 import { useMarkNotificationAsRead } from "@/hooks/notifications/useMarkNotificationAsRead";
 import { useSidebar } from "@/components/ui/sidebar";
+import { Kbd, KbdGroup } from "@/components/ui/kbd";
+import { Input } from "@/components/ui/input";
 
-export default function AppHeader() {
+export default function AppHeader({
+  isGlobalSmartSearchOpen,
+  setIsGlobalSmartSearchOpen,
+}) {
   const { theme, setTheme } = useTheme();
   const { data: notifications } = useFetchNotifications();
   const { mutate: deleteNotification } = useDeleteNotification();
   const { mutate: markNotificationAsRead } = useMarkNotificationAsRead();
   const { toggleSidebar } = useSidebar();
-
   return (
     <header className=" w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-14 items-center px-4">
@@ -67,6 +72,17 @@ export default function AppHeader() {
 
         {/* Right side - Actions */}
         <div className="ml-auto flex items-center space-x-2">
+          {/* Global Search */}
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => setIsGlobalSmartSearchOpen(!isGlobalSmartSearchOpen)}
+          >
+            <KbdGroup>
+              <Kbd>Cmd + K</Kbd>
+            </KbdGroup>
+            <HugeiconsIcon icon={Search02Icon} size={20} strokeWidth={2} />
+          </Button>
           {/* Theme Toggle */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

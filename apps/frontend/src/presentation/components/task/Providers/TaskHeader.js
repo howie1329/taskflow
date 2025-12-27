@@ -13,7 +13,6 @@ import {
 import { FilterDropdownCard } from "../FilterDropDownCard";
 import { CreateTaskDialog } from "../CreateTaskDialog";
 import { Separator } from "@/components/ui/separator";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 
 export const TaskHeader = () => {
   const {
@@ -29,9 +28,8 @@ export const TaskHeader = () => {
     isCreateTaskOpen,
   } = useTaskFilter();
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col w-full h-fit gap-1">
       <div className="flex flex-row justify-between items-center gap-1">
-        <SidebarTrigger className="lg:hidden" />
         <h1 className="text-lg font-bold text-ellipsis line-clamp-1 ">
           Task Board
         </h1>

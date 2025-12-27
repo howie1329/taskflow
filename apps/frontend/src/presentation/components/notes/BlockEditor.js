@@ -13,20 +13,26 @@ export default function BlockEditor({ setBlocks, noteId }) {
   });
 
   return (
-    <div className="h-full overflow-y-auto">
+    <div className="h-full overflow-y-auto ">
       <BlockNoteView
         editor={editor}
         onChange={() => {
           const currentBlocks = editor.document;
           setBlocks(currentBlocks);
         }}
-        className="h-full overflow-y-auto"
+        className="h-full overflow-y-auto "
       />
       <style jsx global>
         {`
           .bn-editor {
             height: 100% !important;
             overflow-y: auto !important;
+            border-radius: 0 !important;
+            background-color: transparent !important;
+          }
+
+          .bn-editor * {
+            color: var(--color-foreground) !important;
           }
         `}
       </style>

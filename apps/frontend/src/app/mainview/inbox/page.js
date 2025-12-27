@@ -89,7 +89,7 @@ export default function Page() {
   const categorizedItems = items.filter((item) => item.category);
 
   return (
-    <div className="flex flex-col h-full bg-background rounded-md">
+    <div className="flex flex-col h-full w-full bg-background rounded-none ">
       {/* Header */}
       <div className="border-b bg-background/95 supports-[backdrop-filter]:bg-background/60 rounded-t-md">
         <div className="flex h-16 items-center px-6">

@@ -62,15 +62,6 @@ export default function AppSideBar() {
 
   return (
     <Sidebar defaultOpen={false} className=" border-none" collapsible="icon">
-      <SidebarHeader className="px-3 py-2 border-b border-sidebar-border">
-        <div className="flex items-center space-x-3">
-          <div className="flex flex-col">
-            <h1 className="text-sm font-semibold text-sidebar-foreground leading-none group-data-[collapsible=icon]:hidden">
-              TaskFlow
-            </h1>
-          </div>
-        </div>
-      </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
           {SideBarItems.map((item) => (
