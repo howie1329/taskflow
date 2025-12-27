@@ -1,7 +1,8 @@
 "use client";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { GlobalSmartSearch } from "@/presentation/components/Layout/GlobalSearch";
 import AppSideBar from "@/presentation/components/Layout/AppSideBar";
+import AppHeader from "@/presentation/components/Layout/AppHeader";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { SocketProvider } from "@/lib/sockets/SocketProvider";
@@ -25,17 +26,23 @@ export default function Layout({ children }) {
     <SocketProvider>
       <QueryClientProvider client={queryClient}>
         <SidebarProvider>
+          {/* Left Sidebar */}
           <AppSideBar />
-          <SidebarInset>
-            <GlobalSmartSearch
-              isGlobalSmartSearchOpen={isGlobalSmartSearchOpen}
-              setIsGlobalSmartSearchOpen={setIsGlobalSmartSearchOpen}
-            />
-            <main className=" h-[100vh]">
-              {/* Mobile-only content to trigger the sidebar... Need to come up with a better solution*/}
+          
+          {/* Main Content Area with Header */}
+          <div className="flex-1 flex flex-col min-h-screen">
+            {/* Persistent Header */}
+            <AppHeader />
+            
+            {/* Main Content */}
+            <main className="flex-1 overflow-auto">
+              <GlobalSmartSearch
+                isGlobalSmartSearchOpen={isGlobalSmartSearchOpen}
+                setIsGlobalSmartSearchOpen={setIsGlobalSmartSearchOpen}
+              />
               {children}
             </main>
-          </SidebarInset>
+          </div>
         </SidebarProvider>
       </QueryClientProvider>
     </SocketProvider>

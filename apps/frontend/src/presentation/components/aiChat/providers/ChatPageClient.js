@@ -33,7 +33,7 @@ export const ChatPageClient = () => {
               <div
                 className={
                   hasMessages
-                    ? "overflow-y-auto h-full w-full max-h-[95vh]"
+                    ? "overflow-y-auto h-full w-full"
                     : ""
                 }
               >

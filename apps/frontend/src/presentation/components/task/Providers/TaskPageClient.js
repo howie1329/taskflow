@@ -14,7 +14,7 @@ export const TaskPageClient = () => {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 100 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
-      className="flex flex-col h-[96vh] p-2"
+      className="flex flex-col h-full p-2"
     >
       <TaskHeader />
       <GeneralKanbanTaskBoard data={filteredTasks} />

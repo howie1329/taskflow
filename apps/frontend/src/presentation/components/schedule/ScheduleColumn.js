@@ -12,7 +12,7 @@ export const ScheduleColumn = ({ column, eventData }) => {
   return (
     <div
       key={column.id}
-      className="flex flex-col bg-[#fafafa] rounded-md border p-1 h-[89vh]"
+      className="flex flex-col bg-[#fafafa] rounded-md border p-1 h-full"
       ref={setNodeRef}
       style={style}
     >

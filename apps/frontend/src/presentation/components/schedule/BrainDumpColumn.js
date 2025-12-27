@@ -4,7 +4,7 @@ export const BrainDumpColumn = ({ data }) => {
   // Loading State If No Data
   if (!data) {
     return (
-      <div className="flex flex-col bg-[#fafafa] rounded-md border h-[89vh] p-1">
+      <div className="flex flex-col bg-[#fafafa] rounded-md border h-full p-1">
         <h2 className="text-sm font-semibold text-gray-700 text-center">
           Brain Dump
         </h2>
@@ -16,7 +16,7 @@ export const BrainDumpColumn = ({ data }) => {
   }
 
   return (
-    <div className="flex flex-col bg-[#fafafa] rounded-md border p-1 h-[89vh]">
+    <div className="flex flex-col bg-[#fafafa] rounded-md border p-1 h-full">
       <h2 className="text-sm font-semibold text-gray-700 text-center">
         Brain Dump
       </h2>
