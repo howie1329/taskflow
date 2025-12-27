@@ -40,6 +40,7 @@ import {
   BookOpen02Icon,
   Calendar02Icon,
   CheckListIcon,
+  ClipboardIcon,
   ColorsIcon,
   Folder02Icon,
   InboxIcon,
@@ -80,6 +81,11 @@ export default function AppSideBar() {
       href: "/mainview/task",
     },
     {
+      label: "Todo",
+      icon: <HugeiconsIcon icon={ClipboardIcon} size={20} strokeWidth={2} />,
+      href: "/mainview/todo",
+    },
+    {
       label: "Projects",
       icon: <HugeiconsIcon icon={Folder02Icon} size={20} strokeWidth={2} />,
       href: "/mainview/projects",
@@ -98,7 +104,7 @@ export default function AppSideBar() {
     },
   ];
   return (
-    <Sidebar>
+    <Sidebar className="[&_[data-sidebar=sidebar]]:!bg-background">
       <SidebarHeader className="px-3 py-2 border-b border-sidebar-border">
         <div className="flex flex-col items-center justify-between w-full gap-1.5">
           {/* Logo Section */}

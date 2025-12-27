@@ -21,6 +21,33 @@ export type ChatMessage = {
     content: string
 }
 
+export type ChatMessageFromDB = {
+    id: string
+    conversationId: string
+    userId: string
+    role: ChatMessageRole
+    content: string
+    createdAt: string
+    updatedAt: string
+    tokens: number
+    vectors: number[]
+    metadata: Record<string, unknown>
+}
+export type MessageSummary = {
+    id: string
+    conversationId: string
+    userId: string;
+    summary: string
+    tags: string[]
+    intent: string
+    messageCount: number
+    messageStartTokens: number
+    messageEndTokens: number
+    messageIndex: number
+    createdAt: string
+    updatedAt: string
+}
+
 export type PrunedContent = | {
     type: "text"
     text: string
@@ -51,4 +78,9 @@ export type TokenService = {
     prunedMessages: PrunedMessage[],
     tokenLimit?: number
   ) => EstimateTokensFromPrunedMessagesResult;
+};
+
+export type GetMessagesToSummarizeResult = {
+  messagesToSummarize: ChatMessageFromDB[];
+  lastSummaryIndex: number;
 };

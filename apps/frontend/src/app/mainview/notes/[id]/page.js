@@ -6,7 +6,7 @@ import BlockEditor from "@/presentation/components/notes/BlockEditor";
 import useSaveNote from "@/hooks/notes/useSaveNote";
 import useDeleteNote from "@/hooks/notes/useDeleteNote";
 import { useQueryClient } from "@tanstack/react-query";
-import useSocketStore from "@/lib/sockets/SocketStore";
+import { useSocket } from "@/lib/sockets/SocketProvider";
 import { Empty, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 import { Spinner } from "@/components/ui/spinner";
 import { NoteOptionsPopover } from "@/presentation/components/notes/NoteOptionsPopover";
@@ -16,7 +16,7 @@ function Page() {
   const { data: note, isLoading, error } = useFetchSingleNote(id);
   const { mutate: saveNote } = useSaveNote();
   const deleteNote = useDeleteNote();
-  const { socket } = useSocketStore();
+  const { socket } = useSocket();
   const queryClient = useQueryClient();
   const [blocks, setBlocks] = useState([]);
 

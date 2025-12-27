@@ -1,19 +1,10 @@
 "use client";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { GlobalSmartSearch } from "@/presentation/components/Layout/GlobalSearch";
-import useSocketConnection from "@/lib/sockets/useSocketConnection";
 import AppSideBar from "@/presentation/components/Layout/AppSideBar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-
-const SocketInitializer = () => {
-  useSocketConnection();
-  return null;
-};
+import { SocketProvider } from "@/lib/sockets/SocketProvider";
 
 export default function Layout({ children }) {
   const [isGlobalSmartSearchOpen, setIsGlobalSmartSearchOpen] = useState(false);
@@ -31,21 +22,22 @@ export default function Layout({ children }) {
   }, [isGlobalSmartSearchOpen]);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <SidebarProvider>
-        <AppSideBar />
-        <SidebarInset>
-          <GlobalSmartSearch
-            isGlobalSmartSearchOpen={isGlobalSmartSearchOpen}
-            setIsGlobalSmartSearchOpen={setIsGlobalSmartSearchOpen}
-          />
-          <SocketInitializer />
-          <main className=" h-[100vh]">
-            {/* Mobile-only content to trigger the sidebar... Need to come up with a better solution*/}
-            {children}
-          </main>
-        </SidebarInset>
-      </SidebarProvider>
-    </QueryClientProvider>
+    <SocketProvider>
+      <QueryClientProvider client={queryClient}>
+        <SidebarProvider>
+          <AppSideBar />
+          <SidebarInset>
+            <GlobalSmartSearch
+              isGlobalSmartSearchOpen={isGlobalSmartSearchOpen}
+              setIsGlobalSmartSearchOpen={setIsGlobalSmartSearchOpen}
+            />
+            <main className=" h-[100vh]">
+              {/* Mobile-only content to trigger the sidebar... Need to come up with a better solution*/}
+              {children}
+            </main>
+          </SidebarInset>
+        </SidebarProvider>
+      </QueryClientProvider>
+    </SocketProvider>
   );
 }

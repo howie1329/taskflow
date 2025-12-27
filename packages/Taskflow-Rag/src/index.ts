@@ -4,6 +4,9 @@ export {
   estimateTokensFromPrunedMessages,
   tokenService,
   summarizeConversation,
+  MessageContextSlicer,
+  formatSummarizedMessageHistory,
+  getMessagesToSummarize,
 } from "./core/index.js";
 
 export type {
@@ -14,4 +17,7 @@ export type {
   PrunedMessage,
   PrunedContent,
   TokenService,
+  ChatMessageFromDB,
+  MessageSummary,
+  GetMessagesToSummarizeResult,
 } from "./types.js";

@@ -9,8 +9,6 @@ export const initSocket = (httpServer, corsOptions) => {
     const userId =
       socket.handshake?.headers.userid || socket.handshake?.auth?.userId;
     socket.join(userId);
-
-    console.log("Socket connected:", userId);
   });
 
   return io;
@@ -26,7 +24,7 @@ export const getIO = () => {
 export const emitToRoom = (roomId, event, payload) => {
   if (io) {
     io.to(roomId).emit(event, payload);
-    console.log("Emitting to room:", roomId, event);
+    console.log("Emitting to room:", roomId, event, payload);
   }
 };
 

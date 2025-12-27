@@ -8,7 +8,7 @@ import { FilterIcon, PlusIcon, SearchIcon } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useMemo } from "react";
 import { useProjectUIStore } from "@/presentation/hooks/useProjectUIStore";
-import useSocketStore from "@/lib/sockets/SocketStore";
+import { useSocket } from "@/lib/sockets/SocketProvider";
 import { useQueryClient } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import {
@@ -27,7 +27,7 @@ export default function Page() {
   const router = useRouter();
   const { data: project } = useFetchSingleProject(id);
   const { data: tasks = [] } = useFetchAllProjectTasks(id);
-  const { socket } = useSocketStore();
+  const { socket } = useSocket();
   const queryClient = useQueryClient();
 
   const {

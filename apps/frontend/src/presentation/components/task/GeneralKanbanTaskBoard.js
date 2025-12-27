@@ -1,12 +1,11 @@
 "use client";
-import { TaskCard } from "./TaskCard";
 import { useState } from "react";
-import { useTaskUIStore } from "@/presentation/hooks/useTaskUIStore";
 import { DndContext, useDroppable } from "@dnd-kit/core";
-import { Badge } from "@/components/ui/badge";
+import { useProjectUIStore } from "@/presentation/hooks/useProjectUIStore";
+import { TaskCard } from "../task/TaskCard";
 
 export const GeneralKanbanTaskBoard = ({ data }) => {
-  const { setFilteredData, filteredData } = useTaskUIStore();
+  const { setFilteredData, filteredData } = useProjectUIStore();
   const [boardColumns] = useState([
     { id: "notStarted", title: "Not Started", tasks: [] },
     { id: "todo", title: "To Do", tasks: [] },
@@ -39,9 +38,9 @@ export const GeneralKanbanTaskBoard = ({ data }) => {
   };
 
   return (
-    <div className="h-full p-1">
+    <div className="h-full pt-1">
       <DndContext onDragEnd={handleDragEnd}>
-        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 h-full gap-2 bg-card/50">
+        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 h-full gap-2">
           {filteredBoardColumns(data).map((column) => (
             <Column key={column.id} column={column} />
           ))}
@@ -61,17 +60,14 @@ const Column = ({ column }) => {
   };
   return (
     <div
-      className="flex flex-col bg-card/50 h-full min-h-0 border-2 border-black"
+      className="flex flex-col bg-card/50 rounded-none border h-full min-h-0"
       ref={setNodeRef}
       style={style}
     >
-      <h3 className="flex flex-row justify-center items-center gap-1 text-sm font-semibold text-gray-700 text-center py-1 flex-shrink-0">
+      <h3 className="text-sm font-semibold text-gray-700 text-center py-1 flex-shrink-0">
         {column.title}
-        <Badge variant="outline" className="text-xs">
-          {column.tasks.length}
-        </Badge>
       </h3>
-      <div className="flex flex-col gap-1 flex-1 overflow-y-auto min-h-0 p-1">
+      <div className="flex flex-col gap-1 flex-1 overflow-y-auto h-full p-1">
         {column.tasks.map((task) => (
           <TaskCard key={task.id} task={task} />
         ))}

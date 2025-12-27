@@ -9,9 +9,6 @@ import { useChatMessageContext } from "./ChatMessageProvider";
 import { Empty, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 import { Spinner } from "@/components/ui/spinner";
 import { Badge } from "@/components/ui/badge";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { AlertCircleIcon } from "@hugeicons/core-free-icons/index";
-import { Button } from "@/components/ui/button";
 
 export const ChatMessagesClient = () => {
   const { messages, messagesLoading, status, regenerate } =

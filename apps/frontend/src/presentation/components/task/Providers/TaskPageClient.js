@@ -1,5 +1,6 @@
 "use client";
-import { GeneralKanbanTaskBoard } from "../../projects/GeneralKanbanTaskBoard";
+import { GeneralKanbanTaskBoard } from "../GeneralKanbanTaskBoard";
+
 import { useTaskData } from "./TaskDataProvider";
 import { motion } from "motion/react";
 import { TaskHeader } from "./TaskHeader";
