@@ -19,12 +19,13 @@ export const metadata = {
   title: "TaskFlow",
   description:
     "TaskFlow is a productivity application that helps you manage your tasks and notes.",
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: true,
-  },
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: true,
 };
 
 export default function RootLayout({ children }) {
