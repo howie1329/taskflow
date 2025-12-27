@@ -18,7 +18,6 @@ import {
   Notebook02Icon,
 } from "@hugeicons/core-free-icons/index";
 import { MenuItem } from "./components/MenuItem";
-
 export default function AppSideBar() {
   const { data: conversations } = useFetchConversations();
   const { data: notes } = useFetchNotes();
@@ -53,22 +52,21 @@ export default function AppSideBar() {
       label: "Notes",
       icon: <HugeiconsIcon icon={Notebook02Icon} size={20} strokeWidth={2} />,
       href: "/mainview/notes",
-      items: notes && notes.length > 0 ? notes : [],
     },
     {
       label: "AI Chat",
       icon: <HugeiconsIcon icon={AiChat02Icon} size={20} strokeWidth={2} />,
       href: "/mainview/aichat",
-      items: conversations && conversations.length > 0 ? conversations : [],
     },
   ];
+
   return (
-    <Sidebar className="[&_[data-sidebar=sidebar]]:!bg-background" collapsible="icon">
+    <Sidebar defaultOpen={false} className=" border-none" collapsible="icon">
       <SidebarHeader className="px-3 py-2 border-b border-sidebar-border">
         <div className="flex items-center space-x-3">
           <div className="flex flex-col">
             <h1 className="text-sm font-semibold text-sidebar-foreground leading-none group-data-[collapsible=icon]:hidden">
-              Navigation
+              TaskFlow
             </h1>
           </div>
         </div>

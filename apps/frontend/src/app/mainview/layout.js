@@ -28,12 +28,12 @@ export default function Layout({ children }) {
         <SidebarProvider>
           {/* Left Sidebar */}
           <AppSideBar />
-          
+
           {/* Main Content Area with Header */}
           <div className="flex-1 flex flex-col min-h-screen">
             {/* Persistent Header */}
             <AppHeader />
-            
+
             {/* Main Content */}
             <main className="flex-1 overflow-auto">
               <GlobalSmartSearch
