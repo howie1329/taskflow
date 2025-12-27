@@ -24,7 +24,8 @@ export const conversationService = {
     );
 
     if (!conversation) {
-      const title = await aiChatService.createTitle(initialMessage);
+      const title =
+        await aiChatService.createTitleFromInitalMessage(initialMessage);
       const newConversation = await conversationOps.create({
         id: conversationId,
         userId,

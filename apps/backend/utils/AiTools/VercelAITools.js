@@ -6,40 +6,6 @@ import { noteOps } from "../../db/operations/notes.js";
 import { NodeSchema } from "./Notes/NotesBlockSchema.js";
 import Exa from "exa-js";
 
-export const responseSchema = z.object({
-  success: z.boolean(),
-  message: z.string().describe("The Model response message to the user"),
-  data: z.object({
-    tasks: z
-      .array(
-        z.object({
-          id: z.string().describe("The task ID"),
-          title: z.string().describe("The task title"),
-          description: z.string().describe("The task description"),
-        })
-      )
-      .nullable()
-      .describe("The tasks found that are relevant to the user's question"),
-    suggestions: z
-      .array(z.string())
-      .nullable()
-      .describe("Any extra suggestions to the user's question"),
-    analysis: z
-      .string()
-      .nullable()
-      .describe("Any extra analysis to the user's question"),
-  }),
-  metadata: z.object({
-    timestamp: z.string().nullable(),
-    modelUsed: z.string().nullable(),
-    requestId: z.string().nullable(),
-    processingTime: z.number().nullable(),
-    totalTokens: z.number().nullable(),
-    inputTokens: z.number().nullable(),
-    outputTokens: z.number().nullable(),
-  }),
-});
-
 export const VercelAITools = (writer) => {
   const exa = new Exa(process.env.EXA_API_KEY);
   return {
@@ -50,14 +16,16 @@ export const VercelAITools = (writer) => {
         query: z.string().describe("The query to search the web for"),
       }),
       execute: async ({ query }) => {
+        const searchId = `tool-call-web-search-${crypto.randomUUID()}`;
         writer.write({
           type: "data-web-search",
-          id: "tool-call-web-search",
+          id: searchId,
           data: {
             status: "loading",
             message: "Using Exa WebSearch Tool to Search the Web",
           },
         });
+        console.log("Query from Exa WebSearch Tool", query);
         const result = await exa.search(query, {
           contents: {
             text: {
@@ -80,9 +48,10 @@ export const VercelAITools = (writer) => {
           numResults: 2,
           type: "auto",
         });
+        console.log("Result from Exa WebSearch Tool", result);
         writer.write({
           type: "data-web-search",
-          id: "tool-call-web-search",
+          id: searchId,
           data: {
             status: "complete",
             message: "Exa WebSearch Tool completed successfully",
@@ -707,51 +676,6 @@ export const VercelAITools = (writer) => {
         });
 
         return deletedNote;
-      },
-    }),
-    VercelJsonResponse: new tool({
-      name: "VercelJsonResponse",
-      description:
-        "Generate a structured AI response following the responseSchema format",
-      inputSchema: responseSchema,
-      execute: async ({ success, message, data, metadata }) => {
-        writer.write({
-          type: "data-vercel-json-response",
-          id: "tool-call-vercel-json-response",
-          data: {
-            status: "loading",
-            message: "Using VercelJsonResponse Tool to Generate Response",
-          },
-        });
-        const safeData = {
-          tasks: Array.isArray(data?.tasks) ? data.tasks : [],
-          suggestions: Array.isArray(data?.suggestions) ? data.suggestions : [],
-          analysis: typeof data?.analysis === "string" ? data.analysis : null,
-        };
-        const safeMetadata = {
-          timestamp: metadata?.timestamp || new Date().toISOString(),
-          modelUsed: metadata?.modelUsed ?? null,
-          requestId: metadata?.requestId ?? null,
-          processingTime: metadata?.processingTime ?? null,
-          totalTokens: metadata?.totalTokens ?? null,
-          inputTokens: metadata?.inputTokens ?? null,
-          outputTokens: metadata?.outputTokens ?? null,
-        };
-        const response = {
-          success: Boolean(success),
-          message: message ?? "",
-          data: safeData,
-          metadata: safeMetadata,
-        };
-        writer.write({
-          type: "data-vercel-json-response",
-          id: "tool-call-vercel-json-response",
-          data: {
-            status: "complete",
-            message: "Response generated successfully",
-          },
-        });
-        return response;
       },
     }),
   };

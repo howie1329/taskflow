@@ -152,6 +152,7 @@ export const aiChatService = {
   },
 
   async createTitleFromInitalMessage(message) {
+    console.log("Creating title from initial message", message);
     const initialMessage = message.parts[0].text;
     const { text: title } = await generateText({
       model: openRouter("openai/gpt-oss-20b:free"),
@@ -160,11 +161,10 @@ export const aiChatService = {
       prompt: `Generate a title for a conversation based on the initial message: ${initialMessage}. 
       The title should be a single sentence and should be no more than 100 characters.
       You must return text.`,
-      maxOutputTokens: 100,
       temperature: 0.7,
       maxRetries: 2,
     });
-
+    console.log("Title from initial message", title);
     return title;
   },
 

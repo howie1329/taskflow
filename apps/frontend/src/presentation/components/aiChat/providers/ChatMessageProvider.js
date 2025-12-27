@@ -257,6 +257,7 @@ export const ChatMessageProvider = ({ conversationId, children }) => {
 
   // UI States
   const [isToolArtifactsOpen, setIsToolArtifactsOpen] = useState(false);
+  const [toolArtifacts, setToolArtifacts] = useState(toolArtifactsDummyData);
 
   // Fetch conversation and messages from the database
   const [defaultConversationId] = useState(
@@ -266,8 +267,6 @@ export const ChatMessageProvider = ({ conversationId, children }) => {
     useFetchConversation(conversationId);
   const { data: fetchedMessages, isLoading: messagesLoading } =
     useFetchConversationMessages(conversationId);
-
-  const [toolArtifacts, setToolArtifacts] = useState(toolArtifactsDummyData);
 
   // Use the useChat hook to send messages to the backend
   const { messages, sendMessage, status, setMessages, stop, regenerate } =

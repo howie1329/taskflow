@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/resizable";
 import { ChatArtifactClient } from "./ChatArtifactClient";
 import { motion } from "motion/react";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 
 export const ChatPageClient = () => {
   const { messages, toolArtifacts, isToolArtifactsOpen } =
