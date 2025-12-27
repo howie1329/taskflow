@@ -55,7 +55,6 @@ export const ChatHeaderClient = () => {
   return (
     <div className="flex flex-col gap-2 justify-between items-center w-full">
       <div className="flex flex-row justify-between items-center w-full">
-        <SidebarTrigger className="lg:hidden" />
         <h1 className="text-lg font-bold text-ellipsis line-clamp-1">
           {title}
         </h1>
