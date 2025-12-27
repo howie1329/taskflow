@@ -2,7 +2,7 @@
 import useFetchConversation from "@/hooks/ai/useFetchConversation";
 import useFetchConversationMessages from "@/hooks/ai/useFetchConversationMessages";
 import { useChat } from "@ai-sdk/react";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { DefaultChatTransport } from "ai";
 import { useAuth } from "@clerk/nextjs";
 import { useQueryClient } from "@tanstack/react-query";
@@ -360,6 +360,14 @@ export const useChatMessageContext = () => {
     );
   }
   return context;
+};
+
+export const useToolArtifacts = () => {
+  const { messages } = useChatMessageContext();
+  const toolArtifacts = useMemo(() => {
+    () => toolArtifactsCollector(messages);
+  }, [messages]);
+  return toolArtifacts;
 };
 
 export const toolArtifactsCollector = (messages) => {
