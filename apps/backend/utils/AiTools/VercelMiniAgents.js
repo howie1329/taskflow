@@ -27,7 +27,6 @@ export const VercelMiniAgents = (writer) => {
         const agent = new Agent({
           name: "TaskAgent",
           instructions: TaskAgentPrompt({ userId }),
-          // model: openai/gpt-4o-mini works
           model: openRouter("openai/gpt-5-nano"),
           tools: {
             getTasks: tools.GetTasks,
