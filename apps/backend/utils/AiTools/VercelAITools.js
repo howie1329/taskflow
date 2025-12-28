@@ -66,7 +66,6 @@ export const VercelAITools = (writer) => {
             },
             `Found ${result.results.length} source${result.results.length !== 1 ? "s" : ""}`
           );
-
           return result.context;
         } catch (error) {
           artifact.error(input, error, "Web search failed");

@@ -27,7 +27,7 @@ export const VercelMiniAgents = (writer) => {
         const agent = new Agent({
           name: "TaskAgent",
           instructions: TaskAgentPrompt({ userId }),
-          model: openRouter("openai/gpt-5-nano"),
+          model: openRouter("openai/gpt-4o-mini"),
           tools: {
             getTasks: tools.GetTasks,
             createTask: tools.CreateTask,
@@ -64,7 +64,7 @@ export const VercelMiniAgents = (writer) => {
         const agent = new Agent({
           name: "NoteAgent",
           instructions: NoteAgentPrompt({ userId }),
-          model: openRouter("openai/gpt-5-nano"),
+          model: openRouter("openai/gpt-4o-mini"),
           tools: {
             getAllNotes: tools.GetNotes,
             getNotesByTask: tools.GetNotesByTaskId,
@@ -87,24 +87,28 @@ export const VercelMiniAgents = (writer) => {
         query: z.string().describe("The query to search the web for"),
       }),
       execute: async ({ query }) => {
-        const agent = new Agent({
-          name: "WebSearchAgent",
-          instructions:
-            "You are a web search agent. You are tasked with searching the web for the query.",
-          model: openRouter("openai/gpt-5-nano"),
-          tools: {
-            webSearch: tools.webSearch,
-          },
-          toolChoice: {
-            type: "tool",
-            toolName: "webSearch",
-          },
-          stopWhen: stepCountIs(5),
-        });
-        const result = await agent.generate({
-          prompt: query,
-        });
-        return result.text;
+        try {
+          const agent = new Agent({
+            name: "WebSearchAgent",
+            instructions:
+              "You are a web search agent. You are tasked with searching the web for the query." +
+              "The results of the web search will be passed to the main agent to use as context " +
+              "To help answer the users question. Include as much information as possible in the results.",
+            model: openRouter("openai/gpt-4o-mini"),
+            tools: {
+              webSearch: tools.webSearch,
+            },
+            stopWhen: stepCountIs(10),
+          });
+          const result = await agent.generate({
+            prompt: query,
+          });
+
+          return result.text;
+        } catch (error) {
+          console.error("Error in WebSearchAgent tool", error);
+          throw error;
+        }
       },
     }),
   };
