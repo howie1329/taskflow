@@ -7,7 +7,7 @@ import { NodeSchema } from "./Notes/NotesBlockSchema.js";
 import Exa from "exa-js";
 import { ArtifactWriter } from "./ArtifactHelpers.js";
 
-export const VercelAITools = (writer) => {
+export const VercelAITools = (writer, artifactsCollector = null) => {
   const exa = new Exa(process.env.EXA_API_KEY);
   return {
     webSearch: new tool({
@@ -17,7 +17,11 @@ export const VercelAITools = (writer) => {
         query: z.string().describe("The query to search the web for"),
       }),
       execute: async ({ query }) => {
-        const artifact = new ArtifactWriter(writer, "WebSearch");
+        const artifact = new ArtifactWriter(
+          writer,
+          "WebSearch",
+          artifactsCollector
+        );
         const input = { query };
 
         try {
@@ -80,7 +84,11 @@ export const VercelAITools = (writer) => {
         userId: z.string().describe("The user ID to fetch the tasks for"),
       }),
       execute: async ({ userId }) => {
-        const artifact = new ArtifactWriter(writer, "GetTasks");
+        const artifact = new ArtifactWriter(
+          writer,
+          "GetTasks",
+          artifactsCollector
+        );
         const input = { userId };
 
         try {
@@ -153,7 +161,11 @@ export const VercelAITools = (writer) => {
         userId,
         projectId,
       }) => {
-        const artifact = new ArtifactWriter(writer, "CreateTask");
+        const artifact = new ArtifactWriter(
+          writer,
+          "CreateTask",
+          artifactsCollector
+        );
         const input = {
           title,
           description,
@@ -242,7 +254,11 @@ export const VercelAITools = (writer) => {
         status,
         isCompleted,
       }) => {
-        const artifact = new ArtifactWriter(writer, "UpdateTask");
+        const artifact = new ArtifactWriter(
+          writer,
+          "UpdateTask",
+          artifactsCollector
+        );
         const input = {
           id,
           userId,
@@ -302,7 +318,11 @@ export const VercelAITools = (writer) => {
         userId: z.string().describe("The user ID who owns the task"),
       }),
       execute: async ({ id, userId }) => {
-        const artifact = new ArtifactWriter(writer, "DeleteTask");
+        const artifact = new ArtifactWriter(
+          writer,
+          "DeleteTask",
+          artifactsCollector
+        );
         const input = { id, userId };
 
         try {
@@ -336,7 +356,11 @@ export const VercelAITools = (writer) => {
         userId: z.string().describe("The user ID who owns the task"),
       }),
       execute: async ({ id, userId }) => {
-        const artifact = new ArtifactWriter(writer, "GetTaskById");
+        const artifact = new ArtifactWriter(
+          writer,
+          "GetTaskById",
+          artifactsCollector
+        );
         const input = { id, userId };
 
         try {
@@ -376,7 +400,11 @@ export const VercelAITools = (writer) => {
         taskId: z.string().describe("The task ID to get subtasks for"),
       }),
       execute: async ({ taskId }) => {
-        const artifact = new ArtifactWriter(writer, "GetSubtasks");
+        const artifact = new ArtifactWriter(
+          writer,
+          "GetSubtasks",
+          artifactsCollector
+        );
         const input = { taskId };
 
         try {
@@ -417,7 +445,11 @@ export const VercelAITools = (writer) => {
           .describe("Whether the subtask is completed (default: false)"),
       }),
       execute: async ({ taskId, subtaskName, isComplete = false }) => {
-        const artifact = new ArtifactWriter(writer, "CreateSubtask");
+        const artifact = new ArtifactWriter(
+          writer,
+          "CreateSubtask",
+          artifactsCollector
+        );
         const input = { taskId, subtaskName, isComplete };
 
         try {
@@ -461,7 +493,11 @@ export const VercelAITools = (writer) => {
           .describe("Whether the subtask is completed"),
       }),
       execute: async ({ id, subtaskName, isComplete }) => {
-        const artifact = new ArtifactWriter(writer, "UpdateSubtask");
+        const artifact = new ArtifactWriter(
+          writer,
+          "UpdateSubtask",
+          artifactsCollector
+        );
         const input = { id, subtaskName, isComplete };
 
         try {
@@ -499,7 +535,11 @@ export const VercelAITools = (writer) => {
         id: z.string().describe("The subtask ID to delete"),
       }),
       execute: async ({ id }) => {
-        const artifact = new ArtifactWriter(writer, "DeleteSubtask");
+        const artifact = new ArtifactWriter(
+          writer,
+          "DeleteSubtask",
+          artifactsCollector
+        );
         const input = { id };
 
         try {
@@ -535,7 +575,11 @@ export const VercelAITools = (writer) => {
           .describe("Array of subtask names to create"),
       }),
       execute: async ({ taskId, subtaskNames }) => {
-        const artifact = new ArtifactWriter(writer, "BulkCreateSubtasks");
+        const artifact = new ArtifactWriter(
+          writer,
+          "BulkCreateSubtasks",
+          artifactsCollector
+        );
         const input = { taskId, subtaskNames };
 
         try {
@@ -583,7 +627,11 @@ export const VercelAITools = (writer) => {
           .describe("Whether the subtask should be marked as complete"),
       }),
       execute: async ({ id, isComplete }) => {
-        const artifact = new ArtifactWriter(writer, "MarkSubtaskComplete");
+        const artifact = new ArtifactWriter(
+          writer,
+          "MarkSubtaskComplete",
+          artifactsCollector
+        );
         const input = { id, isComplete };
 
         try {
@@ -622,7 +670,11 @@ export const VercelAITools = (writer) => {
         userId: z.string().describe("The user ID to fetch notes for"),
       }),
       execute: async ({ userId }) => {
-        const artifact = new ArtifactWriter(writer, "GetNotes");
+        const artifact = new ArtifactWriter(
+          writer,
+          "GetNotes",
+          artifactsCollector
+        );
         const input = { userId };
 
         try {
@@ -661,7 +713,11 @@ export const VercelAITools = (writer) => {
         taskId: z.string().describe("The task ID to get notes for"),
       }),
       execute: async ({ taskId }) => {
-        const artifact = new ArtifactWriter(writer, "GetNotesByTaskId");
+        const artifact = new ArtifactWriter(
+          writer,
+          "GetNotesByTaskId",
+          artifactsCollector
+        );
         const input = { taskId };
 
         try {
@@ -708,7 +764,11 @@ export const VercelAITools = (writer) => {
         userId: z.string().describe("The user ID creating the note"),
       }),
       execute: async ({ title, description, blocks, taskId, userId }) => {
-        const artifact = new ArtifactWriter(writer, "CreateNote");
+        const artifact = new ArtifactWriter(
+          writer,
+          "CreateNote",
+          artifactsCollector
+        );
         const input = { title, description, blocks, taskId, userId };
 
         try {
@@ -759,7 +819,11 @@ export const VercelAITools = (writer) => {
         taskId: z.string().optional().describe("Optional task linkage"),
       }),
       execute: async ({ id, title, description, content, taskId }) => {
-        const artifact = new ArtifactWriter(writer, "UpdateNote");
+        const artifact = new ArtifactWriter(
+          writer,
+          "UpdateNote",
+          artifactsCollector
+        );
         const input = { id, title, description, content, taskId };
 
         try {
@@ -801,7 +865,11 @@ export const VercelAITools = (writer) => {
         id: z.string().describe("The ID of the note to delete"),
       }),
       execute: async ({ id }) => {
-        const artifact = new ArtifactWriter(writer, "DeleteNote");
+        const artifact = new ArtifactWriter(
+          writer,
+          "DeleteNote",
+          artifactsCollector
+        );
         const input = { id };
 
         try {

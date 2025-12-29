@@ -223,7 +223,8 @@ export const vercelChatService = {
   }) {
     const stream = createUIMessageStream({
       execute: ({ writer }) => {
-        const miniAgent = VercelMiniAgents(writer);
+        const artifactsCollector = [];
+        const miniAgent = VercelMiniAgents(writer, artifactsCollector);
 
         const agent = new VercelAgent({
           model: openRouter(model, {
@@ -269,13 +270,28 @@ export const vercelChatService = {
               }
             },
             onFinish: async ({ messages }) => {
-              // Need To save search results to the database
-              // Need to see what is excatly being saved to the database
-              console.log("Messages in onFinish", messages);
+              console.log("Message in onFinish", messages[0]);
+              console.log("Artifacts Collector", artifactsCollector);
+
+              // Add collected artifacts to message parts for database persistence
+              const messageWithArtifacts = {
+                ...messages[0],
+                parts: [
+                  ...messages[0].parts,
+                  ...artifactsCollector.map((artifact) => ({
+                    type: `data-artifact-${artifact.toolName.toLowerCase()}`,
+                    id: artifact.id,
+                    data: artifact,
+                  })),
+                ],
+              };
+
+              console.log("Message with artifacts", messageWithArtifacts);
+
               await conversationService.addAiResponseToConversation(
                 userId,
                 conversationId,
-                messages[0]
+                messageWithArtifacts
               );
             },
           })

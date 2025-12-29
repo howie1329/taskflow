@@ -36,11 +36,12 @@ export const createArtifactData = ({
  * Artifact Writer - wraps writer.write with artifact formatting
  */
 export class ArtifactWriter {
-  constructor(writer, toolName) {
+  constructor(writer, toolName, artifactsCollector) {
     this.writer = writer;
     this.toolName = toolName;
     this.artifactId = null;
     this.startTime = null;
+    this.artifactsCollector = artifactsCollector;
   }
 
   /**
@@ -97,18 +98,28 @@ export class ArtifactWriter {
 
     const duration = this.startTime ? Date.now() - this.startTime : null;
 
+    const artifactData = createArtifactData({
+      status: ArtifactStatus.COMPLETE,
+      toolName: this.toolName,
+      message,
+      input,
+      outputs,
+      duration,
+    });
+
     this.writer.write({
       type: `data-artifact-${this.toolName.toLowerCase()}`,
       id: this.artifactId,
-      data: createArtifactData({
-        status: ArtifactStatus.COMPLETE,
-        toolName: this.toolName,
-        message,
-        input,
-        outputs,
-        duration,
-      }),
+      data: artifactData,
     });
+
+    // Also append to collector for database persistence
+    if (this.artifactsCollector) {
+      this.artifactsCollector.push({
+        id: this.artifactId,
+        ...artifactData,
+      });
+    }
   }
 
   /**
@@ -122,26 +133,42 @@ export class ArtifactWriter {
     const duration = this.startTime ? Date.now() - this.startTime : null;
     const errorMessage = error instanceof Error ? error.message : String(error);
 
+    const artifactData = createArtifactData({
+      status: ArtifactStatus.ERROR,
+      toolName: this.toolName,
+      message,
+      input,
+      error: errorMessage,
+      duration,
+    });
+
     this.writer.write({
       type: `data-artifact-${this.toolName.toLowerCase()}`,
       id: this.artifactId,
-      data: createArtifactData({
-        status: ArtifactStatus.ERROR,
-        toolName: this.toolName,
-        message,
-        input,
-        error: errorMessage,
-        duration,
-      }),
+      data: artifactData,
     });
+
+    // Also append to collector for database persistence
+    if (this.artifactsCollector) {
+      this.artifactsCollector.push({
+        id: this.artifactId,
+        ...artifactData,
+      });
+    }
   }
 }
 
 /**
  * Convenience wrapper for try-catch artifact pattern
  */
-export const withArtifact = async (writer, toolName, input, operation) => {
-  const artifact = new ArtifactWriter(writer, toolName);
+export const withArtifact = async (
+  writer,
+  toolName,
+  input,
+  artifactsCollector,
+  operation
+) => {
+  const artifact = new ArtifactWriter(writer, toolName, artifactsCollector);
   artifact.init(input);
 
   try {
@@ -152,4 +179,3 @@ export const withArtifact = async (writer, toolName, input, operation) => {
     throw error;
   }
 };
-

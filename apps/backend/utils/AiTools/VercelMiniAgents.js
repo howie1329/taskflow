@@ -5,8 +5,8 @@ import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { TaskAgentPrompt } from "../AIPrompts/TaskPrompt.js";
 import { NoteAgentPrompt } from "../AIPrompts/NotePrompt.js";
 
-export const VercelMiniAgents = (writer) => {
-  const tools = VercelAITools(writer);
+export const VercelMiniAgents = (writer, artifactsCollector) => {
+  const tools = VercelAITools(writer, artifactsCollector);
   const openRouter = createOpenRouter({
     apiKey: process.env.OPENROUTER_AI_KEY,
   });
