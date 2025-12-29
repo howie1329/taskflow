@@ -15,7 +15,6 @@ import { sql } from "drizzle-orm";
 import { db } from "../db/index.js";
 import { Experimental_Agent as VercelAgent } from "ai";
 import { VercelMainAgentPrompt } from "../utils/AIPrompts/VercelMainAgentPrompt.js";
-import { createDecidingModelPrompt } from "../utils/AIPrompts/AiDecidingModelPrompt.js";
 import { createSummaryPrompt } from "../utils/AIPrompts/AiSummaryPrompt.js";
 import { VercelMiniAgents } from "../utils/AiTools/VercelMiniAgents.js";
 import { conversationService } from "./conversations.js";
