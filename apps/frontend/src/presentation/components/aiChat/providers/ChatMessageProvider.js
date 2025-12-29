@@ -365,7 +365,7 @@ export const useChatMessageContext = () => {
 export const useToolArtifacts = () => {
   const { messages } = useChatMessageContext();
   const toolArtifacts = useMemo(() => {
-    () => toolArtifactsCollector(messages);
+    return toolArtifactsCollector(messages);
   }, [messages]);
   return toolArtifacts;
 };
