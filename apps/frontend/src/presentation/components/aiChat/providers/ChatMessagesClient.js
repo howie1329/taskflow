@@ -54,7 +54,7 @@ export const ChatMessagesClient = () => {
           };
 
           return (
-            <div key={message.id}>
+            <div key={message.id} data-message-id={message.id}>
               {toolParts.length > 0 && (
                 <div className="flex flex-row flex-wrap gap-2 mb-1">
                   {toolParts.map((part) => (
