@@ -4,10 +4,10 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
-  ConnectIcon,
   Delete03Icon,
   EllipseSelectionIcon,
   TaskEdit01Icon,
+  TextIndentMoreIcon,
 } from "@hugeicons/core-free-icons/index";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -73,7 +73,7 @@ export const ChatHeaderClient = () => {
               className="hover:bg-foreground hover:text-white rounded-none hover:cursor-pointer"
               onClick={() => setIsToolArtifactsOpen(!isToolArtifactsOpen)}
             >
-              <HugeiconsIcon icon={ConnectIcon} strokeWidth={2} />
+              <HugeiconsIcon icon={TextIndentMoreIcon} strokeWidth={2} />
             </Button>
           )}
         </div>
