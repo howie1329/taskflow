@@ -50,7 +50,7 @@ export default function AppHeader({
   const { mutate: markNotificationAsRead } = useMarkNotificationAsRead();
   const { toggleSidebar } = useSidebar();
   return (
-    <header className=" w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className=" w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50 sticky top-0">
       <div className="flex h-14 items-center px-4">
         {/* Left side - Logo and Sidebar Toggle */}
         <div className="flex items-center space-x-3">
