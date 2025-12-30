@@ -12,6 +12,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { CheckIcon, CopyIcon, ExternalLinkIcon, XIcon } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
 
 function safeHost(url) {
   try {
@@ -35,9 +36,21 @@ function fmtDate(iso) {
 
 function StatusBadge({ status, error }) {
   if (error) return <Badge variant="destructive">error</Badge>;
-  if (status === "complete") return <Badge variant="secondary">complete</Badge>;
+  if (status === "complete") return <Badge variant="secondary">Complete</Badge>;
+  if (status === "loading")
+    return (
+      <Badge variant="secondary">
+        <Spinner className="w-3 h-3" />
+        Loading
+      </Badge>
+    );
   if (status) return <Badge variant="outline">{status}</Badge>;
   return <Badge variant="outline">unknown</Badge>;
+}
+
+function ProviderBadge({ provider }) {
+  if (!provider) return <Badge variant="outline">unknown</Badge>;
+  return <Badge variant="outline">{provider}</Badge>;
 }
 
 function Meta({ label, value }) {
@@ -56,6 +69,7 @@ export const ChatSingleArtifactClient = ({ artifact }) => {
   const toolName = artifact?.toolName ?? "Tool";
   const status = artifact?.status;
   const error = artifact?.error;
+  const provider = artifact?.provider;
 
   const primaryInput = useMemo(() => {
     const input = artifact?.input ?? {};
@@ -89,11 +103,12 @@ export const ChatSingleArtifactClient = ({ artifact }) => {
   };
 
   return (
-    <Card className="rounded-none">
+    <Card className="rounded-none shadow-none">
       <Collapsible open={open} onOpenChange={setOpen}>
         <CardHeader>
           <CardTitle className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 min-w-0 flex-wrap">
+              <ProviderBadge provider={provider} />
               <StatusBadge status={status} error={error} />
               <Badge>{toolName}</Badge>
 

@@ -27,25 +27,12 @@ export const ChatPageClient = () => {
         {!hasMessages && <h1>Welcome To TaskFlow Chat Agent</h1>}
         {hasMessages && <ChatHeaderClient />}
         {hasMessages && (
-          <ResizablePanelGroup direction="horizontal">
-            <ResizablePanel>
-              <div
-                className={
-                  hasMessages ? "overflow-y-auto h-full w-full px-2" : ""
-                }
-              >
-                <ChatMessagesClient />
-              </div>
-            </ResizablePanel>
-            {toolArtifacts.length > 0 && isToolArtifactsOpen && (
-              <>
-                <ResizableHandle />
-                <ResizablePanel>
-                  <ChatArtifactClient />
-                </ResizablePanel>
-              </>
-            )}
-          </ResizablePanelGroup>
+          <div
+            className={hasMessages ? "overflow-y-auto h-full w-full px-2" : ""}
+          >
+            <ChatMessagesClient />
+            <ChatArtifactClient />
+          </div>
         )}
         <ChatInput />
       </div>
