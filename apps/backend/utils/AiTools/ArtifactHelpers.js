@@ -16,6 +16,7 @@ export const ArtifactStatus = {
 export const createArtifactData = ({
   status,
   toolName,
+  provider = null,
   message,
   input,
   outputs = null,
@@ -24,6 +25,7 @@ export const createArtifactData = ({
 }) => ({
   status,
   toolName,
+  provider,
   message,
   input,
   outputs,
@@ -36,12 +38,13 @@ export const createArtifactData = ({
  * Artifact Writer - wraps writer.write with artifact formatting
  */
 export class ArtifactWriter {
-  constructor(writer, toolName, artifactsCollector) {
+  constructor(writer, toolName, artifactsCollector, provider = null) {
     this.writer = writer;
     this.toolName = toolName;
     this.artifactId = null;
     this.startTime = null;
     this.artifactsCollector = artifactsCollector;
+    this.provider = provider || null;
   }
 
   /**
@@ -57,6 +60,7 @@ export class ArtifactWriter {
       data: createArtifactData({
         status: ArtifactStatus.PENDING,
         toolName: this.toolName,
+        provider: this.provider,
         message,
         input,
       }),
@@ -80,6 +84,7 @@ export class ArtifactWriter {
       data: createArtifactData({
         status: ArtifactStatus.LOADING,
         toolName: this.toolName,
+        provider: this.provider,
         message,
         input,
       }),
@@ -101,6 +106,7 @@ export class ArtifactWriter {
     const artifactData = createArtifactData({
       status: ArtifactStatus.COMPLETE,
       toolName: this.toolName,
+      provider: this.provider,
       message,
       input,
       outputs,
@@ -136,6 +142,7 @@ export class ArtifactWriter {
     const artifactData = createArtifactData({
       status: ArtifactStatus.ERROR,
       toolName: this.toolName,
+      provider: this.provider,
       message,
       input,
       error: errorMessage,
@@ -166,9 +173,15 @@ export const withArtifact = async (
   toolName,
   input,
   artifactsCollector,
-  operation
+  operation,
+  provider
 ) => {
-  const artifact = new ArtifactWriter(writer, toolName, artifactsCollector);
+  const artifact = new ArtifactWriter(
+    writer,
+    toolName,
+    artifactsCollector,
+    provider
+  );
   artifact.init(input);
 
   try {

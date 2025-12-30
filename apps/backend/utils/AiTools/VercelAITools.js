@@ -20,7 +20,8 @@ export const VercelAITools = (writer, artifactsCollector = null) => {
         const artifact = new ArtifactWriter(
           writer,
           "WebSearch",
-          artifactsCollector
+          artifactsCollector,
+          "exa"
         );
         const input = { query };
 
