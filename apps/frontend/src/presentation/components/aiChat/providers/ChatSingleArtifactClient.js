@@ -249,7 +249,7 @@ export const ChatSingleArtifactClient = ({ artifact }) => {
                                     </CollapsibleTrigger>
                                   </div>
                                   <CollapsibleContent>
-                                    <pre className="mt-2 text-xs whitespace-pre-wrap break-words max-h-[240px] overflow-auto border rounded-md p-3 bg-muted/30 border-black border-2">
+                                    <pre className="mt-2 text-xs whitespace-pre-wrap break-words max-h-[240px] overflow-auto border rounded-md p-3 bg-muted/30">
                                       {s.text}
                                     </pre>
                                   </CollapsibleContent>

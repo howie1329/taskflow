@@ -63,7 +63,7 @@ export default function AppSideBar() {
   return (
     <Sidebar
       defaultOpen={false}
-      className="top-(--header-height) border-r h-[calc(100svh-var(--header-height))]!"
+      className="top-[var(--header-height)] border-r h-[calc(100svh-var(--header-height))]!"
       collapsible="icon"
     >
       <SidebarContent>

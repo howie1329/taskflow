@@ -23,11 +23,14 @@ export default function Layout({ children }) {
   }, [isGlobalSmartSearchOpen]);
 
   return (
-    <div className="[--header-height:calc(--spacing(14))] h-[100svh] w-[100swv] overflow-hidden">
+    <div className="[--header-height:3.5rem] h-[100svh] w-[100swv] overflow-hidden">
       <SocketProvider>
         <QueryClientProvider client={queryClient}>
           <SidebarProvider className="flex flex-col h-full w-full overflow-hidden">
-            <AppHeader />
+            <AppHeader
+              isGlobalSmartSearchOpen={isGlobalSmartSearchOpen}
+              setIsGlobalSmartSearchOpen={setIsGlobalSmartSearchOpen}
+            />
             <div className="flex h-full w-full overflow-hidden">
               <AppSideBar />
               <SidebarInset>

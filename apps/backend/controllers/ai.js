@@ -61,7 +61,7 @@ export const createNote = async (req, res) => {
   return await BaseOperationHandler(req, res, async (req) => {
     const userId = req.userId;
     const { message, model } = req.body;
-    const note = AIActivatedServices.createNote(userId, message, model);
+    const note = await AIActivatedServices.createNote(userId, message, model);
     return note;
   });
 };
