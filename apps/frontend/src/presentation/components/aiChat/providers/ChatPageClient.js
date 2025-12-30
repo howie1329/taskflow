@@ -30,7 +30,9 @@ export const ChatPageClient = () => {
           <ResizablePanelGroup direction="horizontal">
             <ResizablePanel>
               <div
-                className={hasMessages ? "overflow-y-auto h-full w-full" : ""}
+                className={
+                  hasMessages ? "overflow-y-auto h-full w-full px-2" : ""
+                }
               >
                 <ChatMessagesClient />
               </div>
