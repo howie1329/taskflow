@@ -315,7 +315,7 @@ export const TaskCardSheet = ({ selectedTask, isOpen, onOpenChange }) => {
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent className="grid grid-rows-[auto_1fr_1fr_auto] !w-[30vw] !max-w-[30vw] gap-2 p-2">
+      <SheetContent className="grid grid-rows-[auto_1fr_auto] gap-1 p-2 h-full overflow-hidden">
         <SheetHeader className="flex flex-col gap-2 p-0">
           <SheetTitle className="">
             <Input
@@ -335,7 +335,7 @@ export const TaskCardSheet = ({ selectedTask, isOpen, onOpenChange }) => {
           </SheetDescription>
           <Separator />
         </SheetHeader>
-        <div className="grid grid-rows-[auto_auto_auto_auto_1fr] gap-3">
+        <div className="grid grid-rows-[auto_auto_auto_auto_1fr] gap-3 overflow-y-auto h-full">
           <div className="flex flex-row items-center gap-2">
             <h3 className="text-sm font-medium"> Status:</h3>
             <Select value={status} onValueChange={handleStatusChange}>
@@ -362,10 +362,10 @@ export const TaskCardSheet = ({ selectedTask, isOpen, onOpenChange }) => {
             />
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 overflow-x-auto ">
             <div className="flex flex-row items-center gap-2">
               <h3 className="text-sm font-medium">Labels:</h3>
-              <div className="flex flex-row items-center gap-1 flex-wrap">
+              <div className="flex flex-row w-full gap-1 flex-wrap overflow-x-auto ">
                 {labels.map((label) => (
                   <Badge
                     key={label}
