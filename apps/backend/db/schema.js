@@ -148,6 +148,7 @@ export const tasks = pgTable(
       .notNull(),
     status: text().default("notStarted").notNull(),
     projectId: uuid("project_id"),
+    notes: text(),
   },
   (table) => [
     foreignKey({
