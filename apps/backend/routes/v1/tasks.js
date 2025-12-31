@@ -12,19 +12,26 @@ import {
   fetchTaskWithNoVector,
   fetchTasksByProjectId,
 } from "../../controllers/tasks.js";
+import { validate } from "../../middleware/validation.js";
+import {
+  createTaskSchema,
+  updateTaskSchema,
+  taskParamsSchema,
+  projectParamsSchema,
+} from "../../validation/schemas.js";
 
 const router = express.Router();
 
 router.get("/user", fetchTasks);
-router.get("/user/:taskId", fetchSingleTask);
-router.get("/subtasks/:taskId", fetchSubtasks);
-router.get("/notes/:taskId", fetchNotes);
+router.get("/user/:taskId", validate(taskParamsSchema), fetchSingleTask);
+router.get("/subtasks/:taskId", validate(taskParamsSchema), fetchSubtasks);
+router.get("/notes/:taskId", validate(taskParamsSchema), fetchNotes);
 router.get("/no-vector", fetchTaskWithNoVector);
-router.get("/project/:projectId", fetchTasksByProjectId);
-router.post("/create", createTask);
-router.patch("/update/:taskId", updateTask);
-router.patch("/complete/:taskId", markTaskAsComplete);
-router.patch("/incomplete/:taskId", markTaskAsIncomplete);
-router.delete("/delete/:taskId", deleteTask);
+router.get("/project/:projectId", validate(projectParamsSchema), fetchTasksByProjectId);
+router.post("/create", validate(createTaskSchema), createTask);
+router.patch("/update/:taskId", validate(updateTaskSchema), updateTask);
+router.patch("/complete/:taskId", validate(taskParamsSchema), markTaskAsComplete);
+router.patch("/incomplete/:taskId", validate(taskParamsSchema), markTaskAsIncomplete);
+router.delete("/delete/:taskId", validate(taskParamsSchema), deleteTask);
 
 export default router;
