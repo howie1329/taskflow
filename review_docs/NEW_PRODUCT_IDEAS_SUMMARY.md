@@ -32,40 +32,104 @@
 **MVP Time**: 2-3 weeks
 **Stack**: Image recognition + recipe generation + your stack
 
+### 6. **AI Bug Predictor & Fixer** ⭐⭐⭐⭐
+**What**: Predicts potential bugs, suggests fixes, learns from bug history
+**Why Fun**: Code analysis + ML prediction + pattern recognition
+**MVP Time**: 2-3 weeks
+**Stack**: Static analysis + ML + your AI stack
+
+### 7. **AI Error Message Translator** ⭐⭐⭐⭐
+**What**: Explains cryptic errors in plain English, suggests fixes
+**Why Fun**: Useful immediately, browser extension, simple to start
+**MVP Time**: 1-2 weeks
+**Stack**: Error parsing + AI explanation + browser extension
+
+### 8. **AI Git Commit Message Generator** ⭐⭐⭐⭐
+**What**: Analyzes code changes, generates meaningful commit messages
+**Why Fun**: Simple, useful, CLI tool, everyone needs this
+**MVP Time**: 1 week
+**Stack**: Git diff analysis + AI + CLI
+
+### 9. **AI Test Generator** ⭐⭐⭐⭐
+**What**: Generates unit/integration tests from code
+**Why Fun**: Code analysis + test generation challenge
+**MVP Time**: 2-3 weeks
+**Stack**: AST parsing + AI + test frameworks
+
+### 10. **AI Documentation Generator** ⭐⭐⭐⭐
+**What**: Auto-generates API docs, READMEs from codebase
+**Why Fun**: Code analysis + doc generation + beautiful output
+**MVP Time**: 2-3 weeks
+**Stack**: AST parsing + AI + doc generation
+
 ---
 
 ## 🎯 By Interest Area
 
 ### **If you love code analysis:**
 → **AI Code Review Assistant**
+→ **AI Bug Predictor & Fixer**
+→ **AI Architecture Analyzer**
+→ **AI Code Refactoring Assistant**
 
 ### **If you love RAG/vector search:**
 → **AI Research Assistant** (perfect RAG use case)
+→ **AI Code Review Assistant** (codebase context)
+→ **AI Learning Path Generator** (resource finding)
 
 ### **If you love real-time systems:**
 → **AI Meeting Notes** (real-time transcription + streaming)
+→ **AI Writing Coach** (streaming suggestions)
+→ **AI Log Analyzer** (real-time log processing)
 
 ### **If you want something creative:**
 → **AI Story Generator** or **AI Music Composer**
+→ **AI Video Script Generator**
+→ **AI Recipe Generator**
 
 ### **If you want practical/usable:**
 → **AI Recipe Generator** or **AI Email Assistant**
+→ **AI Git Commit Message Generator** (everyone needs this!)
+→ **AI Error Message Translator** (useful immediately)
 
 ---
 
 ## ⚡ Quick Start Ideas
 
-### **Weekend Project** (2-3 days):
+### **Weekend Project** (1-2 days):
+**AI Git Commit Message Generator**
+- CLI tool
+- Git diff analysis
+- Commit message generation
+- GitHub integration
+
+**AI Error Message Translator**
+- Browser extension
+- Error parsing
+- Plain English explanation
+- Fix suggestions
+
+### **2-3 Day Sprint**:
 **AI Code Review MVP**
 - GitHub webhook → analyze PR → post comments
 - Start with simple suggestions
 - Add RAG later
 
-### **2-Week Sprint**:
+**AI Recipe Generator MVP**
+- Simple recipe generation
+- Ingredient input
+- Basic meal planning
+
+### **1-2 Week Sprint**:
 **AI Research Assistant MVP**
 - Web scraping + PDF parsing
 - Vector search + Q&A
 - Simple UI
+
+**AI Test Generator MVP**
+- Code analysis
+- Basic test generation
+- Multiple frameworks
 
 ### **Month Project**:
 **AI Meeting Notes**
@@ -96,8 +160,11 @@
 ## 💰 Best Market Opportunities
 
 1. **AI Code Review** - Every developer needs this
-2. **AI Email Assistant** - Everyone uses email
-3. **AI Meeting Notes** - Everyone has meetings
+2. **AI Git Commit Message Generator** - All developers (huge market)
+3. **AI Error Message Translator** - All developers (massive market)
+4. **AI Email Assistant** - Everyone uses email
+5. **AI Meeting Notes** - Everyone has meetings
+6. **AI Test Generator** - All developers need tests
 
 ---
 
@@ -143,4 +210,17 @@
 
 ---
 
-*See `NEW_PRODUCT_IDEAS.md` for detailed specs*
+## 📚 All Ideas
+
+**Total: 41 product ideas across 7 categories**
+
+- **Developer Tools**: 15 ideas (code review, testing, docs, etc.)
+- **Content Creation**: 8 ideas (writing, social media, video)
+- **Productivity**: 6 ideas (meetings, email, research)
+- **Creative**: 3 ideas (story, music, recipes)
+- **Finance**: 2 ideas (personal finance, stocks)
+- **Lifestyle**: 5 ideas (fitness, sleep, habits, travel, home)
+- **Education**: 2 ideas (learning paths, language)
+
+See `NEW_PRODUCT_IDEAS.md` for detailed specs of all 41 ideas
+See `NEW_PRODUCT_IDEAS_INDEX.md` for categorized index
