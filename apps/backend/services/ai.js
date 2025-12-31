@@ -18,6 +18,13 @@ import { createSummaryPrompt } from "../utils/AIPrompts/AiSummaryPrompt.js";
 import { VercelMiniAgents } from "../utils/AiTools/VercelMiniAgents.js";
 import { conversationService } from "./conversations.js";
 import { VercelAITools } from "../utils/AiTools/VercelAITools.js";
+import {
+  publishChatStart,
+  publishChatTextDelta,
+  publishChatFinish,
+  publishChatError,
+  publishChatChunk,
+} from "./redisPubSub.js";
 
 // AI Providers
 
@@ -215,6 +222,7 @@ export const vercelChatService = {
     conversationId,
     tokensAmountObject,
     res,
+    useRedisPubSub = true, // Enable Redis pub/sub by default
   }) {
     const stream = createUIMessageStream({
       execute: ({ writer }) => {
@@ -251,17 +259,41 @@ export const vercelChatService = {
           result.toUIMessageStream({
             messageMetadata: ({ part }) => {
               if (part.type === "start") {
-                return {
+                const metadata = {
                   contextTokens: tokensAmountObject,
                   createdAt: new Date().toISOString(),
                   model: model,
                 };
+                
+                // Publish start event to Redis
+                if (useRedisPubSub) {
+                  publishChatStart(conversationId, {
+                    userId,
+                    ...metadata,
+                  }).catch((err) => {
+                    console.error("Error publishing chat start to Redis:", err);
+                  });
+                }
+                
+                return metadata;
               }
               if (part.type === "finish") {
-                return {
+                const metadata = {
                   tokens: part.totalUsage.outputTokens,
                   totalTokens: part.totalUsage.totalTokens,
                 };
+                
+                // Publish finish event to Redis
+                if (useRedisPubSub) {
+                  publishChatFinish(conversationId, {
+                    userId,
+                    ...metadata,
+                  }).catch((err) => {
+                    console.error("Error publishing chat finish to Redis:", err);
+                  });
+                }
+                
+                return metadata;
               }
             },
             onFinish: async ({ messages }) => {
@@ -294,10 +326,73 @@ export const vercelChatService = {
       },
     });
 
+    // Wrap the stream to intercept chunks and publish to Redis
+    let streamToPipe = stream;
+    
+    if (useRedisPubSub) {
+      // Create a transform stream that intercepts chunks without consuming the original stream
+      const transformStream = new TransformStream({
+        transform(chunk, controller) {
+          // Decode and process the chunk
+          try {
+            const decoder = new TextDecoder();
+            const text = decoder.decode(chunk, { stream: true });
+            const lines = text.split("\n").filter((line) => line.trim());
+            
+            for (const line of lines) {
+              try {
+                const data = JSON.parse(line);
+                
+                // Publish text deltas to Redis
+                if (data.type === "text-delta" && data.textDelta) {
+                  publishChatTextDelta(conversationId, data.textDelta).catch(
+                    (err) => {
+                      console.error("Error publishing text delta to Redis:", err);
+                    }
+                  );
+                } else if (data.type === "tool-call" || data.type === "tool-result") {
+                  // Publish tool calls/results to Redis
+                  publishChatChunk(conversationId, {
+                    userId,
+                    ...data,
+                  }).catch((err) => {
+                    console.error("Error publishing tool chunk to Redis:", err);
+                  });
+                }
+              } catch (parseError) {
+                // Not JSON, might be part of streaming format - ignore
+              }
+            }
+          } catch (error) {
+            console.error("Error processing stream chunk:", error);
+          }
+
+          // Pass through the chunk
+          controller.enqueue(chunk);
+        },
+        flush(controller) {
+          controller.terminate();
+        },
+      });
+
+      // Pipe through transform stream
+      streamToPipe = stream.pipeThrough(transformStream);
+    }
+
+    // Handle stream errors
+    streamToPipe.catch(async (error) => {
+      console.error("Chat stream error:", error);
+      if (useRedisPubSub) {
+        await publishChatError(conversationId, error).catch((err) => {
+          console.error("Error publishing chat error to Redis:", err);
+        });
+      }
+    });
+
     pipeUIMessageStreamToResponse({
       response: res,
       status: 200,
-      stream: stream,
+      stream: streamToPipe,
     });
   },
 };

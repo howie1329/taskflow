@@ -12,6 +12,7 @@ import router from "./routes/v1/index.js";
 import { initSocket } from "./sockets/index.js";
 import "./services/bullmq/jobs.js";
 import { cacheService } from "./services/cache.js";
+import { subscribeToChatStreams } from "./services/redisPubSub.js";
 
 const allowedOrigins = [
   "https://thetaskflow.app",
@@ -51,6 +52,15 @@ httpServer.listen(port, async () => {
   console.log(`Server is running at http://localhost:${port}`);
   // Start the notifications cron jobs
   await cacheService.connect();
+  
+  // Initialize Redis pub/sub for chat streaming
+  try {
+    await subscribeToChatStreams();
+    console.log("Redis pub/sub subscriber initialized for chat streaming");
+  } catch (error) {
+    console.error("Failed to initialize Redis pub/sub subscriber:", error);
+  }
+  
   initWorkers();
   startNotificationCleanupCron();
   cleanupPastJobs();

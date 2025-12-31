@@ -2,10 +2,11 @@
 import useFetchConversation from "@/hooks/ai/useFetchConversation";
 import useFetchConversationMessages from "@/hooks/ai/useFetchConversationMessages";
 import { useChat } from "@ai-sdk/react";
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, useRef } from "react";
 import { DefaultChatTransport } from "ai";
 import { useAuth } from "@clerk/nextjs";
 import { useQueryClient } from "@tanstack/react-query";
+import { useChatStream } from "@/hooks/ai/useChatStream";
 
 // Create the context
 const ChatMessageContext = createContext();
@@ -268,7 +269,7 @@ export const ChatMessageProvider = ({ conversationId, children }) => {
     useFetchConversationMessages(conversationId);
 
   // Use the useChat hook to send messages to the backend
-  const { messages, sendMessage, status, setMessages, stop, regenerate } =
+  const { messages, sendMessage, status, setMessages, stop, regenerate, append } =
     useChat({
       id: defaultConversationId, // If no conversationId is provided, use null might need to set to a default value
       transport: new DefaultChatTransport({
@@ -302,6 +303,111 @@ export const ChatMessageProvider = ({ conversationId, children }) => {
       },
       experimental_throttle: 100, // 100ms throttle trying to improve the apperance of the chat of messages streaming in
     });
+
+  // Track current streaming message for Socket.io updates
+  const currentStreamingMessageRef = useRef(null);
+
+  // Set up Socket.io chat streaming
+  useChatStream({
+    conversationId: defaultConversationId,
+    onStreamStart: (data) => {
+      console.log("Chat stream started via Socket.io", data);
+      // Create a new assistant message if it doesn't exist
+      if (!currentStreamingMessageRef.current) {
+        currentStreamingMessageRef.current = {
+          id: `temp-${Date.now()}`,
+          role: "assistant",
+          content: "",
+        };
+        // Append the message to the chat if append is available
+        if (append) {
+          append({
+            role: "assistant",
+            content: "",
+          });
+        } else {
+          // Fallback: manually add message
+          setMessages((prevMessages) => [
+            ...prevMessages,
+            {
+              id: currentStreamingMessageRef.current.id,
+              role: "assistant",
+              content: "",
+              parts: [{ type: "text", text: "" }],
+            },
+          ]);
+        }
+      }
+    },
+    onStreamChunk: (textDelta) => {
+      // Update the current streaming message with the text delta
+      if (currentStreamingMessageRef.current && typeof textDelta === "string") {
+        // Update the last assistant message with the new text
+        setMessages((prevMessages) => {
+          if (prevMessages.length === 0) return prevMessages;
+          
+          const updatedMessages = [...prevMessages];
+          const lastMessage = { ...updatedMessages[updatedMessages.length - 1] };
+          
+          if (lastMessage && lastMessage.role === "assistant") {
+            // Update the content
+            const currentText = lastMessage.content || "";
+            lastMessage.content = currentText + textDelta;
+            
+            // Update parts if they exist
+            if (lastMessage.parts && lastMessage.parts.length > 0) {
+              const parts = [...lastMessage.parts];
+              const textPartIndex = parts.findIndex((p) => p.type === "text");
+              if (textPartIndex >= 0) {
+                parts[textPartIndex] = {
+                  ...parts[textPartIndex],
+                  text: (parts[textPartIndex].text || "") + textDelta,
+                };
+              } else {
+                parts.push({ type: "text", text: textDelta });
+              }
+              lastMessage.parts = parts;
+            } else {
+              lastMessage.parts = [{ type: "text", text: lastMessage.content }];
+            }
+            
+            updatedMessages[updatedMessages.length - 1] = lastMessage;
+          }
+          
+          return updatedMessages;
+        });
+      }
+    },
+    onStreamFinish: (data) => {
+      console.log("Chat stream finished via Socket.io", data);
+      currentStreamingMessageRef.current = null;
+      
+      // Update the last message with final metadata if available
+      if (data.tokens || data.totalTokens) {
+        setMessages((prevMessages) => {
+          if (prevMessages.length === 0) return prevMessages;
+          
+          const updatedMessages = [...prevMessages];
+          const lastMessage = { ...updatedMessages[updatedMessages.length - 1] };
+          
+          if (lastMessage && lastMessage.role === "assistant") {
+            lastMessage.metadata = {
+              ...lastMessage.metadata,
+              tokens: data.tokens,
+              totalTokens: data.totalTokens,
+            };
+            updatedMessages[updatedMessages.length - 1] = lastMessage;
+          }
+          
+          return updatedMessages;
+        });
+      }
+    },
+    onStreamError: (error) => {
+      console.error("Chat stream error via Socket.io", error);
+      currentStreamingMessageRef.current = null;
+    },
+  });
 
   // Set the messages from the database to the useChat hook
   useEffect(() => {

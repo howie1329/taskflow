@@ -27,4 +27,16 @@ redisClient.on("end", () => {
   console.log("Redis Client Disconnected");
 });
 
+// Connect Redis client on initialization
+(async () => {
+  try {
+    if (!redisClient.isOpen) {
+      await redisClient.connect();
+      console.log("Redis client connected successfully");
+    }
+  } catch (error) {
+    console.error("Failed to connect Redis client:", error);
+  }
+})();
+
 export default redisClient;

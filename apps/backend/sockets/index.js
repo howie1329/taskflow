@@ -8,7 +8,31 @@ export const initSocket = (httpServer, corsOptions) => {
   io.on("connection", (socket) => {
     const userId =
       socket.handshake?.headers.userid || socket.handshake?.auth?.userId;
-    socket.join(userId);
+    
+    // Join user-specific room
+    if (userId) {
+      socket.join(userId);
+    }
+
+    // Handle joining conversation rooms
+    socket.on("join-conversation", (conversationId) => {
+      if (conversationId) {
+        socket.join(conversationId);
+        console.log(`Socket ${socket.id} joined conversation room: ${conversationId}`);
+      }
+    });
+
+    // Handle leaving conversation rooms
+    socket.on("leave-conversation", (conversationId) => {
+      if (conversationId) {
+        socket.leave(conversationId);
+        console.log(`Socket ${socket.id} left conversation room: ${conversationId}`);
+      }
+    });
+
+    socket.on("disconnect", () => {
+      console.log(`Socket ${socket.id} disconnected`);
+    });
   });
 
   return io;
