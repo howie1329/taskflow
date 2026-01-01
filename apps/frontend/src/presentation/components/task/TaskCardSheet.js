@@ -201,17 +201,21 @@ export const TaskCardSheet = ({ selectedTask, isOpen, onOpenChange }) => {
   }, [dueDate, selectedTask.id, selectedTask.date, updateTask]);
 
   // Debounced update for notes
+  // Debounced update for notes
   useEffect(() => {
     if (notesTimeoutRef.current) {
       clearTimeout(notesTimeoutRef.current);
     }
 
+    // Normalize both values to empty string for comparison
+    const normalizedNotes = notes || "";
     const originalNotes = selectedTask.notes || "";
-    if (notes !== originalNotes) {
+
+    if (normalizedNotes !== originalNotes) {
       notesTimeoutRef.current = setTimeout(() => {
         updateTask({
           taskId: selectedTask.id,
-          taskData: { notes: notes || null },
+          taskData: { notes: normalizedNotes || null },
         });
       }, 1000);
     }
@@ -572,7 +576,9 @@ export const TaskCardSheet = ({ selectedTask, isOpen, onOpenChange }) => {
           <DialogHeader>
             <DialogTitle>Delete Task</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete "{title}"? This action cannot be undone and will also delete all subtasks associated with this task.
+              Are you sure you want to delete "{title}"? This action cannot be
+              undone and will also delete all subtasks associated with this
+              task.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
