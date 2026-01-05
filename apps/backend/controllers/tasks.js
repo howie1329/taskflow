@@ -1,17 +1,14 @@
 import { taskService } from "../services/tasks.js";
 import { subtaskService } from "../services/subtasks.js";
+import { BaseOperationHandler } from "./base.js";
 
 export const createTask = async (req, res) => {
-  try {
+  return await BaseOperationHandler(req, res, async (req) => {
     const userId = req.userId;
     const { subtasks, ...taskData } = req.body;
-
     taskData.userId = userId;
-    console.log("taskData", taskData);
     const task = await taskService.createTask(taskData);
-    console.log("task", task);
 
-    // Handle subtasks if provided
     if (subtasks && subtasks.length > 0) {
       const subtasksWithTaskId = subtasks
         .filter((subtask) => subtask !== "")
@@ -24,56 +21,36 @@ export const createTask = async (req, res) => {
         await subtaskService.createMultipleSubtasks(subtasksWithTaskId);
       }
     }
-
-    return res.status(201).json({
-      success: true,
-      message: "Task created successfully",
-      data: task,
-    });
-  } catch (error) {
-    console.error("Create task error:", error);
-    return res.status(500).json({ error: "Failed to create task" });
-  }
+    return task;
+  });
 };
 
 export const fetchTasks = async (req, res) => {
-  try {
+  return await BaseOperationHandler(req, res, async (req) => {
     const userId = req.userId;
     const tasks = await taskService.fetchTasks(userId);
-    return res.status(200).json({
-      success: true,
-      message: "Tasks fetched successfully",
-      data: tasks,
-    });
-  } catch (error) {
-    console.error("Fetch tasks error:", error);
-    return res.status(500).json({ error: "Failed to fetch tasks" });
-  }
+    return tasks;
+  });
 };
 
 export const fetchSingleTask = async (req, res) => {
-  try {
+  return await BaseOperationHandler(req, res, async (req) => {
     const userId = req.userId;
     const { taskId } = req.params;
     const task = await taskService.fetchSingleTask(taskId, userId);
 
     if (!task) {
-      return res.status(404).json({ error: "Task not found" });
+      const error = new Error("Task not found");
+      error.statusCode = 404;
+      throw error;
     }
 
-    return res.status(200).json({
-      success: true,
-      message: "Task fetched successfully",
-      data: task,
-    });
-  } catch (error) {
-    console.error("Fetch single task error:", error);
-    return res.status(500).json({ error: "Failed to fetch task" });
-  }
+    return task;
+  });
 };
 
 export const updateTask = async (req, res) => {
-  try {
+  return await BaseOperationHandler(req, res, async (req) => {
     const userId = req.userId;
     const { taskId } = req.params;
     const taskData = req.body;
@@ -81,139 +58,77 @@ export const updateTask = async (req, res) => {
     const task = await taskService.updateTask(taskId, userId, taskData);
 
     if (!task) {
-      return res.status(404).json({ error: "Task not found" });
+      const error = new Error("Task not found");
+      error.statusCode = 404;
+      throw error;
     }
 
-    return res.status(200).json({
-      success: true,
-      message: "Task updated successfully",
-      data: task,
-    });
-  } catch (error) {
-    console.error("Update task error:", error);
-    return res.status(500).json({ error: "Failed to update task" });
-  }
+    return task;
+  });
 };
 
 export const deleteTask = async (req, res) => {
-  try {
+  return await BaseOperationHandler(req, res, async (req) => {
     const userId = req.userId;
     const { taskId } = req.params;
 
     const task = await taskService.deleteTask(taskId, userId);
 
     if (!task) {
-      return res.status(404).json({ error: "Task not found" });
+      const error = new Error("Task not found");
+      error.statusCode = 404;
+      throw error;
     }
 
-    return res.status(200).json({
-      success: true,
-      message: "Task deleted successfully",
-      data: task,
-    });
-  } catch (error) {
-    console.error("Delete task error:", error);
-    return res.status(500).json({ error: "Failed to delete task" });
-  }
+    return task;
+  });
 };
 
 export const markTaskAsComplete = async (req, res) => {
-  try {
+  return await BaseOperationHandler(req, res, async (req) => {
     const userId = req.userId;
     const { taskId } = req.params;
-
     const task = await taskService.markTaskAsComplete(taskId, userId);
-
-    return res.status(200).json({
-      success: true,
-      message: "Task marked as complete",
-      data: task,
-    });
-  } catch (error) {
-    console.error("Mark task complete error:", error);
-    return res.status(500).json({ error: "Failed to mark task as complete" });
-  }
+    return task;
+  });
 };
 
 export const markTaskAsIncomplete = async (req, res) => {
-  try {
+  return await BaseOperationHandler(req, res, async (req) => {
     const userId = req.userId;
     const { taskId } = req.params;
-
     const task = await taskService.markTaskAsIncomplete(taskId, userId);
-
-    return res.status(200).json({
-      success: true,
-      message: "Task marked as incomplete",
-      data: task,
-    });
-  } catch (error) {
-    console.error("Mark task incomplete error:", error);
-    return res.status(500).json({ error: "Failed to mark task as incomplete" });
-  }
+    return task;
+  });
 };
 
 export const fetchSubtasks = async (req, res) => {
-  try {
+  return await BaseOperationHandler(req, res, async (req) => {
     const { taskId } = req.params;
     const subtasks = await taskService.fetchSubtasks(taskId);
-
-    return res.status(200).json({
-      success: true,
-      message: "Subtasks fetched successfully",
-      data: subtasks,
-    });
-  } catch (error) {
-    console.error("Fetch subtasks error:", error);
-    return res.status(500).json({ error: "Failed to fetch subtasks" });
-  }
+    return subtasks;
+  });
 };
 
 export const fetchNotes = async (req, res) => {
-  try {
+  return await BaseOperationHandler(req, res, async (req) => {
     const { taskId } = req.params;
     const notes = await taskService.fetchNotes(taskId);
-
-    return res.status(200).json({
-      success: true,
-      message: "Notes fetched successfully",
-      data: notes,
-    });
-  } catch (error) {
-    console.error("Fetch notes error:", error);
-    return res.status(500).json({ error: "Failed to fetch notes" });
-  }
+    return notes;
+  });
 };
 
 export const fetchTaskWithNoVector = async (req, res) => {
-  try {
+  return await BaseOperationHandler(req, res, async (req) => {
     const tasks = await taskService.fetchTaskWithNoVector();
-
-    return res.status(200).json({
-      success: true,
-      message: "Tasks fetched successfully",
-      data: tasks,
-    });
-  } catch (error) {
-    console.error("Fetch tasks with no vector error:", error);
-    return res
-      .status(500)
-      .json({ error: "Failed to fetch tasks with no vector" });
-  }
+    return tasks;
+  });
 };
 
 export const fetchTasksByProjectId = async (req, res) => {
-  try {
+  return await BaseOperationHandler(req, res, async (req) => {
     const { projectId } = req.params;
     const tasks = await taskService.fetchTasksByProjectId(projectId);
-
-    return res.status(200).json({
-      success: true,
-      message: "Tasks fetched successfully",
-      data: tasks,
-    });
-  } catch (error) {
-    console.error("Fetch tasks by project error:", error);
-    return res.status(500).json({ error: "Failed to fetch tasks by project" });
-  }
+    return tasks;
+  });
 };

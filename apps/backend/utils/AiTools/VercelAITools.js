@@ -5,8 +5,9 @@ import { subtaskOps } from "../../db/operations/subtasks.js";
 import { noteOps } from "../../db/operations/notes.js";
 import { NodeSchema } from "./Notes/NotesBlockSchema.js";
 import Exa from "exa-js";
+import { ArtifactWriter } from "./ArtifactHelpers.js";
 
-export const VercelAITools = (writer) => {
+export const VercelAITools = (writer, artifactsCollector = null) => {
   const exa = new Exa(process.env.EXA_API_KEY);
   return {
     webSearch: new tool({
@@ -16,50 +17,65 @@ export const VercelAITools = (writer) => {
         query: z.string().describe("The query to search the web for"),
       }),
       execute: async ({ query }) => {
-        const searchId = `tool-call-web-search-${crypto.randomUUID()}`;
-        writer.write({
-          type: "data-web-search",
-          id: searchId,
-          data: {
-            status: "loading",
-            message: "Using Exa WebSearch Tool to Search the Web",
-          },
-        });
-        console.log("Query from Exa WebSearch Tool", query);
-        const result = await exa.search(query, {
-          contents: {
-            text: {
-              maxCharacters: 2500,
+        const artifact = new ArtifactWriter(
+          writer,
+          "WebSearch",
+          artifactsCollector,
+          "exa"
+        );
+        const input = { query };
+
+        try {
+          artifact.loading(input, `Searching the web for: "${query}"`);
+
+          const result = await exa.search(query, {
+            contents: {
+              text: { maxCharacters: 2500 },
+              summary: { query: "What is the main idea of the sources?" },
+              livecrawl: "preferred",
+              livecrawlTimeout: 12500,
+              context: { maxCharacters: 5000 },
+              highlights: {
+                highlightsPerUrl: 2,
+                numSentences: 1,
+                query: "What is the main idea of the sources?",
+              },
             },
-            summary: {
-              query: "What is the main idea of the sources?",
+            numResults: 2,
+            type: "auto",
+          });
+
+          artifact.complete(
+            input,
+            {
+              resultsCount: result.results.length,
+              sources: result.results.map((r) => ({
+                id: r.id,
+                url: r.url,
+                title: r.title,
+                summary: r.summary || null,
+                text: r.text || null,
+                highlights:
+                  r.highlights?.map((h) => ({
+                    text: h.text,
+                    score: h.score,
+                  })) || [],
+                publishedDate: r.publishedDate || null,
+                author: r.author || null,
+              })),
+              cost: {
+                total: result.costDollars?.total || 0,
+                search: result.costDollars?.search || 0,
+                contents: result.costDollars?.contents || 0,
+              },
             },
-            livecrawl: "preferred",
-            livecrawlTimeout: 12500,
-            context: {
-              maxCharacters: 5000,
-            },
-            highlights: {
-              highlightsPerUrl: 2,
-              numSentences: 1,
-              query: "What is the main idea of the sources?",
-            },
-          },
-          numResults: 2,
-          type: "auto",
-        });
-        console.log("Result from Exa WebSearch Tool", result);
-        writer.write({
-          type: "data-web-search",
-          id: searchId,
-          data: {
-            status: "complete",
-            message: "Exa WebSearch Tool completed successfully",
-            results: result.results,
-            cost: result.costDollars,
-          },
-        });
-        return result.context;
+            `Found ${result.results.length} source${result.results.length !== 1 ? "s" : ""}`
+          );
+          return result.context;
+        } catch (error) {
+          artifact.error(input, error, "Web search failed");
+          throw error;
+        }
       },
     }),
     GetTasks: new tool({
@@ -69,50 +85,51 @@ export const VercelAITools = (writer) => {
         userId: z.string().describe("The user ID to fetch the tasks for"),
       }),
       execute: async ({ userId }) => {
-        writer.write({
-          type: "data-get-tasks",
-          id: "tool-call-get-tasks",
-          data: {
-            status: "loading",
-            message: "Using GetTasks Tools to Find Tasks",
-          },
-        });
-        const tasks = await taskOps.findByUserId(userId);
-        console.log("Tasks in GetTasks tool", tasks);
-        writer.write({
-          type: "data-get-tasks",
-          id: "tool-call-get-tasks",
-          data: {
-            status: "complete",
-            message:
-              "Tasks fetched successfully... have found " +
-              tasks.length +
-              " tasks",
-          },
-        });
-        const formattedTasks = tasks.map((task) => ({
-          id: task.id,
-          title: task.title,
-          description: task.description,
-          date: task.date,
-          isCompleted: task.isCompleted,
-          priority: task.priority,
-        }));
-        console.log("About to write artifact for GetTasks tool");
-        writer.write({
-          type: "data-artifact-get-tasks",
-          id: "data-artifact-get-tasks",
-          data: {
-            status: "complete",
-            toolName: "GetTasks",
-            message: "Tasks fetched successfully",
-            input: { userId },
-            outputs: { tasksCount: tasks.length, tasks: formattedTasks },
-            timestamp: new Date().toISOString(),
-          },
-        });
-        console.log("Artifact written for GetTasks tool");
-        return formattedTasks;
+        const artifact = new ArtifactWriter(
+          writer,
+          "GetTasks",
+          artifactsCollector
+        );
+        const input = { userId };
+
+        try {
+          artifact.loading(input, "Fetching tasks...");
+
+          const tasks = await taskOps.findByUserId(userId);
+
+          const formattedTasks = tasks.map((task) => ({
+            id: task.id,
+            title: task.title,
+            description: task.description,
+            date: task.date,
+            isCompleted: task.isCompleted,
+            priority: task.priority,
+            status: task.status,
+            labels: task.labels || [],
+          }));
+
+          artifact.complete(
+            input,
+            {
+              tasksCount: tasks.length,
+              tasks: formattedTasks,
+              summary: {
+                completed: tasks.filter((t) => t.isCompleted).length,
+                byPriority: {
+                  high: tasks.filter((t) => t.priority === "High").length,
+                  medium: tasks.filter((t) => t.priority === "Medium").length,
+                  low: tasks.filter((t) => t.priority === "Low").length,
+                },
+              },
+            },
+            `Found ${tasks.length} task${tasks.length !== 1 ? "s" : ""}`
+          );
+
+          return formattedTasks;
+        } catch (error) {
+          artifact.error(input, error, "Failed to fetch tasks");
+          throw error;
+        }
       },
     }),
     CreateTask: new tool({
@@ -145,35 +162,60 @@ export const VercelAITools = (writer) => {
         userId,
         projectId,
       }) => {
-        writer.write({
-          type: "data-create-task",
-          id: "tool-call-create-task",
-          data: {
-            status: "loading",
-            message: "Using CreateTask Tool to Create Task",
-          },
-        });
-        const taskData = {
+        const artifact = new ArtifactWriter(
+          writer,
+          "CreateTask",
+          artifactsCollector
+        );
+        const input = {
           title,
           description,
+          date,
+          priority,
+          labels,
           userId,
-          ...(date && { date }),
-          ...(priority && { priority }),
-          ...(labels && { labels }),
-          ...(projectId && { projectId }),
+          projectId,
         };
 
-        const newTask = await taskOps.create(taskData);
-        writer.write({
-          type: "data-create-task",
-          id: "tool-call-create-task",
-          data: {
-            status: "complete",
-            message: "Task created successfully",
-          },
-        });
+        try {
+          artifact.loading(input, `Creating task: "${title}"`);
 
-        return newTask;
+          const taskData = {
+            title,
+            description,
+            userId,
+            ...(date && { date }),
+            ...(priority && { priority }),
+            ...(labels && { labels }),
+            ...(projectId && { projectId }),
+          };
+
+          const newTask = await taskOps.create(taskData);
+
+          artifact.complete(
+            input,
+            {
+              task: {
+                id: newTask.id,
+                title: newTask.title,
+                description: newTask.description,
+                date: newTask.date,
+                priority: newTask.priority,
+                labels: newTask.labels || [],
+                isCompleted: newTask.isCompleted,
+                status: newTask.status,
+                projectId: newTask.projectId || null,
+                createdAt: newTask.createdAt,
+              },
+            },
+            "Task created successfully"
+          );
+
+          return newTask;
+        } catch (error) {
+          artifact.error(input, error, "Failed to create task");
+          throw error;
+        }
       },
     }),
     UpdateTask: new tool({
@@ -213,34 +255,60 @@ export const VercelAITools = (writer) => {
         status,
         isCompleted,
       }) => {
-        writer.write({
-          type: "data-update-task",
-          id: "tool-call-update-task",
-          data: {
-            status: "loading",
-            message: "Using UpdateTask Tool to Update Task",
-          },
-        });
-        const updates = {};
-        if (title !== undefined) updates.title = title;
-        if (description !== undefined) updates.description = description;
-        if (date !== undefined) updates.date = date;
-        if (priority !== undefined) updates.priority = priority;
-        if (labels !== undefined) updates.labels = labels;
-        if (status !== undefined) updates.status = status;
-        if (isCompleted !== undefined) updates.isCompleted = isCompleted;
+        const artifact = new ArtifactWriter(
+          writer,
+          "UpdateTask",
+          artifactsCollector
+        );
+        const input = {
+          id,
+          userId,
+          title,
+          description,
+          date,
+          priority,
+          labels,
+          status,
+          isCompleted,
+        };
 
-        const updatedTask = await taskOps.update(id, userId, updates);
-        writer.write({
-          type: "data-update-task",
-          id: "tool-call-update-task",
-          data: {
-            status: "complete",
-            message: "Task updated successfully",
-          },
-        });
+        try {
+          artifact.loading(input, `Updating task...`);
 
-        return updatedTask;
+          const updates = {};
+          if (title !== undefined) updates.title = title;
+          if (description !== undefined) updates.description = description;
+          if (date !== undefined) updates.date = date;
+          if (priority !== undefined) updates.priority = priority;
+          if (labels !== undefined) updates.labels = labels;
+          if (status !== undefined) updates.status = status;
+          if (isCompleted !== undefined) updates.isCompleted = isCompleted;
+
+          const updatedTask = await taskOps.update(id, userId, updates);
+
+          artifact.complete(
+            input,
+            {
+              task: {
+                id: updatedTask.id,
+                title: updatedTask.title,
+                description: updatedTask.description,
+                date: updatedTask.date,
+                priority: updatedTask.priority,
+                labels: updatedTask.labels || [],
+                isCompleted: updatedTask.isCompleted,
+                status: updatedTask.status,
+                updatedAt: updatedTask.updatedAt,
+              },
+            },
+            "Task updated successfully"
+          );
+
+          return updatedTask;
+        } catch (error) {
+          artifact.error(input, error, "Failed to update task");
+          throw error;
+        }
       },
     }),
     DeleteTask: new tool({
@@ -251,25 +319,34 @@ export const VercelAITools = (writer) => {
         userId: z.string().describe("The user ID who owns the task"),
       }),
       execute: async ({ id, userId }) => {
-        writer.write({
-          type: "data-delete-task",
-          id: "tool-call-delete-task",
-          data: {
-            status: "loading",
-            message: "Using DeleteTask Tool to Delete Task",
-          },
-        });
-        const deletedTask = await taskOps.delete(id, userId);
-        writer.write({
-          type: "data-delete-task",
-          id: "tool-call-delete-task",
-          data: {
-            status: "complete",
-            message: "Task deleted successfully",
-          },
-        });
+        const artifact = new ArtifactWriter(
+          writer,
+          "DeleteTask",
+          artifactsCollector
+        );
+        const input = { id, userId };
 
-        return deletedTask;
+        try {
+          artifact.loading(input, "Deleting task...");
+
+          const deletedTask = await taskOps.delete(id, userId);
+
+          artifact.complete(
+            input,
+            {
+              task: {
+                id: deletedTask.id,
+                title: deletedTask.title,
+              },
+            },
+            "Task deleted successfully"
+          );
+
+          return deletedTask;
+        } catch (error) {
+          artifact.error(input, error, "Failed to delete task");
+          throw error;
+        }
       },
     }),
     GetTaskById: new tool({
@@ -280,25 +357,41 @@ export const VercelAITools = (writer) => {
         userId: z.string().describe("The user ID who owns the task"),
       }),
       execute: async ({ id, userId }) => {
-        writer.write({
-          type: "data-get-task-by-id",
-          id: "tool-call-get-task-by-id",
-          data: {
-            status: "loading",
-            message: "Using GetTaskById Tool to Find Task",
-          },
-        });
-        const task = await taskOps.findById(id, userId);
-        writer.write({
-          type: "data-get-task-by-id",
-          id: "tool-call-get-task-by-id",
-          data: {
-            status: "complete",
-            message: "Task fetched successfully",
-          },
-        });
+        const artifact = new ArtifactWriter(
+          writer,
+          "GetTaskById",
+          artifactsCollector
+        );
+        const input = { id, userId };
 
-        return task;
+        try {
+          artifact.loading(input, "Fetching task...");
+
+          const task = await taskOps.findById(id, userId);
+
+          artifact.complete(
+            input,
+            {
+              task: {
+                id: task.id,
+                title: task.title,
+                description: task.description,
+                date: task.date,
+                priority: task.priority,
+                labels: task.labels || [],
+                isCompleted: task.isCompleted,
+                status: task.status,
+                projectId: task.projectId || null,
+              },
+            },
+            "Task fetched successfully"
+          );
+
+          return task;
+        } catch (error) {
+          artifact.error(input, error, "Failed to fetch task");
+          throw error;
+        }
       },
     }),
     GetSubtasks: new tool({
@@ -308,25 +401,37 @@ export const VercelAITools = (writer) => {
         taskId: z.string().describe("The task ID to get subtasks for"),
       }),
       execute: async ({ taskId }) => {
-        writer.write({
-          type: "data-get-subtasks",
-          id: "tool-call-get-subtasks",
-          data: {
-            status: "loading",
-            message: "Using GetSubtasks Tool to Find Subtasks",
-          },
-        });
-        const subtasks = await subtaskOps.findByTaskId(taskId);
-        writer.write({
-          type: "data-get-subtasks",
-          id: "tool-call-get-subtasks",
-          data: {
-            status: "complete",
-            message: `Subtasks fetched successfully... have found ${subtasks.length} subtasks`,
-          },
-        });
+        const artifact = new ArtifactWriter(
+          writer,
+          "GetSubtasks",
+          artifactsCollector
+        );
+        const input = { taskId };
 
-        return subtasks;
+        try {
+          artifact.loading(input, "Fetching subtasks...");
+
+          const subtasks = await subtaskOps.findByTaskId(taskId);
+
+          artifact.complete(
+            input,
+            {
+              subtasksCount: subtasks.length,
+              subtasks: subtasks.map((st) => ({
+                id: st.id,
+                taskId: st.taskId,
+                subtaskName: st.subtaskName,
+                isComplete: st.isComplete,
+              })),
+            },
+            `Found ${subtasks.length} subtask${subtasks.length !== 1 ? "s" : ""}`
+          );
+
+          return subtasks;
+        } catch (error) {
+          artifact.error(input, error, "Failed to fetch subtasks");
+          throw error;
+        }
       },
     }),
     CreateSubtask: new tool({
@@ -341,31 +446,37 @@ export const VercelAITools = (writer) => {
           .describe("Whether the subtask is completed (default: false)"),
       }),
       execute: async ({ taskId, subtaskName, isComplete = false }) => {
-        writer.write({
-          type: "data-create-subtask",
-          id: "tool-call-create-subtask",
-          data: {
-            status: "loading",
-            message: "Using CreateSubtask Tool to Create Subtask",
-          },
-        });
-        const subtaskData = {
-          taskId,
-          subtaskName,
-          isComplete,
-        };
+        const artifact = new ArtifactWriter(
+          writer,
+          "CreateSubtask",
+          artifactsCollector
+        );
+        const input = { taskId, subtaskName, isComplete };
 
-        const newSubtask = await subtaskOps.create(subtaskData);
-        writer.write({
-          type: "data-create-subtask",
-          id: "tool-call-create-subtask",
-          data: {
-            status: "complete",
-            message: "Subtask created successfully",
-          },
-        });
+        try {
+          artifact.loading(input, `Creating subtask: "${subtaskName}"`);
 
-        return newSubtask;
+          const subtaskData = { taskId, subtaskName, isComplete };
+          const newSubtask = await subtaskOps.create(subtaskData);
+
+          artifact.complete(
+            input,
+            {
+              subtask: {
+                id: newSubtask.id,
+                taskId: newSubtask.taskId,
+                subtaskName: newSubtask.subtaskName,
+                isComplete: newSubtask.isComplete,
+              },
+            },
+            "Subtask created successfully"
+          );
+
+          return newSubtask;
+        } catch (error) {
+          artifact.error(input, error, "Failed to create subtask");
+          throw error;
+        }
       },
     }),
     UpdateSubtask: new tool({
@@ -383,29 +494,39 @@ export const VercelAITools = (writer) => {
           .describe("Whether the subtask is completed"),
       }),
       execute: async ({ id, subtaskName, isComplete }) => {
-        writer.write({
-          type: "data-update-subtask",
-          id: "tool-call-update-subtask",
-          data: {
-            status: "loading",
-            message: "Using UpdateSubtask Tool to Update Subtask",
-          },
-        });
-        const updates = {};
-        if (subtaskName !== undefined) updates.subtaskName = subtaskName;
-        if (isComplete !== undefined) updates.isComplete = isComplete;
+        const artifact = new ArtifactWriter(
+          writer,
+          "UpdateSubtask",
+          artifactsCollector
+        );
+        const input = { id, subtaskName, isComplete };
 
-        const updatedSubtask = await subtaskOps.update(id, updates);
-        writer.write({
-          type: "data-update-subtask",
-          id: "tool-call-update-subtask",
-          data: {
-            status: "complete",
-            message: "Subtask updated successfully",
-          },
-        });
+        try {
+          artifact.loading(input, "Updating subtask...");
 
-        return updatedSubtask;
+          const updates = {};
+          if (subtaskName !== undefined) updates.subtaskName = subtaskName;
+          if (isComplete !== undefined) updates.isComplete = isComplete;
+
+          const updatedSubtask = await subtaskOps.update(id, updates);
+
+          artifact.complete(
+            input,
+            {
+              subtask: {
+                id: updatedSubtask.id,
+                subtaskName: updatedSubtask.subtaskName,
+                isComplete: updatedSubtask.isComplete,
+              },
+            },
+            "Subtask updated successfully"
+          );
+
+          return updatedSubtask;
+        } catch (error) {
+          artifact.error(input, error, "Failed to update subtask");
+          throw error;
+        }
       },
     }),
     DeleteSubtask: new tool({
@@ -415,25 +536,34 @@ export const VercelAITools = (writer) => {
         id: z.string().describe("The subtask ID to delete"),
       }),
       execute: async ({ id }) => {
-        writer.write({
-          type: "data-delete-subtask",
-          id: "tool-call-delete-subtask",
-          data: {
-            status: "loading",
-            message: "Using DeleteSubtask Tool to Delete Subtask",
-          },
-        });
-        const deletedSubtask = await subtaskOps.delete(id);
-        writer.write({
-          type: "data-delete-subtask",
-          id: "tool-call-delete-subtask",
-          data: {
-            status: "complete",
-            message: "Subtask deleted successfully",
-          },
-        });
+        const artifact = new ArtifactWriter(
+          writer,
+          "DeleteSubtask",
+          artifactsCollector
+        );
+        const input = { id };
 
-        return deletedSubtask;
+        try {
+          artifact.loading(input, "Deleting subtask...");
+
+          const deletedSubtask = await subtaskOps.delete(id);
+
+          artifact.complete(
+            input,
+            {
+              subtask: {
+                id: deletedSubtask.id,
+                subtaskName: deletedSubtask.subtaskName,
+              },
+            },
+            "Subtask deleted successfully"
+          );
+
+          return deletedSubtask;
+        } catch (error) {
+          artifact.error(input, error, "Failed to delete subtask");
+          throw error;
+        }
       },
     }),
     BulkCreateSubtasks: new tool({
@@ -446,31 +576,46 @@ export const VercelAITools = (writer) => {
           .describe("Array of subtask names to create"),
       }),
       execute: async ({ taskId, subtaskNames }) => {
-        writer.write({
-          type: "data-bulk-create-subtasks",
-          id: "tool-call-bulk-create-subtasks",
-          data: {
-            status: "loading",
-            message: `Using BulkCreateSubtasks Tool to Create ${subtaskNames.length} Subtasks`,
-          },
-        });
-        const subtasksData = subtaskNames.map((name) => ({
-          taskId,
-          subtaskName: name,
-          isComplete: false,
-        }));
+        const artifact = new ArtifactWriter(
+          writer,
+          "BulkCreateSubtasks",
+          artifactsCollector
+        );
+        const input = { taskId, subtaskNames };
 
-        const newSubtasks = await subtaskOps.createMultiple(subtasksData);
-        writer.write({
-          type: "data-bulk-create-subtasks",
-          id: "tool-call-bulk-create-subtasks",
-          data: {
-            status: "complete",
-            message: `${newSubtasks.length} subtasks created successfully`,
-          },
-        });
+        try {
+          artifact.loading(
+            input,
+            `Creating ${subtaskNames.length} subtasks...`
+          );
 
-        return newSubtasks;
+          const subtasksData = subtaskNames.map((name) => ({
+            taskId,
+            subtaskName: name,
+            isComplete: false,
+          }));
+
+          const newSubtasks = await subtaskOps.createMultiple(subtasksData);
+
+          artifact.complete(
+            input,
+            {
+              subtasksCount: newSubtasks.length,
+              subtasks: newSubtasks.map((st) => ({
+                id: st.id,
+                taskId: st.taskId,
+                subtaskName: st.subtaskName,
+                isComplete: st.isComplete,
+              })),
+            },
+            `${newSubtasks.length} subtasks created successfully`
+          );
+
+          return newSubtasks;
+        } catch (error) {
+          artifact.error(input, error, "Failed to create subtasks");
+          throw error;
+        }
       },
     }),
     MarkSubtaskComplete: new tool({
@@ -483,31 +628,40 @@ export const VercelAITools = (writer) => {
           .describe("Whether the subtask should be marked as complete"),
       }),
       execute: async ({ id, isComplete }) => {
-        writer.write({
-          type: "data-mark-subtask-complete",
-          id: "tool-call-mark-subtask-complete",
-          data: {
-            status: "loading",
-            message: `Using MarkSubtaskComplete Tool to Mark Subtask as ${
-              isComplete ? "Complete" : "Incomplete"
-            }`,
-          },
-        });
-        const updatedSubtask = isComplete
-          ? await subtaskOps.markComplete(id)
-          : await subtaskOps.markIncomplete(id);
-        writer.write({
-          type: "data-mark-subtask-complete",
-          id: "tool-call-mark-subtask-complete",
-          data: {
-            status: "complete",
-            message: `Subtask marked as ${
-              isComplete ? "complete" : "incomplete"
-            } successfully`,
-          },
-        });
+        const artifact = new ArtifactWriter(
+          writer,
+          "MarkSubtaskComplete",
+          artifactsCollector
+        );
+        const input = { id, isComplete };
 
-        return updatedSubtask;
+        try {
+          artifact.loading(
+            input,
+            `Marking subtask as ${isComplete ? "complete" : "incomplete"}...`
+          );
+
+          const updatedSubtask = isComplete
+            ? await subtaskOps.markComplete(id)
+            : await subtaskOps.markIncomplete(id);
+
+          artifact.complete(
+            input,
+            {
+              subtask: {
+                id: updatedSubtask.id,
+                subtaskName: updatedSubtask.subtaskName,
+                isComplete: updatedSubtask.isComplete,
+              },
+            },
+            `Subtask marked as ${isComplete ? "complete" : "incomplete"}`
+          );
+
+          return updatedSubtask;
+        } catch (error) {
+          artifact.error(input, error, "Failed to mark subtask");
+          throw error;
+        }
       },
     }),
     GetNotes: new tool({
@@ -517,25 +671,40 @@ export const VercelAITools = (writer) => {
         userId: z.string().describe("The user ID to fetch notes for"),
       }),
       execute: async ({ userId }) => {
-        writer.write({
-          type: "data-get-notes",
-          id: "tool-call-get-notes",
-          data: {
-            status: "loading",
-            message: "Using GetNotes Tool to Find Notes",
-          },
-        });
-        const notes = await noteOps.findByUserId(userId);
-        writer.write({
-          type: "data-get-notes",
-          id: "tool-call-get-notes",
-          data: {
-            status: "complete",
-            message: `Notes fetched successfully... have found ${notes.length} notes`,
-          },
-        });
+        const artifact = new ArtifactWriter(
+          writer,
+          "GetNotes",
+          artifactsCollector
+        );
+        const input = { userId };
 
-        return notes;
+        try {
+          artifact.loading(input, "Fetching notes...");
+
+          const notes = await noteOps.findByUserId(userId);
+
+          artifact.complete(
+            input,
+            {
+              notesCount: notes.length,
+              notes: notes.map((note) => ({
+                id: note.id,
+                title: note.title,
+                description: note.description || null,
+                blocks: note.blocks || [],
+                taskId: note.taskId || null,
+                createdAt: note.createdAt,
+                updatedAt: note.updatedAt,
+              })),
+            },
+            `Found ${notes.length} note${notes.length !== 1 ? "s" : ""}`
+          );
+
+          return notes;
+        } catch (error) {
+          artifact.error(input, error, "Failed to fetch notes");
+          throw error;
+        }
       },
     }),
     GetNotesByTaskId: new tool({
@@ -545,25 +714,40 @@ export const VercelAITools = (writer) => {
         taskId: z.string().describe("The task ID to get notes for"),
       }),
       execute: async ({ taskId }) => {
-        writer.write({
-          type: "data-get-notes-by-task-id",
-          id: "tool-call-get-notes-by-task-id",
-          data: {
-            status: "loading",
-            message: "Using GetNotesByTaskId Tool to Find Notes",
-          },
-        });
-        const notes = await noteOps.findByTaskId(taskId);
-        writer.write({
-          type: "data-get-notes-by-task-id",
-          id: "tool-call-get-notes-by-task-id",
-          data: {
-            status: "complete",
-            message: `Notes fetched successfully... have found ${notes.length} notes`,
-          },
-        });
+        const artifact = new ArtifactWriter(
+          writer,
+          "GetNotesByTaskId",
+          artifactsCollector
+        );
+        const input = { taskId };
 
-        return notes;
+        try {
+          artifact.loading(input, "Fetching notes for task...");
+
+          const notes = await noteOps.findByTaskId(taskId);
+
+          artifact.complete(
+            input,
+            {
+              notesCount: notes.length,
+              notes: notes.map((note) => ({
+                id: note.id,
+                title: note.title,
+                description: note.description || null,
+                blocks: note.blocks || [],
+                taskId: note.taskId,
+                createdAt: note.createdAt,
+                updatedAt: note.updatedAt,
+              })),
+            },
+            `Found ${notes.length} note${notes.length !== 1 ? "s" : ""} for task`
+          );
+
+          return notes;
+        } catch (error) {
+          artifact.error(input, error, "Failed to fetch notes");
+          throw error;
+        }
       },
     }),
     // Need to see if blocks work. Right now we know know content is working and being saved.
@@ -581,32 +765,45 @@ export const VercelAITools = (writer) => {
         userId: z.string().describe("The user ID creating the note"),
       }),
       execute: async ({ title, description, blocks, taskId, userId }) => {
-        writer.write({
-          type: "data-create-note",
-          id: "tool-call-create-note",
-          data: {
-            status: "loading",
-            message: "Using CreateNote Tool to Create Note",
-          },
-        });
-        const noteData = {
-          title,
-          description: description ?? "",
-          blocks,
-          userId,
-          ...(taskId && { taskId }),
-        };
-        const newNote = await noteOps.create(noteData);
-        writer.write({
-          type: "data-create-note",
-          id: "tool-call-create-note",
-          data: {
-            status: "complete",
-            message: "Note created successfully",
-          },
-        });
+        const artifact = new ArtifactWriter(
+          writer,
+          "CreateNote",
+          artifactsCollector
+        );
+        const input = { title, description, blocks, taskId, userId };
 
-        return newNote;
+        try {
+          artifact.loading(input, `Creating note: "${title}"`);
+
+          const noteData = {
+            title,
+            description: description ?? "",
+            blocks,
+            userId,
+            ...(taskId && { taskId }),
+          };
+          const newNote = await noteOps.create(noteData);
+
+          artifact.complete(
+            input,
+            {
+              note: {
+                id: newNote.id,
+                title: newNote.title,
+                description: newNote.description,
+                blocks: newNote.blocks,
+                taskId: newNote.taskId || null,
+                createdAt: newNote.createdAt,
+              },
+            },
+            "Note created successfully"
+          );
+
+          return newNote;
+        } catch (error) {
+          artifact.error(input, error, "Failed to create note");
+          throw error;
+        }
       },
     }),
     UpdateNote: new tool({
@@ -623,31 +820,43 @@ export const VercelAITools = (writer) => {
         taskId: z.string().optional().describe("Optional task linkage"),
       }),
       execute: async ({ id, title, description, content, taskId }) => {
-        writer.write({
-          type: "data-update-note",
-          id: "tool-call-update-note",
-          data: {
-            status: "loading",
-            message: "Using UpdateNote Tool to Update Note",
-          },
-        });
-        const updates = {};
-        if (title !== undefined) updates.title = title;
-        if (description !== undefined) updates.description = description;
-        if (content !== undefined) updates.content = content;
-        if (taskId !== undefined) updates.taskId = taskId;
+        const artifact = new ArtifactWriter(
+          writer,
+          "UpdateNote",
+          artifactsCollector
+        );
+        const input = { id, title, description, content, taskId };
 
-        const updatedNote = await noteOps.update(id, updates);
-        writer.write({
-          type: "data-update-note",
-          id: "tool-call-update-note",
-          data: {
-            status: "complete",
-            message: "Note updated successfully",
-          },
-        });
+        try {
+          artifact.loading(input, "Updating note...");
 
-        return updatedNote;
+          const updates = {};
+          if (title !== undefined) updates.title = title;
+          if (description !== undefined) updates.description = description;
+          if (content !== undefined) updates.content = content;
+          if (taskId !== undefined) updates.taskId = taskId;
+
+          const updatedNote = await noteOps.update(id, updates);
+
+          artifact.complete(
+            input,
+            {
+              note: {
+                id: updatedNote.id,
+                title: updatedNote.title,
+                description: updatedNote.description,
+                taskId: updatedNote.taskId || null,
+                updatedAt: updatedNote.updatedAt,
+              },
+            },
+            "Note updated successfully"
+          );
+
+          return updatedNote;
+        } catch (error) {
+          artifact.error(input, error, "Failed to update note");
+          throw error;
+        }
       },
     }),
     DeleteNote: new tool({
@@ -657,25 +866,34 @@ export const VercelAITools = (writer) => {
         id: z.string().describe("The ID of the note to delete"),
       }),
       execute: async ({ id }) => {
-        writer.write({
-          type: "data-delete-note",
-          id: "tool-call-delete-note",
-          data: {
-            status: "loading",
-            message: "Using DeleteNote Tool to Delete Note",
-          },
-        });
-        const deletedNote = await noteOps.delete(id);
-        writer.write({
-          type: "data-delete-note",
-          id: "tool-call-delete-note",
-          data: {
-            status: "complete",
-            message: "Note deleted successfully",
-          },
-        });
+        const artifact = new ArtifactWriter(
+          writer,
+          "DeleteNote",
+          artifactsCollector
+        );
+        const input = { id };
 
-        return deletedNote;
+        try {
+          artifact.loading(input, "Deleting note...");
+
+          const deletedNote = await noteOps.delete(id);
+
+          artifact.complete(
+            input,
+            {
+              note: {
+                id: deletedNote.id,
+                title: deletedNote.title,
+              },
+            },
+            "Note deleted successfully"
+          );
+
+          return deletedNote;
+        } catch (error) {
+          artifact.error(input, error, "Failed to delete note");
+          throw error;
+        }
       },
     }),
   };

@@ -1,9 +1,5 @@
 "use client";
-import {
-  SidebarInput,
-  SidebarInset,
-  SidebarProvider,
-} from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { GlobalSmartSearch } from "@/presentation/components/Layout/GlobalSearch";
 import AppSideBar from "@/presentation/components/Layout/AppSideBar";
 import AppHeader from "@/presentation/components/Layout/AppHeader";
@@ -27,31 +23,29 @@ export default function Layout({ children }) {
   }, [isGlobalSmartSearchOpen]);
 
   return (
-    <SocketProvider>
-      <QueryClientProvider client={queryClient}>
-        <SidebarProvider>
-          <div className="h-screen w-screen flex flex-row">
-            {/* Left Sidebar */}
-            <AppSideBar />
-            {/* Main Content Area with Header */}
-            <div className=" flex flex-col h-full w-full overflow-hidden">
-              {/* Persistent Header */}
-              <AppHeader
-                isGlobalSmartSearchOpen={isGlobalSmartSearchOpen}
-                setIsGlobalSmartSearchOpen={setIsGlobalSmartSearchOpen}
-              />
-              {/* Main Content */}
-              <main className="flex flex-col h-full w-full overflow-hidden">
+    <div className="[--header-height:3.5rem] h-[100svh] w-[100swv] overflow-hidden">
+      <SocketProvider>
+        <QueryClientProvider client={queryClient}>
+          <SidebarProvider className="flex flex-col h-full w-full overflow-hidden">
+            <AppHeader
+              isGlobalSmartSearchOpen={isGlobalSmartSearchOpen}
+              setIsGlobalSmartSearchOpen={setIsGlobalSmartSearchOpen}
+            />
+            <div className="flex h-full w-full overflow-hidden">
+              <AppSideBar />
+              <SidebarInset>
                 <GlobalSmartSearch
                   isGlobalSmartSearchOpen={isGlobalSmartSearchOpen}
                   setIsGlobalSmartSearchOpen={setIsGlobalSmartSearchOpen}
                 />
-                {children}
-              </main>
+                <main className="flex flex-col h-[calc(100svh-var(--header-height))] w-full overflow-hidden ">
+                  {children}
+                </main>
+              </SidebarInset>
             </div>
-          </div>
-        </SidebarProvider>
-      </QueryClientProvider>
-    </SocketProvider>
+          </SidebarProvider>
+        </QueryClientProvider>
+      </SocketProvider>
+    </div>
   );
 }

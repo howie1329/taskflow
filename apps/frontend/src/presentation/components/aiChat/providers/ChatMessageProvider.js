@@ -257,7 +257,6 @@ export const ChatMessageProvider = ({ conversationId, children }) => {
 
   // UI States
   const [isToolArtifactsOpen, setIsToolArtifactsOpen] = useState(false);
-  const [toolArtifacts, setToolArtifacts] = useState(toolArtifactsDummyData);
 
   // Fetch conversation and messages from the database
   const [defaultConversationId] = useState(
@@ -311,12 +310,9 @@ export const ChatMessageProvider = ({ conversationId, children }) => {
     }
   }, [fetchedMessages, setMessages]);
 
-  // Collect Tool Artifacts from the useChat Hook
-  useEffect(() => {
-    console.log("Messages", messages);
-    const tempToolArtifacts = toolArtifactsCollector(messages);
-    setToolArtifacts(tempToolArtifacts);
-    console.log("Temp Tool Artifacts", tempToolArtifacts);
+  // Compute Tool Artifacts from messages using useMemo for efficiency
+  const toolArtifacts = useMemo(() => {
+    return toolArtifactsCollector(messages);
   }, [messages]);
 
   // Update the conversation title on messsages receive
@@ -365,7 +361,7 @@ export const useChatMessageContext = () => {
 export const useToolArtifacts = () => {
   const { messages } = useChatMessageContext();
   const toolArtifacts = useMemo(() => {
-    () => toolArtifactsCollector(messages);
+    return toolArtifactsCollector(messages);
   }, [messages]);
   return toolArtifacts;
 };
