@@ -168,7 +168,7 @@ export const RenderAssistantMessageContent = ({
           <span className="text-xs text-blue-500/70">🧠 Smart Context</span>
         )}
       </div>
-      <div className="relative text-foreground rounded-none w-full max-w-[65%] px-2 py-2 prose prose-sm dark:prose-invert border-r max-w-none">
+      <div className="relative text-foreground rounded-none w-full max-w-[65%] px-2 py-2 prose prose-sm dark:prose-invert border-r">
         <Markdown
           remarkPlugins={[remarkGfm]}
           rehypePlugins={[rehypeSanitize, rehypeHighlight]}
