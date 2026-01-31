@@ -20,24 +20,33 @@ export function LandingFooter() {
           </div>
 
           <nav className="flex items-center gap-6 text-xs">
+            {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
             <a
-              href="#workflow"
+              href="/#workflow"
               className="text-muted-foreground hover:text-foreground transition-colors"
             >
               Workflow
             </a>
+            {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
             <a
-              href="#features"
+              href="/#features"
               className="text-muted-foreground hover:text-foreground transition-colors"
             >
               Features
             </a>
+            {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
             <a
-              href="#ai"
+              href="/#ai"
               className="text-muted-foreground hover:text-foreground transition-colors"
             >
               AI
             </a>
+            <Link
+              href="/roadmap"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Roadmap
+            </Link>
           </nav>
 
           <div className="flex items-center gap-2">
