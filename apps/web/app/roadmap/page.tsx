@@ -71,7 +71,7 @@ const phases = [
     title: "Foundation",
     timeline: "Week 1",
     items: [
-      "Convex schema + auth rules (Clerk identity → user-scoped data)",
+      "Convex schema + auth rules (identity → user-scoped data)",
       "Base UI shell: layout, navigation, command entry points",
       "Core types + validation strategy (Zod)",
     ],

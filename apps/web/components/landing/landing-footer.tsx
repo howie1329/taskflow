@@ -67,7 +67,7 @@ export function LandingFooter() {
             shadcn/ui.
           </p>
           <p className="text-[10px] text-muted-foreground">
-            Convex-powered backend. Clerk authentication.
+            Convex-powered backend.
           </p>
         </div>
       </div>

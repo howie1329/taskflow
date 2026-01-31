@@ -48,7 +48,7 @@ Non-goals for v1:
 
 ### Phase 1 — Foundation (Week 1)
 
-- Convex schema + auth rules (Clerk identity -> user-scoped data)
+- Convex schema + auth rules (identity -> user-scoped data)
 - Base UI shell: layout, navigation, command entry points
 - Core types + validation strategy (Zod)
 
@@ -83,7 +83,6 @@ Non-goals for v1:
 
 - Next.js (App Router) + React
 - Convex (backend)
-- Clerk (auth)
 - Tailwind CSS + shadcn/ui
 - Zod (validation)
 
@@ -92,7 +91,6 @@ Non-goals for v1:
 - Node.js 20+
 - npm
 - A Convex deployment
-- Clerk keys (publishable + secret)
 
 ## Setup
 
@@ -109,10 +107,6 @@ At minimum:
 # Convex
 CONVEX_DEPLOYMENT=
 NEXT_PUBLIC_CONVEX_URL=
-
-# Clerk
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
-CLERK_SECRET_KEY=
 ```
 
 Tip: running `npm run dev:backend` will guide you through creating a Convex deployment and will write the Convex env vars.
