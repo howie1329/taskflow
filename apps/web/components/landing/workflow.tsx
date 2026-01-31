@@ -58,7 +58,7 @@ export function Workflow() {
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 max-w-6xl mx-auto">
         {workflowSteps.map((step, index) => (
           <Card key={step.title} className="relative group">
             <CardHeader className="pb-3">

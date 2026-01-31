@@ -37,7 +37,7 @@ export function Hero() {
         </div>
       </div>
 
-      <div className="relative w-full max-w-4xl mt-12">
+      <div className="relative w-full max-w-4xl mx-auto mt-12">
         <div className="absolute -inset-4 bg-gradient-to-r from-primary/5 via-secondary/5 to-primary/5 blur-2xl" />
         <Card className="relative overflow-hidden border-dashed">
           <CardHeader className="gap-4 border-b border-dashed pb-4">

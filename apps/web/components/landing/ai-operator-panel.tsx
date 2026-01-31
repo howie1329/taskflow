@@ -50,7 +50,7 @@ export function AiOperatorPanel() {
         </p>
       </div>
 
-      <Card className="mx-auto max-w-2xl overflow-hidden">
+      <Card className="mx-auto max-w-2xl overflow-hidden border-dashed">
         <CardHeader className="border-b border-dashed pb-4">
           <div className="flex items-center justify-between">
             <CardTitle className="text-sm">Example conversation</CardTitle>
