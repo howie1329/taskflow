@@ -7,6 +7,7 @@ This repo contains multiple generations of documentation. Use this map to find w
 - `docs/ROADMAP.md`
 - `docs/FEATURES.md`
 - `docs/FEATURES/`
+- `docs/UI_GUIDELINES.md`
 - `docs/ARCHITECTURE/`
 - `docs/DECISIONS/`
 

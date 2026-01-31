@@ -12,6 +12,7 @@ Legacy code still exists for reference:
 - Roadmap: `docs/ROADMAP.md`
 - Feature index: `docs/FEATURES.md`
 - Architecture: `docs/ARCHITECTURE/overview.md`
+- UI guidelines: `docs/UI_GUIDELINES.md`
 - Key decisions (ADRs): `docs/DECISIONS/`
 - Legacy reference inventory: `docs/LEGACY/feature-inventory.md`
 - Source docs map: `docs/SOURCES.md`
