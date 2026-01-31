@@ -11,10 +11,13 @@
     "dev": "turbo run dev",
     "dev:frontend": "turbo run dev --filter=@taskflow/frontend",
     "dev:backend": "turbo run dev --filter=@taskflow/backend",
+    "dev:web": "turbo run dev --filter=@taskflow/web",
     "build": "turbo run build",
     "build:frontend": "turbo run build --filter=@taskflow/frontend",
     "build:backend": "turbo run build --filter=@taskflow/backend",
+    "build:web": "turbo run build --filter=@taskflow/web",
     "start:backend": "turbo run start --filter=@taskflow/backend",
+    "start:web": "turbo run start --filter=@taskflow/web",
     "lint": "turbo run lint",
     "test": "turbo run test"
   },
