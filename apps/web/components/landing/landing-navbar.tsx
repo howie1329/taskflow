@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export function LandingNavbar() {
   return (
@@ -36,6 +37,7 @@ export function LandingNavbar() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <ThemeToggle />
           <a
             href="#goals"
             className="hidden text-xs text-muted-foreground hover:text-foreground sm:block"
