@@ -24,16 +24,16 @@ export function Hero() {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto pt-4">
-          <Link href="/app" className="w-full sm:w-auto">
+          <Link href="/sign-up" className="w-full sm:w-auto">
             <Button size="lg" className="w-full sm:w-auto">
-              Open app
+              Get started free
             </Button>
           </Link>
-          <a href="#goals" className="w-full sm:w-auto">
+          <Link href="/sign-in" className="w-full sm:w-auto">
             <Button variant="outline" size="lg" className="w-full sm:w-auto">
-              Read the plan
+              Sign in
             </Button>
-          </a>
+          </Link>
         </div>
       </div>
 

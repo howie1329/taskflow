@@ -44,8 +44,8 @@ export function LandingNavbar() {
           >
             The plan
           </a>
-          <Link href="/app">
-            <Button size="sm">Open app</Button>
+          <Link href="/sign-in">
+            <Button size="sm">Get started</Button>
           </Link>
         </div>
       </div>
