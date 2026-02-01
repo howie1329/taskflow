@@ -1,7 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Kbd } from "@/components/ui/kbd";
 import { BoardView } from "@/components/tasks/board-view";
 import { TodayBoardView } from "@/components/tasks/today-board-view";
 import { TaskDetailsSheet } from "@/components/tasks/task-details-sheet";
@@ -10,6 +25,7 @@ import { useViewer } from "@/components/settings/hooks/use-viewer";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Doc } from "@/convex/_generated/dataModel";
+import { SearchIcon, XIcon } from "lucide-react";
 
 type Task = Doc<"tasks">;
 type Project = Doc<"projects">;
@@ -17,6 +33,9 @@ type Tag = Doc<"tags">;
 type Subtask = Doc<"subtasks">;
 
 export default function TasksPage() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { viewer, isLoading: isViewerLoading } = useViewer();
   const updatePreferences = useMutation(api.preferences.updateMyPreferences);
   const createTask = useMutation(api.tasks.createTask);
@@ -48,6 +67,20 @@ export default function TasksPage() {
   // Hide completed tasks state
   const [hideCompleted, setHideCompleted] = useState(false);
 
+  // Search state
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchInput, setSearchInput] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchButtonRef = useRef<HTMLButtonElement | null>(null);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Filter state
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [priorityFilter, setPriorityFilter] = useState("all");
+  const [projectFilter, setProjectFilter] = useState("all");
+  const [tagFilter, setTagFilter] = useState("all");
+  const [scheduleFilter, setScheduleFilter] = useState("any");
+
   // Sync view with preferences when they load (not just initial state)
   useEffect(() => {
     if (viewer?.preferences?.taskDefaultView) {
@@ -61,6 +94,81 @@ export default function TasksPage() {
       setHideCompleted(viewer.preferences.hideCompletedTasks);
     }
   }, [viewer?.preferences?.hideCompletedTasks]);
+
+  // Sync filters and search from URL params
+  useEffect(() => {
+    const urlQuery = searchParams.get("q") ?? "";
+    setSearchInput(urlQuery);
+    if (urlQuery) {
+      setIsSearchOpen(true);
+    }
+    setStatusFilter(searchParams.get("status") ?? "all");
+    setPriorityFilter(searchParams.get("priority") ?? "all");
+    setProjectFilter(searchParams.get("project") ?? "all");
+    setTagFilter(searchParams.get("tag") ?? "all");
+    setScheduleFilter(searchParams.get("schedule") ?? "any");
+  }, [searchParams]);
+
+  // Debounce search input
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setSearchQuery(searchInput.trim());
+    }, 250);
+    return () => clearTimeout(timeout);
+  }, [searchInput]);
+
+  // Keep search open if there's an active query
+  useEffect(() => {
+    if (searchInput.length > 0) {
+      setIsSearchOpen(true);
+    }
+  }, [searchInput]);
+
+  // Keyboard shortcut: '/' to open search
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      const isEditable =
+        target?.tagName === "INPUT" ||
+        target?.tagName === "TEXTAREA" ||
+        target?.isContentEditable;
+
+      if (event.key === "/" && !isEditable) {
+        event.preventDefault();
+        setIsSearchOpen(true);
+        requestAnimationFrame(() => searchInputRef.current?.focus());
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Persist search + filters to URL
+  useEffect(() => {
+    const params = new URLSearchParams();
+
+    if (searchQuery) params.set("q", searchQuery);
+    if (statusFilter !== "all") params.set("status", statusFilter);
+    if (priorityFilter !== "all") params.set("priority", priorityFilter);
+    if (projectFilter !== "all") params.set("project", projectFilter);
+    if (tagFilter !== "all") params.set("tag", tagFilter);
+    if (scheduleFilter !== "any") params.set("schedule", scheduleFilter);
+
+    const queryString = params.toString();
+    router.replace(queryString ? `${pathname}?${queryString}` : pathname, {
+      scroll: false,
+    });
+  }, [
+    searchQuery,
+    statusFilter,
+    priorityFilter,
+    projectFilter,
+    tagFilter,
+    scheduleFilter,
+    pathname,
+    router,
+  ]);
 
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
@@ -264,6 +372,253 @@ export default function TasksPage() {
     selectedTask?._id ? { taskId: selectedTask._id } : "skip",
   );
 
+  const handleClearFilters = () => {
+    setSearchInput("");
+    setSearchQuery("");
+    setIsSearchOpen(false);
+    setStatusFilter("all");
+    setPriorityFilter("all");
+    setProjectFilter("all");
+    setTagFilter("all");
+    setScheduleFilter("any");
+    searchButtonRef.current?.focus();
+  };
+
+  const filteredTasks = useMemo(() => {
+    if (!tasks) return [];
+
+    let result = [...tasks];
+
+    if (hideCompleted) {
+      result = result.filter((task) => task.status !== "Completed");
+    }
+
+    if (statusFilter !== "all") {
+      result = result.filter((task) => task.status === statusFilter);
+    }
+
+    if (priorityFilter !== "all") {
+      result = result.filter((task) => task.priority === priorityFilter);
+    }
+
+    if (projectFilter !== "all") {
+      result = result.filter(
+        (task) => String(task.projectId ?? "") === projectFilter,
+      );
+    }
+
+    if (tagFilter !== "all") {
+      result = result.filter((task) =>
+        task.tagIds.some((id) => String(id) === tagFilter),
+      );
+    }
+
+    if (scheduleFilter !== "any") {
+      const today = new Date();
+      const todayString = today.toISOString().split("T")[0];
+
+      if (scheduleFilter === "today") {
+        result = result.filter((task) => task.scheduledDate === todayString);
+      } else if (scheduleFilter === "unscheduled") {
+        result = result.filter((task) => !task.scheduledDate);
+      } else if (scheduleFilter === "week") {
+        const weekEnd = new Date(today);
+        weekEnd.setDate(today.getDate() + 6);
+
+        result = result.filter((task) => {
+          if (!task.scheduledDate) return false;
+          const date = new Date(`${task.scheduledDate}T00:00:00`);
+          return date >= today && date <= weekEnd;
+        });
+      }
+    }
+
+    const query = searchQuery.trim().toLowerCase();
+    if (query) {
+      result = result.filter((task) => {
+        const haystack = [task.title, task.description, task.notes]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+        return haystack.includes(query);
+      });
+    }
+
+    return result;
+  }, [
+    tasks,
+    hideCompleted,
+    statusFilter,
+    priorityFilter,
+    projectFilter,
+    tagFilter,
+    scheduleFilter,
+    searchQuery,
+  ]);
+
+  const hasActiveFilters =
+    searchQuery.length > 0 ||
+    statusFilter !== "all" ||
+    priorityFilter !== "all" ||
+    projectFilter !== "all" ||
+    tagFilter !== "all" ||
+    scheduleFilter !== "any";
+
+  const showNoResults = tasks && tasks.length > 0 && filteredTasks.length === 0;
+
+  const searchControl =
+    isSearchOpen || searchInput.length > 0 ? (
+      <InputGroup className="h-8">
+        <InputGroupAddon>
+          <SearchIcon className="size-4" />
+        </InputGroupAddon>
+        <InputGroupInput
+          id="task-search-input"
+          ref={searchInputRef}
+          value={searchInput}
+          onChange={(event) => setSearchInput(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Escape") {
+              if (searchInput.trim().length === 0) {
+                setIsSearchOpen(false);
+                searchButtonRef.current?.focus();
+              } else {
+                setSearchInput("");
+                setSearchQuery("");
+              }
+            }
+          }}
+          placeholder="Search tasks"
+          aria-label="Search tasks"
+        />
+        <InputGroupButton
+          size="icon-xs"
+          onClick={() => {
+            setSearchInput("");
+            setSearchQuery("");
+            setIsSearchOpen(false);
+            searchButtonRef.current?.focus();
+          }}
+          aria-label="Clear search"
+        >
+          <XIcon className="size-3.5" />
+        </InputGroupButton>
+      </InputGroup>
+    ) : (
+      <button
+        ref={searchButtonRef}
+        type="button"
+        className="h-8 w-full rounded-none border border-border bg-transparent px-2.5 text-xs text-muted-foreground flex items-center justify-between"
+        onClick={() => {
+          setIsSearchOpen(true);
+          requestAnimationFrame(() => searchInputRef.current?.focus());
+        }}
+        aria-expanded={isSearchOpen}
+        aria-controls="task-search-input"
+      >
+        <span className="flex items-center gap-2">
+          <SearchIcon className="size-4" />
+          Search tasks
+        </span>
+        <Kbd>/</Kbd>
+      </button>
+    );
+
+  const filterControls = (
+    <div className="flex flex-wrap gap-2">
+      <Select value={statusFilter} onValueChange={setStatusFilter}>
+        <SelectTrigger size="sm" className="min-w-[120px]">
+          <SelectValue placeholder="Status" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All status</SelectItem>
+          <SelectItem value="Not Started">Not Started</SelectItem>
+          <SelectItem value="To Do">To Do</SelectItem>
+          <SelectItem value="In Progress">In Progress</SelectItem>
+          <SelectItem value="Completed">Completed</SelectItem>
+        </SelectContent>
+      </Select>
+
+      <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+        <SelectTrigger size="sm" className="min-w-[110px]">
+          <SelectValue placeholder="Priority" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All priority</SelectItem>
+          <SelectItem value="low">Low</SelectItem>
+          <SelectItem value="medium">Medium</SelectItem>
+          <SelectItem value="high">High</SelectItem>
+        </SelectContent>
+      </Select>
+
+      <Select value={projectFilter} onValueChange={setProjectFilter}>
+        <SelectTrigger size="sm" className="min-w-[140px]">
+          <SelectValue placeholder="Project" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All projects</SelectItem>
+          {projects && projects.length > 0 ? (
+            projects.map((project) => (
+              <SelectItem
+                key={project._id as string}
+                value={project._id as string}
+              >
+                <span className="mr-2">{project.icon}</span>
+                {project.title}
+              </SelectItem>
+            ))
+          ) : (
+            <SelectItem value="none" disabled>
+              No projects
+            </SelectItem>
+          )}
+        </SelectContent>
+      </Select>
+
+      <Select value={tagFilter} onValueChange={setTagFilter}>
+        <SelectTrigger size="sm" className="min-w-[120px]">
+          <SelectValue placeholder="Tag" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All tags</SelectItem>
+          {tags && tags.length > 0 ? (
+            tags.map((tag) => (
+              <SelectItem key={tag._id as string} value={tag._id as string}>
+                {tag.name}
+              </SelectItem>
+            ))
+          ) : (
+            <SelectItem value="none" disabled>
+              No tags
+            </SelectItem>
+          )}
+        </SelectContent>
+      </Select>
+
+      <Select value={scheduleFilter} onValueChange={setScheduleFilter}>
+        <SelectTrigger size="sm" className="min-w-[140px]">
+          <SelectValue placeholder="Schedule" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="any">Any schedule</SelectItem>
+          <SelectItem value="today">Today</SelectItem>
+          <SelectItem value="week">This week</SelectItem>
+          <SelectItem value="unscheduled">Unscheduled</SelectItem>
+        </SelectContent>
+      </Select>
+
+      {hasActiveFilters && (
+        <button
+          type="button"
+          onClick={handleClearFilters}
+          className="text-xs px-2.5 py-1.5 rounded border border-border hover:bg-accent transition-colors"
+        >
+          Clear
+        </button>
+      )}
+    </div>
+  );
+
   // Combined loading state
   const isLoading =
     isViewerLoading || isTasksLoading || isProjectsLoading || isTagsLoading;
@@ -288,30 +643,38 @@ export default function TasksPage() {
     return (
       <div className="flex flex-col gap-4 h-full">
         {/* Header with view switcher */}
-        <div className="flex items-center justify-between shrink-0">
-          <p className="text-sm text-muted-foreground">
-            Organize and track your work
-          </p>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleToggleHideCompleted}
-              className="text-xs px-3 py-1.5 rounded border border-border hover:bg-accent transition-colors"
-              style={{ opacity: hideCompleted ? 1 : 0.5 }}
-            >
-              {hideCompleted ? "✓ Hide completed" : "Hide completed"}
-            </button>
-            <Tabs
-              value={currentView}
-              onValueChange={(v) =>
-                handleViewChange(v as "board" | "todayPlusBoard")
-              }
-            >
-              <TabsList>
-                <TabsTrigger value="board">Board</TabsTrigger>
-                <TabsTrigger value="todayPlusBoard">Today + Board</TabsTrigger>
-              </TabsList>
-            </Tabs>
+        <div className="flex flex-col gap-3 shrink-0">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-muted-foreground">
+              Organize and track your work
+            </p>
+            <div className="w-full sm:flex-1 sm:max-w-[420px]">
+              {searchControl}
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleToggleHideCompleted}
+                className="text-xs px-3 py-1.5 rounded border border-border hover:bg-accent transition-colors"
+                style={{ opacity: hideCompleted ? 1 : 0.5 }}
+              >
+                {hideCompleted ? "✓ Hide completed" : "Hide completed"}
+              </button>
+              <Tabs
+                value={currentView}
+                onValueChange={(v) =>
+                  handleViewChange(v as "board" | "todayPlusBoard")
+                }
+              >
+                <TabsList>
+                  <TabsTrigger value="board">Board</TabsTrigger>
+                  <TabsTrigger value="todayPlusBoard">
+                    Today + Board
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
           </div>
+          {filterControls}
         </div>
 
         {/* Empty state */}
@@ -363,37 +726,60 @@ export default function TasksPage() {
   return (
     <div className="flex flex-col gap-4 h-full">
       {/* Header with view switcher */}
-      <div className="flex items-center justify-between shrink-0">
-        <p className="text-sm text-muted-foreground">
-          Organize and track your work
-        </p>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handleToggleHideCompleted}
-            className="text-xs px-3 py-1.5 rounded border border-border hover:bg-accent transition-colors"
-            style={{ opacity: hideCompleted ? 1 : 0.5 }}
-          >
-            {hideCompleted ? "✓ Hide completed" : "Hide completed"}
-          </button>
-          <Tabs
-            value={currentView}
-            onValueChange={(v) =>
-              handleViewChange(v as "board" | "todayPlusBoard")
-            }
-          >
-            <TabsList>
-              <TabsTrigger value="board">Board</TabsTrigger>
-              <TabsTrigger value="todayPlusBoard">Today + Board</TabsTrigger>
-            </TabsList>
-          </Tabs>
+      <div className="flex flex-col gap-3 shrink-0">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-muted-foreground">
+            Organize and track your work
+          </p>
+          <div className="w-full sm:flex-1 sm:max-w-[420px]">
+            {searchControl}
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleToggleHideCompleted}
+              className="text-xs px-3 py-1.5 rounded border border-border hover:bg-accent transition-colors"
+              style={{ opacity: hideCompleted ? 1 : 0.5 }}
+            >
+              {hideCompleted ? "✓ Hide completed" : "Hide completed"}
+            </button>
+            <Tabs
+              value={currentView}
+              onValueChange={(v) =>
+                handleViewChange(v as "board" | "todayPlusBoard")
+              }
+            >
+              <TabsList>
+                <TabsTrigger value="board">Board</TabsTrigger>
+                <TabsTrigger value="todayPlusBoard">Today + Board</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
         </div>
+        {filterControls}
       </div>
 
       {/* Main content area */}
       <div className="flex-1 min-h-0">
-        {currentView === "board" ? (
+        {showNoResults ? (
+          <div className="flex-1 min-h-0 flex items-center justify-center">
+            <div className="flex flex-col items-center justify-center gap-2 text-center max-w-sm">
+              <h3 className="text-sm font-medium">No matching tasks</h3>
+              <p className="text-xs text-muted-foreground">
+                Try adjusting your search or filters
+              </p>
+              {hasActiveFilters && (
+                <button
+                  onClick={handleClearFilters}
+                  className="mt-3 px-3 py-1.5 text-xs border border-border hover:bg-accent transition-colors"
+                >
+                  Clear filters
+                </button>
+              )}
+            </div>
+          </div>
+        ) : currentView === "board" ? (
           <BoardView
-            tasks={tasks}
+            tasks={filteredTasks}
             onTaskClick={handleTaskClick}
             onCreateTask={handleOpenCreate}
             projects={projects}
@@ -402,7 +788,7 @@ export default function TasksPage() {
           />
         ) : (
           <TodayBoardView
-            tasks={tasks}
+            tasks={filteredTasks}
             onTaskClick={handleTaskClick}
             onCreateTask={handleOpenCreate}
             projects={projects}

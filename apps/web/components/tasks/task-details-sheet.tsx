@@ -205,19 +205,14 @@ export function TaskDetailsSheet({
             {/* Top row: Project + Status + Actions */}
             <div className="flex items-center justify-between mb-2">
               <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4">
-                <Badge
-                  variant="outline"
-                  className="text-[10px] px-1.5 py-0 h-4"
-                >
-                  {project ? (
-                    <>
-                      <span className="mr-1">{project.icon}</span>
-                      {project.title}
-                    </>
-                  ) : (
-                    "No project"
-                  )}
-                </Badge>
+                {project ? (
+                  <>
+                    <span className="mr-1">{project.icon}</span>
+                    {project.title}
+                  </>
+                ) : (
+                  "No project"
+                )}
               </Badge>
               <div className="flex items-center gap-1">
                 {/* Toggle Complete Button */}
