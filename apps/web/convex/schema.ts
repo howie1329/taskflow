@@ -35,6 +35,10 @@ const schema = defineSchema({
         name: v.string(),
       }),
     ),
+    // NEW: Task view preference (board | todayPlusBoard)
+    taskDefaultView: v.optional(
+      v.union(v.literal("board"), v.literal("todayPlusBoard")),
+    ),
     // Future: theme, notifications, privacy settings
   }).index("by_user", ["userId"]),
 

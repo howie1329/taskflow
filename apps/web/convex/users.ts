@@ -71,6 +71,7 @@ export const ensureViewerInitialized = mutation({
     if (!preferences) {
       const preferencesId = await ctx.db.insert("userPreferences", {
         userId,
+        taskDefaultView: "board",
         // defaultAIModel is optional - will be set later when models system is rebuilt
       });
       preferences = await ctx.db.get(preferencesId);

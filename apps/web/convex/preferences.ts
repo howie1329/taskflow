@@ -28,6 +28,9 @@ export const updateMyPreferences = mutation({
         name: v.string(),
       }),
     ),
+    taskDefaultView: v.optional(
+      v.union(v.literal("board"), v.literal("todayPlusBoard")),
+    ),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -40,16 +43,27 @@ export const updateMyPreferences = mutation({
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .first();
 
+    // Build patch object with only provided fields
+    const patch: {
+      defaultAIModel?: typeof args.defaultAIModel;
+      taskDefaultView?: typeof args.taskDefaultView;
+    } = {};
+    if (args.defaultAIModel !== undefined) {
+      patch.defaultAIModel = args.defaultAIModel;
+    }
+    if (args.taskDefaultView !== undefined) {
+      patch.taskDefaultView = args.taskDefaultView;
+    }
+
     if (existingPreferences) {
-      // Update existing preferences
-      return await ctx.db.patch(existingPreferences._id, {
-        defaultAIModel: args.defaultAIModel,
-      });
+      // Update existing preferences (partial update)
+      return await ctx.db.patch(existingPreferences._id, patch);
     } else {
-      // Create new preferences
+      // Create new preferences with defaults
       const preferencesId = await ctx.db.insert("userPreferences", {
         userId,
-        defaultAIModel: args.defaultAIModel,
+        taskDefaultView: "board",
+        ...patch,
       });
       return await ctx.db.get(preferencesId);
     }
