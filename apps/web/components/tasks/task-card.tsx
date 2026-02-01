@@ -1,18 +1,24 @@
 "use client";
 
-import { Task, mockTags } from "./mock-data";
+import type { Doc } from "@/convex/_generated/dataModel";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+
+type Task = Doc<"tasks">;
 
 interface TaskCardProps {
   task: Task;
   onClick: (task: Task) => void;
 }
 
+// TODO: Phase 4 - fetch real tags and projects
+const mockTags: Record<string, { name: string; color: string }> = {};
+
 export function TaskCard({ task, onClick }: TaskCardProps) {
+  // TODO: Phase 4 - use real tags
   const tags = task.tagIds
-    .map((id) => mockTags[id as keyof typeof mockTags])
+    .map((id) => mockTags[id as unknown as string])
     .filter(Boolean);
 
   const priorityColors = {
@@ -21,7 +27,7 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
     high: "bg-red-500",
   };
 
-  const formatDate = (timestamp: number | null) => {
+  const formatDate = (timestamp: number | null | undefined) => {
     if (!timestamp) return null;
     const date = new Date(timestamp);
     const today = new Date();
@@ -37,6 +43,9 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
 
   const isOverdue = task.dueDate && new Date(task.dueDate) < new Date();
 
+  // Format project ID for display (will be replaced with real project name in Phase 4)
+  const projectDisplay = task.projectId ? "Project" : "No project";
+
   return (
     <Card
       className="p-2 cursor-pointer hover:bg-accent/50 transition-colors"
@@ -45,7 +54,7 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
       {/* Top row: Project badge */}
       <div className="flex items-center justify-between mb-1.5">
         <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4">
-          {task.projectId || "No project"}
+          {projectDisplay}
         </Badge>
 
         {/* Due date + Priority */}
@@ -64,7 +73,7 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
           <div
             className={cn(
               "w-1.5 h-1.5 rounded-full",
-              priorityColors[task.priority as keyof typeof priorityColors],
+              priorityColors[task.priority],
             )}
             title={`Priority: ${task.priority}`}
           />

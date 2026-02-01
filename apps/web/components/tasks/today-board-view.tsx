@@ -1,6 +1,6 @@
 "use client";
 
-import { Task } from "./mock-data";
+import type { Doc } from "@/convex/_generated/dataModel";
 import { TaskCard } from "./task-card";
 import { BoardView } from "./board-view";
 import { AddTaskCard } from "./add-task-card";
@@ -9,6 +9,8 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { Add01Icon } from "@hugeicons/core-free-icons";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+
+type Task = Doc<"tasks">;
 
 interface TodayBoardViewProps {
   tasks: Task[];

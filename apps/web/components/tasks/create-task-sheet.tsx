@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useId } from "react";
+import type { Doc } from "@/convex/_generated/dataModel";
 import {
   Sheet,
   SheetContent,
@@ -28,7 +29,8 @@ import { Kbd } from "@/components/ui/kbd";
 import { Separator } from "@/components/ui/separator";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
-import { Task, mockProjects, mockTags } from "./mock-data";
+
+type Task = Doc<"tasks">;
 
 interface CreateTaskSheetProps {
   open: boolean;
@@ -40,10 +42,29 @@ interface CreateTaskSheetProps {
   onCreate: (draft: TaskDraft) => void;
 }
 
-type TaskDraft = Omit<Task, "_id" | "userId" | "createdAt" | "updatedAt"> & {
-  aiSummary?: string | null;
-  aiContext?: unknown;
-  embedding?: number[] | null;
+// Draft for creating a task (all fields user can set, excluding server-managed ones)
+type TaskDraft = {
+  title: string;
+  description?: string;
+  notes?: string;
+  status: Task["status"];
+  priority: Task["priority"];
+  dueDate?: number | null;
+  scheduledDate?: string | null;
+  completionDate?: number | null;
+  projectId?: string | null;
+  tagIds: string[];
+  parentTaskId?: string | null;
+  estimatedDuration?: number | null;
+  actualDuration?: number | null;
+  energyLevel: Task["energyLevel"];
+  context: string[];
+  source: Task["source"];
+  orderIndex: number;
+  lastActiveAt: number;
+  streakCount: number;
+  difficulty: Task["difficulty"];
+  isTemplate: boolean;
 };
 
 const statusOptions: Task["status"][] = [
@@ -55,10 +76,8 @@ const statusOptions: Task["status"][] = [
 
 const priorityOptions: Task["priority"][] = ["low", "medium", "high"];
 
-const projectOptions = Object.entries(mockProjects).map(([id, project]) => ({
-  id,
-  ...project,
-}));
+// TODO: Phase 4 - fetch real projects
+const projectOptions: { id: string; name: string; color: string }[] = [];
 
 export function CreateTaskSheet({
   open,
@@ -85,10 +104,9 @@ export function CreateTaskSheet({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [projectId, setProjectId] = useState<string>("__none__");
-  const [status, setStatus] = useState<Task["status"]>(
-    defaults.status ?? "Not Started",
-  );
-  const [priority, setPriority] = useState<Task["priority"]>("low");
+  const initialStatus = (defaults.status ?? "Not Started") as Task["status"];
+  const [status, setStatus] = useState(initialStatus);
+  const [priority, setPriority] = useState("low" as Task["priority"]);
   const [scheduledDate, setScheduledDate] = useState<string>(
     defaults.scheduledDate ?? "",
   );
@@ -138,32 +156,28 @@ export function CreateTaskSheet({
     }
 
     const now = Date.now();
-    const draft = {
+    const draft: TaskDraft = {
       title: title.trim(),
-      description: (description.trim() || null) as Task["description"],
+      description: description.trim() || undefined,
       status,
       priority,
-      dueDate: (dueDate
-        ? new Date(dueDate).getTime()
-        : null) as Task["dueDate"],
-      scheduledDate: (scheduledDate || null) as Task["scheduledDate"],
-      completionDate: null as Task["completionDate"],
-      projectId: (projectId === "__none__"
-        ? null
-        : projectId) as Task["projectId"],
-      tagIds: tagIds as Task["tagIds"],
-      parentTaskId: null as Task["parentTaskId"],
-      estimatedDuration: null as unknown as Task["estimatedDuration"],
-      actualDuration: null as Task["actualDuration"],
-      energyLevel: "medium" as Task["energyLevel"],
-      context: [] as Task["context"],
-      source: "created" as Task["source"],
+      dueDate: dueDate ? new Date(dueDate).getTime() : null,
+      scheduledDate: scheduledDate || null,
+      completionDate: null,
+      projectId: projectId === "__none__" ? null : projectId,
+      tagIds,
+      parentTaskId: null,
+      estimatedDuration: null,
+      actualDuration: null,
+      energyLevel: "medium",
+      context: [],
+      source: "created",
       orderIndex: 0,
       lastActiveAt: now,
       streakCount: 0,
-      difficulty: "medium" as Task["difficulty"],
+      difficulty: "medium",
       isTemplate: false,
-    } satisfies Omit<Task, "_id" | "userId" | "createdAt" | "updatedAt">;
+    };
 
     onCreate(draft);
   };
@@ -430,27 +444,11 @@ export function CreateTaskSheet({
             <Field>
               <FieldLabel className="text-xs font-medium">Tags</FieldLabel>
               <FieldContent>
+                {/* TODO: Phase 4 - fetch real tags */}
                 <div className="flex flex-wrap gap-2">
-                  {Object.entries(mockTags).map(([id, tag]) => {
-                    const isSelected = tagIds.includes(id);
-                    return (
-                      <Button
-                        key={id}
-                        type="button"
-                        variant={isSelected ? "secondary" : "outline"}
-                        size="xs"
-                        onClick={() => toggleTag(id)}
-                        aria-pressed={isSelected}
-                        className="h-7 px-2 text-xs rounded-none"
-                      >
-                        <span
-                          className="inline-block w-1.5 h-1.5 rounded-full mr-1.5"
-                          style={{ backgroundColor: tag.color }}
-                        />
-                        {tag.name}
-                      </Button>
-                    );
-                  })}
+                  <span className="text-xs text-muted-foreground">
+                    Tags will be available in Phase 4
+                  </span>
                 </div>
               </FieldContent>
             </Field>

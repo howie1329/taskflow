@@ -1,6 +1,6 @@
 "use client";
 
-import { Task, mockProjects, mockTags } from "./mock-data";
+import type { Doc } from "@/convex/_generated/dataModel";
 import {
   Sheet,
   SheetContent,
@@ -11,6 +11,12 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+
+type Task = Doc<"tasks">;
+
+// TODO: Phase 4 - fetch real projects and tags
+const mockProjects: Record<string, { name: string; color: string }> = {};
+const mockTags: Record<string, { name: string; color: string }> = {};
 
 interface TaskDetailsSheetProps {
   task: Task | null;
@@ -29,14 +35,15 @@ export function TaskDetailsSheet({
     return null;
   }
 
+  // TODO: Phase 4 - use real projects and tags
   const project = task.projectId
-    ? mockProjects[task.projectId as keyof typeof mockProjects]
+    ? mockProjects[task.projectId as unknown as string]
     : null;
   const tags = task.tagIds
-    .map((id) => mockTags[id as keyof typeof mockTags])
+    .map((id) => mockTags[id as unknown as string])
     .filter(Boolean);
 
-  const formatDate = (timestamp: number | null) => {
+  const formatDate = (timestamp: number | null | undefined) => {
     if (!timestamp) return "Not set";
     return new Date(timestamp).toLocaleDateString("en-US", {
       year: "numeric",
@@ -150,6 +157,16 @@ export function TaskDetailsSheet({
                 )}
               </p>
             </div>
+
+            {/* Notes */}
+            {task.notes && (
+              <div>
+                <h4 className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-2">
+                  Notes
+                </h4>
+                <p className="text-sm text-foreground">{task.notes}</p>
+              </div>
+            )}
 
             <Separator />
 
