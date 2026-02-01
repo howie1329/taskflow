@@ -56,7 +56,7 @@ export const ensureViewerInitialized = mutation({
         userId,
         firstName: "",
         lastName: "",
-        email: identityEmail, // Pre-fill with auth email as contact email
+        email: identityEmail,
       });
       profile = await ctx.db.get(profileId);
     }
@@ -67,18 +67,11 @@ export const ensureViewerInitialized = mutation({
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .first();
 
-    // Create preferences if missing with default model
+    // Create preferences if missing (no default model - models being rebuilt)
     if (!preferences) {
-      // Get first recommended/active model from allowlist as default
-      const defaultModel = await ctx.db
-        .query("modelAllowlist")
-        .withIndex("by_active", (q) => q.eq("isActive", true))
-        .filter((q) => q.eq(q.field("recommended"), true))
-        .first();
-
       const preferencesId = await ctx.db.insert("userPreferences", {
         userId,
-        defaultAIModel: defaultModel?.modelId || "openai/gpt-4", // Fallback default
+        // defaultAIModel is optional - will be set later when models system is rebuilt
       });
       preferences = await ctx.db.get(preferencesId);
     }

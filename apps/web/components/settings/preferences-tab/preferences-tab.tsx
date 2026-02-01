@@ -1,6 +1,5 @@
 "use client";
 
-import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
 import { useViewer } from "../hooks/use-viewer";
 
@@ -20,15 +19,16 @@ export function PreferencesTab() {
             <div className="space-y-2">
               <label className="text-sm font-medium">Default AI Model</label>
               {isLoading ? (
-                <Skeleton className="h-8 w-full" />
+                <div className="h-8 w-48 bg-muted rounded animate-pulse" />
               ) : (
                 <div className="text-sm text-muted-foreground">
-                  {preferences?.defaultAIModel || "No model selected"}
+                  {preferences?.defaultAIModel || (
+                    <span className="italic">
+                      No model selected (AI models being rebuilt)
+                    </span>
+                  )}
                 </div>
               )}
-              <p className="text-xs text-muted-foreground">
-                Model selection UI will be added in Phase III
-              </p>
             </div>
           </div>
         </div>

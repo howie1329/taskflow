@@ -10,7 +10,6 @@
 
 import type * as auth from "../auth.js";
 import type * as http from "../http.js";
-import type * as models from "../models.js";
 import type * as preferences from "../preferences.js";
 import type * as profiles from "../profiles.js";
 import type * as users from "../users.js";
@@ -24,7 +23,6 @@ import type {
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   http: typeof http;
-  models: typeof models;
   preferences: typeof preferences;
   profiles: typeof profiles;
   users: typeof users;

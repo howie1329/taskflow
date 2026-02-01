@@ -17,40 +17,9 @@ const schema = defineSchema({
   // User preferences and settings
   userPreferences: defineTable({
     userId: v.id("users"), // Reference to auth user
-    defaultAIModel: v.string(), // OpenRouter model ID
+    defaultAIModel: v.optional(v.string()), // OpenRouter model ID (optional, not used currently)
     // Future: theme, notifications, privacy settings
   }).index("by_user", ["userId"]),
-
-  // OpenRouter model allowlist - YOUR control layer
-  modelAllowlist: defineTable({
-    modelId: v.string(), // OpenRouter model ID (e.g., "openai/gpt-4")
-    category: v.optional(v.string()), // Your categorization: "general", "coding", "creative"
-    customDescription: v.optional(v.string()), // Your user-friendly descriptions
-    recommended: v.boolean(), // Highlight popular choices
-    isActive: v.boolean(), // Enable/disable user access
-    maxCostPerRequest: v.optional(v.number()), // Cost controls if needed
-  }).index("by_active", ["isActive"]),
-
-  // Cached model data from OpenRouter (24-hour TTL)
-  modelCache: defineTable({
-    modelId: v.string(), // OpenRouter model ID
-    name: v.string(), // Display name from API
-    provider: v.string(), // Provider from API
-    description: v.string(), // API description + your custom description
-    contextLength: v.number(), // From API
-    pricing: v.object({
-      // From API
-      prompt: v.string(),
-      completion: v.string(),
-    }),
-    category: v.string(), // Your category from allowlist
-    customDescription: v.string(), // Your description from allowlist
-    recommended: v.boolean(), // Your recommendation from allowlist
-    lastUpdated: v.number(), // Timestamp for cache invalidation
-  })
-    .index("by_model", ["modelId"])
-    .index("by_category", ["category"])
-    .index("by_recommended", ["recommended"]),
 
   // Projects - Task containers with status, color, icon
   projects: defineTable({
