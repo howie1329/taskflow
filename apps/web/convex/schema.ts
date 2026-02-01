@@ -1,9 +1,167 @@
-import { defineSchema } from "convex/server";
+import { defineSchema, defineTable } from "convex/server";
+import { v } from "convex/values";
 import { authTables } from "@convex-dev/auth/server";
 
 const schema = defineSchema({
-    ...authTables,
-});
+  ...authTables,
 
+  // User identity information
+  userProfiles: defineTable({
+    userId: v.id("users"), // Reference to auth user
+    firstName: v.string(), // Max 50 chars
+    lastName: v.string(), // Max 50 chars
+    email: v.string(), // Email address
+    // Future: avatarUrl, bio, timezone, language
+  }).index("by_user", ["userId"]),
+
+  // User preferences and settings
+  userPreferences: defineTable({
+    userId: v.id("users"), // Reference to auth user
+    defaultAIModel: v.string(), // OpenRouter model ID
+    // Future: theme, notifications, privacy settings
+  }).index("by_user", ["userId"]),
+
+  // OpenRouter model allowlist - YOUR control layer
+  modelAllowlist: defineTable({
+    modelId: v.string(), // OpenRouter model ID (e.g., "openai/gpt-4")
+    category: v.optional(v.string()), // Your categorization: "general", "coding", "creative"
+    customDescription: v.optional(v.string()), // Your user-friendly descriptions
+    recommended: v.boolean(), // Highlight popular choices
+    isActive: v.boolean(), // Enable/disable user access
+    maxCostPerRequest: v.optional(v.number()), // Cost controls if needed
+  }).index("by_active", ["isActive"]),
+
+  // Cached model data from OpenRouter (24-hour TTL)
+  modelCache: defineTable({
+    modelId: v.string(), // OpenRouter model ID
+    name: v.string(), // Display name from API
+    provider: v.string(), // Provider from API
+    description: v.string(), // API description + your custom description
+    contextLength: v.number(), // From API
+    pricing: v.object({
+      // From API
+      prompt: v.string(),
+      completion: v.string(),
+    }),
+    category: v.string(), // Your category from allowlist
+    customDescription: v.string(), // Your description from allowlist
+    recommended: v.boolean(), // Your recommendation from allowlist
+    lastUpdated: v.number(), // Timestamp for cache invalidation
+  })
+    .index("by_model", ["modelId"])
+    .index("by_category", ["category"])
+    .index("by_recommended", ["recommended"]),
+
+  // Projects - Task containers with status, color, icon
+  projects: defineTable({
+    userId: v.id("users"), // Reference to auth user
+    title: v.string(), // Project title
+    description: v.optional(v.string()), // Optional description
+    status: v.union(
+      v.literal("active"),
+      v.literal("archived"),
+      v.literal("deleted"),
+    ),
+    color: v.string(), // Hex color: "#ff5733"
+    icon: v.string(), // Emoji/icon identifier
+    createdAt: v.number(), // Timestamp
+    updatedAt: v.number(), // Timestamp
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_status", ["userId", "status"]),
+
+  // Tags - Flexible tagging system with usage tracking
+  tags: defineTable({
+    userId: v.id("users"), // Reference to auth user
+    name: v.string(), // Tag name
+    color: v.string(), // Hex color: "#ff5733"
+    usageCount: v.number(), // Track popularity
+    createdAt: v.number(), // Timestamp
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_usage", ["userId", "usageCount"]),
+
+  // Tasks - Rich task management with AI integration
+  tasks: defineTable({
+    // Core fields
+    userId: v.id("users"), // Reference to auth user
+    title: v.string(), // Task title
+    description: v.optional(v.string()), // Optional description
+    status: v.union(
+      v.literal("Not Started"),
+      v.literal("To Do"),
+      v.literal("In Progress"),
+      v.literal("Completed"),
+    ),
+    priority: v.union(v.literal("low"), v.literal("medium"), v.literal("high")),
+
+    // Dates
+    dueDate: v.optional(v.number()), // Timestamp for precise timing
+    scheduledDate: v.optional(v.string()), // YYYY-MM-DD for day-based planning
+    completionDate: v.optional(v.number()), // When actually completed
+
+    // Relationships
+    projectId: v.optional(v.id("projects")), // Many-to-one with projects
+    tagIds: v.array(v.id("tags")), // Many-to-many with tags
+    parentTaskId: v.optional(v.id("tasks")), // Self-referencing for subtasks
+
+    // Enhanced task management
+    estimatedDuration: v.optional(v.number()), // Minutes
+    actualDuration: v.optional(v.number()), // Minutes
+    energyLevel: v.union(
+      v.literal("low"),
+      v.literal("medium"),
+      v.literal("high"),
+    ),
+    context: v.array(v.string()), // @home, @office, @calls, etc.
+    source: v.union(
+      v.literal("inbox"),
+      v.literal("created"),
+      v.literal("ai-suggested"),
+    ),
+    orderIndex: v.number(), // For manual ordering
+
+    // AI & Intelligence
+    aiSummary: v.optional(v.string()), // AI-generated summary
+    aiContext: v.any(), // Flexible AI analysis data
+    embedding: v.optional(v.array(v.number())), // For future semantic search
+
+    // Metadata
+    lastActiveAt: v.number(), // Activity tracking
+    streakCount: v.number(), // Completion streak
+    difficulty: v.union(
+      v.literal("easy"),
+      v.literal("medium"),
+      v.literal("hard"),
+    ),
+    isTemplate: v.boolean(), // Template flag
+
+    // Timestamps
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_status", ["userId", "status"])
+    .index("by_user_project", ["userId", "projectId"])
+    .index("by_user_scheduled", ["userId", "scheduledDate"])
+    .index("by_user_due", ["userId", "dueDate"])
+    .index("by_user_priority", ["userId", "priority"])
+    .index("by_user_active", ["userId", "lastActiveAt"])
+    .index("by_user_parent", ["userId", "parentTaskId"])
+    .index("by_user_tags", ["userId", "tagIds"]),
+
+  // Subtasks - Lightweight checklists under tasks
+  subtasks: defineTable({
+    userId: v.id("users"), // Reference to auth user
+    taskId: v.id("tasks"), // Parent task
+    title: v.string(), // Subtask title
+    isComplete: v.boolean(), // Completion status
+    orderIndex: v.number(), // Ordering within task
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_task", ["userId", "taskId"]),
+});
 
 export default schema;
