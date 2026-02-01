@@ -5,7 +5,8 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BoardView } from "@/components/tasks/board-view";
 import { TodayBoardView } from "@/components/tasks/today-board-view";
 import { TaskDetailsSheet } from "@/components/tasks/task-details-sheet";
-import { mockTasks } from "@/components/tasks/mock-data";
+import { CreateTaskSheet } from "@/components/tasks/create-task-sheet";
+import { mockTasks, Task } from "@/components/tasks/mock-data";
 import { useViewer } from "@/components/settings/hooks/use-viewer";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -14,13 +15,21 @@ export default function TasksPage() {
   const { viewer, isLoading } = useViewer();
   const updatePreferences = useMutation(api.preferences.updateMyPreferences);
 
+  // Tasks state (UI-only, in-memory)
+  const [tasks, setTasks] = useState<Task[]>(mockTasks);
+
   const [currentView, setCurrentView] = useState<"board" | "todayPlusBoard">(
     () => viewer?.preferences?.taskDefaultView ?? "board",
   );
-  const [selectedTask, setSelectedTask] = useState<
-    (typeof mockTasks)[0] | null
-  >(null);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+
+  // Create task sheet state
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [createDefaults, setCreateDefaults] = useState<{
+    status?: Task["status"];
+    scheduledDate?: string | null;
+  }>({});
 
   const handleViewChange = async (newView: "board" | "todayPlusBoard") => {
     setCurrentView(newView);
@@ -35,8 +44,39 @@ export default function TasksPage() {
     }
   };
 
-  const handleTaskClick = (task: (typeof mockTasks)[0]) => {
+  const handleTaskClick = (task: Task) => {
     setSelectedTask(task);
+    setIsDetailsOpen(true);
+  };
+
+  const handleOpenCreate = (defaults: {
+    status?: Task["status"];
+    scheduledDate?: string | null;
+  }) => {
+    setCreateDefaults(defaults);
+    setIsCreateOpen(true);
+  };
+
+  const handleCreateTask = (
+    draft: Omit<Task, "_id" | "createdAt" | "updatedAt">,
+  ) => {
+    // Generate a unique ID for the new task
+    const newTaskId = `task-${Date.now()}`;
+    const now = Date.now();
+
+    const newTask = {
+      _id: newTaskId,
+      ...draft,
+      createdAt: now,
+      updatedAt: now,
+    } as Task;
+
+    // Add to tasks array
+    setTasks((prev) => [newTask, ...prev]);
+
+    // Close create sheet and open details sheet
+    setIsCreateOpen(false);
+    setSelectedTask(newTask);
     setIsDetailsOpen(true);
   };
 
@@ -78,9 +118,17 @@ export default function TasksPage() {
       {/* Main content area */}
       <div className="flex-1 min-h-0">
         {currentView === "board" ? (
-          <BoardView tasks={mockTasks} onTaskClick={handleTaskClick} />
+          <BoardView
+            tasks={tasks}
+            onTaskClick={handleTaskClick}
+            onCreateTask={handleOpenCreate}
+          />
         ) : (
-          <TodayBoardView tasks={mockTasks} onTaskClick={handleTaskClick} />
+          <TodayBoardView
+            tasks={tasks}
+            onTaskClick={handleTaskClick}
+            onCreateTask={handleOpenCreate}
+          />
         )}
       </div>
 
@@ -89,6 +137,14 @@ export default function TasksPage() {
         task={selectedTask}
         open={isDetailsOpen}
         onOpenChange={setIsDetailsOpen}
+      />
+
+      {/* Create task sheet */}
+      <CreateTaskSheet
+        open={isCreateOpen}
+        onOpenChange={setIsCreateOpen}
+        defaults={createDefaults}
+        onCreate={handleCreateTask}
       />
     </div>
   );

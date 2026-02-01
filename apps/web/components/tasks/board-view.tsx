@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 interface BoardViewProps {
   tasks: Task[];
   onTaskClick: (task: Task) => void;
+  onCreateTask: (defaults: { status: Task["status"] }) => void;
 }
 
 const columns = [
@@ -20,7 +21,11 @@ const columns = [
   { id: "Completed", label: "Completed" },
 ] as const;
 
-export function BoardView({ tasks, onTaskClick }: BoardViewProps) {
+export function BoardView({
+  tasks,
+  onTaskClick,
+  onCreateTask,
+}: BoardViewProps) {
   const getTasksByStatus = (status: string) => {
     return tasks
       .filter((task) => task.status === status)
@@ -52,10 +57,7 @@ export function BoardView({ tasks, onTaskClick }: BoardViewProps) {
                     variant="ghost"
                     size="icon-sm"
                     className="h-6 w-6"
-                    onClick={() => {
-                      // TODO: Add task to this column (Phase 4)
-                      console.log("Add task to", column.id);
-                    }}
+                    onClick={() => onCreateTask({ status: column.id })}
                   >
                     <HugeiconsIcon icon={Add01Icon} className="size-4" />
                   </Button>
@@ -86,10 +88,7 @@ export function BoardView({ tasks, onTaskClick }: BoardViewProps) {
                 ))}
                 {/* Always show Add task card at bottom */}
                 <AddTaskCard
-                  onClick={() => {
-                    // TODO: Add task to this column (Phase 4)
-                    console.log("Add task to", column.id);
-                  }}
+                  onClick={() => onCreateTask({ status: column.id })}
                 />
               </div>
             </div>

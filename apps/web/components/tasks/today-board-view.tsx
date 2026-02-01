@@ -11,9 +11,17 @@ import { Add01Icon } from "@hugeicons/core-free-icons";
 interface TodayBoardViewProps {
   tasks: Task[];
   onTaskClick: (task: Task) => void;
+  onCreateTask: (defaults: {
+    status?: Task["status"];
+    scheduledDate?: string | null;
+  }) => void;
 }
 
-export function TodayBoardView({ tasks, onTaskClick }: TodayBoardViewProps) {
+export function TodayBoardView({
+  tasks,
+  onTaskClick,
+  onCreateTask,
+}: TodayBoardViewProps) {
   // Get today's date in YYYY-MM-DD format
   const today = new Date().toISOString().split("T")[0];
 
@@ -44,10 +52,9 @@ export function TodayBoardView({ tasks, onTaskClick }: TodayBoardViewProps) {
             variant="ghost"
             size="icon-sm"
             className="h-6 w-6"
-            onClick={() => {
-              // TODO: Add task scheduled for today (Phase 4)
-              console.log("Add task for today");
-            }}
+            onClick={() =>
+              onCreateTask({ status: "To Do", scheduledDate: today })
+            }
           >
             <HugeiconsIcon icon={Add01Icon} className="size-4" />
           </Button>
@@ -60,10 +67,9 @@ export function TodayBoardView({ tasks, onTaskClick }: TodayBoardViewProps) {
           ))}
           {/* Always show Add task card at bottom */}
           <AddTaskCard
-            onClick={() => {
-              // TODO: Add task scheduled for today (Phase 4)
-              console.log("Add task for today");
-            }}
+            onClick={() =>
+              onCreateTask({ status: "To Do", scheduledDate: today })
+            }
           />
         </div>
       </div>
@@ -71,7 +77,11 @@ export function TodayBoardView({ tasks, onTaskClick }: TodayBoardViewProps) {
       {/* Board View - Right side */}
       <div className="flex-1 h-full min-h-[300px]">
         <div className="h-full">
-          <BoardView tasks={boardTasks} onTaskClick={onTaskClick} />
+          <BoardView
+            tasks={boardTasks}
+            onTaskClick={onTaskClick}
+            onCreateTask={(defaults) => onCreateTask(defaults)}
+          />
         </div>
       </div>
     </div>
