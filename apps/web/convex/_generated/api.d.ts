@@ -15,6 +15,7 @@ import type * as models from "../models.js";
 import type * as preferences from "../preferences.js";
 import type * as profiles from "../profiles.js";
 import type * as projects from "../projects.js";
+import type * as subtasks from "../subtasks.js";
 import type * as tags from "../tags.js";
 import type * as tasks from "../tasks.js";
 import type * as users from "../users.js";
@@ -33,6 +34,7 @@ declare const fullApi: ApiFromModules<{
   preferences: typeof preferences;
   profiles: typeof profiles;
   projects: typeof projects;
+  subtasks: typeof subtasks;
   tags: typeof tags;
   tasks: typeof tasks;
   users: typeof users;

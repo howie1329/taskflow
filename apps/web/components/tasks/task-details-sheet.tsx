@@ -16,11 +16,19 @@ import { Separator } from "@/components/ui/separator";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
-import { CheckSquareIcon, SquareIcon, PencilIcon, XIcon } from "lucide-react";
+import {
+  CheckSquareIcon,
+  SquareIcon,
+  PencilIcon,
+  XIcon,
+  TrashIcon,
+  PlusIcon,
+} from "lucide-react";
 
 type Task = Doc<"tasks">;
 type Project = Doc<"projects">;
 type Tag = Doc<"tags">;
+type Subtask = Doc<"subtasks">;
 
 interface TaskDetailsSheetProps {
   task: Task | null;
@@ -31,6 +39,11 @@ interface TaskDetailsSheetProps {
   onToggleComplete?: (taskId: string) => void;
   projects?: Project[];
   tags?: Tag[];
+  subtasks?: Subtask[];
+  onCreateSubtask?: (taskId: string, title: string) => void;
+  onToggleSubtask?: (subtaskId: string) => void;
+  onDeleteSubtask?: (subtaskId: string) => void;
+  onUpdateSubtask?: (subtaskId: string, title: string) => void;
 }
 
 export function TaskDetailsSheet({
@@ -42,6 +55,11 @@ export function TaskDetailsSheet({
   onToggleComplete,
   projects = [],
   tags: availableTags = [],
+  subtasks = [],
+  onCreateSubtask,
+  onToggleSubtask,
+  onDeleteSubtask,
+  onUpdateSubtask,
 }: TaskDetailsSheetProps) {
   const isMobile = useIsMobile();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -49,8 +67,12 @@ export function TaskDetailsSheet({
   const [editedTitle, setEditedTitle] = useState("");
   const [editedDescription, setEditedDescription] = useState("");
   const [editedNotes, setEditedNotes] = useState("");
-  const [isEditingProject, setIsEditingProject] = useState(false);
-  const [isEditingTags, setIsEditingTags] = useState(false);
+
+  // Subtask state
+  const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
+  const [editingSubtaskId, setEditingSubtaskId] = useState<string | null>(null);
+  const [editingSubtaskTitle, setEditingSubtaskTitle] = useState("");
+  const [hideCompletedSubtasks, setHideCompletedSubtasks] = useState(false);
 
   // Reset editing state when task changes
   useEffect(() => {
@@ -59,9 +81,10 @@ export function TaskDetailsSheet({
       setEditedDescription(task.description ?? "");
       setEditedNotes(task.notes ?? "");
       setIsEditing(false);
-      setIsEditingProject(false);
-      setIsEditingTags(false);
       setShowDeleteConfirm(false);
+      setNewSubtaskTitle("");
+      setEditingSubtaskId(null);
+      setEditingSubtaskTitle("");
     }
   }, [task?._id]);
 
@@ -90,6 +113,12 @@ export function TaskDetailsSheet({
 
   const isOverdue = task.dueDate && new Date(task.dueDate) < new Date();
   const isCompleted = task.status === "Completed";
+
+  // Subtask calculations
+  const completedSubtasks = subtasks.filter((s) => s.isComplete).length;
+  const totalSubtasks = subtasks.length;
+  const subtaskProgress =
+    totalSubtasks > 0 ? `${completedSubtasks}/${totalSubtasks}` : null;
 
   const handleDelete = () => {
     if (onDelete) {
@@ -121,6 +150,48 @@ export function TaskDetailsSheet({
     setEditedNotes(task.notes ?? "");
     setIsEditing(false);
   };
+
+  const handleAddSubtask = () => {
+    if (onCreateSubtask && newSubtaskTitle.trim()) {
+      onCreateSubtask(task._id as unknown as string, newSubtaskTitle.trim());
+      setNewSubtaskTitle("");
+    }
+  };
+
+  const handleToggleSubtask = (subtaskId: string) => {
+    if (onToggleSubtask) {
+      onToggleSubtask(subtaskId);
+    }
+  };
+
+  const handleDeleteSubtask = (subtaskId: string) => {
+    if (onDeleteSubtask) {
+      onDeleteSubtask(subtaskId);
+    }
+  };
+
+  const handleEditSubtask = (subtask: Subtask) => {
+    setEditingSubtaskId(subtask._id as string);
+    setEditingSubtaskTitle(subtask.title);
+  };
+
+  const handleSaveSubtask = () => {
+    if (onUpdateSubtask && editingSubtaskId && editingSubtaskTitle.trim()) {
+      onUpdateSubtask(editingSubtaskId, editingSubtaskTitle.trim());
+    }
+    setEditingSubtaskId(null);
+    setEditingSubtaskTitle("");
+  };
+
+  const handleCancelEditSubtask = () => {
+    setEditingSubtaskId(null);
+    setEditingSubtaskTitle("");
+  };
+
+  // Filter subtasks if hide completed is on
+  const visibleSubtasks = hideCompletedSubtasks
+    ? subtasks.filter((s) => !s.isComplete)
+    : subtasks;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -281,6 +352,158 @@ export function TaskDetailsSheet({
 
           {/* Scrollable Content */}
           <div className="flex-1 overflow-y-auto py-4 px-2 space-y-6">
+            {/* Subtasks Section */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+                  Subtasks {subtaskProgress && `(${subtaskProgress})`}
+                </h4>
+                {totalSubtasks > 0 && (
+                  <button
+                    onClick={() =>
+                      setHideCompletedSubtasks(!hideCompletedSubtasks)
+                    }
+                    className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {hideCompletedSubtasks
+                      ? "Show completed"
+                      : "Hide completed"}
+                  </button>
+                )}
+              </div>
+
+              {/* Add new subtask */}
+              {onCreateSubtask && (
+                <div className="flex gap-2 mb-3">
+                  <Input
+                    value={newSubtaskTitle}
+                    onChange={(e) => setNewSubtaskTitle(e.target.value)}
+                    placeholder="Add a checklist item..."
+                    className="h-8 text-xs flex-1"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        handleAddSubtask();
+                      }
+                    }}
+                  />
+                  <Button
+                    size="icon-sm"
+                    onClick={handleAddSubtask}
+                    disabled={!newSubtaskTitle.trim()}
+                    className="h-8 w-8"
+                  >
+                    <PlusIcon className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              )}
+
+              {/* Subtasks list */}
+              <div className="space-y-1">
+                {visibleSubtasks.map((subtask) => (
+                  <div
+                    key={subtask._id as string}
+                    className="flex items-center gap-2 group"
+                  >
+                    {editingSubtaskId === subtask._id ? (
+                      <div className="flex gap-2 flex-1">
+                        <Input
+                          value={editingSubtaskTitle}
+                          onChange={(e) =>
+                            setEditingSubtaskTitle(e.target.value)
+                          }
+                          className="h-7 text-xs flex-1"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              handleSaveSubtask();
+                            } else if (e.key === "Escape") {
+                              handleCancelEditSubtask();
+                            }
+                          }}
+                          autoFocus
+                        />
+                        <Button
+                          size="icon-sm"
+                          onClick={handleSaveSubtask}
+                          className="h-7 w-7"
+                        >
+                          <CheckSquareIcon className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          onClick={() =>
+                            handleToggleSubtask(subtask._id as string)
+                          }
+                          className="h-6 w-6 shrink-0"
+                        >
+                          {subtask.isComplete ? (
+                            <CheckSquareIcon className="h-4 w-4 text-primary" />
+                          ) : (
+                            <SquareIcon className="h-4 w-4" />
+                          )}
+                        </Button>
+                        <span
+                          className={cn(
+                            "text-sm flex-1 cursor-pointer",
+                            subtask.isComplete &&
+                              "line-through text-muted-foreground",
+                          )}
+                          onClick={() =>
+                            onUpdateSubtask && handleEditSubtask(subtask)
+                          }
+                        >
+                          {subtask.title}
+                        </span>
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                          {onUpdateSubtask && (
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              onClick={() => handleEditSubtask(subtask)}
+                              className="h-6 w-6"
+                            >
+                              <PencilIcon className="h-3 w-3" />
+                            </Button>
+                          )}
+                          {onDeleteSubtask && (
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              onClick={() =>
+                                handleDeleteSubtask(subtask._id as string)
+                              }
+                              className="h-6 w-6 text-destructive"
+                            >
+                              <TrashIcon className="h-3 w-3" />
+                            </Button>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ))}
+
+                {subtasks.length === 0 && (
+                  <p className="text-xs text-muted-foreground italic">
+                    No checklist items
+                  </p>
+                )}
+
+                {hideCompletedSubtasks &&
+                  subtasks.length > visibleSubtasks.length && (
+                    <p className="text-xs text-muted-foreground">
+                      {subtasks.length - visibleSubtasks.length} completed
+                      item(s) hidden
+                    </p>
+                  )}
+              </div>
+            </div>
+
+            <Separator />
+
             {/* Tags */}
             {taskTags.length > 0 && (
               <div>

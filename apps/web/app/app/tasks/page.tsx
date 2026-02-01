@@ -14,6 +14,7 @@ import type { Doc } from "@/convex/_generated/dataModel";
 type Task = Doc<"tasks">;
 type Project = Doc<"projects">;
 type Tag = Doc<"tags">;
+type Subtask = Doc<"subtasks">;
 
 export default function TasksPage() {
   const { viewer, isLoading: isViewerLoading } = useViewer();
@@ -22,6 +23,12 @@ export default function TasksPage() {
   const updateTask = useMutation(api.tasks.updateTask);
   const toggleComplete = useMutation(api.tasks.toggleComplete);
   const deleteTask = useMutation(api.tasks.deleteTask);
+
+  // Subtask mutations
+  const createSubtask = useMutation(api.subtasks.createSubtask);
+  const updateSubtask = useMutation(api.subtasks.updateSubtask);
+  const toggleSubtask = useMutation(api.subtasks.toggleSubtask);
+  const deleteSubtask = useMutation(api.subtasks.deleteSubtask);
 
   // Fetch real tasks from Convex
   const tasks = useQuery(api.tasks.listMyTasks, {});
@@ -208,6 +215,55 @@ export default function TasksPage() {
     }
   };
 
+  // Subtask handlers
+  const handleCreateSubtask = async (taskId: string, title: string) => {
+    try {
+      await createSubtask({
+        taskId: taskId as unknown as Doc<"tasks">["_id"],
+        title,
+      });
+    } catch (error) {
+      console.error("Failed to create subtask:", error);
+    }
+  };
+
+  const handleToggleSubtask = async (subtaskId: string) => {
+    try {
+      await toggleSubtask({
+        subtaskId: subtaskId as unknown as Doc<"subtasks">["_id"],
+      });
+    } catch (error) {
+      console.error("Failed to toggle subtask:", error);
+    }
+  };
+
+  const handleDeleteSubtask = async (subtaskId: string) => {
+    try {
+      await deleteSubtask({
+        subtaskId: subtaskId as unknown as Doc<"subtasks">["_id"],
+      });
+    } catch (error) {
+      console.error("Failed to delete subtask:", error);
+    }
+  };
+
+  const handleUpdateSubtask = async (subtaskId: string, title: string) => {
+    try {
+      await updateSubtask({
+        subtaskId: subtaskId as unknown as Doc<"subtasks">["_id"],
+        title,
+      });
+    } catch (error) {
+      console.error("Failed to update subtask:", error);
+    }
+  };
+
+  // Fetch subtasks for the selected task
+  const subtasks = useQuery(
+    api.subtasks.listMySubtasks,
+    selectedTask?._id ? { taskId: selectedTask._id } : "skip",
+  );
+
   // Combined loading state
   const isLoading =
     isViewerLoading || isTasksLoading || isProjectsLoading || isTagsLoading;
@@ -282,6 +338,13 @@ export default function TasksPage() {
           onDelete={handleDeleteTask}
           onUpdate={handleUpdateTask}
           onToggleComplete={handleToggleComplete}
+          projects={projects}
+          tags={tags}
+          subtasks={subtasks || []}
+          onCreateSubtask={handleCreateSubtask}
+          onToggleSubtask={handleToggleSubtask}
+          onDeleteSubtask={handleDeleteSubtask}
+          onUpdateSubtask={handleUpdateSubtask}
         />
 
         {/* Create task sheet */}
@@ -359,6 +422,11 @@ export default function TasksPage() {
         onToggleComplete={handleToggleComplete}
         projects={projects}
         tags={tags}
+        subtasks={subtasks || []}
+        onCreateSubtask={handleCreateSubtask}
+        onToggleSubtask={handleToggleSubtask}
+        onDeleteSubtask={handleDeleteSubtask}
+        onUpdateSubtask={handleUpdateSubtask}
       />
 
       {/* Create task sheet */}
