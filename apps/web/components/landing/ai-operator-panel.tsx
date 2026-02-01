@@ -63,14 +63,13 @@ export function AiOperatorPanel() {
           <div className="divide-y divide-dashed">
             {examples.map((example, index) => (
               <div key={index} className="p-4 flex gap-3">
-                <div className="flex-shrink-0">
+                <div className="shrink-0">
                   <HugeiconsIcon
                     icon={example.icon}
-                    className={`h-4 w-4 ${
-                      example.user === "You"
+                    className={`h-4 w-4 ${example.user === "You"
                         ? "text-muted-foreground"
                         : "text-primary"
-                    }`}
+                      }`}
                   />
                 </div>
                 <div className="flex-1 space-y-1">

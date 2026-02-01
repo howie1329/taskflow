@@ -38,7 +38,7 @@ export function Hero() {
       </div>
 
       <div className="relative w-full max-w-4xl mx-auto mt-12">
-        <div className="absolute -inset-4 bg-gradient-to-r from-primary/5 via-secondary/5 to-primary/5 blur-2xl" />
+        <div className="absolute -inset-4 bg-linear-to-r from-primary/5 via-secondary/5 to-primary/5 blur-2xl" />
         <Card className="relative overflow-hidden border-dashed">
           <CardHeader className="gap-4 border-b border-dashed pb-4">
             <div className="flex items-center justify-between">
@@ -78,14 +78,14 @@ export function Hero() {
                   </div>
                   <div className="space-y-3">
                     <div className="flex items-start gap-3">
-                      <div className="h-6 w-6 rounded bg-muted flex-shrink-0" />
+                      <div className="h-6 w-6 rounded bg-muted shrink-0" />
                       <div className="space-y-2 flex-1">
                         <div className="h-2 w-full bg-muted/50 rounded" />
                         <div className="h-2 w-5/6 bg-muted/50 rounded" />
                       </div>
                     </div>
                     <div className="flex items-start gap-3 pl-8">
-                      <div className="h-6 w-6 rounded bg-primary/10 flex-shrink-0" />
+                      <div className="h-6 w-6 rounded bg-primary/10 shrink-0" />
                       <div className="space-y-2 flex-1">
                         <div className="h-2 w-4/5 bg-primary/5 rounded" />
                         <div className="h-2 w-3/4 bg-primary/5 rounded" />
