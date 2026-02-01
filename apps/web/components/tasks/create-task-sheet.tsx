@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useId } from "react";
 import {
   Sheet,
   SheetContent,
@@ -24,6 +24,7 @@ import {
   FieldContent,
   FieldError,
 } from "@/components/ui/field";
+import { Kbd } from "@/components/ui/kbd";
 import { Separator } from "@/components/ui/separator";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
@@ -39,9 +40,7 @@ interface CreateTaskSheetProps {
   onCreate: (draft: TaskDraft) => void;
 }
 
-// Task draft type - matches Task structure without generated fields
 type TaskDraft = Omit<Task, "_id" | "userId" | "createdAt" | "updatedAt"> & {
-  // Allow additional fields that might exist in Task type but not in mock data
   aiSummary?: string | null;
   aiContext?: unknown;
   embedding?: number[] | null;
@@ -68,6 +67,19 @@ export function CreateTaskSheet({
   onCreate,
 }: CreateTaskSheetProps) {
   const isMobile = useIsMobile();
+  const baseId = useId();
+
+  // Generate unique IDs for accessibility
+  const ids = {
+    title: `${baseId}-title`,
+    description: `${baseId}-description`,
+    project: `${baseId}-project`,
+    status: `${baseId}-status`,
+    priority: `${baseId}-priority`,
+    scheduled: `${baseId}-scheduled`,
+    due: `${baseId}-due`,
+    titleError: `${baseId}-title-error`,
+  };
 
   // Form state
   const [title, setTitle] = useState("");
@@ -102,49 +114,24 @@ export function CreateTaskSheet({
   // Validation
   const isTitleValid = title.trim().length > 0;
   const canSubmit = isTitleValid;
+  const showTitleError = touched && !isTitleValid;
 
   // Focus title on open
   useEffect(() => {
     if (open) {
-      // Small delay to ensure sheet is rendered
       const timeout = setTimeout(() => {
-        const titleInput = document.querySelector(
-          '[data-slot="create-task-title"]',
+        const titleInput = document.getElementById(
+          ids.title,
         ) as HTMLInputElement;
         titleInput?.focus();
       }, 100);
       return () => clearTimeout(timeout);
     }
-  }, [open]);
+  }, [open, ids.title]);
 
-  // Keyboard handlers
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      // Ctrl/Cmd + Enter to submit
-      if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && canSubmit) {
-        e.preventDefault();
-        handleSubmit();
-      }
-      // Enter in title input to submit
-      if (e.key === "Enter" && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
-        const target = e.target as HTMLElement;
-        if (
-          target.tagName === "INPUT" &&
-          target.getAttribute("data-slot") === "create-task-title"
-        ) {
-          e.preventDefault();
-          if (canSubmit) {
-            handleSubmit();
-          } else {
-            setTouched(true);
-          }
-        }
-      }
-    },
-    [canSubmit],
-  );
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
 
-  const handleSubmit = () => {
     if (!isTitleValid) {
       setTouched(true);
       return;
@@ -193,6 +180,17 @@ export function CreateTaskSheet({
     );
   };
 
+  // Handle Cmd/Ctrl+Enter in textarea
+  const handleDescriptionKeyDown = (
+    e: React.KeyboardEvent<HTMLTextAreaElement>,
+  ) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && canSubmit) {
+      e.preventDefault();
+      const form = e.currentTarget.closest("form");
+      form?.requestSubmit();
+    }
+  };
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
@@ -201,49 +199,57 @@ export function CreateTaskSheet({
       >
         <div className="flex flex-col h-full">
           {/* Header */}
-          <SheetHeader className="pt-10 pb-3 shrink-0">
+          <SheetHeader className="pt-6 pb-2 shrink-0">
             <SheetTitle className="text-sm font-medium">New task</SheetTitle>
-            <p className="text-xs text-muted-foreground">
-              Enter to create · Esc to close
-            </p>
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Kbd>Enter</Kbd>
+              <span>to create</span>
+              <span className="mx-1">·</span>
+              <Kbd>Esc</Kbd>
+              <span>to close</span>
+            </div>
           </SheetHeader>
 
-          <Separator />
-
           {/* Body */}
-          <div
-            className="flex-1 overflow-y-auto py-4 space-y-4"
-            onKeyDown={handleKeyDown}
+          <form
+            onSubmit={handleSubmit}
+            className="flex-1 overflow-y-auto py-4 px-4 space-y-4"
           >
             {/* Title - Required */}
             <Field>
-              <FieldLabel className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+              <FieldLabel htmlFor={ids.title} className="text-xs font-medium">
                 Title
               </FieldLabel>
               <FieldContent>
                 <Input
-                  data-slot="create-task-title"
+                  id={ids.title}
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="What needs to be done?"
                   className="h-9 text-sm font-medium"
-                  aria-invalid={touched && !isTitleValid}
+                  aria-invalid={showTitleError}
+                  aria-describedby={showTitleError ? ids.titleError : undefined}
                 />
-                {touched && !isTitleValid && (
-                  <FieldError>Title is required</FieldError>
+                {showTitleError && (
+                  <FieldError id={ids.titleError}>Title is required</FieldError>
                 )}
               </FieldContent>
             </Field>
 
             {/* Description */}
             <Field>
-              <FieldLabel className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+              <FieldLabel
+                htmlFor={ids.description}
+                className="text-xs font-medium"
+              >
                 Description
               </FieldLabel>
               <FieldContent>
                 <Textarea
+                  id={ids.description}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
+                  onKeyDown={handleDescriptionKeyDown}
                   placeholder="Add details (optional)"
                   className="min-h-20 text-xs"
                 />
@@ -254,7 +260,10 @@ export function CreateTaskSheet({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Project */}
               <Field>
-                <FieldLabel className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+                <FieldLabel
+                  htmlFor={ids.project}
+                  className="text-xs font-medium"
+                >
                   Project
                 </FieldLabel>
                 <FieldContent>
@@ -262,7 +271,10 @@ export function CreateTaskSheet({
                     value={projectId}
                     onValueChange={(value) => setProjectId(value)}
                   >
-                    <SelectTrigger className="w-full h-8 text-xs">
+                    <SelectTrigger
+                      id={ids.project}
+                      className="w-full h-8 text-xs"
+                    >
                       <SelectValue placeholder="No project" />
                     </SelectTrigger>
                     <SelectContent>
@@ -291,7 +303,10 @@ export function CreateTaskSheet({
 
               {/* Status */}
               <Field>
-                <FieldLabel className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+                <FieldLabel
+                  htmlFor={ids.status}
+                  className="text-xs font-medium"
+                >
                   Status
                 </FieldLabel>
                 <FieldContent>
@@ -299,7 +314,10 @@ export function CreateTaskSheet({
                     value={status}
                     onValueChange={(v) => setStatus(v as Task["status"])}
                   >
-                    <SelectTrigger className="w-full h-8 text-xs">
+                    <SelectTrigger
+                      id={ids.status}
+                      className="w-full h-8 text-xs"
+                    >
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -315,7 +333,10 @@ export function CreateTaskSheet({
 
               {/* Priority */}
               <Field>
-                <FieldLabel className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+                <FieldLabel
+                  htmlFor={ids.priority}
+                  className="text-xs font-medium"
+                >
                   Priority
                 </FieldLabel>
                 <FieldContent>
@@ -323,7 +344,10 @@ export function CreateTaskSheet({
                     value={priority}
                     onValueChange={(v) => setPriority(v as Task["priority"])}
                   >
-                    <SelectTrigger className="w-full h-8 text-xs">
+                    <SelectTrigger
+                      id={ids.priority}
+                      className="w-full h-8 text-xs"
+                    >
                       <SelectValue>
                         <div className="flex items-center gap-2">
                           <div
@@ -366,11 +390,15 @@ export function CreateTaskSheet({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Scheduled Date */}
               <Field>
-                <FieldLabel className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+                <FieldLabel
+                  htmlFor={ids.scheduled}
+                  className="text-xs font-medium"
+                >
                   Scheduled
                 </FieldLabel>
                 <FieldContent>
                   <Input
+                    id={ids.scheduled}
                     type="date"
                     value={scheduledDate}
                     onChange={(e) => setScheduledDate(e.target.value)}
@@ -381,11 +409,12 @@ export function CreateTaskSheet({
 
               {/* Due Date */}
               <Field>
-                <FieldLabel className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+                <FieldLabel htmlFor={ids.due} className="text-xs font-medium">
                   Due Date
                 </FieldLabel>
                 <FieldContent>
                   <Input
+                    id={ids.due}
                     type="date"
                     value={dueDate}
                     onChange={(e) => setDueDate(e.target.value)}
@@ -399,57 +428,52 @@ export function CreateTaskSheet({
 
             {/* Tags */}
             <Field>
-              <FieldLabel className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-                Tags
-              </FieldLabel>
+              <FieldLabel className="text-xs font-medium">Tags</FieldLabel>
               <FieldContent>
                 <div className="flex flex-wrap gap-2">
                   {Object.entries(mockTags).map(([id, tag]) => {
                     const isSelected = tagIds.includes(id);
                     return (
-                      <button
+                      <Button
                         key={id}
                         type="button"
+                        variant={isSelected ? "secondary" : "outline"}
+                        size="xs"
                         onClick={() => toggleTag(id)}
-                        className={cn(
-                          "px-2 py-1 text-[10px] rounded-none border transition-colors",
-                          isSelected
-                            ? "bg-secondary text-secondary-foreground border-secondary"
-                            : "bg-transparent text-muted-foreground border-border hover:border-foreground",
-                        )}
+                        aria-pressed={isSelected}
+                        className="h-7 px-2 text-xs rounded-none"
                       >
                         <span
-                          className="inline-block w-1.5 h-1.5 rounded-full mr-1"
+                          className="inline-block w-1.5 h-1.5 rounded-full mr-1.5"
                           style={{ backgroundColor: tag.color }}
                         />
                         {tag.name}
-                      </button>
+                      </Button>
                     );
                   })}
                 </div>
               </FieldContent>
             </Field>
-          </div>
 
-          <Separator />
-
-          {/* Footer */}
-          <SheetFooter className="border-t gap-2 sm:flex-row sm:justify-end shrink-0 py-3">
-            <Button
-              variant="outline"
-              onClick={handleCancel}
-              className="h-9 text-xs sm:h-8"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              disabled={!canSubmit}
-              className="h-9 text-xs sm:h-8"
-            >
-              Create
-            </Button>
-          </SheetFooter>
+            {/* Footer */}
+            <SheetFooter className="gap-2 sm:flex-row sm:justify-end pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleCancel}
+                className="h-9 text-xs sm:h-8"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={!canSubmit}
+                className="h-9 text-xs sm:h-8"
+              >
+                Create
+              </Button>
+            </SheetFooter>
+          </form>
         </div>
       </SheetContent>
     </Sheet>

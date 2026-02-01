@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
 interface TaskDetailsSheetProps {
@@ -22,6 +23,8 @@ export function TaskDetailsSheet({
   open,
   onOpenChange,
 }: TaskDetailsSheetProps) {
+  const isMobile = useIsMobile();
+
   if (!task) {
     return null;
   }
@@ -46,7 +49,10 @@ export function TaskDetailsSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right">
+      <SheetContent
+        side={isMobile ? "bottom" : "right"}
+        className={cn("sm:max-w-sm", isMobile && "h-[85vh]")}
+      >
         <div className="flex flex-col h-full">
           {/* Header Block */}
           <SheetHeader className="pt-10 pb-4">

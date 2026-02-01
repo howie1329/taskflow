@@ -7,6 +7,8 @@ import { AddTaskCard } from "./add-task-card";
 import { Button } from "@/components/ui/button";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Add01Icon } from "@hugeicons/core-free-icons";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 interface TodayBoardViewProps {
   tasks: Task[];
@@ -22,6 +24,8 @@ export function TodayBoardView({
   onTaskClick,
   onCreateTask,
 }: TodayBoardViewProps) {
+  const isMobile = useIsMobile();
+
   // Get today's date in YYYY-MM-DD format
   const today = new Date().toISOString().split("T")[0];
 
@@ -51,7 +55,7 @@ export function TodayBoardView({
           <Button
             variant="ghost"
             size="icon-sm"
-            className="h-6 w-6"
+            className={cn("shrink-0", isMobile ? "size-8" : "size-7")}
             onClick={() =>
               onCreateTask({ status: "To Do", scheduledDate: today })
             }

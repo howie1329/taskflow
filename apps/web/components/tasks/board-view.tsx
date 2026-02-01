@@ -6,6 +6,7 @@ import { AddTaskCard } from "./add-task-card";
 import { Button } from "@/components/ui/button";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Add01Icon } from "@hugeicons/core-free-icons";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
 interface BoardViewProps {
@@ -26,6 +27,8 @@ export function BoardView({
   onTaskClick,
   onCreateTask,
 }: BoardViewProps) {
+  const isMobile = useIsMobile();
+
   const getTasksByStatus = (status: string) => {
     return tasks
       .filter((task) => task.status === status)
@@ -56,7 +59,7 @@ export function BoardView({
                   <Button
                     variant="ghost"
                     size="icon-sm"
-                    className="h-6 w-6"
+                    className={cn("shrink-0", isMobile ? "size-8" : "size-7")}
                     onClick={() => onCreateTask({ status: column.id })}
                   >
                     <HugeiconsIcon icon={Add01Icon} className="size-4" />
@@ -65,7 +68,7 @@ export function BoardView({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-6 text-xs px-2"
+                    className="h-7 text-xs px-2 shrink-0"
                     onClick={() => {
                       // TODO: Toggle completed visibility (Phase 4)
                       console.log("Toggle completed visibility");
