@@ -22,7 +22,12 @@ export const getMyPreferences = query({
 // Update current user's preferences (no userId arg - derived from auth context)
 export const updateMyPreferences = mutation({
   args: {
-    defaultAIModel: v.string(),
+    defaultAIModel: v.optional(
+      v.object({
+        modelId: v.string(),
+        name: v.string(),
+      }),
+    ),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);

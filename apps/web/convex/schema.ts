@@ -29,7 +29,12 @@ const schema = defineSchema({
   // User preferences and settings
   userPreferences: defineTable({
     userId: v.id("users"), // Reference to auth user
-    defaultAIModel: v.optional(v.string()), // OpenRouter model ID (optional, not used currently)
+    defaultAIModel: v.optional(
+      v.object({
+        modelId: v.string(),
+        name: v.string(),
+      }),
+    ),
     // Future: theme, notifications, privacy settings
   }).index("by_user", ["userId"]),
 
