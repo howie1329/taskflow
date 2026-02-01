@@ -72,7 +72,7 @@ export function CreateTaskSheet({
   // Form state
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [projectId, setProjectId] = useState<string>("");
+  const [projectId, setProjectId] = useState<string>("__none__");
   const [status, setStatus] = useState<Task["status"]>(
     defaults.status ?? "Not Started",
   );
@@ -89,7 +89,7 @@ export function CreateTaskSheet({
     if (open) {
       setTitle("");
       setDescription("");
-      setProjectId("");
+      setProjectId("__none__");
       setStatus(defaults.status ?? "Not Started");
       setPriority("low");
       setScheduledDate(defaults.scheduledDate ?? "");
@@ -161,7 +161,9 @@ export function CreateTaskSheet({
         : null) as Task["dueDate"],
       scheduledDate: (scheduledDate || null) as Task["scheduledDate"],
       completionDate: null as Task["completionDate"],
-      projectId: (projectId || null) as Task["projectId"],
+      projectId: (projectId === "__none__"
+        ? null
+        : projectId) as Task["projectId"],
       tagIds: tagIds as Task["tagIds"],
       parentTaskId: null as Task["parentTaskId"],
       estimatedDuration: null as unknown as Task["estimatedDuration"],
@@ -257,14 +259,14 @@ export function CreateTaskSheet({
                 </FieldLabel>
                 <FieldContent>
                   <Select
-                    value={projectId ?? ""}
+                    value={projectId}
                     onValueChange={(value) => setProjectId(value)}
                   >
                     <SelectTrigger className="w-full h-8 text-xs">
                       <SelectValue placeholder="No project" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="" className="text-xs">
+                      <SelectItem value="__none__" className="text-xs">
                         No project
                       </SelectItem>
                       {projectOptions.map((project) => (
