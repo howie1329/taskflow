@@ -38,12 +38,22 @@ export default function TasksPage() {
     "board",
   );
 
+  // Hide completed tasks state
+  const [hideCompleted, setHideCompleted] = useState(false);
+
   // Sync view with preferences when they load (not just initial state)
   useEffect(() => {
     if (viewer?.preferences?.taskDefaultView) {
       setCurrentView(viewer.preferences.taskDefaultView);
     }
   }, [viewer?.preferences?.taskDefaultView]);
+
+  // Sync hide completed preference when viewer loads
+  useEffect(() => {
+    if (viewer?.preferences?.hideCompletedTasks !== undefined) {
+      setHideCompleted(viewer.preferences.hideCompletedTasks);
+    }
+  }, [viewer?.preferences?.hideCompletedTasks]);
 
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
@@ -64,6 +74,22 @@ export default function TasksPage() {
         await updatePreferences({ taskDefaultView: newView });
       } catch (error) {
         console.error("Failed to save view preference:", error);
+      }
+    }
+  };
+
+  const handleToggleHideCompleted = async () => {
+    const newValue = !hideCompleted;
+    setHideCompleted(newValue);
+
+    // Persist the change to Convex
+    if (viewer?.userId) {
+      try {
+        await updatePreferences({ hideCompletedTasks: newValue });
+      } catch (error) {
+        console.error("Failed to save hide completed preference:", error);
+        // Revert on error
+        setHideCompleted(!newValue);
       }
     }
   };
@@ -210,17 +236,26 @@ export default function TasksPage() {
           <p className="text-sm text-muted-foreground">
             Organize and track your work
           </p>
-          <Tabs
-            value={currentView}
-            onValueChange={(v) =>
-              handleViewChange(v as "board" | "todayPlusBoard")
-            }
-          >
-            <TabsList>
-              <TabsTrigger value="board">Board</TabsTrigger>
-              <TabsTrigger value="todayPlusBoard">Today + Board</TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleToggleHideCompleted}
+              className="text-xs px-3 py-1.5 rounded border border-border hover:bg-accent transition-colors"
+              style={{ opacity: hideCompleted ? 1 : 0.5 }}
+            >
+              {hideCompleted ? "✓ Hide completed" : "Hide completed"}
+            </button>
+            <Tabs
+              value={currentView}
+              onValueChange={(v) =>
+                handleViewChange(v as "board" | "todayPlusBoard")
+              }
+            >
+              <TabsList>
+                <TabsTrigger value="board">Board</TabsTrigger>
+                <TabsTrigger value="todayPlusBoard">Today + Board</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
         </div>
 
         {/* Empty state */}
@@ -269,17 +304,26 @@ export default function TasksPage() {
         <p className="text-sm text-muted-foreground">
           Organize and track your work
         </p>
-        <Tabs
-          value={currentView}
-          onValueChange={(v) =>
-            handleViewChange(v as "board" | "todayPlusBoard")
-          }
-        >
-          <TabsList>
-            <TabsTrigger value="board">Board</TabsTrigger>
-            <TabsTrigger value="todayPlusBoard">Today + Board</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleToggleHideCompleted}
+            className="text-xs px-3 py-1.5 rounded border border-border hover:bg-accent transition-colors"
+            style={{ opacity: hideCompleted ? 1 : 0.5 }}
+          >
+            {hideCompleted ? "✓ Hide completed" : "Hide completed"}
+          </button>
+          <Tabs
+            value={currentView}
+            onValueChange={(v) =>
+              handleViewChange(v as "board" | "todayPlusBoard")
+            }
+          >
+            <TabsList>
+              <TabsTrigger value="board">Board</TabsTrigger>
+              <TabsTrigger value="todayPlusBoard">Today + Board</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
       </div>
 
       {/* Main content area */}
@@ -291,6 +335,7 @@ export default function TasksPage() {
             onCreateTask={handleOpenCreate}
             projects={projects}
             tags={tags}
+            hideCompleted={hideCompleted}
           />
         ) : (
           <TodayBoardView
@@ -299,6 +344,7 @@ export default function TasksPage() {
             onCreateTask={handleOpenCreate}
             projects={projects}
             tags={tags}
+            hideCompleted={hideCompleted}
           />
         )}
       </div>

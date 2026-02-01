@@ -23,6 +23,7 @@ interface TodayBoardViewProps {
   }) => void;
   projects?: Project[];
   tags?: Tag[];
+  hideCompleted?: boolean;
 }
 
 export function TodayBoardView({
@@ -31,6 +32,7 @@ export function TodayBoardView({
   onCreateTask,
   projects = [],
   tags = [],
+  hideCompleted = false,
 }: TodayBoardViewProps) {
   const isMobile = useIsMobile();
 
@@ -101,6 +103,7 @@ export function TodayBoardView({
             onCreateTask={(defaults) => onCreateTask(defaults)}
             projects={projects}
             tags={tags}
+            hideCompleted={hideCompleted}
           />
         </div>
       </div>

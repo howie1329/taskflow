@@ -19,6 +19,7 @@ interface BoardViewProps {
   onCreateTask: (defaults: { status: Task["status"] }) => void;
   projects?: Project[];
   tags?: Tag[];
+  hideCompleted?: boolean;
 }
 
 const columns = [
@@ -34,6 +35,7 @@ export function BoardView({
   onCreateTask,
   projects = [],
   tags = [],
+  hideCompleted = false,
 }: BoardViewProps) {
   const isMobile = useIsMobile();
 
@@ -43,10 +45,15 @@ export function BoardView({
       .sort((a, b) => a.orderIndex - b.orderIndex);
   };
 
+  // Filter out Completed column if hideCompleted is true
+  const visibleColumns = hideCompleted
+    ? columns.filter((c) => c.id !== "Completed")
+    : columns;
+
   return (
     <div className="h-full overflow-x-auto overflow-y-hidden">
-      <div className="flex gap-4 h-full min-w-[880px] lg:min-w-0">
-        {columns.map((column) => {
+      <div className="flex gap-4 h-full min-w-[660px] lg:min-w-0">
+        {visibleColumns.map((column) => {
           const columnTasks = getTasksByStatus(column.id);
           const isCompleted = column.id === "Completed";
 
@@ -63,28 +70,14 @@ export function BoardView({
                     {columnTasks.length}
                   </span>
                 </div>
-                {!isCompleted ? (
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    className={cn("shrink-0", isMobile ? "size-8" : "size-7")}
-                    onClick={() => onCreateTask({ status: column.id })}
-                  >
-                    <HugeiconsIcon icon={Add01Icon} className="size-4" />
-                  </Button>
-                ) : (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 text-xs px-2 shrink-0"
-                    onClick={() => {
-                      // TODO: Toggle completed visibility (Phase 5)
-                      console.log("Toggle completed visibility");
-                    }}
-                  >
-                    ✓ Hide
-                  </Button>
-                )}
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  className={cn("shrink-0", isMobile ? "size-8" : "size-7")}
+                  onClick={() => onCreateTask({ status: column.id })}
+                >
+                  <HugeiconsIcon icon={Add01Icon} className="size-4" />
+                </Button>
               </div>
 
               {/* Task list with Add card */}
