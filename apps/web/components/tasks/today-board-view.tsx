@@ -11,6 +11,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
 type Task = Doc<"tasks">;
+type Project = Doc<"projects">;
+type Tag = Doc<"tags">;
 
 interface TodayBoardViewProps {
   tasks: Task[];
@@ -19,12 +21,16 @@ interface TodayBoardViewProps {
     status?: Task["status"];
     scheduledDate?: string | null;
   }) => void;
+  projects?: Project[];
+  tags?: Tag[];
 }
 
 export function TodayBoardView({
   tasks,
   onTaskClick,
   onCreateTask,
+  projects = [],
+  tags = [],
 }: TodayBoardViewProps) {
   const isMobile = useIsMobile();
 
@@ -69,7 +75,13 @@ export function TodayBoardView({
         {/* Today task list with Add card */}
         <div className="flex-1 overflow-y-auto space-y-2 p-1 -mx-1 border border-dashed border-border rounded-none">
           {todayTasks.map((task) => (
-            <TaskCard key={task._id} task={task} onClick={onTaskClick} />
+            <TaskCard
+              key={task._id}
+              task={task}
+              onClick={onTaskClick}
+              projects={projects}
+              tags={tags}
+            />
           ))}
           {/* Always show Add task card at bottom */}
           <AddTaskCard
@@ -87,6 +99,8 @@ export function TodayBoardView({
             tasks={boardTasks}
             onTaskClick={onTaskClick}
             onCreateTask={(defaults) => onCreateTask(defaults)}
+            projects={projects}
+            tags={tags}
           />
         </div>
       </div>

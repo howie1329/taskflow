@@ -19,10 +19,8 @@ import { useState, useEffect } from "react";
 import { CheckSquareIcon, SquareIcon, PencilIcon, XIcon } from "lucide-react";
 
 type Task = Doc<"tasks">;
-
-// TODO: Phase 4 - fetch real projects and tags
-const mockProjects: Record<string, { name: string; color: string }> = {};
-const mockTags: Record<string, { name: string; color: string }> = {};
+type Project = Doc<"projects">;
+type Tag = Doc<"tags">;
 
 interface TaskDetailsSheetProps {
   task: Task | null;
@@ -31,6 +29,8 @@ interface TaskDetailsSheetProps {
   onDelete?: (taskId: string) => void;
   onUpdate?: (taskId: string, updates: Partial<Task>) => void;
   onToggleComplete?: (taskId: string) => void;
+  projects?: Project[];
+  tags?: Tag[];
 }
 
 export function TaskDetailsSheet({
@@ -40,6 +40,8 @@ export function TaskDetailsSheet({
   onDelete,
   onUpdate,
   onToggleComplete,
+  projects = [],
+  tags: availableTags = [],
 }: TaskDetailsSheetProps) {
   const isMobile = useIsMobile();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -47,6 +49,8 @@ export function TaskDetailsSheet({
   const [editedTitle, setEditedTitle] = useState("");
   const [editedDescription, setEditedDescription] = useState("");
   const [editedNotes, setEditedNotes] = useState("");
+  const [isEditingProject, setIsEditingProject] = useState(false);
+  const [isEditingTags, setIsEditingTags] = useState(false);
 
   // Reset editing state when task changes
   useEffect(() => {
@@ -55,6 +59,8 @@ export function TaskDetailsSheet({
       setEditedDescription(task.description ?? "");
       setEditedNotes(task.notes ?? "");
       setIsEditing(false);
+      setIsEditingProject(false);
+      setIsEditingTags(false);
       setShowDeleteConfirm(false);
     }
   }, [task?._id]);
@@ -63,13 +69,15 @@ export function TaskDetailsSheet({
     return null;
   }
 
-  // TODO: Phase 4 - use real projects and tags
+  // Find the project for this task
   const project = task.projectId
-    ? mockProjects[task.projectId as unknown as string]
+    ? projects.find((p) => p._id === task.projectId)
     : null;
-  const tags = task.tagIds
-    .map((id) => mockTags[id as unknown as string])
-    .filter(Boolean);
+
+  // Find the tags for this task
+  const taskTags = task.tagIds
+    .map((id) => availableTags.find((t) => t._id === id))
+    .filter(Boolean) as Tag[];
 
   const formatDate = (timestamp: number | null | undefined) => {
     if (!timestamp) return "Not set";
@@ -126,7 +134,19 @@ export function TaskDetailsSheet({
             {/* Top row: Project + Status + Actions */}
             <div className="flex items-center justify-between mb-2">
               <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4">
-                {project?.name || "No project"}
+                <Badge
+                  variant="outline"
+                  className="text-[10px] px-1.5 py-0 h-4"
+                >
+                  {project ? (
+                    <>
+                      <span className="mr-1">{project.icon}</span>
+                      {project.title}
+                    </>
+                  ) : (
+                    "No project"
+                  )}
+                </Badge>
               </Badge>
               <div className="flex items-center gap-1">
                 {/* Toggle Complete Button */}
@@ -262,17 +282,22 @@ export function TaskDetailsSheet({
           {/* Scrollable Content */}
           <div className="flex-1 overflow-y-auto py-4 px-2 space-y-6">
             {/* Tags */}
-            {tags.length > 0 && (
+            {taskTags.length > 0 && (
               <div>
                 <h4 className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-2">
                   Tags
                 </h4>
                 <div className="flex flex-wrap gap-1">
-                  {tags.map((tag, idx) => (
+                  {taskTags.map((tag, idx) => (
                     <Badge
                       key={idx}
                       variant="secondary"
                       className="text-[10px] px-1.5 py-0 h-4"
+                      style={{
+                        backgroundColor: `${tag.color}20`,
+                        color: tag.color,
+                        borderColor: tag.color,
+                      }}
                     >
                       {tag.name}
                     </Badge>

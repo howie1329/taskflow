@@ -31,6 +31,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
 type Task = Doc<"tasks">;
+type Project = Doc<"projects">;
+type Tag = Doc<"tags">;
 
 interface CreateTaskSheetProps {
   open: boolean;
@@ -40,6 +42,8 @@ interface CreateTaskSheetProps {
     scheduledDate?: string | null;
   };
   onCreate: (draft: TaskDraft) => void;
+  projects?: Project[];
+  tags?: Tag[];
 }
 
 // Draft for creating a task (all fields user can set, excluding server-managed ones)
@@ -80,14 +84,13 @@ const statusOptions: Task["status"][] = [
 
 const priorityOptions: Task["priority"][] = ["low", "medium", "high"];
 
-// TODO: Phase 4 - fetch real projects
-const projectOptions: { id: string; name: string; color: string }[] = [];
-
 export function CreateTaskSheet({
   open,
   onOpenChange,
   defaults,
   onCreate,
+  projects = [],
+  tags = [],
 }: CreateTaskSheetProps) {
   const isMobile = useIsMobile();
   const baseId = useId();
@@ -299,10 +302,10 @@ export function CreateTaskSheet({
                       <SelectItem value="__none__" className="text-xs">
                         No project
                       </SelectItem>
-                      {projectOptions.map((project) => (
+                      {projects.map((project) => (
                         <SelectItem
-                          key={project.id}
-                          value={project.id}
+                          key={project._id as string}
+                          value={project._id as string}
                           className="text-xs"
                         >
                           <div className="flex items-center gap-2">
@@ -310,7 +313,8 @@ export function CreateTaskSheet({
                               className="w-2 h-2 rounded-full"
                               style={{ backgroundColor: project.color }}
                             />
-                            {project.name}
+                            <span className="mr-1">{project.icon}</span>
+                            {project.title}
                           </div>
                         </SelectItem>
                       ))}
@@ -448,12 +452,34 @@ export function CreateTaskSheet({
             <Field>
               <FieldLabel className="text-xs font-medium">Tags</FieldLabel>
               <FieldContent>
-                {/* TODO: Phase 4 - fetch real tags */}
-                <div className="flex flex-wrap gap-2">
+                {tags.length === 0 ? (
                   <span className="text-xs text-muted-foreground">
-                    Tags will be available in Phase 4
+                    No tags available. Create tags in Settings.
                   </span>
-                </div>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {tags.map((tag) => {
+                      const isSelected = tagIds.includes(tag._id as string);
+                      return (
+                        <Button
+                          key={tag._id as string}
+                          type="button"
+                          variant={isSelected ? "secondary" : "outline"}
+                          size="xs"
+                          onClick={() => toggleTag(tag._id as string)}
+                          aria-pressed={isSelected}
+                          className="h-7 px-2 text-xs rounded-none"
+                        >
+                          <span
+                            className="inline-block w-1.5 h-1.5 rounded-full mr-1.5"
+                            style={{ backgroundColor: tag.color }}
+                          />
+                          {tag.name}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                )}
               </FieldContent>
             </Field>
 

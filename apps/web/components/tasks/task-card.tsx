@@ -6,20 +6,31 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 type Task = Doc<"tasks">;
+type Project = Doc<"projects">;
+type Tag = Doc<"tags">;
 
 interface TaskCardProps {
   task: Task;
   onClick: (task: Task) => void;
+  projects?: Project[];
+  tags?: Tag[];
 }
 
-// TODO: Phase 4 - fetch real tags and projects
-const mockTags: Record<string, { name: string; color: string }> = {};
+export function TaskCard({
+  task,
+  onClick,
+  projects = [],
+  tags = [],
+}: TaskCardProps) {
+  // Find the project for this task
+  const project = task.projectId
+    ? projects.find((p) => p._id === task.projectId)
+    : null;
 
-export function TaskCard({ task, onClick }: TaskCardProps) {
-  // TODO: Phase 4 - use real tags
-  const tags = task.tagIds
-    .map((id) => mockTags[id as unknown as string])
-    .filter(Boolean);
+  // Find the tags for this task
+  const taskTags = task.tagIds
+    .map((id) => tags.find((t) => t._id === id))
+    .filter(Boolean) as Tag[];
 
   const priorityColors = {
     low: "bg-blue-500",
@@ -42,9 +53,7 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
   };
 
   const isOverdue = task.dueDate && new Date(task.dueDate) < new Date();
-
-  // Format project ID for display (will be replaced with real project name in Phase 4)
-  const projectDisplay = task.projectId ? "Project" : "No project";
+  const isCompleted = task.status === "Completed";
 
   return (
     <Card
@@ -53,9 +62,23 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
     >
       {/* Top row: Project badge */}
       <div className="flex items-center justify-between mb-1.5">
-        <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4">
-          {projectDisplay}
-        </Badge>
+        {project ? (
+          <Badge
+            variant="outline"
+            className="text-[10px] px-1.5 py-0 h-4"
+            style={{ borderColor: project.color, color: project.color }}
+          >
+            <span className="mr-1">{project.icon}</span>
+            {project.title}
+          </Badge>
+        ) : (
+          <Badge
+            variant="outline"
+            className="text-[10px] px-1.5 py-0 h-4 text-muted-foreground"
+          >
+            No project
+          </Badge>
+        )}
 
         {/* Due date + Priority */}
         <div className="flex items-center gap-1.5">
@@ -81,27 +104,37 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
       </div>
 
       {/* Title */}
-      <h4 className="text-sm font-medium leading-tight line-clamp-2 mb-1.5">
+      <h4
+        className={cn(
+          "text-sm font-medium leading-tight line-clamp-2 mb-1.5",
+          isCompleted && "line-through text-muted-foreground",
+        )}
+      >
         {task.title}
       </h4>
 
       {/* Bottom row: Tags + Scheduled */}
       <div className="flex items-center gap-1.5">
         {/* Tags */}
-        {tags.length > 0 && (
+        {taskTags.length > 0 && (
           <div className="flex items-center gap-1 flex-wrap flex-1">
-            {tags.slice(0, 2).map((tag, idx) => (
+            {taskTags.slice(0, 2).map((tag, idx) => (
               <Badge
                 key={idx}
                 variant="secondary"
                 className="text-[10px] px-1 py-0 h-4"
+                style={{
+                  backgroundColor: `${tag.color}20`,
+                  color: tag.color,
+                  borderColor: tag.color,
+                }}
               >
                 {tag.name}
               </Badge>
             ))}
-            {tags.length > 2 && (
+            {taskTags.length > 2 && (
               <span className="text-[10px] text-muted-foreground">
-                +{tags.length - 2}
+                +{taskTags.length - 2}
               </span>
             )}
           </div>

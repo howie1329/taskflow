@@ -10,11 +10,15 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
 type Task = Doc<"tasks">;
+type Project = Doc<"projects">;
+type Tag = Doc<"tags">;
 
 interface BoardViewProps {
   tasks: Task[];
   onTaskClick: (task: Task) => void;
   onCreateTask: (defaults: { status: Task["status"] }) => void;
+  projects?: Project[];
+  tags?: Tag[];
 }
 
 const columns = [
@@ -28,6 +32,8 @@ export function BoardView({
   tasks,
   onTaskClick,
   onCreateTask,
+  projects = [],
+  tags = [],
 }: BoardViewProps) {
   const isMobile = useIsMobile();
 
@@ -72,7 +78,7 @@ export function BoardView({
                     size="sm"
                     className="h-7 text-xs px-2 shrink-0"
                     onClick={() => {
-                      // TODO: Toggle completed visibility (Phase 4)
+                      // TODO: Toggle completed visibility (Phase 5)
                       console.log("Toggle completed visibility");
                     }}
                   >
@@ -89,7 +95,13 @@ export function BoardView({
                 )}
               >
                 {columnTasks.map((task) => (
-                  <TaskCard key={task._id} task={task} onClick={onTaskClick} />
+                  <TaskCard
+                    key={task._id}
+                    task={task}
+                    onClick={onTaskClick}
+                    projects={projects}
+                    tags={tags}
+                  />
                 ))}
                 {/* Always show Add task card at bottom */}
                 <AddTaskCard

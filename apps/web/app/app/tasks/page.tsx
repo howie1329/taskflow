@@ -12,6 +12,8 @@ import { api } from "@/convex/_generated/api";
 import type { Doc } from "@/convex/_generated/dataModel";
 
 type Task = Doc<"tasks">;
+type Project = Doc<"projects">;
+type Tag = Doc<"tags">;
 
 export default function TasksPage() {
   const { viewer, isLoading: isViewerLoading } = useViewer();
@@ -24,6 +26,12 @@ export default function TasksPage() {
   // Fetch real tasks from Convex
   const tasks = useQuery(api.tasks.listMyTasks, {});
   const isTasksLoading = tasks === undefined;
+
+  // Fetch projects and tags
+  const projects = useQuery(api.projects.listMyProjects, {});
+  const tags = useQuery(api.tags.listMyTags, {});
+  const isProjectsLoading = projects === undefined;
+  const isTagsLoading = tags === undefined;
 
   // View state - sync with preferences when they load
   const [currentView, setCurrentView] = useState<"board" | "todayPlusBoard">(
@@ -175,7 +183,8 @@ export default function TasksPage() {
   };
 
   // Combined loading state
-  const isLoading = isViewerLoading || isTasksLoading;
+  const isLoading =
+    isViewerLoading || isTasksLoading || isProjectsLoading || isTagsLoading;
 
   if (isLoading) {
     return (
@@ -246,6 +255,8 @@ export default function TasksPage() {
           onOpenChange={setIsCreateOpen}
           defaults={createDefaults}
           onCreate={handleCreateTask}
+          projects={projects}
+          tags={tags}
         />
       </div>
     );
@@ -278,12 +289,16 @@ export default function TasksPage() {
             tasks={tasks}
             onTaskClick={handleTaskClick}
             onCreateTask={handleOpenCreate}
+            projects={projects}
+            tags={tags}
           />
         ) : (
           <TodayBoardView
             tasks={tasks}
             onTaskClick={handleTaskClick}
             onCreateTask={handleOpenCreate}
+            projects={projects}
+            tags={tags}
           />
         )}
       </div>
@@ -296,6 +311,8 @@ export default function TasksPage() {
         onDelete={handleDeleteTask}
         onUpdate={handleUpdateTask}
         onToggleComplete={handleToggleComplete}
+        projects={projects}
+        tags={tags}
       />
 
       {/* Create task sheet */}
@@ -304,6 +321,8 @@ export default function TasksPage() {
         onOpenChange={setIsCreateOpen}
         defaults={createDefaults}
         onCreate={handleCreateTask}
+        projects={projects}
+        tags={tags}
       />
     </div>
   );
