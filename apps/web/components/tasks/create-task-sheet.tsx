@@ -65,6 +65,9 @@ type TaskDraft = {
   streakCount: number;
   difficulty: Task["difficulty"];
   isTemplate: boolean;
+  aiContext?: unknown;
+  aiSummary?: string | null;
+  embedding?: number[] | null;
 };
 
 const statusOptions: Task["status"][] = [

@@ -6,11 +6,14 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
+  SheetFooter,
 } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
 
 type Task = Doc<"tasks">;
 
@@ -22,14 +25,17 @@ interface TaskDetailsSheetProps {
   task: Task | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onDelete?: (taskId: string) => void;
 }
 
 export function TaskDetailsSheet({
   task,
   open,
   onOpenChange,
+  onDelete,
 }: TaskDetailsSheetProps) {
   const isMobile = useIsMobile();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   if (!task) {
     return null;
@@ -53,6 +59,13 @@ export function TaskDetailsSheet({
   };
 
   const isOverdue = task.dueDate && new Date(task.dueDate) < new Date();
+
+  const handleDelete = () => {
+    if (onDelete) {
+      onDelete(task._id as unknown as string);
+    }
+    setShowDeleteConfirm(false);
+  };
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -254,6 +267,46 @@ export function TaskDetailsSheet({
               </dl>
             </div>
           </div>
+
+          {/* Footer with Delete */}
+          {onDelete && (
+            <SheetFooter className="border-t gap-2 sm:flex-row sm:justify-between shrink-0 py-3">
+              {showDeleteConfirm ? (
+                <>
+                  <span className="text-xs text-muted-foreground">
+                    Are you sure?
+                  </span>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowDeleteConfirm(false)}
+                      className="h-8 text-xs"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={handleDelete}
+                      className="h-8 text-xs"
+                    >
+                      Delete
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="h-8 text-xs text-destructive hover:text-destructive"
+                >
+                  Delete task
+                </Button>
+              )}
+            </SheetFooter>
+          )}
         </div>
       </SheetContent>
     </Sheet>

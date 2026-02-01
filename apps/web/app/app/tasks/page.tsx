@@ -16,6 +16,8 @@ type Task = Doc<"tasks">;
 export default function TasksPage() {
   const { viewer, isLoading: isViewerLoading } = useViewer();
   const updatePreferences = useMutation(api.preferences.updateMyPreferences);
+  const createTask = useMutation(api.tasks.createTask);
+  const deleteTask = useMutation(api.tasks.deleteTask);
 
   // Fetch real tasks from Convex
   const tasks = useQuery(api.tasks.listMyTasks, {});
@@ -69,12 +71,47 @@ export default function TasksPage() {
     setIsCreateOpen(true);
   };
 
-  const handleCreateTask = (
-    draft: Omit<Task, "_id" | "_creationTime" | "createdAt" | "updatedAt">,
+  const handleCreateTask = async (
+    draft: Omit<
+      Task,
+      "_id" | "_creationTime" | "userId" | "createdAt" | "updatedAt"
+    >,
   ) => {
-    // TODO: Phase 2 - create via Convex mutation
-    // For now, just close the sheet
-    setIsCreateOpen(false);
+    try {
+      const newTask = await createTask({
+        title: draft.title,
+        description: draft.description,
+        notes: draft.notes,
+        status: draft.status,
+        priority: draft.priority,
+        dueDate: draft.dueDate,
+        scheduledDate: draft.scheduledDate,
+        projectId: draft.projectId,
+        tagIds: draft.tagIds,
+        estimatedDuration: draft.estimatedDuration,
+        energyLevel: draft.energyLevel,
+        difficulty: draft.difficulty,
+      });
+
+      // Close create sheet and open details sheet for the new task
+      setIsCreateOpen(false);
+      if (newTask) {
+        setSelectedTask(newTask);
+        setIsDetailsOpen(true);
+      }
+    } catch (error) {
+      console.error("Failed to create task:", error);
+    }
+  };
+
+  const handleDeleteTask = async (taskId: string) => {
+    try {
+      await deleteTask({ taskId: taskId as unknown as Doc<"tasks">["_id"] });
+      setIsDetailsOpen(false);
+      setSelectedTask(null);
+    } catch (error) {
+      console.error("Failed to delete task:", error);
+    }
   };
 
   // Combined loading state
@@ -138,6 +175,7 @@ export default function TasksPage() {
           task={selectedTask}
           open={isDetailsOpen}
           onOpenChange={setIsDetailsOpen}
+          onDelete={handleDeleteTask}
         />
 
         {/* Create task sheet */}
@@ -193,6 +231,7 @@ export default function TasksPage() {
         task={selectedTask}
         open={isDetailsOpen}
         onOpenChange={setIsDetailsOpen}
+        onDelete={handleDeleteTask}
       />
 
       {/* Create task sheet */}

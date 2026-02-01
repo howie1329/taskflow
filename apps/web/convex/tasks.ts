@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { query } from "./_generated/server";
+import { query, mutation } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import type { Doc } from "./_generated/dataModel";
 
@@ -94,5 +94,129 @@ export const getMyTask = query({
     }
 
     return task;
+  },
+});
+
+// Create a new task for the current user
+export const createTask = mutation({
+  args: {
+    title: v.string(),
+    description: v.optional(v.string()),
+    notes: v.optional(v.string()),
+    status: v.union(
+      v.literal("Not Started"),
+      v.literal("To Do"),
+      v.literal("In Progress"),
+      v.literal("Completed"),
+    ),
+    priority: v.union(v.literal("low"), v.literal("medium"), v.literal("high")),
+    dueDate: v.optional(v.number()),
+    scheduledDate: v.optional(v.string()),
+    projectId: v.optional(v.id("projects")),
+    tagIds: v.optional(v.array(v.id("tags"))),
+    estimatedDuration: v.optional(v.number()),
+    energyLevel: v.union(
+      v.literal("low"),
+      v.literal("medium"),
+      v.literal("high"),
+    ),
+    difficulty: v.union(
+      v.literal("easy"),
+      v.literal("medium"),
+      v.literal("hard"),
+    ),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+
+    const now = Date.now();
+
+    // Validate project ownership if projectId provided
+    if (args.projectId) {
+      const project = await ctx.db.get(args.projectId);
+      if (!project || project.userId !== userId) {
+        throw new Error("Invalid project");
+      }
+    }
+
+    // Validate tag ownership if tagIds provided
+    if (args.tagIds && args.tagIds.length > 0) {
+      for (const tagId of args.tagIds) {
+        const tag = await ctx.db.get(tagId);
+        if (!tag || tag.userId !== userId) {
+          throw new Error("Invalid tag");
+        }
+      }
+    }
+
+    const taskId = await ctx.db.insert("tasks", {
+      userId,
+      title: args.title,
+      description: args.description,
+      notes: args.notes,
+      status: args.status,
+      priority: args.priority,
+      dueDate: args.dueDate,
+      scheduledDate: args.scheduledDate,
+      completionDate: args.status === "Completed" ? now : undefined,
+      projectId: args.projectId,
+      tagIds: args.tagIds ?? [],
+      parentTaskId: undefined,
+      estimatedDuration: args.estimatedDuration,
+      actualDuration: undefined,
+      energyLevel: args.energyLevel ?? "medium",
+      context: [],
+      source: "created",
+      orderIndex: 0,
+      lastActiveAt: now,
+      streakCount: 0,
+      difficulty: args.difficulty ?? "medium",
+      isTemplate: false,
+      aiSummary: undefined,
+      aiContext: undefined,
+      embedding: undefined,
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    return await ctx.db.get(taskId);
+  },
+});
+
+// Delete a task (with ownership check)
+export const deleteTask = mutation({
+  args: {
+    taskId: v.id("tasks"),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+
+    const task = await ctx.db.get(args.taskId);
+    if (!task || task.userId !== userId) {
+      throw new Error("Task not found or access denied");
+    }
+
+    // Delete associated subtasks first
+    const subtasks = await ctx.db
+      .query("subtasks")
+      .withIndex("by_user_task", (q) =>
+        q.eq("userId", userId).eq("taskId", args.taskId),
+      )
+      .collect();
+
+    for (const subtask of subtasks) {
+      await ctx.db.delete(subtask._id);
+    }
+
+    // Delete the task
+    await ctx.db.delete(args.taskId);
+
+    return { success: true };
   },
 });
