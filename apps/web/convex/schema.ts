@@ -6,7 +6,7 @@ const schema = defineSchema({
   ...authTables,
   baseModels: defineTable({
     modelId: v.string(),
-  }),
+  }).index("by_modelId", ["modelId"]),
   availableModels: defineTable({
     modelId: v.string(),
     name: v.string(),
@@ -15,7 +15,8 @@ const schema = defineSchema({
       prompt: v.string(),
       completion: v.string(),
     }),
-  }),
+    syncedAt: v.number(),
+  }).index("by_modelId", ["modelId"]),
   // User identity information
   userProfiles: defineTable({
     userId: v.id("users"), // Reference to auth user

@@ -1,10 +1,12 @@
 import { cronJobs } from "convex/server";
-import { api, internal } from "./_generated/api";
+import { internal } from "./_generated/api";
 
-const crons = cronJobs()
+const crons = cronJobs();
 
-crons.interval("update available models", { "hours": 6 }, api.models.updateAvailableModels)
-
-
+crons.interval(
+  "sync models from OpenRouter",
+  { hours: 6 },
+  internal.models.syncModels,
+);
 
 export default crons;
