@@ -6,6 +6,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+import { SignOutButton } from "@/components/auth/sign-out-button";
 
 export default function AppPage() {
   return (
@@ -16,10 +17,13 @@ export default function AppPage() {
           <CardDescription>
             Your personal AI-assisted workplace is coming online soon.
           </CardDescription>
-          <div className="pt-4">
+          <div className="flex flex-col gap-3 pt-4">
             <Link href="/">
-              <Button variant="outline">Back to landing page</Button>
+              <Button variant="outline" className="w-full">
+                Back to landing page
+              </Button>
             </Link>
+            <SignOutButton />
           </div>
         </CardHeader>
       </Card>

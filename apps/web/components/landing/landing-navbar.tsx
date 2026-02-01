@@ -4,8 +4,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { useConvexAuth } from "convex/react";
 
 export function LandingNavbar() {
+  const { isAuthenticated } = useConvexAuth();
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-sm">
       <div className="container flex h-14 items-center justify-between px-4 lg:px-6">
@@ -53,9 +56,15 @@ export function LandingNavbar() {
           >
             The plan
           </Link>
-          <Link href="/sign-in">
-            <Button size="sm">Get started</Button>
-          </Link>
+          {isAuthenticated ? (
+            <Link href="/app">
+              <Button size="sm">To app</Button>
+            </Link>
+          ) : (
+            <Link href="/sign-in">
+              <Button size="sm">Get started</Button>
+            </Link>
+          )}
         </div>
       </div>
     </header>

@@ -1,8 +1,15 @@
 import { AuthSide } from "@/components/auth/auth-side";
 import { AuthCard } from "@/components/auth/auth-card";
-import { AuthPlaceholderSignUp } from "@/components/auth/auth-placeholder-form";
+import { SignUpForm } from "@/components/auth/auth-forms";
+import { isAuthenticatedNextjs } from "@convex-dev/auth/nextjs/server";
+import { redirect } from "next/navigation";
 
-export default function SignUpPage() {
+export default async function SignUpPage() {
+  // Redirect to /app if already authenticated
+  if (await isAuthenticatedNextjs()) {
+    redirect("/app");
+  }
+
   return (
     <div className="w-full max-w-5xl mx-auto">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
@@ -17,7 +24,7 @@ export default function SignUpPage() {
             title="Create account"
             description="Enter your details to get started with Taskflow"
           >
-            <AuthPlaceholderSignUp />
+            <SignUpForm />
           </AuthCard>
         </div>
       </div>

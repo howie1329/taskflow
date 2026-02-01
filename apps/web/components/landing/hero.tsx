@@ -1,9 +1,14 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useConvexAuth } from "convex/react";
 
 export function Hero() {
+  const { isAuthenticated } = useConvexAuth();
+
   return (
     <section className="container relative flex flex-col items-center justify-center gap-8 px-4 py-24 lg:px-6 lg:py-32">
       <div className="flex flex-col items-center gap-6 text-center max-w-3xl mx-auto">
@@ -24,16 +29,30 @@ export function Hero() {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto pt-4">
-          <Link href="/sign-up" className="w-full sm:w-auto">
-            <Button size="lg" className="w-full sm:w-auto">
-              Get started free
-            </Button>
-          </Link>
-          <Link href="/sign-in" className="w-full sm:w-auto">
-            <Button variant="outline" size="lg" className="w-full sm:w-auto">
-              Sign in
-            </Button>
-          </Link>
+          {isAuthenticated ? (
+            <Link href="/app" className="w-full sm:w-auto">
+              <Button size="lg" className="w-full sm:w-auto">
+                Open Taskflow
+              </Button>
+            </Link>
+          ) : (
+            <>
+              <Link href="/sign-up" className="w-full sm:w-auto">
+                <Button size="lg" className="w-full sm:w-auto">
+                  Get started free
+                </Button>
+              </Link>
+              <Link href="/sign-in" className="w-full sm:w-auto">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full sm:w-auto"
+                >
+                  Sign in
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
       </div>
 
