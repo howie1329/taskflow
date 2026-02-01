@@ -77,6 +77,33 @@ export const listMyTasks = query({
   },
 });
 
+// Search tasks by title for the current user
+export const searchMyTasks = query({
+  args: {
+    query: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      return [];
+    }
+
+    const tasks = await ctx.db
+      .query("tasks")
+      .withSearchIndex("search_title", (q) =>
+        q.search("title", args.query).eq("userId", userId),
+      )
+      .collect();
+
+    return tasks.sort((a, b) => {
+      if (a.orderIndex !== b.orderIndex) {
+        return a.orderIndex - b.orderIndex;
+      }
+      return b.lastActiveAt - a.lastActiveAt;
+    });
+  },
+});
+
 // Get a single task by ID (with ownership check)
 export const getMyTask = query({
   args: {
@@ -314,6 +341,41 @@ export const toggleComplete = mutation({
     });
 
     return await ctx.db.get(args.taskId);
+  },
+});
+
+// Bulk update task order
+export const updateTaskOrder = mutation({
+  args: {
+    updates: v.array(
+      v.object({
+        taskId: v.id("tasks"),
+        orderIndex: v.number(),
+      }),
+    ),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+
+    const now = Date.now();
+
+    for (const update of args.updates) {
+      const task = await ctx.db.get(update.taskId);
+      if (!task || task.userId !== userId) {
+        throw new Error("Task not found or access denied");
+      }
+
+      await ctx.db.patch(update.taskId, {
+        orderIndex: update.orderIndex,
+        updatedAt: now,
+        lastActiveAt: now,
+      });
+    }
+
+    return { success: true };
   },
 });
 

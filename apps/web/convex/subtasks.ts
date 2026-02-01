@@ -159,3 +159,37 @@ export const deleteSubtask = mutation({
     return { success: true };
   },
 });
+
+// Bulk update subtask order
+export const reorderSubtasks = mutation({
+  args: {
+    updates: v.array(
+      v.object({
+        subtaskId: v.id("subtasks"),
+        orderIndex: v.number(),
+      }),
+    ),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+
+    const now = Date.now();
+
+    for (const update of args.updates) {
+      const subtask = await ctx.db.get(update.subtaskId);
+      if (!subtask || subtask.userId !== userId) {
+        throw new Error("Subtask not found or access denied");
+      }
+
+      await ctx.db.patch(update.subtaskId, {
+        orderIndex: update.orderIndex,
+        updatedAt: now,
+      });
+    }
+
+    return { success: true };
+  },
+});

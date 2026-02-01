@@ -22,10 +22,11 @@ import { TodayBoardView } from "@/components/tasks/today-board-view";
 import { TaskDetailsSheet } from "@/components/tasks/task-details-sheet";
 import { CreateTaskSheet } from "@/components/tasks/create-task-sheet";
 import { useViewer } from "@/components/settings/hooks/use-viewer";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation, useConvex } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Doc } from "@/convex/_generated/dataModel";
 import { SearchIcon, XIcon } from "lucide-react";
+import { toast } from "sonner";
 
 type Task = Doc<"tasks">;
 type Project = Doc<"projects">;
@@ -36,6 +37,7 @@ export default function TasksPage() {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const convex = useConvex();
   const { viewer, isLoading: isViewerLoading } = useViewer();
   const updatePreferences = useMutation(api.preferences.updateMyPreferences);
   const createTask = useMutation(api.tasks.createTask);
@@ -71,6 +73,8 @@ export default function TasksPage() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<Task[] | null>(null);
+  const [isSearchLoading, setIsSearchLoading] = useState(false);
   const searchButtonRef = useRef<HTMLButtonElement | null>(null);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -102,12 +106,65 @@ export default function TasksPage() {
     if (urlQuery) {
       setIsSearchOpen(true);
     }
-    setStatusFilter(searchParams.get("status") ?? "all");
-    setPriorityFilter(searchParams.get("priority") ?? "all");
-    setProjectFilter(searchParams.get("project") ?? "all");
-    setTagFilter(searchParams.get("tag") ?? "all");
-    setScheduleFilter(searchParams.get("schedule") ?? "any");
-  }, [searchParams]);
+
+    const statusValue = searchParams.get("status") ?? "all";
+    const priorityValue = searchParams.get("priority") ?? "all";
+    const projectValue = searchParams.get("project") ?? "all";
+    const tagValue = searchParams.get("tag") ?? "all";
+    const scheduleValue = searchParams.get("schedule") ?? "any";
+
+    const validStatus = [
+      "all",
+      "Not Started",
+      "To Do",
+      "In Progress",
+      "Completed",
+    ];
+    const validPriority = ["all", "low", "medium", "high"];
+    const validSchedule = ["any", "today", "week", "unscheduled"];
+
+    if (!validStatus.includes(statusValue)) {
+      toast.error("Invalid status filter. Reset to all.");
+      setStatusFilter("all");
+    } else {
+      setStatusFilter(statusValue);
+    }
+
+    if (!validPriority.includes(priorityValue)) {
+      toast.error("Invalid priority filter. Reset to all.");
+      setPriorityFilter("all");
+    } else {
+      setPriorityFilter(priorityValue);
+    }
+
+    if (!validSchedule.includes(scheduleValue)) {
+      toast.error("Invalid schedule filter. Reset to any.");
+      setScheduleFilter("any");
+    } else {
+      setScheduleFilter(scheduleValue);
+    }
+
+    if (projectValue === "all") {
+      setProjectFilter("all");
+    } else if (
+      projects &&
+      projects.some((p) => String(p._id) === projectValue)
+    ) {
+      setProjectFilter(projectValue);
+    } else if (projects) {
+      toast.error("Selected project filter no longer exists.");
+      setProjectFilter("all");
+    }
+
+    if (tagValue === "all") {
+      setTagFilter("all");
+    } else if (tags && tags.some((t) => String(t._id) === tagValue)) {
+      setTagFilter(tagValue);
+    } else if (tags) {
+      toast.error("Selected tag filter no longer exists.");
+      setTagFilter("all");
+    }
+  }, [searchParams, projects, tags]);
 
   // Debounce search input
   useEffect(() => {
@@ -116,6 +173,43 @@ export default function TasksPage() {
     }, 250);
     return () => clearTimeout(timeout);
   }, [searchInput]);
+
+  // Fetch search results from Convex
+  useEffect(() => {
+    let isCancelled = false;
+
+    if (!searchQuery) {
+      setSearchResults(null);
+      setIsSearchLoading(false);
+      return;
+    }
+
+    const fetchResults = async () => {
+      setIsSearchLoading(true);
+      try {
+        const results = await convex.query(api.tasks.searchMyTasks, {
+          query: searchQuery,
+        });
+        if (!isCancelled) {
+          setSearchResults(results);
+        }
+      } catch (error) {
+        if (!isCancelled) {
+          toast.error("Search failed. Showing existing tasks.");
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsSearchLoading(false);
+        }
+      }
+    };
+
+    fetchResults();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [convex, searchQuery]);
 
   // Keep search open if there's an active query
   useEffect(() => {
@@ -384,10 +478,12 @@ export default function TasksPage() {
     searchButtonRef.current?.focus();
   };
 
-  const filteredTasks = useMemo(() => {
-    if (!tasks) return [];
+  const baseTasks = searchQuery ? (searchResults ?? tasks) : tasks;
 
-    let result = [...tasks];
+  const filteredTasks = useMemo(() => {
+    if (!baseTasks) return [];
+
+    let result = [...baseTasks];
 
     if (hideCompleted) {
       result = result.filter((task) => task.status !== "Completed");
@@ -446,7 +542,7 @@ export default function TasksPage() {
 
     return result;
   }, [
-    tasks,
+    baseTasks,
     hideCompleted,
     statusFilter,
     priorityFilter,
@@ -464,7 +560,10 @@ export default function TasksPage() {
     tagFilter !== "all" ||
     scheduleFilter !== "any";
 
-  const showNoResults = tasks && tasks.length > 0 && filteredTasks.length === 0;
+  const showNoResults =
+    !isSearchLoading &&
+    filteredTasks.length === 0 &&
+    ((baseTasks && baseTasks.length > 0) || searchQuery.length > 0);
 
   const searchControl =
     isSearchOpen || searchInput.length > 0 ? (
@@ -621,7 +720,11 @@ export default function TasksPage() {
 
   // Combined loading state
   const isLoading =
-    isViewerLoading || isTasksLoading || isProjectsLoading || isTagsLoading;
+    isViewerLoading ||
+    isTasksLoading ||
+    isProjectsLoading ||
+    isTagsLoading ||
+    isSearchLoading;
 
   if (isLoading) {
     return (
@@ -639,7 +742,7 @@ export default function TasksPage() {
   }
 
   // Empty state
-  if (!tasks || tasks.length === 0) {
+  if ((!tasks || tasks.length === 0) && !searchQuery) {
     return (
       <div className="flex flex-col gap-4 h-full">
         {/* Header with view switcher */}
