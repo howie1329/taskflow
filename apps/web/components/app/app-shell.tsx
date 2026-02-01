@@ -10,10 +10,12 @@ import {
   NoteIcon,
   SettingsIcon,
   CommandIcon,
+  Sun02Icon,
+  Moon02Icon,
 } from "@hugeicons/core-free-icons";
 
 import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { useTheme } from "next-themes";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import {
   Sidebar,
@@ -71,6 +73,24 @@ interface AppShellProps {
   children: React.ReactNode;
 }
 
+function ThemeToggleMenuItem() {
+  const { setTheme, resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
+
+  return (
+    <SidebarMenuButton
+      onClick={() => setTheme(isDark ? "light" : "dark")}
+      tooltip={isDark ? "Switch to light mode" : "Switch to dark mode"}
+    >
+      <HugeiconsIcon
+        icon={isDark ? Sun02Icon : Moon02Icon}
+        className="size-4"
+      />
+      <span>{isDark ? "Light mode" : "Dark mode"}</span>
+    </SidebarMenuButton>
+  );
+}
+
 export function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
   const pageTitle = getPageTitle(pathname);
@@ -123,10 +143,10 @@ export function AppShell({ children }: AppShellProps) {
         <SidebarFooter>
           <SidebarMenu>
             <SidebarMenuItem>
-              <div className="flex items-center justify-between px-2 py-2">
-                <ThemeToggle />
-                <SignOutButton />
-              </div>
+              <ThemeToggleMenuItem />
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SignOutButton />
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarFooter>
