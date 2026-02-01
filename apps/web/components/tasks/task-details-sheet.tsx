@@ -49,7 +49,7 @@ export function TaskDetailsSheet({
       <SheetContent side="right">
         <div className="flex flex-col h-full">
           {/* Header Block */}
-          <SheetHeader className="pb-4">
+          <SheetHeader className="pt-10 pb-4">
             {/* Top row: Project + Status */}
             <div className="flex items-center justify-between mb-2">
               <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4">
@@ -110,7 +110,7 @@ export function TaskDetailsSheet({
           <Separator />
 
           {/* Scrollable Content */}
-          <div className="flex-1 overflow-y-auto py-4 space-y-6">
+          <div className="flex-1 overflow-y-auto py-4 px-2 space-y-6">
             {/* Tags */}
             {tags.length > 0 && (
               <div>
