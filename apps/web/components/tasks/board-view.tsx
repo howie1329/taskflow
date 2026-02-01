@@ -2,6 +2,7 @@
 
 import { Task } from "./mock-data";
 import { TaskCard } from "./task-card";
+import { AddTaskCard } from "./add-task-card";
 import { Button } from "@/components/ui/button";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Add01Icon } from "@hugeicons/core-free-icons";
@@ -73,26 +74,23 @@ export function BoardView({ tasks, onTaskClick }: BoardViewProps) {
                 )}
               </div>
 
-              {/* Task list */}
+              {/* Task list with Add card */}
               <div
                 className={cn(
                   "flex-1 overflow-y-auto space-y-2 p-1 -mx-1",
                   isCompleted && "opacity-75",
                 )}
               >
-                {columnTasks.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <p className="text-xs">No tasks</p>
-                  </div>
-                ) : (
-                  columnTasks.map((task) => (
-                    <TaskCard
-                      key={task._id}
-                      task={task}
-                      onClick={onTaskClick}
-                    />
-                  ))
-                )}
+                {columnTasks.map((task) => (
+                  <TaskCard key={task._id} task={task} onClick={onTaskClick} />
+                ))}
+                {/* Always show Add task card at bottom */}
+                <AddTaskCard
+                  onClick={() => {
+                    // TODO: Add task to this column (Phase 4)
+                    console.log("Add task to", column.id);
+                  }}
+                />
               </div>
             </div>
           );

@@ -1,6 +1,6 @@
 "use client";
 
-import { Task, mockProjects, mockTags } from "./mock-data";
+import { Task, mockTags } from "./mock-data";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -11,9 +11,6 @@ interface TaskCardProps {
 }
 
 export function TaskCard({ task, onClick }: TaskCardProps) {
-  const project = task.projectId
-    ? mockProjects[task.projectId as keyof typeof mockProjects]
-    : null;
   const tags = task.tagIds
     .map((id) => mockTags[id as keyof typeof mockTags])
     .filter(Boolean);
@@ -34,16 +31,15 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
 
     if (diffDays === 0) return "Today";
     if (diffDays === 1) return "Tomorrow";
-    if (diffDays === -1) return "Yesterday";
-    if (diffDays < -1) return `${Math.abs(diffDays)} days ago`;
-    if (diffDays > 1) return `${diffDays} days`;
+    if (diffDays < 0) return "Overdue";
     return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   };
 
+  const isOverdue = task.dueDate && new Date(task.dueDate) < new Date();
+
   return (
     <Card
-      className="p-3 cursor-pointer hover:bg-accent/50 transition-colors border-l-4"
-      style={{ borderLeftColor: project?.color || "transparent" }}
+      className="p-3 cursor-pointer hover:bg-accent/50 transition-colors"
       onClick={() => onClick(task)}
     >
       {/* Title */}
@@ -51,66 +47,62 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
         {task.title}
       </h4>
 
-      {/* Footer metadata */}
-      <div className="flex items-center gap-2 flex-wrap">
-        {/* Priority indicator */}
-        <div
-          className={cn(
-            "w-2 h-2 rounded-full",
-            priorityColors[task.priority as keyof typeof priorityColors],
+      {/* Tags */}
+      {tags.length > 0 && (
+        <div className="flex items-center gap-1 flex-wrap mb-2">
+          {tags.slice(0, 3).map((tag, idx) => (
+            <Badge
+              key={idx}
+              variant="secondary"
+              className="text-xs px-1.5 py-0 h-5"
+            >
+              {tag.name}
+            </Badge>
+          ))}
+          {tags.length > 3 && (
+            <span className="text-xs text-muted-foreground">
+              +{tags.length - 3}
+            </span>
           )}
-          title={`Priority: ${task.priority}`}
-        />
-
-        {/* Due date */}
-        {task.dueDate && (
-          <Badge variant="outline" className="text-xs px-1.5 py-0 h-5">
-            {formatDate(task.dueDate)}
-          </Badge>
-        )}
-
-        {/* Scheduled date */}
-        {task.scheduledDate && !task.dueDate && (
-          <Badge variant="secondary" className="text-xs px-1.5 py-0 h-5">
-            {task.scheduledDate === new Date().toISOString().split("T")[0]
-              ? "Today"
-              : task.scheduledDate}
-          </Badge>
-        )}
-
-        {/* Project badge */}
-        {project && (
-          <Badge
-            variant="outline"
-            className="text-xs px-1.5 py-0 h-5"
-            style={{ borderColor: project.color, color: project.color }}
-          >
-            {project.name}
-          </Badge>
-        )}
-
-        {/* Tag dots */}
-        {tags.slice(0, 3).map((tag, idx) => (
-          <div
-            key={idx}
-            className="w-2 h-2 rounded-full"
-            style={{ backgroundColor: tag.color }}
-            title={tag.name}
-          />
-        ))}
-        {tags.length > 3 && (
-          <span className="text-xs text-muted-foreground">
-            +{tags.length - 3}
-          </span>
-        )}
-      </div>
-
-      {/* Energy level indicator */}
-      {task.energyLevel && task.energyLevel !== "medium" && (
-        <div className="mt-2 text-xs text-muted-foreground">
-          {task.energyLevel === "high" ? "⚡ High energy" : "🪫 Low energy"}
         </div>
       )}
+
+      {/* Meta row */}
+      <div className="flex items-center justify-between">
+        {/* Left: Project + Scheduled */}
+        <div className="flex items-center gap-1.5">
+          <Badge variant="outline" className="text-xs px-1.5 py-0 h-5">
+            {task.projectId || "No project"}
+          </Badge>
+          {task.scheduledDate && (
+            <Badge variant="secondary" className="text-xs px-1.5 py-0 h-5">
+              {task.scheduledDate}
+            </Badge>
+          )}
+        </div>
+
+        {/* Right: Due date + Priority */}
+        <div className="flex items-center gap-2">
+          {task.dueDate && (
+            <Badge
+              variant="outline"
+              className={cn(
+                "text-xs px-1.5 py-0 h-5",
+                isOverdue && "border-destructive text-destructive",
+              )}
+            >
+              {formatDate(task.dueDate)}
+            </Badge>
+          )}
+          <div
+            className={cn(
+              "w-2 h-2 rounded-full",
+              priorityColors[task.priority as keyof typeof priorityColors],
+            )}
+            title={`Priority: ${task.priority}`}
+          />
+        </div>
+      </div>
     </Card>
   );
 }

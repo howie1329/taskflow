@@ -3,6 +3,7 @@
 import { Task } from "./mock-data";
 import { TaskCard } from "./task-card";
 import { BoardView } from "./board-view";
+import { AddTaskCard } from "./add-task-card";
 import { Button } from "@/components/ui/button";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Add01Icon } from "@hugeicons/core-free-icons";
@@ -52,20 +53,18 @@ export function TodayBoardView({ tasks, onTaskClick }: TodayBoardViewProps) {
           </Button>
         </div>
 
-        {/* Today task list */}
+        {/* Today task list with Add card */}
         <div className="flex-1 overflow-y-auto space-y-2 p-1 -mx-1 border border-dashed border-border rounded-none">
-          {todayTasks.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <p className="text-sm font-medium mb-1">No tasks for today</p>
-              <p className="text-xs">
-                Add tasks scheduled for today to see them here
-              </p>
-            </div>
-          ) : (
-            todayTasks.map((task) => (
-              <TaskCard key={task._id} task={task} onClick={onTaskClick} />
-            ))
-          )}
+          {todayTasks.map((task) => (
+            <TaskCard key={task._id} task={task} onClick={onTaskClick} />
+          ))}
+          {/* Always show Add task card at bottom */}
+          <AddTaskCard
+            onClick={() => {
+              // TODO: Add task scheduled for today (Phase 4)
+              console.log("Add task for today");
+            }}
+          />
         </div>
       </div>
 
