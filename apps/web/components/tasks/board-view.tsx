@@ -29,7 +29,7 @@ export function BoardView({ tasks, onTaskClick }: BoardViewProps) {
 
   return (
     <div className="h-full overflow-x-auto overflow-y-hidden">
-      <div className="flex gap-4 h-full min-w-[1024px] lg:min-w-0">
+      <div className="flex gap-4 h-full min-w-[880px] lg:min-w-0">
         {columns.map((column) => {
           const columnTasks = getTasksByStatus(column.id);
           const isCompleted = column.id === "Completed";
@@ -37,7 +37,7 @@ export function BoardView({ tasks, onTaskClick }: BoardViewProps) {
           return (
             <div
               key={column.id}
-              className="flex flex-col flex-1 min-w-[240px] max-w-[400px] h-full"
+              className="flex flex-col flex-1 min-w-[220px] max-w-[360px] h-full"
             >
               {/* Column header */}
               <div className="flex items-center justify-between mb-3 px-1">

@@ -30,7 +30,7 @@ export function TodayBoardView({ tasks, onTaskClick }: TodayBoardViewProps) {
   return (
     <div className="h-full flex flex-col lg:flex-row gap-4">
       {/* Today Lane - Left side */}
-      <div className="lg:w-[35%] xl:w-[30%] flex flex-col h-full min-h-[200px]">
+      <div className="lg:w-[32%] xl:w-[28%] flex flex-col h-full min-h-[200px]">
         {/* Today header */}
         <div className="flex items-center justify-between mb-3 px-1 shrink-0">
           <div className="flex items-center gap-2">

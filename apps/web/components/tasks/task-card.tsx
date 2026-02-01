@@ -39,55 +39,22 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
 
   return (
     <Card
-      className="p-3 cursor-pointer hover:bg-accent/50 transition-colors"
+      className="p-2 cursor-pointer hover:bg-accent/50 transition-colors"
       onClick={() => onClick(task)}
     >
-      {/* Title */}
-      <h4 className="text-sm font-medium leading-tight line-clamp-2 mb-2">
-        {task.title}
-      </h4>
+      {/* Top row: Project badge */}
+      <div className="flex items-center justify-between mb-1.5">
+        <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4">
+          {task.projectId || "No project"}
+        </Badge>
 
-      {/* Tags */}
-      {tags.length > 0 && (
-        <div className="flex items-center gap-1 flex-wrap mb-2">
-          {tags.slice(0, 3).map((tag, idx) => (
-            <Badge
-              key={idx}
-              variant="secondary"
-              className="text-xs px-1.5 py-0 h-5"
-            >
-              {tag.name}
-            </Badge>
-          ))}
-          {tags.length > 3 && (
-            <span className="text-xs text-muted-foreground">
-              +{tags.length - 3}
-            </span>
-          )}
-        </div>
-      )}
-
-      {/* Meta row */}
-      <div className="flex items-center justify-between">
-        {/* Left: Project + Scheduled */}
+        {/* Due date + Priority */}
         <div className="flex items-center gap-1.5">
-          <Badge variant="outline" className="text-xs px-1.5 py-0 h-5">
-            {task.projectId || "No project"}
-          </Badge>
-          {task.scheduledDate && (
-            <Badge variant="secondary" className="text-xs px-1.5 py-0 h-5">
-              {task.scheduledDate}
-            </Badge>
-          )}
-        </div>
-
-        {/* Right: Due date + Priority */}
-        <div className="flex items-center gap-2">
           {task.dueDate && (
             <Badge
               variant="outline"
               className={cn(
-                "text-xs px-1.5 py-0 h-5",
+                "text-[10px] px-1 py-0 h-4",
                 isOverdue && "border-destructive text-destructive",
               )}
             >
@@ -96,12 +63,50 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
           )}
           <div
             className={cn(
-              "w-2 h-2 rounded-full",
+              "w-1.5 h-1.5 rounded-full",
               priorityColors[task.priority as keyof typeof priorityColors],
             )}
             title={`Priority: ${task.priority}`}
           />
         </div>
+      </div>
+
+      {/* Title */}
+      <h4 className="text-sm font-medium leading-tight line-clamp-2 mb-1.5">
+        {task.title}
+      </h4>
+
+      {/* Bottom row: Tags + Scheduled */}
+      <div className="flex items-center gap-1.5">
+        {/* Tags */}
+        {tags.length > 0 && (
+          <div className="flex items-center gap-1 flex-wrap flex-1">
+            {tags.slice(0, 2).map((tag, idx) => (
+              <Badge
+                key={idx}
+                variant="secondary"
+                className="text-[10px] px-1 py-0 h-4"
+              >
+                {tag.name}
+              </Badge>
+            ))}
+            {tags.length > 2 && (
+              <span className="text-[10px] text-muted-foreground">
+                +{tags.length - 2}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Scheduled date */}
+        {task.scheduledDate && (
+          <Badge
+            variant="secondary"
+            className="text-[10px] px-1 py-0 h-4 shrink-0"
+          >
+            {task.scheduledDate}
+          </Badge>
+        )}
       </div>
     </Card>
   );
