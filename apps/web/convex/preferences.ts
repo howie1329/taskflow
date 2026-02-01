@@ -31,6 +31,7 @@ export const updateMyPreferences = mutation({
     taskDefaultView: v.optional(
       v.union(v.literal("board"), v.literal("todayPlusBoard")),
     ),
+    hideCompletedTasks: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -47,12 +48,16 @@ export const updateMyPreferences = mutation({
     const patch: {
       defaultAIModel?: typeof args.defaultAIModel;
       taskDefaultView?: typeof args.taskDefaultView;
+      hideCompletedTasks?: typeof args.hideCompletedTasks;
     } = {};
     if (args.defaultAIModel !== undefined) {
       patch.defaultAIModel = args.defaultAIModel;
     }
     if (args.taskDefaultView !== undefined) {
       patch.taskDefaultView = args.taskDefaultView;
+    }
+    if (args.hideCompletedTasks !== undefined) {
+      patch.hideCompletedTasks = args.hideCompletedTasks;
     }
 
     if (existingPreferences) {
@@ -63,6 +68,7 @@ export const updateMyPreferences = mutation({
       const preferencesId = await ctx.db.insert("userPreferences", {
         userId,
         taskDefaultView: "board",
+        hideCompletedTasks: false,
         ...patch,
       });
       return await ctx.db.get(preferencesId);

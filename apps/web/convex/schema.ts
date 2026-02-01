@@ -35,10 +35,12 @@ const schema = defineSchema({
         name: v.string(),
       }),
     ),
-    // NEW: Task view preference (board | todayPlusBoard)
+    // Task view preference (board | todayPlusBoard)
     taskDefaultView: v.optional(
       v.union(v.literal("board"), v.literal("todayPlusBoard")),
     ),
+    // Hide completed tasks in board/list views
+    hideCompletedTasks: v.optional(v.boolean()),
     // Future: theme, notifications, privacy settings
   }).index("by_user", ["userId"]),
 
@@ -77,6 +79,7 @@ const schema = defineSchema({
     userId: v.id("users"), // Reference to auth user
     title: v.string(), // Task title
     description: v.optional(v.string()), // Optional description
+    notes: v.optional(v.string()), // Private notes for the task
     status: v.union(
       v.literal("Not Started"),
       v.literal("To Do"),
