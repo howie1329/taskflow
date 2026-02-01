@@ -4,7 +4,18 @@ import { authTables } from "@convex-dev/auth/server";
 
 const schema = defineSchema({
   ...authTables,
-
+  baseModels: defineTable({
+    modelId: v.string(),
+  }),
+  availableModels: defineTable({
+    modelId: v.string(),
+    name: v.string(),
+    description: v.string(),
+    pricing: v.object({
+      prompt: v.string(),
+      completion: v.string(),
+    }),
+  }),
   // User identity information
   userProfiles: defineTable({
     userId: v.id("users"), // Reference to auth user
