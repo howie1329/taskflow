@@ -29,14 +29,28 @@ export function PreferencesTab() {
   const updatePreferences = useMutation(api.preferences.updateMyPreferences);
 
   const [selectedModelId, setSelectedModelId] = useState<string>("");
+  const [taskDefaultView, setTaskDefaultView] = useState<
+    "board" | "todayPlusBoard"
+  >("board");
   const [isSaving, setIsSaving] = useState(false);
 
   // Initialize selected model from preferences
   useEffect(() => {
-    if (preferences?.defaultAIModel?.modelId && !isSaving) {
-      setSelectedModelId(preferences.defaultAIModel.modelId);
+    const modelId = preferences?.defaultAIModel?.modelId;
+    if (modelId && modelId !== selectedModelId && !isSaving) {
+      setSelectedModelId(modelId);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [preferences?.defaultAIModel?.modelId, isSaving]);
+
+  // Initialize task view from preferences
+  useEffect(() => {
+    const savedView = preferences?.taskDefaultView;
+    if (savedView && savedView !== taskDefaultView && !isSaving) {
+      setTaskDefaultView(savedView);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [preferences?.taskDefaultView, isSaving]);
 
   const handleSave = async () => {
     if (!selectedModelId) {
@@ -62,6 +76,21 @@ export function PreferencesTab() {
       toast.success("Default AI model updated");
     } catch (error) {
       toast.error("Failed to update default model");
+      console.error(error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSaveTaskView = async () => {
+    setIsSaving(true);
+    try {
+      await updatePreferences({
+        taskDefaultView,
+      });
+      toast.success("Default task view updated");
+    } catch (error) {
+      toast.error("Failed to update task view");
       console.error(error);
     } finally {
       setIsSaving(false);
@@ -172,6 +201,68 @@ export function PreferencesTab() {
                 </Button>
               </div>
             )}
+
+            {/* Tasks Section */}
+            <div className="pt-4 border-t">
+              <h3 className="text-sm font-medium mb-3">Tasks</h3>
+              <Field>
+                <FieldLabel>Default Task View</FieldLabel>
+                {isLoadingViewer ? (
+                  <Skeleton className="h-10 w-full" />
+                ) : (
+                  <>
+                    <Select
+                      value={taskDefaultView}
+                      onValueChange={(value) =>
+                        setTaskDefaultView(value as "board" | "todayPlusBoard")
+                      }
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select default task view" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="board">
+                          Board (Classic Kanban)
+                        </SelectItem>
+                        <SelectItem value="todayPlusBoard">
+                          Today + Board (Split View)
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    {/* Show current default view */}
+                    <div className="text-sm mt-2">
+                      <span className="text-muted-foreground">
+                        Current default:{" "}
+                      </span>
+                      <span className="font-medium">
+                        {preferences?.taskDefaultView === "todayPlusBoard"
+                          ? "Today + Board"
+                          : "Board"}
+                      </span>
+                    </div>
+
+                    <FieldDescription>
+                      This determines which view is shown when you open the
+                      Tasks page
+                    </FieldDescription>
+
+                    {/* Save Button */}
+                    <div className="flex justify-end mt-3">
+                      <Button
+                        onClick={handleSaveTaskView}
+                        disabled={
+                          isSaving ||
+                          preferences?.taskDefaultView === taskDefaultView
+                        }
+                      >
+                        {isSaving ? "Saving..." : "Save Default View"}
+                      </Button>
+                    </div>
+                  </>
+                )}
+              </Field>
+            </div>
           </div>
         </div>
       </Card>

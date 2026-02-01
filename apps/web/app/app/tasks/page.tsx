@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BoardView } from "@/components/tasks/board-view";
 import { TodayBoardView } from "@/components/tasks/today-board-view";
@@ -15,20 +15,12 @@ export default function TasksPage() {
   const updatePreferences = useMutation(api.preferences.updateMyPreferences);
 
   const [currentView, setCurrentView] = useState<"board" | "todayPlusBoard">(
-    "board",
+    () => viewer?.preferences?.taskDefaultView ?? "board",
   );
   const [selectedTask, setSelectedTask] = useState<
     (typeof mockTasks)[0] | null
   >(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-
-  // Load saved view preference when viewer data loads
-  useEffect(() => {
-    const savedView = viewer?.preferences?.taskDefaultView;
-    if (savedView && savedView !== currentView) {
-      setCurrentView(savedView);
-    }
-  }, [viewer, currentView]);
 
   const handleViewChange = async (newView: "board" | "todayPlusBoard") => {
     setCurrentView(newView);
