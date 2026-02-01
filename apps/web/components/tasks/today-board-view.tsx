@@ -1,0 +1,80 @@
+"use client";
+
+import { Task } from "./mock-data";
+import { TaskCard } from "./task-card";
+import { BoardView } from "./board-view";
+import { Button } from "@/components/ui/button";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Add01Icon } from "@hugeicons/core-free-icons";
+
+interface TodayBoardViewProps {
+  tasks: Task[];
+  onTaskClick: (task: Task) => void;
+}
+
+export function TodayBoardView({ tasks, onTaskClick }: TodayBoardViewProps) {
+  // Get today's date in YYYY-MM-DD format
+  const today = new Date().toISOString().split("T")[0];
+
+  // Get tasks scheduled for today
+  const todayTasks = tasks
+    .filter((task) => task.scheduledDate === today)
+    .sort((a, b) => a.orderIndex - b.orderIndex);
+
+  // Get non-completed tasks for the board (to avoid duplication in Today lane)
+  const boardTasks = tasks.filter(
+    (task) => task.scheduledDate !== today || task.status === "Completed",
+  );
+
+  return (
+    <div className="h-full flex flex-col lg:flex-row gap-4">
+      {/* Today Lane - Left side */}
+      <div className="lg:w-[35%] xl:w-[30%] flex flex-col h-full min-h-[200px]">
+        {/* Today header */}
+        <div className="flex items-center justify-between mb-3 px-1 shrink-0">
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-medium">Today</h3>
+            <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-none">
+              {todayTasks.length}
+            </span>
+            <span className="text-xs text-muted-foreground">{today}</span>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            className="h-6 w-6"
+            onClick={() => {
+              // TODO: Add task scheduled for today (Phase 4)
+              console.log("Add task for today");
+            }}
+          >
+            <HugeiconsIcon icon={Add01Icon} className="size-4" />
+          </Button>
+        </div>
+
+        {/* Today task list */}
+        <div className="flex-1 overflow-y-auto space-y-2 p-1 -mx-1 border border-dashed border-border rounded-none">
+          {todayTasks.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <p className="text-sm font-medium mb-1">No tasks for today</p>
+              <p className="text-xs">
+                Add tasks scheduled for today to see them here
+              </p>
+            </div>
+          ) : (
+            todayTasks.map((task) => (
+              <TaskCard key={task._id} task={task} onClick={onTaskClick} />
+            ))
+          )}
+        </div>
+      </div>
+
+      {/* Board View - Right side */}
+      <div className="flex-1 h-full min-h-[300px]">
+        <div className="h-full">
+          <BoardView tasks={boardTasks} onTaskClick={onTaskClick} />
+        </div>
+      </div>
+    </div>
+  );
+}
