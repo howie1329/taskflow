@@ -180,7 +180,7 @@ export const createTask = mutation({
       difficulty: args.difficulty ?? "medium",
       isTemplate: false,
       aiSummary: undefined,
-      aiContext: undefined,
+      aiContext: {},
       embedding: undefined,
       createdAt: now,
       updatedAt: now,
