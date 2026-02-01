@@ -43,28 +43,29 @@ interface CreateTaskSheetProps {
 }
 
 // Draft for creating a task (all fields user can set, excluding server-managed ones)
+// Only title is required - everything else is optional with defaults
 type TaskDraft = {
   title: string;
   description?: string;
   notes?: string;
-  status: Task["status"];
-  priority: Task["priority"];
+  status?: Task["status"];
+  priority?: Task["priority"];
   dueDate?: number | null;
   scheduledDate?: string | null;
   completionDate?: number | null;
   projectId?: string | null;
-  tagIds: string[];
+  tagIds?: string[];
   parentTaskId?: string | null;
   estimatedDuration?: number | null;
   actualDuration?: number | null;
-  energyLevel: Task["energyLevel"];
-  context: string[];
-  source: Task["source"];
-  orderIndex: number;
-  lastActiveAt: number;
-  streakCount: number;
-  difficulty: Task["difficulty"];
-  isTemplate: boolean;
+  energyLevel?: Task["energyLevel"];
+  context?: string[];
+  source?: Task["source"];
+  orderIndex?: number;
+  lastActiveAt?: number;
+  streakCount?: number;
+  difficulty?: Task["difficulty"];
+  isTemplate?: boolean;
   aiContext?: unknown;
   aiSummary?: string | null;
   embedding?: number[] | null;

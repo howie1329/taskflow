@@ -98,32 +98,33 @@ export const getMyTask = query({
 });
 
 // Create a new task for the current user
+// Only title is required - everything else has defaults
 export const createTask = mutation({
   args: {
     title: v.string(),
     description: v.optional(v.string()),
     notes: v.optional(v.string()),
-    status: v.union(
-      v.literal("Not Started"),
-      v.literal("To Do"),
-      v.literal("In Progress"),
-      v.literal("Completed"),
+    status: v.optional(
+      v.union(
+        v.literal("Not Started"),
+        v.literal("To Do"),
+        v.literal("In Progress"),
+        v.literal("Completed"),
+      ),
     ),
-    priority: v.union(v.literal("low"), v.literal("medium"), v.literal("high")),
+    priority: v.optional(
+      v.union(v.literal("low"), v.literal("medium"), v.literal("high")),
+    ),
     dueDate: v.optional(v.number()),
     scheduledDate: v.optional(v.string()),
     projectId: v.optional(v.id("projects")),
     tagIds: v.optional(v.array(v.id("tags"))),
     estimatedDuration: v.optional(v.number()),
-    energyLevel: v.union(
-      v.literal("low"),
-      v.literal("medium"),
-      v.literal("high"),
+    energyLevel: v.optional(
+      v.union(v.literal("low"), v.literal("medium"), v.literal("high")),
     ),
-    difficulty: v.union(
-      v.literal("easy"),
-      v.literal("medium"),
-      v.literal("hard"),
+    difficulty: v.optional(
+      v.union(v.literal("easy"), v.literal("medium"), v.literal("hard")),
     ),
   },
   handler: async (ctx, args) => {
@@ -152,16 +153,19 @@ export const createTask = mutation({
       }
     }
 
+    // Apply defaults for optional fields
+    const finalStatus = args.status ?? "Not Started";
+
     const taskId = await ctx.db.insert("tasks", {
       userId,
       title: args.title,
       description: args.description,
       notes: args.notes,
-      status: args.status,
-      priority: args.priority,
+      status: finalStatus,
+      priority: args.priority ?? "low",
       dueDate: args.dueDate,
       scheduledDate: args.scheduledDate,
-      completionDate: args.status === "Completed" ? now : undefined,
+      completionDate: finalStatus === "Completed" ? now : undefined,
       projectId: args.projectId,
       tagIds: args.tagIds ?? [],
       parentTaskId: undefined,
@@ -183,6 +187,133 @@ export const createTask = mutation({
     });
 
     return await ctx.db.get(taskId);
+  },
+});
+
+// Update an existing task (with ownership check)
+// All fields are optional except taskId - only provided fields are updated
+export const updateTask = mutation({
+  args: {
+    taskId: v.id("tasks"),
+    title: v.optional(v.string()),
+    description: v.optional(v.string()),
+    notes: v.optional(v.string()),
+    status: v.optional(
+      v.union(
+        v.literal("Not Started"),
+        v.literal("To Do"),
+        v.literal("In Progress"),
+        v.literal("Completed"),
+      ),
+    ),
+    priority: v.optional(
+      v.union(v.literal("low"), v.literal("medium"), v.literal("high")),
+    ),
+    dueDate: v.optional(v.number()),
+    scheduledDate: v.optional(v.string()),
+    projectId: v.optional(v.id("projects")),
+    tagIds: v.optional(v.array(v.id("tags"))),
+    estimatedDuration: v.optional(v.number()),
+    energyLevel: v.optional(
+      v.union(v.literal("low"), v.literal("medium"), v.literal("high")),
+    ),
+    difficulty: v.optional(
+      v.union(v.literal("easy"), v.literal("medium"), v.literal("hard")),
+    ),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+
+    const task = await ctx.db.get(args.taskId);
+    if (!task || task.userId !== userId) {
+      throw new Error("Task not found or access denied");
+    }
+
+    const now = Date.now();
+
+    // Validate project ownership if projectId provided
+    if (args.projectId) {
+      const project = await ctx.db.get(args.projectId);
+      if (!project || project.userId !== userId) {
+        throw new Error("Invalid project");
+      }
+    }
+
+    // Validate tag ownership if tagIds provided
+    if (args.tagIds && args.tagIds.length > 0) {
+      for (const tagId of args.tagIds) {
+        const tag = await ctx.db.get(tagId);
+        if (!tag || tag.userId !== userId) {
+          throw new Error("Invalid tag");
+        }
+      }
+    }
+
+    // Build patch object with only provided fields
+    const patch: Partial<Doc<"tasks">> = {
+      updatedAt: now,
+      lastActiveAt: now,
+    };
+
+    if (args.title !== undefined) patch.title = args.title;
+    if (args.description !== undefined) patch.description = args.description;
+    if (args.notes !== undefined) patch.notes = args.notes;
+    if (args.priority !== undefined) patch.priority = args.priority;
+    if (args.dueDate !== undefined) patch.dueDate = args.dueDate;
+    if (args.scheduledDate !== undefined)
+      patch.scheduledDate = args.scheduledDate;
+    if (args.projectId !== undefined) patch.projectId = args.projectId;
+    if (args.tagIds !== undefined) patch.tagIds = args.tagIds;
+    if (args.estimatedDuration !== undefined)
+      patch.estimatedDuration = args.estimatedDuration;
+    if (args.energyLevel !== undefined) patch.energyLevel = args.energyLevel;
+    if (args.difficulty !== undefined) patch.difficulty = args.difficulty;
+
+    // Handle status change specially - update completionDate
+    if (args.status !== undefined) {
+      patch.status = args.status;
+      if (args.status === "Completed" && task.status !== "Completed") {
+        patch.completionDate = now;
+      } else if (args.status !== "Completed" && task.status === "Completed") {
+        patch.completionDate = undefined;
+      }
+    }
+
+    await ctx.db.patch(args.taskId, patch);
+    return await ctx.db.get(args.taskId);
+  },
+});
+
+// Toggle task completion status
+export const toggleComplete = mutation({
+  args: {
+    taskId: v.id("tasks"),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+
+    const task = await ctx.db.get(args.taskId);
+    if (!task || task.userId !== userId) {
+      throw new Error("Task not found or access denied");
+    }
+
+    const now = Date.now();
+    const isCompleted = task.status === "Completed";
+
+    await ctx.db.patch(args.taskId, {
+      status: isCompleted ? "Not Started" : "Completed",
+      completionDate: isCompleted ? undefined : now,
+      updatedAt: now,
+      lastActiveAt: now,
+    });
+
+    return await ctx.db.get(args.taskId);
   },
 });
 

@@ -17,6 +17,8 @@ export default function TasksPage() {
   const { viewer, isLoading: isViewerLoading } = useViewer();
   const updatePreferences = useMutation(api.preferences.updateMyPreferences);
   const createTask = useMutation(api.tasks.createTask);
+  const updateTask = useMutation(api.tasks.updateTask);
+  const toggleComplete = useMutation(api.tasks.toggleComplete);
   const deleteTask = useMutation(api.tasks.deleteTask);
 
   // Fetch real tasks from Convex
@@ -71,24 +73,39 @@ export default function TasksPage() {
     setIsCreateOpen(true);
   };
 
-  const handleCreateTask = async (
-    draft: Omit<
-      Task,
-      "_id" | "_creationTime" | "userId" | "createdAt" | "updatedAt"
-    >,
-  ) => {
+  const handleCreateTask = async (draft: {
+    title: string;
+    description?: string;
+    notes?: string;
+    status?: Task["status"];
+    priority?: Task["priority"];
+    dueDate?: number | null;
+    scheduledDate?: string | null;
+    projectId?: string | null;
+    tagIds?: string[];
+    estimatedDuration?: number | null;
+    energyLevel?: Task["energyLevel"];
+    difficulty?: Task["difficulty"];
+  }) => {
     try {
+      // Normalize null values to undefined for optional fields
+      // Cast IDs from strings to proper Convex ID types
       const newTask = await createTask({
         title: draft.title,
         description: draft.description,
         notes: draft.notes,
         status: draft.status,
         priority: draft.priority,
-        dueDate: draft.dueDate,
-        scheduledDate: draft.scheduledDate,
-        projectId: draft.projectId,
-        tagIds: draft.tagIds,
-        estimatedDuration: draft.estimatedDuration,
+        dueDate: draft.dueDate ?? undefined,
+        scheduledDate: draft.scheduledDate ?? undefined,
+        projectId: draft.projectId
+          ? (draft.projectId as unknown as Doc<"tasks">["projectId"])
+          : undefined,
+        tagIds:
+          draft.tagIds && draft.tagIds.length > 0
+            ? (draft.tagIds as unknown as Doc<"tasks">["tagIds"])
+            : undefined,
+        estimatedDuration: draft.estimatedDuration ?? undefined,
         energyLevel: draft.energyLevel,
         difficulty: draft.difficulty,
       });
@@ -111,6 +128,49 @@ export default function TasksPage() {
       setSelectedTask(null);
     } catch (error) {
       console.error("Failed to delete task:", error);
+    }
+  };
+
+  const handleUpdateTask = async (taskId: string, updates: Partial<Task>) => {
+    try {
+      const updatedTask = await updateTask({
+        taskId: taskId as unknown as Doc<"tasks">["_id"],
+        title: updates.title,
+        description: updates.description,
+        notes: updates.notes,
+        status: updates.status,
+        priority: updates.priority,
+        dueDate: updates.dueDate ?? undefined,
+        scheduledDate: updates.scheduledDate ?? undefined,
+        projectId: updates.projectId
+          ? (updates.projectId as unknown as Doc<"tasks">["projectId"])
+          : undefined,
+        tagIds:
+          updates.tagIds && updates.tagIds.length > 0
+            ? (updates.tagIds as unknown as Doc<"tasks">["tagIds"])
+            : undefined,
+        estimatedDuration: updates.estimatedDuration ?? undefined,
+        energyLevel: updates.energyLevel,
+        difficulty: updates.difficulty,
+      });
+      if (updatedTask) {
+        setSelectedTask(updatedTask);
+      }
+    } catch (error) {
+      console.error("Failed to update task:", error);
+    }
+  };
+
+  const handleToggleComplete = async (taskId: string) => {
+    try {
+      const updatedTask = await toggleComplete({
+        taskId: taskId as unknown as Doc<"tasks">["_id"],
+      });
+      if (updatedTask) {
+        setSelectedTask(updatedTask);
+      }
+    } catch (error) {
+      console.error("Failed to toggle complete:", error);
     }
   };
 
@@ -176,6 +236,8 @@ export default function TasksPage() {
           open={isDetailsOpen}
           onOpenChange={setIsDetailsOpen}
           onDelete={handleDeleteTask}
+          onUpdate={handleUpdateTask}
+          onToggleComplete={handleToggleComplete}
         />
 
         {/* Create task sheet */}
@@ -232,6 +294,8 @@ export default function TasksPage() {
         open={isDetailsOpen}
         onOpenChange={setIsDetailsOpen}
         onDelete={handleDeleteTask}
+        onUpdate={handleUpdateTask}
+        onToggleComplete={handleToggleComplete}
       />
 
       {/* Create task sheet */}
