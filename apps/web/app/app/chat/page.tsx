@@ -36,13 +36,7 @@ import {
   PlusSignIcon,
 } from "@hugeicons/core-free-icons";
 import { nanoid } from "nanoid";
-
-// Mock projects for scope selection
-const mockProjects = [
-  { id: "p1", title: "Website Redesign", icon: "🎨" },
-  { id: "p2", title: "Mobile App", icon: "📱" },
-  { id: "p3", title: "Q1 Planning", icon: "📊" },
-];
+import { mockProjects } from "./components/mock-data";
 
 type Scope =
   | { type: "all" }
@@ -136,8 +130,7 @@ function ComposerWithScope() {
   const { textInput } = usePromptInputController();
 
   const handleSubmit = () => {
-    // Mock: create thread and navigate
-    const threadId = nanoid();
+    const threadId = `temp-${nanoid()}`;
     router.push(`/app/chat/${threadId}`);
   };
 
@@ -224,7 +217,7 @@ function ComposerWithScope() {
       </ScrollArea>
 
       {/* Composer - Fixed at bottom */}
-      <div className="shrink-0 border-t bg-background/80 backdrop-blur p-4">
+      <div className="shrink-0 border-t bg-background/80 backdrop-blur p-4 pb-[env(safe-area-inset-bottom)]">
         <div className="max-w-3xl mx-auto">
           {/* Scope indicator above composer */}
           <div className="flex items-center gap-2 mb-2 px-1">

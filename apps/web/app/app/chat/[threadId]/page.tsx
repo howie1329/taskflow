@@ -20,9 +20,14 @@ import {
 import {
   Conversation,
   ConversationContent,
+  ConversationEmptyState,
   ConversationScrollButton,
 } from "@/components/ai-elements/conversation";
-import { Message, MessageContent } from "@/components/ai-elements/message";
+import {
+  Message,
+  MessageContent,
+  MessageResponse,
+} from "@/components/ai-elements/message";
 import {
   Empty,
   EmptyHeader,
@@ -41,98 +46,26 @@ import {
   MessageQuestionIcon,
   MoreHorizontalIcon,
 } from "@hugeicons/core-free-icons";
-
-// Mock projects
-const mockProjects = [
-  { id: "p1", title: "Website Redesign", icon: "🎨" },
-  { id: "p2", title: "Mobile App", icon: "📱" },
-  { id: "p3", title: "Q1 Planning", icon: "📊" },
-];
-
-// Mock threads with messages
-const mockThreads: Record<
-  string,
-  {
-    title: string;
-    projectId?: string;
-    messages: Array<{
-      id: string;
-      role: "user" | "assistant";
-      content: string;
-    }>;
-  }
-> = {
-  t1: {
-    title: "Planning Q1 roadmap",
-    messages: [
-      { id: "m1", role: "user", content: "Help me plan the Q1 roadmap" },
-      {
-        id: "m2",
-        role: "assistant",
-        content:
-          "I'd be happy to help you plan your Q1 roadmap. Let me break this down into key areas:\n\n1. **Goals & Objectives** - What are the main outcomes you want to achieve?\n2. **Key Projects** - Which major initiatives need to be completed?\n3. **Timeline** - When do these need to be delivered?\n4. **Resources** - What team members and budget are available?\n\nCould you share more details about your current priorities?",
-      },
-      {
-        id: "m3",
-        role: "user",
-        content:
-          "We need to focus on the website redesign and mobile app launch",
-      },
-      {
-        id: "m4",
-        role: "assistant",
-        content:
-          "Great focus areas! Here's a suggested Q1 plan:\n\n**January:**\n- Finalize website redesign requirements\n- Begin mobile app development\n- Set up analytics and tracking\n\n**February:**\n- Website redesign implementation\n- Mobile app beta testing\n- Content migration planning\n\n**March:**\n- Website launch preparation\n- Mobile app store submission\n- Post-launch monitoring setup\n\nWould you like me to create tasks for any of these phases?",
-      },
-    ],
-  },
-  t2: {
-    title: "Website redesign ideas",
-    projectId: "p1",
-    messages: [
-      {
-        id: "m1",
-        role: "user",
-        content: "What are some good color schemes for a modern SaaS website?",
-      },
-      {
-        id: "m2",
-        role: "assistant",
-        content:
-          "Here are some popular color schemes for modern SaaS websites:\n\n1. **Blue & White (Classic)** - Trust, professionalism\n2. **Purple & Pink (Creative)** - Innovation, uniqueness\n3. **Green & Neutral (Growth)** - Sustainability, growth\n4. **Dark Mode (Modern)** - Sleek, developer-friendly\n\nConsider your target audience and brand personality when choosing.",
-      },
-    ],
-  },
-  t3: {
-    title: "Task prioritization",
-    messages: [
-      {
-        id: "m1",
-        role: "user",
-        content: "How should I prioritize my backlog?",
-      },
-      {
-        id: "m2",
-        role: "assistant",
-        content:
-          "Here's a framework for prioritizing your backlog:\n\n**1. Impact vs Effort Matrix**\n- High Impact, Low Effort: Do first\n- High Impact, High Effort: Plan carefully\n- Low Impact, Low Effort: Quick wins\n- Low Impact, High Effort: Deprioritize\n\n**2. RICE Scoring**\n- Reach, Impact, Confidence, Effort\n\n**3. MoSCoW Method**\n- Must have, Should have, Could have, Won't have\n\nWould you like me to help apply any of these to your specific tasks?",
-      },
-    ],
-  },
-};
+import {
+  mockProjects,
+  mockThreads,
+  mockMessagesByThreadId,
+} from "../components/mock-data";
 
 export default function ThreadPage() {
   const params = useParams();
   const router = useRouter();
   const threadId = params.threadId as string;
 
-  const thread = mockThreads[threadId];
+  const thread = mockThreads.find((item) => item.id === threadId);
   const project = thread?.projectId
     ? mockProjects.find((p) => p.id === thread.projectId)
     : undefined;
+  const messages = thread ? (mockMessagesByThreadId[thread.id] ?? []) : [];
+  const isTempThread = threadId.startsWith("temp-");
 
   // Not found state
-  if (!thread) {
+  if (!thread && !isTempThread) {
     return (
       <div className="flex flex-col h-full">
         {/* Mobile header */}
@@ -202,7 +135,7 @@ export default function ThreadPage() {
 
             <div>
               <h2 className="text-sm font-medium">
-                {thread.title || "Untitled chat"}
+                {thread?.title || "New chat"}
               </h2>
               <div className="flex items-center gap-2 mt-0.5">
                 {project ? (
@@ -246,32 +179,36 @@ export default function ThreadPage() {
         {/* Conversation */}
         <Conversation className="flex-1">
           <ConversationContent className="p-4 space-y-6">
-            {thread.messages.map((message) => (
-              <Message
-                key={message.id}
-                from={message.role}
-                className={cn(message.role === "user" && "justify-end")}
-              >
-                <MessageContent
-                  className={cn(
-                    "max-w-[80%]",
-                    message.role === "user"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted",
-                  )}
+            {messages.length === 0 ? (
+              <ConversationEmptyState
+                title="Start a new conversation"
+                description="Ask anything, or use a prompt suggestion"
+              />
+            ) : (
+              messages.map((message) => (
+                <Message
+                  key={message.id}
+                  from={message.role}
+                  className={cn(message.role === "user" && "justify-end")}
                 >
-                  <div className="text-sm whitespace-pre-wrap">
-                    {message.content}
-                  </div>
-                </MessageContent>
-              </Message>
-            ))}
+                  <MessageContent className="max-w-[80%]">
+                    {message.role === "assistant" ? (
+                      <MessageResponse>{message.content}</MessageResponse>
+                    ) : (
+                      <div className="text-sm whitespace-pre-wrap">
+                        {message.content}
+                      </div>
+                    )}
+                  </MessageContent>
+                </Message>
+              ))
+            )}
           </ConversationContent>
           <ConversationScrollButton />
         </Conversation>
 
         {/* Composer */}
-        <div className="shrink-0 border-t bg-background/80 backdrop-blur p-4">
+        <div className="shrink-0 border-t bg-background/80 backdrop-blur p-4 pb-[env(safe-area-inset-bottom)]">
           <div className="max-w-3xl mx-auto">
             <PromptInput onSubmit={() => {}}>
               <PromptInputHeader>
