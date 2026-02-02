@@ -24,18 +24,47 @@ import {
   TrashIcon,
   PlusIcon,
 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 
 type Task = Doc<"tasks">;
 type Project = Doc<"projects">;
 type Tag = Doc<"tags">;
 type Subtask = Doc<"subtasks">;
 
+// Task update type with string IDs for client-side use
+interface TaskUpdate {
+  title?: string;
+  description?: string;
+  notes?: string;
+  status?: Task["status"];
+  priority?: Task["priority"];
+  projectId?: string;
+  tagIds?: string[];
+  scheduledDate?: string;
+  dueDate?: number;
+}
+
 interface TaskDetailsSheetProps {
   task: Task | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onDelete?: (taskId: string) => void;
-  onUpdate?: (taskId: string, updates: Partial<Task>) => void;
+  onUpdate?: (taskId: string, updates: TaskUpdate) => void;
   onToggleComplete?: (taskId: string) => void;
   projects?: Project[];
   tags?: Tag[];
@@ -44,6 +73,7 @@ interface TaskDetailsSheetProps {
   onToggleSubtask?: (subtaskId: string) => void;
   onDeleteSubtask?: (subtaskId: string) => void;
   onUpdateSubtask?: (subtaskId: string, title: string) => void;
+  onCreateTag?: (name: string) => Promise<Tag | null>;
 }
 
 export function TaskDetailsSheet({
@@ -60,6 +90,7 @@ export function TaskDetailsSheet({
   onToggleSubtask,
   onDeleteSubtask,
   onUpdateSubtask,
+  onCreateTag,
 }: TaskDetailsSheetProps) {
   const isMobile = useIsMobile();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -67,6 +98,18 @@ export function TaskDetailsSheet({
   const [editedTitle, setEditedTitle] = useState("");
   const [editedDescription, setEditedDescription] = useState("");
   const [editedNotes, setEditedNotes] = useState("");
+  const [editedStatus, setEditedStatus] =
+    useState<Task["status"]>("Not Started");
+  const [editedPriority, setEditedPriority] = useState<Task["priority"]>("low");
+  const [editedProjectId, setEditedProjectId] = useState<string>("__none__");
+  const [editedTagIds, setEditedTagIds] = useState<string[]>([]);
+  const [editedScheduledDate, setEditedScheduledDate] = useState<string>("");
+  const [editedDueDate, setEditedDueDate] = useState<string>("");
+
+  // Create tag dialog state
+  const [isCreateTagDialogOpen, setIsCreateTagDialogOpen] = useState(false);
+  const [newTagName, setNewTagName] = useState("");
+  const [isCreatingTag, setIsCreatingTag] = useState(false);
 
   // Subtask state
   const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
@@ -80,6 +123,14 @@ export function TaskDetailsSheet({
       setEditedTitle(task.title);
       setEditedDescription(task.description ?? "");
       setEditedNotes(task.notes ?? "");
+      setEditedStatus(task.status);
+      setEditedPriority(task.priority);
+      setEditedProjectId(task.projectId ? String(task.projectId) : "__none__");
+      setEditedTagIds(task.tagIds.map((id) => String(id)));
+      setEditedScheduledDate(task.scheduledDate ?? "");
+      setEditedDueDate(
+        task.dueDate ? new Date(task.dueDate).toISOString().split("T")[0] : "",
+      );
       setIsEditing(false);
       setShowDeleteConfirm(false);
       setNewSubtaskTitle("");
@@ -139,6 +190,12 @@ export function TaskDetailsSheet({
         title: editedTitle.trim(),
         description: editedDescription.trim() || undefined,
         notes: editedNotes.trim() || undefined,
+        status: editedStatus,
+        priority: editedPriority,
+        projectId: editedProjectId === "__none__" ? undefined : editedProjectId,
+        tagIds: editedTagIds.length > 0 ? editedTagIds : undefined,
+        scheduledDate: editedScheduledDate || undefined,
+        dueDate: editedDueDate ? new Date(editedDueDate).getTime() : undefined,
       });
     }
     setIsEditing(false);
@@ -148,7 +205,34 @@ export function TaskDetailsSheet({
     setEditedTitle(task.title);
     setEditedDescription(task.description ?? "");
     setEditedNotes(task.notes ?? "");
+    setEditedStatus(task.status);
+    setEditedPriority(task.priority);
+    setEditedProjectId(task.projectId ? String(task.projectId) : "__none__");
+    setEditedTagIds(task.tagIds.map((id) => String(id)));
+    setEditedScheduledDate(task.scheduledDate ?? "");
+    setEditedDueDate(
+      task.dueDate ? new Date(task.dueDate).toISOString().split("T")[0] : "",
+    );
     setIsEditing(false);
+  };
+
+  const handleCreateTag = async () => {
+    if (!newTagName.trim() || !onCreateTag) return;
+
+    setIsCreatingTag(true);
+    try {
+      const newTag = await onCreateTag(newTagName.trim());
+      if (newTag) {
+        // Add the new tag to the task's selected tags
+        setEditedTagIds((prev) => [...prev, newTag._id as string]);
+        setNewTagName("");
+        setIsCreateTagDialogOpen(false);
+      }
+    } catch (error) {
+      console.error("Failed to create tag:", error);
+    } finally {
+      setIsCreatingTag(false);
+    }
   };
 
   const handleAddSubtask = () => {
@@ -278,6 +362,164 @@ export function TaskDetailsSheet({
                   className="text-xs min-h-[60px]"
                   placeholder="Notes (optional)"
                 />
+                {/* Status and Priority */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs text-muted-foreground mb-1 block">
+                      Status
+                    </label>
+                    <Select
+                      value={editedStatus}
+                      onValueChange={(v) =>
+                        setEditedStatus(v as Task["status"])
+                      }
+                    >
+                      <SelectTrigger className="h-8 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Not Started">Not Started</SelectItem>
+                        <SelectItem value="To Do">To Do</SelectItem>
+                        <SelectItem value="In Progress">In Progress</SelectItem>
+                        <SelectItem value="Completed">Completed</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="text-xs text-muted-foreground mb-1 block">
+                      Priority
+                    </label>
+                    <Select
+                      value={editedPriority}
+                      onValueChange={(v) =>
+                        setEditedPriority(v as Task["priority"])
+                      }
+                    >
+                      <SelectTrigger className="h-8 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="low">Low</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="high">High</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                {/* Project */}
+                <div>
+                  <label className="text-xs text-muted-foreground mb-1 block">
+                    Project
+                  </label>
+                  <Select
+                    value={editedProjectId}
+                    onValueChange={setEditedProjectId}
+                  >
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue placeholder="No project" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">No project</SelectItem>
+                      {projects.map((project) => (
+                        <SelectItem
+                          key={project._id as string}
+                          value={project._id as string}
+                        >
+                          <span className="mr-1">{project.icon}</span>
+                          {project.title}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {/* Tags */}
+                <div>
+                  <label className="text-xs text-muted-foreground mb-1 block">
+                    Tags
+                  </label>
+                  {availableTags.length === 0 ? (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">
+                        No tags available.
+                      </span>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="xs"
+                        onClick={() => setIsCreateTagDialogOpen(true)}
+                        className="h-7 px-2 text-xs"
+                      >
+                        + Create tag
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      {availableTags.map((tag) => {
+                        const isSelected = editedTagIds.includes(
+                          tag._id as string,
+                        );
+                        return (
+                          <Button
+                            key={tag._id as string}
+                            type="button"
+                            variant={isSelected ? "secondary" : "outline"}
+                            size="xs"
+                            onClick={() => {
+                              setEditedTagIds((prev) =>
+                                isSelected
+                                  ? prev.filter(
+                                      (id) => id !== (tag._id as string),
+                                    )
+                                  : [...prev, tag._id as string],
+                              );
+                            }}
+                            className="h-7 px-2 text-xs rounded-none"
+                          >
+                            <span
+                              className="inline-block w-1.5 h-1.5 rounded-full mr-1.5"
+                              style={{ backgroundColor: tag.color }}
+                            />
+                            {tag.name}
+                          </Button>
+                        );
+                      })}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="xs"
+                        onClick={() => setIsCreateTagDialogOpen(true)}
+                        className="h-7 px-2 text-xs rounded-none border-dashed"
+                      >
+                        + Create tag
+                      </Button>
+                    </div>
+                  )}
+                </div>
+                {/* Dates */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs text-muted-foreground mb-1 block">
+                      Scheduled
+                    </label>
+                    <Input
+                      type="date"
+                      value={editedScheduledDate}
+                      onChange={(e) => setEditedScheduledDate(e.target.value)}
+                      className="h-8 text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-muted-foreground mb-1 block">
+                      Due Date
+                    </label>
+                    <Input
+                      type="date"
+                      value={editedDueDate}
+                      onChange={(e) => setEditedDueDate(e.target.value)}
+                      className="h-8 text-xs"
+                    />
+                  </div>
+                </div>
                 <div className="flex gap-2">
                   <Button
                     size="sm"
@@ -678,6 +920,53 @@ export function TaskDetailsSheet({
           )}
         </div>
       </SheetContent>
+      {/* Create tag dialog */}
+      <Dialog
+        open={isCreateTagDialogOpen}
+        onOpenChange={setIsCreateTagDialogOpen}
+      >
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>Create new tag</DialogTitle>
+            <DialogDescription>
+              Enter a name for your new tag. Color will be set automatically.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="tag-name">Tag name</Label>
+              <Input
+                id="tag-name"
+                value={newTagName}
+                onChange={(e) => setNewTagName(e.target.value)}
+                placeholder="e.g., urgent, work, personal"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && newTagName.trim()) {
+                    handleCreateTag();
+                  }
+                }}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setNewTagName("");
+                setIsCreateTagDialogOpen(false);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreateTag}
+              disabled={!newTagName.trim() || isCreatingTag}
+            >
+              {isCreatingTag ? "Creating..." : "Create tag"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Sheet>
   );
 }

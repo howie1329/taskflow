@@ -7,16 +7,17 @@ Tasks are the primary execution unit. Users can create, organize, and complete t
 ## User Stories
 
 - As a user, I can create a task quickly.
-- As a user, I can edit status/priority/due date/labels.
+- As a user, I can edit status/priority/due date/tags.
 - As a user, I can complete and un-complete tasks.
 - As a user, I can view tasks by project and by schedule day.
 
 ## MVP Scope (v1)
 
 - Task CRUD
-- Fields: title, description (optional), status, priority, dueDate (optional), labels (optional)
+- Fields: title, description (optional), notes (optional), status, priority, dueDate (optional), scheduledDate (optional), tags (tagIds array), projectId (optional)
 - Project association (optional)
 - Completion toggle
+- Inline tag creation from task page
 
 ## Non-goals (v1)
 
@@ -28,51 +29,89 @@ Tasks are the primary execution unit. Users can create, organize, and complete t
 ## Data Model (Convex)
 
 - `tasks`
-  - `userId` (string)
-  - `title` (string)
-  - `description` (string)
-  - `status` ("todo" | "inProgress" | "done")
-  - `priority` ("none" | "low" | "medium" | "high")
-  - `dueDate` (number | null)
-  - `projectId` (Id<"projects"> | null)
-  - `scheduledDate` (string | null) (v1 schedule: assign to day)
+  - `userId` (Id<"users">) - Reference to auth user
+  - `title` (string) - Task title
+  - `description` (string | undefined) - Optional description
+  - `notes` (string | undefined) - Private notes for the task
+  - `status` ("Not Started" | "To Do" | "In Progress" | "Completed")
+  - `priority` ("low" | "medium" | "high")
+  - `dueDate` (number | undefined) - Timestamp for precise timing
+  - `scheduledDate` (string | undefined) - YYYY-MM-DD for day-based planning
+  - `completionDate` (number | undefined) - When actually completed
+  - `projectId` (Id<"projects"> | undefined) - Many-to-one with projects
+  - `tagIds` (Id<"tags">[]) - Many-to-many with tags (array, can be empty)
+  - `parentTaskId` (Id<"tasks"> | undefined) - Self-referencing for subtasks
+  - `estimatedDuration` (number | undefined) - Minutes
+  - `actualDuration` (number | undefined) - Minutes
+  - `energyLevel` ("low" | "medium" | "high")
+  - `context` (string[]) - @home, @office, @calls, etc.
+  - `source` ("inbox" | "created" | "ai-suggested")
+  - `orderIndex` (number) - For manual ordering
+  - `lastActiveAt` (number) - Activity tracking
+  - `streakCount` (number) - Completion streak
+  - `difficulty` ("easy" | "medium" | "hard")
+  - `isTemplate` (boolean) - Template flag
+  - `aiSummary` (string | undefined) - AI-generated summary
+  - `aiContext` (any) - Flexible AI analysis data
+  - `embedding` (number[] | undefined) - For future semantic search
   - `createdAt` (number)
   - `updatedAt` (number)
 
 Indexes:
 
-- by `userId`
-- by `userId + status`
-- by `userId + projectId`
-- by `userId + scheduledDate`
+- by `userId` (by_user)
+- by `userId + status` (by_user_status)
+- by `userId + projectId` (by_user_project)
+- by `userId + scheduledDate` (by_user_scheduled)
+- by `userId + dueDate` (by_user_due)
+- by `userId + priority` (by_user_priority)
+- by `userId + lastActiveAt` (by_user_active)
+- by `userId + parentTaskId` (by_user_parent)
+- by `userId + tagIds` (by_user_tags)
+- Search index: `search_title` (searches title field only)
 
 ## UI/UX
 
-- Task list view with filters
-- Task detail view (edit fields)
-- Completion toggle
+- Board view with filters (status, priority, project, tag, schedule)
+- Today+Board view combining today's tasks with regular board
+- Task detail sheet with full editing capabilities
+- Inline tag creation from filter dropdown
+- "Create tag..." option in tag dropdown auto-selects new tag
+- Completion toggle with visual feedback
+- Search via "/" keyboard shortcut (title-only search)
 
-## Convex API Surface (to implement)
+## Convex API Surface (implemented)
 
 - queries
-  - `tasks.list({ status?, projectId?, scheduledDate? })`
-  - `tasks.get({ id })`
+  - `tasks.listMyTasks({ status?, projectId?, hideCompleted?, scheduledDate? })` - List tasks with optional filters
+  - `tasks.getMyTask({ taskId })` - Get single task by ID with ownership check
+  - `tasks.searchMyTasks({ query })` - Search tasks by title (uses search_title index)
 - mutations
-  - `tasks.create({ ... })`
-  - `tasks.update({ id, patch })`
-  - `tasks.setComplete({ id, isComplete })`
-  - `tasks.delete({ id })`
+  - `tasks.createTask({ title, description?, notes?, status?, priority?, dueDate?, scheduledDate?, projectId?, tagIds?, estimatedDuration?, energyLevel?, difficulty? })`
+  - `tasks.updateTask({ taskId, title?, description?, notes?, status?, priority?, dueDate?, scheduledDate?, projectId?, tagIds?, estimatedDuration?, energyLevel?, difficulty? })` - Supports clearing fields by passing null
+  - `tasks.toggleComplete({ taskId })` - Toggle completion status
+  - `tasks.updateTaskOrder({ updates: [{ taskId, orderIndex }] })` - Bulk update task ordering
+  - `tasks.deleteTask({ taskId })`
 
 ## Permissions & Invariants
 
-- Only owner can access.
-- `status` and `priority` must be validated.
+- Only owner can access tasks.
+- `status` and `priority` must be validated against allowed values.
 - If `projectId` set, project must belong to the same user.
+- If `tagIds` provided, all tags must belong to the same user.
+- updateTask supports clearing optional fields by passing null (converted to undefined in DB).
 
 ## Acceptance Criteria
 
 - CRUD works and stays consistent across views.
-- Tasks can be filtered by status/project/day.
+- Tasks can be filtered by status/project/tag/schedule.
+- Tags can be created inline from task page and auto-selected.
+- Task details can be edited including status, priority, project, tags, dates, and notes.
+- Clearing fields (setting to null) actually removes them from the task.
+
+## Known Gaps
+
+- Search is title-only via search_title index. Full-text search across description/notes not yet implemented.
 
 ## Legacy Reference (do not copy blindly)
 

@@ -27,11 +27,35 @@ import { api } from "@/convex/_generated/api";
 import type { Doc } from "@/convex/_generated/dataModel";
 import { SearchIcon, XIcon } from "lucide-react";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 
 type Task = Doc<"tasks">;
 type Project = Doc<"projects">;
 type Tag = Doc<"tags">;
 type Subtask = Doc<"subtasks">;
+
+// Task update interface for client-side updates
+interface TaskUpdate {
+  title?: string;
+  description?: string;
+  notes?: string;
+  status?: Task["status"];
+  priority?: Task["priority"];
+  projectId?: string;
+  tagIds?: string[];
+  scheduledDate?: string;
+  dueDate?: number;
+}
 
 export default function TasksPage() {
   const pathname = usePathname();
@@ -50,6 +74,9 @@ export default function TasksPage() {
   const updateSubtask = useMutation(api.subtasks.updateSubtask);
   const toggleSubtask = useMutation(api.subtasks.toggleSubtask);
   const deleteSubtask = useMutation(api.subtasks.deleteSubtask);
+
+  // Tag creation mutation
+  const createTag = useMutation(api.tags.createTag);
 
   // Fetch real tasks from Convex
   const tasks = useQuery(api.tasks.listMyTasks, {});
@@ -84,6 +111,12 @@ export default function TasksPage() {
   const [projectFilter, setProjectFilter] = useState("all");
   const [tagFilter, setTagFilter] = useState("all");
   const [scheduleFilter, setScheduleFilter] = useState("any");
+
+  // Create tag dialog state
+  const [isCreateTagDialogOpen, setIsCreateTagDialogOpen] = useState(false);
+  const [newTagName, setNewTagName] = useState("");
+  const [isCreatingTag, setIsCreatingTag] = useState(false);
+  const lastCreatedTagIdRef = useRef<string | null>(null);
 
   // Sync view with preferences when they load (not just initial state)
   useEffect(() => {
@@ -159,6 +192,13 @@ export default function TasksPage() {
     if (tagValue === "all") {
       setTagFilter("all");
     } else if (tags && tags.some((t) => String(t._id) === tagValue)) {
+      setTagFilter(tagValue);
+      // Clear the ref once the tag appears in the list (race resolved)
+      if (lastCreatedTagIdRef.current === tagValue) {
+        lastCreatedTagIdRef.current = null;
+      }
+    } else if (lastCreatedTagIdRef.current === tagValue) {
+      // Race condition: we just created this tag, trust it even if not in tags yet
       setTagFilter(tagValue);
     } else if (tags) {
       toast.error("Selected tag filter no longer exists.");
@@ -374,7 +414,7 @@ export default function TasksPage() {
     }
   };
 
-  const handleUpdateTask = async (taskId: string, updates: Partial<Task>) => {
+  const handleUpdateTask = async (taskId: string, updates: TaskUpdate) => {
     try {
       const updatedTask = await updateTask({
         taskId: taskId as unknown as Doc<"tasks">["_id"],
@@ -392,9 +432,6 @@ export default function TasksPage() {
           updates.tagIds && updates.tagIds.length > 0
             ? (updates.tagIds as unknown as Doc<"tasks">["tagIds"])
             : undefined,
-        estimatedDuration: updates.estimatedDuration ?? undefined,
-        energyLevel: updates.energyLevel,
-        difficulty: updates.difficulty,
       });
       if (updatedTask) {
         setSelectedTask(updatedTask);
@@ -460,6 +497,17 @@ export default function TasksPage() {
     }
   };
 
+  const handleCreateTag = async (name: string): Promise<Tag | null> => {
+    try {
+      const newTag = await createTag({ name });
+      return newTag || null;
+    } catch (error) {
+      console.error("Failed to create tag:", error);
+      toast.error("Failed to create tag");
+      return null;
+    }
+  };
+
   // Fetch subtasks for the selected task
   const subtasks = useQuery(
     api.subtasks.listMySubtasks,
@@ -476,6 +524,37 @@ export default function TasksPage() {
     setTagFilter("all");
     setScheduleFilter("any");
     searchButtonRef.current?.focus();
+  };
+
+  // Handle tag filter change - including "Create tag..." option
+  const handleTagFilterChange = (value: string) => {
+    if (value === "__create__") {
+      setIsCreateTagDialogOpen(true);
+      return;
+    }
+    setTagFilter(value);
+  };
+
+  // Handle creating a new tag from the dialog
+  const handleCreateTagFromDialog = async () => {
+    if (!newTagName.trim()) return;
+
+    setIsCreatingTag(true);
+    try {
+      const newTag = await createTag({ name: newTagName.trim() });
+      if (newTag) {
+        // Store the new tag ID to prevent race condition during validation
+        lastCreatedTagIdRef.current = newTag._id as string;
+        setTagFilter(newTag._id as string);
+        setNewTagName("");
+        setIsCreateTagDialogOpen(false);
+      }
+    } catch (error) {
+      console.error("Failed to create tag:", error);
+      toast.error("Failed to create tag");
+    } finally {
+      setIsCreatingTag(false);
+    }
   };
 
   const baseTasks = searchQuery ? (searchResults ?? tasks) : tasks;
@@ -674,7 +753,7 @@ export default function TasksPage() {
         </SelectContent>
       </Select>
 
-      <Select value={tagFilter} onValueChange={setTagFilter}>
+      <Select value={tagFilter} onValueChange={handleTagFilterChange}>
         <SelectTrigger size="sm" className="min-w-[120px]">
           <SelectValue placeholder="Tag" />
         </SelectTrigger>
@@ -691,6 +770,7 @@ export default function TasksPage() {
               No tags
             </SelectItem>
           )}
+          <SelectItem value="__create__">+ Create tag...</SelectItem>
         </SelectContent>
       </Select>
 
@@ -741,90 +821,8 @@ export default function TasksPage() {
     );
   }
 
-  // Empty state
-  if ((!tasks || tasks.length === 0) && !searchQuery) {
-    return (
-      <div className="flex flex-col gap-4 h-full">
-        {/* Header with view switcher */}
-        <div className="flex flex-col gap-3 shrink-0">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-muted-foreground">
-              Organize and track your work
-            </p>
-            <div className="w-full sm:flex-1 sm:max-w-[420px]">
-              {searchControl}
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleToggleHideCompleted}
-                className="text-xs px-3 py-1.5 rounded border border-border hover:bg-accent transition-colors"
-                style={{ opacity: hideCompleted ? 1 : 0.5 }}
-              >
-                {hideCompleted ? "✓ Hide completed" : "Hide completed"}
-              </button>
-              <Tabs
-                value={currentView}
-                onValueChange={(v) =>
-                  handleViewChange(v as "board" | "todayPlusBoard")
-                }
-              >
-                <TabsList>
-                  <TabsTrigger value="board">Board</TabsTrigger>
-                  <TabsTrigger value="todayPlusBoard">
-                    Today + Board
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </div>
-          </div>
-          {filterControls}
-        </div>
-
-        {/* Empty state */}
-        <div className="flex-1 min-h-0 flex items-center justify-center">
-          <div className="flex flex-col items-center justify-center gap-2 text-center max-w-sm">
-            <h3 className="text-sm font-medium">No tasks yet</h3>
-            <p className="text-xs text-muted-foreground">
-              Create your first task to get started
-            </p>
-            <button
-              onClick={() => handleOpenCreate({ status: "Not Started" })}
-              className="mt-4 px-3 py-1.5 text-xs bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-            >
-              Add your first task
-            </button>
-          </div>
-        </div>
-
-        {/* Task details sheet */}
-        <TaskDetailsSheet
-          task={selectedTask}
-          open={isDetailsOpen}
-          onOpenChange={setIsDetailsOpen}
-          onDelete={handleDeleteTask}
-          onUpdate={handleUpdateTask}
-          onToggleComplete={handleToggleComplete}
-          projects={projects}
-          tags={tags}
-          subtasks={subtasks || []}
-          onCreateSubtask={handleCreateSubtask}
-          onToggleSubtask={handleToggleSubtask}
-          onDeleteSubtask={handleDeleteSubtask}
-          onUpdateSubtask={handleUpdateSubtask}
-        />
-
-        {/* Create task sheet */}
-        <CreateTaskSheet
-          open={isCreateOpen}
-          onOpenChange={setIsCreateOpen}
-          defaults={createDefaults}
-          onCreate={handleCreateTask}
-          projects={projects}
-          tags={tags}
-        />
-      </div>
-    );
-  }
+  // Determine if we should show empty state
+  const isEmptyState = (!tasks || tasks.length === 0) && !searchQuery;
 
   return (
     <div className="flex flex-col gap-4 h-full">
@@ -863,7 +861,22 @@ export default function TasksPage() {
 
       {/* Main content area */}
       <div className="flex-1 min-h-0">
-        {showNoResults ? (
+        {isEmptyState ? (
+          <div className="flex-1 min-h-0 flex items-center justify-center">
+            <div className="flex flex-col items-center justify-center gap-2 text-center max-w-sm">
+              <h3 className="text-sm font-medium">No tasks yet</h3>
+              <p className="text-xs text-muted-foreground">
+                Create your first task to get started
+              </p>
+              <button
+                onClick={() => handleOpenCreate({ status: "Not Started" })}
+                className="mt-4 px-3 py-1.5 text-xs bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+              >
+                Add your first task
+              </button>
+            </div>
+          </div>
+        ) : showNoResults ? (
           <div className="flex-1 min-h-0 flex items-center justify-center">
             <div className="flex flex-col items-center justify-center gap-2 text-center max-w-sm">
               <h3 className="text-sm font-medium">No matching tasks</h3>
@@ -916,6 +929,7 @@ export default function TasksPage() {
         onToggleSubtask={handleToggleSubtask}
         onDeleteSubtask={handleDeleteSubtask}
         onUpdateSubtask={handleUpdateSubtask}
+        onCreateTag={handleCreateTag}
       />
 
       {/* Create task sheet */}
@@ -927,6 +941,54 @@ export default function TasksPage() {
         projects={projects}
         tags={tags}
       />
+
+      {/* Create tag dialog */}
+      <Dialog
+        open={isCreateTagDialogOpen}
+        onOpenChange={setIsCreateTagDialogOpen}
+      >
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>Create new tag</DialogTitle>
+            <DialogDescription>
+              Enter a name for your new tag. Color will be set automatically.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="tag-name">Tag name</Label>
+              <Input
+                id="tag-name"
+                value={newTagName}
+                onChange={(e) => setNewTagName(e.target.value)}
+                placeholder="e.g., urgent, work, personal"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && newTagName.trim()) {
+                    handleCreateTagFromDialog();
+                  }
+                }}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setNewTagName("");
+                setIsCreateTagDialogOpen(false);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreateTagFromDialog}
+              disabled={!newTagName.trim() || isCreatingTag}
+            >
+              {isCreatingTag ? "Creating..." : "Create tag"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

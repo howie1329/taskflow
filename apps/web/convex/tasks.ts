@@ -223,8 +223,8 @@ export const updateTask = mutation({
   args: {
     taskId: v.id("tasks"),
     title: v.optional(v.string()),
-    description: v.optional(v.string()),
-    notes: v.optional(v.string()),
+    description: v.optional(v.union(v.string(), v.null())),
+    notes: v.optional(v.union(v.string(), v.null())),
     status: v.optional(
       v.union(
         v.literal("Not Started"),
@@ -236,11 +236,11 @@ export const updateTask = mutation({
     priority: v.optional(
       v.union(v.literal("low"), v.literal("medium"), v.literal("high")),
     ),
-    dueDate: v.optional(v.number()),
-    scheduledDate: v.optional(v.string()),
-    projectId: v.optional(v.id("projects")),
-    tagIds: v.optional(v.array(v.id("tags"))),
-    estimatedDuration: v.optional(v.number()),
+    dueDate: v.optional(v.union(v.number(), v.null())),
+    scheduledDate: v.optional(v.union(v.string(), v.null())),
+    projectId: v.optional(v.union(v.id("projects"), v.null())),
+    tagIds: v.optional(v.union(v.array(v.id("tags")), v.null())),
+    estimatedDuration: v.optional(v.union(v.number(), v.null())),
     energyLevel: v.optional(
       v.union(v.literal("low"), v.literal("medium"), v.literal("high")),
     ),
@@ -286,16 +286,25 @@ export const updateTask = mutation({
     };
 
     if (args.title !== undefined) patch.title = args.title;
-    if (args.description !== undefined) patch.description = args.description;
-    if (args.notes !== undefined) patch.notes = args.notes;
+    // Handle fields that can be cleared (null means clear/undefined)
+    if (args.description !== undefined)
+      patch.description =
+        args.description === null ? undefined : args.description;
+    if (args.notes !== undefined)
+      patch.notes = args.notes === null ? undefined : args.notes;
     if (args.priority !== undefined) patch.priority = args.priority;
-    if (args.dueDate !== undefined) patch.dueDate = args.dueDate;
+    if (args.dueDate !== undefined)
+      patch.dueDate = args.dueDate === null ? undefined : args.dueDate;
     if (args.scheduledDate !== undefined)
-      patch.scheduledDate = args.scheduledDate;
-    if (args.projectId !== undefined) patch.projectId = args.projectId;
-    if (args.tagIds !== undefined) patch.tagIds = args.tagIds;
+      patch.scheduledDate =
+        args.scheduledDate === null ? undefined : args.scheduledDate;
+    if (args.projectId !== undefined)
+      patch.projectId = args.projectId === null ? undefined : args.projectId;
+    if (args.tagIds !== undefined)
+      patch.tagIds = args.tagIds === null ? undefined : args.tagIds;
     if (args.estimatedDuration !== undefined)
-      patch.estimatedDuration = args.estimatedDuration;
+      patch.estimatedDuration =
+        args.estimatedDuration === null ? undefined : args.estimatedDuration;
     if (args.energyLevel !== undefined) patch.energyLevel = args.energyLevel;
     if (args.difficulty !== undefined) patch.difficulty = args.difficulty;
 
