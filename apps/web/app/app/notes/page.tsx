@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import {
   AlertDialog,
@@ -72,13 +73,23 @@ function generateId(): string {
 
 export default function NotesPage() {
   const isMobile = useIsMobile();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // State
+  // Initialize state from URL params
   const [notes, setNotes] = useState<MockNote[]>(mockNotesData);
-  const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
-  const [projectFilter, setProjectFilter] = useState<string>("all");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useState<ViewMode>("byProject");
+  const [selectedNoteId, setSelectedNoteId] = useState<string | null>(
+    searchParams.get("note") || null,
+  );
+  const [projectFilter, setProjectFilter] = useState<string>(
+    searchParams.get("project") || "all",
+  );
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
+  const [viewMode, setViewMode] = useState<ViewMode>(
+    (searchParams.get("view") as ViewMode) || "byProject",
+  );
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [noteToDelete, setNoteToDelete] = useState<string | null>(null);
@@ -159,6 +170,21 @@ export default function NotesPage() {
     if (projectId === "__none__") return null;
     return mockProjects.find((p) => p._id === projectId) || null;
   }, []);
+
+  // Sync state to URL params
+  useEffect(() => {
+    const params = new URLSearchParams();
+
+    if (selectedNoteId) params.set("note", selectedNoteId);
+    if (projectFilter !== "all") params.set("project", projectFilter);
+    if (searchQuery) params.set("q", searchQuery);
+    if (viewMode !== "byProject") params.set("view", viewMode);
+
+    const queryString = params.toString();
+    router.replace(queryString ? `${pathname}?${queryString}` : pathname, {
+      scroll: false,
+    });
+  }, [selectedNoteId, projectFilter, searchQuery, viewMode, router, pathname]);
 
   // Simulate save state - track when content changes
   useEffect(() => {
@@ -248,10 +274,24 @@ export default function NotesPage() {
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Cmd/Ctrl + N for new note
       if ((e.metaKey || e.ctrlKey) && e.key === "n") {
         e.preventDefault();
         handleCreateNote();
       }
+      // / for search focus
+      if (e.key === "/" && !e.metaKey && !e.ctrlKey) {
+        const target = e.target as HTMLElement;
+        if (
+          target.tagName !== "INPUT" &&
+          target.tagName !== "TEXTAREA" &&
+          !target.isContentEditable
+        ) {
+          e.preventDefault();
+          searchInputRef.current?.focus();
+        }
+      }
+      // Esc to deselect
       if (e.key === "Escape" && selectedNoteId && !isMobile) {
         setSelectedNoteId(null);
       }
@@ -286,6 +326,7 @@ export default function NotesPage() {
               onDeleteNote={handleDeleteNote}
               projectForNote={projectForNote}
               mockProjects={mockProjects}
+              searchInputRef={searchInputRef}
             />
           </div>
 
@@ -336,6 +377,7 @@ export default function NotesPage() {
               onDeleteNote={handleDeleteNote}
               projectForNote={projectForNote}
               mockProjects={mockProjects}
+              searchInputRef={searchInputRef}
             />
           </div>
 

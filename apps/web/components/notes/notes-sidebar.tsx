@@ -38,6 +38,7 @@ interface NotesSidebarProps {
   onDeleteNote: (noteId: string) => void;
   projectForNote: (projectId: string) => MockProject | null;
   mockProjects: MockProject[];
+  searchInputRef?: React.RefObject<HTMLInputElement | null>;
 }
 
 export function NotesSidebar({
@@ -60,6 +61,7 @@ export function NotesSidebar({
   onDeleteNote,
   projectForNote,
   mockProjects,
+  searchInputRef,
 }: NotesSidebarProps) {
   return (
     <div className="flex h-full flex-col gap-4">
@@ -98,6 +100,7 @@ export function NotesSidebar({
             className="absolute left-2 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
           />
           <Input
+            ref={searchInputRef}
             type="text"
             placeholder="Search notes..."
             value={searchQuery}
