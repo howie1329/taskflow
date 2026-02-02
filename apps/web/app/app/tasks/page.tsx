@@ -856,7 +856,7 @@ export default function TasksPage() {
             </Tabs>
           </div>
         </div>
-        {filterControls}
+        {!isEmptyState && filterControls}
       </div>
 
       {/* Main content area */}
@@ -873,6 +873,12 @@ export default function TasksPage() {
                 className="mt-4 px-3 py-1.5 text-xs bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
               >
                 Add your first task
+              </button>
+              <button
+                onClick={() => setIsCreateTagDialogOpen(true)}
+                className="mt-2 px-3 py-1.5 text-xs border border-border hover:bg-accent transition-colors"
+              >
+                Create a tag
               </button>
             </div>
           </div>
