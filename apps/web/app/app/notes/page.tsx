@@ -160,16 +160,16 @@ export default function NotesPage() {
     return mockProjects.find((p) => p._id === projectId) || null;
   }, []);
 
-  // Simulate save state
+  // Simulate save state - track when content changes
   useEffect(() => {
-    if (selectedNote) {
-      setIsSaved(false);
-      const timer = setTimeout(() => {
-        setIsSaved(true);
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [selectedNote?.title, selectedNote?.content]);
+    if (!selectedNote) return;
+
+    setIsSaved(false);
+    const timer = setTimeout(() => {
+      setIsSaved(true);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [selectedNote?._id, selectedNote?.title, selectedNote?.content]);
 
   // Actions
   const handleCreateNote = useCallback(() => {
