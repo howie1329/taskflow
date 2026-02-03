@@ -117,8 +117,8 @@ export default function ThreadPage() {
     <PromptInputProvider>
       <div className="flex flex-col h-full">
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between p-4 border-b bg-background/80 backdrop-blur shrink-0">
-          <div className="flex items-center gap-3">
+        <div className="sticky top-0 z-10 flex items-center justify-between px-4 py-3 border-b bg-background/80 backdrop-blur shrink-0">
+          <div className="flex items-center gap-3 min-w-0">
             {/* Mobile back button */}
             <Button
               variant="ghost"
@@ -131,10 +131,11 @@ export default function ThreadPage() {
                 className="size-4"
                 strokeWidth={2}
               />
+              <span className="sr-only">Back to chats</span>
             </Button>
 
-            <div>
-              <h2 className="text-sm font-medium">
+            <div className="min-w-0">
+              <h2 className="text-sm font-medium truncate">
                 {thread?.title || "New chat"}
               </h2>
               <div className="flex items-center gap-2 mt-0.5">
@@ -173,12 +174,13 @@ export default function ThreadPage() {
               className="size-4"
               strokeWidth={2}
             />
+            <span className="sr-only">Conversation actions</span>
           </Button>
         </div>
 
         {/* Conversation */}
         <Conversation className="flex-1">
-          <ConversationContent className="p-4 space-y-6">
+          <ConversationContent className="mx-auto w-full max-w-5xl px-3 py-6 gap-4">
             {messages.length === 0 ? (
               <ConversationEmptyState
                 title="Start a new conversation"
@@ -189,11 +191,24 @@ export default function ThreadPage() {
                 <Message
                   key={message.id}
                   from={message.role}
-                  className={cn(message.role === "user" && "justify-end")}
+                  className={cn(
+                    "max-w-none gap-1.5",
+                    message.role === "user" && "justify-end",
+                  )}
                 >
-                  <MessageContent className="max-w-[80%]">
+                  <MessageContent
+                    className={cn(
+                      "text-sm leading-6",
+                      message.role === "assistant" &&
+                      "w-full border-l border-border/60 pl-4",
+                      message.role === "user" &&
+                      "border border-border bg-muted/50 px-4 py-3 max-w-[32rem]",
+                    )}
+                  >
                     {message.role === "assistant" ? (
-                      <MessageResponse>{message.content}</MessageResponse>
+                      <MessageResponse className="text-sm leading-6">
+                        {message.content}
+                      </MessageResponse>
                     ) : (
                       <div className="text-sm whitespace-pre-wrap">
                         {message.content}
@@ -208,45 +223,47 @@ export default function ThreadPage() {
         </Conversation>
 
         {/* Composer */}
-        <div className="shrink-0 border-t bg-background/80 backdrop-blur p-4 pb-[env(safe-area-inset-bottom)]">
-          <div className="max-w-3xl mx-auto">
-            <PromptInput onSubmit={() => {}}>
-              <PromptInputHeader>
-                <PromptInputTools>
-                  <PromptInputActionMenu>
-                    <PromptInputActionMenuTrigger>
-                      <HugeiconsIcon
-                        icon={PlusSignIcon}
-                        className="size-4"
-                        strokeWidth={2}
-                      />
-                    </PromptInputActionMenuTrigger>
-                    <PromptInputActionMenuContent>
-                      <PromptInputActionAddAttachments />
-                    </PromptInputActionMenuContent>
-                  </PromptInputActionMenu>
-                  <PromptInputButton variant="ghost" size="icon-sm">
+        <div className="shrink-0 border-t bg-background/80 backdrop-blur px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+12px)]">
+          <label htmlFor="thread-message" className="sr-only">
+            Message
+          </label>
+          <PromptInput onSubmit={() => { }}>
+            <PromptInputTextarea
+              className="pt-4"
+              id="thread-message"
+              placeholder="Continue the conversation..."
+            />
+
+            <PromptInputFooter>
+              <PromptInputTools>
+                <PromptInputActionMenu>
+                  <PromptInputActionMenuTrigger>
                     <HugeiconsIcon
-                      icon={Image01Icon}
+                      icon={PlusSignIcon}
                       className="size-4"
                       strokeWidth={2}
                     />
-                  </PromptInputButton>
-                </PromptInputTools>
-              </PromptInputHeader>
-
-              <PromptInputTextarea placeholder="Continue the conversation..." />
-
-              <PromptInputFooter>
-                <PromptInputTools>
-                  <span className="text-xs text-muted-foreground">
-                    Press Enter to send, Shift+Enter for new line
-                  </span>
-                </PromptInputTools>
+                  </PromptInputActionMenuTrigger>
+                  <PromptInputActionMenuContent>
+                    <PromptInputActionAddAttachments />
+                  </PromptInputActionMenuContent>
+                </PromptInputActionMenu>
+                <PromptInputButton variant="ghost" size="icon-sm">
+                  <HugeiconsIcon
+                    icon={Image01Icon}
+                    className="size-4"
+                    strokeWidth={2}
+                  />
+                </PromptInputButton>
+              </PromptInputTools>
+              <PromptInputTools>
+                <span className="hidden sm:block text-xs text-muted-foreground pr-2">
+                  Press Enter to send, Shift+Enter for new line
+                </span>
                 <PromptInputSubmit />
-              </PromptInputFooter>
-            </PromptInput>
-          </div>
+              </PromptInputTools>
+            </PromptInputFooter>
+          </PromptInput>
         </div>
       </div>
     </PromptInputProvider>
