@@ -46,6 +46,28 @@ const schema = defineSchema({
     hideCompletedTasks: v.optional(v.boolean()),
     // Future: theme, notifications, privacy settings
   }).index("by_user", ["userId"]),
+  // In-app notifications
+  notifications: defineTable({
+    userId: v.id("users"), // Reference to auth user
+    type: v.string(), // Notification type identifier
+    title: v.string(), // Short title for the notification
+    body: v.optional(v.string()), // Optional details
+    data: v.optional(v.any()), // Flexible payload for deep links
+    status: v.union(
+      v.literal("unread"),
+      v.literal("read"),
+      v.literal("archived"),
+    ),
+    priority: v.optional(
+      v.union(v.literal("low"), v.literal("normal"), v.literal("high")),
+    ),
+    createdAt: v.number(),
+    readAt: v.optional(v.number()),
+    archivedAt: v.optional(v.number()),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_status", ["userId", "status"])
+    .index("by_user_createdAt", ["userId", "createdAt"]),
 
   // Projects - Task containers with status, color, icon
   projects: defineTable({
