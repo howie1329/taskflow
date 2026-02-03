@@ -36,6 +36,11 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Separator } from "@/components/ui/separator";
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
@@ -46,11 +51,11 @@ import {
   MessageQuestionIcon,
   MoreHorizontalIcon,
 } from "@hugeicons/core-free-icons";
+import { ChevronDownIcon } from "lucide-react";
 import {
   mockThreads,
   mockProjects,
   type ChatThread,
-  type ChatProject,
 } from "./mock-data";
 
 function formatTimeAgo(timestamp: number): string {
@@ -67,7 +72,6 @@ function formatTimeAgo(timestamp: number): string {
 interface ThreadRowProps {
   thread: ChatThread;
   isActive: boolean;
-  project?: ChatProject;
   isEditing: boolean;
   editingTitle: string;
   onEditTitleChange: (value: string) => void;
@@ -81,7 +85,6 @@ interface ThreadRowProps {
 function ThreadRow({
   thread,
   isActive,
-  project,
   isEditing,
   editingTitle,
   onEditTitleChange,
@@ -133,14 +136,6 @@ function ThreadRow({
           <span className="text-xs text-muted-foreground tabular-nums">
             {formatTimeAgo(thread.updatedAt)}
           </span>
-          {project && (
-            <Badge
-              variant="outline"
-              className="rounded-none text-[10px] h-4 px-1"
-            >
-              {project.icon} {project.title}
-            </Badge>
-          )}
         </div>
       </div>
 
@@ -250,13 +245,12 @@ export function ChatShell({ children }: ChatShellProps) {
       t.snippet.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  const pinnedThreads = filteredThreads.filter((t) => t.pinned);
-  const recentThreads = filteredThreads.filter((t) => !t.pinned);
-
-  const getProject = (thread: ChatThread) =>
-    thread.projectId
-      ? mockProjects.find((p) => p.id === thread.projectId)
-      : undefined;
+  const pinnedThreads = filteredThreads.filter(
+    (t) => t.pinned && !t.projectId,
+  );
+  const recentThreads = filteredThreads.filter(
+    (t) => !t.pinned && !t.projectId,
+  );
 
   const handleStartEdit = (thread: ChatThread) => {
     setEditingThreadId(thread.id);
@@ -301,10 +295,6 @@ export function ChatShell({ children }: ChatShellProps) {
       ),
     }))
     .filter((group) => group.threads.length > 0);
-
-  const unassignedThreads = filteredThreads.filter(
-    (thread) => !thread.projectId,
-  );
 
   return (
     <>
@@ -429,7 +419,6 @@ export function ChatShell({ children }: ChatShellProps) {
                             key={thread.id}
                             thread={thread}
                             isActive={thread.id === activeThreadId}
-                            project={getProject(thread)}
                             isEditing={editingThreadId === thread.id}
                             editingTitle={editingTitle}
                             onEditTitleChange={setEditingTitle}
@@ -464,7 +453,6 @@ export function ChatShell({ children }: ChatShellProps) {
                             key={thread.id}
                             thread={thread}
                             isActive={thread.id === activeThreadId}
-                            project={getProject(thread)}
                             isEditing={editingThreadId === thread.id}
                             editingTitle={editingTitle}
                             onEditTitleChange={setEditingTitle}
@@ -479,41 +467,41 @@ export function ChatShell({ children }: ChatShellProps) {
                     </div>
                   )}
 
-                  {(groupedByProject.length > 0 ||
-                    unassignedThreads.length > 0) && (
+                  {groupedByProject.length > 0 && (
                     <>
                       <Separator className="bg-sidebar-border" />
                       <div className="space-y-3">
                         <div className="flex items-center gap-2 px-1">
                           <span className="text-xs font-medium text-muted-foreground">
-                            By project
+                            Projects
                           </span>
                         </div>
-
-                        <div className="space-y-4">
+                        <div className="space-y-2">
                           {groupedByProject.map((group) => (
-                            <div key={group.project.id} className="space-y-2">
-                              <div className="flex items-center gap-2 px-1">
-                                <span className="text-xs">
-                                  {group.project.icon}
-                                </span>
-                                <span className="text-xs font-medium text-muted-foreground">
+                            <Collapsible
+                              key={group.project.id}
+                              defaultOpen
+                              className="rounded-none border border-sidebar-border/60 bg-sidebar/40"
+                            >
+                              <CollapsibleTrigger className="group flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-xs font-medium text-muted-foreground transition-colors hover:bg-accent/40">
+                                <span className="flex items-center gap-2">
+                                  <span>{group.project.icon}</span>
                                   {group.project.title}
+                                  <Badge
+                                    variant="secondary"
+                                    className="rounded-none text-[10px] h-4 px-1"
+                                  >
+                                    {group.threads.length}
+                                  </Badge>
                                 </span>
-                                <Badge
-                                  variant="secondary"
-                                  className="rounded-none text-[10px] h-4 px-1"
-                                >
-                                  {group.threads.length}
-                                </Badge>
-                              </div>
-                              <div className="space-y-1">
+                                <ChevronDownIcon className="size-4 transition-transform group-data-[state=open]:rotate-180" />
+                              </CollapsibleTrigger>
+                              <CollapsibleContent className="space-y-1 px-1 pb-2">
                                 {group.threads.map((thread) => (
                                   <ThreadRow
                                     key={thread.id}
                                     thread={thread}
                                     isActive={thread.id === activeThreadId}
-                                    project={getProject(thread)}
                                     isEditing={editingThreadId === thread.id}
                                     editingTitle={editingTitle}
                                     onEditTitleChange={setEditingTitle}
@@ -528,48 +516,9 @@ export function ChatShell({ children }: ChatShellProps) {
                                     }
                                   />
                                 ))}
-                              </div>
-                            </div>
+                              </CollapsibleContent>
+                            </Collapsible>
                           ))}
-
-                          {unassignedThreads.length > 0 && (
-                            <div className="space-y-2">
-                              <div className="flex items-center gap-2 px-1">
-                                <span className="text-xs">📌</span>
-                                <span className="text-xs font-medium text-muted-foreground">
-                                  No project
-                                </span>
-                                <Badge
-                                  variant="secondary"
-                                  className="rounded-none text-[10px] h-4 px-1"
-                                >
-                                  {unassignedThreads.length}
-                                </Badge>
-                              </div>
-                              <div className="space-y-1">
-                                {unassignedThreads.map((thread) => (
-                                  <ThreadRow
-                                    key={thread.id}
-                                    thread={thread}
-                                    isActive={thread.id === activeThreadId}
-                                    project={getProject(thread)}
-                                    isEditing={editingThreadId === thread.id}
-                                    editingTitle={editingTitle}
-                                    onEditTitleChange={setEditingTitle}
-                                    onStartEdit={() => handleStartEdit(thread)}
-                                    onCancelEdit={handleCancelEdit}
-                                    onCommitEdit={handleCommitEdit}
-                                    onTogglePin={() =>
-                                      handleTogglePin(thread.id)
-                                    }
-                                    onDeleteRequest={() =>
-                                      setDeleteThreadId(thread.id)
-                                    }
-                                  />
-                                ))}
-                              </div>
-                            </div>
-                          )}
                         </div>
                       </div>
                     </>
