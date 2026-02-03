@@ -92,8 +92,8 @@ function ThreadRow({
   onDeleteRequest,
 }: ThreadRowProps) {
   const content = (
-    <div className="flex items-start justify-between gap-2">
-      <div className="flex-1 min-w-0">
+    <div className="flex items-start justify-between gap-3">
+      <div className="flex-1 min-w-0 space-y-1">
         <div className="flex items-center gap-2">
           {thread.pinned && (
             <HugeiconsIcon
@@ -126,10 +126,10 @@ function ThreadRow({
             </span>
           )}
         </div>
-        <p className="text-xs text-muted-foreground line-clamp-1 mt-1">
+        <p className="text-xs text-muted-foreground line-clamp-1">
           {thread.snippet}
         </p>
-        <div className="flex items-center gap-2 mt-2">
+        <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground tabular-nums">
             {formatTimeAgo(thread.updatedAt)}
           </span>
@@ -149,7 +149,7 @@ function ThreadRow({
           <Button
             variant="ghost"
             size="icon-xs"
-            className="opacity-0 group-hover:opacity-100"
+            className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -190,18 +190,38 @@ function ThreadRow({
   );
 
   const classes = cn(
-    "group block rounded-none border p-3 transition-all duration-200",
+    "group relative block rounded-none px-3 py-2.5 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
     isActive
-      ? "border-foreground/40 bg-accent"
-      : "border-border hover:border-foreground/20 hover:bg-accent/50",
+      ? "bg-accent text-foreground"
+      : "hover:bg-accent/50 text-foreground",
   );
 
   if (isEditing) {
-    return <div className={classes}>{content}</div>;
+    return (
+      <div className={classes}>
+        <span
+          className={cn(
+            "absolute left-0 top-0 h-full w-0.5 bg-transparent",
+            isActive && "bg-primary"
+          )}
+        />
+        {content}
+      </div>
+    );
   }
 
   return (
-    <Link href={`/app/chat/${thread.id}`} className={classes}>
+    <Link
+      href={`/app/chat/${thread.id}`}
+      className={classes}
+      aria-current={isActive ? "page" : undefined}
+    >
+      <span
+        className={cn(
+          "absolute left-0 top-0 h-full w-0.5 bg-transparent",
+          isActive && "bg-primary"
+        )}
+      />
       {content}
     </Link>
   );
@@ -292,12 +312,12 @@ export function ChatShell({ children }: ChatShellProps) {
         {/* Left Rail */}
         <div
           className={cn(
-            "w-full md:w-[340px] shrink-0 border-r flex flex-col",
+            "w-full md:w-[340px] shrink-0 border-r flex flex-col bg-sidebar text-sidebar-foreground",
             isThreadRoute && "hidden md:flex",
           )}
         >
           {/* Header */}
-          <div className="p-4 border-b space-y-3">
+          <div className="p-4 border-b border-sidebar-border space-y-3">
             <Link href="/app/chat">
               <Button
                 className={cn(
@@ -393,7 +413,7 @@ export function ChatShell({ children }: ChatShellProps) {
                           className="size-3 text-muted-foreground"
                           strokeWidth={2}
                         />
-                        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        <span className="text-xs font-medium text-muted-foreground">
                           Pinned
                         </span>
                         <Badge
@@ -428,7 +448,7 @@ export function ChatShell({ children }: ChatShellProps) {
                   {recentThreads.length > 0 && (
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 px-1">
-                        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        <span className="text-xs font-medium text-muted-foreground">
                           Recent
                         </span>
                         <Badge
@@ -462,10 +482,10 @@ export function ChatShell({ children }: ChatShellProps) {
                   {(groupedByProject.length > 0 ||
                     unassignedThreads.length > 0) && (
                     <>
-                      <Separator />
+                      <Separator className="bg-sidebar-border" />
                       <div className="space-y-3">
                         <div className="flex items-center gap-2 px-1">
-                          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                          <span className="text-xs font-medium text-muted-foreground">
                             By project
                           </span>
                         </div>

@@ -117,7 +117,7 @@ export default function ThreadPage() {
     <PromptInputProvider>
       <div className="flex flex-col h-full">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b shrink-0">
+        <div className="sticky top-0 z-10 flex items-center justify-between p-4 border-b bg-background/80 backdrop-blur shrink-0">
           <div className="flex items-center gap-3">
             {/* Mobile back button */}
             <Button
