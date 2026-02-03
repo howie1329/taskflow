@@ -40,6 +40,7 @@ interface CreateTaskSheetProps {
   defaults: {
     status?: Task["status"];
     scheduledDate?: string | null;
+    projectId?: string | null;
   };
   onCreate: (draft: TaskDraft) => void;
   projects?: Project[];
@@ -126,7 +127,7 @@ export function CreateTaskSheet({
     if (open) {
       setTitle("");
       setDescription("");
-      setProjectId("__none__");
+      setProjectId(defaults.projectId ?? "__none__");
       setStatus(defaults.status ?? "Not Started");
       setPriority("low");
       setScheduledDate(defaults.scheduledDate ?? "");

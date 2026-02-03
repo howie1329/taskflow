@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   InputGroup,
@@ -34,6 +35,7 @@ import {
   ProjectSheet,
   type ProjectDraft,
 } from "@/components/projects/project-sheet";
+import { mockProjects } from "@/components/projects/mock-data";
 import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
@@ -43,57 +45,8 @@ import {
   Archive02Icon,
 } from "@hugeicons/core-free-icons";
 
-// Mock data for UI development
-const mockProjects: ProjectCardData[] = [
-  {
-    _id: "1",
-    title: "Website Redesign",
-    description: "Complete overhaul of the company website with new branding",
-    status: "active",
-    color: "#3b82f6",
-    icon: "🎨",
-    updatedAt: Date.now() - 86400000, // 1 day ago
-  },
-  {
-    _id: "2",
-    title: "Q4 Marketing Campaign",
-    description: "Holiday marketing campaign planning and execution",
-    status: "active",
-    color: "#ef4444",
-    icon: "📢",
-    updatedAt: Date.now() - 172800000, // 2 days ago
-  },
-  {
-    _id: "3",
-    title: "Mobile App v2.0",
-    description:
-      "Major version update with new features and performance improvements",
-    status: "active",
-    color: "#22c55e",
-    icon: "📱",
-    updatedAt: Date.now() - 259200000, // 3 days ago
-  },
-  {
-    _id: "4",
-    title: "Old Brand Assets",
-    description: "Previous brand design system and assets",
-    status: "archived",
-    color: "#6b7280",
-    icon: "🗂️",
-    updatedAt: Date.now() - 604800000, // 7 days ago
-  },
-  {
-    _id: "5",
-    title: "2023 Annual Report",
-    description: "Completed annual report project from last year",
-    status: "archived",
-    color: "#8b5cf6",
-    icon: "📊",
-    updatedAt: Date.now() - 2592000000, // 30 days ago
-  },
-];
-
 export default function ProjectsPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<"active" | "archived">("active");
   const [searchQuery, setSearchQuery] = useState("");
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -154,8 +107,7 @@ export default function ProjectsPage() {
   };
 
   const handleCardClick = (project: ProjectCardData) => {
-    // TODO: Navigate to project detail page
-    console.log("Open project:", project._id);
+    router.push(`/app/projects/${project._id}`);
   };
 
   const handleSheetSubmit = (draft: ProjectDraft) => {

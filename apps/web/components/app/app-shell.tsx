@@ -69,6 +69,8 @@ const navItems = [
 ];
 
 function getPageTitle(pathname: string): string {
+  if (pathname.startsWith("/app/projects/")) return "Projects"
+  if (pathname.startsWith("/app/chat/")) return "AI Chat"
   const item = navItems.find((item) => pathname === item.href);
   if (item) return item.title;
   if (pathname === "/app") return "Overview";
