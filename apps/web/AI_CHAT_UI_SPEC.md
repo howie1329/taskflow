@@ -16,6 +16,13 @@
 - Empty states: `Empty` component with `border-dashed`
 - Mobile-first with route-driven navigation
 
+## Implementation Notes (Current Code)
+
+- Left rail state is managed in `app/app/chat/components/chat-shell.tsx` using mock thread data.
+- Thread editing, pinning, and deletion are implemented against local state only.
+- `/app/chat` creates temporary thread IDs (prefixed with `temp-`) and routes to `/app/chat/[threadId]`.
+- Conversation content is mocked via `app/app/chat/components/mock-data.ts`.
+
 ## Layout Architecture
 
 ### Desktop (md+): 2-Pane Split
@@ -437,5 +444,5 @@ From AI elements:
 
 ---
 
-**Status**: Phase 0 — Specification Locked
-**Next**: Phase 1 — Routing + Shared Chat Shell
+**Status**: UI implemented with mock state (no Convex persistence yet)
+**Next**: Replace mock threads/messages with Convex-backed conversations

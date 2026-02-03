@@ -16,6 +16,12 @@
 - Empty states: `Empty` component with `border-dashed`
 - Mobile-first sheet pattern: bottom `Sheet` for editor (like TaskDetailsSheet)
 
+## Implementation Notes (Current Code)
+
+- Notes data lives in local component state with URL param syncing for `note`, `project`, `view`, and `q`.
+- Project list and note list are mocked in the page module for now.
+- Editor save state is simulated client-side (no persistence).
+
 ## Layout Architecture
 
 ### Desktop (md+): 2-Pane Split

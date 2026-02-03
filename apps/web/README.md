@@ -44,6 +44,14 @@ Non-goals for v1:
 - Semantic vector search (planned v1.1+)
 - Full reminders engine (planned after schedule model is solid)
 
+## Current Implementation Snapshot
+
+- Convex-backed data: inbox, tasks, projects, tags, subtasks, onboarding, settings.
+- UI-only (mock state): notes and AI chat.
+- Marketing routes: landing page and roadmap.
+
+Detailed docs live in [`docs/`](./docs/README.md).
+
 ## Roadmap
 
 ### Phase 1 — Foundation (Week 1)
@@ -88,7 +96,7 @@ Non-goals for v1:
 
 ## Requirements
 
-- Node.js 20+
+- Node.js 25+
 - npm
 - A Convex deployment
 
