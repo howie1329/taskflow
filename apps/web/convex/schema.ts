@@ -35,6 +35,9 @@ const schema = defineSchema({
         name: v.string(),
       }),
     ),
+    onboardingCompletedAt: v.optional(v.number()),
+    onboardingVersion: v.optional(v.string()),
+    notificationsEnabled: v.optional(v.boolean()),
     // Task view preference (board | todayPlusBoard)
     taskDefaultView: v.optional(
       v.union(v.literal("board"), v.literal("todayPlusBoard")),

@@ -1,7 +1,8 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import Link from "next/link"
+import { usePathname, useRouter } from "next/navigation"
+import { useEffect } from "react"
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Task01Icon,
@@ -16,8 +17,9 @@ import {
 } from "@hugeicons/core-free-icons";
 
 import { Button } from "@/components/ui/button";
-import { useTheme } from "next-themes";
-import { SignOutButton } from "@/components/auth/sign-out-button";
+import { useTheme } from "next-themes"
+import { SignOutButton } from "@/components/auth/sign-out-button"
+import { useViewer } from "@/components/settings/hooks/use-viewer"
 import {
   Sidebar,
   SidebarContent,
@@ -100,8 +102,28 @@ function ThemeToggleMenuItem() {
 }
 
 export function AppShell({ children }: AppShellProps) {
-  const pathname = usePathname();
-  const pageTitle = getPageTitle(pathname);
+  const pathname = usePathname()
+  const pageTitle = getPageTitle(pathname)
+  const router = useRouter()
+  const { isLoading, preferences } = useViewer()
+
+  const isOnboardingRoute = pathname === "/app/onboarding"
+  const isOnboarded = !!preferences?.onboardingCompletedAt
+
+  useEffect(() => {
+    if (isLoading) return
+    if (!isOnboarded && !isOnboardingRoute) {
+      router.replace("/app/onboarding")
+    }
+  }, [isLoading, isOnboarded, isOnboardingRoute, router])
+
+  if (!isOnboardingRoute && !isOnboarded) {
+    return (
+      <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">
+        {isLoading ? "Loading..." : "Redirecting to onboarding..."}
+      </div>
+    )
+  }
 
   return (
     <SidebarProvider>

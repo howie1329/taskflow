@@ -28,6 +28,9 @@ export const updateMyPreferences = mutation({
         name: v.string(),
       }),
     ),
+    onboardingCompletedAt: v.optional(v.number()),
+    onboardingVersion: v.optional(v.string()),
+    notificationsEnabled: v.optional(v.boolean()),
     taskDefaultView: v.optional(
       v.union(v.literal("board"), v.literal("todayPlusBoard")),
     ),
@@ -47,11 +50,23 @@ export const updateMyPreferences = mutation({
     // Build patch object with only provided fields
     const patch: {
       defaultAIModel?: typeof args.defaultAIModel;
+      onboardingCompletedAt?: typeof args.onboardingCompletedAt;
+      onboardingVersion?: typeof args.onboardingVersion;
+      notificationsEnabled?: typeof args.notificationsEnabled;
       taskDefaultView?: typeof args.taskDefaultView;
       hideCompletedTasks?: typeof args.hideCompletedTasks;
     } = {};
     if (args.defaultAIModel !== undefined) {
       patch.defaultAIModel = args.defaultAIModel;
+    }
+    if (args.onboardingCompletedAt !== undefined) {
+      patch.onboardingCompletedAt = args.onboardingCompletedAt;
+    }
+    if (args.onboardingVersion !== undefined) {
+      patch.onboardingVersion = args.onboardingVersion;
+    }
+    if (args.notificationsEnabled !== undefined) {
+      patch.notificationsEnabled = args.notificationsEnabled;
     }
     if (args.taskDefaultView !== undefined) {
       patch.taskDefaultView = args.taskDefaultView;
