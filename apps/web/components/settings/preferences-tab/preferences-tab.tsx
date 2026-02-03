@@ -64,6 +64,8 @@ export function PreferencesTab() {
   const [hideCompletedTasks, setHideCompletedTasks] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isSavingHideCompleted, setIsSavingHideCompleted] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [isSavingNotifications, setIsSavingNotifications] = useState(false);
 
   const [newTagName, setNewTagName] = useState("");
   const [newTagColor, setNewTagColor] = useState("#6366f1");
@@ -104,6 +106,21 @@ export function PreferencesTab() {
       setHideCompletedTasks(savedValue);
     }
   }, [preferences?.hideCompletedTasks, hideCompletedTasks, isSavingHideCompleted]);
+
+  useEffect(() => {
+    const savedValue = preferences?.notificationsEnabled;
+    if (
+      savedValue !== undefined &&
+      savedValue !== notificationsEnabled &&
+      !isSavingNotifications
+    ) {
+      setNotificationsEnabled(savedValue);
+    }
+  }, [
+    preferences?.notificationsEnabled,
+    notificationsEnabled,
+    isSavingNotifications,
+  ]);
 
   // Initialize edit dialog state when tag changes
   useEffect(() => {
@@ -170,6 +187,21 @@ export function PreferencesTab() {
       console.error(error);
     } finally {
       setIsSavingHideCompleted(false);
+    }
+  };
+
+  const handleToggleNotifications = async (value: boolean) => {
+    setNotificationsEnabled(value);
+    setIsSavingNotifications(true);
+    try {
+      await updatePreferences({ notificationsEnabled: value });
+      toast.success("Notification preference updated");
+    } catch (error) {
+      toast.error("Failed to update notifications");
+      setNotificationsEnabled(!value);
+      console.error(error);
+    } finally {
+      setIsSavingNotifications(false);
     }
   };
 
@@ -426,6 +458,30 @@ export function PreferencesTab() {
                       onCheckedChange={handleToggleHideCompleted}
                       disabled={isSavingHideCompleted}
                       aria-label="Hide completed tasks"
+                    />
+                  )}
+                </div>
+              </Field>
+            </div>
+
+            <div className="pt-4 border-t">
+              <h3 className="text-sm font-medium mb-3">Notifications</h3>
+              <Field>
+                <div className="flex items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <FieldLabel>In-app notifications</FieldLabel>
+                    <FieldDescription>
+                      Toggle updates like successful saves or reminders
+                    </FieldDescription>
+                  </div>
+                  {isLoadingViewer ? (
+                    <Skeleton className="h-6 w-10" />
+                  ) : (
+                    <Switch
+                      checked={notificationsEnabled}
+                      onCheckedChange={handleToggleNotifications}
+                      disabled={isSavingNotifications}
+                      aria-label="Enable in-app notifications"
                     />
                   )}
                 </div>
