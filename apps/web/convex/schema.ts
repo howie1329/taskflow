@@ -147,6 +147,21 @@ const schema = defineSchema({
       filterFields: ["userId"],
     }),
 
+  // Inbox Items - Capture and triage
+  inboxItems: defineTable({
+    userId: v.id("users"),
+    content: v.string(),
+    status: v.union(v.literal("open"), v.literal("archived")),
+    labels: v.optional(v.array(v.string())),
+    source: v.optional(v.union(v.literal("manual"), v.literal("ai"))),
+    metadata: v.optional(v.any()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_status", ["userId", "status"])
+    .index("by_user_createdAt", ["userId", "createdAt"]),
+
   // Subtasks - Lightweight checklists under tasks
   subtasks: defineTable({
     userId: v.id("users"), // Reference to auth user

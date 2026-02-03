@@ -1,6 +1,9 @@
 "use client";
 
 import { useState, useMemo, useCallback, useRef, useEffect } from "react";
+import { useMutation, useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import type { Doc } from "@/convex/_generated/dataModel";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -70,36 +73,8 @@ import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 type InboxItemStatus = "open" | "archived";
-
-interface InboxItem {
-  id: string;
-  content: string;
-  status: InboxItemStatus;
-  createdAt: number;
-}
-
-// Mock initial items for UI iteration
-const mockItems: InboxItem[] = [
-  {
-    id: "1",
-    content: "Brainstorm feature ideas for Q1 roadmap",
-    status: "open",
-    createdAt: Date.now() - 1000 * 60 * 30, // 30 min ago
-  },
-  {
-    id: "2",
-    content:
-      "Research competitor pricing\n- Check linear.so\n- Check notion.so\n- Check asana.com",
-    status: "open",
-    createdAt: Date.now() - 1000 * 60 * 60 * 2, // 2 hours ago
-  },
-  {
-    id: "3",
-    content: "Schedule user interviews for next week",
-    status: "archived",
-    createdAt: Date.now() - 1000 * 60 * 60 * 24, // 1 day ago
-  },
-];
+type InboxItem = Doc<"inboxItems">;
+type InboxItemId = InboxItem["_id"];
 
 function formatRelativeTime(timestamp: number): string {
   const now = Date.now();
@@ -147,9 +122,9 @@ function MobileActionSheet({
   item: InboxItem | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onArchive: (id: string) => void;
-  onUnarchive: (id: string) => void;
-  onDelete: (id: string) => void;
+  onArchive: (id: InboxItemId) => void;
+  onUnarchive: (id: InboxItemId) => void;
+  onDelete: (id: InboxItemId) => void;
   onConvert: (type: "task" | "note" | "project") => void;
 }) {
   if (!item) return null;
@@ -201,7 +176,7 @@ function MobileActionSheet({
               variant="ghost"
               className="justify-start gap-2 h-10"
               onClick={() => {
-                onUnarchive(item.id);
+                onUnarchive(item._id);
                 onOpenChange(false);
               }}
             >
@@ -213,7 +188,7 @@ function MobileActionSheet({
               variant="ghost"
               className="justify-start gap-2 h-10"
               onClick={() => {
-                onArchive(item.id);
+                onArchive(item._id);
                 onOpenChange(false);
               }}
             >
@@ -244,7 +219,7 @@ function MobileActionSheet({
                 <AlertDialogAction
                   variant="destructive"
                   onClick={() => {
-                    onDelete(item.id);
+                    onDelete(item._id);
                     onOpenChange(false);
                   }}
                 >
@@ -265,13 +240,15 @@ function InboxItemRow({
   onUnarchive,
   onDelete,
   onConvert,
+  onOpenActions,
   isNew = false,
 }: {
   item: InboxItem;
-  onArchive: (id: string) => void;
-  onUnarchive: (id: string) => void;
-  onDelete: (id: string) => void;
-  onConvert: (id: string, type: "task" | "note" | "project") => void;
+  onArchive: (id: InboxItemId) => void;
+  onUnarchive: (id: InboxItemId) => void;
+  onDelete: (id: InboxItemId) => void;
+  onConvert: (id: InboxItemId, type: "task" | "note" | "project") => void;
+  onOpenActions: (item: InboxItem) => void;
   isNew?: boolean;
 }) {
   const [convertDialog, setConvertDialog] = useState<{
@@ -283,10 +260,13 @@ function InboxItemRow({
 
   const handleConvert = useCallback(
     (type: "task" | "note" | "project") => {
-      onConvert(item.id, type);
-      setConvertDialog({ open: true, type });
+      if (type === "note") {
+        setConvertDialog({ open: true, type });
+        return;
+      }
+      onConvert(item._id, type);
     },
-    [item.id, onConvert],
+    [item._id, onConvert],
   );
 
   return (
@@ -312,7 +292,7 @@ function InboxItemRow({
             variant="ghost"
             size="icon-sm"
             className="shrink-0"
-            onClick={() => handleConvert("task")}
+            onClick={() => onOpenActions(item)}
           >
             <HugeiconsIcon icon={MoreVerticalIcon} className="size-4" />
             <span className="sr-only">Actions</span>
@@ -359,12 +339,12 @@ function InboxItemRow({
               <DropdownMenuSeparator />
 
               {isArchived ? (
-                <DropdownMenuItem onClick={() => onUnarchive(item.id)}>
+                <DropdownMenuItem onClick={() => onUnarchive(item._id)}>
                   <HugeiconsIcon icon={Unarchive03Icon} className="size-4" />
                   Unarchive
                 </DropdownMenuItem>
               ) : (
-                <DropdownMenuItem onClick={() => onArchive(item.id)}>
+                <DropdownMenuItem onClick={() => onArchive(item._id)}>
                   <HugeiconsIcon icon={ArchiveIcon} className="size-4" />
                   Archive
                 </DropdownMenuItem>
@@ -392,7 +372,7 @@ function InboxItemRow({
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction
                       variant="destructive"
-                      onClick={() => onDelete(item.id)}
+                      onClick={() => onDelete(item._id)}
                     >
                       Delete
                     </AlertDialogAction>
@@ -535,7 +515,6 @@ function Toast({
 }
 
 export default function InboxPage() {
-  const [items, setItems] = useState<InboxItem[]>(mockItems);
   const [captureText, setCaptureText] = useState("");
   const [activeTab, setActiveTab] = useState<InboxItemStatus>("open");
   const [searchQuery, setSearchQuery] = useState("");
@@ -548,16 +527,20 @@ export default function InboxPage() {
     message: string;
     type: "success" | "info";
   } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const isMobile = useIsMobile();
 
-  // Simulate loading state
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 500);
-    return () => clearTimeout(timer);
-  }, []);
+  const createInboxItem = useMutation(api.inbox.createInboxItem);
+  const archiveInboxItem = useMutation(api.inbox.archiveInboxItem);
+  const unarchiveInboxItem = useMutation(api.inbox.unarchiveInboxItem);
+  const deleteInboxItem = useMutation(api.inbox.deleteInboxItem);
+  const convertInboxItemToTask = useMutation(api.inbox.convertInboxItemToTask);
+  const convertInboxItemToProject = useMutation(
+    api.inbox.convertInboxItemToProject,
+  );
+
+  const items = useQuery(api.inbox.listMyInboxItems, {});
+  const isLoading = items === undefined;
 
   // Auto-resize textarea
   useAutoResizeTextarea(textareaRef, captureText, 80, 200);
@@ -581,14 +564,14 @@ export default function InboxPage() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  const openItems = useMemo(
-    () => items.filter((i) => i.status === "open"),
-    [items],
-  );
-  const archivedItems = useMemo(
-    () => items.filter((i) => i.status === "archived"),
-    [items],
-  );
+  const openItems = useMemo(() => {
+    if (!items) return [];
+    return items.filter((i) => i.status === "open");
+  }, [items]);
+  const archivedItems = useMemo(() => {
+    if (!items) return [];
+    return items.filter((i) => i.status === "archived");
+  }, [items]);
 
   const filteredOpenItems = useMemo(() => {
     if (!searchQuery.trim()) return openItems;
@@ -606,31 +589,28 @@ export default function InboxPage() {
     );
   }, [archivedItems, searchQuery]);
 
-  const handleCapture = useCallback(() => {
+  const handleCapture = useCallback(async () => {
     const trimmed = captureText.trim();
     if (!trimmed) return;
 
-    const newItem: InboxItem = {
-      id: Math.random().toString(36).slice(2),
-      content: trimmed,
-      status: "open",
-      createdAt: Date.now(),
-    };
-
-    setItems((prev) => [newItem, ...prev]);
-    setCaptureText("");
-    setNewItemIds((prev) => new Set(prev).add(newItem.id));
-    setToast({ message: "Item captured", type: "success" });
-
-    // Remove "new" animation class after animation completes
-    setTimeout(() => {
-      setNewItemIds((prev) => {
-        const next = new Set(prev);
-        next.delete(newItem.id);
-        return next;
-      });
-    }, 1000);
-  }, [captureText]);
+    try {
+      const newItem = await createInboxItem({ content: trimmed });
+      setCaptureText("");
+      if (newItem?._id) {
+        setNewItemIds((prev) => new Set(prev).add(String(newItem._id)));
+        setTimeout(() => {
+          setNewItemIds((prev) => {
+            const next = new Set(prev);
+            next.delete(String(newItem._id));
+            return next;
+          });
+        }, 1000);
+      }
+      setToast({ message: "Item captured", type: "success" });
+    } catch (error) {
+      setToast({ message: "Failed to capture item", type: "info" });
+    }
+  }, [captureText, createInboxItem]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -646,40 +626,62 @@ export default function InboxPage() {
     [handleCapture],
   );
 
-  const handleArchive = useCallback((id: string) => {
-    setItems((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, status: "archived" } : item,
-      ),
-    );
-    setToast({ message: "Item archived", type: "success" });
-  }, []);
+  const handleArchive = useCallback(
+    async (id: InboxItemId) => {
+      try {
+        await archiveInboxItem({ inboxItemId: id });
+        setToast({ message: "Item archived", type: "success" });
+      } catch (error) {
+        setToast({ message: "Failed to archive item", type: "info" });
+      }
+    },
+    [archiveInboxItem],
+  );
 
-  const handleUnarchive = useCallback((id: string) => {
-    setItems((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, status: "open" } : item)),
-    );
-    setToast({ message: "Item unarchived", type: "success" });
-  }, []);
+  const handleUnarchive = useCallback(
+    async (id: InboxItemId) => {
+      try {
+        await unarchiveInboxItem({ inboxItemId: id });
+        setToast({ message: "Item unarchived", type: "success" });
+      } catch (error) {
+        setToast({ message: "Failed to unarchive item", type: "info" });
+      }
+    },
+    [unarchiveInboxItem],
+  );
 
-  const handleDelete = useCallback((id: string) => {
-    setItems((prev) => prev.filter((item) => item.id !== id));
-    setToast({ message: "Item deleted", type: "success" });
-  }, []);
+  const handleDelete = useCallback(
+    async (id: InboxItemId) => {
+      try {
+        await deleteInboxItem({ inboxItemId: id });
+        setToast({ message: "Item deleted", type: "success" });
+      } catch (error) {
+        setToast({ message: "Failed to delete item", type: "info" });
+      }
+    },
+    [deleteInboxItem],
+  );
 
   const handleConvert = useCallback(
-    (id: string, _type: "task" | "note" | "project") => {
-      // In mobile view, open the sheet instead of dialog
-      if (isMobile) {
-        const item = items.find((i) => i.id === id);
-        if (item) {
-          setMobileActionItem(item);
-          setIsMobileSheetOpen(true);
-        }
+    async (id: InboxItemId, type: "task" | "note" | "project") => {
+      if (type === "note") {
+        setToast({ message: "Convert to note coming soon", type: "info" });
+        return;
       }
-      // Dialog is handled in InboxItemRow component
+
+      try {
+        if (type === "task") {
+          await convertInboxItemToTask({ inboxItemId: id });
+          setToast({ message: "Converted to task", type: "success" });
+          return;
+        }
+        await convertInboxItemToProject({ inboxItemId: id });
+        setToast({ message: "Converted to project", type: "success" });
+      } catch (error) {
+        setToast({ message: "Failed to convert item", type: "info" });
+      }
     },
-    [items, isMobile],
+    [convertInboxItemToProject, convertInboxItemToTask],
   );
 
   const focusCapture = useCallback(() => {
@@ -819,13 +821,17 @@ export default function InboxPage() {
             <div className="space-y-2 pb-4">
               {filteredOpenItems.map((item) => (
                 <InboxItemRow
-                  key={item.id}
+                  key={item._id}
                   item={item}
                   onArchive={handleArchive}
                   onUnarchive={handleUnarchive}
                   onDelete={handleDelete}
                   onConvert={handleConvert}
-                  isNew={newItemIds.has(item.id)}
+                  onOpenActions={(selectedItem) => {
+                    setMobileActionItem(selectedItem);
+                    setIsMobileSheetOpen(true);
+                  }}
+                  isNew={newItemIds.has(String(item._id))}
                 />
               ))}
             </div>
@@ -842,12 +848,16 @@ export default function InboxPage() {
             <div className="space-y-2 pb-4">
               {filteredArchivedItems.map((item) => (
                 <InboxItemRow
-                  key={item.id}
+                  key={item._id}
                   item={item}
                   onArchive={handleArchive}
                   onUnarchive={handleUnarchive}
                   onDelete={handleDelete}
                   onConvert={handleConvert}
+                  onOpenActions={(selectedItem) => {
+                    setMobileActionItem(selectedItem);
+                    setIsMobileSheetOpen(true);
+                  }}
                 />
               ))}
             </div>
@@ -863,14 +873,10 @@ export default function InboxPage() {
         onArchive={handleArchive}
         onUnarchive={handleUnarchive}
         onDelete={handleDelete}
-        onConvert={(_type) => {
-          if (mobileActionItem) {
-            setIsMobileSheetOpen(false);
-            // Trigger convert dialog after sheet closes
-            setTimeout(() => {
-              // The convert dialog will be handled by the item row
-            }, 200);
-          }
+        onConvert={(type) => {
+          if (!mobileActionItem) return;
+          handleConvert(mobileActionItem._id, type);
+          setIsMobileSheetOpen(false);
         }}
       />
 

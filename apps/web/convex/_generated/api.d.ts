@@ -11,6 +11,7 @@
 import type * as auth from "../auth.js";
 import type * as crons from "../crons.js";
 import type * as http from "../http.js";
+import type * as inbox from "../inbox.js";
 import type * as models from "../models.js";
 import type * as preferences from "../preferences.js";
 import type * as profiles from "../profiles.js";
@@ -30,6 +31,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   crons: typeof crons;
   http: typeof http;
+  inbox: typeof inbox;
   models: typeof models;
   preferences: typeof preferences;
   profiles: typeof profiles;
