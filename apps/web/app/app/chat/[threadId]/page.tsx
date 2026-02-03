@@ -180,7 +180,7 @@ export default function ThreadPage() {
 
         {/* Conversation */}
         <Conversation className="flex-1">
-          <ConversationContent className="mx-auto w-full max-w-5xl px-3 py-6 gap-4">
+          <ConversationContent className="mx-auto w-full max-w-7xl px-3 py-6 gap-4">
             {messages.length === 0 ? (
               <ConversationEmptyState
                 title="Start a new conversation"
@@ -200,7 +200,7 @@ export default function ThreadPage() {
                     className={cn(
                       "text-sm leading-6",
                       message.role === "assistant" &&
-                      "w-full border-l border-border/60 pl-4",
+                      "w-full border-l border-border/60 pl-6",
                       message.role === "user" &&
                       "border border-border bg-muted/50 px-4 py-3 max-w-[32rem]",
                     )}
@@ -228,13 +228,7 @@ export default function ThreadPage() {
             Message
           </label>
           <PromptInput onSubmit={() => { }}>
-            <PromptInputTextarea
-              className="pt-4"
-              id="thread-message"
-              placeholder="Continue the conversation..."
-            />
-
-            <PromptInputFooter>
+            <PromptInputHeader>
               <PromptInputTools>
                 <PromptInputActionMenu>
                   <PromptInputActionMenuTrigger>
@@ -256,12 +250,20 @@ export default function ThreadPage() {
                   />
                 </PromptInputButton>
               </PromptInputTools>
+            </PromptInputHeader>
+
+            <PromptInputTextarea
+              id="thread-message"
+              placeholder="Continue the conversation..."
+            />
+
+            <PromptInputFooter>
               <PromptInputTools>
-                <span className="hidden sm:block text-xs text-muted-foreground pr-2">
+                <span className="hidden sm:block text-xs text-muted-foreground">
                   Press Enter to send, Shift+Enter for new line
                 </span>
-                <PromptInputSubmit />
               </PromptInputTools>
+              <PromptInputSubmit />
             </PromptInputFooter>
           </PromptInput>
         </div>
