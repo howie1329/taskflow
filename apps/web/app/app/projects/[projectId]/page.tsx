@@ -22,7 +22,6 @@ import {
   EmptyDescription,
   EmptyMedia,
 } from "@/components/ui/empty"
-import { Separator } from "@/components/ui/separator"
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -39,15 +38,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { BoardView } from "@/components/tasks/board-view"
 import { TaskDetailsSheet } from "@/components/tasks/task-details-sheet"
 import { CreateTaskSheet } from "@/components/tasks/create-task-sheet"
 import { ProjectSheet, type ProjectDraft } from "@/components/projects/project-sheet"
-import { NotesList } from "@/components/notes/notes-list"
-import { NoteEditor } from "@/components/notes/note-editor"
-import type { MockNote, MockProject, ViewMode } from "@/components/notes/types"
+import { ProjectGridSkeleton } from "@/components/projects/project-skeleton"
 import type { Doc, Id } from "@/convex/_generated/dataModel"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
@@ -63,12 +59,8 @@ import {
   NoteIcon,
   Search01Icon,
 } from "@hugeicons/core-free-icons"
-import {
-  mockProjects,
-  mockProjectTasks,
-  mockProjectTags,
-  mockProjectNotes,
-} from "@/components/projects/mock-data"
+import { useMutation, useQuery } from "convex/react"
+import { api } from "@/convex/_generated/api"
 
 type Task = Doc<"tasks">
 type Tag = Doc<"tags">
@@ -85,7 +77,6 @@ type TaskUpdate = {
 }
 
 type TabKey = "tasks" | "notes"
-type NotesView = Exclude<ViewMode, "byProject">
 
 function formatRelativeTime(timestamp: number) {
   const diff = Date.now() - timestamp
@@ -97,30 +88,40 @@ function formatRelativeTime(timestamp: number) {
   return `${Math.floor(days / 30)} months ago`
 }
 
-function generateId() {
-  return Math.random().toString(36).slice(2)
-}
-
 export default function ProjectDetailPage() {
   const params = useParams()
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const isMobile = useIsMobile()
-  const projectId = params.projectId as string
+  const projectId = params.projectId as Id<"projects">
 
-  const baseProject = useMemo(
-    () => mockProjects.find((p) => p._id === projectId) ?? null,
-    [projectId],
-  )
+  const project = useQuery(api.projects.getMyProject, { projectId })
+  const isProjectLoading = project === undefined
 
-  const [project, setProject] = useState(baseProject)
+  const allProjects = useQuery(api.projects.listMyProjects, {})
+  const tags = useQuery(api.tags.listMyTags, {})
+
+  const updateProject = useMutation(api.projects.updateProject)
+  const archiveProject = useMutation(api.projects.archiveProject)
+  const unarchiveProject = useMutation(api.projects.unarchiveProject)
+  const deleteProject = useMutation(api.projects.deleteProject)
+
+  const createTask = useMutation(api.tasks.createTask)
+  const updateTask = useMutation(api.tasks.updateTask)
+  const toggleComplete = useMutation(api.tasks.toggleComplete)
+  const deleteTask = useMutation(api.tasks.deleteTask)
+
+  const createSubtask = useMutation(api.subtasks.createSubtask)
+  const updateSubtask = useMutation(api.subtasks.updateSubtask)
+  const toggleSubtask = useMutation(api.subtasks.toggleSubtask)
+  const deleteSubtask = useMutation(api.subtasks.deleteSubtask)
+
+  const createTag = useMutation(api.tags.createTag)
+
   const [isProjectSheetOpen, setIsProjectSheetOpen] = useState(false)
   const [isDeleteProjectOpen, setIsDeleteProjectOpen] = useState(false)
-
-  useEffect(() => {
-    setProject(baseProject)
-  }, [baseProject])
+  const [isProjectSubmitting, setIsProjectSubmitting] = useState(false)
 
   const tabParam = searchParams.get("tab")
   const defaultTab: TabKey = tabParam === "notes" ? "notes" : "tasks"
@@ -145,45 +146,20 @@ export default function ProjectDetailPage() {
   }, [activeTab, pathname, router, searchParams])
 
   const isArchived = project?.status === "archived"
-
-  const handleArchiveToggle = () => {
-    if (!project) return
-    const nextStatus = project.status === "archived" ? "active" : "archived"
-    setProject({ ...project, status: nextStatus })
-    toast.success(
-      nextStatus === "archived"
-        ? `Archived "${project.title}"`
-        : `Unarchived "${project.title}"`,
-    )
-  }
-
-  const handleProjectSave = (draft: ProjectDraft) => {
-    if (!project) return
-    setProject({
-      ...project,
-      title: draft.title,
-      description: draft.description,
-      icon: draft.icon,
-      color: draft.color,
-      updatedAt: Date.now(),
-    })
-    toast.success(`Updated "${draft.title}"`)
-    setIsProjectSheetOpen(false)
-  }
-
-  const handleDeleteProject = () => {
-    if (!project) return
-    toast.success(`Deleted "${project.title}"`)
-    setIsDeleteProjectOpen(false)
-    router.push("/app/projects")
-  }
-
-  const [tasks, setTasks] = useState<Task[]>(mockProjectTasks)
-  const [tags, setTags] = useState<Tag[]>(mockProjectTags)
-  const fallbackUserId = useMemo(
-    () => tasks[0]?.userId ?? ("user-1" as Id<"users">),
-    [tasks],
+  const projectForSheet = useMemo(
+    () =>
+      project
+        ? {
+            _id: String(project._id),
+            title: project.title,
+            description: project.description,
+            icon: project.icon,
+            color: project.color,
+          }
+        : null,
+    [project],
   )
+
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null)
   const [isTaskSheetOpen, setIsTaskSheetOpen] = useState(false)
   const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false)
@@ -192,11 +168,15 @@ export default function ProjectDetailPage() {
   }>({ status: "Not Started" })
   const [taskSearchQuery, setTaskSearchQuery] = useState("")
   const [hideCompleted, setHideCompleted] = useState(false)
+  const taskSearchRef = useRef<HTMLInputElement>(null)
 
-  const projectTasks = useMemo(() => {
-    if (!project) return []
-    return tasks.filter((task) => String(task.projectId) === project._id)
-  }, [tasks, project])
+  const tasks = useQuery(
+    api.tasks.listMyTasks,
+    project ? { projectId: project._id, hideCompleted } : "skip",
+  )
+  const taskList = tasks ?? []
+
+  const projectTasks = useMemo(() => taskList, [taskList])
 
   const filteredTasks = useMemo(() => {
     const query = taskSearchQuery.trim().toLowerCase()
@@ -214,8 +194,13 @@ export default function ProjectDetailPage() {
   }, [projectTasks, taskSearchQuery])
 
   const selectedTask = useMemo(
-    () => tasks.find((task) => String(task._id) === selectedTaskId) ?? null,
-    [tasks, selectedTaskId],
+    () => taskList.find((task) => String(task._id) === selectedTaskId) ?? null,
+    [taskList, selectedTaskId],
+  )
+
+  const subtasks = useQuery(
+    api.subtasks.listMySubtasks,
+    selectedTask?._id ? { taskId: selectedTask._id } : "skip",
   )
 
   const handleTaskClick = (task: Task) => {
@@ -233,7 +218,7 @@ export default function ProjectDetailPage() {
   }
 
   const handleCreateTaskSubmit = useCallback(
-    (draft: {
+    async (draft: {
       title: string
       description?: string
       notes?: string
@@ -258,234 +243,215 @@ export default function ProjectDetailPage() {
       embedding?: number[] | null
     }) => {
       if (!project) return
-      const now = Date.now()
-      const task: Task = {
-        _id: `task-${generateId()}` as Id<"tasks">,
-        _creationTime: now,
-        userId: fallbackUserId,
-        title: draft.title,
-        description: draft.description,
-        notes: draft.notes,
-        status: draft.status ?? "Not Started",
-        priority: draft.priority ?? "low",
-        dueDate: draft.dueDate ?? undefined,
-        scheduledDate: draft.scheduledDate ?? undefined,
-        completionDate: undefined,
-        projectId: project._id as Id<"projects">,
-        tagIds: (draft.tagIds ?? []) as Id<"tags">[],
-        parentTaskId: undefined,
-        estimatedDuration: draft.estimatedDuration ?? undefined,
-        actualDuration: draft.actualDuration ?? undefined,
-        energyLevel: draft.energyLevel ?? "medium",
-        context: draft.context ?? [],
-        source: draft.source ?? "created",
-        orderIndex: draft.orderIndex ?? 0,
-        lastActiveAt: draft.lastActiveAt ?? now,
-        streakCount: draft.streakCount ?? 0,
-        difficulty: draft.difficulty ?? "medium",
-        isTemplate: draft.isTemplate ?? false,
-        aiSummary: draft.aiSummary ?? undefined,
-        aiContext: draft.aiContext ?? undefined,
-        embedding: draft.embedding ?? undefined,
-        createdAt: now,
-        updatedAt: now,
+      try {
+        const newTask = await createTask({
+          title: draft.title,
+          description: draft.description,
+          notes: draft.notes,
+          status: draft.status,
+          priority: draft.priority,
+          dueDate: draft.dueDate ?? undefined,
+          scheduledDate: draft.scheduledDate ?? undefined,
+          projectId: project._id,
+          tagIds:
+            draft.tagIds && draft.tagIds.length > 0
+              ? (draft.tagIds as unknown as Doc<"tasks">["tagIds"])
+              : undefined,
+          estimatedDuration: draft.estimatedDuration ?? undefined,
+          energyLevel: draft.energyLevel,
+          difficulty: draft.difficulty,
+        })
+        setIsCreateTaskOpen(false)
+        if (newTask) {
+          setSelectedTaskId(newTask._id as string)
+          setIsTaskSheetOpen(true)
+        }
+      } catch (error) {
+        console.error("Failed to create task:", error)
+        toast.error("Failed to create task")
       }
-      setTasks((prev) => [task, ...prev])
-      setIsCreateTaskOpen(false)
     },
-    [project],
+    [createTask, project],
   )
 
-  const handleTaskUpdate = (taskId: string, updates: TaskUpdate) => {
-    const mappedUpdates: Partial<Task> = {
-      ...updates,
-      projectId: updates.projectId
-        ? (updates.projectId as Id<"projects">)
-        : undefined,
-      tagIds: updates.tagIds ? (updates.tagIds as Id<"tags">[]) : undefined,
+  const handleTaskUpdate = async (taskId: string, updates: TaskUpdate) => {
+    try {
+      const updatedTask = await updateTask({
+        taskId: taskId as unknown as Doc<"tasks">["_id"],
+        title: updates.title,
+        description: updates.description,
+        notes: updates.notes,
+        status: updates.status,
+        priority: updates.priority,
+        dueDate: updates.dueDate ?? undefined,
+        scheduledDate: updates.scheduledDate ?? undefined,
+        projectId: updates.projectId
+          ? (updates.projectId as unknown as Doc<"tasks">["projectId"])
+          : undefined,
+        tagIds:
+          updates.tagIds && updates.tagIds.length > 0
+            ? (updates.tagIds as unknown as Doc<"tasks">["tagIds"])
+            : undefined,
+      })
+      if (updatedTask) {
+        setSelectedTaskId(updatedTask._id as string)
+      }
+    } catch (error) {
+      console.error("Failed to update task:", error)
+      toast.error("Failed to update task")
     }
-    setTasks((prev) =>
-      prev.map((task) =>
-        String(task._id) === taskId
-          ? { ...task, ...mappedUpdates, updatedAt: Date.now() }
-          : task,
-      ),
-    )
   }
 
-  const handleTaskDelete = (taskId: string) => {
-    setTasks((prev) => prev.filter((task) => String(task._id) !== taskId))
-    if (selectedTaskId === taskId) {
-      setSelectedTaskId(null)
-      setIsTaskSheetOpen(false)
+  const handleTaskDelete = async (taskId: string) => {
+    try {
+      await deleteTask({ taskId: taskId as unknown as Doc<"tasks">["_id"] })
+      if (selectedTaskId === taskId) {
+        setSelectedTaskId(null)
+        setIsTaskSheetOpen(false)
+      }
+    } catch (error) {
+      console.error("Failed to delete task:", error)
+      toast.error("Failed to delete task")
     }
   }
 
-  const handleTaskToggleComplete = (taskId: string) => {
-    setTasks((prev) =>
-      prev.map((task) => {
-        if (String(task._id) !== taskId) return task
-        const completed = task.status === "Completed"
-        return {
-          ...task,
-          status: completed ? "To Do" : "Completed",
-          completionDate: completed ? undefined : Date.now(),
-          updatedAt: Date.now(),
-        }
-      }),
-    )
+  const handleTaskToggleComplete = async (taskId: string) => {
+    try {
+      const updatedTask = await toggleComplete({
+        taskId: taskId as unknown as Doc<"tasks">["_id"],
+      })
+      if (updatedTask) {
+        setSelectedTaskId(updatedTask._id as string)
+      }
+    } catch (error) {
+      console.error("Failed to toggle complete:", error)
+      toast.error("Failed to update task")
+    }
   }
 
   const handleTaskCreateTag = async (name: string) => {
-    if (!project) return null
-    const newTag: Tag = {
-      _id: `tag-${generateId()}` as Id<"tags">,
-      _creationTime: Date.now(),
-      userId: fallbackUserId,
-      name,
-      color: "#6366f1",
-      usageCount: 0,
-      createdAt: Date.now(),
+    try {
+      const newTag = await createTag({ name })
+      return newTag || null
+    } catch (error) {
+      console.error("Failed to create tag:", error)
+      toast.error("Failed to create tag")
+      return null
     }
-    setTags((prev) => [...prev, newTag])
-    return newTag
   }
 
-  const [notes, setNotes] = useState<MockNote[]>(mockProjectNotes)
-  const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null)
-  const [noteSearchQuery, setNoteSearchQuery] = useState("")
-  const [noteViewMode, setNoteViewMode] = useState<NotesView>("recent")
-  const [isEditorOpen, setIsEditorOpen] = useState(false)
-  const [isSaved, setIsSaved] = useState(true)
-  const [noteToDelete, setNoteToDelete] = useState<string | null>(null)
-  const [isDeleteNoteOpen, setIsDeleteNoteOpen] = useState(false)
-  const noteSearchRef = useRef<HTMLInputElement>(null)
-
-  const projectNotes = useMemo(() => {
-    if (!project) return []
-    return notes.filter((note) => note.projectId === project._id)
-  }, [notes, project])
-
-  const filteredNotes = useMemo(() => {
-    let list = projectNotes
-    const query = noteSearchQuery.trim().toLowerCase()
-    if (query) {
-      list = list.filter((note) => {
-        const title = note.title.toLowerCase()
-        const content = note.content.toLowerCase()
-        return title.includes(query) || content.includes(query)
+  const handleCreateSubtask = async (taskId: string, title: string) => {
+    try {
+      await createSubtask({
+        taskId: taskId as unknown as Doc<"tasks">["_id"],
+        title,
       })
-    }
-    if (noteViewMode === "pinned") {
-      list = list.filter((note) => note.pinned)
-    }
-    return [...list].sort((a, b) => b.updatedAt - a.updatedAt)
-  }, [projectNotes, noteSearchQuery, noteViewMode])
-
-  const selectedNote = useMemo(
-    () => projectNotes.find((note) => note._id === selectedNoteId) ?? null,
-    [projectNotes, selectedNoteId],
-  )
-
-  useEffect(() => {
-    if (!selectedNote) return
-    setIsSaved(false)
-    const timer = setTimeout(() => setIsSaved(true), 800)
-    return () => clearTimeout(timer)
-  }, [selectedNote?._id, selectedNote?.title, selectedNote?.content])
-
-  const noteProjectList: MockProject[] = project
-    ? [{ _id: project._id, title: project.title, icon: project.icon }]
-    : []
-
-  const projectForNote = useCallback(
-    (projectIdValue: string) => {
-      if (!project) return null
-      return projectIdValue === project._id
-        ? { _id: project._id, title: project.title, icon: project.icon }
-        : null
-    },
-    [project],
-  )
-
-  const handleSelectNote = (noteId: string) => {
-    setSelectedNoteId(noteId)
-    if (isMobile) {
-      setIsEditorOpen(true)
+    } catch (error) {
+      console.error("Failed to create subtask:", error)
     }
   }
 
-  const handleCreateNote = () => {
+  const handleToggleSubtask = async (subtaskId: string) => {
+    try {
+      await toggleSubtask({
+        subtaskId: subtaskId as unknown as Doc<"subtasks">["_id"],
+      })
+    } catch (error) {
+      console.error("Failed to toggle subtask:", error)
+    }
+  }
+
+  const handleDeleteSubtask = async (subtaskId: string) => {
+    try {
+      await deleteSubtask({
+        subtaskId: subtaskId as unknown as Doc<"subtasks">["_id"],
+      })
+    } catch (error) {
+      console.error("Failed to delete subtask:", error)
+    }
+  }
+
+  const handleUpdateSubtask = async (subtaskId: string, title: string) => {
+    try {
+      await updateSubtask({
+        subtaskId: subtaskId as unknown as Doc<"subtasks">["_id"],
+        title,
+      })
+    } catch (error) {
+      console.error("Failed to update subtask:", error)
+    }
+  }
+
+  const handleArchiveToggle = async () => {
     if (!project) return
-    if (isArchived) {
-      toast.error("Unarchive this project to add new notes.")
-      return
+    try {
+      if (project.status === "archived") {
+        await unarchiveProject({ projectId: project._id })
+        toast.success(`Unarchived "${project.title}"`)
+      } else {
+        await archiveProject({ projectId: project._id })
+        toast.success(`Archived "${project.title}"`)
+      }
+    } catch (error) {
+      console.error("Failed to update project:", error)
+      toast.error("Failed to update project")
     }
-    const newNote: MockNote = {
-      _id: `note-${generateId()}`,
-      projectId: project._id,
-      title: "",
-      content: "",
-      pinned: false,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    }
-    setNotes((prev) => [newNote, ...prev])
-    setSelectedNoteId(newNote._id)
-    if (isMobile) setIsEditorOpen(true)
   }
 
-  const handleUpdateNote = (noteId: string, updates: Partial<MockNote>) => {
-    setNotes((prev) =>
-      prev.map((note) =>
-        note._id === noteId
-          ? { ...note, ...updates, updatedAt: Date.now() }
-          : note,
-      ),
+  const handleProjectSave = async (draft: ProjectDraft) => {
+    if (!project) return
+    setIsProjectSubmitting(true)
+    try {
+      await updateProject({
+        projectId: project._id,
+        title: draft.title,
+        description: draft.description,
+        icon: draft.icon,
+        color: draft.color,
+      })
+      toast.success(`Updated "${draft.title}"`)
+      setIsProjectSheetOpen(false)
+    } catch (error) {
+      console.error("Failed to update project:", error)
+      toast.error("Failed to update project")
+    } finally {
+      setIsProjectSubmitting(false)
+    }
+  }
+
+  const handleDeleteProject = async () => {
+    if (!project) return
+    try {
+      await deleteProject({ projectId: project._id })
+      toast.success(`Deleted "${project.title}"`)
+      setIsDeleteProjectOpen(false)
+      router.push("/app/projects")
+    } catch (error) {
+      console.error("Failed to delete project:", error)
+      toast.error("Failed to delete project")
+    }
+  }
+
+  if (isProjectLoading) {
+    return (
+      <div className="flex h-full flex-col">
+        {isMobile && (
+          <div className="flex items-center gap-2 p-4 border-b md:hidden">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => router.push("/app/projects")}
+            >
+              <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
+            </Button>
+            <span className="text-sm font-medium">Back to projects</span>
+          </div>
+        )}
+        <div className="flex-1 p-8">
+          <ProjectGridSkeleton count={3} />
+        </div>
+      </div>
     )
-  }
-
-  const handlePinNote = (noteId: string) => {
-    setNotes((prev) =>
-      prev.map((note) =>
-        note._id === noteId
-          ? { ...note, pinned: !note.pinned, updatedAt: Date.now() }
-          : note,
-      ),
-    )
-  }
-
-  const handleMoveNote = (noteId: string, newProjectId: string) => {
-    setNotes((prev) =>
-      prev.map((note) =>
-        note._id === noteId
-          ? { ...note, projectId: newProjectId, updatedAt: Date.now() }
-          : note,
-      ),
-    )
-    if (newProjectId !== project?._id) {
-      setSelectedNoteId(null)
-    }
-  }
-
-  const handleDeleteNote = (noteId: string) => {
-    setNoteToDelete(noteId)
-    setIsDeleteNoteOpen(true)
-  }
-
-  const confirmDeleteNote = () => {
-    if (!noteToDelete) return
-    setNotes((prev) => prev.filter((note) => note._id !== noteToDelete))
-    if (selectedNoteId === noteToDelete) {
-      setSelectedNoteId(null)
-      setIsEditorOpen(false)
-    }
-    setNoteToDelete(null)
-    setIsDeleteNoteOpen(false)
-  }
-
-  const handleCloseSheet = () => {
-    setIsEditorOpen(false)
   }
 
   if (!project) {
@@ -590,7 +556,11 @@ export default function ProjectDetailPage() {
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={handleArchiveToggle}>
                   <HugeiconsIcon
-                    icon={project.status === "archived" ? Unarchive03Icon : Archive02Icon}
+                    icon={
+                      project.status === "archived"
+                        ? Unarchive03Icon
+                        : Archive02Icon
+                    }
                     className="size-4 mr-2"
                   />
                   {project.status === "archived" ? "Unarchive" : "Archive"}
@@ -614,325 +584,92 @@ export default function ProjectDetailPage() {
       </div>
 
       <TabsContent value="tasks" className="flex flex-col gap-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-            <InputGroup className="w-full sm:max-w-xs">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+          <InputGroup className="w-full sm:max-w-xs">
+            <InputGroupAddon>
+              <HugeiconsIcon icon={Search01Icon} className="size-4" />
+            </InputGroupAddon>
+            <InputGroupInput
+              ref={taskSearchRef}
+              placeholder="Search tasks..."
+              value={taskSearchQuery}
+              onChange={(e) => setTaskSearchQuery(e.target.value)}
+            />
+            {taskSearchQuery && (
               <InputGroupAddon>
-                <HugeiconsIcon icon={Search01Icon} className="size-4" />
-              </InputGroupAddon>
-              <InputGroupInput
-                placeholder="Search tasks..."
-                value={taskSearchQuery}
-                onChange={(e) => setTaskSearchQuery(e.target.value)}
-              />
-              {taskSearchQuery && (
-                <InputGroupAddon>
-                  <Button
-                    variant="ghost"
-                    size="icon-xs"
-                    onClick={() => setTaskSearchQuery("")}
-                    className="h-6 w-6"
-                  >
-                    ×
-                  </Button>
-                </InputGroupAddon>
-              )}
-            </InputGroup>
-
-            <Button
-              variant={hideCompleted ? "secondary" : "outline"}
-              size="sm"
-              className="h-8"
-              onClick={() => setHideCompleted((prev) => !prev)}
-            >
-              {hideCompleted ? "Showing open only" : "Hide completed"}
-            </Button>
-          </div>
-
-          <div className="flex-1 min-h-0">
-            {filteredTasks.length === 0 ? (
-              <Empty className="min-h-[320px]">
-                <EmptyHeader>
-                  <EmptyMedia variant="icon">
-                    <HugeiconsIcon icon={FolderManagementIcon} className="size-5" />
-                  </EmptyMedia>
-                  <EmptyTitle>No tasks yet</EmptyTitle>
-                  <EmptyDescription>
-                    {taskSearchQuery
-                      ? "No tasks match your search."
-                      : "Create your first task for this project."}
-                  </EmptyDescription>
-                </EmptyHeader>
-                {!taskSearchQuery && (
-                  <Button
-                    onClick={() => handleCreateTask({ status: "Not Started" })}
-                    disabled={isArchived}
-                  >
-                    <HugeiconsIcon icon={PlusSignIcon} className="size-4 mr-2" />
-                    Create task
-                  </Button>
-                )}
-              </Empty>
-            ) : (
-              <BoardView
-                tasks={filteredTasks}
-                onTaskClick={handleTaskClick}
-                onCreateTask={handleCreateTask}
-                projects={mockProjects as unknown as Doc<"projects">[]}
-                tags={tags}
-                hideCompleted={hideCompleted}
-              />
-            )}
-          </div>
-      </TabsContent>
-
-      <TabsContent value="notes" className="flex-1 min-h-0">
-          {isMobile ? (
-            <div className="flex h-full flex-col gap-4">
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">
-                  Capture context for this project
-                </p>
                 <Button
-                  size="sm"
-                  className="h-8"
-                  onClick={handleCreateNote}
+                  variant="ghost"
+                  size="icon-xs"
+                  onClick={() => setTaskSearchQuery("")}
+                  className="h-6 w-6"
+                >
+                  ×
+                </Button>
+              </InputGroupAddon>
+            )}
+          </InputGroup>
+
+          <Button
+            variant={hideCompleted ? "secondary" : "outline"}
+            size="sm"
+            className="h-8"
+            onClick={() => setHideCompleted((prev) => !prev)}
+          >
+            {hideCompleted ? "Showing open only" : "Hide completed"}
+          </Button>
+        </div>
+
+        <div className="flex-1 min-h-0">
+          {filteredTasks.length === 0 ? (
+            <Empty className="min-h-[320px]">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <HugeiconsIcon icon={FolderManagementIcon} className="size-5" />
+                </EmptyMedia>
+                <EmptyTitle>No tasks yet</EmptyTitle>
+                <EmptyDescription>
+                  {taskSearchQuery
+                    ? "No tasks match your search."
+                    : "Create your first task for this project."}
+                </EmptyDescription>
+              </EmptyHeader>
+              {!taskSearchQuery && (
+                <Button
+                  onClick={() => handleCreateTask({ status: "Not Started" })}
                   disabled={isArchived}
                 >
                   <HugeiconsIcon icon={PlusSignIcon} className="size-4 mr-2" />
-                  New note
+                  Create task
                 </Button>
-              </div>
-
-              <div className="space-y-3">
-                <div className="relative">
-                  <HugeiconsIcon
-                    icon={Search01Icon}
-                    className="absolute left-2 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-                  />
-                  <InputGroupInput
-                    ref={noteSearchRef}
-                    placeholder="Search notes..."
-                    value={noteSearchQuery}
-                    onChange={(e) => setNoteSearchQuery(e.target.value)}
-                    className="h-8 pl-8 text-xs"
-                  />
-                  {noteSearchQuery && (
-                    <Button
-                      variant="ghost"
-                      size="icon-xs"
-                      className="absolute right-1 top-1/2 -translate-y-1/2"
-                      onClick={() => setNoteSearchQuery("")}
-                    >
-                      ×
-                    </Button>
-                  )}
-                </div>
-
-                <Tabs
-                  value={noteViewMode}
-                  onValueChange={(v) => setNoteViewMode(v as NotesView)}
-                >
-                  <TabsList variant="line" className="w-full">
-                    <TabsTrigger value="recent" className="flex-1">
-                      Recent
-                      <Badge
-                        variant="secondary"
-                        className="ml-1.5 rounded-none text-[10px] px-1 py-0 h-4"
-                      >
-                        {filteredNotes.length}
-                      </Badge>
-                    </TabsTrigger>
-                    <TabsTrigger value="pinned" className="flex-1">
-                      Pinned
-                      <Badge
-                        variant="secondary"
-                        className="ml-1.5 rounded-none text-[10px] px-1 py-0 h-4"
-                      >
-                        {projectNotes.filter((n) => n.pinned).length}
-                      </Badge>
-                    </TabsTrigger>
-                  </TabsList>
-                </Tabs>
-              </div>
-
-              <Separator />
-
-              <div className="min-h-0 flex-1 overflow-y-auto">
-                {isArchived && filteredNotes.length === 0 ? (
-                  <Empty className="min-h-[240px]">
-                    <EmptyHeader>
-                      <EmptyMedia variant="icon">
-                        <HugeiconsIcon icon={NoteIcon} className="size-4" />
-                      </EmptyMedia>
-                      <EmptyTitle>No notes yet</EmptyTitle>
-                      <EmptyDescription>
-                        Unarchive this project to add new notes.
-                      </EmptyDescription>
-                    </EmptyHeader>
-                  </Empty>
-                ) : (
-                  <NotesList
-                    sortedNotes={filteredNotes}
-                    groupedNotes={null}
-                    viewMode={noteViewMode}
-                    selectedNoteId={selectedNoteId}
-                    projectFilter={project._id}
-                    searchQuery={noteSearchQuery}
-                    isMobile={isMobile}
-                    onSelectNote={handleSelectNote}
-                    onCreateNote={handleCreateNote}
-                    onPinNote={handlePinNote}
-                    onMoveNote={handleMoveNote}
-                    onDeleteNote={handleDeleteNote}
-                    projectForNote={projectForNote}
-                    mockProjects={noteProjectList}
-                  />
-                )}
-              </div>
-
-              <Sheet open={isEditorOpen} onOpenChange={setIsEditorOpen}>
-                <SheetContent side="bottom" className="h-[85vh] p-4" showCloseButton={false}>
-                  <div className="h-full overflow-y-auto">
-                    <NoteEditor
-                      note={selectedNote}
-                      isSaved={isSaved}
-                      isInSheet={true}
-                      mockProjects={noteProjectList}
-                      projectForNote={projectForNote}
-                      onUpdateNote={handleUpdateNote}
-                      onPinNote={handlePinNote}
-                      onMoveNote={handleMoveNote}
-                      onDeleteNote={handleDeleteNote}
-                      onCreateNote={handleCreateNote}
-                      onCloseSheet={handleCloseSheet}
-                    />
-                  </div>
-                </SheetContent>
-              </Sheet>
-            </div>
+              )}
+            </Empty>
           ) : (
-            <div className="flex h-full">
-              <div className="flex w-[350px] shrink-0 flex-col border-r p-4 gap-4">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm text-muted-foreground">
-                    Capture context for this project
-                  </p>
-                  <Button
-                    size="sm"
-                    className="h-8"
-                    onClick={handleCreateNote}
-                    disabled={isArchived}
-                  >
-                    <HugeiconsIcon icon={PlusSignIcon} className="size-4 mr-2" />
-                    New note
-                  </Button>
-                </div>
-
-                <div className="space-y-3">
-                  <div className="relative">
-                    <HugeiconsIcon
-                      icon={Search01Icon}
-                      className="absolute left-2 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-                    />
-                    <InputGroupInput
-                      ref={noteSearchRef}
-                      placeholder="Search notes..."
-                      value={noteSearchQuery}
-                      onChange={(e) => setNoteSearchQuery(e.target.value)}
-                      className="h-8 pl-8 text-xs"
-                    />
-                    {noteSearchQuery && (
-                      <Button
-                        variant="ghost"
-                        size="icon-xs"
-                        className="absolute right-1 top-1/2 -translate-y-1/2"
-                        onClick={() => setNoteSearchQuery("")}
-                      >
-                        ×
-                      </Button>
-                    )}
-                  </div>
-
-                  <Tabs
-                    value={noteViewMode}
-                    onValueChange={(v) => setNoteViewMode(v as NotesView)}
-                  >
-                    <TabsList variant="line" className="w-full">
-                      <TabsTrigger value="recent" className="flex-1">
-                        Recent
-                        <Badge
-                          variant="secondary"
-                          className="ml-1.5 rounded-none text-[10px] px-1 py-0 h-4"
-                        >
-                          {filteredNotes.length}
-                        </Badge>
-                      </TabsTrigger>
-                      <TabsTrigger value="pinned" className="flex-1">
-                        Pinned
-                        <Badge
-                          variant="secondary"
-                          className="ml-1.5 rounded-none text-[10px] px-1 py-0 h-4"
-                        >
-                          {projectNotes.filter((n) => n.pinned).length}
-                        </Badge>
-                      </TabsTrigger>
-                    </TabsList>
-                  </Tabs>
-                </div>
-
-                <Separator />
-
-                <div className="min-h-0 flex-1 overflow-y-auto">
-                  {isArchived && filteredNotes.length === 0 ? (
-                    <Empty className="min-h-[240px]">
-                      <EmptyHeader>
-                        <EmptyMedia variant="icon">
-                          <HugeiconsIcon icon={NoteIcon} className="size-4" />
-                        </EmptyMedia>
-                        <EmptyTitle>No notes yet</EmptyTitle>
-                        <EmptyDescription>
-                          Unarchive this project to add new notes.
-                        </EmptyDescription>
-                      </EmptyHeader>
-                    </Empty>
-                  ) : (
-                    <NotesList
-                      sortedNotes={filteredNotes}
-                      groupedNotes={null}
-                      viewMode={noteViewMode}
-                      selectedNoteId={selectedNoteId}
-                      projectFilter={project._id}
-                      searchQuery={noteSearchQuery}
-                      isMobile={isMobile}
-                      onSelectNote={handleSelectNote}
-                      onCreateNote={handleCreateNote}
-                      onPinNote={handlePinNote}
-                      onMoveNote={handleMoveNote}
-                      onDeleteNote={handleDeleteNote}
-                      projectForNote={projectForNote}
-                      mockProjects={noteProjectList}
-                    />
-                  )}
-                </div>
-              </div>
-
-              <div className="flex min-h-0 flex-1 flex-col p-4">
-                <NoteEditor
-                  note={selectedNote}
-                  isSaved={isSaved}
-                  isInSheet={false}
-                  mockProjects={noteProjectList}
-                  projectForNote={projectForNote}
-                  onUpdateNote={handleUpdateNote}
-                  onPinNote={handlePinNote}
-                  onMoveNote={handleMoveNote}
-                  onDeleteNote={handleDeleteNote}
-                  onCreateNote={handleCreateNote}
-                  onCloseSheet={handleCloseSheet}
-                />
-              </div>
-            </div>
+            <BoardView
+              tasks={filteredTasks}
+              onTaskClick={handleTaskClick}
+              onCreateTask={handleCreateTask}
+              projects={allProjects ?? []}
+              tags={tags ?? []}
+              hideCompleted={hideCompleted}
+            />
           )}
+        </div>
+      </TabsContent>
+
+      <TabsContent value="notes" className="flex-1 min-h-0">
+        <div className="flex h-full items-center justify-center">
+          <Empty className="min-h-[320px]">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <HugeiconsIcon icon={NoteIcon} className="size-5" />
+              </EmptyMedia>
+              <EmptyTitle>Notes aren’t wired yet</EmptyTitle>
+              <EmptyDescription>
+                Project notes will be connected to Convex next.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        </div>
       </TabsContent>
 
       <TaskDetailsSheet
@@ -945,9 +682,13 @@ export default function ProjectDetailPage() {
         onDelete={handleTaskDelete}
         onUpdate={(taskId, updates) => handleTaskUpdate(taskId, updates)}
         onToggleComplete={handleTaskToggleComplete}
-        projects={mockProjects as unknown as Doc<"projects">[]}
-        tags={tags}
-        subtasks={[]}
+        projects={allProjects ?? []}
+        tags={tags ?? []}
+        subtasks={subtasks ?? []}
+        onCreateSubtask={handleCreateSubtask}
+        onToggleSubtask={handleToggleSubtask}
+        onDeleteSubtask={handleDeleteSubtask}
+        onUpdateSubtask={handleUpdateSubtask}
         onCreateTag={handleTaskCreateTag}
       />
 
@@ -957,18 +698,19 @@ export default function ProjectDetailPage() {
         defaults={{
           status: createTaskDefaults.status,
           scheduledDate: null,
-          projectId: project._id,
+          projectId: String(project._id),
         }}
         onCreate={handleCreateTaskSubmit}
-        projects={mockProjects as unknown as Doc<"projects">[]}
-        tags={tags}
+        projects={allProjects ?? []}
+        tags={tags ?? []}
       />
 
       <ProjectSheet
         open={isProjectSheetOpen}
         onOpenChange={setIsProjectSheetOpen}
-        project={project}
+        project={projectForSheet}
         onSubmit={handleProjectSave}
+        isSubmitting={isProjectSubmitting}
       />
 
       <AlertDialog
@@ -979,34 +721,17 @@ export default function ProjectDetailPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete project?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. Tasks and notes will become
-              unassigned.
+              This action cannot be undone. Tasks will become unassigned.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setIsDeleteProjectOpen(false)}>
               Cancel
             </AlertDialogCancel>
-            <AlertDialogAction variant="destructive" onClick={handleDeleteProject}>
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog open={isDeleteNoteOpen} onOpenChange={setIsDeleteNoteOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete note?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. The note will be permanently removed.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setNoteToDelete(null)}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction variant="destructive" onClick={confirmDeleteNote}>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={handleDeleteProject}
+            >
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

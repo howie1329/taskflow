@@ -1,21 +1,21 @@
-"use client";
+"use client"
 
-import { useState, useMemo, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { useState, useMemo, useEffect, useRef } from "react"
+import { useRouter } from "next/navigation"
+import { Button } from "@/components/ui/button"
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
-} from "@/components/ui/input-group";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from "@/components/ui/input-group"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Empty,
   EmptyHeader,
   EmptyTitle,
   EmptyDescription,
   EmptyMedia,
-} from "@/components/ui/empty";
+} from "@/components/ui/empty"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,133 +25,188 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from "@/components/ui/alert-dialog"
 import {
   ProjectCard,
   type ProjectCardData,
-} from "@/components/projects/project-card";
-import { ProjectGridSkeleton } from "@/components/projects/project-skeleton";
+} from "@/components/projects/project-card"
+import { ProjectGridSkeleton } from "@/components/projects/project-skeleton"
 import {
   ProjectSheet,
   type ProjectDraft,
-} from "@/components/projects/project-sheet";
-import { mockProjects } from "@/components/projects/mock-data";
-import { toast } from "sonner";
-import { HugeiconsIcon } from "@hugeicons/react";
+} from "@/components/projects/project-sheet"
+import { toast } from "sonner"
+import { HugeiconsIcon } from "@hugeicons/react"
 import {
   PlusSignIcon,
   SearchIcon,
   Folder02Icon,
   Archive02Icon,
-} from "@hugeicons/core-free-icons";
+} from "@hugeicons/core-free-icons"
+import { useMutation, useQuery } from "convex/react"
+import { api } from "@/convex/_generated/api"
+import type { Doc } from "@/convex/_generated/dataModel"
 
 export default function ProjectsPage() {
-  const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"active" | "archived">("active");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const router = useRouter()
+  const [activeTab, setActiveTab] = useState<"active" | "archived">("active")
+  const [searchQuery, setSearchQuery] = useState("")
+  const [isSheetOpen, setIsSheetOpen] = useState(false)
   const [editingProject, setEditingProject] = useState<ProjectCardData | null>(
     null,
-  );
+  )
   const [deleteProject, setDeleteProject] = useState<ProjectCardData | null>(
     null,
-  );
-  const [isLoading] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const searchInputRef = useRef<HTMLInputElement>(null);
+  )
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const searchInputRef = useRef<HTMLInputElement>(null)
+
+  const projects = useQuery(api.projects.listMyProjects, {
+    status: activeTab,
+  })
+  const isLoading = projects === undefined
+
+  const createProject = useMutation(api.projects.createProject)
+  const updateProject = useMutation(api.projects.updateProject)
+  const archiveProject = useMutation(api.projects.archiveProject)
+  const unarchiveProject = useMutation(api.projects.unarchiveProject)
+  const deleteProjectMutation = useMutation(api.projects.deleteProject)
 
   const filteredProjects = useMemo(() => {
-    const projects = mockProjects.filter((p) => p.status === activeTab);
-    if (!searchQuery.trim()) return projects;
-    const query = searchQuery.toLowerCase();
-    return projects.filter(
+    const list = projects ?? []
+    if (!searchQuery.trim()) return list
+    const query = searchQuery.toLowerCase()
+    return list.filter(
       (p) =>
         p.title.toLowerCase().includes(query) ||
         (p.description?.toLowerCase() || "").includes(query),
-    );
-  }, [activeTab, searchQuery]);
+    )
+  }, [projects, searchQuery])
+
+  const displayProjects = useMemo<ProjectCardData[]>(
+    () =>
+      filteredProjects.map((project) => ({
+        _id: String(project._id),
+        title: project.title,
+        description: project.description,
+        status: project.status,
+        color: project.color,
+        icon: project.icon,
+        updatedAt: project.updatedAt,
+      })),
+    [filteredProjects],
+  )
 
   const handleCreateClick = () => {
-    setEditingProject(null);
-    setIsSheetOpen(true);
-  };
+    setEditingProject(null)
+    setIsSheetOpen(true)
+  }
 
   const handleEdit = (project: ProjectCardData) => {
-    setEditingProject(project);
-    setIsSheetOpen(true);
-  };
+    setEditingProject(project)
+    setIsSheetOpen(true)
+  }
 
-  const handleArchive = (project: ProjectCardData) => {
-    // TODO: Archive project - call mutation
-    console.log("Archive project:", project._id);
-    toast.success(`Archived "${project.title}"`);
-  };
+  const handleArchive = async (project: ProjectCardData) => {
+    try {
+      await archiveProject({
+        projectId: project._id as unknown as Doc<"projects">["_id"],
+      })
+      toast.success(`Archived "${project.title}"`)
+    } catch (error) {
+      console.error("Failed to archive project:", error)
+      toast.error("Failed to archive project")
+    }
+  }
 
-  const handleUnarchive = (project: ProjectCardData) => {
-    // TODO: Unarchive project - call mutation
-    console.log("Unarchive project:", project._id);
-    toast.success(`Unarchived "${project.title}"`);
-  };
+  const handleUnarchive = async (project: ProjectCardData) => {
+    try {
+      await unarchiveProject({
+        projectId: project._id as unknown as Doc<"projects">["_id"],
+      })
+      toast.success(`Unarchived "${project.title}"`)
+    } catch (error) {
+      console.error("Failed to unarchive project:", error)
+      toast.error("Failed to unarchive project")
+    }
+  }
 
   const handleDelete = (project: ProjectCardData) => {
-    setDeleteProject(project);
-  };
+    setDeleteProject(project)
+  }
 
-  const handleConfirmDelete = () => {
-    if (deleteProject) {
-      // TODO: Delete project - call mutation
-      console.log("Delete project:", deleteProject._id);
-      toast.success(`Deleted "${deleteProject.title}"`);
-      setDeleteProject(null);
+  const handleConfirmDelete = async () => {
+    if (!deleteProject) return
+    try {
+      await deleteProjectMutation({
+        projectId: deleteProject._id as unknown as Doc<"projects">["_id"],
+      })
+      toast.success(`Deleted "${deleteProject.title}"`)
+      setDeleteProject(null)
+    } catch (error) {
+      console.error("Failed to delete project:", error)
+      toast.error("Failed to delete project")
     }
-  };
+  }
 
   const handleCardClick = (project: ProjectCardData) => {
-    router.push(`/app/projects/${project._id}`);
-  };
+    router.push(`/app/projects/${project._id}`)
+  }
 
-  const handleSheetSubmit = (draft: ProjectDraft) => {
-    setIsSubmitting(true);
+  const handleSheetSubmit = async (draft: ProjectDraft) => {
+    setIsSubmitting(true)
 
-    // Simulate async operation
-    setTimeout(() => {
+    try {
       if (editingProject) {
-        // TODO: Update project - call mutation
-        console.log("Update project:", editingProject._id, draft);
-        toast.success(`Updated "${draft.title}"`);
+        await updateProject({
+          projectId: editingProject._id as unknown as Doc<"projects">["_id"],
+          title: draft.title,
+          description: draft.description,
+          icon: draft.icon,
+          color: draft.color,
+        })
+        toast.success(`Updated "${draft.title}"`)
       } else {
-        // TODO: Create project - call mutation
-        console.log("Create project:", draft);
-        toast.success(`Created "${draft.title}"`);
+        await createProject({
+          title: draft.title,
+          description: draft.description,
+          icon: draft.icon,
+          color: draft.color,
+        })
+        toast.success(`Created "${draft.title}"`)
       }
 
-      setIsSubmitting(false);
-      setIsSheetOpen(false);
-      setEditingProject(null);
-    }, 500);
-  };
+      setIsSheetOpen(false)
+      setEditingProject(null)
+    } catch (error) {
+      console.error("Failed to save project:", error)
+      toast.error("Failed to save project")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Cmd/Ctrl + K to focus search
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault();
-        searchInputRef.current?.focus();
+        e.preventDefault()
+        searchInputRef.current?.focus()
       }
       // Escape to close dialogs/sheets
       if (e.key === "Escape") {
         if (deleteProject) {
-          setDeleteProject(null);
+          setDeleteProject(null)
         } else if (isSheetOpen) {
-          setIsSheetOpen(false);
+          setIsSheetOpen(false)
         }
       }
-    };
+    }
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [deleteProject, isSheetOpen]);
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [deleteProject, isSheetOpen])
 
   return (
     <div className="flex flex-col gap-6 h-full">
@@ -225,7 +280,7 @@ export default function ProjectsPage() {
         {isLoading ? (
           // Loading State
           <ProjectGridSkeleton count={6} />
-        ) : filteredProjects.length === 0 ? (
+        ) : displayProjects.length === 0 ? (
           // Empty State
           <Empty className="h-full min-h-[400px]">
             <EmptyHeader>
@@ -287,9 +342,9 @@ export default function ProjectsPage() {
               aria-live="polite"
               aria-atomic="true"
             >
-              Showing {filteredProjects.length}{" "}
+              Showing {displayProjects.length}{" "}
               {activeTab === "active" ? "active" : "archived"} project
-              {filteredProjects.length === 1 ? "" : "s"}
+              {displayProjects.length === 1 ? "" : "s"}
               {searchQuery && ` matching "${searchQuery}"`}
             </div>
             <div
@@ -297,7 +352,7 @@ export default function ProjectsPage() {
               role="list"
               aria-label={`${activeTab === "active" ? "Active" : "Archived"} projects`}
             >
-              {filteredProjects.map((project) => (
+              {displayProjects.map((project) => (
                 <div key={project._id} role="listitem">
                   <ProjectCard
                     project={project}

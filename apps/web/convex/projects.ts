@@ -6,7 +6,9 @@ import type { Doc } from "./_generated/dataModel";
 // Get all projects for the current user
 export const listMyProjects = query({
   args: {
-    status: v.optional(v.string()),
+    status: v.optional(
+      v.union(v.literal("active"), v.literal("archived"), v.literal("deleted")),
+    ),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -132,6 +134,50 @@ export const updateProject = mutation({
     if (args.status !== undefined) patch.status = args.status;
 
     await ctx.db.patch(args.projectId, patch);
+    return await ctx.db.get(args.projectId);
+  },
+});
+
+// Archive a project (with ownership check)
+export const archiveProject = mutation({
+  args: {
+    projectId: v.id("projects"),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+
+    const project = await ctx.db.get(args.projectId);
+    if (!project || project.userId !== userId) {
+      throw new Error("Project not found or access denied");
+    }
+
+    const now = Date.now();
+    await ctx.db.patch(args.projectId, { status: "archived", updatedAt: now });
+    return await ctx.db.get(args.projectId);
+  },
+});
+
+// Unarchive a project (with ownership check)
+export const unarchiveProject = mutation({
+  args: {
+    projectId: v.id("projects"),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+
+    const project = await ctx.db.get(args.projectId);
+    if (!project || project.userId !== userId) {
+      throw new Error("Project not found or access denied");
+    }
+
+    const now = Date.now();
+    await ctx.db.patch(args.projectId, { status: "active", updatedAt: now });
     return await ctx.db.get(args.projectId);
   },
 });
