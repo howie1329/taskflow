@@ -14,6 +14,7 @@ import {
   Sun02Icon,
   Moon02Icon,
   InboxDownloadIcon,
+  NotificationIcon,
 } from "@hugeicons/core-free-icons";
 
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,11 @@ const navItems = [
     title: "Inbox",
     href: "/app/inbox",
     icon: InboxDownloadIcon,
+  },
+  {
+    title: "Notifications",
+    href: "/app/notifications",
+    icon: NotificationIcon,
   },
   {
     title: "Tasks",
