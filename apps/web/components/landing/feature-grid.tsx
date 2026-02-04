@@ -60,41 +60,47 @@ export function FeatureGrid() {
   return (
     <section
       id="features"
-      className="container px-4 py-16 lg:px-6 lg:py-24 border-t"
+      className="w-full px-4 py-16 lg:px-6 lg:py-24 border-t"
     >
-      <div className="mx-auto max-w-3xl text-center mb-12">
-        <Badge
-          variant="outline"
-          className="rounded-md mb-4 font-mono text-xs"
-        >
-          Features
-        </Badge>
-        <h2 className="text-2xl font-medium tracking-tight lg:text-3xl mb-4">
-          Everything you need
-        </h2>
-        <p className="text-muted-foreground text-sm">
-          Core entities to manage your personal workflow. No bloat, no missing
-          pieces.
-        </p>
-      </div>
+      <div className="mx-auto w-full max-w-7xl">
+        <div className="mx-auto max-w-3xl text-center mb-12">
+          <Badge
+            variant="outline"
+            className="rounded-md mb-4 font-mono text-xs"
+          >
+            Features
+          </Badge>
+          <h2 className="text-balance text-2xl font-medium tracking-tight lg:text-3xl mb-4">
+            Everything you need
+          </h2>
+          <p className="text-muted-foreground text-sm">
+            Core entities to manage your personal workflow. No bloat, no missing
+            pieces.
+          </p>
+        </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
-        {features.map((feature) => (
-          <Card key={feature.title} className="group">
-            <CardHeader className="pb-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {features.map((feature) => (
+            <Card
+              key={feature.title}
+              className="border-border/60 bg-card/40 dark:bg-card/20"
+            >
+              <CardHeader className="pb-3">
               <HugeiconsIcon
                 icon={feature.icon}
+                aria-hidden="true"
                 className="h-5 w-5 text-muted-foreground"
               />
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <CardTitle className="text-sm">{feature.title}</CardTitle>
-              <CardDescription className="text-xs">
-                {feature.description}
-              </CardDescription>
-            </CardContent>
-          </Card>
-        ))}
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <CardTitle className="text-sm">{feature.title}</CardTitle>
+                <CardDescription className="text-xs">
+                  {feature.description}
+                </CardDescription>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     </section>
   );

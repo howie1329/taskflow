@@ -147,6 +147,13 @@ Rows should feel tappable/clickable without “shouting”.
   - `mx-auto w-full max-w-4xl`
 - User messages may be a right-aligned bubble; assistant responses read as full-width content with minimal chrome.
 
+### Marketing Pages (Landing / Roadmap)
+
+- Sections span full width (`w-full`) with stable side padding (`px-4 lg:px-6`).
+- Constrain long-form text for readability:
+  - headings/body: `max-w-3xl`
+  - dense sections/grids: `max-w-7xl`
+
 ### Focus + Data Density
 
 - Focus rings:
