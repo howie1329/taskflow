@@ -75,11 +75,17 @@ function NoteRow({
     <div
       onClick={() => onSelect(note._id)}
       className={cn(
-        "group flex cursor-pointer flex-col gap-1 rounded-lg border border-border p-3 transition-all duration-200",
-        "hover:border-foreground/20 hover:bg-accent/50",
-        isSelected && "border-foreground/40 bg-accent",
+        "group relative flex cursor-pointer flex-col gap-1 rounded-lg border border-border/60 bg-background/30 p-3 transition-[background-color,border-color,transform] duration-200",
+        "hover:border-border hover:bg-accent/25 hover:-translate-y-[1px]",
+        isSelected && "border-border bg-accent/35",
       )}
     >
+      <span
+        className={cn(
+          "absolute left-0 top-0 h-full w-0.5 bg-transparent",
+          isSelected && "bg-primary/80",
+        )}
+      />
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0 flex-1">
           {note.pinned && (
@@ -93,7 +99,7 @@ function NoteRow({
           </span>
         </div>
         {!isMobile && (
-          <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+          <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
             <Button
               variant="ghost"
               size="icon-xs"
@@ -279,7 +285,7 @@ export function NotesList({
         {groupedNotes.map((group) => (
           <div key={group.project?._id || "__none__"}>
             <div className="mb-2 flex items-center gap-2 px-1">
-              <span className="text-xs font-medium text-muted-foreground">
+              <span className="text-[11px] font-medium text-muted-foreground">
                 {group.project ? (
                   <>
                     {group.project.icon} {group.project.title}
@@ -288,16 +294,19 @@ export function NotesList({
                   "No project"
                 )}
               </span>
-              <Badge variant="secondary" className="rounded-md text-[10px]">
+              <Badge
+                variant="secondary"
+                className="rounded-md text-[10px] tabular-nums bg-muted/70"
+              >
                 {group.notes.length}
               </Badge>
             </div>
-            <div className="space-y-2">{group.notes.map(renderNoteRow)}</div>
+            <div className="space-y-1.5">{group.notes.map(renderNoteRow)}</div>
           </div>
         ))}
       </div>
     );
   }
 
-  return <div className="space-y-2">{sortedNotes.map(renderNoteRow)}</div>;
+  return <div className="space-y-1.5">{sortedNotes.map(renderNoteRow)}</div>;
 }

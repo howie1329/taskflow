@@ -302,7 +302,7 @@ export default function NotesPage() {
   }, [handleCreateNote, selectedNoteId, isMobile]);
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full w-full flex-col">
       {isMobile ? (
         <>
           <div className="flex h-full flex-col gap-4 p-4">
@@ -355,8 +355,8 @@ export default function NotesPage() {
           </Sheet>
         </>
       ) : (
-        <div className="flex h-full">
-          <div className="flex w-[350px] shrink-0 flex-col border-r p-4">
+        <div className="flex h-full w-full min-h-0 overflow-hidden rounded-xl border border-border/60 bg-card/40 dark:bg-card/20">
+          <div className="flex w-[350px] shrink-0 flex-col border-r border-border/60 p-4">
             <NotesSidebar
               notes={notes}
               filteredNotes={filteredNotes}
@@ -381,7 +381,7 @@ export default function NotesPage() {
             />
           </div>
 
-          <div className="flex min-h-0 flex-1 flex-col p-4">
+          <div className="flex min-h-0 flex-1 min-w-0 flex-col p-4">
             <NoteEditor
               note={selectedNote}
               isSaved={isSaved}

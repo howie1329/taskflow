@@ -136,7 +136,7 @@ export function NoteEditor({
     return (
       <div className="flex h-full flex-col gap-4">
         {/* Mobile Header */}
-        <div className="shrink-0 border-b pb-4">
+      <div className="shrink-0 border-b border-border/60 pb-4">
           <div className="flex items-center justify-between mb-3">
             <Button
               variant="ghost"
@@ -210,7 +210,7 @@ export function NoteEditor({
             value={note.title}
             onChange={(e) => onUpdateNote(note._id, { title: e.target.value })}
             placeholder="Note title"
-            className="border-0 bg-transparent px-0 text-lg font-semibold shadow-none focus-visible:ring-0 placeholder:text-muted-foreground/50"
+            className="border-0 bg-transparent px-0 text-lg font-semibold tracking-tight shadow-none focus-visible:ring-0 placeholder:text-muted-foreground/50"
           />
           <div className="flex items-center gap-2 mt-2">
             <Badge variant="outline" className="rounded-md text-[10px]">
@@ -222,11 +222,11 @@ export function NoteEditor({
                 "No project"
               )}
             </Badge>
-            <span className="text-xs text-muted-foreground">
+            <span className="text-[11px] text-muted-foreground tabular-nums">
               {formatRelativeTime(note.updatedAt)}
             </span>
             {isSaved ? (
-              <span className="flex items-center gap-1 text-xs text-green-600">
+              <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
                 <HugeiconsIcon
                   icon={CheckmarkCircle02Icon}
                   className="size-3"
@@ -234,7 +234,9 @@ export function NoteEditor({
                 Saved
               </span>
             ) : (
-              <span className="text-xs text-muted-foreground">Saving...</span>
+              <span className="text-[11px] text-muted-foreground">
+                Saving...
+              </span>
             )}
           </div>
         </div>
@@ -249,7 +251,7 @@ export function NoteEditor({
         />
 
         {/* Mobile Footer */}
-        <div className="shrink-0 border-t pt-3 flex items-center justify-between text-xs text-muted-foreground">
+        <div className="shrink-0 border-t border-border/60 pt-3 flex items-center justify-between text-xs text-muted-foreground">
           <div className="flex items-center gap-3">
             <span>{note.content.length} chars</span>
             <span>
@@ -265,13 +267,13 @@ export function NoteEditor({
   return (
     <div className="flex h-full flex-col gap-4">
       {/* Header */}
-      <div className="shrink-0 space-y-3">
+      <div className="shrink-0 rounded-lg border border-border/60 bg-muted/30 p-3 space-y-3">
         <Input
           ref={titleInputRef}
           value={note.title}
           onChange={(e) => onUpdateNote(note._id, { title: e.target.value })}
           placeholder="Note title"
-          className="border-0 bg-transparent px-0 text-lg font-semibold shadow-none focus-visible:ring-0 placeholder:text-muted-foreground/50"
+          className="border-0 bg-transparent px-0 text-lg font-semibold tracking-tight shadow-none focus-visible:ring-0 placeholder:text-muted-foreground/50"
         />
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -284,11 +286,11 @@ export function NoteEditor({
                 "No project"
               )}
             </Badge>
-            <span className="text-xs text-muted-foreground">
+            <span className="text-[11px] text-muted-foreground tabular-nums">
               {formatRelativeTime(note.updatedAt)}
             </span>
             {isSaved ? (
-              <span className="flex items-center gap-1 text-xs text-green-600">
+              <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
                 <HugeiconsIcon
                   icon={CheckmarkCircle02Icon}
                   className="size-3"
@@ -296,7 +298,9 @@ export function NoteEditor({
                 Saved
               </span>
             ) : (
-              <span className="text-xs text-muted-foreground">Saving...</span>
+              <span className="text-[11px] text-muted-foreground">
+                Saving...
+              </span>
             )}
           </div>
           <div className="flex items-center gap-1">
@@ -357,7 +361,7 @@ export function NoteEditor({
         </div>
       </div>
 
-      <Separator />
+      <Separator className="bg-border/60" />
 
       {/* Body */}
       <Textarea
@@ -369,7 +373,7 @@ export function NoteEditor({
       />
 
       {/* Footer */}
-      <div className="shrink-0 border-t pt-3 flex items-center justify-between text-xs text-muted-foreground">
+      <div className="shrink-0 border-t border-border/60 pt-3 flex items-center justify-between text-xs text-muted-foreground">
         <div className="flex items-center gap-3">
           <span>{note.content.length} characters</span>
           <span>{note.content.split(/\s+/).filter(Boolean).length} words</span>

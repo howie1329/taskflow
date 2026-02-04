@@ -64,7 +64,7 @@ export function NotesSidebar({
   searchInputRef,
 }: NotesSidebarProps) {
   return (
-    <div className="flex h-full flex-col gap-4">
+    <div className="flex h-full flex-col gap-3">
       {/* Header */}
       <div className="flex shrink-0 items-center justify-between">
         <p className="text-sm text-muted-foreground">Organize your thoughts</p>
@@ -75,7 +75,7 @@ export function NotesSidebar({
       </div>
 
       {/* Controls */}
-      <div className="shrink-0 space-y-3">
+      <div className="shrink-0 rounded-lg border border-border/60 bg-muted/30 p-2 space-y-3">
         {/* Project Filter */}
         <Select value={projectFilter} onValueChange={onProjectFilterChange}>
           <SelectTrigger className="h-8 text-xs">
@@ -111,7 +111,7 @@ export function NotesSidebar({
             <Button
               variant="ghost"
               size="icon-xs"
-              className="absolute right-1 top-1/2 -translate-y-1/2"
+              className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6"
               onClick={() => onSearchQueryChange("")}
             >
               ×
@@ -156,7 +156,7 @@ export function NotesSidebar({
         </Tabs>
       </div>
 
-      <Separator />
+      <Separator className="bg-border/60" />
 
       {/* Notes List */}
       <div className="min-h-0 flex-1 overflow-y-auto">
