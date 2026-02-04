@@ -77,6 +77,13 @@ Think in layers, not boxes:
 - Container (optional): used when it improves scanability (e.g., dashboard tiles).
 - Control: interactive elements (buttons, inputs, menus).
 
+### Borders and Radius
+
+- Rounded corners are the default across the app.
+- Apply a consistent radius scale to all surfaces and controls.
+- If a component needs stronger emphasis, increase contrast or spacing first, not radius.
+- Avoid mixing sharp and rounded edges within the same region.
+
 ### Container Discipline
 
 - Prefer dividers and spacing over heavy borders.
