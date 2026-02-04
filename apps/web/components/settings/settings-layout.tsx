@@ -11,21 +11,23 @@ export function SettingsLayout() {
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid w-full grid-cols-3">
-        <TabsTrigger value="profile">Profile</TabsTrigger>
-        <TabsTrigger value="preferences">Preferences</TabsTrigger>
-        <TabsTrigger value="ai">AI Settings</TabsTrigger>
-      </TabsList>
+      <div className="rounded-lg border border-border/60 bg-muted/30 p-2">
+        <TabsList variant="line" className="grid w-full grid-cols-3 bg-transparent p-0">
+          <TabsTrigger value="profile">Profile</TabsTrigger>
+          <TabsTrigger value="preferences">Preferences</TabsTrigger>
+          <TabsTrigger value="ai">AI Settings</TabsTrigger>
+        </TabsList>
+      </div>
 
-      <TabsContent value="profile" className="mt-6">
+      <TabsContent value="profile" className="mt-4">
         <ProfileTab />
       </TabsContent>
 
-      <TabsContent value="preferences" className="mt-6">
+      <TabsContent value="preferences" className="mt-4">
         <PreferencesTab />
       </TabsContent>
 
-      <TabsContent value="ai" className="mt-6">
+      <TabsContent value="ai" className="mt-4">
         <AITab />
       </TabsContent>
     </Tabs>

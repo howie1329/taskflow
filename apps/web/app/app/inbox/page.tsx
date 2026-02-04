@@ -273,7 +273,7 @@ function InboxItemRow({
     <>
       <div
         className={cn(
-          "group flex items-start gap-3 rounded-lg border border-border p-3 transition-all duration-200 hover:border-foreground/20 hover:shadow-sm",
+          "group flex items-start gap-3 rounded-lg border border-border/60 bg-background/30 p-3 transition-[background-color,border-color,transform] duration-200 hover:border-border hover:bg-accent/25 hover:-translate-y-[1px]",
           isArchived && "opacity-60",
           isNew && "animate-in fade-in slide-in-from-top-2 duration-300",
         )}
@@ -303,7 +303,7 @@ function InboxItemRow({
               <Button
                 variant="ghost"
                 size="icon-sm"
-                className="shrink-0 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
+                className="shrink-0 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
               >
                 <HugeiconsIcon icon={MoreVerticalIcon} className="size-4" />
                 <span className="sr-only">Actions</span>
@@ -499,10 +499,10 @@ function Toast({
   return (
     <div
       className={cn(
-        "fixed bottom-4 right-4 z-50 flex items-center gap-2 rounded-lg border px-4 py-3 text-xs shadow-lg animate-in slide-in-from-bottom-2",
+        "fixed bottom-4 right-4 z-50 flex items-center gap-2 rounded-lg border border-border/60 bg-background/80 px-4 py-3 text-xs shadow-lg backdrop-blur supports-[backdrop-filter]:bg-background/60 animate-in slide-in-from-bottom-2",
         type === "success"
-          ? "border-green-500/20 bg-green-500/10 text-green-700 dark:text-green-400"
-          : "border-blue-500/20 bg-blue-500/10 text-blue-700 dark:text-blue-400",
+          ? "text-green-700 dark:text-green-400"
+          : "text-blue-700 dark:text-blue-400",
       )}
     >
       <HugeiconsIcon
@@ -690,180 +690,191 @@ export default function InboxPage() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-4 h-full">
-        <div className="flex items-center justify-between">
-          <Skeleton className="h-4 w-48" />
-        </div>
-        <Skeleton className="h-20 w-full" />
-        <div className="flex justify-between">
-          <Skeleton className="h-8 w-64" />
-          <Skeleton className="h-8 w-20" />
-        </div>
-        <Separator />
-        <div className="space-y-2">
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-16 w-full" />
+      <div className="flex h-full w-full min-h-0 flex-col overflow-hidden rounded-xl border border-border/60 bg-card/40 dark:bg-card/20">
+        <div className="flex flex-1 min-h-0 flex-col gap-4 p-4">
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-4 w-48" />
+          </div>
+          <Skeleton className="h-20 w-full" />
+          <div className="flex justify-between">
+            <Skeleton className="h-8 w-64" />
+            <Skeleton className="h-8 w-20" />
+          </div>
+          <Separator />
+          <div className="space-y-2">
+            <Skeleton className="h-16 w-full" />
+            <Skeleton className="h-16 w-full" />
+            <Skeleton className="h-16 w-full" />
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-4 h-full">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          Capture fast, triage later
-        </p>
-      </div>
-
-      {/* Capture composer */}
-      <div className="space-y-2">
-        <div className="relative">
-          <Textarea
-            ref={textareaRef}
-            value={captureText}
-            onChange={(e) => setCaptureText(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="What's on your mind?"
-            className="min-h-[80px] resize-none pr-12 transition-shadow focus:shadow-sm"
-          />
-          {captureText.length > 0 && (
-            <div className="absolute bottom-2 right-2 text-xs text-muted-foreground tabular-nums">
-              {captureText.length}
-            </div>
-          )}
+    <div className="flex h-full w-full min-h-0 flex-col overflow-hidden rounded-xl border border-border/60 bg-card/40 dark:bg-card/20">
+      <div className="flex flex-1 min-h-0 flex-col gap-4 p-4">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            Capture fast, triage later
+          </p>
         </div>
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <div className="flex items-center gap-3">
-            <span className="flex items-center gap-1">
-              <Kbd>Enter</Kbd> to capture
-            </span>
-            <span className="flex items-center gap-1">
-              <Kbd>Shift</Kbd> + <Kbd>Enter</Kbd> for new line
-            </span>
-            <span className="flex items-center gap-1 hidden sm:inline-flex">
-              <Kbd>Esc</Kbd> to clear
-            </span>
-            <span className="flex items-center gap-1 hidden sm:inline-flex">
-              <Kbd>C</Kbd> to focus
-            </span>
-          </div>
-          <Button
-            size="sm"
-            onClick={handleCapture}
-            disabled={!captureText.trim()}
-          >
-            Capture
-          </Button>
-        </div>
-      </div>
 
-      <Separator />
-
-      {/* Search bar */}
-      <div className="flex items-center gap-2">
-        <div className="relative flex-1">
-          <HugeiconsIcon
-            icon={Search01Icon}
-            className="absolute left-2 top-1/2 -translate-y-1/2 size-4 text-muted-foreground"
-          />
-          <Input
-            type="text"
-            placeholder="Search inbox..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8 h-9 text-xs"
-          />
-          {searchQuery && (
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              className="absolute right-1 top-1/2 -translate-y-1/2"
-              onClick={() => setSearchQuery("")}
-            >
-              <span className="sr-only">Clear search</span>×
-            </Button>
-          )}
-        </div>
-      </div>
-
-      {/* Tabs */}
-      <Tabs
-        value={activeTab}
-        onValueChange={(v) => setActiveTab(v as InboxItemStatus)}
-        className="flex-1 flex flex-col min-h-0"
-      >
-        <TabsList variant="line" className="mb-4">
-          <TabsTrigger value="open" className="gap-2">
-            Open
-            <Badge variant="secondary" className="rounded-md">
-              {openItems.length}
-            </Badge>
-          </TabsTrigger>
-          <TabsTrigger value="archived" className="gap-2">
-            Archived
-            <Badge variant="secondary" className="rounded-md">
-              {archivedItems.length}
-            </Badge>
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="open" className="flex-1 overflow-y-auto min-h-0">
-          {filteredOpenItems.length === 0 ? (
-            <InboxEmptyState
-              status="open"
-              onCaptureFocus={focusCapture}
-              searchQuery={searchQuery}
+        {/* Capture composer */}
+        <div className="rounded-lg border border-border/60 bg-background/30 p-3 space-y-2">
+          <div className="relative">
+            <Textarea
+              ref={textareaRef}
+              value={captureText}
+              onChange={(e) => setCaptureText(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="What's on your mind?"
+              className="min-h-[80px] resize-none pr-12 border-border/60 focus-visible:ring-[3px] focus-visible:ring-ring/50"
             />
-          ) : (
-            <div className="space-y-2 pb-4">
-              {filteredOpenItems.map((item) => (
-                <InboxItemRow
-                  key={item._id}
-                  item={item}
-                  onArchive={handleArchive}
-                  onUnarchive={handleUnarchive}
-                  onDelete={handleDelete}
-                  onConvert={handleConvert}
-                  onOpenActions={(selectedItem) => {
-                    setMobileActionItem(selectedItem);
-                    setIsMobileSheetOpen(true);
-                  }}
-                  isNew={newItemIds.has(String(item._id))}
-                />
-              ))}
+            {captureText.length > 0 && (
+              <div className="absolute bottom-2 right-2 text-xs text-muted-foreground tabular-nums">
+                {captureText.length}
+              </div>
+            )}
+          </div>
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <div className="flex items-center gap-3">
+              <span className="flex items-center gap-1">
+                <Kbd>Enter</Kbd> to capture
+              </span>
+              <span className="flex items-center gap-1">
+                <Kbd>Shift</Kbd> + <Kbd>Enter</Kbd> for new line
+              </span>
+              <span className="flex items-center gap-1 hidden sm:inline-flex">
+                <Kbd>Esc</Kbd> to clear
+              </span>
+              <span className="flex items-center gap-1 hidden sm:inline-flex">
+                <Kbd>C</Kbd> to focus
+              </span>
             </div>
-          )}
-        </TabsContent>
+            <Button
+              size="sm"
+              onClick={handleCapture}
+              disabled={!captureText.trim()}
+            >
+              Capture
+            </Button>
+          </div>
+        </div>
 
-        <TabsContent
-          value="archived"
-          className="flex-1 overflow-y-auto min-h-0"
-        >
-          {filteredArchivedItems.length === 0 ? (
-            <InboxEmptyState status="archived" searchQuery={searchQuery} />
-          ) : (
-            <div className="space-y-2 pb-4">
-              {filteredArchivedItems.map((item) => (
-                <InboxItemRow
-                  key={item._id}
-                  item={item}
-                  onArchive={handleArchive}
-                  onUnarchive={handleUnarchive}
-                  onDelete={handleDelete}
-                  onConvert={handleConvert}
-                  onOpenActions={(selectedItem) => {
-                    setMobileActionItem(selectedItem);
-                    setIsMobileSheetOpen(true);
-                  }}
-                />
-              ))}
+        {/* Toolbar */}
+        <div className="rounded-lg border border-border/60 bg-muted/30 p-2 space-y-2">
+          {/* Search bar */}
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <HugeiconsIcon
+                icon={Search01Icon}
+                className="absolute left-2 top-1/2 -translate-y-1/2 size-4 text-muted-foreground"
+              />
+              <Input
+                type="text"
+                placeholder="Search inbox..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-8 h-9 text-xs"
+              />
+              {searchQuery && (
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6"
+                  onClick={() => setSearchQuery("")}
+                >
+                  <span className="sr-only">Clear search</span>×
+                </Button>
+              )}
             </div>
-          )}
-        </TabsContent>
-      </Tabs>
+          </div>
+
+          {/* Tabs */}
+          <Tabs
+            value={activeTab}
+            onValueChange={(v) => setActiveTab(v as InboxItemStatus)}
+            className="flex-1 flex flex-col min-h-0"
+          >
+            <TabsList variant="line" className="mb-0">
+              <TabsTrigger value="open" className="gap-2">
+                Open
+                <Badge
+                  variant="secondary"
+                  className="rounded-md tabular-nums bg-muted/70"
+                >
+                  {openItems.length}
+                </Badge>
+              </TabsTrigger>
+              <TabsTrigger value="archived" className="gap-2">
+                Archived
+                <Badge
+                  variant="secondary"
+                  className="rounded-md tabular-nums bg-muted/70"
+                >
+                  {archivedItems.length}
+                </Badge>
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="open" className="flex-1 overflow-y-auto min-h-0">
+              {filteredOpenItems.length === 0 ? (
+                <InboxEmptyState
+                  status="open"
+                  onCaptureFocus={focusCapture}
+                  searchQuery={searchQuery}
+                />
+              ) : (
+                <div className="space-y-2 pb-4">
+                  {filteredOpenItems.map((item) => (
+                    <InboxItemRow
+                      key={item._id}
+                      item={item}
+                      onArchive={handleArchive}
+                      onUnarchive={handleUnarchive}
+                      onDelete={handleDelete}
+                      onConvert={handleConvert}
+                      onOpenActions={(selectedItem) => {
+                        setMobileActionItem(selectedItem);
+                        setIsMobileSheetOpen(true);
+                      }}
+                      isNew={newItemIds.has(String(item._id))}
+                    />
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent
+              value="archived"
+              className="flex-1 overflow-y-auto min-h-0"
+            >
+              {filteredArchivedItems.length === 0 ? (
+                <InboxEmptyState status="archived" searchQuery={searchQuery} />
+              ) : (
+                <div className="space-y-2 pb-4">
+                  {filteredArchivedItems.map((item) => (
+                    <InboxItemRow
+                      key={item._id}
+                      item={item}
+                      onArchive={handleArchive}
+                      onUnarchive={handleUnarchive}
+                      onDelete={handleDelete}
+                      onConvert={handleConvert}
+                      onOpenActions={(selectedItem) => {
+                        setMobileActionItem(selectedItem);
+                        setIsMobileSheetOpen(true);
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
+        </div>
+      </div>
 
       {/* Mobile action sheet */}
       <MobileActionSheet
