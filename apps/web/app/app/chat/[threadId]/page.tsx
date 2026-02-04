@@ -115,9 +115,9 @@ export default function ThreadPage() {
 
   return (
     <PromptInputProvider>
-      <div className="flex flex-col h-full">
+      <div className="flex flex-col h-full w-full min-h-0">
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between px-4 py-3 border-b bg-background/80 backdrop-blur shrink-0">
+        <div className="sticky top-0 z-10 flex items-center justify-between px-4 py-3 border-b border-border/60 bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60 shrink-0">
           <div className="flex items-center gap-3 min-w-0">
             {/* Mobile back button */}
             <Button
@@ -180,7 +180,7 @@ export default function ThreadPage() {
 
         {/* Conversation */}
         <Conversation className="flex-1">
-          <ConversationContent className="mx-auto w-full max-w-7xl px-3 py-6 gap-4">
+          <ConversationContent className="mx-auto w-full max-w-4xl px-3 py-6 gap-4">
             {messages.length === 0 ? (
               <ConversationEmptyState
                 title="Start a new conversation"
@@ -200,9 +200,9 @@ export default function ThreadPage() {
                     className={cn(
                       "text-sm leading-6",
                       message.role === "assistant" &&
-                      "w-full border-l border-border/60 pl-6",
+                      "w-full border-l border-border/50 pl-5",
                       message.role === "user" &&
-                      "border border-border bg-muted/50 px-4 py-3 max-w-[32rem]",
+                      "border border-border/60 bg-muted/40 px-4 py-3 max-w-[32rem] rounded-lg",
                     )}
                   >
                     {message.role === "assistant" ? (
@@ -223,7 +223,7 @@ export default function ThreadPage() {
         </Conversation>
 
         {/* Composer */}
-        <div className="shrink-0 border-t bg-background/80 backdrop-blur px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+12px)]">
+        <div className="shrink-0 border-t border-border/60 bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+12px)]">
           <label htmlFor="thread-message" className="sr-only">
             Message
           </label>

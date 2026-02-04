@@ -141,10 +141,10 @@ export function ThreadRow({
   )
 
   const classes = cn(
-    "group relative block rounded-md px-3 py-2.5 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+    "group relative block rounded-md px-3 py-2.5 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
     isActive
-      ? "bg-accent/60 text-foreground"
-      : "hover:bg-accent/40 text-foreground",
+      ? "bg-accent/40 text-foreground"
+      : "hover:bg-accent/25 text-foreground",
   )
 
   if (isEditing) {
@@ -153,7 +153,7 @@ export function ThreadRow({
         <span
           className={cn(
             "absolute left-0 top-0 h-full w-0.5 bg-transparent",
-            isActive && "bg-primary"
+            isActive && "bg-primary/80"
           )}
         />
         {content}
@@ -170,7 +170,7 @@ export function ThreadRow({
       <span
         className={cn(
           "absolute left-0 top-0 h-full w-0.5 bg-transparent",
-          isActive && "bg-primary"
+          isActive && "bg-primary/80"
         )}
       />
       {content}

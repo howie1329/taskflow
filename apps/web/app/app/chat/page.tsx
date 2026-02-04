@@ -42,7 +42,7 @@ function ComposerWithScope() {
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex-1 min-h-0 flex items-center justify-center px-6 py-12">
-        <div className="w-full max-w-3xl">
+        <div className="w-full max-w-3xl rounded-xl border border-border/60 bg-card/40 dark:bg-card/20 p-6">
           <h1 className="text-center text-sm font-medium text-muted-foreground">
             Start a new chat
           </h1>

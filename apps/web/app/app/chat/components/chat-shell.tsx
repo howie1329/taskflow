@@ -96,7 +96,7 @@ export function ChatShell({ children }: ChatShellProps) {
 
   return (
     <>
-    <div className="flex flex-1 min-h-0 overflow-hidden rounded-lg border">
+    <div className="flex flex-1 min-h-0 overflow-hidden rounded-xl border border-border/60 bg-card/40 dark:bg-card/20">
         <ThreadsRail
           className={cn(isThreadRoute && "hidden md:flex")}
           isNewChat={isNewChat}

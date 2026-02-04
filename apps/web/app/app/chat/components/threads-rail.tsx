@@ -80,11 +80,11 @@ export function ThreadsRail({
     <nav
       aria-label="Threads"
       className={cn(
-        "w-full md:w-[300px] shrink-0 border-r flex flex-col bg-sidebar text-sidebar-foreground",
+        "w-full md:w-[300px] shrink-0 border-r border-border/60 flex flex-col bg-background/40 text-foreground",
         className,
       )}
     >
-      <div className="sticky top-0 z-10 border-b border-sidebar-border/60 bg-sidebar/95 p-3 backdrop-blur supports-[backdrop-filter]:bg-sidebar/80 space-y-2">
+      <div className="sticky top-0 z-10 border-b border-border/60 bg-background/70 p-3 backdrop-blur supports-[backdrop-filter]:bg-background/60 space-y-2">
         <div className="flex items-center justify-between gap-2">
           <span className="text-xs font-medium text-muted-foreground">
             Threads
