@@ -142,7 +142,7 @@ export default function ThreadPage() {
                 {project ? (
                   <Badge
                     variant="outline"
-                    className="rounded-none text-[10px] h-4 px-1"
+                    className="rounded-md text-[10px] h-4 px-1"
                   >
                     <HugeiconsIcon
                       icon={FolderManagementIcon}
@@ -154,7 +154,7 @@ export default function ThreadPage() {
                 ) : (
                   <Badge
                     variant="outline"
-                    className="rounded-none text-[10px] h-4 px-1"
+                    className="rounded-md text-[10px] h-4 px-1"
                   >
                     <HugeiconsIcon
                       icon={GlobalIcon}

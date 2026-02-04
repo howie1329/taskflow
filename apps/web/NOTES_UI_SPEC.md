@@ -9,7 +9,7 @@
 
 ## Design Principles (Match Existing App)
 
-- All borders `rounded-none` (consistent with Tasks/Inbox/Projects)
+- Borders use subtle rounding (`rounded-md` by default, `rounded-lg` for larger surfaces)
 - Typography: `text-xs` for meta, `text-sm` for content, `font-medium` for headers
 - Spacing: `gap-4`, `p-3`/`p-4` patterns matching Tasks/Inbox pages
 - Colors: Use theme tokens (`--muted`, `--border`, `--accent`, etc.)
@@ -163,7 +163,7 @@ interface MockNote {
 
 ### Styling
 
-- Container: `rounded-none border border-border p-3`
+- Container: `rounded-md border border-border p-3`
 - Hover: `hover:bg-accent/50 hover:border-foreground/20`
 - Selected: `bg-accent border-foreground/40` (distinct from hover)
 - Transition: `transition-all duration-200`

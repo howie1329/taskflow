@@ -521,7 +521,7 @@ export default function ProjectDetailPage() {
                   aria-hidden="true"
                 />
                 <span>{project.icon}</span>
-                <Badge variant="outline" className="rounded-none text-[10px]">
+                <Badge variant="outline" className="rounded-md text-[10px]">
                   {project.status === "archived" ? "Archived" : "Active"}
                 </Badge>
                 <span>Updated {formatRelativeTime(project.updatedAt)}</span>

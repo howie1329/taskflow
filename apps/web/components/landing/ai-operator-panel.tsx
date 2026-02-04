@@ -38,7 +38,7 @@ export function AiOperatorPanel() {
       <div className="mx-auto max-w-3xl text-center mb-12">
         <Badge
           variant="outline"
-          className="rounded-none mb-4 font-mono text-xs"
+          className="rounded-md mb-4 font-mono text-xs"
         >
           AI operator
         </Badge>
@@ -54,7 +54,7 @@ export function AiOperatorPanel() {
         <CardHeader className="border-b border-dashed pb-4">
           <div className="flex items-center justify-between">
             <CardTitle className="text-sm">Example conversation</CardTitle>
-            <Badge variant="secondary" className="rounded-none text-[10px]">
+            <Badge variant="secondary" className="rounded-md text-[10px]">
               AI chat
             </Badge>
           </div>
@@ -86,13 +86,13 @@ export function AiOperatorPanel() {
                     <div className="flex items-center gap-2 pt-2">
                       <Badge
                         variant="outline"
-                        className="rounded-none text-[10px]"
+                        className="rounded-md text-[10px]"
                       >
                         Created task
                       </Badge>
                       <Badge
                         variant="outline"
-                        className="rounded-none text-[10px]"
+                        className="rounded-md text-[10px]"
                       >
                         Scheduled today
                       </Badge>

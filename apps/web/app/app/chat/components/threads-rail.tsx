@@ -92,7 +92,7 @@ export function ThreadsRail({
           <Link href="/app/chat">
             <Button
               className={cn(
-                "h-8 rounded-none px-3 text-xs",
+                "h-8 rounded-md px-3 text-xs",
                 isNewChat && "bg-accent text-accent-foreground",
               )}
               variant={isNewChat ? "secondary" : "default"}

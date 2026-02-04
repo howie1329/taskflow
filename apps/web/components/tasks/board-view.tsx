@@ -66,7 +66,7 @@ export function BoardView({
               <div className="flex items-center justify-between mb-3 px-1">
                 <div className="flex items-center gap-2">
                   <h3 className="text-sm font-medium">{column.label}</h3>
-                  <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-none">
+                  <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-md">
                     {columnTasks.length}
                   </span>
                 </div>

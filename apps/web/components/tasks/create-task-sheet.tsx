@@ -469,7 +469,7 @@ export function CreateTaskSheet({
                           size="xs"
                           onClick={() => toggleTag(tag._id as string)}
                           aria-pressed={isSelected}
-                          className="h-7 px-2 text-xs rounded-none"
+                          className="h-7 px-2 text-xs rounded-md"
                         >
                           <span
                             className="inline-block w-1.5 h-1.5 rounded-full mr-1.5"

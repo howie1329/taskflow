@@ -101,7 +101,7 @@ export const SandboxTabsList = ({
   ...props
 }: SandboxTabsListProps) => (
   <TabsList
-    className={cn("h-auto rounded-none border-0 bg-transparent p-0", className)}
+    className={cn("h-auto rounded-md border-0 bg-transparent p-0", className)}
     {...props}
   />
 );
@@ -114,7 +114,7 @@ export const SandboxTabsTrigger = ({
 }: SandboxTabsTriggerProps) => (
   <TabsTrigger
     className={cn(
-      "rounded-none border-0 border-transparent border-b-2 px-4 py-2 font-medium text-muted-foreground text-sm transition-colors data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none",
+      "rounded-md border-0 border-transparent border-b-2 px-4 py-2 font-medium text-muted-foreground text-sm transition-colors data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none",
       className
     )}
     {...props}

@@ -12,7 +12,7 @@ export function LandingFooter() {
           <div className="flex items-center gap-2">
             <Badge
               variant="secondary"
-              className="rounded-none font-mono text-xs"
+              className="rounded-md font-mono text-xs"
             >
               Taskflow
             </Badge>

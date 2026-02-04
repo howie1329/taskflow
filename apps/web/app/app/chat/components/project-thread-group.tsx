@@ -32,7 +32,7 @@ export function ProjectThreadGroup({
           <span className="truncate">{project.title}</span>
           <Badge
             variant="secondary"
-            className="rounded-none text-[10px] h-4 px-1"
+            className="rounded-md text-[10px] h-4 px-1"
           >
             {threads.length}
           </Badge>

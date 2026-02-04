@@ -129,7 +129,7 @@ export function NotesSidebar({
               By project
               <Badge
                 variant="secondary"
-                className="ml-1.5 rounded-none text-[10px] px-1 py-0 h-4"
+                className="ml-1.5 rounded-md text-[10px] px-1 py-0 h-4"
               >
                 {filteredNotes.length}
               </Badge>
@@ -138,7 +138,7 @@ export function NotesSidebar({
               Recent
               <Badge
                 variant="secondary"
-                className="ml-1.5 rounded-none text-[10px] px-1 py-0 h-4"
+                className="ml-1.5 rounded-md text-[10px] px-1 py-0 h-4"
               >
                 {filteredNotes.length}
               </Badge>
@@ -147,7 +147,7 @@ export function NotesSidebar({
               Pinned
               <Badge
                 variant="secondary"
-                className="ml-1.5 rounded-none text-[10px] px-1 py-0 h-4"
+                className="ml-1.5 rounded-md text-[10px] px-1 py-0 h-4"
               >
                 {notes.filter((n) => n.pinned).length}
               </Badge>

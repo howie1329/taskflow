@@ -473,7 +473,7 @@ export function TaskDetailsSheet({
                                   : [...prev, tag._id as string],
                               );
                             }}
-                            className="h-7 px-2 text-xs rounded-none"
+                            className="h-7 px-2 text-xs rounded-md"
                           >
                             <span
                               className="inline-block w-1.5 h-1.5 rounded-full mr-1.5"
@@ -488,7 +488,7 @@ export function TaskDetailsSheet({
                         variant="outline"
                         size="xs"
                         onClick={() => setIsCreateTagDialogOpen(true)}
-                        className="h-7 px-2 text-xs rounded-none border-dashed"
+                        className="h-7 px-2 text-xs rounded-md border-dashed"
                       >
                         + Create tag
                       </Button>

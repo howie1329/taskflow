@@ -75,7 +75,7 @@ function NoteRow({
     <div
       onClick={() => onSelect(note._id)}
       className={cn(
-        "group flex cursor-pointer flex-col gap-1 rounded-none border border-border p-3 transition-all duration-200",
+        "group flex cursor-pointer flex-col gap-1 rounded-lg border border-border p-3 transition-all duration-200",
         "hover:border-foreground/20 hover:bg-accent/50",
         isSelected && "border-foreground/40 bg-accent",
       )}
@@ -288,7 +288,7 @@ export function NotesList({
                   "No project"
                 )}
               </span>
-              <Badge variant="secondary" className="rounded-none text-[10px]">
+              <Badge variant="secondary" className="rounded-md text-[10px]">
                 {group.notes.length}
               </Badge>
             </div>

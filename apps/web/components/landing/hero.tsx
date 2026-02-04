@@ -13,7 +13,7 @@ export function Hero() {
     <section className="container relative flex flex-col items-center justify-center gap-8 px-4 py-24 lg:px-6 lg:py-32">
       <div className="flex flex-col items-center gap-6 text-center max-w-3xl mx-auto">
         <div className="flex items-center gap-2">
-          <Badge variant="outline" className="rounded-none font-mono text-xs">
+          <Badge variant="outline" className="rounded-md font-mono text-xs">
             v1 Rewrite
           </Badge>
           <span className="text-xs text-muted-foreground">Convex-powered</span>
@@ -90,7 +90,7 @@ export function Hero() {
                     <div className="h-2 w-24 bg-muted rounded" />
                     <Badge
                       variant="outline"
-                      className="rounded-none text-[10px]"
+                      className="rounded-md text-[10px]"
                     >
                       AI chat
                     </Badge>

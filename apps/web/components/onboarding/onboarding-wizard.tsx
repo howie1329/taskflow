@@ -334,7 +334,7 @@ export function OnboardingWizard() {
               </EmptyContent>
             </Empty>
           ) : hasModelMatches ? (
-            <ScrollArea className="h-56 rounded-none border">
+            <ScrollArea className="h-56 rounded-lg border">
               <div className="divide-y">
                 {filteredModels.map((model) => {
                   const isSelected = model.modelId === selectedModelId
@@ -370,7 +370,7 @@ export function OnboardingWizard() {
           )}
 
           {!isEmpty && selectedModelId && (
-            <div className="rounded-none border px-3 py-2 text-xs text-muted-foreground">
+            <div className="rounded-md border px-3 py-2 text-xs text-muted-foreground">
               Selected model:{" "}
               <span className="text-foreground">
                 {models.find((model) => model.modelId === selectedModelId)?.name}
@@ -397,7 +397,7 @@ export function OnboardingWizard() {
             </div>
           </Field>
 
-          <div className="rounded-none border p-4 text-xs text-muted-foreground space-y-2">
+          <div className="rounded-lg border p-4 text-xs text-muted-foreground space-y-2">
             <div className="text-foreground font-medium">Review</div>
             <div>
               {profileData.firstName} {profileData.lastName} ·{" "}

@@ -57,7 +57,7 @@ export function TodayBoardView({
         <div className="flex items-center justify-between mb-3 px-1 shrink-0">
           <div className="flex items-center gap-2">
             <h3 className="text-sm font-medium">Today</h3>
-            <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-none">
+            <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-md">
               {todayTasks.length}
             </span>
             <span className="text-xs text-muted-foreground">{today}</span>
@@ -75,7 +75,7 @@ export function TodayBoardView({
         </div>
 
         {/* Today task list with Add card */}
-        <div className="flex-1 overflow-y-auto space-y-2 p-1 -mx-1 border border-dashed border-border rounded-none">
+        <div className="flex-1 overflow-y-auto space-y-2 p-1 -mx-1 border border-dashed border-border rounded-lg">
           {todayTasks.map((task) => (
             <TaskCard
               key={task._id}

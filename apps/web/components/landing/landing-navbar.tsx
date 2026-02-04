@@ -13,7 +13,7 @@ export function LandingNavbar() {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-sm">
       <div className="container flex h-14 items-center justify-between px-4 lg:px-6">
         <Link href="/" className="flex items-center gap-2 font-medium">
-          <Badge variant="secondary" className="rounded-none font-mono text-xs">
+          <Badge variant="secondary" className="rounded-md font-mono text-xs">
             Taskflow
           </Badge>
         </Link>

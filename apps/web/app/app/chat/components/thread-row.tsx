@@ -141,7 +141,7 @@ export function ThreadRow({
   )
 
   const classes = cn(
-    "group relative block rounded-none px-3 py-2.5 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+    "group relative block rounded-md px-3 py-2.5 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
     isActive
       ? "bg-accent/60 text-foreground"
       : "hover:bg-accent/40 text-foreground",

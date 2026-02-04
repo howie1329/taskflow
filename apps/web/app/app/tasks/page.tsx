@@ -686,7 +686,7 @@ export default function TasksPage() {
       <button
         ref={searchButtonRef}
         type="button"
-        className="h-8 w-full rounded-none border border-border bg-transparent px-2.5 text-xs text-muted-foreground flex items-center justify-between"
+        className="h-8 w-full rounded-md border border-border bg-transparent px-2.5 text-xs text-muted-foreground flex items-center justify-between"
         onClick={() => {
           setIsSearchOpen(true);
           requestAnimationFrame(() => searchInputRef.current?.focus());
@@ -870,13 +870,13 @@ export default function TasksPage() {
               </p>
               <button
                 onClick={() => handleOpenCreate({ status: "Not Started" })}
-                className="mt-4 px-3 py-1.5 text-xs bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                className="mt-4 px-3 py-1.5 text-xs rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
               >
                 Add your first task
               </button>
               <button
                 onClick={() => setIsCreateTagDialogOpen(true)}
-                className="mt-2 px-3 py-1.5 text-xs border border-border hover:bg-accent transition-colors"
+                className="mt-2 px-3 py-1.5 text-xs rounded-md border border-border hover:bg-accent transition-colors"
               >
                 Create a tag
               </button>

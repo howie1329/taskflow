@@ -306,7 +306,7 @@ export function ProjectSheet({
                     type="color"
                     value={form.color}
                     onChange={handleColorChange}
-                    className="w-8 h-8 p-0 border-0 rounded-none cursor-pointer"
+                    className="w-8 h-8 p-0 border-0 rounded-md cursor-pointer"
                     aria-label="Custom color"
                   />
                   <Input

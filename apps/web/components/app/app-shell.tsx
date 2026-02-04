@@ -139,7 +139,7 @@ export function AppShell({ children }: AppShellProps) {
             <SidebarMenuItem>
               <SidebarMenuButton size="lg" asChild>
                 <Link href="/app">
-                  <div className="flex aspect-square size-8 items-center justify-center rounded-none bg-primary text-primary-foreground">
+                  <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
                     <HugeiconsIcon icon={CommandIcon} className="size-4" />
                   </div>
                   <div className="grid flex-1 text-left text-sm leading-tight">

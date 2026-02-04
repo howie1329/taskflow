@@ -45,7 +45,7 @@ export function Workflow() {
       <div className="mx-auto max-w-3xl text-center mb-12">
         <Badge
           variant="outline"
-          className="rounded-none mb-4 font-mono text-xs"
+          className="rounded-md mb-4 font-mono text-xs"
         >
           The loop
         </Badge>

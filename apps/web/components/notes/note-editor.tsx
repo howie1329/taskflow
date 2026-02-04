@@ -213,7 +213,7 @@ export function NoteEditor({
             className="border-0 bg-transparent px-0 text-lg font-semibold shadow-none focus-visible:ring-0 placeholder:text-muted-foreground/50"
           />
           <div className="flex items-center gap-2 mt-2">
-            <Badge variant="outline" className="rounded-none text-[10px]">
+            <Badge variant="outline" className="rounded-md text-[10px]">
               {project ? (
                 <>
                   {project.icon} {project.title}
@@ -275,7 +275,7 @@ export function NoteEditor({
         />
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="rounded-none text-[10px]">
+            <Badge variant="outline" className="rounded-md text-[10px]">
               {project ? (
                 <>
                   {project.icon} {project.title}

@@ -273,7 +273,7 @@ function InboxItemRow({
     <>
       <div
         className={cn(
-          "group flex items-start gap-3 rounded-none border border-border p-3 transition-all duration-200 hover:border-foreground/20 hover:shadow-sm",
+          "group flex items-start gap-3 rounded-lg border border-border p-3 transition-all duration-200 hover:border-foreground/20 hover:shadow-sm",
           isArchived && "opacity-60",
           isNew && "animate-in fade-in slide-in-from-top-2 duration-300",
         )}
@@ -499,7 +499,7 @@ function Toast({
   return (
     <div
       className={cn(
-        "fixed bottom-4 right-4 z-50 flex items-center gap-2 rounded-none border px-4 py-3 text-xs shadow-lg animate-in slide-in-from-bottom-2",
+        "fixed bottom-4 right-4 z-50 flex items-center gap-2 rounded-lg border px-4 py-3 text-xs shadow-lg animate-in slide-in-from-bottom-2",
         type === "success"
           ? "border-green-500/20 bg-green-500/10 text-green-700 dark:text-green-400"
           : "border-blue-500/20 bg-blue-500/10 text-blue-700 dark:text-blue-400",
@@ -798,13 +798,13 @@ export default function InboxPage() {
         <TabsList variant="line" className="mb-4">
           <TabsTrigger value="open" className="gap-2">
             Open
-            <Badge variant="secondary" className="rounded-none">
+            <Badge variant="secondary" className="rounded-md">
               {openItems.length}
             </Badge>
           </TabsTrigger>
           <TabsTrigger value="archived" className="gap-2">
             Archived
-            <Badge variant="secondary" className="rounded-none">
+            <Badge variant="secondary" className="rounded-md">
               {archivedItems.length}
             </Badge>
           </TabsTrigger>

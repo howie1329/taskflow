@@ -135,7 +135,7 @@ export default function RoadmapPage() {
           <Link href="/" className="flex items-center gap-2 font-medium">
             <Badge
               variant="secondary"
-              className="rounded-none font-mono text-xs"
+              className="rounded-md font-mono text-xs"
             >
               Taskflow
             </Badge>
@@ -156,7 +156,7 @@ export default function RoadmapPage() {
 
         <div className="relative flex flex-col items-center gap-6 text-center max-w-3xl mx-auto">
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="rounded-none font-mono text-xs">
+            <Badge variant="outline" className="rounded-md font-mono text-xs">
               <HugeiconsIcon icon={RocketIcon} className="h-3 w-3 mr-1" />
               v1
             </Badge>
@@ -182,7 +182,7 @@ export default function RoadmapPage() {
         <div className="mx-auto max-w-3xl text-center mb-8">
           <Badge
             variant="outline"
-            className="rounded-none mb-4 font-mono text-xs"
+            className="rounded-md mb-4 font-mono text-xs"
           >
             <HugeiconsIcon icon={CheckListIcon} className="h-3 w-3 mr-1" />
             MVP Scope
@@ -220,7 +220,7 @@ export default function RoadmapPage() {
         <div className="mx-auto max-w-3xl text-center mb-8">
           <Badge
             variant="outline"
-            className="rounded-none mb-4 font-mono text-xs"
+            className="rounded-md mb-4 font-mono text-xs"
           >
             <HugeiconsIcon icon={Layers01Icon} className="h-3 w-3 mr-1" />
             Development phases
@@ -241,7 +241,7 @@ export default function RoadmapPage() {
                   <div className="flex items-center gap-3">
                     <Badge
                       variant="secondary"
-                      className="rounded-none font-mono text-xs"
+                      className="rounded-md font-mono text-xs"
                     >
                       {phase.phase}
                     </Badge>
@@ -280,7 +280,7 @@ export default function RoadmapPage() {
         <div className="mx-auto max-w-3xl text-center mb-8">
           <Badge
             variant="outline"
-            className="rounded-none mb-4 font-mono text-xs"
+            className="rounded-md mb-4 font-mono text-xs"
           >
             <HugeiconsIcon icon={SparklesIcon} className="h-3 w-3 mr-1" />
             v1.1+
@@ -313,7 +313,7 @@ export default function RoadmapPage() {
       <section className="container px-4 py-8 lg:px-6 border-t">
         <div className="mx-auto max-w-3xl">
           <div className="flex items-center gap-2 mb-4">
-            <Badge variant="outline" className="rounded-none font-mono text-xs">
+            <Badge variant="outline" className="rounded-md font-mono text-xs">
               <HugeiconsIcon icon={Flag03Icon} className="h-3 w-3 mr-1" />
               Non-goals
             </Badge>
@@ -326,7 +326,7 @@ export default function RoadmapPage() {
               <Badge
                 key={goal}
                 variant="secondary"
-                className="rounded-none text-[10px]"
+                className="rounded-md text-[10px]"
               >
                 {goal}
               </Badge>

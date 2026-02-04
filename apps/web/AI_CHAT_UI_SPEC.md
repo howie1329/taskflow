@@ -9,7 +9,7 @@
 
 ## Design Principles (Match Existing App)
 
-- All borders `rounded-none` (consistent with Tasks/Inbox/Projects/Notes)
+- Borders use subtle rounding (`rounded-md` by default, `rounded-lg` for larger surfaces)
 - Typography: `text-xs` for meta, `text-sm` for content, `font-medium` for headers
 - Spacing: `gap-4`, `p-3`/`p-4` patterns matching other pages
 - Colors: Use theme tokens (`--muted`, `--border`, `--accent`, etc.)
@@ -184,7 +184,7 @@ interface ChatMessage {
 - **New chat button**: Full-width, `Button variant="default"`
 - **Search**: `InputGroup` with left search icon, clear button on right when query present
 - **Section headers**: `text-xs font-medium text-muted-foreground` with optional count badge
-- **Thread rows**: `rounded-none border` container with hover/focus states
+- **Thread rows**: `rounded-md border` container with hover/focus states
 
 ### Thread Row Styling
 
@@ -439,7 +439,7 @@ From AI elements:
 - [ ] Thread view: Header, conversation log, composer
 - [ ] Empty states: No threads, no search results, invalid threadId
 - [ ] Responsive behavior correct at all breakpoints
-- [ ] Visual style matches existing app (rounded-none, text sizing, colors)
+- [ ] Visual style matches existing app (rounded corners, text sizing, colors)
 - [ ] No TypeScript errors, no broken imports
 
 ---
