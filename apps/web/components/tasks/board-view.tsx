@@ -51,8 +51,8 @@ export function BoardView({
     : columns;
 
   return (
-    <div className="h-full overflow-x-auto overflow-y-hidden">
-      <div className="flex gap-4 h-full min-w-[660px] lg:min-w-0">
+    <div className="h-full w-full min-h-0 overflow-y-auto lg:overflow-y-hidden">
+      <div className="grid gap-4 lg:grid-cols-4 lg:h-full">
         {visibleColumns.map((column) => {
           const columnTasks = getTasksByStatus(column.id);
           const isCompleted = column.id === "Completed";
@@ -60,13 +60,15 @@ export function BoardView({
           return (
             <div
               key={column.id}
-              className="flex flex-col flex-1 min-w-[220px] max-w-[360px] h-full"
+              className="flex flex-col min-w-0 lg:min-h-0 rounded-xl border bg-card/40 dark:bg-card/20"
             >
               {/* Column header */}
-              <div className="flex items-center justify-between mb-3 px-1">
+              <div className="flex items-center justify-between px-3 py-2.5 border-b bg-background/40 backdrop-blur supports-[backdrop-filter]:bg-background/30">
                 <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-medium">{column.label}</h3>
-                  <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-md">
+                  <h3 className="text-sm font-medium tracking-tight">
+                    {column.label}
+                  </h3>
+                  <span className="text-[11px] tabular-nums text-muted-foreground bg-muted/70 px-2 py-0.5 rounded-md">
                     {columnTasks.length}
                   </span>
                 </div>
@@ -83,8 +85,9 @@ export function BoardView({
               {/* Task list with Add card */}
               <div
                 className={cn(
-                  "flex-1 overflow-y-auto space-y-2 p-1 -mx-1",
-                  isCompleted && "opacity-75",
+                  "flex-1 min-h-0 space-y-2 px-3 py-2",
+                  "lg:overflow-y-auto",
+                  isCompleted && "opacity-80",
                 )}
               >
                 {columnTasks.map((task) => (

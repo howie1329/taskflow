@@ -50,17 +50,17 @@ export function TodayBoardView({
   );
 
   return (
-    <div className="h-full flex flex-col lg:flex-row gap-4">
+    <div className="h-full w-full min-h-0 flex flex-col lg:flex-row gap-4 overflow-y-auto lg:overflow-hidden">
       {/* Today Lane - Left side */}
-      <div className="lg:w-[32%] xl:w-[28%] flex flex-col h-full min-h-[200px]">
+      <div className="lg:w-[32%] xl:w-[28%] min-w-[260px] flex flex-col min-h-[200px] lg:min-h-0 rounded-xl border bg-card/40 dark:bg-card/20">
         {/* Today header */}
-        <div className="flex items-center justify-between mb-3 px-1 shrink-0">
+        <div className="flex items-center justify-between px-3 py-2.5 border-b bg-background/40 backdrop-blur supports-[backdrop-filter]:bg-background/30 shrink-0">
           <div className="flex items-center gap-2">
-            <h3 className="text-sm font-medium">Today</h3>
-            <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-md">
+            <h3 className="text-sm font-medium tracking-tight">Today</h3>
+            <span className="text-[11px] tabular-nums text-muted-foreground bg-muted/70 px-2 py-0.5 rounded-md">
               {todayTasks.length}
             </span>
-            <span className="text-xs text-muted-foreground">{today}</span>
+            <span className="text-[11px] text-muted-foreground">{today}</span>
           </div>
           <Button
             variant="ghost"
@@ -75,7 +75,7 @@ export function TodayBoardView({
         </div>
 
         {/* Today task list with Add card */}
-        <div className="flex-1 overflow-y-auto space-y-2 p-1 -mx-1 border border-dashed border-border rounded-lg">
+        <div className="flex-1 min-h-0 space-y-2 px-3 py-2 lg:overflow-y-auto">
           {todayTasks.map((task) => (
             <TaskCard
               key={task._id}
@@ -95,8 +95,8 @@ export function TodayBoardView({
       </div>
 
       {/* Board View - Right side */}
-      <div className="flex-1 h-full min-h-[300px]">
-        <div className="h-full">
+      <div className="flex-1 h-full min-h-[300px] min-w-0">
+        <div className="h-full min-h-0">
           <BoardView
             tasks={boardTasks}
             onTaskClick={onTaskClick}

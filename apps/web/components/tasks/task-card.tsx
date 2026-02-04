@@ -57,7 +57,7 @@ export function TaskCard({
 
   return (
     <Card
-      className="p-2 cursor-pointer hover:bg-accent/50 transition-colors"
+      className="p-2.5 cursor-pointer rounded-lg border border-border/60 bg-card/60 dark:bg-card/40 shadow-sm shadow-black/5 hover:bg-accent/40 hover:border-border transition-[transform,box-shadow,background-color,border-color] hover:-translate-y-[1px]"
       onClick={() => onClick(task)}
     >
       {/* Top row: Project badge */}
@@ -65,7 +65,7 @@ export function TaskCard({
         {project ? (
           <Badge
             variant="outline"
-            className="text-[10px] px-1.5 py-0 h-4"
+            className="text-[10px] px-1.5 py-0 h-4 border-border/60 text-foreground/80"
             style={{ borderColor: project.color, color: project.color }}
           >
             <span className="mr-1">{project.icon}</span>
@@ -74,7 +74,7 @@ export function TaskCard({
         ) : (
           <Badge
             variant="outline"
-            className="text-[10px] px-1.5 py-0 h-4 text-muted-foreground"
+            className="text-[10px] px-1.5 py-0 h-4 text-muted-foreground border-border/60"
           >
             No project
           </Badge>
@@ -86,7 +86,7 @@ export function TaskCard({
             <Badge
               variant="outline"
               className={cn(
-                "text-[10px] px-1 py-0 h-4",
+                "text-[10px] px-1 py-0 h-4 tabular-nums border-border/60 text-muted-foreground",
                 isOverdue && "border-destructive text-destructive",
               )}
             >
@@ -95,7 +95,7 @@ export function TaskCard({
           )}
           <div
             className={cn(
-              "w-1.5 h-1.5 rounded-full",
+              "w-1.5 h-1.5 rounded-full opacity-80",
               priorityColors[task.priority],
             )}
             title={`Priority: ${task.priority}`}
@@ -106,7 +106,7 @@ export function TaskCard({
       {/* Title */}
       <h4
         className={cn(
-          "text-sm font-medium leading-tight line-clamp-2 mb-1.5",
+          "text-[13px] font-medium leading-snug line-clamp-2 mb-1.5",
           isCompleted && "line-through text-muted-foreground",
         )}
       >
@@ -122,7 +122,7 @@ export function TaskCard({
               <Badge
                 key={idx}
                 variant="secondary"
-                className="text-[10px] px-1 py-0 h-4"
+                className="text-[10px] px-1 py-0 h-4 border border-transparent"
                 style={{
                   backgroundColor: `${tag.color}20`,
                   color: tag.color,
@@ -133,7 +133,7 @@ export function TaskCard({
               </Badge>
             ))}
             {taskTags.length > 2 && (
-              <span className="text-[10px] text-muted-foreground">
+              <span className="text-[10px] text-muted-foreground tabular-nums">
                 +{taskTags.length - 2}
               </span>
             )}
@@ -144,7 +144,7 @@ export function TaskCard({
         {task.scheduledDate && (
           <Badge
             variant="secondary"
-            className="text-[10px] px-1 py-0 h-4 shrink-0"
+            className="text-[10px] px-1 py-0 h-4 shrink-0 text-muted-foreground"
           >
             {task.scheduledDate}
           </Badge>

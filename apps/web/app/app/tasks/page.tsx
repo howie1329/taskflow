@@ -825,21 +825,21 @@ export default function TasksPage() {
   const isEmptyState = (!tasks || tasks.length === 0) && !searchQuery;
 
   return (
-    <div className="flex flex-col gap-4 h-full">
+    <div className="flex flex-col gap-4 h-full w-full">
       {/* Header with view switcher */}
       <div className="flex flex-col gap-3 shrink-0">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-muted-foreground">
-            Organize and track your work
-          </p>
-          <div className="w-full sm:flex-1 sm:max-w-[420px]">
-            {searchControl}
-          </div>
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-4">
           <div className="flex items-center gap-2">
+            <p className="text-sm text-muted-foreground">
+              Organize and track your work
+            </p>
+          </div>
+          <div className="w-full flex-1 min-w-0">{searchControl}</div>
+          <div className="flex items-center gap-2 lg:justify-end">
             <button
               onClick={handleToggleHideCompleted}
               className="text-xs px-3 py-1.5 rounded border border-border hover:bg-accent transition-colors"
-              style={{ opacity: hideCompleted ? 1 : 0.5 }}
+              style={{ opacity: hideCompleted ? 1 : 0.55 }}
             >
               {hideCompleted ? "✓ Hide completed" : "Hide completed"}
             </button>
@@ -856,11 +856,15 @@ export default function TasksPage() {
             </Tabs>
           </div>
         </div>
-        {!isEmptyState && filterControls}
+        {!isEmptyState && (
+          <div className="rounded-lg border border-border/60 bg-muted/30 p-2">
+            {filterControls}
+          </div>
+        )}
       </div>
 
       {/* Main content area */}
-      <div className="flex-1 min-h-0">
+      <div className="flex-1 min-h-0 w-full">
         {isEmptyState ? (
           <div className="flex-1 min-h-0 flex items-center justify-center">
             <div className="flex flex-col items-center justify-center gap-2 text-center max-w-sm">
