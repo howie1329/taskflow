@@ -209,10 +209,10 @@ export default function ProjectsPage() {
   }, [deleteProject, isSheetOpen])
 
   return (
-    <div className="flex flex-col gap-6 h-full">
+    <div className="flex flex-col gap-4 h-full w-full">
       {/* Header Row */}
-      <div className="flex items-center justify-between shrink-0">
-        <div>
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between shrink-0">
+        <div className="flex items-center gap-2">
           <p className="text-sm text-muted-foreground">
             Group related work together
           </p>
@@ -228,51 +228,53 @@ export default function ProjectsPage() {
       </div>
 
       {/* Controls Row */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 shrink-0">
-        <Tabs
-          value={activeTab}
-          onValueChange={(v) => setActiveTab(v as "active" | "archived")}
-          className="w-full sm:w-auto"
-        >
-          <TabsList className="w-full sm:w-auto">
-            <TabsTrigger value="active" className="flex-1 sm:flex-none">
-              Active
-            </TabsTrigger>
-            <TabsTrigger value="archived" className="flex-1 sm:flex-none">
-              Archived
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+      <div className="rounded-lg border border-border/60 bg-muted/30 p-2 shrink-0">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
+          <Tabs
+            value={activeTab}
+            onValueChange={(v) => setActiveTab(v as "active" | "archived")}
+            className="w-full sm:w-auto"
+          >
+            <TabsList className="w-full sm:w-auto">
+              <TabsTrigger value="active" className="flex-1 sm:flex-none">
+                Active
+              </TabsTrigger>
+              <TabsTrigger value="archived" className="flex-1 sm:flex-none">
+                Archived
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
 
-        <InputGroup className="w-full sm:flex-1 sm:max-w-xs">
-          <InputGroupAddon>
-            <HugeiconsIcon icon={SearchIcon} strokeWidth={2} />
-          </InputGroupAddon>
-          <InputGroupInput
-            ref={searchInputRef}
-            placeholder="Search projects..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            aria-label="Search projects"
-            aria-describedby="search-shortcut"
-          />
-          {searchQuery && (
+          <InputGroup className="w-full flex-1 min-w-0">
             <InputGroupAddon>
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                onClick={() => setSearchQuery("")}
-                className="h-6 w-6"
-                aria-label="Clear search"
-              >
-                ×
-              </Button>
+              <HugeiconsIcon icon={SearchIcon} strokeWidth={2} />
             </InputGroupAddon>
-          )}
-        </InputGroup>
-        <span id="search-shortcut" className="sr-only">
-          Press Command K or Control K to focus search
-        </span>
+            <InputGroupInput
+              ref={searchInputRef}
+              placeholder="Search projects..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              aria-label="Search projects"
+              aria-describedby="search-shortcut"
+            />
+            {searchQuery && (
+              <InputGroupAddon>
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
+                  onClick={() => setSearchQuery("")}
+                  className="h-6 w-6"
+                  aria-label="Clear search"
+                >
+                  ×
+                </Button>
+              </InputGroupAddon>
+            )}
+          </InputGroup>
+          <span id="search-shortcut" className="sr-only">
+            Press Command K or Control K to focus search
+          </span>
+        </div>
       </div>
 
       {/* Content Area */}
@@ -348,7 +350,7 @@ export default function ProjectsPage() {
               {searchQuery && ` matching "${searchQuery}"`}
             </div>
             <div
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-4"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 pb-4"
               role="list"
               aria-label={`${activeTab === "active" ? "Active" : "Archived"} projects`}
             >

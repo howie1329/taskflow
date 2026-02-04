@@ -83,7 +83,7 @@ export function ProjectCard({
       role="button"
       tabIndex={0}
       aria-label={`${project.title} project. Press Enter to open.`}
-      className="group border p-4 hover:bg-accent/50 hover:shadow-sm hover:-translate-y-0.5 transition-all duration-200 ease-out cursor-pointer relative h-full flex flex-col outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      className="group rounded-xl border border-border/60 bg-card/40 dark:bg-card/20 p-4 hover:bg-accent/30 hover:border-border shadow-sm shadow-black/5 hover:-translate-y-[1px] transition-[transform,box-shadow,background-color,border-color] duration-200 ease-out cursor-pointer relative h-full flex flex-col outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-offset-2"
     >
       {/* Card Header */}
       <div className="flex items-start justify-between gap-2 mb-2">
@@ -181,7 +181,7 @@ export function ProjectCard({
       </p>
 
       {/* Footer */}
-      <div className="flex items-center justify-between text-[11px] text-muted-foreground/80 mt-auto pt-2 border-t border-border/30">
+      <div className="flex items-center justify-between text-[11px] text-muted-foreground/80 mt-auto pt-2 border-t border-border/30 tabular-nums">
         <span className="flex items-center gap-1">
           <span className="text-muted-foreground/50">Updated</span>
           {formatRelativeTime(project.updatedAt)}

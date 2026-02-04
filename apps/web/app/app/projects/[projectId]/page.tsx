@@ -494,11 +494,11 @@ export default function ProjectDetailPage() {
     <Tabs
       value={activeTab}
       onValueChange={(v) => setActiveTab(v as TabKey)}
-      className="flex flex-col gap-6 h-full"
+      className="flex flex-col gap-4 h-full w-full min-h-0"
     >
       <div className="flex flex-col gap-3">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-start gap-3">
+        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
+          <div className="flex items-start gap-3 min-w-0">
             <Button
               variant="ghost"
               size="icon-sm"
@@ -514,9 +514,9 @@ export default function ProjectDetailPage() {
               <p className="text-sm text-muted-foreground leading-relaxed">
                 {project.description || "No description"}
               </p>
-              <div className="flex flex-wrap items-center gap-2 mt-2 text-xs text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-2 mt-2 text-[11px] text-muted-foreground tabular-nums">
                 <span
-                  className="inline-flex h-2 w-2 rounded-full"
+                  className="inline-flex h-2 w-2 rounded-full ring-1 ring-border/50"
                   style={{ backgroundColor: project.color }}
                   aria-hidden="true"
                 />
@@ -529,7 +529,7 @@ export default function ProjectDetailPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 lg:justify-end">
             <Button
               size="sm"
               className="h-8"
@@ -584,39 +584,41 @@ export default function ProjectDetailPage() {
       </div>
 
       <TabsContent value="tasks" className="flex flex-col gap-4">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-          <InputGroup className="w-full sm:max-w-xs">
-            <InputGroupAddon>
-              <HugeiconsIcon icon={Search01Icon} className="size-4" />
-            </InputGroupAddon>
-            <InputGroupInput
-              ref={taskSearchRef}
-              placeholder="Search tasks..."
-              value={taskSearchQuery}
-              onChange={(e) => setTaskSearchQuery(e.target.value)}
-            />
-            {taskSearchQuery && (
+        <div className="rounded-lg border border-border/60 bg-muted/30 p-2">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+            <InputGroup className="w-full flex-1 min-w-0">
               <InputGroupAddon>
-                <Button
-                  variant="ghost"
-                  size="icon-xs"
-                  onClick={() => setTaskSearchQuery("")}
-                  className="h-6 w-6"
-                >
-                  ×
-                </Button>
+                <HugeiconsIcon icon={Search01Icon} className="size-4" />
               </InputGroupAddon>
-            )}
-          </InputGroup>
+              <InputGroupInput
+                ref={taskSearchRef}
+                placeholder="Search tasks..."
+                value={taskSearchQuery}
+                onChange={(e) => setTaskSearchQuery(e.target.value)}
+              />
+              {taskSearchQuery && (
+                <InputGroupAddon>
+                  <Button
+                    variant="ghost"
+                    size="icon-xs"
+                    onClick={() => setTaskSearchQuery("")}
+                    className="h-6 w-6"
+                  >
+                    ×
+                  </Button>
+                </InputGroupAddon>
+              )}
+            </InputGroup>
 
-          <Button
-            variant={hideCompleted ? "secondary" : "outline"}
-            size="sm"
-            className="h-8"
-            onClick={() => setHideCompleted((prev) => !prev)}
-          >
-            {hideCompleted ? "Showing open only" : "Hide completed"}
-          </Button>
+            <Button
+              variant={hideCompleted ? "secondary" : "outline"}
+              size="sm"
+              className="h-8"
+              onClick={() => setHideCompleted((prev) => !prev)}
+            >
+              {hideCompleted ? "Showing open only" : "Hide completed"}
+            </Button>
+          </div>
         </div>
 
         <div className="flex-1 min-h-0">

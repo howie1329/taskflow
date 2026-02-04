@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export function ProjectCardSkeleton() {
   return (
     <div
-      className="border p-4 h-full flex flex-col space-y-2"
+      className="rounded-xl border border-border/60 bg-card/40 dark:bg-card/20 p-4 h-full flex flex-col space-y-2"
       aria-hidden="true"
     >
       <div className="flex items-center gap-2.5 mb-2">
@@ -30,7 +30,7 @@ interface ProjectGridSkeletonProps {
 export function ProjectGridSkeleton({ count = 6 }: ProjectGridSkeletonProps) {
   return (
     <div
-      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4"
       role="status"
       aria-label="Loading projects..."
     >
