@@ -334,23 +334,23 @@ export function OnboardingWizard() {
               </EmptyContent>
             </Empty>
           ) : hasModelMatches ? (
-              <ScrollArea className="h-56 rounded-lg border border-border/60">
-                <div className="divide-y divide-border/60">
-                  {filteredModels.map((model) => {
-                    const isSelected = model.modelId === selectedModelId
-                    return (
-                      <button
-                        key={model._id}
-                        type="button"
-                        onClick={() => setSelectedModelId(model.modelId)}
-                        className={`flex w-full flex-col gap-1 px-3 py-2 text-left text-xs transition ${
-                          isSelected
-                            ? "bg-accent/35 text-foreground"
-                            : "hover:bg-accent/25"
-                        }`}
-                      >
-                        <span className="font-medium">{model.name}</span>
-                        <span className="text-muted-foreground">
+            <ScrollArea className="h-56 rounded-lg border border-border/60">
+              <div className="divide-y divide-border/60">
+                {filteredModels.map((model) => {
+                  const isSelected = model.modelId === selectedModelId
+                  return (
+                    <button
+                      key={model._id}
+                      type="button"
+                      onClick={() => setSelectedModelId(model.modelId)}
+                      className={`flex w-full flex-col gap-1 px-3 py-2 text-left text-xs transition ${
+                        isSelected
+                          ? "bg-accent/35 text-foreground"
+                          : "hover:bg-accent/25"
+                      }`}
+                    >
+                      <span className="font-medium">{model.name}</span>
+                      <span className="text-muted-foreground">
                         {model.modelId}
                       </span>
                     </button>
@@ -370,12 +370,12 @@ export function OnboardingWizard() {
           )}
 
           {!isEmpty && selectedModelId && (
-              <div className="rounded-lg border border-border/60 bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
-                Selected model:{" "}
-                <span className="text-foreground">
-                  {models.find((model) => model.modelId === selectedModelId)?.name}
-                </span>
-              </div>
+            <div className="rounded-lg border border-border/60 bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
+              Selected model:{" "}
+              <span className="text-foreground">
+                {models.find((model) => model.modelId === selectedModelId)?.name}
+              </span>
+            </div>
           )}
         </div>
       )}

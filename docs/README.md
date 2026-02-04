@@ -17,6 +17,10 @@ Legacy code still exists for reference:
 - Legacy reference inventory: `docs/LEGACY/feature-inventory.md`
 - Source docs map: `docs/SOURCES.md`
 
+## UI System (Rewrite)
+
+The rewrite UI (`apps/web`) standardizes on a small set of reusable patterns (page shells, toolbar strips, calm list rows, wide kanban, centered chat reading column). These are codified in `docs/UI_GUIDELINES.md` under “Canonical UI Patterns (apps/web)”.
+
 ## Product Definition (v1)
 
 Taskflow is a solo AI-assisted workplace.

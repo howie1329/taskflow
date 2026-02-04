@@ -93,6 +93,67 @@ Think in layers, not boxes:
   - focused reading regions (editor, detail panels).
 - Avoid nested containers unless they materially clarify structure.
 
+## Canonical UI Patterns (apps/web)
+
+These are the concrete, reusable patterns we use across the rewrite to achieve the “calm / modern / native / ChatGPT-like” feel without adding visual noise.
+
+### Page Shell (Framed)
+
+Use for 2-pane pages or focused workflows (Chat, Notes, Inbox).
+
+- Structure: one outer surface that contains the page’s subregions.
+- Prefer:
+  - `rounded-xl border border-border/60 bg-card/40 dark:bg-card/20`
+  - `overflow-hidden` when the shell contains internal scrolling regions
+
+### Toolbar Strip (Controls Cluster)
+
+Use when a set of controls should read as one unit (filters + search + tabs).
+
+- Prefer:
+  - `rounded-lg border border-border/60 bg-muted/30 p-2`
+- Keep the strip compact; avoid multiple stacked dividers if spacing is already doing the grouping.
+
+### Section Panel (Local Focus)
+
+Use to emphasize a single region within a page (e.g., Inbox capture, editor header).
+
+- Prefer:
+  - `rounded-lg border border-border/60 bg-background/30 p-3`
+
+### List Rows (Calm Scan Rhythm)
+
+Rows should feel tappable/clickable without “shouting”.
+
+- Base row:
+  - `rounded-lg border border-border/60 bg-background/30`
+- Hover:
+  - `hover:bg-accent/25 hover:border-border`
+- Selected/active:
+  - `bg-accent/35`
+  - Optional 0.5px left indicator: `w-0.5 bg-primary/80`
+
+### Kanban Board (Wide, Desktop-Native)
+
+- Desktop (`lg+`): prefer a full-width grid so columns use the available space.
+  - `grid gap-4 lg:grid-cols-4`
+  - Columns are panels: `rounded-xl border bg-card/40`
+  - Column list scrolls internally (`lg:overflow-y-auto`) rather than forcing horizontal scrolling.
+- Mobile: prefer stacked sections (avoid horizontal scrolling for core flows).
+
+### Chat Conversation (ChatGPT-like Reading Column)
+
+- Center conversation content for readability:
+  - `mx-auto w-full max-w-4xl`
+- User messages may be a right-aligned bubble; assistant responses read as full-width content with minimal chrome.
+
+### Focus + Data Density
+
+- Focus rings:
+  - Prefer visible, calm focus: `focus-visible:ring-[3px] focus-visible:ring-ring/50`
+- Counts and timestamps:
+  - Use `tabular-nums` for scanability (counts, “x of y”, “2h”, etc.).
+
 ## Navigation
 
 - Primary navigation lives in a stable rail/sidebar.
