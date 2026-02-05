@@ -38,6 +38,8 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { ChatSidebar } from "@/components/app/chat-sidebar";
+import { NotesAppSidebar } from "@/components/app/notes-app-sidebar";
+import { NotesProvider } from "@/components/notes";
 
 const navItems = [
   {
@@ -80,6 +82,7 @@ const navItems = [
 function getPageTitle(pathname: string): string {
   if (pathname.startsWith("/app/projects/")) return "Projects";
   if (pathname.startsWith("/app/chat/")) return "AI Chat";
+  if (pathname.startsWith("/app/notes/")) return "Notes";
   const item = navItems.find((item) => pathname === item.href);
   if (item) return item.title;
   if (pathname === "/app") return "Overview";
@@ -116,10 +119,14 @@ export function AppShell({ children }: AppShellProps) {
   const [chatSidebarMode, setChatSidebarMode] = useState<
     "threads" | "workspace"
   >("threads");
+  const [notesSidebarMode, setNotesSidebarMode] = useState<
+    "notes" | "workspace"
+  >("notes");
 
   const isOnboardingRoute = pathname === "/app/onboarding";
   const isOnboarded = !!preferences?.onboardingCompletedAt;
   const isChatRoute = pathname.startsWith("/app/chat");
+  const isNotesRoute = pathname.startsWith("/app/notes");
 
   useEffect(() => {
     if (isLoading) return;
@@ -134,6 +141,12 @@ export function AppShell({ children }: AppShellProps) {
     }
   }, [isChatRoute]);
 
+  useEffect(() => {
+    if (isNotesRoute) {
+      setNotesSidebarMode("notes");
+    }
+  }, [isNotesRoute]);
+
   if (!isOnboardingRoute && !isOnboarded) {
     return (
       <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">
@@ -142,18 +155,30 @@ export function AppShell({ children }: AppShellProps) {
     );
   }
 
-  return (
+  const shell = (
     <SidebarProvider
       style={
         isChatRoute
-          ? ({ "--sidebar-width": "18rem" } as React.CSSProperties)
-          : undefined
+          ? ({
+              "--sidebar-width": "18rem",
+              "--sidebar-width-mobile": "18rem",
+            } as React.CSSProperties)
+          : isNotesRoute
+            ? ({
+                "--sidebar-width": "20rem",
+                "--sidebar-width-mobile": "18rem",
+              } as React.CSSProperties)
+            : undefined
       }
     >
       <Sidebar variant="floating" collapsible="icon">
         {isChatRoute && chatSidebarMode === "threads" ? (
           <ChatSidebar
             onBackToWorkspace={() => setChatSidebarMode("workspace")}
+          />
+        ) : isNotesRoute && notesSidebarMode === "notes" ? (
+          <NotesAppSidebar
+            onBackToWorkspace={() => setNotesSidebarMode("workspace")}
           />
         ) : (
           <>
@@ -183,6 +208,10 @@ export function AppShell({ children }: AppShellProps) {
                   <SidebarMenu>
                     {navItems.map((item) => {
                       const isChatItem = item.href === "/app/chat";
+                      const isNotesItem = item.href === "/app/notes";
+                      const isActive =
+                        pathname === item.href ||
+                        pathname.startsWith(`${item.href}/`);
                       const handleChatClick =
                         isChatRoute && isChatItem
                           ? (event: React.MouseEvent<HTMLAnchorElement>) => {
@@ -190,15 +219,25 @@ export function AppShell({ children }: AppShellProps) {
                               setChatSidebarMode("threads");
                             }
                           : undefined;
+                      const handleNotesClick =
+                        isNotesRoute && isNotesItem
+                          ? (event: React.MouseEvent<HTMLAnchorElement>) => {
+                              event.preventDefault();
+                              setNotesSidebarMode("notes");
+                            }
+                          : undefined;
 
                       return (
                         <SidebarMenuItem key={item.href}>
                           <SidebarMenuButton
                             asChild
-                            isActive={pathname === item.href}
+                            isActive={isActive}
                             tooltip={item.title}
                           >
-                            <Link href={item.href} onClick={handleChatClick}>
+                            <Link
+                              href={item.href}
+                              onClick={handleChatClick ?? handleNotesClick}
+                            >
                               <HugeiconsIcon
                                 icon={item.icon}
                                 className="size-4"
@@ -249,4 +288,10 @@ export function AppShell({ children }: AppShellProps) {
       </SidebarInset>
     </SidebarProvider>
   );
+
+  if (isNotesRoute) {
+    return <NotesProvider>{shell}</NotesProvider>;
+  }
+
+  return shell;
 }

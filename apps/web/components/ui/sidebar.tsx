@@ -29,7 +29,6 @@ const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 const SIDEBAR_WIDTH = "12rem";
 const SIDEBAR_WIDTH_MOBILE = "16rem";
-const SIDEBAR_WIDTH_CHAT_MOBILE = "18rem";
 const SIDEBAR_WIDTH_ICON = "3rem";
 const SIDEBAR_KEYBOARD_SHORTCUT = "b";
 
@@ -71,12 +70,10 @@ function SidebarProvider({
   const isMobile = useIsMobile();
   const [openMobile, setOpenMobile] = React.useState(false);
 
-  // Extract chat-specific width from style prop if present
-  const chatSidebarWidth = (style as any)?.["--sidebar-width"] as string;
-  const mobileSidebarWidth = chatSidebarWidth || SIDEBAR_WIDTH_MOBILE;
-  const resolvedMobileWidth = chatSidebarWidth
-    ? SIDEBAR_WIDTH_CHAT_MOBILE
-    : SIDEBAR_WIDTH_MOBILE;
+  const mobileSidebarWidth =
+    (style as any)?.["--sidebar-width-mobile"] ??
+    (style as any)?.["--sidebar-width"] ??
+    SIDEBAR_WIDTH_MOBILE;
 
   // This is the internal state of the sidebar.
   // We use openProp and setOpenProp for control from outside the component.
@@ -131,7 +128,7 @@ function SidebarProvider({
       openMobile,
       setOpenMobile,
       toggleSidebar,
-      mobileSidebarWidth: resolvedMobileWidth,
+      mobileSidebarWidth,
     }),
     [
       state,
@@ -141,7 +138,7 @@ function SidebarProvider({
       openMobile,
       setOpenMobile,
       toggleSidebar,
-      resolvedMobileWidth,
+      mobileSidebarWidth,
     ],
   );
 
