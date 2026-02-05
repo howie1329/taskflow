@@ -267,21 +267,23 @@ export function AppShell({ children }: AppShellProps) {
         <SidebarRail />
       </Sidebar>
       <SidebarInset className="overflow-hidden">
-        <header className="flex h-14 shrink-0 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <SidebarTrigger />
-          <div className="flex flex-1 items-center justify-between">
-            <h1 className="text-sm font-medium">{pageTitle}</h1>
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm" className="h-8 gap-2 text-xs">
-                <HugeiconsIcon icon={CommandIcon} className="size-3" />
-                <span className="hidden sm:inline">Search</span>
-                <kbd className="pointer-events-none hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
-                  <span className="text-xs">⌘</span>K
-                </kbd>
-              </Button>
+        {!isChatRoute && (
+          <header className="flex h-14 shrink-0 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <SidebarTrigger />
+            <div className="flex flex-1 items-center justify-between">
+              <h1 className="text-sm font-medium">{pageTitle}</h1>
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="sm" className="h-8 gap-2 text-xs">
+                  <HugeiconsIcon icon={CommandIcon} className="size-3" />
+                  <span className="hidden sm:inline">Search</span>
+                  <kbd className="pointer-events-none hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
+                    <span className="text-xs">⌘</span>K
+                  </kbd>
+                </Button>
+              </div>
             </div>
-          </div>
-        </header>
+          </header>
+        )}
         <main className="flex flex-1 flex-col gap-4 p-4 md:gap-6 md:p-6 overflow-hidden">
           {children}
         </main>

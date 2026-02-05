@@ -1,9 +1,26 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
   PromptInput,
   PromptInputProvider,
@@ -50,9 +67,13 @@ import {
   FolderManagementIcon,
   MessageQuestionIcon,
   MoreHorizontalIcon,
+  PencilEdit01Icon,
+  Delete02Icon,
 } from "@hugeicons/core-free-icons";
 import type { UIMessage } from "ai";
 import { useChatContext } from "../components/chat-provider";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 function ThreadPageContent() {
   const router = useRouter();
@@ -69,8 +90,31 @@ function ThreadPageContent() {
   } = useChatContext();
   const { textInput } = usePromptInputController();
 
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [editTitle, setEditTitle] = useState(thread?.title || "");
+
+  const updateThreadTitle = useMutation(api.chat.updateThreadTitle);
+  const softDeleteThread = useMutation(api.chat.softDeleteThread);
+
   const shouldShowNotFound =
     thread === null && messages.length === 0 && status === "ready";
+
+  const handleEditTitle = async () => {
+    if (!thread || !editTitle.trim()) return;
+    await updateThreadTitle({
+      threadId: thread.threadId,
+      title: editTitle.trim(),
+    });
+    setIsEditDialogOpen(false);
+  };
+
+  const handleDeleteThread = async () => {
+    if (!thread) return;
+    await softDeleteThread({ threadId: thread.threadId });
+    setIsDeleteDialogOpen(false);
+    router.push("/app/chat");
+  };
 
   // Not found state
   if (shouldShowNotFound) {
@@ -150,6 +194,11 @@ function ThreadPageContent() {
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border/60 bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60 shrink-0">
         <div className="flex items-center gap-3 min-w-0">
+          {/* Sidebar trigger for desktop */}
+          <div className="hidden md:block">
+            <SidebarTrigger />
+          </div>
+
           {/* Mobile back button */}
           <Button
             variant="ghost"
@@ -199,15 +248,106 @@ function ThreadPageContent() {
           </div>
         </div>
 
-        <Button variant="ghost" size="icon-sm">
-          <HugeiconsIcon
-            icon={MoreHorizontalIcon}
-            className="size-4"
-            strokeWidth={2}
-          />
-          <span className="sr-only">Conversation actions</span>
-        </Button>
+        {/* Options dropdown */}
+        {thread && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon-sm">
+                <HugeiconsIcon
+                  icon={MoreHorizontalIcon}
+                  className="size-4"
+                  strokeWidth={2}
+                />
+                <span className="sr-only">Conversation actions</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                onClick={() => {
+                  setEditTitle(thread.title || "");
+                  setIsEditDialogOpen(true);
+                }}
+              >
+                <HugeiconsIcon
+                  icon={PencilEdit01Icon}
+                  className="size-4 mr-2"
+                  strokeWidth={2}
+                />
+                Edit title
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => setIsDeleteDialogOpen(true)}
+                className="text-destructive focus:text-destructive"
+              >
+                <HugeiconsIcon
+                  icon={Delete02Icon}
+                  className="size-4 mr-2"
+                  strokeWidth={2}
+                />
+                Delete thread
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
+
+      {/* Edit Title Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit conversation title</DialogTitle>
+            <DialogDescription>
+              Change the title of this conversation.
+            </DialogDescription>
+          </DialogHeader>
+          <Input
+            value={editTitle}
+            onChange={(e) => setEditTitle(e.target.value)}
+            placeholder="Enter new title"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleEditTitle();
+              }
+            }}
+          />
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsEditDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleEditTitle} disabled={!editTitle.trim()}>
+              Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete conversation</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this conversation? This action
+              cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsDeleteDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteThread}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Conversation */}
       <Conversation className="flex-1">
