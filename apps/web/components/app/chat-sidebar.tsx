@@ -39,9 +39,10 @@ import { useSidebar } from "@/components/ui/sidebar";
 import { ThreadsRail } from "@/app/app/chat/components/threads-rail";
 import {
   mockProjects,
-  mockThreads,
+  convertToChatThread,
   type ChatThread,
 } from "@/app/app/chat/components/mock-data";
+import { useThreads } from "@/hooks/use-threads";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -53,12 +54,23 @@ interface ChatSidebarProps {
 export function ChatSidebar({ onBackToWorkspace }: ChatSidebarProps) {
   const pathname = usePathname();
   const [searchQuery, setSearchQuery] = useState("");
-  const [threads, setThreads] = useState<ChatThread[]>(mockThreads);
   const [editingThreadId, setEditingThreadId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState("");
   const [deleteThreadId, setDeleteThreadId] = useState<string | null>(null);
   const { setTheme, resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
+
+  // Fetch threads from Convex
+  const {
+    threads: convexThreads,
+    isLoading,
+    updateTitle,
+    togglePin,
+    softDelete,
+  } = useThreads();
+
+  // Convert Convex threads to ChatThread format
+  const threads = convexThreads.map(convertToChatThread);
 
   const { state, isMobile } = useSidebar();
   const isCollapsed = state === "collapsed" && !isMobile;
@@ -93,15 +105,20 @@ export function ChatSidebar({ onBackToWorkspace }: ChatSidebarProps) {
     setEditingTitle(thread.title);
   };
 
-  const handleCommitEdit = () => {
+  const handleCommitEdit = async () => {
     if (!editingThreadId) return;
-    setThreads((prev) =>
-      prev.map((thread) =>
-        thread.id === editingThreadId
-          ? { ...thread, title: editingTitle.trim() || "Untitled chat" }
-          : thread,
-      ),
-    );
+
+    const trimmedTitle = editingTitle.trim() || "Untitled chat";
+
+    try {
+      await updateTitle({
+        threadId: editingThreadId,
+        title: trimmedTitle,
+      });
+    } catch (error) {
+      console.error("Failed to update thread title:", error);
+    }
+
     setEditingThreadId(null);
   };
 
@@ -109,17 +126,31 @@ export function ChatSidebar({ onBackToWorkspace }: ChatSidebarProps) {
     setEditingThreadId(null);
   };
 
-  const handleTogglePin = (threadId: string) => {
-    setThreads((prev) =>
-      prev.map((thread) =>
-        thread.id === threadId ? { ...thread, pinned: !thread.pinned } : thread,
-      ),
-    );
+  const handleTogglePin = async (threadId: string) => {
+    const thread = threads.find((t) => t.id === threadId);
+    if (!thread) return;
+
+    try {
+      await togglePin({
+        threadId,
+        pinned: !thread.pinned,
+      });
+    } catch (error) {
+      console.error("Failed to toggle pin:", error);
+    }
   };
 
-  const handleDeleteThread = () => {
+  const handleDeleteThread = async () => {
     if (!deleteThreadId) return;
-    setThreads((prev) => prev.filter((thread) => thread.id !== deleteThreadId));
+
+    try {
+      await softDelete({
+        threadId: deleteThreadId,
+      });
+    } catch (error) {
+      console.error("Failed to delete thread:", error);
+    }
+
     setDeleteThreadId(null);
   };
 
