@@ -7,6 +7,32 @@ const schema = defineSchema({
   baseModels: defineTable({
     modelId: v.string(),
   }).index("by_modelId", ["modelId"]),
+  thread: defineTable({
+    userId: v.string(),
+    threadId: v.string(),
+    title: v.string(),
+    snippet: v.optional(v.string()),
+    pinned: v.optional(v.boolean()),
+    projectId: v.optional(v.id("projects")),
+    model: v.optional(v.string()),
+    scope: v.optional(v.union(v.literal("workspace"), v.literal("project"))),
+    deletedAt: v.optional(v.number()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_userId", ["userId"])
+    .index("by_threadId", ["threadId"])
+    .index("by_userId_deletedAt", ["userId", "deletedAt"]),
+  threadMessages: defineTable({
+    userId: v.string(),
+    threadId: v.string(),
+    messageId: v.string(),
+    role: v.union(v.literal("user"), v.literal("assistant"), v.literal("system")),
+    model: v.string(),
+    content: v.any(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_userId", ["userId"]).index("by_threadId", ["threadId"]).index("by_messageId", ["messageId"]),
   availableModels: defineTable({
     modelId: v.string(),
     name: v.string(),
