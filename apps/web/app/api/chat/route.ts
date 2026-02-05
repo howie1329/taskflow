@@ -11,6 +11,7 @@ import {
 import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server"
 import { fetchMutation, fetchQuery } from "convex/nextjs"
 import { api } from "@/convex/_generated/api"
+import { Tools } from "@/lib/AITools/Tools"
 
 const getFirstUserText = (messages: UIMessage[]) => {
   const firstUser = messages.find((message) => message.role === "user")
@@ -137,6 +138,7 @@ export async function POST(req: Request) {
           experimental_context: {
             threadId,
           },
+          tools: Tools,
         })
 
         const stream = await agent.stream({ messages: modelMessages })
