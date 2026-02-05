@@ -172,7 +172,106 @@ function getToolInputSummary(input: unknown): string | null {
   if ("query" in inputObj && typeof inputObj.query === "string") {
     return `Searching the web for "${inputObj.query}"`;
   }
+  if ("title" in inputObj && typeof inputObj.title === "string") {
+    return `Creating "${inputObj.title}"`;
+  }
+  if ("name" in inputObj && typeof inputObj.name === "string") {
+    return `Processing "${inputObj.name}"`;
+  }
   return null;
+}
+
+function summarizeToolOutput(output: unknown): string | null {
+  if (output === null || output === undefined) return null;
+
+  if (typeof output === "string") {
+    const trimmed = output.trim();
+    if (trimmed.length === 0) return null;
+    return trimmed.length > 150 ? `${trimmed.slice(0, 150)}...` : trimmed;
+  }
+
+  if (typeof output === "object" && !Array.isArray(output)) {
+    const obj = output as Record<string, unknown>;
+    const entries = Object.entries(obj).filter(([_, value]) => {
+      if (value === null || value === undefined) return false;
+      if (typeof value === "object" && !Array.isArray(value)) return false;
+      if (typeof value === "string" && value.length > 100) return false;
+      return true;
+    });
+
+    if (entries.length === 0) return null;
+
+    if (entries.length === 1) {
+      const [key, value] = entries[0];
+      return `${key}: ${value}`;
+    }
+
+    const summary = entries
+      .slice(0, 3)
+      .map(([key, value]) => {
+        const label = key
+          .replace(/_/g, " ")
+          .replace(/([A-Z])/g, " $1")
+          .trim();
+        return `${label}: ${value}`;
+      })
+      .join(" · ");
+
+    return summary;
+  }
+
+  return null;
+}
+
+function renderToolContent(toolCall: ToolCall): React.ReactNode {
+  if (
+    toolCall.state !== "output-available" &&
+    toolCall.state !== "output-error"
+  ) {
+    return (
+      <p className="text-muted-foreground text-sm">
+        {getToolStateInfo(toolCall.state).badgeLabel}...
+      </p>
+    );
+  }
+
+  if (toolCall.errorText) {
+    return <p className="text-destructive text-sm">{toolCall.errorText}</p>;
+  }
+
+  if (toolCall.toolName === "webSearch" && isWebSearchOutput(toolCall.output)) {
+    const output = toolCall.output as WebSearchOutput;
+    return (
+      <div className="space-y-2">
+        {output.results.length > 0 && (
+          <p className="text-xs text-muted-foreground">
+            Found {output.results.length} source
+            {output.results.length !== 1 ? "s" : ""}
+          </p>
+        )}
+        {output.answer && <p className="text-sm">{output.answer}</p>}
+        {output.results.length > 0 && (
+          <Sources>
+            <SourcesTrigger count={output.results.length} />
+            <SourcesContent>
+              {output.results.slice(0, 5).map((result, index) => (
+                <Source key={index} href={result.url} title={result.title}>
+                  {result.title}
+                </Source>
+              ))}
+            </SourcesContent>
+          </Sources>
+        )}
+      </div>
+    );
+  }
+
+  const summary = summarizeToolOutput(toolCall.output);
+  if (summary) {
+    return <p className="text-sm">{summary}</p>;
+  }
+
+  return <p className="text-muted-foreground text-sm">Done</p>;
 }
 
 function getToolCalls(message: UIMessage): ToolCall[] {
@@ -224,46 +323,6 @@ function isWebSearchOutput(output: unknown): output is WebSearchOutput {
     "results" in obj &&
     Array.isArray(obj.results)
   );
-}
-
-function renderToolContent(toolCall: ToolCall): React.ReactNode {
-  if (
-    toolCall.state !== "output-available" &&
-    toolCall.state !== "output-error"
-  ) {
-    return (
-      <p className="text-muted-foreground text-sm">
-        {getToolStateInfo(toolCall.state).badgeLabel}...
-      </p>
-    );
-  }
-
-  if (toolCall.errorText) {
-    return <p className="text-destructive text-sm">{toolCall.errorText}</p>;
-  }
-
-  if (toolCall.toolName === "webSearch" && isWebSearchOutput(toolCall.output)) {
-    const output = toolCall.output as WebSearchOutput;
-    return (
-      <div className="space-y-3">
-        {output.answer && <p className="text-sm">{output.answer}</p>}
-        {output.results.length > 0 && (
-          <Sources>
-            <SourcesTrigger count={output.results.length} />
-            <SourcesContent>
-              {output.results.slice(0, 5).map((result, index) => (
-                <Source key={index} href={result.url} title={result.title}>
-                  {result.title}
-                </Source>
-              ))}
-            </SourcesContent>
-          </Sources>
-        )}
-      </div>
-    );
-  }
-
-  return <p className="text-muted-foreground text-sm">Completed</p>;
 }
 
 function ThreadPageContent() {
