@@ -124,7 +124,13 @@ export async function POST(req: Request) {
     stream: createUIMessageStream({
       execute: async ({ writer }) => {
         const agent = new Agent({
-          model: openRouter(model),
+          model: openRouter.chat(model, {
+            reasoning: { enabled: true, effort: "medium" },
+            parallelToolCalls: true,
+            usage: {
+              include: true,
+            }
+          }),
           instructions:
             "You are a helpful assistant that can answer questions and help with tasks.",
           stopWhen: stepCountIs(10),

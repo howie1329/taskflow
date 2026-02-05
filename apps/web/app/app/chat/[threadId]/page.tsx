@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import { useMemo } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   PromptInput,
   PromptInputProvider,
@@ -23,27 +23,32 @@ import {
   PromptInputSelectTrigger,
   PromptInputSelectValue,
   usePromptInputController,
-} from "@/components/ai-elements/prompt-input"
+} from "@/components/ai-elements/prompt-input";
 import {
   Conversation,
   ConversationContent,
   ConversationEmptyState,
   ConversationScrollButton,
-} from "@/components/ai-elements/conversation"
+} from "@/components/ai-elements/conversation";
 import {
   Message,
   MessageContent,
   MessageResponse,
-} from "@/components/ai-elements/message"
+} from "@/components/ai-elements/message";
+import {
+  Reasoning,
+  ReasoningTrigger,
+  ReasoningContent,
+} from "@/components/ai-elements/reasoning";
 import {
   Empty,
   EmptyHeader,
   EmptyTitle,
   EmptyDescription,
   EmptyMedia,
-} from "@/components/ui/empty"
-import { cn } from "@/lib/utils"
-import { HugeiconsIcon } from "@hugeicons/react"
+} from "@/components/ui/empty";
+import { cn } from "@/lib/utils";
+import { HugeiconsIcon } from "@hugeicons/react";
 import {
   ArrowLeft01Icon,
   GlobalIcon,
@@ -52,12 +57,12 @@ import {
   PlusSignIcon,
   MessageQuestionIcon,
   MoreHorizontalIcon,
-} from "@hugeicons/core-free-icons"
-import type { UIMessage } from "ai"
-import { useChatContext } from "../components/chat-provider"
+} from "@hugeicons/core-free-icons";
+import type { UIMessage } from "ai";
+import { useChatContext } from "../components/chat-provider";
 
 function ThreadPageContent() {
-  const router = useRouter()
+  const router = useRouter();
   const {
     messages,
     status,
@@ -68,11 +73,11 @@ function ThreadPageContent() {
     selectedModelId,
     setSelectedModelId,
     availableModels,
-  } = useChatContext()
-  const { textInput } = usePromptInputController()
+  } = useChatContext();
+  const { textInput } = usePromptInputController();
 
   const shouldShowNotFound =
-    thread === null && messages.length === 0 && status === "ready"
+    thread === null && messages.length === 0 && status === "ready";
 
   // Not found state
   if (shouldShowNotFound) {
@@ -120,22 +125,32 @@ function ThreadPageContent() {
           </Empty>
         </div>
       </div>
-    )
+    );
   }
 
-  const uiMessages = useMemo(() => messages ?? [], [messages])
+  const uiMessages = useMemo(() => messages ?? [], [messages]);
 
   const handleSubmit = () => {
-    if (!textInput.value.trim()) return
-    void sendText(textInput.value)
-    textInput.clear()
-  }
+    if (!textInput.value.trim()) return;
+    void sendText(textInput.value);
+    textInput.clear();
+  };
 
   const renderMessageText = (message: UIMessage) =>
     message.parts
       .filter((part) => part.type === "text")
       .map((part) => part.text)
-      .join("")
+      .join("");
+
+  const renderMessageReasoning = (message: UIMessage) => {
+    const reasoningParts = message.parts.filter(
+      (part) => part.type === "reasoning",
+    );
+    if (reasoningParts.length === 0) return null;
+    return reasoningParts
+      .map((part) => (part as { type: "reasoning"; text: string }).text)
+      .join("");
+  };
 
   return (
     <div className="flex flex-col h-full w-full min-h-0">
@@ -210,36 +225,49 @@ function ThreadPageContent() {
               description="Ask anything, or use a prompt suggestion"
             />
           ) : (
-            uiMessages.map((message) => (
-              <Message
-                key={message.id}
-                from={message.role}
-                className={cn(
-                  "max-w-none gap-1.5",
-                  message.role === "user" && "justify-end",
-                )}
-              >
-                <MessageContent
+            uiMessages.map((message) => {
+              const reasoningText = renderMessageReasoning(message);
+              const hasReasoning = !!reasoningText;
+
+              return (
+                <Message
+                  key={message.id}
+                  from={message.role}
                   className={cn(
-                    "text-sm leading-6",
-                    message.role === "assistant" &&
-                      "w-full border-l border-border/50 pl-6",
-                    message.role === "user" &&
-                      "border border-border/60 bg-muted/40 px-4 py-3 max-w-[32rem] rounded-lg",
+                    "max-w-none gap-1.5",
+                    message.role === "user" && "justify-end",
                   )}
                 >
-                  {message.role === "assistant" ? (
-                    <MessageResponse className="text-sm leading-6">
-                      {renderMessageText(message)}
-                    </MessageResponse>
-                  ) : (
-                    <div className="text-sm whitespace-pre-wrap">
-                      {renderMessageText(message)}
-                    </div>
-                  )}
-                </MessageContent>
-              </Message>
-            ))
+                  <MessageContent
+                    className={cn(
+                      "text-sm leading-6",
+                      message.role === "assistant" &&
+                        "w-full border-l border-border/50 pl-6",
+                      message.role === "user" &&
+                        "border border-border/60 bg-muted/40 px-4 py-3 max-w-[32rem] rounded-lg",
+                    )}
+                  >
+                    {message.role === "assistant" ? (
+                      <div className="flex flex-col gap-4">
+                        {hasReasoning && (
+                          <Reasoning isStreaming={status === "streaming"}>
+                            <ReasoningTrigger />
+                            <ReasoningContent>{reasoningText}</ReasoningContent>
+                          </Reasoning>
+                        )}
+                        <MessageResponse className="text-sm leading-6">
+                          {renderMessageText(message)}
+                        </MessageResponse>
+                      </div>
+                    ) : (
+                      <div className="text-sm whitespace-pre-wrap">
+                        {renderMessageText(message)}
+                      </div>
+                    )}
+                  </MessageContent>
+                </Message>
+              );
+            })
           )}
         </ConversationContent>
         <ConversationScrollButton />
@@ -311,7 +339,7 @@ function ThreadPageContent() {
         </PromptInput>
       </div>
     </div>
-  )
+  );
 }
 
 export default function ThreadPage() {
@@ -319,5 +347,5 @@ export default function ThreadPage() {
     <PromptInputProvider>
       <ThreadPageContent />
     </PromptInputProvider>
-  )
+  );
 }
