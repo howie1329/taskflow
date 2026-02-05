@@ -53,6 +53,19 @@ import {
   ReasoningContent,
 } from "@/components/ai-elements/reasoning";
 import {
+  ChainOfThought,
+  ChainOfThoughtHeader,
+  ChainOfThoughtContent,
+  ChainOfThoughtStep,
+} from "@/components/ai-elements/chain-of-thought";
+import { Tool, ToolHeader, ToolContent } from "@/components/ai-elements/tool";
+import {
+  Sources,
+  SourcesTrigger,
+  SourcesContent,
+  Source,
+} from "@/components/ai-elements/sources";
+import {
   Empty,
   EmptyHeader,
   EmptyTitle,
@@ -70,10 +83,187 @@ import {
   PencilEdit01Icon,
   Delete02Icon,
 } from "@hugeicons/core-free-icons";
-import type { UIMessage } from "ai";
+import type { UIMessage, ToolUIPart, DynamicToolUIPart } from "ai";
 import { useChatContext } from "../components/chat-provider";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+
+type ToolCall = {
+  id: string;
+  toolName: string;
+  state: ToolUIPart["state"];
+  input?: unknown;
+  output?: unknown;
+  errorText?: string;
+};
+
+type ToolStateInfo = {
+  badgeLabel: string;
+  stepStatus: "pending" | "active" | "complete";
+  isError: boolean;
+};
+
+function getToolDisplayName(part: ToolUIPart | DynamicToolUIPart): string {
+  if (part.type === "dynamic-tool" && "toolName" in part) {
+    const name = part.toolName;
+    if (name === "webSearch") return "Web search";
+    return name
+      .replace(/([A-Z])/g, " $1")
+      .replace(/^./, (s) => s.toUpperCase());
+  }
+  const baseType = part.type.split("-").slice(1).join("-");
+  if (baseType === "webSearch") return "Web search";
+  return baseType
+    .replace(/([A-Z])/g, " $1")
+    .replace(/^./, (s) => s.toUpperCase());
+}
+
+function getToolStateInfo(state: ToolUIPart["state"]): ToolStateInfo {
+  const stateMap: Record<ToolUIPart["state"], ToolStateInfo> = {
+    "input-streaming": {
+      badgeLabel: "Pending",
+      stepStatus: "pending",
+      isError: false,
+    },
+    "input-available": {
+      badgeLabel: "Running",
+      stepStatus: "active",
+      isError: false,
+    },
+    "approval-requested": {
+      badgeLabel: "Awaiting approval",
+      stepStatus: "active",
+      isError: false,
+    },
+    "approval-responded": {
+      badgeLabel: "Approved",
+      stepStatus: "complete",
+      isError: false,
+    },
+    "output-available": {
+      badgeLabel: "Completed",
+      stepStatus: "complete",
+      isError: false,
+    },
+    "output-error": {
+      badgeLabel: "Error",
+      stepStatus: "complete",
+      isError: true,
+    },
+    "output-denied": {
+      badgeLabel: "Denied",
+      stepStatus: "complete",
+      isError: true,
+    },
+  };
+  return (
+    stateMap[state] ?? {
+      badgeLabel: state,
+      stepStatus: "pending",
+      isError: false,
+    }
+  );
+}
+
+function getToolInputSummary(input: unknown): string | null {
+  if (!input || typeof input !== "object") return null;
+  const inputObj = input as Record<string, unknown>;
+  if ("query" in inputObj && typeof inputObj.query === "string") {
+    return `Searching the web for "${inputObj.query}"`;
+  }
+  return null;
+}
+
+function getToolCalls(message: UIMessage): ToolCall[] {
+  return message.parts
+    .filter((part): part is ToolUIPart | DynamicToolUIPart => {
+      if (typeof part.type !== "string") return false;
+      return part.type.startsWith("tool-") || part.type === "dynamic-tool";
+    })
+    .map((part) => ({
+      id: part.toolCallId ?? `tool-${Math.random().toString(36).slice(2)}`,
+      toolName:
+        part.type === "dynamic-tool" && "toolName" in part
+          ? part.toolName
+          : part.type,
+      state: part.state,
+      input: "input" in part ? part.input : undefined,
+      output: "output" in part ? part.output : undefined,
+      errorText: "errorText" in part ? part.errorText : undefined,
+    }));
+}
+
+type WebSearchResult = {
+  title: string;
+  url: string;
+  content: string;
+  score: number;
+  raw_content: string | null;
+  favicon?: string;
+};
+
+type WebSearchOutput = {
+  query: string;
+  answer: string;
+  images: string[];
+  results: WebSearchResult[];
+  response_time: string;
+  auto_parameters: {
+    topic: string;
+    search_depth: string;
+  };
+};
+
+function isWebSearchOutput(output: unknown): output is WebSearchOutput {
+  if (!output || typeof output !== "object") return false;
+  const obj = output as Record<string, unknown>;
+  return (
+    "query" in obj &&
+    "answer" in obj &&
+    "results" in obj &&
+    Array.isArray(obj.results)
+  );
+}
+
+function renderToolContent(toolCall: ToolCall): React.ReactNode {
+  if (
+    toolCall.state !== "output-available" &&
+    toolCall.state !== "output-error"
+  ) {
+    return (
+      <p className="text-muted-foreground text-sm">
+        {getToolStateInfo(toolCall.state).badgeLabel}...
+      </p>
+    );
+  }
+
+  if (toolCall.errorText) {
+    return <p className="text-destructive text-sm">{toolCall.errorText}</p>;
+  }
+
+  if (toolCall.toolName === "webSearch" && isWebSearchOutput(toolCall.output)) {
+    const output = toolCall.output as WebSearchOutput;
+    return (
+      <div className="space-y-3">
+        {output.answer && <p className="text-sm">{output.answer}</p>}
+        {output.results.length > 0 && (
+          <Sources>
+            <SourcesTrigger count={output.results.length} />
+            <SourcesContent>
+              {output.results.slice(0, 5).map((result, index) => (
+                <Source key={index} href={result.url} title={result.title}>
+                  {result.title}
+                </Source>
+              ))}
+            </SourcesContent>
+          </Sources>
+        )}
+      </div>
+    );
+  }
+
+  return <p className="text-muted-foreground text-sm">Completed</p>;
+}
 
 function ThreadPageContent() {
   const router = useRouter();
@@ -361,6 +551,9 @@ function ThreadPageContent() {
             uiMessages.map((message) => {
               const reasoningText = renderMessageReasoning(message);
               const hasReasoning = !!reasoningText;
+              const toolCalls =
+                message.role === "assistant" ? getToolCalls(message) : [];
+              const hasToolCalls = toolCalls.length > 0;
 
               return (
                 <Message
@@ -382,8 +575,72 @@ function ThreadPageContent() {
                   >
                     {message.role === "assistant" ? (
                       <div className="flex flex-col gap-4">
+                        {hasToolCalls && (
+                          <>
+                            <ChainOfThought defaultOpen={false}>
+                              <ChainOfThoughtHeader>
+                                Actions ({toolCalls.length})
+                              </ChainOfThoughtHeader>
+                              <ChainOfThoughtContent>
+                                {toolCalls.map((toolCall) => {
+                                  const stateInfo = getToolStateInfo(
+                                    toolCall.state,
+                                  );
+                                  const isStandardTool =
+                                    toolCall.toolName.startsWith("tool-");
+                                  return (
+                                    <Tool key={toolCall.id}>
+                                      {isStandardTool ? (
+                                        <ToolHeader
+                                          type={
+                                            toolCall.toolName as ToolUIPart["type"]
+                                          }
+                                          state={toolCall.state}
+                                        />
+                                      ) : (
+                                        <ToolHeader
+                                          type="dynamic-tool"
+                                          state={toolCall.state}
+                                          toolName={toolCall.toolName}
+                                        />
+                                      )}
+                                      <ToolContent>
+                                        {renderToolContent(toolCall)}
+                                      </ToolContent>
+                                    </Tool>
+                                  );
+                                })}
+                              </ChainOfThoughtContent>
+                            </ChainOfThought>
+                            {toolCalls.map((toolCall) => {
+                              const isStandardTool =
+                                toolCall.toolName.startsWith("tool-");
+                              const headerProps = isStandardTool
+                                ? {
+                                    type: toolCall.toolName as ToolUIPart["type"],
+                                    state: toolCall.state,
+                                  }
+                                : {
+                                    type: "dynamic-tool" as const,
+                                    state: toolCall.state,
+                                    toolName: toolCall.toolName,
+                                  };
+                              return (
+                                <Tool key={toolCall.id}>
+                                  <ToolHeader {...headerProps} />
+                                  <ToolContent>
+                                    {renderToolContent(toolCall)}
+                                  </ToolContent>
+                                </Tool>
+                              );
+                            })}
+                          </>
+                        )}
                         {hasReasoning && (
-                          <Reasoning isStreaming={status === "streaming"}>
+                          <Reasoning
+                            isStreaming={status === "streaming"}
+                            defaultOpen={false}
+                          >
                             <ReasoningTrigger />
                             <ReasoningContent>{reasoningText}</ReasoningContent>
                           </Reasoning>
