@@ -9,6 +9,11 @@ import {
   PromptInputTextarea,
   PromptInputSubmit,
   PromptInputFooter,
+  PromptInputSelect,
+  PromptInputSelectContent,
+  PromptInputSelectItem,
+  PromptInputSelectTrigger,
+  PromptInputSelectValue,
   usePromptInputController,
 } from "@/components/ai-elements/prompt-input"
 import {
@@ -28,8 +33,15 @@ function ComposerWithScope() {
   const router = useRouter()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const { textInput } = usePromptInputController()
-  const { activeThreadId, sendText, status, stop, selectedModelId } =
-    useChatContext()
+  const {
+    activeThreadId,
+    sendText,
+    status,
+    stop,
+    selectedModelId,
+    setSelectedModelId,
+    availableModels,
+  } = useChatContext()
 
   const handleSubmit = () => {
     if (!textInput.value.trim() || !selectedModelId) return
@@ -81,6 +93,26 @@ function ComposerWithScope() {
             />
 
             <PromptInputFooter>
+              {availableModels.length > 0 && (
+                <PromptInputSelect
+                  value={selectedModelId ?? undefined}
+                  onValueChange={setSelectedModelId}
+                >
+                  <PromptInputSelectTrigger className="h-7 text-[11px] px-2">
+                    <PromptInputSelectValue placeholder="Select model" />
+                  </PromptInputSelectTrigger>
+                  <PromptInputSelectContent>
+                    {availableModels.map((model) => (
+                      <PromptInputSelectItem
+                        key={model.modelId}
+                        value={model.modelId}
+                      >
+                        {model.name}
+                      </PromptInputSelectItem>
+                    ))}
+                  </PromptInputSelectContent>
+                </PromptInputSelect>
+              )}
               <span className="hidden sm:block text-xs text-muted-foreground">
                 Enter to send · Shift+Enter for new line
               </span>

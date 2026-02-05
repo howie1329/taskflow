@@ -17,6 +17,11 @@ import {
   PromptInputActionMenuTrigger,
   PromptInputActionMenuContent,
   PromptInputActionAddAttachments,
+  PromptInputSelect,
+  PromptInputSelectContent,
+  PromptInputSelectItem,
+  PromptInputSelectTrigger,
+  PromptInputSelectValue,
   usePromptInputController,
 } from "@/components/ai-elements/prompt-input"
 import {
@@ -60,6 +65,9 @@ function ThreadPageContent() {
     sendText,
     thread,
     project,
+    selectedModelId,
+    setSelectedModelId,
+    availableModels,
   } = useChatContext()
   const { textInput } = usePromptInputController()
 
@@ -273,6 +281,26 @@ function ThreadPageContent() {
           />
 
           <PromptInputFooter>
+            {availableModels.length > 0 && (
+              <PromptInputSelect
+                value={selectedModelId ?? undefined}
+                onValueChange={setSelectedModelId}
+              >
+                <PromptInputSelectTrigger className="h-7 text-[11px] px-2">
+                  <PromptInputSelectValue placeholder="Select model" />
+                </PromptInputSelectTrigger>
+                <PromptInputSelectContent>
+                  {availableModels.map((model) => (
+                    <PromptInputSelectItem
+                      key={model.modelId}
+                      value={model.modelId}
+                    >
+                      {model.name}
+                    </PromptInputSelectItem>
+                  ))}
+                </PromptInputSelectContent>
+              </PromptInputSelect>
+            )}
             <PromptInputTools>
               <span className="hidden sm:block text-xs text-muted-foreground">
                 Press Enter to send, Shift+Enter for new line
