@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { UserIcon, SparklesIcon } from "@hugeicons/core-free-icons";
 
@@ -43,10 +44,10 @@ export function AiOperatorPanel() {
           >
             AI operator
           </Badge>
-          <h2 className="text-balance text-2xl font-medium tracking-tight lg:text-3xl mb-4">
+          <h2 className="text-balance text-2xl font-medium lg:text-3xl mb-4">
             AI as workplace operator
           </h2>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-pretty text-muted-foreground text-sm">
             Talk to your workspace. Create items, link them, find what you need.
           </p>
         </div>
@@ -68,18 +69,19 @@ export function AiOperatorPanel() {
                     <HugeiconsIcon
                       icon={example.icon}
                       aria-hidden="true"
-                      className={`h-4 w-4 ${
+                      className={cn(
+                        "h-4 w-4",
                         example.user === "You"
                           ? "text-muted-foreground"
-                          : "text-primary"
-                      }`}
+                          : "text-primary",
+                      )}
                     />
                   </div>
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-medium">{example.user}</span>
                     </div>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-pretty text-sm text-muted-foreground">
                       {example.message}
                     </p>
                     {example.actions && (

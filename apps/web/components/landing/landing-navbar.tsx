@@ -29,27 +29,27 @@ export function LandingNavbar() {
             {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
             <a
               href="/#workflow"
-              className="text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              className="text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
             >
               Workflow
             </a>
             {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
             <a
               href="/#features"
-              className="text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              className="text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
             >
               Features
             </a>
             {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
             <a
               href="/#ai"
-              className="text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              className="text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
             >
               AI
             </a>
             <Link
               href="/roadmap"
-              className="text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              className="text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
             >
               Roadmap
             </Link>
@@ -59,7 +59,7 @@ export function LandingNavbar() {
             <ThemeToggle />
             <Link
               href="/roadmap"
-              className="hidden text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:block"
+              className="hidden text-xs text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:block"
             >
               The Plan
             </Link>

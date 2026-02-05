@@ -24,27 +24,27 @@ export function LandingFooter() {
               {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
               <a
                 href="/#workflow"
-                className="text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                className="text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               >
                 Workflow
               </a>
               {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
               <a
                 href="/#features"
-                className="text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                className="text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               >
                 Features
               </a>
               {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
               <a
                 href="/#ai"
-                className="text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                className="text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               >
                 AI
               </a>
               <Link
                 href="/roadmap"
-                className="text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                className="text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               >
                 Roadmap
               </Link>
@@ -53,7 +53,7 @@ export function LandingFooter() {
             <div className="flex items-center gap-2">
               <Link
                 href="/app"
-                className="text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                className="text-xs text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               >
                 Open App
               </Link>
@@ -63,11 +63,11 @@ export function LandingFooter() {
           <Separator className="my-8" />
 
           <div className="flex flex-col items-center gap-2 text-center">
-            <p className="text-xs text-muted-foreground">
+            <p className="text-pretty text-xs text-muted-foreground">
               Solo AI-assisted workplace. Built with Next.js, Convex, and
               shadcn/ui.
             </p>
-            <p className="text-[10px] text-muted-foreground">
+            <p className="text-pretty text-[10px] text-muted-foreground">
               Convex-powered backend.
             </p>
           </div>

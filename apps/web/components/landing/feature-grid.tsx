@@ -70,10 +70,10 @@ export function FeatureGrid() {
           >
             Features
           </Badge>
-          <h2 className="text-balance text-2xl font-medium tracking-tight lg:text-3xl mb-4">
+          <h2 className="text-balance text-2xl font-medium lg:text-3xl mb-4">
             Everything you need
           </h2>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-pretty text-muted-foreground text-sm">
             Core entities to manage your personal workflow. No bloat, no missing
             pieces.
           </p>

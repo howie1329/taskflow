@@ -50,10 +50,10 @@ export function Workflow() {
           >
             The loop
           </Badge>
-          <h2 className="text-balance text-2xl font-medium tracking-tight lg:text-3xl mb-4">
+          <h2 className="text-balance text-2xl font-medium lg:text-3xl mb-4">
             Solo workflow, amplified
           </h2>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-pretty text-muted-foreground text-sm">
             One seamless cycle from capture to completion, with AI as your
             copilot.
           </p>

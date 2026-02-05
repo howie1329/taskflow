@@ -165,11 +165,6 @@
   }
 }
 
-/* Landing page atmospheric effects */
-html {
-  scroll-behavior: smooth;
-}
-
 /* Subtle grid pattern overlay for hero sections */
 .landing-grid-bg {
   background-image:
@@ -177,14 +172,6 @@ html {
     linear-gradient(to bottom, var(--border) 1px, transparent 1px);
   background-size: 60px 60px;
   mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
-}
-
-/* Radial wash for depth */
-.landing-radial-wash {
-  background: radial-gradient(ellipse at 50% 0%,
-      var(--primary) 0%,
-      transparent 50%);
-  opacity: 0.03;
 }
 
 /* Motion-safe reveal animation */

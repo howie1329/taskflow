@@ -11,9 +11,6 @@ export function Hero() {
 
   return (
     <section id="main" className="relative w-full px-4 py-20 lg:px-6 lg:py-28">
-      <div className="absolute inset-0 landing-radial-wash" />
-      <div className="absolute inset-0 landing-grid-bg opacity-60" />
-
       <div className="relative mx-auto w-full max-w-7xl">
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:items-center">
           <div className="flex flex-col items-center gap-6 text-center lg:items-start lg:text-left">
@@ -26,11 +23,11 @@ export function Hero() {
               </span>
             </div>
 
-            <h1 className="text-balance text-4xl font-medium tracking-tight lg:text-5xl xl:text-6xl">
+            <h1 className="text-balance text-4xl font-medium lg:text-5xl xl:text-6xl">
               Your AI-assisted workplace
             </h1>
 
-            <p className="max-w-[600px] text-muted-foreground text-sm leading-relaxed lg:text-base">
+            <p className="max-w-[600px] text-pretty text-muted-foreground text-sm leading-relaxed lg:text-base">
               Solo productivity system: capture ideas, organize projects and
               tasks, manage notes, schedule your day, and get AI help without
               tab-hopping.
@@ -65,7 +62,7 @@ export function Hero() {
           </div>
 
           <div className="relative w-full">
-            <div className="absolute -inset-6 bg-linear-to-r from-primary/5 via-secondary/5 to-primary/5 blur-2xl" />
+            <div className="absolute -inset-6 bg-muted/20" />
             <Card className="relative overflow-hidden border-border/60 bg-card/40 dark:bg-card/20">
               <CardHeader className="gap-4 border-b border-border/60 pb-4">
                 <div className="flex items-center justify-between">
