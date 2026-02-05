@@ -12,11 +12,6 @@ import {
   PromptInputHeader,
   PromptInputFooter,
   PromptInputTools,
-  PromptInputButton,
-  PromptInputActionMenu,
-  PromptInputActionMenuTrigger,
-  PromptInputActionMenuContent,
-  PromptInputActionAddAttachments,
   PromptInputSelect,
   PromptInputSelectContent,
   PromptInputSelectItem,
@@ -53,8 +48,6 @@ import {
   ArrowLeft01Icon,
   GlobalIcon,
   FolderManagementIcon,
-  Image01Icon,
-  PlusSignIcon,
   MessageQuestionIcon,
   MoreHorizontalIcon,
 } from "@hugeicons/core-free-icons";
@@ -242,9 +235,9 @@ function ThreadPageContent() {
                     className={cn(
                       "text-sm leading-6",
                       message.role === "assistant" &&
-                      "w-full border-l border-border/50 pl-6",
+                        "w-full border-l border-border/50 pl-6",
                       message.role === "user" &&
-                      "border border-border/60 bg-muted/40 px-4 py-3 max-w-[32rem] rounded-lg",
+                        "border border-border/60 bg-muted/40 px-4 py-3 max-w-[32rem] rounded-lg",
                     )}
                   >
                     {message.role === "assistant" ? (
@@ -280,27 +273,7 @@ function ThreadPageContent() {
         </label>
         <PromptInput onSubmit={handleSubmit}>
           <PromptInputHeader>
-            <PromptInputTools>
-              <PromptInputActionMenu>
-                <PromptInputActionMenuTrigger>
-                  <HugeiconsIcon
-                    icon={PlusSignIcon}
-                    className="size-4"
-                    strokeWidth={2}
-                  />
-                </PromptInputActionMenuTrigger>
-                <PromptInputActionMenuContent>
-                  <PromptInputActionAddAttachments />
-                </PromptInputActionMenuContent>
-              </PromptInputActionMenu>
-              <PromptInputButton variant="ghost" size="icon-sm">
-                <HugeiconsIcon
-                  icon={Image01Icon}
-                  className="size-4"
-                  strokeWidth={2}
-                />
-              </PromptInputButton>
-            </PromptInputTools>
+            <PromptInputTools></PromptInputTools>
           </PromptInputHeader>
 
           <PromptInputTextarea
@@ -329,9 +302,7 @@ function ThreadPageContent() {
                 </PromptInputSelectContent>
               </PromptInputSelect>
             )}
-            <PromptInputTools>
-
-            </PromptInputTools>
+            <PromptInputTools></PromptInputTools>
             <PromptInputSubmit status={status} onStop={stop} />
           </PromptInputFooter>
         </PromptInput>
