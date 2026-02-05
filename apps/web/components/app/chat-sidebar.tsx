@@ -1,6 +1,5 @@
 "use client"
 
-import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useState } from "react"
 import { HugeiconsIcon } from "@hugeicons/react"
@@ -29,7 +28,11 @@ import {
   type ChatThread,
 } from "@/app/app/chat/components/mock-data"
 
-export function ChatSidebar() {
+interface ChatSidebarProps {
+  onBackToWorkspace?: () => void
+}
+
+export function ChatSidebar({ onBackToWorkspace }: ChatSidebarProps) {
   const pathname = usePathname()
   const [searchQuery, setSearchQuery] = useState("")
   const [threads, setThreads] = useState<ChatThread[]>(mockThreads)
@@ -102,18 +105,20 @@ export function ChatSidebar() {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip="Back to workspace">
-              <Link href="/app">
-                <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
-                <span>Back to workspace</span>
-              </Link>
+            <SidebarMenuButton
+              tooltip="Back to workspace"
+              onClick={onBackToWorkspace}
+            >
+              <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
+              <span>Back to workspace</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent className="px-0">
+      <SidebarContent className="px-0 overflow-hidden">
         <ThreadsRail
-          className="w-full border-0 bg-transparent"
+          className="w-full"
+          variant="sidebar"
           isNewChat={isNewChat}
           searchQuery={searchQuery}
           onSearchQueryChange={setSearchQuery}

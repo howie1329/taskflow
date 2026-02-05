@@ -32,6 +32,7 @@ import { ThreadSection } from "./thread-section"
 
 interface ThreadsRailProps {
   className?: string
+  variant?: "rail" | "sidebar"
   isNewChat: boolean
   searchQuery: string
   onSearchQueryChange: (value: string) => void
@@ -53,6 +54,7 @@ interface ThreadsRailProps {
 
 export function ThreadsRail({
   className,
+  variant = "rail",
   isNewChat,
   searchQuery,
   onSearchQueryChange,
@@ -76,11 +78,16 @@ export function ThreadsRail({
     0,
   )
 
+  const isSidebar = variant === "sidebar"
+
   return (
     <nav
       aria-label="Threads"
       className={cn(
-        "w-full md:w-[300px] shrink-0 border-r border-border/60 flex flex-col bg-background/40 text-foreground",
+        "flex min-h-0 flex-col text-foreground",
+        isSidebar
+          ? "w-full flex-1 bg-transparent"
+          : "w-full md:w-[300px] shrink-0 border-r border-border/60 bg-background/40",
         className,
       )}
     >
@@ -136,7 +143,7 @@ export function ThreadsRail({
         </InputGroup>
       </div>
 
-      <ScrollArea className="flex-1">
+      <ScrollArea className="flex-1 min-h-0">
         <div className="p-3 space-y-4">
           {threads.length === 0 ? (
             <Empty className="min-h-[260px]">

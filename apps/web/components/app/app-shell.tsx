@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Task01Icon,
@@ -113,6 +113,9 @@ export function AppShell({ children }: AppShellProps) {
   const pageTitle = getPageTitle(pathname)
   const router = useRouter()
   const { isLoading, preferences } = useViewer()
+  const [chatSidebarMode, setChatSidebarMode] = useState<"threads" | "workspace">(
+    "threads",
+  )
 
   const isOnboardingRoute = pathname === "/app/onboarding"
   const isOnboarded = !!preferences?.onboardingCompletedAt
@@ -125,6 +128,12 @@ export function AppShell({ children }: AppShellProps) {
     }
   }, [isLoading, isOnboarded, isOnboardingRoute, router])
 
+  useEffect(() => {
+    if (isChatRoute) {
+      setChatSidebarMode("threads")
+    }
+  }, [isChatRoute])
+
   if (!isOnboardingRoute && !isOnboarded) {
     return (
       <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">
@@ -136,8 +145,8 @@ export function AppShell({ children }: AppShellProps) {
   return (
     <SidebarProvider>
       <Sidebar variant="floating" collapsible="icon">
-        {isChatRoute ? (
-          <ChatSidebar />
+        {isChatRoute && chatSidebarMode === "threads" ? (
+          <ChatSidebar onBackToWorkspace={() => setChatSidebarMode("workspace")} />
         ) : (
           <>
             <SidebarHeader>
@@ -164,20 +173,30 @@ export function AppShell({ children }: AppShellProps) {
                 <SidebarGroupLabel>Workspace</SidebarGroupLabel>
                 <SidebarGroupContent>
                   <SidebarMenu>
-                    {navItems.map((item) => (
-                      <SidebarMenuItem key={item.href}>
-                        <SidebarMenuButton
-                          asChild
-                          isActive={pathname === item.href}
-                          tooltip={item.title}
-                        >
-                          <Link href={item.href}>
-                            <HugeiconsIcon icon={item.icon} className="size-4" />
-                            <span>{item.title}</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    ))}
+                    {navItems.map((item) => {
+                      const isChatItem = item.href === "/app/chat"
+                      const handleChatClick = isChatRoute && isChatItem
+                        ? (event: React.MouseEvent<HTMLAnchorElement>) => {
+                          event.preventDefault()
+                          setChatSidebarMode("threads")
+                        }
+                        : undefined
+
+                      return (
+                        <SidebarMenuItem key={item.href}>
+                          <SidebarMenuButton
+                            asChild
+                            isActive={pathname === item.href}
+                            tooltip={item.title}
+                          >
+                            <Link href={item.href} onClick={handleChatClick}>
+                              <HugeiconsIcon icon={item.icon} className="size-4" />
+                              <span>{item.title}</span>
+                            </Link>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      )
+                    })}
                   </SidebarMenu>
                 </SidebarGroupContent>
               </SidebarGroup>
