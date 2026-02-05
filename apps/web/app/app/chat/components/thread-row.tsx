@@ -48,7 +48,7 @@ export function ThreadRow({
     return (
       <div
         className={cn(
-          "group flex items-center gap-2 rounded-md px-2 py-1.5",
+          "flex items-center gap-2 rounded-md px-2 py-1.5 w-full max-w-full overflow-hidden",
           isActive ? "bg-accent" : "bg-accent/40",
         )}
       >
@@ -59,7 +59,7 @@ export function ThreadRow({
           )}
         />
         <Input
-          className="h-6 px-2 py-0 text-xs"
+          className="h-6 px-2 py-0 text-xs min-w-0 flex-1 w-full max-w-full"
           value={editingTitle}
           onChange={(e) => onEditTitleChange(e.target.value)}
           onKeyDown={(e) => {
@@ -83,7 +83,7 @@ export function ThreadRow({
     <Link
       href={`/app/chat/${thread.id}`}
       className={cn(
-        "group relative flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-sm transition-colors",
+        "group relative flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors w-full max-w-full overflow-hidden",
         "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
         isActive
           ? "bg-accent text-accent-foreground"
@@ -98,7 +98,7 @@ export function ThreadRow({
         )}
       />
 
-      <div className="flex items-center gap-2 min-w-0 flex-1">
+      <div className="flex items-center gap-2 min-w-0 flex-1 w-full max-w-full">
         {thread.pinned && (
           <HugeiconsIcon
             icon={PinIcon}
@@ -106,7 +106,7 @@ export function ThreadRow({
             strokeWidth={2}
           />
         )}
-        <span className="truncate text-xs font-medium">
+        <span className="truncate text-xs font-medium min-w-0">
           {thread.title || "Untitled chat"}
         </span>
       </div>
@@ -116,7 +116,7 @@ export function ThreadRow({
           <Button
             variant="ghost"
             size="icon-xs"
-            className="h-5 w-5 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 transition-opacity"
+            className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 transition-opacity flex-shrink-0"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();

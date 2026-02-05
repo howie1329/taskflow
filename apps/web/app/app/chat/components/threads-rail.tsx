@@ -157,8 +157,13 @@ export function ThreadsRail({
         </InputGroup>
       </div>
 
-      <ScrollArea className="flex-1 min-h-0">
-        <div className={cn("space-y-4", isSidebar ? "p-2 space-y-3" : "p-3")}>
+      <ScrollArea className="flex-1 min-h-0 [&>div>div]:!w-full">
+        <div
+          className={cn(
+            "space-y-4 w-full max-w-full",
+            isSidebar ? "p-2 space-y-3" : "p-3",
+          )}
+        >
           {threads.length === 0 ? (
             <Empty className="min-h-[260px]">
               <EmptyHeader>
@@ -193,7 +198,7 @@ export function ThreadsRail({
           ) : (
             <>
               {pinnedThreads.length > 0 && (
-                <div className="space-y-2">
+                <div className="space-y-2 w-full max-w-full">
                   <ThreadSection
                     label="Pinned"
                     count={pinnedThreads.length}
@@ -205,7 +210,7 @@ export function ThreadsRail({
                       />
                     }
                   />
-                  <div className="space-y-0.5">
+                  <div className="space-y-0.5 w-full max-w-full">
                     {pinnedThreads.map((thread) => (
                       <ThreadRow
                         key={thread.id}
@@ -226,9 +231,9 @@ export function ThreadsRail({
               )}
 
               {recentThreads.length > 0 && (
-                <div className="space-y-2">
+                <div className="space-y-2 w-full max-w-full">
                   <ThreadSection label="Recent" count={recentThreads.length} />
-                  <div className="space-y-0.5">
+                  <div className="space-y-0.5 w-full max-w-full">
                     {recentThreads.map((thread) => (
                       <ThreadRow
                         key={thread.id}
@@ -253,12 +258,17 @@ export function ThreadsRail({
                   {(pinnedThreads.length > 0 || recentThreads.length > 0) && (
                     <Separator className="bg-sidebar-border/70" />
                   )}
-                  <div className={cn("space-y-3", isSidebar && "space-y-2")}>
+                  <div
+                    className={cn(
+                      "space-y-3 w-full max-w-full",
+                      isSidebar && "space-y-2",
+                    )}
+                  >
                     <ThreadSection
                       label="Projects"
                       count={projectThreadCount}
                     />
-                    <div className="space-y-0.5">
+                    <div className="space-y-0.5 w-full max-w-full">
                       {groupedByProject.map((group) => (
                         <ProjectThreadGroup
                           key={group.project.id}
