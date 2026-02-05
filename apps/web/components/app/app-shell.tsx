@@ -266,8 +266,8 @@ export function AppShell({ children }: AppShellProps) {
         )}
         <SidebarRail />
       </Sidebar>
-      <SidebarInset>
-        <header className="sticky top-0 z-40 flex h-14 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <SidebarInset className="overflow-hidden">
+        <header className="flex h-14 shrink-0 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <SidebarTrigger />
           <div className="flex flex-1 items-center justify-between">
             <h1 className="text-sm font-medium">{pageTitle}</h1>
@@ -282,7 +282,7 @@ export function AppShell({ children }: AppShellProps) {
             </div>
           </div>
         </header>
-        <main className="flex flex-1 flex-col gap-4 p-4 md:gap-6 md:p-6">
+        <main className="flex flex-1 flex-col gap-4 p-4 md:gap-6 md:p-6 overflow-hidden">
           {children}
         </main>
       </SidebarInset>
