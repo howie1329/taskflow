@@ -74,6 +74,9 @@ function SidebarProvider({
   // Extract chat-specific width from style prop if present
   const chatSidebarWidth = (style as any)?.["--sidebar-width"] as string;
   const mobileSidebarWidth = chatSidebarWidth || SIDEBAR_WIDTH_MOBILE;
+  const resolvedMobileWidth = chatSidebarWidth
+    ? SIDEBAR_WIDTH_CHAT_MOBILE
+    : SIDEBAR_WIDTH_MOBILE;
 
   // This is the internal state of the sidebar.
   // We use openProp and setOpenProp for control from outside the component.
@@ -128,7 +131,7 @@ function SidebarProvider({
       openMobile,
       setOpenMobile,
       toggleSidebar,
-      mobileSidebarWidth,
+      mobileSidebarWidth: resolvedMobileWidth,
     }),
     [
       state,
@@ -138,7 +141,7 @@ function SidebarProvider({
       openMobile,
       setOpenMobile,
       toggleSidebar,
-      mobileSidebarWidth,
+      resolvedMobileWidth,
     ],
   );
 
