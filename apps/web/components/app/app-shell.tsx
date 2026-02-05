@@ -16,9 +16,9 @@ import {
   InboxDownloadIcon,
   NotificationIcon,
 } from "@hugeicons/core-free-icons";
+import { useTheme } from "next-themes"
 
 import { Button } from "@/components/ui/button";
-import { useTheme } from "next-themes"
 import { SignOutButton } from "@/components/auth/sign-out-button"
 import { useViewer } from "@/components/settings/hooks/use-viewer"
 import {
@@ -37,6 +37,7 @@ import {
   SidebarRail,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { ChatSidebar } from "@/components/app/chat-sidebar";
 
 const navItems = [
   {
@@ -115,6 +116,7 @@ export function AppShell({ children }: AppShellProps) {
 
   const isOnboardingRoute = pathname === "/app/onboarding"
   const isOnboarded = !!preferences?.onboardingCompletedAt
+  const isChatRoute = pathname.startsWith("/app/chat")
 
   useEffect(() => {
     if (isLoading) return
@@ -134,58 +136,64 @@ export function AppShell({ children }: AppShellProps) {
   return (
     <SidebarProvider>
       <Sidebar variant="floating" collapsible="icon">
-        <SidebarHeader>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton size="lg" asChild>
-                <Link href="/app">
-                  <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-                    <HugeiconsIcon icon={CommandIcon} className="size-4" />
-                  </div>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">Taskflow</span>
-                    <span className="truncate text-xs text-muted-foreground">
-                      Workspace
-                    </span>
-                  </div>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarGroup>
-            <SidebarGroupLabel>Workspace</SidebarGroupLabel>
-            <SidebarGroupContent>
+        {isChatRoute ? (
+          <ChatSidebar />
+        ) : (
+          <>
+            <SidebarHeader>
               <SidebarMenu>
-                {navItems.map((item) => (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={pathname === item.href}
-                      tooltip={item.title}
-                    >
-                      <Link href={item.href}>
-                        <HugeiconsIcon icon={item.icon} className="size-4" />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
+                <SidebarMenuItem>
+                  <SidebarMenuButton size="lg" asChild>
+                    <Link href="/app">
+                      <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                        <HugeiconsIcon icon={CommandIcon} className="size-4" />
+                      </div>
+                      <div className="grid flex-1 text-left text-sm leading-tight">
+                        <span className="truncate font-semibold">Taskflow</span>
+                        <span className="truncate text-xs text-muted-foreground">
+                          Workspace
+                        </span>
+                      </div>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
               </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </SidebarContent>
-        <SidebarFooter>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <ThemeToggleMenuItem />
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SignOutButton />
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarFooter>
+            </SidebarHeader>
+            <SidebarContent>
+              <SidebarGroup>
+                <SidebarGroupLabel>Workspace</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {navItems.map((item) => (
+                      <SidebarMenuItem key={item.href}>
+                        <SidebarMenuButton
+                          asChild
+                          isActive={pathname === item.href}
+                          tooltip={item.title}
+                        >
+                          <Link href={item.href}>
+                            <HugeiconsIcon icon={item.icon} className="size-4" />
+                            <span>{item.title}</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            </SidebarContent>
+            <SidebarFooter>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <ThemeToggleMenuItem />
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SignOutButton />
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarFooter>
+          </>
+        )}
         <SidebarRail />
       </Sidebar>
       <SidebarInset>
