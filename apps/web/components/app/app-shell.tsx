@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Task01Icon,
@@ -16,11 +16,11 @@ import {
   InboxDownloadIcon,
   NotificationIcon,
 } from "@hugeicons/core-free-icons";
-import { useTheme } from "next-themes"
+import { useTheme } from "next-themes";
 
 import { Button } from "@/components/ui/button";
-import { SignOutButton } from "@/components/auth/sign-out-button"
-import { useViewer } from "@/components/settings/hooks/use-viewer"
+import { SignOutButton } from "@/components/auth/sign-out-button";
+import { useViewer } from "@/components/settings/hooks/use-viewer";
 import {
   Sidebar,
   SidebarContent,
@@ -78,8 +78,8 @@ const navItems = [
 ];
 
 function getPageTitle(pathname: string): string {
-  if (pathname.startsWith("/app/projects/")) return "Projects"
-  if (pathname.startsWith("/app/chat/")) return "AI Chat"
+  if (pathname.startsWith("/app/projects/")) return "Projects";
+  if (pathname.startsWith("/app/chat/")) return "AI Chat";
   const item = navItems.find((item) => pathname === item.href);
   if (item) return item.title;
   if (pathname === "/app") return "Overview";
@@ -109,44 +109,52 @@ function ThemeToggleMenuItem() {
 }
 
 export function AppShell({ children }: AppShellProps) {
-  const pathname = usePathname()
-  const pageTitle = getPageTitle(pathname)
-  const router = useRouter()
-  const { isLoading, preferences } = useViewer()
-  const [chatSidebarMode, setChatSidebarMode] = useState<"threads" | "workspace">(
-    "threads",
-  )
+  const pathname = usePathname();
+  const pageTitle = getPageTitle(pathname);
+  const router = useRouter();
+  const { isLoading, preferences } = useViewer();
+  const [chatSidebarMode, setChatSidebarMode] = useState<
+    "threads" | "workspace"
+  >("threads");
 
-  const isOnboardingRoute = pathname === "/app/onboarding"
-  const isOnboarded = !!preferences?.onboardingCompletedAt
-  const isChatRoute = pathname.startsWith("/app/chat")
+  const isOnboardingRoute = pathname === "/app/onboarding";
+  const isOnboarded = !!preferences?.onboardingCompletedAt;
+  const isChatRoute = pathname.startsWith("/app/chat");
 
   useEffect(() => {
-    if (isLoading) return
+    if (isLoading) return;
     if (!isOnboarded && !isOnboardingRoute) {
-      router.replace("/app/onboarding")
+      router.replace("/app/onboarding");
     }
-  }, [isLoading, isOnboarded, isOnboardingRoute, router])
+  }, [isLoading, isOnboarded, isOnboardingRoute, router]);
 
   useEffect(() => {
     if (isChatRoute) {
-      setChatSidebarMode("threads")
+      setChatSidebarMode("threads");
     }
-  }, [isChatRoute])
+  }, [isChatRoute]);
 
   if (!isOnboardingRoute && !isOnboarded) {
     return (
       <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">
         {isLoading ? "Loading..." : "Redirecting to onboarding..."}
       </div>
-    )
+    );
   }
 
   return (
-    <SidebarProvider>
+    <SidebarProvider
+      style={
+        isChatRoute
+          ? ({ "--sidebar-width": "18rem" } as React.CSSProperties)
+          : undefined
+      }
+    >
       <Sidebar variant="floating" collapsible="icon">
         {isChatRoute && chatSidebarMode === "threads" ? (
-          <ChatSidebar onBackToWorkspace={() => setChatSidebarMode("workspace")} />
+          <ChatSidebar
+            onBackToWorkspace={() => setChatSidebarMode("workspace")}
+          />
         ) : (
           <>
             <SidebarHeader>
@@ -174,13 +182,14 @@ export function AppShell({ children }: AppShellProps) {
                 <SidebarGroupContent>
                   <SidebarMenu>
                     {navItems.map((item) => {
-                      const isChatItem = item.href === "/app/chat"
-                      const handleChatClick = isChatRoute && isChatItem
-                        ? (event: React.MouseEvent<HTMLAnchorElement>) => {
-                          event.preventDefault()
-                          setChatSidebarMode("threads")
-                        }
-                        : undefined
+                      const isChatItem = item.href === "/app/chat";
+                      const handleChatClick =
+                        isChatRoute && isChatItem
+                          ? (event: React.MouseEvent<HTMLAnchorElement>) => {
+                              event.preventDefault();
+                              setChatSidebarMode("threads");
+                            }
+                          : undefined;
 
                       return (
                         <SidebarMenuItem key={item.href}>
@@ -190,12 +199,15 @@ export function AppShell({ children }: AppShellProps) {
                             tooltip={item.title}
                           >
                             <Link href={item.href} onClick={handleChatClick}>
-                              <HugeiconsIcon icon={item.icon} className="size-4" />
+                              <HugeiconsIcon
+                                icon={item.icon}
+                                className="size-4"
+                              />
                               <span>{item.title}</span>
                             </Link>
                           </SidebarMenuButton>
                         </SidebarMenuItem>
-                      )
+                      );
                     })}
                   </SidebarMenu>
                 </SidebarGroupContent>

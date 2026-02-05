@@ -1,55 +1,55 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { HugeiconsIcon } from "@hugeicons/react"
+import Link from "next/link";
+import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Cancel01Icon,
   MessageQuestionIcon,
   PinIcon,
   PlusSignIcon,
   SearchIcon,
-} from "@hugeicons/core-free-icons"
-import { Button } from "@/components/ui/button"
+} from "@hugeicons/core-free-icons";
+import { Button } from "@/components/ui/button";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
-} from "@/components/ui/input-group"
-import { ScrollArea } from "@/components/ui/scroll-area"
+} from "@/components/ui/input-group";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Empty,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/components/ui/empty"
-import { Separator } from "@/components/ui/separator"
-import { cn } from "@/lib/utils"
-import type { ChatProject, ChatThread } from "./mock-data"
-import { ProjectThreadGroup } from "./project-thread-group"
-import { ThreadRow } from "./thread-row"
-import { ThreadSection } from "./thread-section"
+} from "@/components/ui/empty";
+import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
+import type { ChatProject, ChatThread } from "./mock-data";
+import { ProjectThreadGroup } from "./project-thread-group";
+import { ThreadRow } from "./thread-row";
+import { ThreadSection } from "./thread-section";
 
 interface ThreadsRailProps {
-  className?: string
-  variant?: "rail" | "sidebar"
-  isNewChat: boolean
-  searchQuery: string
-  onSearchQueryChange: (value: string) => void
-  threads: ChatThread[]
-  filteredThreads: ChatThread[]
-  pinnedThreads: ChatThread[]
-  recentThreads: ChatThread[]
-  groupedByProject: { project: ChatProject; threads: ChatThread[] }[]
-  activeThreadId: string | null
-  editingThreadId: string | null
-  editingTitle: string
-  onEditTitleChange: (value: string) => void
-  onStartEdit: (thread: ChatThread) => void
-  onCancelEdit: () => void
-  onCommitEdit: () => void
-  onTogglePin: (threadId: string) => void
-  onDeleteRequest: (threadId: string | null) => void
+  className?: string;
+  variant?: "rail" | "sidebar";
+  isNewChat: boolean;
+  searchQuery: string;
+  onSearchQueryChange: (value: string) => void;
+  threads: ChatThread[];
+  filteredThreads: ChatThread[];
+  pinnedThreads: ChatThread[];
+  recentThreads: ChatThread[];
+  groupedByProject: { project: ChatProject; threads: ChatThread[] }[];
+  activeThreadId: string | null;
+  editingThreadId: string | null;
+  editingTitle: string;
+  onEditTitleChange: (value: string) => void;
+  onStartEdit: (thread: ChatThread) => void;
+  onCancelEdit: () => void;
+  onCommitEdit: () => void;
+  onTogglePin: (threadId: string) => void;
+  onDeleteRequest: (threadId: string | null) => void;
 }
 
 export function ThreadsRail({
@@ -76,9 +76,9 @@ export function ThreadsRail({
   const projectThreadCount = groupedByProject.reduce(
     (total, group) => total + group.threads.length,
     0,
-  )
+  );
 
-  const isSidebar = variant === "sidebar"
+  const isSidebar = variant === "sidebar";
 
   return (
     <nav
@@ -91,38 +91,52 @@ export function ThreadsRail({
         className,
       )}
     >
-      <div className="sticky top-0 z-10 border-b border-border/60 bg-background/70 p-3 backdrop-blur supports-[backdrop-filter]:bg-background/60 space-y-2">
+      <div
+        className={cn(
+          "sticky top-0 z-10 border-b border-border/60 bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60 space-y-2",
+          isSidebar ? "p-2" : "p-3",
+        )}
+      >
         <div className="flex items-center justify-between gap-2">
-          <span className="text-xs font-medium text-muted-foreground">
+          <span
+            className={cn(
+              "font-medium text-muted-foreground",
+              isSidebar ? "text-xs" : "text-sm",
+            )}
+          >
             Threads
           </span>
           <Link href="/app/chat">
             <Button
               className={cn(
-                "h-8 rounded-md px-3 text-xs",
+                "rounded-md",
+                isSidebar ? "h-7 px-2 text-xs" : "h-8 px-3 text-xs",
                 isNewChat && "bg-accent text-accent-foreground",
               )}
               variant={isNewChat ? "secondary" : "default"}
             >
               <HugeiconsIcon
                 icon={PlusSignIcon}
-                className="size-3.5 mr-2"
+                className={cn("mr-1", isSidebar ? "size-3" : "size-3.5 mr-2")}
                 strokeWidth={2}
               />
-              New
+              {isSidebar ? "New" : "New"}
             </Button>
           </Link>
         </div>
 
         <InputGroup className="w-full">
           <InputGroupAddon>
-            <HugeiconsIcon icon={SearchIcon} className="size-4" strokeWidth={2} />
+            <HugeiconsIcon
+              icon={SearchIcon}
+              className={cn("stroke-2", isSidebar ? "size-3.5" : "size-4")}
+            />
           </InputGroupAddon>
           <InputGroupInput
             placeholder="Search threads..."
             value={searchQuery}
             onChange={(e) => onSearchQueryChange(e.target.value)}
-            className="text-xs"
+            className={cn("text-xs", isSidebar ? "h-7" : "h-8")}
           />
           {searchQuery && (
             <InputGroupAddon>
@@ -130,7 +144,7 @@ export function ThreadsRail({
                 variant="ghost"
                 size="icon-xs"
                 onClick={() => onSearchQueryChange("")}
-                className="h-6 w-6"
+                className="h-5 w-5"
               >
                 <HugeiconsIcon
                   icon={Cancel01Icon}
@@ -144,7 +158,7 @@ export function ThreadsRail({
       </div>
 
       <ScrollArea className="flex-1 min-h-0">
-        <div className="p-3 space-y-4">
+        <div className={cn("space-y-4", isSidebar ? "p-2 space-y-3" : "p-3")}>
           {threads.length === 0 ? (
             <Empty className="min-h-[260px]">
               <EmptyHeader>
@@ -191,7 +205,7 @@ export function ThreadsRail({
                       />
                     }
                   />
-                  <div className="space-y-1">
+                  <div className="space-y-0.5">
                     {pinnedThreads.map((thread) => (
                       <ThreadRow
                         key={thread.id}
@@ -214,7 +228,7 @@ export function ThreadsRail({
               {recentThreads.length > 0 && (
                 <div className="space-y-2">
                   <ThreadSection label="Recent" count={recentThreads.length} />
-                  <div className="space-y-1">
+                  <div className="space-y-0.5">
                     {recentThreads.map((thread) => (
                       <ThreadRow
                         key={thread.id}
@@ -239,9 +253,12 @@ export function ThreadsRail({
                   {(pinnedThreads.length > 0 || recentThreads.length > 0) && (
                     <Separator className="bg-sidebar-border/70" />
                   )}
-                  <div className="space-y-3">
-                    <ThreadSection label="Projects" count={projectThreadCount} />
-                    <div className="space-y-2">
+                  <div className={cn("space-y-3", isSidebar && "space-y-2")}>
+                    <ThreadSection
+                      label="Projects"
+                      count={projectThreadCount}
+                    />
+                    <div className="space-y-0.5">
                       {groupedByProject.map((group) => (
                         <ProjectThreadGroup
                           key={group.project.id}
@@ -274,5 +291,5 @@ export function ThreadsRail({
         </div>
       </ScrollArea>
     </nav>
-  )
+  );
 }
