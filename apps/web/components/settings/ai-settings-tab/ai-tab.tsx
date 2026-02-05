@@ -1,15 +1,90 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
+import { Field, FieldLabel, FieldDescription } from "@/components/ui/field";
 import { useAvailableModels } from "../hooks/use-available-models";
 import { useViewer } from "../hooks/use-viewer";
+import { toast } from "sonner";
 
 export function AITab() {
   const { models, isLoading, isEmpty, lastSyncedAt, count } =
     useAvailableModels();
   const { preferences } = useViewer();
+  const updatePreferences = useMutation(api.preferences.updateMyPreferences);
+
+  const [showActions, setShowActions] = useState(true);
+  const [showToolDetails, setShowToolDetails] = useState(true);
+  const [showReasoning, setShowReasoning] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (preferences) {
+      if (preferences.aiChatShowActions !== undefined) {
+        setShowActions(preferences.aiChatShowActions);
+      }
+      if (preferences.aiChatShowToolDetails !== undefined) {
+        setShowToolDetails(preferences.aiChatShowToolDetails);
+      }
+      if (preferences.aiChatShowReasoning !== undefined) {
+        setShowReasoning(preferences.aiChatShowReasoning);
+      }
+    }
+  }, [preferences]);
+
+  const handleShowActionsChange = async (value: boolean) => {
+    setShowActions(value);
+    if (!value) {
+      setShowToolDetails(false);
+    }
+    setIsSaving(true);
+    try {
+      await updatePreferences({
+        aiChatShowActions: value,
+        aiChatShowToolDetails: value ? undefined : false,
+      });
+      toast.success("Settings updated");
+    } catch {
+      toast.error("Failed to update settings");
+      setShowActions(!value);
+      setShowToolDetails(!value);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleShowToolDetailsChange = async (value: boolean) => {
+    setShowToolDetails(value);
+    setIsSaving(true);
+    try {
+      await updatePreferences({ aiChatShowToolDetails: value });
+      toast.success("Settings updated");
+    } catch {
+      toast.error("Failed to update settings");
+      setShowToolDetails(!value);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleShowReasoningChange = async (value: boolean) => {
+    setShowReasoning(value);
+    setIsSaving(true);
+    try {
+      await updatePreferences({ aiChatShowReasoning: value });
+      toast.success("Settings updated");
+    } catch {
+      toast.error("Failed to update settings");
+      setShowReasoning(!value);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const currentDefaultModelId = preferences?.defaultAIModel?.modelId;
 
@@ -26,6 +101,84 @@ export function AITab() {
 
   return (
     <div className="space-y-6">
+      {/* AI Chat Card */}
+      <Card className="p-6">
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <h2 className="text-base font-medium">AI Chat</h2>
+            <p className="text-sm text-muted-foreground">
+              Control what the assistant shows while it works.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <Field>
+              <div className="flex items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <FieldLabel>Show actions</FieldLabel>
+                  <FieldDescription>
+                    A short timeline of what the assistant is doing.
+                  </FieldDescription>
+                </div>
+                {isLoading ? (
+                  <Skeleton className="h-6 w-10" />
+                ) : (
+                  <Switch
+                    checked={showActions}
+                    onCheckedChange={handleShowActionsChange}
+                    disabled={isSaving}
+                    aria-label="Show actions in chat"
+                  />
+                )}
+              </div>
+            </Field>
+
+            <Field>
+              <div className="flex items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <FieldLabel>Show tool details</FieldLabel>
+                  <FieldDescription>
+                    Expandable results like sources and outcomes.
+                  </FieldDescription>
+                </div>
+                {isLoading ? (
+                  <Skeleton className="h-6 w-10" />
+                ) : (
+                  <Switch
+                    checked={showToolDetails}
+                    onCheckedChange={handleShowToolDetailsChange}
+                    disabled={isSaving || !showActions}
+                    aria-label="Show tool details in chat"
+                  />
+                )}
+              </div>
+            </Field>
+
+            <Field>
+              <div className="flex items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <FieldLabel>Show reasoning</FieldLabel>
+                  <FieldDescription>
+                    Optional thinking text (always collapsed by default).
+                  </FieldDescription>
+                </div>
+                {isLoading ? (
+                  <Skeleton className="h-6 w-10" />
+                ) : (
+                  <Switch
+                    checked={showReasoning}
+                    onCheckedChange={handleShowReasoningChange}
+                    disabled={isSaving}
+                    aria-label="Show reasoning in chat"
+                  />
+                )}
+              </div>
+            </Field>
+          </div>
+        </div>
+      </Card>
+
+      {/* AI Models Card */}
       <Card className="p-6">
         <div className="space-y-6">
           {/* Header */}

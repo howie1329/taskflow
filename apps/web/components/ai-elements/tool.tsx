@@ -24,7 +24,10 @@ export type ToolProps = ComponentProps<typeof Collapsible>;
 
 export const Tool = ({ className, ...props }: ToolProps) => (
   <Collapsible
-    className={cn("group not-prose mb-4 w-full rounded-md border", className)}
+    className={cn(
+      "group not-prose w-full rounded-md border border-border/60",
+      className,
+    )}
     {...props}
   />
 );
@@ -47,25 +50,28 @@ export const getStatusBadge = (status: ToolPart["state"]) => {
   const labels: Record<ToolPart["state"], string> = {
     "input-streaming": "Pending",
     "input-available": "Running",
-    "approval-requested": "Awaiting Approval",
-    "approval-responded": "Responded",
-    "output-available": "Completed",
+    "approval-requested": "Awaiting",
+    "approval-responded": "Approved",
+    "output-available": "Done",
     "output-error": "Error",
     "output-denied": "Denied",
   };
 
   const icons: Record<ToolPart["state"], ReactNode> = {
-    "input-streaming": <CircleIcon className="size-4" />,
-    "input-available": <ClockIcon className="size-4 animate-pulse" />,
-    "approval-requested": <ClockIcon className="size-4 text-yellow-600" />,
-    "approval-responded": <CheckCircleIcon className="size-4 text-blue-600" />,
-    "output-available": <CheckCircleIcon className="size-4 text-green-600" />,
-    "output-error": <XCircleIcon className="size-4 text-red-600" />,
-    "output-denied": <XCircleIcon className="size-4 text-orange-600" />,
+    "input-streaming": <CircleIcon className="size-3" />,
+    "input-available": <ClockIcon className="size-3 animate-pulse" />,
+    "approval-requested": <ClockIcon className="size-3" />,
+    "approval-responded": <CheckCircleIcon className="size-3" />,
+    "output-available": <CheckCircleIcon className="size-3" />,
+    "output-error": <XCircleIcon className="size-3" />,
+    "output-denied": <XCircleIcon className="size-3" />,
   };
 
   return (
-    <Badge className="gap-1.5 rounded-full text-xs" variant="secondary">
+    <Badge
+      className="gap-1 rounded-full text-[10px] px-2 h-5"
+      variant="outline"
+    >
       {icons[status]}
       {labels[status]}
     </Badge>
@@ -86,17 +92,18 @@ export const ToolHeader = ({
   return (
     <CollapsibleTrigger
       className={cn(
-        "flex w-full items-center justify-between gap-4 p-3",
-        className
+        "flex w-full items-center justify-between gap-3 px-3 py-2 text-xs transition-colors hover:bg-muted/50",
+        className,
       )}
       {...props}
     >
       <div className="flex items-center gap-2">
-        <WrenchIcon className="size-4 text-muted-foreground" />
-        <span className="font-medium text-sm">{title ?? derivedName}</span>
-        {getStatusBadge(state)}
+        <span className="font-medium">{title ?? derivedName}</span>
       </div>
-      <ChevronDownIcon className="size-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+      <div className="flex items-center gap-2">
+        {getStatusBadge(state)}
+        <ChevronDownIcon className="size-3 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+      </div>
     </CollapsibleTrigger>
   );
 };
@@ -106,8 +113,9 @@ export type ToolContentProps = ComponentProps<typeof CollapsibleContent>;
 export const ToolContent = ({ className, ...props }: ToolContentProps) => (
   <CollapsibleContent
     className={cn(
-      "data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2 text-popover-foreground outline-none data-[state=closed]:animate-out data-[state=open]:animate-in",
-      className
+      "px-3 pb-3",
+      "data-[state=closed]:animate-out data-[state=open]:animate-in",
+      className,
     )}
     {...props}
   />
@@ -163,7 +171,7 @@ export const ToolOutput = ({
           "overflow-x-auto rounded-md text-xs [&_table]:w-full",
           errorText
             ? "bg-destructive/10 text-destructive"
-            : "bg-muted/50 text-foreground"
+            : "bg-muted/50 text-foreground",
         )}
       >
         {errorText && <div>{errorText}</div>}

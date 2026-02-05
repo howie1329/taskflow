@@ -27,12 +27,19 @@ const schema = defineSchema({
     userId: v.string(),
     threadId: v.string(),
     messageId: v.string(),
-    role: v.union(v.literal("user"), v.literal("assistant"), v.literal("system")),
+    role: v.union(
+      v.literal("user"),
+      v.literal("assistant"),
+      v.literal("system"),
+    ),
     model: v.string(),
     content: v.any(),
     createdAt: v.number(),
     updatedAt: v.number(),
-  }).index("by_userId", ["userId"]).index("by_threadId", ["threadId"]).index("by_messageId", ["messageId"]),
+  })
+    .index("by_userId", ["userId"])
+    .index("by_threadId", ["threadId"])
+    .index("by_messageId", ["messageId"]),
   availableModels: defineTable({
     modelId: v.string(),
     name: v.string(),
@@ -70,7 +77,10 @@ const schema = defineSchema({
     ),
     // Hide completed tasks in board/list views
     hideCompletedTasks: v.optional(v.boolean()),
-    // Future: theme, notifications, privacy settings
+    // AI Chat visibility preferences
+    aiChatShowActions: v.optional(v.boolean()),
+    aiChatShowToolDetails: v.optional(v.boolean()),
+    aiChatShowReasoning: v.optional(v.boolean()),
   }).index("by_user", ["userId"]),
   // In-app notifications
   notifications: defineTable({

@@ -1,27 +1,27 @@
-"use client"
+"use client";
 
-import { useEffect, useMemo, useState } from "react"
-import { useRouter } from "next/navigation"
-import { toast } from "sonner"
-import { useMutation } from "convex/react"
-import { api } from "@/convex/_generated/api"
-import { useViewer } from "@/components/settings/hooks/use-viewer"
-import { useAvailableModels } from "@/components/settings/hooks/use-available-models"
-import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Field, FieldDescription, FieldLabel } from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
-import { Switch } from "@/components/ui/switch"
-import { Progress } from "@/components/ui/progress"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { useViewer } from "@/components/settings/hooks/use-viewer";
+import { useAvailableModels } from "@/components/settings/hooks/use-available-models";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Progress } from "@/components/ui/progress";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Empty,
   EmptyContent,
   EmptyDescription,
   EmptyHeader,
   EmptyTitle,
-} from "@/components/ui/empty"
-import { Skeleton } from "@/components/ui/skeleton"
+} from "@/components/ui/empty";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const steps = [
   {
@@ -35,39 +35,47 @@ const steps = [
     description: "Pick the model you want Taskflow to use by default.",
   },
   {
+    key: "aiChat",
+    title: "AI Chat",
+    description: "Control what the assistant shows while it works.",
+  },
+  {
     key: "notifications",
     title: "Notifications",
     description: "Choose how you want in-app updates to appear.",
   },
-]
+];
 
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function OnboardingWizard() {
-  const router = useRouter()
-  const { displayValues, preferences, isLoading } = useViewer()
-  const { models, isLoading: isLoadingModels, isEmpty } = useAvailableModels()
+  const router = useRouter();
+  const { displayValues, preferences, isLoading } = useViewer();
+  const { models, isLoading: isLoadingModels, isEmpty } = useAvailableModels();
 
-  const updateProfile = useMutation(api.profiles.updateMyProfile)
-  const updatePreferences = useMutation(api.preferences.updateMyPreferences)
+  const updateProfile = useMutation(api.profiles.updateMyProfile);
+  const updatePreferences = useMutation(api.preferences.updateMyPreferences);
 
-  const [activeStep, setActiveStep] = useState(0)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [activeStep, setActiveStep] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [profileData, setProfileData] = useState({
     firstName: "",
     lastName: "",
     email: "",
-  })
-  const [modelQuery, setModelQuery] = useState("")
-  const [selectedModelId, setSelectedModelId] = useState("")
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true)
+  });
+  const [modelQuery, setModelQuery] = useState("");
+  const [selectedModelId, setSelectedModelId] = useState("");
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [aiChatShowActions, setAiChatShowActions] = useState(true);
+  const [aiChatShowToolDetails, setAiChatShowToolDetails] = useState(true);
+  const [aiChatShowReasoning, setAiChatShowReasoning] = useState(true);
 
-  const isCompleted = !!preferences?.onboardingCompletedAt
+  const isCompleted = !!preferences?.onboardingCompletedAt;
 
-  const displayFirstName = displayValues?.firstName || ""
-  const displayLastName = displayValues?.lastName || ""
-  const displayEmail = displayValues?.email || ""
+  const displayFirstName = displayValues?.firstName || "";
+  const displayLastName = displayValues?.lastName || "";
+  const displayEmail = displayValues?.email || "";
 
   useEffect(() => {
     if (
@@ -75,13 +83,13 @@ export function OnboardingWizard() {
       profileData.lastName === displayLastName &&
       profileData.email === displayEmail
     ) {
-      return
+      return;
     }
     setProfileData({
       firstName: displayFirstName,
       lastName: displayLastName,
       email: displayEmail,
-    })
+    });
   }, [
     displayFirstName,
     displayLastName,
@@ -89,33 +97,51 @@ export function OnboardingWizard() {
     profileData.firstName,
     profileData.lastName,
     profileData.email,
-  ])
+  ]);
 
   useEffect(() => {
     if (preferences?.defaultAIModel?.modelId && !selectedModelId) {
-      setSelectedModelId(preferences.defaultAIModel.modelId)
+      setSelectedModelId(preferences.defaultAIModel.modelId);
     }
-  }, [preferences?.defaultAIModel?.modelId, selectedModelId])
+  }, [preferences?.defaultAIModel?.modelId, selectedModelId]);
 
   useEffect(() => {
     if (preferences?.notificationsEnabled !== undefined) {
-      setNotificationsEnabled(preferences.notificationsEnabled)
+      setNotificationsEnabled(preferences.notificationsEnabled);
     }
-  }, [preferences?.notificationsEnabled])
+  }, [preferences?.notificationsEnabled]);
+
+  useEffect(() => {
+    if (preferences?.aiChatShowActions !== undefined) {
+      setAiChatShowActions(preferences.aiChatShowActions);
+    }
+  }, [preferences?.aiChatShowActions]);
+
+  useEffect(() => {
+    if (preferences?.aiChatShowToolDetails !== undefined) {
+      setAiChatShowToolDetails(preferences.aiChatShowToolDetails);
+    }
+  }, [preferences?.aiChatShowToolDetails]);
+
+  useEffect(() => {
+    if (preferences?.aiChatShowReasoning !== undefined) {
+      setAiChatShowReasoning(preferences.aiChatShowReasoning);
+    }
+  }, [preferences?.aiChatShowReasoning]);
 
   const filteredModels = useMemo(() => {
-    if (!modelQuery.trim()) return models
-    const query = modelQuery.toLowerCase()
+    if (!modelQuery.trim()) return models;
+    const query = modelQuery.toLowerCase();
     return models.filter(
       (model) =>
         model.name.toLowerCase().includes(query) ||
         model.modelId.toLowerCase().includes(query),
-    )
-  }, [modelQuery, models])
+    );
+  }, [modelQuery, models]);
 
-  const progressValue = ((activeStep + 1) / steps.length) * 100
-  const currentStep = steps[activeStep]
-  const hasModelMatches = filteredModels.length > 0
+  const progressValue = ((activeStep + 1) / steps.length) * 100;
+  const currentStep = steps[activeStep];
+  const hasModelMatches = filteredModels.length > 0;
 
   const handleProfileSubmit = async () => {
     if (
@@ -123,82 +149,99 @@ export function OnboardingWizard() {
       !profileData.lastName.trim() ||
       !profileData.email.trim()
     ) {
-      toast.error("All profile fields are required")
-      return
+      toast.error("All profile fields are required");
+      return;
     }
 
     if (!emailRegex.test(profileData.email)) {
-      toast.error("Please enter a valid email address")
-      return
+      toast.error("Please enter a valid email address");
+      return;
     }
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     try {
       await updateProfile({
         firstName: profileData.firstName.trim(),
         lastName: profileData.lastName.trim(),
         email: profileData.email.trim(),
-      })
-      setActiveStep(1)
+      });
+      setActiveStep(1);
     } catch (error) {
-      toast.error("Failed to save profile")
-      console.error(error)
+      toast.error("Failed to save profile");
+      console.error(error);
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleModelSubmit = async () => {
     if (!selectedModelId && !isEmpty) {
-      toast.error("Please select a default model")
-      return
+      toast.error("Please select a default model");
+      return;
     }
 
     if (selectedModelId) {
       const selectedModel = models.find(
         (model) => model.modelId === selectedModelId,
-      )
+      );
       if (!selectedModel) {
-        toast.error("Selected model not found")
-        return
+        toast.error("Selected model not found");
+        return;
       }
 
-      setIsSubmitting(true)
+      setIsSubmitting(true);
       try {
         await updatePreferences({
           defaultAIModel: {
             modelId: selectedModel.modelId,
             name: selectedModel.name,
           },
-        })
-        setActiveStep(2)
+        });
+        setActiveStep(2);
       } catch (error) {
-        toast.error("Failed to save default model")
-        console.error(error)
+        toast.error("Failed to save default model");
+        console.error(error);
       } finally {
-        setIsSubmitting(false)
+        setIsSubmitting(false);
       }
     } else {
-      setActiveStep(2)
+      setActiveStep(2);
     }
-  }
+  };
+
+  const handleAiChatSubmit = async () => {
+    setIsSubmitting(true);
+    try {
+      await updatePreferences({
+        aiChatShowActions,
+        aiChatShowToolDetails,
+        aiChatShowReasoning,
+      });
+      setActiveStep(3);
+    } catch (error) {
+      toast.error("Failed to save AI Chat settings");
+      console.error(error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleFinish = async () => {
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     try {
       await updatePreferences({
         notificationsEnabled,
         onboardingCompletedAt: Date.now(),
         onboardingVersion: "v1",
-      })
-      router.push("/app/tasks")
+      });
+      router.push("/app/tasks");
     } catch (error) {
-      toast.error("Failed to finish onboarding")
-      console.error(error)
+      toast.error("Failed to finish onboarding");
+      console.error(error);
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   if (isLoading) {
     return (
@@ -212,7 +255,7 @@ export function OnboardingWizard() {
           <Skeleton className="h-9 w-full" />
         </div>
       </Card>
-    )
+    );
   }
 
   if (isCompleted) {
@@ -221,14 +264,14 @@ export function OnboardingWizard() {
         <div>
           <h2 className="text-base font-medium">Onboarding complete</h2>
           <p className="text-sm text-muted-foreground">
-            You’re all set. Jump back into your workspace whenever you’re ready.
+            You're all set. Jump back into your workspace whenever you're ready.
           </p>
         </div>
         <div className="flex justify-end">
           <Button onClick={() => router.push("/app/tasks")}>Go to Tasks</Button>
         </div>
       </Card>
-    )
+    );
   }
 
   return (
@@ -245,7 +288,9 @@ export function OnboardingWizard() {
 
       <div className="space-y-2">
         <h2 className="text-base font-medium">{currentStep.title}</h2>
-        <p className="text-sm text-muted-foreground">{currentStep.description}</p>
+        <p className="text-sm text-muted-foreground">
+          {currentStep.description}
+        </p>
       </div>
 
       {currentStep.key === "profile" && (
@@ -325,7 +370,7 @@ export function OnboardingWizard() {
               <EmptyHeader>
                 <EmptyTitle>No models available yet</EmptyTitle>
                 <EmptyDescription>
-                  We’ll let you continue and you can set a model later in
+                  We'll let you continue and you can set a model later in
                   Settings.
                 </EmptyDescription>
               </EmptyHeader>
@@ -337,7 +382,7 @@ export function OnboardingWizard() {
             <ScrollArea className="h-56 rounded-lg border border-border/60">
               <div className="divide-y divide-border/60">
                 {filteredModels.map((model) => {
-                  const isSelected = model.modelId === selectedModelId
+                  const isSelected = model.modelId === selectedModelId;
                   return (
                     <button
                       key={model._id}
@@ -354,7 +399,7 @@ export function OnboardingWizard() {
                         {model.modelId}
                       </span>
                     </button>
-                  )
+                  );
                 })}
               </div>
             </ScrollArea>
@@ -373,10 +418,83 @@ export function OnboardingWizard() {
             <div className="rounded-lg border border-border/60 bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
               Selected model:{" "}
               <span className="text-foreground">
-                {models.find((model) => model.modelId === selectedModelId)?.name}
+                {
+                  models.find((model) => model.modelId === selectedModelId)
+                    ?.name
+                }
               </span>
             </div>
           )}
+        </div>
+      )}
+
+      {currentStep.key === "aiChat" && (
+        <div className="space-y-6">
+          <Field>
+            <div className="flex items-center justify-between gap-4">
+              <div className="space-y-1">
+                <FieldLabel>Show actions</FieldLabel>
+                <FieldDescription>
+                  A short timeline of what the assistant is doing.
+                </FieldDescription>
+              </div>
+              <Switch
+                checked={aiChatShowActions}
+                onCheckedChange={setAiChatShowActions}
+              />
+            </div>
+          </Field>
+
+          <Field>
+            <div className="flex items-center justify-between gap-4">
+              <div className="space-y-1">
+                <FieldLabel>Show tool details</FieldLabel>
+                <FieldDescription>
+                  Expandable results like sources and outcomes.
+                </FieldDescription>
+              </div>
+              <Switch
+                checked={aiChatShowToolDetails}
+                onCheckedChange={setAiChatShowToolDetails}
+                disabled={!aiChatShowActions}
+              />
+            </div>
+          </Field>
+
+          <Field>
+            <div className="flex items-center justify-between gap-4">
+              <div className="space-y-1">
+                <FieldLabel>Show reasoning</FieldLabel>
+                <FieldDescription>
+                  Optional thinking text (always collapsed by default).
+                </FieldDescription>
+              </div>
+              <Switch
+                checked={aiChatShowReasoning}
+                onCheckedChange={setAiChatShowReasoning}
+              />
+            </div>
+          </Field>
+
+          <div className="rounded-lg border border-border/60 bg-muted/30 p-4 text-xs text-muted-foreground space-y-2">
+            <div className="text-foreground font-medium">Review</div>
+            <div>
+              {profileData.firstName} {profileData.lastName} ·{" "}
+              {profileData.email}
+            </div>
+            <div>
+              Default model:{" "}
+              {selectedModelId
+                ? models.find((model) => model.modelId === selectedModelId)
+                    ?.name
+                : "Not set yet"}
+            </div>
+            <div>
+              Actions: {aiChatShowActions ? "Shown" : "Hidden"} · Tool details:{" "}
+              {aiChatShowActions && aiChatShowToolDetails ? "Shown" : "Hidden"}{" "}
+              · Reasoning: {aiChatShowReasoning ? "Shown" : "Hidden"}
+            </div>
+          </div>
         </div>
       )}
 
@@ -406,8 +524,14 @@ export function OnboardingWizard() {
             <div>
               Default model:{" "}
               {selectedModelId
-                ? models.find((model) => model.modelId === selectedModelId)?.name
+                ? models.find((model) => model.modelId === selectedModelId)
+                    ?.name
                 : "Not set yet"}
+            </div>
+            <div>
+              Actions: {aiChatShowActions ? "Shown" : "Hidden"} · Tool details:{" "}
+              {aiChatShowActions && aiChatShowToolDetails ? "Shown" : "Hidden"}{" "}
+              · Reasoning: {aiChatShowReasoning ? "Shown" : "Hidden"}
             </div>
             <div>
               Notifications: {notificationsEnabled ? "Enabled" : "Disabled"}
@@ -435,6 +559,11 @@ export function OnboardingWizard() {
               {isSubmitting ? "Saving..." : "Next"}
             </Button>
           )}
+          {currentStep.key === "aiChat" && (
+            <Button onClick={handleAiChatSubmit} disabled={isSubmitting}>
+              {isSubmitting ? "Saving..." : "Next"}
+            </Button>
+          )}
           {currentStep.key === "notifications" && (
             <Button onClick={handleFinish} disabled={isSubmitting}>
               {isSubmitting ? "Finishing..." : "Finish"}
@@ -443,5 +572,5 @@ export function OnboardingWizard() {
         </div>
       </div>
     </Card>
-  )
+  );
 }

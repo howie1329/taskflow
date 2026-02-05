@@ -85,6 +85,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import type { UIMessage, ToolUIPart, DynamicToolUIPart } from "ai";
 import { useChatContext } from "../components/chat-provider";
+import { useViewer } from "@/components/settings/hooks/use-viewer";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 
@@ -279,6 +280,7 @@ function ThreadPageContent() {
     availableModels,
   } = useChatContext();
   const { textInput } = usePromptInputController();
+  const { preferences } = useViewer();
 
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -575,76 +577,82 @@ function ThreadPageContent() {
                   >
                     {message.role === "assistant" ? (
                       <div className="flex flex-col gap-4">
-                        {hasToolCalls && (
-                          <>
-                            <ChainOfThought defaultOpen={false}>
-                              <ChainOfThoughtHeader>
-                                Actions ({toolCalls.length})
-                              </ChainOfThoughtHeader>
-                              <ChainOfThoughtContent>
-                                {toolCalls.map((toolCall) => {
-                                  const stateInfo = getToolStateInfo(
-                                    toolCall.state,
-                                  );
+                        {hasToolCalls &&
+                          preferences?.aiChatShowActions !== false && (
+                            <>
+                              <ChainOfThought defaultOpen={false}>
+                                <ChainOfThoughtHeader>
+                                  Actions ({toolCalls.length})
+                                </ChainOfThoughtHeader>
+                                <ChainOfThoughtContent>
+                                  {toolCalls.map((toolCall) => {
+                                    const stateInfo = getToolStateInfo(
+                                      toolCall.state,
+                                    );
+                                    const summary = getToolInputSummary(
+                                      toolCall.input,
+                                    );
+                                    const displayName =
+                                      toolCall.toolName.startsWith("tool-")
+                                        ? getToolDisplayName({
+                                            type: toolCall.toolName,
+                                            state: toolCall.state,
+                                          } as ToolUIPart)
+                                        : getToolDisplayName({
+                                            type: "dynamic-tool",
+                                            toolName: toolCall.toolName,
+                                            state: toolCall.state,
+                                          } as DynamicToolUIPart);
+                                    return (
+                                      <ChainOfThoughtStep
+                                        key={toolCall.id}
+                                        label={displayName}
+                                        description={
+                                          summary ?? stateInfo.badgeLabel
+                                        }
+                                        status={stateInfo.stepStatus}
+                                      />
+                                    );
+                                  })}
+                                </ChainOfThoughtContent>
+                              </ChainOfThought>
+                              {preferences?.aiChatShowToolDetails !== false &&
+                                toolCalls.map((toolCall) => {
                                   const isStandardTool =
                                     toolCall.toolName.startsWith("tool-");
+                                  const headerProps = isStandardTool
+                                    ? {
+                                        type: toolCall.toolName as ToolUIPart["type"],
+                                        state: toolCall.state,
+                                      }
+                                    : {
+                                        type: "dynamic-tool" as const,
+                                        state: toolCall.state,
+                                        toolName: toolCall.toolName,
+                                      };
                                   return (
                                     <Tool key={toolCall.id}>
-                                      {isStandardTool ? (
-                                        <ToolHeader
-                                          type={
-                                            toolCall.toolName as ToolUIPart["type"]
-                                          }
-                                          state={toolCall.state}
-                                        />
-                                      ) : (
-                                        <ToolHeader
-                                          type="dynamic-tool"
-                                          state={toolCall.state}
-                                          toolName={toolCall.toolName}
-                                        />
-                                      )}
+                                      <ToolHeader {...headerProps} />
                                       <ToolContent>
                                         {renderToolContent(toolCall)}
                                       </ToolContent>
                                     </Tool>
                                   );
                                 })}
-                              </ChainOfThoughtContent>
-                            </ChainOfThought>
-                            {toolCalls.map((toolCall) => {
-                              const isStandardTool =
-                                toolCall.toolName.startsWith("tool-");
-                              const headerProps = isStandardTool
-                                ? {
-                                    type: toolCall.toolName as ToolUIPart["type"],
-                                    state: toolCall.state,
-                                  }
-                                : {
-                                    type: "dynamic-tool" as const,
-                                    state: toolCall.state,
-                                    toolName: toolCall.toolName,
-                                  };
-                              return (
-                                <Tool key={toolCall.id}>
-                                  <ToolHeader {...headerProps} />
-                                  <ToolContent>
-                                    {renderToolContent(toolCall)}
-                                  </ToolContent>
-                                </Tool>
-                              );
-                            })}
-                          </>
-                        )}
-                        {hasReasoning && (
-                          <Reasoning
-                            isStreaming={status === "streaming"}
-                            defaultOpen={false}
-                          >
-                            <ReasoningTrigger />
-                            <ReasoningContent>{reasoningText}</ReasoningContent>
-                          </Reasoning>
-                        )}
+                            </>
+                          )}
+                        {hasReasoning &&
+                          preferences?.aiChatShowReasoning !== false && (
+                            <Reasoning
+                              isStreaming={status === "streaming"}
+                              defaultOpen={false}
+                            >
+                              <ReasoningTrigger />
+                              <ReasoningContent>
+                                {reasoningText}
+                              </ReasoningContent>
+                            </Reasoning>
+                          )}
                         <MessageResponse className="text-sm leading-6">
                           {renderMessageText(message)}
                         </MessageResponse>

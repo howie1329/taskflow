@@ -35,6 +35,9 @@ export const updateMyPreferences = mutation({
       v.union(v.literal("board"), v.literal("todayPlusBoard")),
     ),
     hideCompletedTasks: v.optional(v.boolean()),
+    aiChatShowActions: v.optional(v.boolean()),
+    aiChatShowToolDetails: v.optional(v.boolean()),
+    aiChatShowReasoning: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -55,6 +58,9 @@ export const updateMyPreferences = mutation({
       notificationsEnabled?: typeof args.notificationsEnabled;
       taskDefaultView?: typeof args.taskDefaultView;
       hideCompletedTasks?: typeof args.hideCompletedTasks;
+      aiChatShowActions?: typeof args.aiChatShowActions;
+      aiChatShowToolDetails?: typeof args.aiChatShowToolDetails;
+      aiChatShowReasoning?: typeof args.aiChatShowReasoning;
     } = {};
     if (args.defaultAIModel !== undefined) {
       patch.defaultAIModel = args.defaultAIModel;
@@ -74,6 +80,15 @@ export const updateMyPreferences = mutation({
     if (args.hideCompletedTasks !== undefined) {
       patch.hideCompletedTasks = args.hideCompletedTasks;
     }
+    if (args.aiChatShowActions !== undefined) {
+      patch.aiChatShowActions = args.aiChatShowActions;
+    }
+    if (args.aiChatShowToolDetails !== undefined) {
+      patch.aiChatShowToolDetails = args.aiChatShowToolDetails;
+    }
+    if (args.aiChatShowReasoning !== undefined) {
+      patch.aiChatShowReasoning = args.aiChatShowReasoning;
+    }
 
     if (existingPreferences) {
       // Update existing preferences (partial update)
@@ -84,6 +99,9 @@ export const updateMyPreferences = mutation({
         userId,
         taskDefaultView: "board",
         hideCompletedTasks: false,
+        aiChatShowActions: true,
+        aiChatShowToolDetails: true,
+        aiChatShowReasoning: true,
         ...patch,
       });
       return await ctx.db.get(preferencesId);

@@ -73,7 +73,9 @@ export const ensureViewerInitialized = mutation({
         userId,
         taskDefaultView: "board",
         hideCompletedTasks: false,
-        // defaultAIModel is optional - will be set later when models system is rebuilt
+        aiChatShowActions: true,
+        aiChatShowToolDetails: true,
+        aiChatShowReasoning: true,
       });
       preferences = await ctx.db.get(preferencesId);
     }
