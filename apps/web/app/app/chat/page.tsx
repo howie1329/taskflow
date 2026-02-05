@@ -1,8 +1,8 @@
-"use client";
+"use client"
 
-import { useRef } from "react";
-import { useRouter } from "next/navigation";
-import { Separator } from "@/components/ui/separator";
+import { useRef } from "react"
+import { useRouter } from "next/navigation"
+import { Separator } from "@/components/ui/separator"
 import {
   PromptInput,
   PromptInputProvider,
@@ -10,34 +10,38 @@ import {
   PromptInputSubmit,
   PromptInputFooter,
   usePromptInputController,
-} from "@/components/ai-elements/prompt-input";
+} from "@/components/ai-elements/prompt-input"
 import {
   Suggestions,
   Suggestion,
-} from "@/components/ai-elements/suggestion";
-import { nanoid } from "nanoid";
+} from "@/components/ai-elements/suggestion"
+import { useChatContext } from "./components/chat-provider"
 
 const SUGGESTIONS = [
   { title: "Plan my day", value: "Plan my day" },
   { title: "Break this into tasks", value: "Break this into tasks" },
   { title: "Prioritize my backlog", value: "Prioritize my backlog" },
   { title: "Create a project plan", value: "Create a project plan" },
-];
+]
 
 function ComposerWithScope() {
-  const router = useRouter();
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { textInput } = usePromptInputController();
+  const router = useRouter()
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const { textInput } = usePromptInputController()
+  const { activeThreadId, sendText, status, stop, selectedModelId } =
+    useChatContext()
 
   const handleSubmit = () => {
-    const threadId = `temp-${nanoid()}`;
-    router.push(`/app/chat/${threadId}`);
-  };
+    if (!textInput.value.trim() || !selectedModelId) return
+    router.push(`/app/chat/${activeThreadId}`)
+    void sendText(textInput.value)
+    textInput.clear()
+  }
 
   const handleSuggestionSelect = (suggestion: string) => {
-    textInput.setInput(suggestion);
-    textareaRef.current?.focus();
-  };
+    textInput.setInput(suggestion)
+    textareaRef.current?.focus()
+  }
 
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -80,13 +84,13 @@ function ComposerWithScope() {
               <span className="hidden sm:block text-xs text-muted-foreground">
                 Enter to send · Shift+Enter for new line
               </span>
-              <PromptInputSubmit />
+              <PromptInputSubmit status={status} onStop={stop} />
             </PromptInputFooter>
           </PromptInput>
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 export default function ChatPage() {
@@ -94,5 +98,5 @@ export default function ChatPage() {
     <PromptInputProvider>
       <ComposerWithScope />
     </PromptInputProvider>
-  );
+  )
 }

@@ -153,6 +153,7 @@ export const getChatBootstrap = query({
  */
 export const createThread = mutation({
     args: {
+        threadId: v.optional(v.string()),
         title: v.optional(v.string()),
         projectId: v.optional(v.id("projects")),
         model: v.optional(v.string()),
@@ -173,8 +174,20 @@ export const createThread = mutation({
         }
 
         const now = Date.now();
-        // Generate a unique threadId (using timestamp + random suffix)
-        const threadId = `thread_${now}_${Math.random().toString(36).substring(2, 9)}`;
+        const threadId =
+            args.threadId ??
+            `thread_${now}_${Math.random().toString(36).substring(2, 9)}`;
+
+        if (args.threadId) {
+            const existing = await ctx.db
+                .query("thread")
+                .withIndex("by_threadId", (q) => q.eq("threadId", args.threadId))
+                .first();
+
+            if (existing) {
+                throw new Error("Thread already exists");
+            }
+        }
 
         const threadId_db = await ctx.db.insert("thread", {
             userId,
@@ -210,6 +223,15 @@ export const appendMessage = mutation({
         const userId = await getAuthUserId(ctx);
         if (!userId) {
             throw new Error("Not authenticated");
+        }
+
+        const existingMessage = await ctx.db
+            .query("threadMessages")
+            .withIndex("by_messageId", (q) => q.eq("messageId", args.messageId))
+            .first();
+
+        if (existingMessage) {
+            return { success: true, deduped: true };
         }
 
         // Verify thread exists and belongs to user

@@ -1,126 +1,168 @@
-import { NextResponse } from "next/server";
-import { createOpenRouter } from "@openrouter/ai-sdk-provider";
+import { NextResponse } from "next/server"
+import { createOpenRouter } from "@openrouter/ai-sdk-provider"
 import {
-    stepCountIs,
-    ToolLoopAgent as Agent,
-    createUIMessageStream,
-    createUIMessageStreamResponse,
-    convertToModelMessages,
-} from "ai";
-import { ConvexHttpClient } from "convex/browser";
-import { api } from "@/convex/_generated/api";
+  stepCountIs,
+  ToolLoopAgent as Agent,
+  createUIMessageStream,
+  createUIMessageStreamResponse,
+  convertToModelMessages,
+  type UIMessage,
+} from "ai"
+import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server"
+import { fetchMutation, fetchQuery } from "convex/nextjs"
+import { api } from "@/convex/_generated/api"
 
+const getFirstUserText = (messages: UIMessage[]) => {
+  const firstUser = messages.find((message) => message.role === "user")
+  if (!firstUser) return ""
+  return firstUser.parts
+    .filter((part) => part.type === "text")
+    .map((part) => part.text)
+    .join("")
+}
+
+const getTrimmedTitle = (text: string) => {
+  const cleaned = text.replace(/\s+/g, " ").trim()
+  if (!cleaned) return "Untitled chat"
+  return cleaned.length > 60 ? `${cleaned.slice(0, 60)}...` : cleaned
+}
 
 export async function POST(req: Request) {
+  const token = await convexAuthNextjsToken()
+  if (!token) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
 
-    const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
+  const openRouter = createOpenRouter({
+    apiKey: process.env.OPENROUTER_AI_KEY,
+  })
 
-    const openRouter = createOpenRouter({
-        apiKey: process.env.OPENROUTER_AI_KEY,
-    });
+  if (!openRouter) {
+    console.error("OpenRouter not initialized")
+    return NextResponse.json(
+      { error: "OpenRouter not initialized" },
+      { status: 500 }
+    )
+  }
 
-    if (!convex || !openRouter) {
-        console.error("Convex client or openRouter not initialized");
-        return NextResponse.json({ error: "Convex client or openRouter not initialized" }, { status: 500 });
-    }
+  let model: string
+  let threadId: string
+  let messages: UIMessage[]
+  let messageId: string | undefined
 
-    let model, message, threadId, userId;
+  try {
+    const body = await req.json()
+    model = body.model
+    threadId = body.id
+    messages = body.messages
+    messageId = body.messageId
+  } catch (error) {
+    console.error("Error parsing request:", error)
+    return NextResponse.json({ error: "Invalid request" }, { status: 400 })
+  }
 
+  if (!threadId || !Array.isArray(messages) || !model) {
+    return NextResponse.json({ error: "Invalid request" }, { status: 400 })
+  }
+
+  let thread = await fetchQuery(
+    api.chat.getThread,
+    { threadId },
+    { token }
+  )
+
+  if (!thread) {
+    const title = getTrimmedTitle(getFirstUserText(messages))
     try {
-        const body = await req.json();
-        model = body.model;
-        message = body.message;
-        threadId = body.threadId;
-        userId = body.userId;
+      thread = await fetchMutation(
+        api.chat.createThread,
+        {
+          threadId,
+          title,
+          model,
+        },
+        { token }
+      )
     } catch (error) {
-        console.error("Error parsing request:", error);
-        return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+      console.error("Error creating thread:", error)
+      return NextResponse.json(
+        { error: "Error creating thread" },
+        { status: 500 }
+      )
     }
+  }
 
-    // See if the thread exisit and is not deleted
+  const lastMessage =
+    messages.find((msg) => msg.id === messageId) ?? messages[messages.length - 1]
 
-    const thread = await convex.query(api.chat.getThread, {
-        threadId
-    });
-    if (!thread) {
-        console.error("Thread not found");
-        return NextResponse.json({ error: "Thread not found" }, { status: 404 });
-    } else if (thread.deletedAt !== undefined) {
-        console.error("Thread is deleted");
-        return NextResponse.json({ error: "Thread is deleted" }, { status: 404 });
-    }
-
-    // Append users message to the thread
+  if (lastMessage?.role === "user") {
     try {
-        await convex.mutation(api.chat.appendMessage, {
+      await fetchMutation(
+        api.chat.appendMessage,
+        {
+          threadId,
+          model,
+          messageId: lastMessage.id,
+          role: "user",
+          parts: lastMessage.parts,
+        },
+        { token }
+      )
+    } catch (error) {
+      console.error("Error appending user message:", error)
+      return NextResponse.json(
+        { error: "Error appending message to thread" },
+        { status: 500 }
+      )
+    }
+  }
+
+  const modelMessages = await convertToModelMessages(messages)
+
+  const response = createUIMessageStreamResponse({
+    status: 200,
+    stream: createUIMessageStream({
+      execute: async ({ writer }) => {
+        const agent = new Agent({
+          model: openRouter(model),
+          instructions:
+            "You are a helpful assistant that can answer questions and help with tasks.",
+          stopWhen: stepCountIs(10),
+          experimental_context: {
             threadId,
-            model,
-            messageId: crypto.randomUUID(),
-            role: "user",
-            parts: [{
-                type: "text",
-                text: message
-            }]
+          },
         })
-    } catch (error) {
-        console.error("Error appending message to thread:", error);
-        return NextResponse.json({ error: "Error appending message to thread" }, { status: 500 });
-    }
 
-    // Get all messages from the thread
-    const messages = await convex.query(api.chat.listMessages, {
-        threadId
-    });
-    if (!messages || messages.length === 0) {
-        console.error("No messages found");
-        return NextResponse.json({ error: "No messages found" }, { status: 404 });
-    }
+        const stream = await agent.stream({ messages: modelMessages })
+        writer.merge(
+          stream.toUIMessageStream({
+            onFinish: async ({ messages: streamedMessages }) => {
+              if (!streamedMessages.length) {
+                console.error("No messages returned from agent")
+                return
+              }
 
-    // Transform messages to Model message format expected by agent.stream
-    // Model messages have: { role, content } where content can be string or array
-    const modelMessages = await convertToModelMessages(messages.map(msg => ({
-        role: msg.role,
-        parts: msg.content,
-    })));
-
-    const response = createUIMessageStreamResponse({
-        status: 200,
-        stream: createUIMessageStream({
-            execute: async ({ writer }) => {
-                const agent = new Agent({
-                    model: openRouter(model),
-                    instructions: "You are a helpful assistant that can answer questions and help with tasks.",
-                    stopWhen: stepCountIs(10),
-                    experimental_context: {
-                        userId,
-                        threadId,
-                    },
-                })
-
-                const stream = await agent.stream({ messages: modelMessages })
-                writer.merge(
-                    stream.toUIMessageStream({
-                        onFinish: async ({ messages }) => {
-                            if (messages.length < 0) {
-                                console.error("No messages returned from agent");
-                            }
-
-                            const agentMessage = messages[messages.length - 1]
-
-
-                            // This is where we would add the messages to the database
-                            await convex.mutation(api.chat.appendMessage, {
-                                threadId,
-                                model,
-                                messageId: crypto.randomUUID(),
-                                role: "assistant",
-                                parts: agentMessage.parts
-                            })
-                        }
-                    })
+              const agentMessage = streamedMessages[streamedMessages.length - 1]
+              try {
+                await fetchMutation(
+                  api.chat.appendMessage,
+                  {
+                    threadId,
+                    model,
+                    messageId: crypto.randomUUID(),
+                    role: "assistant",
+                    parts: agentMessage.parts,
+                  },
+                  { token }
                 )
-            }
-        })
-    })
-    return response;
+              } catch (error) {
+                console.error("Error appending assistant message:", error)
+              }
+            },
+          })
+        )
+      },
+    }),
+  })
+  return response
 }

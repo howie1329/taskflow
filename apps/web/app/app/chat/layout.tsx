@@ -1,9 +1,14 @@
-import { ChatShell } from "./components/chat-shell";
+import { ChatShell } from "./components/chat-shell"
+import { ChatProvider } from "./components/chat-provider"
 
 export default function ChatLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
-  return <ChatShell>{children}</ChatShell>;
+  return (
+    <ChatProvider>
+      <ChatShell>{children}</ChatShell>
+    </ChatProvider>
+  )
 }
