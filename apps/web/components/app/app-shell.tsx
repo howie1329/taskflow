@@ -147,7 +147,7 @@ export function AppShell({ children }: AppShellProps) {
       style={
         isChatRoute
           ? ({ "--sidebar-width": "18rem" } as React.CSSProperties)
-          : undefined
+          : ({ "--sidebar-width": "16rem" } as React.CSSProperties)
       }
     >
       <Sidebar variant="floating" collapsible="icon">
