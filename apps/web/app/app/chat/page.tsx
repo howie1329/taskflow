@@ -113,9 +113,7 @@ function ComposerWithScope() {
                   </PromptInputSelectContent>
                 </PromptInputSelect>
               )}
-              <span className="hidden sm:block text-xs text-muted-foreground">
-                Enter to send · Shift+Enter for new line
-              </span>
+
               <PromptInputSubmit status={status} onStop={stop} />
             </PromptInputFooter>
           </PromptInput>

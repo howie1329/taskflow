@@ -242,9 +242,9 @@ function ThreadPageContent() {
                     className={cn(
                       "text-sm leading-6",
                       message.role === "assistant" &&
-                        "w-full border-l border-border/50 pl-6",
+                      "w-full border-l border-border/50 pl-6",
                       message.role === "user" &&
-                        "border border-border/60 bg-muted/40 px-4 py-3 max-w-[32rem] rounded-lg",
+                      "border border-border/60 bg-muted/40 px-4 py-3 max-w-[32rem] rounded-lg",
                     )}
                   >
                     {message.role === "assistant" ? (
@@ -330,9 +330,7 @@ function ThreadPageContent() {
               </PromptInputSelect>
             )}
             <PromptInputTools>
-              <span className="hidden sm:block text-xs text-muted-foreground">
-                Press Enter to send, Shift+Enter for new line
-              </span>
+
             </PromptInputTools>
             <PromptInputSubmit status={status} onStop={stop} />
           </PromptInputFooter>
