@@ -9,6 +9,7 @@ import {
   Moon02Icon,
   SearchIcon,
   Cancel01Icon,
+  PlusSignIcon,
 } from "@hugeicons/core-free-icons";
 import {
   AlertDialog,
@@ -42,6 +43,8 @@ import {
   type ChatThread,
 } from "@/app/app/chat/components/mock-data";
 import { useTheme } from "next-themes";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 interface ChatSidebarProps {
   onBackToWorkspace?: () => void;
@@ -138,39 +141,58 @@ export function ChatSidebar({ onBackToWorkspace }: ChatSidebarProps) {
         </SidebarHeader>
 
         <SidebarContent className="px-2">
-          <InputGroup className="w-full">
-            <InputGroupAddon>
-              <HugeiconsIcon
-                icon={SearchIcon}
-                className="size-3.5"
-                strokeWidth={2}
-              />
-            </InputGroupAddon>
-            <InputGroupInput
-              placeholder="Search threads..."
-              value={searchQuery}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setSearchQuery(e.target.value)
-              }
-              className="h-7 text-xs"
-            />
-            {searchQuery && (
+          <div className="space-y-2">
+            <Link href="/app/chat">
+              <Button
+                className={cn(
+                  "w-full h-7 rounded-md px-2 text-xs",
+                  isNewChat && "bg-accent text-accent-foreground",
+                )}
+                variant={isNewChat ? "secondary" : "default"}
+              >
+                <HugeiconsIcon
+                  icon={PlusSignIcon}
+                  className="size-3 mr-1"
+                  strokeWidth={2}
+                />
+                New
+              </Button>
+            </Link>
+
+            <InputGroup className="w-full">
               <InputGroupAddon>
-                <Button
-                  variant="ghost"
-                  size="icon-xs"
-                  onClick={() => setSearchQuery("")}
-                  className="h-5 w-5"
-                >
-                  <HugeiconsIcon
-                    icon={Cancel01Icon}
-                    className="size-3"
-                    strokeWidth={2}
-                  />
-                </Button>
+                <HugeiconsIcon
+                  icon={SearchIcon}
+                  className="size-3.5"
+                  strokeWidth={2}
+                />
               </InputGroupAddon>
-            )}
-          </InputGroup>
+              <InputGroupInput
+                placeholder="Search threads..."
+                value={searchQuery}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setSearchQuery(e.target.value)
+                }
+                className="h-7 text-xs"
+              />
+              {searchQuery && (
+                <InputGroupAddon>
+                  <Button
+                    variant="ghost"
+                    size="icon-xs"
+                    onClick={() => setSearchQuery("")}
+                    className="h-5 w-5"
+                  >
+                    <HugeiconsIcon
+                      icon={Cancel01Icon}
+                      className="size-3"
+                      strokeWidth={2}
+                    />
+                  </Button>
+                </InputGroupAddon>
+              )}
+            </InputGroup>
+          </div>
         </SidebarContent>
 
         <SidebarFooter>

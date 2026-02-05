@@ -180,7 +180,7 @@ export default function ThreadPage() {
 
         {/* Conversation */}
         <Conversation className="flex-1">
-          <ConversationContent className="mx-auto w-full max-w-4xl px-3 py-6 gap-4">
+          <ConversationContent className="mx-auto w-full max-w-6xl px-3 py-6 gap-4">
             {messages.length === 0 ? (
               <ConversationEmptyState
                 title="Start a new conversation"
@@ -200,7 +200,7 @@ export default function ThreadPage() {
                     className={cn(
                       "text-sm leading-6",
                       message.role === "assistant" &&
-                      "w-full border-l border-border/50 pl-5",
+                      "w-full border-l border-border/50 pl-6",
                       message.role === "user" &&
                       "border border-border/60 bg-muted/40 px-4 py-3 max-w-[32rem] rounded-lg",
                     )}
