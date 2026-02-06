@@ -417,3 +417,6 @@ export const taskflowTools = {
     },
   }),
 } as const
+
+
+export const taskflowToolsKeys = Object.keys(taskflowTools)

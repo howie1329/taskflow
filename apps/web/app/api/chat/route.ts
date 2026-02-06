@@ -12,7 +12,7 @@ import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server";
 import { fetchMutation, fetchQuery } from "convex/nextjs";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import { Tools } from "@/lib/AITools/Tools";
+import { Tools } from "@/lib/AITools/index";
 import { buildSystemPrompt, type ProjectContext } from "@/lib/ai_context";
 
 const getFirstUserText = (messages: UIMessage[]) => {

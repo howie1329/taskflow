@@ -2,7 +2,7 @@ import { tool } from "ai";
 import { z } from "zod";
 import { tavily } from "@tavily/core";
 
-// ... existing imports ...
+// Used to search the web and provide information
 
 const tavilyResultItemSchema = z.object({
     title: z.string(),
