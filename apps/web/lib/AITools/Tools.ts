@@ -1,5 +1,7 @@
-import { TavilyWebSearch } from "./Tavily";
+import { TavilyWebSearch } from "./Tavily"
+import { taskflowTools } from "./Taskflow"
 
 export const Tools = {
-    webSearch: TavilyWebSearch,
-} as const;
+  webSearch: TavilyWebSearch,
+  ...taskflowTools,
+} as const

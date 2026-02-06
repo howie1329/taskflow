@@ -52,6 +52,25 @@ export const listMyInboxItems = query({
   },
 });
 
+export const getMyInboxItem = query({
+  args: {
+    inboxItemId: v.id("inboxItems"),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      return null;
+    }
+
+    const item = await ctx.db.get(args.inboxItemId);
+    if (!item || item.userId !== userId) {
+      return null;
+    }
+
+    return item;
+  },
+});
+
 export const createInboxItem = mutation({
   args: {
     content: v.string(),
@@ -80,6 +99,47 @@ export const createInboxItem = mutation({
     });
 
     return await ctx.db.get(inboxItemId);
+  },
+});
+
+export const updateInboxItem = mutation({
+  args: {
+    inboxItemId: v.id("inboxItems"),
+    content: v.optional(v.string()),
+    status: v.optional(inboxStatus),
+    labels: v.optional(v.union(v.array(v.string()), v.null())),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+
+    await getInboxItemForUser(ctx, userId, args.inboxItemId);
+
+    const now = Date.now();
+    const patch: Partial<Doc<"inboxItems">> = {
+      updatedAt: now,
+    };
+
+    if (args.content !== undefined) {
+      const trimmed = args.content.trim();
+      if (!trimmed) {
+        throw new Error("Content cannot be empty");
+      }
+      patch.content = trimmed;
+    }
+
+    if (args.status !== undefined) {
+      patch.status = args.status;
+    }
+
+    if (args.labels !== undefined) {
+      patch.labels = args.labels === null ? undefined : args.labels;
+    }
+
+    await ctx.db.patch(args.inboxItemId, patch);
+    return await ctx.db.get(args.inboxItemId);
   },
 });
 

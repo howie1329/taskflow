@@ -50,6 +50,7 @@ export async function POST(req: Request) {
   let threadId: string
   let messages: UIMessage[]
   let messageId: string | undefined
+  let userId: string | undefined
 
   try {
     const body = await req.json()
@@ -57,12 +58,18 @@ export async function POST(req: Request) {
     threadId = body.id
     messages = body.messages
     messageId = body.messageId
+    userId = body.userId
   } catch (error) {
     console.error("Error parsing request:", error)
     return NextResponse.json({ error: "Invalid request" }, { status: 400 })
   }
 
-  if (!threadId || !Array.isArray(messages) || !model) {
+  if (
+    !threadId ||
+    !Array.isArray(messages) ||
+    !model ||
+    typeof userId !== "string"
+  ) {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 })
   }
 
@@ -133,10 +140,12 @@ export async function POST(req: Request) {
             }
           }),
           instructions:
-            "You are a helpful assistant that can answer questions and help with tasks.",
+            "You are a helpful assistant that can answer questions and help manage tasks, projects, and inbox items.",
           stopWhen: stepCountIs(10),
           experimental_context: {
             threadId,
+            userId,
+            token,
           },
           tools: Tools,
         })

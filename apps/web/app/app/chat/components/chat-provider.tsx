@@ -15,6 +15,7 @@ import { nanoid } from "nanoid";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Doc } from "@/convex/_generated/dataModel";
+import { useViewer } from "@/components/settings/hooks/use-viewer";
 
 type ChatContextValue = {
   activeThreadId: string;
@@ -58,6 +59,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   const { messages, setMessages, sendMessage, status, error, stop } = useChat({
     id: activeThreadId,
   });
+  const { userId } = useViewer();
 
   const thread = useQuery(api.chat.getThread, { threadId: activeThreadId });
   const project = useQuery(
@@ -132,8 +134,11 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
 
   const sendText = async (text: string) => {
     const trimmed = text.trim();
-    if (!trimmed || !selectedModelId) return;
-    await sendMessage({ text: trimmed }, { body: { model: selectedModelId } });
+    if (!trimmed || !selectedModelId || !userId) return;
+    await sendMessage(
+      { text: trimmed },
+      { body: { model: selectedModelId, userId } },
+    );
   };
 
   const value = useMemo<ChatContextValue>(
