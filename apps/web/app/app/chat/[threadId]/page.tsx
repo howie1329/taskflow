@@ -802,7 +802,7 @@ function ThreadPageContent() {
                             " " +
                             projects.find((p) => p._id === selectedProjectId)
                               ?.title || "Select project"
-                        : "Project"}
+                        : "No project"}
                     </span>
                   </ProjectSelectorTrigger>
                   <ProjectSelectorContent>

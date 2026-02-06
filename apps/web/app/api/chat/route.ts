@@ -62,7 +62,7 @@ export async function POST(req: Request) {
     messages = body.messages;
     messageId = body.messageId;
     userId = body.userId;
-    projectId = body.projectId;
+    projectId = body.projectId || undefined;
   } catch (error) {
     console.error("Error parsing request:", error);
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
