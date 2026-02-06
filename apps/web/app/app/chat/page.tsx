@@ -9,11 +9,6 @@ import {
   PromptInputTextarea,
   PromptInputSubmit,
   PromptInputFooter,
-  PromptInputSelect,
-  PromptInputSelectContent,
-  PromptInputSelectItem,
-  PromptInputSelectTrigger,
-  PromptInputSelectValue,
   usePromptInputController,
 } from "@/components/ai-elements/prompt-input";
 import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion";
@@ -26,6 +21,16 @@ import {
   ProjectSelectorGroup,
   ProjectSelectorEmpty,
 } from "@/components/ai-elements/project-selector";
+import {
+  ModelSelector,
+  ModelSelectorTrigger,
+  ModelSelectorContent,
+  ModelSelectorInput,
+  ModelSelectorList,
+  ModelSelectorItem,
+  ModelSelectorGroup,
+  ModelSelectorName,
+} from "@/components/ai-elements/model-selector";
 import { useChatContext } from "./components/chat-provider";
 
 const SUGGESTIONS = [
@@ -102,66 +107,77 @@ function ComposerWithScope() {
             />
 
             <PromptInputFooter>
-              {projects.length > 0 && (
-                <ProjectSelector>
-                  <ProjectSelectorTrigger className="h-7 text-[11px] px-2 flex items-center gap-1">
-                    <span className="truncate max-w-[150px]">
-                      {selectedProjectId
-                        ? projects.find((p) => p._id === selectedProjectId)
-                            ?.icon +
-                            " " +
-                            projects.find((p) => p._id === selectedProjectId)
-                              ?.title || "Select project"
-                        : "Project"}
-                    </span>
-                  </ProjectSelectorTrigger>
-                  <ProjectSelectorContent>
-                    <ProjectSelectorList>
-                      <ProjectSelectorEmpty>
-                        No projects found
-                      </ProjectSelectorEmpty>
-                      <ProjectSelectorGroup heading="Your Projects">
-                        <ProjectSelectorItem
-                          value="none"
-                          onSelect={() => setSelectedProjectId(null)}
-                        >
-                          No project
-                        </ProjectSelectorItem>
-                        {projects.map((project) => (
+              <div className="flex items-center gap-2">
+                {availableModels.length > 0 && (
+                  <ModelSelector>
+                    <ModelSelectorTrigger className="h-7 text-[11px] px-2">
+                      <ModelSelectorName>
+                        {availableModels.find(
+                          (m) => m.modelId === selectedModelId,
+                        )?.name ?? "Select model"}
+                      </ModelSelectorName>
+                    </ModelSelectorTrigger>
+                    <ModelSelectorContent>
+                      <ModelSelectorInput placeholder="Search models..." />
+                      <ModelSelectorList>
+                        <ModelSelectorGroup heading="Available Models">
+                          {availableModels.map((model) => (
+                            <ModelSelectorItem
+                              key={model.modelId}
+                              value={model.modelId}
+                              onSelect={() => setSelectedModelId(model.modelId)}
+                            >
+                              <ModelSelectorName>
+                                {model.name}
+                              </ModelSelectorName>
+                            </ModelSelectorItem>
+                          ))}
+                        </ModelSelectorGroup>
+                      </ModelSelectorList>
+                    </ModelSelectorContent>
+                  </ModelSelector>
+                )}
+                {projects.length > 0 && (
+                  <ProjectSelector>
+                    <ProjectSelectorTrigger className="h-7 text-[11px] px-2 flex items-center gap-1">
+                      <span className="truncate max-w-[150px]">
+                        {selectedProjectId
+                          ? projects.find((p) => p._id === selectedProjectId)
+                              ?.icon +
+                              " " +
+                              projects.find((p) => p._id === selectedProjectId)
+                                ?.title || "Select project"
+                          : "Project"}
+                      </span>
+                    </ProjectSelectorTrigger>
+                    <ProjectSelectorContent>
+                      <ProjectSelectorList>
+                        <ProjectSelectorEmpty>
+                          No projects found
+                        </ProjectSelectorEmpty>
+                        <ProjectSelectorGroup heading="Your Projects">
                           <ProjectSelectorItem
-                            key={project._id}
-                            value={project._id}
-                            onSelect={() => setSelectedProjectId(project._id)}
+                            value="none"
+                            onSelect={() => setSelectedProjectId(null)}
                           >
-                            <span className="mr-2">{project.icon}</span>
-                            {project.title}
+                            No project
                           </ProjectSelectorItem>
-                        ))}
-                      </ProjectSelectorGroup>
-                    </ProjectSelectorList>
-                  </ProjectSelectorContent>
-                </ProjectSelector>
-              )}
-              {availableModels.length > 0 && (
-                <PromptInputSelect
-                  value={selectedModelId ?? undefined}
-                  onValueChange={setSelectedModelId}
-                >
-                  <PromptInputSelectTrigger className="h-7 text-[11px] px-2">
-                    <PromptInputSelectValue placeholder="Select model" />
-                  </PromptInputSelectTrigger>
-                  <PromptInputSelectContent>
-                    {availableModels.map((model) => (
-                      <PromptInputSelectItem
-                        key={model.modelId}
-                        value={model.modelId}
-                      >
-                        {model.name}
-                      </PromptInputSelectItem>
-                    ))}
-                  </PromptInputSelectContent>
-                </PromptInputSelect>
-              )}
+                          {projects.map((project) => (
+                            <ProjectSelectorItem
+                              key={project._id}
+                              value={project._id}
+                              onSelect={() => setSelectedProjectId(project._id)}
+                            >
+                              <span className="mr-2">{project.icon}</span>
+                              {project.title}
+                            </ProjectSelectorItem>
+                          ))}
+                        </ProjectSelectorGroup>
+                      </ProjectSelectorList>
+                    </ProjectSelectorContent>
+                  </ProjectSelector>
+                )}
+              </div>
 
               <PromptInputSubmit status={status} onStop={stop} />
             </PromptInputFooter>
