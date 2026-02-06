@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { useRef } from "react"
-import { useRouter } from "next/navigation"
-import { Separator } from "@/components/ui/separator"
+import { useRef } from "react";
+import { useRouter } from "next/navigation";
+import { Separator } from "@/components/ui/separator";
 import {
   PromptInput,
   PromptInputProvider,
@@ -15,24 +15,30 @@ import {
   PromptInputSelectTrigger,
   PromptInputSelectValue,
   usePromptInputController,
-} from "@/components/ai-elements/prompt-input"
+} from "@/components/ai-elements/prompt-input";
+import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion";
 import {
-  Suggestions,
-  Suggestion,
-} from "@/components/ai-elements/suggestion"
-import { useChatContext } from "./components/chat-provider"
+  ProjectSelector,
+  ProjectSelectorTrigger,
+  ProjectSelectorContent,
+  ProjectSelectorList,
+  ProjectSelectorItem,
+  ProjectSelectorGroup,
+  ProjectSelectorEmpty,
+} from "@/components/ai-elements/project-selector";
+import { useChatContext } from "./components/chat-provider";
 
 const SUGGESTIONS = [
   { title: "Plan my day", value: "Plan my day" },
   { title: "Break this into tasks", value: "Break this into tasks" },
   { title: "Prioritize my backlog", value: "Prioritize my backlog" },
   { title: "Create a project plan", value: "Create a project plan" },
-]
+];
 
 function ComposerWithScope() {
-  const router = useRouter()
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const { textInput } = usePromptInputController()
+  const router = useRouter();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const { textInput } = usePromptInputController();
   const {
     activeThreadId,
     sendText,
@@ -40,20 +46,23 @@ function ComposerWithScope() {
     stop,
     selectedModelId,
     setSelectedModelId,
+    selectedProjectId,
+    setSelectedProjectId,
+    projects,
     availableModels,
-  } = useChatContext()
+  } = useChatContext();
 
   const handleSubmit = () => {
-    if (!textInput.value.trim() || !selectedModelId) return
-    router.push(`/app/chat/${activeThreadId}`)
-    void sendText(textInput.value)
-    textInput.clear()
-  }
+    if (!textInput.value.trim() || !selectedModelId) return;
+    router.push(`/app/chat/${activeThreadId}`);
+    void sendText(textInput.value);
+    textInput.clear();
+  };
 
   const handleSuggestionSelect = (suggestion: string) => {
-    textInput.setInput(suggestion)
-    textareaRef.current?.focus()
-  }
+    textInput.setInput(suggestion);
+    textareaRef.current?.focus();
+  };
 
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -93,6 +102,46 @@ function ComposerWithScope() {
             />
 
             <PromptInputFooter>
+              {projects.length > 0 && (
+                <ProjectSelector>
+                  <ProjectSelectorTrigger className="h-7 text-[11px] px-2 flex items-center gap-1">
+                    <span className="truncate max-w-[150px]">
+                      {selectedProjectId
+                        ? projects.find((p) => p._id === selectedProjectId)
+                            ?.icon +
+                            " " +
+                            projects.find((p) => p._id === selectedProjectId)
+                              ?.title || "Select project"
+                        : "Project"}
+                    </span>
+                  </ProjectSelectorTrigger>
+                  <ProjectSelectorContent>
+                    <ProjectSelectorList>
+                      <ProjectSelectorEmpty>
+                        No projects found
+                      </ProjectSelectorEmpty>
+                      <ProjectSelectorGroup heading="Your Projects">
+                        <ProjectSelectorItem
+                          value="none"
+                          onSelect={() => setSelectedProjectId(null)}
+                        >
+                          No project
+                        </ProjectSelectorItem>
+                        {projects.map((project) => (
+                          <ProjectSelectorItem
+                            key={project._id}
+                            value={project._id}
+                            onSelect={() => setSelectedProjectId(project._id)}
+                          >
+                            <span className="mr-2">{project.icon}</span>
+                            {project.title}
+                          </ProjectSelectorItem>
+                        ))}
+                      </ProjectSelectorGroup>
+                    </ProjectSelectorList>
+                  </ProjectSelectorContent>
+                </ProjectSelector>
+              )}
               {availableModels.length > 0 && (
                 <PromptInputSelect
                   value={selectedModelId ?? undefined}
@@ -120,7 +169,7 @@ function ComposerWithScope() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export default function ChatPage() {
@@ -128,5 +177,5 @@ export default function ChatPage() {
     <PromptInputProvider>
       <ComposerWithScope />
     </PromptInputProvider>
-  )
+  );
 }

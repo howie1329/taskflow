@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server"
-import { createOpenRouter } from "@openrouter/ai-sdk-provider"
+import { NextResponse } from "next/server";
+import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import {
   stepCountIs,
   ToolLoopAgent as Agent,
@@ -7,61 +7,65 @@ import {
   createUIMessageStreamResponse,
   convertToModelMessages,
   type UIMessage,
-} from "ai"
-import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server"
-import { fetchMutation, fetchQuery } from "convex/nextjs"
-import { api } from "@/convex/_generated/api"
-import { Tools } from "@/lib/AITools/Tools"
+} from "ai";
+import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server";
+import { fetchMutation, fetchQuery } from "convex/nextjs";
+import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
+import { Tools } from "@/lib/AITools/Tools";
+import { buildSystemPrompt, type ProjectContext } from "@/lib/ai_context";
 
 const getFirstUserText = (messages: UIMessage[]) => {
-  const firstUser = messages.find((message) => message.role === "user")
-  if (!firstUser) return ""
+  const firstUser = messages.find((message) => message.role === "user");
+  if (!firstUser) return "";
   return firstUser.parts
     .filter((part) => part.type === "text")
     .map((part) => part.text)
-    .join("")
-}
+    .join("");
+};
 
 const getTrimmedTitle = (text: string) => {
-  const cleaned = text.replace(/\s+/g, " ").trim()
-  if (!cleaned) return "Untitled chat"
-  return cleaned.length > 60 ? `${cleaned.slice(0, 60)}...` : cleaned
-}
+  const cleaned = text.replace(/\s+/g, " ").trim();
+  if (!cleaned) return "Untitled chat";
+  return cleaned.length > 60 ? `${cleaned.slice(0, 60)}...` : cleaned;
+};
 
 export async function POST(req: Request) {
-  const token = await convexAuthNextjsToken()
+  const token = await convexAuthNextjsToken();
   if (!token) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const openRouter = createOpenRouter({
     apiKey: process.env.OPENROUTER_AI_KEY,
-  })
+  });
 
   if (!openRouter) {
-    console.error("OpenRouter not initialized")
+    console.error("OpenRouter not initialized");
     return NextResponse.json(
       { error: "OpenRouter not initialized" },
-      { status: 500 }
-    )
+      { status: 500 },
+    );
   }
 
-  let model: string
-  let threadId: string
-  let messages: UIMessage[]
-  let messageId: string | undefined
-  let userId: string | undefined
+  let model: string;
+  let threadId: string;
+  let messages: UIMessage[];
+  let messageId: string | undefined;
+  let userId: string | undefined;
+  let projectId: Id<"projects"> | undefined;
 
   try {
-    const body = await req.json()
-    model = body.model
-    threadId = body.id
-    messages = body.messages
-    messageId = body.messageId
-    userId = body.userId
+    const body = await req.json();
+    model = body.model;
+    threadId = body.id;
+    messages = body.messages;
+    messageId = body.messageId;
+    userId = body.userId;
+    projectId = body.projectId;
   } catch (error) {
-    console.error("Error parsing request:", error)
-    return NextResponse.json({ error: "Invalid request" }, { status: 400 })
+    console.error("Error parsing request:", error);
+    return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
 
   if (
@@ -70,17 +74,13 @@ export async function POST(req: Request) {
     !model ||
     typeof userId !== "string"
   ) {
-    return NextResponse.json({ error: "Invalid request" }, { status: 400 })
+    return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
 
-  let thread = await fetchQuery(
-    api.chat.getThread,
-    { threadId },
-    { token }
-  )
+  let thread = await fetchQuery(api.chat.getThread, { threadId }, { token });
 
   if (!thread) {
-    const title = getTrimmedTitle(getFirstUserText(messages))
+    const title = getTrimmedTitle(getFirstUserText(messages));
     try {
       thread = await fetchMutation(
         api.chat.createThread,
@@ -88,20 +88,23 @@ export async function POST(req: Request) {
           threadId,
           title,
           model,
+          projectId,
+          scope: projectId ? "project" : "workspace",
         },
-        { token }
-      )
+        { token },
+      );
     } catch (error) {
-      console.error("Error creating thread:", error)
+      console.error("Error creating thread:", error);
       return NextResponse.json(
         { error: "Error creating thread" },
-        { status: 500 }
-      )
+        { status: 500 },
+      );
     }
   }
 
   const lastMessage =
-    messages.find((msg) => msg.id === messageId) ?? messages[messages.length - 1]
+    messages.find((msg) => msg.id === messageId) ??
+    messages[messages.length - 1];
 
   if (lastMessage?.role === "user") {
     try {
@@ -114,18 +117,35 @@ export async function POST(req: Request) {
           role: "user",
           parts: lastMessage.parts,
         },
-        { token }
-      )
+        { token },
+      );
     } catch (error) {
-      console.error("Error appending user message:", error)
+      console.error("Error appending user message:", error);
       return NextResponse.json(
         { error: "Error appending message to thread" },
-        { status: 500 }
-      )
+        { status: 500 },
+      );
     }
   }
 
-  const modelMessages = await convertToModelMessages(messages)
+  const modelMessages = await convertToModelMessages(messages);
+
+  // Fetch project context if projectId is provided
+  let projectContext: ProjectContext | null = null;
+  if (projectId) {
+    try {
+      projectContext = await fetchQuery(
+        api.projects.getProjectContext,
+        { projectId },
+        { token },
+      );
+    } catch (error) {
+      console.error("Error fetching project context:", error);
+    }
+  }
+
+  // Build system instructions with project context
+  const instructions = buildSystemPrompt(projectContext ?? undefined);
 
   const response = createUIMessageStreamResponse({
     status: 200,
@@ -137,10 +157,9 @@ export async function POST(req: Request) {
             parallelToolCalls: true,
             usage: {
               include: true,
-            }
+            },
           }),
-          instructions:
-            "You are a helpful assistant that can answer questions and help manage tasks, projects, and inbox items.",
+          instructions,
           stopWhen: stepCountIs(10),
           experimental_context: {
             threadId,
@@ -148,18 +167,19 @@ export async function POST(req: Request) {
             token,
           },
           tools: Tools,
-        })
+        });
 
-        const stream = await agent.stream({ messages: modelMessages })
+        const stream = await agent.stream({ messages: modelMessages });
         writer.merge(
           stream.toUIMessageStream({
             onFinish: async ({ messages: streamedMessages }) => {
               if (!streamedMessages.length) {
-                console.error("No messages returned from agent")
-                return
+                console.error("No messages returned from agent");
+                return;
               }
 
-              const agentMessage = streamedMessages[streamedMessages.length - 1]
+              const agentMessage =
+                streamedMessages[streamedMessages.length - 1];
               try {
                 await fetchMutation(
                   api.chat.appendMessage,
@@ -170,16 +190,16 @@ export async function POST(req: Request) {
                     role: "assistant",
                     parts: agentMessage.parts,
                   },
-                  { token }
-                )
+                  { token },
+                );
               } catch (error) {
-                console.error("Error appending assistant message:", error)
+                console.error("Error appending assistant message:", error);
               }
             },
-          })
-        )
+          }),
+        );
       },
     }),
-  })
-  return response
+  });
+  return response;
 }

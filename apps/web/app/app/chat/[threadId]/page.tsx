@@ -37,6 +37,15 @@ import {
   usePromptInputController,
 } from "@/components/ai-elements/prompt-input";
 import {
+  ProjectSelector,
+  ProjectSelectorTrigger,
+  ProjectSelectorContent,
+  ProjectSelectorList,
+  ProjectSelectorItem,
+  ProjectSelectorGroup,
+  ProjectSelectorEmpty,
+} from "@/components/ai-elements/project-selector";
+import {
   Conversation,
   ConversationContent,
   ConversationEmptyState,
@@ -336,6 +345,9 @@ function ThreadPageContent() {
     project,
     selectedModelId,
     setSelectedModelId,
+    selectedProjectId,
+    setSelectedProjectId,
+    projects,
     availableModels,
   } = useChatContext();
   const { textInput } = usePromptInputController();
@@ -347,6 +359,7 @@ function ThreadPageContent() {
 
   const updateThreadTitle = useMutation(api.chat.updateThreadTitle);
   const softDeleteThread = useMutation(api.chat.softDeleteThread);
+  const setThreadScope = useMutation(api.chat.setThreadScope);
 
   const shouldShowNotFound =
     thread === null && messages.length === 0 && status === "ready";
@@ -746,6 +759,63 @@ function ThreadPageContent() {
           />
 
           <PromptInputFooter>
+            {projects.length > 0 && (
+              <ProjectSelector>
+                <ProjectSelectorTrigger className="h-7 text-[11px] px-2 flex items-center gap-1">
+                  <span className="truncate max-w-[150px]">
+                    {selectedProjectId
+                      ? projects.find((p) => p._id === selectedProjectId)
+                          ?.icon +
+                          " " +
+                          projects.find((p) => p._id === selectedProjectId)
+                            ?.title || "Select project"
+                      : "Project"}
+                  </span>
+                </ProjectSelectorTrigger>
+                <ProjectSelectorContent>
+                  <ProjectSelectorList>
+                    <ProjectSelectorEmpty>
+                      No projects found
+                    </ProjectSelectorEmpty>
+                    <ProjectSelectorGroup heading="Your Projects">
+                      <ProjectSelectorItem
+                        value="none"
+                        onSelect={() => {
+                          setSelectedProjectId(null);
+                          if (thread) {
+                            void setThreadScope({
+                              threadId: thread.threadId,
+                              scope: "workspace",
+                            });
+                          }
+                        }}
+                      >
+                        No project
+                      </ProjectSelectorItem>
+                      {projects.map((project) => (
+                        <ProjectSelectorItem
+                          key={project._id}
+                          value={project._id}
+                          onSelect={() => {
+                            setSelectedProjectId(project._id);
+                            if (thread) {
+                              void setThreadScope({
+                                threadId: thread.threadId,
+                                scope: "project",
+                                projectId: project._id,
+                              });
+                            }
+                          }}
+                        >
+                          <span className="mr-2">{project.icon}</span>
+                          {project.title}
+                        </ProjectSelectorItem>
+                      ))}
+                    </ProjectSelectorGroup>
+                  </ProjectSelectorList>
+                </ProjectSelectorContent>
+              </ProjectSelector>
+            )}
             {availableModels.length > 0 && (
               <PromptInputSelect
                 value={selectedModelId ?? undefined}

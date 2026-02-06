@@ -27,7 +27,10 @@ type ChatContextValue = {
   stop: () => Promise<void>;
   selectedModelId: string | null;
   setSelectedModelId: (value: string | null) => void;
+  selectedProjectId: string | null;
+  setSelectedProjectId: (value: string | null) => void;
   availableModels: Doc<"availableModels">[];
+  projects: Doc<"projects">[];
   thread: Doc<"thread"> | null | undefined;
   project: Doc<"projects"> | null | undefined;
 };
@@ -66,6 +69,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     api.projects.getMyProject,
     thread?.projectId ? { projectId: thread.projectId } : "skip",
   );
+  const projects = useQuery(api.projects.listMyProjects, { status: "active" });
   const threadMessages = useQuery(api.chat.listMessages, {
     threadId: activeThreadId,
   });
@@ -87,6 +91,9 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   ]);
 
   const [selectedModelId, setSelectedModelId] = useState<string | null>(null);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
+    null,
+  );
   const hasUserSelectedModel = useRef(false);
   const previousThreadId = useRef(activeThreadId);
 
@@ -137,7 +144,9 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     if (!trimmed || !selectedModelId || !userId) return;
     await sendMessage(
       { text: trimmed },
-      { body: { model: selectedModelId, userId } },
+      {
+        body: { model: selectedModelId, userId, projectId: selectedProjectId },
+      },
     );
   };
 
@@ -152,7 +161,10 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       stop,
       selectedModelId,
       setSelectedModelId: handleSetSelectedModelId,
+      selectedProjectId,
+      setSelectedProjectId,
       availableModels,
+      projects: projects ?? [],
       thread,
       project,
     }),
@@ -165,7 +177,9 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       sendText,
       stop,
       selectedModelId,
+      selectedProjectId,
       availableModels,
+      projects,
       thread,
       project,
     ],

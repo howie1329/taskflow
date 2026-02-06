@@ -182,6 +182,61 @@ export const unarchiveProject = mutation({
   },
 });
 
+// Get project context including tasks and notes
+export const getProjectContext = query({
+  args: {
+    projectId: v.id("projects"),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      return null;
+    }
+
+    const project = await ctx.db.get(args.projectId);
+    if (!project || project.userId !== userId) {
+      return null;
+    }
+
+    // Get tasks for this project
+    const tasks = await ctx.db
+      .query("tasks")
+      .withIndex("by_user_project", (q) =>
+        q.eq("userId", userId).eq("projectId", args.projectId),
+      )
+      .collect();
+
+    // Get notes for this project
+    const notes = await ctx.db
+      .query("notes")
+      .withIndex("by_user_project", (q) =>
+        q.eq("userId", userId).eq("projectId", args.projectId),
+      )
+      .collect();
+
+    return {
+      project: {
+        id: project._id,
+        title: project.title,
+        description: project.description,
+        icon: project.icon,
+      },
+      tasks: tasks.map((task) => ({
+        id: task._id,
+        title: task.title,
+        status: task.status,
+        priority: task.priority,
+        dueDate: task.dueDate,
+      })),
+      notes: notes.map((note) => ({
+        id: note._id,
+        title: note.title,
+        content: note.contentText,
+      })),
+    };
+  },
+});
+
 // Delete a project (with ownership check)
 // Note: This will orphan tasks that reference this project
 export const deleteProject = mutation({
