@@ -1,10 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  ScrollArea,
-  ScrollBar,
-} from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import type { ComponentProps } from "react";
 
@@ -43,7 +40,11 @@ export const Suggestion = ({
 
   return (
     <Button
-      className={cn("cursor-pointer rounded-full px-4", className)}
+      className={cn(
+        "cursor-pointer rounded-full px-4 transition-all duration-150",
+        "hover:scale-[1.02] active:scale-[0.98]",
+        className,
+      )}
       onClick={handleClick}
       size={size}
       type="button"

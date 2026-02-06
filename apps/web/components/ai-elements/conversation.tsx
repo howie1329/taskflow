@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ArrowDownIcon } from "lucide-react";
+import { motion } from "framer-motion";
 import type { ComponentProps } from "react";
 import { useCallback } from "react";
 import { StickToBottom, useStickToBottomContext } from "use-stick-to-bottom";
@@ -50,7 +51,7 @@ export const ConversationEmptyState = ({
   <div
     className={cn(
       "flex size-full flex-col items-center justify-center gap-3 p-8 text-center",
-      className
+      className,
     )}
     {...props}
   >
@@ -82,19 +83,27 @@ export const ConversationScrollButton = ({
 
   return (
     !isAtBottom && (
-      <Button
-        className={cn(
-          "absolute bottom-4 left-[50%] translate-x-[-50%] rounded-full dark:bg-background dark:hover:bg-muted",
-          className
-        )}
-        onClick={handleScrollToBottom}
-        size="icon"
-        type="button"
-        variant="outline"
-        {...props}
+      <motion.div
+        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+        transition={{ duration: 0.2, ease: "easeOut" }}
+        className="absolute bottom-4 left-[50%] -translate-x-1/2"
       >
-        <ArrowDownIcon className="size-4" />
-      </Button>
+        <Button
+          className={cn(
+            "rounded-full dark:bg-background dark:hover:bg-muted",
+            className,
+          )}
+          onClick={handleScrollToBottom}
+          size="icon"
+          type="button"
+          variant="outline"
+          {...props}
+        >
+          <ArrowDownIcon className="size-4" />
+        </Button>
+      </motion.div>
     )
   );
 };

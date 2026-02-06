@@ -1,10 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  ButtonGroup,
-  ButtonGroupText,
-} from "@/components/ui/button-group";
+import { ButtonGroup, ButtonGroupText } from "@/components/ui/button-group";
 import {
   Tooltip,
   TooltipContent,
@@ -18,21 +15,37 @@ import { math } from "@streamdown/math";
 import { mermaid } from "@streamdown/mermaid";
 import type { UIMessage } from "ai";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import { motion, type HTMLMotionProps } from "framer-motion";
 import type { ComponentProps, HTMLAttributes, ReactElement } from "react";
 import { createContext, memo, useContext, useEffect, useState } from "react";
 import { Streamdown } from "streamdown";
 
-export type MessageProps = HTMLAttributes<HTMLDivElement> & {
+export type MessageProps = Omit<HTMLMotionProps<"div">, "from"> & {
   from: UIMessage["role"];
 };
 
+const messageVariants = {
+  user: {
+    initial: { opacity: 0, x: 20, y: 8 },
+    animate: { opacity: 1, x: 0, y: 0 },
+  },
+  assistant: {
+    initial: { opacity: 0, x: -20, y: 8 },
+    animate: { opacity: 1, x: 0, y: 0 },
+  },
+};
+
 export const Message = ({ className, from, ...props }: MessageProps) => (
-  <div
+  <motion.div
     className={cn(
       "group flex w-full max-w-[95%] flex-col gap-2",
       from === "user" ? "is-user ml-auto justify-end" : "is-assistant",
-      className
+      className,
     )}
+    initial="initial"
+    animate="animate"
+    variants={messageVariants}
+    transition={{ duration: from === "user" ? 0.15 : 0.2, ease: "easeOut" }}
     {...props}
   />
 );
@@ -49,7 +62,7 @@ export const MessageContent = ({
       "is-user:dark flex w-fit min-w-0 max-w-full flex-col gap-2 overflow-hidden text-sm",
       "group-[.is-user]:ml-auto group-[.is-user]:rounded-lg group-[.is-user]:bg-secondary group-[.is-user]:px-4 group-[.is-user]:py-3 group-[.is-user]:text-foreground",
       "group-[.is-assistant]:text-foreground",
-      className
+      className,
     )}
     {...props}
   >
@@ -115,7 +128,7 @@ interface MessageBranchContextType {
 }
 
 const MessageBranchContext = createContext<MessageBranchContextType | null>(
-  null
+  null,
 );
 
 const useMessageBranch = () => {
@@ -123,7 +136,7 @@ const useMessageBranch = () => {
 
   if (!context) {
     throw new Error(
-      "MessageBranch components must be used within MessageBranch"
+      "MessageBranch components must be used within MessageBranch",
     );
   }
 
@@ -200,7 +213,7 @@ export const MessageBranchContent = ({
     <div
       className={cn(
         "grid gap-2 overflow-hidden [&>div]:pb-0",
-        index === currentBranch ? "block" : "hidden"
+        index === currentBranch ? "block" : "hidden",
       )}
       key={branch.key}
       {...props}
@@ -293,7 +306,7 @@ export const MessageBranchPage = ({
     <ButtonGroupText
       className={cn(
         "border-none bg-transparent text-muted-foreground shadow-none",
-        className
+        className,
       )}
       {...props}
     >
@@ -302,6 +315,46 @@ export const MessageBranchPage = ({
   );
 };
 
+export type StreamingTextProps = {
+  text: string;
+  isStreaming: boolean;
+};
+
+export const StreamingText = memo(function StreamingText({
+  text,
+  isStreaming,
+}: StreamingTextProps) {
+  const [displayed, setDisplayed] = useState("");
+
+  useEffect(() => {
+    if (!isStreaming) {
+      setDisplayed(text);
+      return;
+    }
+
+    let i = 0;
+    const timer = setInterval(() => {
+      setDisplayed(text.slice(0, i + 1));
+      i++;
+      if (i >= text.length) clearInterval(timer);
+    }, 25);
+
+    return () => clearInterval(timer);
+  }, [text, isStreaming]);
+
+  return (
+    <span>
+      {displayed}
+      {isStreaming && (
+        <motion.span
+          className="inline-block ml-0.5 w-0.5 h-4 align-middle bg-foreground/40 animate-cursor"
+          aria-hidden="true"
+        />
+      )}
+    </span>
+  );
+});
+
 export type MessageResponseProps = ComponentProps<typeof Streamdown>;
 
 export const MessageResponse = memo(
@@ -309,13 +362,13 @@ export const MessageResponse = memo(
     <Streamdown
       className={cn(
         "size-full [&>*:first-child]:mt-0 [&>*:last-child]:mb-0",
-        className
+        className,
       )}
       plugins={{ code, mermaid, math, cjk }}
       {...props}
     />
   ),
-  (prevProps, nextProps) => prevProps.children === nextProps.children
+  (prevProps, nextProps) => prevProps.children === nextProps.children,
 );
 
 MessageResponse.displayName = "MessageResponse";
@@ -330,7 +383,7 @@ export const MessageToolbar = ({
   <div
     className={cn(
       "mt-4 flex w-full items-center justify-between gap-4",
-      className
+      className,
     )}
     {...props}
   >

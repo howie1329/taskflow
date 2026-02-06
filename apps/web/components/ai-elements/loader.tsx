@@ -81,13 +81,20 @@ const LoaderIcon = ({ size = 16 }: LoaderIconProps) => (
 
 export type LoaderProps = HTMLAttributes<HTMLDivElement> & {
   size?: number;
+  pulse?: boolean;
 };
 
-export const Loader = ({ className, size = 16, ...props }: LoaderProps) => (
+export const Loader = ({
+  className,
+  size = 16,
+  pulse = false,
+  ...props
+}: LoaderProps) => (
   <div
     className={cn(
-      "inline-flex animate-spin items-center justify-center",
-      className
+      "inline-flex items-center justify-center",
+      pulse ? "animate-pulse-loader" : "animate-spin",
+      className,
     )}
     {...props}
   >
