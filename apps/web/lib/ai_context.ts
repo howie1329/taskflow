@@ -1,3 +1,4 @@
+import { MainAgentPrompt } from "./AiPrompts/MainAgent";
 export interface ProjectContext {
   project: {
     id: string;
@@ -50,8 +51,7 @@ ${project.description ? `**Description**: ${project.description}\n` : ""}
   return prompt;
 }
 
-export const BASE_SYSTEM_INSTRUCTIONS =
-  "You are a helpful assistant that can answer questions and help manage tasks, projects, and inbox items.";
+export const BASE_SYSTEM_INSTRUCTIONS = MainAgentPrompt
 
 export function buildSystemPrompt(
   projectContext?: ProjectContext,
