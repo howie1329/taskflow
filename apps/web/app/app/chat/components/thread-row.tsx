@@ -24,6 +24,7 @@ interface ThreadRowProps {
   isActive: boolean;
   isEditing: boolean;
   editingTitle: string;
+  projectIcon?: string;
   onEditTitleChange: (value: string) => void;
   onStartEdit: () => void;
   onCancelEdit: () => void;
@@ -37,6 +38,7 @@ export function ThreadRow({
   isActive,
   isEditing,
   editingTitle,
+  projectIcon,
   onEditTitleChange,
   onStartEdit,
   onCancelEdit,
@@ -105,6 +107,11 @@ export function ThreadRow({
             className="size-3 shrink-0 text-muted-foreground"
             strokeWidth={2}
           />
+        )}
+        {projectIcon && (
+          <span className="shrink-0 text-xs" title="Project thread">
+            {projectIcon}
+          </span>
         )}
         <span className="truncate text-xs font-medium min-w-0">
           {thread.title || "Untitled chat"}

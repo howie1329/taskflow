@@ -38,7 +38,6 @@ import {
 import { useSidebar } from "@/components/ui/sidebar";
 import { ThreadsRail } from "@/app/app/chat/components/threads-rail";
 import {
-  mockProjects,
   convertToChatThread,
   type ChatThread,
 } from "@/app/app/chat/components/mock-data";
@@ -46,6 +45,9 @@ import { useThreads } from "@/hooks/use-threads";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import type { Doc } from "@/convex/_generated/dataModel";
 
 interface ChatSidebarProps {
   onBackToWorkspace?: () => void;
@@ -78,27 +80,46 @@ export function ChatSidebar({ onBackToWorkspace }: ChatSidebarProps) {
   const isNewChat = pathname === "/app/chat";
   const activeThreadId = isNewChat ? null : pathname.split("/").pop() || null;
 
+  // Fetch real projects from Convex
+  const projects = useQuery(api.projects.listMyProjects, { status: "active" });
+
   const filteredThreads = threads.filter(
     (thread) =>
       thread.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       thread.snippet.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  const pinnedThreads = filteredThreads.filter(
-    (thread) => thread.pinned && !thread.projectId,
-  );
+  // Pinned section: ALL pinned threads (with or without projects)
+  const pinnedThreads = filteredThreads.filter((thread) => thread.pinned);
+
+  // Recent section: Non-pinned threads WITHOUT projects
   const recentThreads = filteredThreads.filter(
     (thread) => !thread.pinned && !thread.projectId,
   );
 
-  const groupedByProject = mockProjects
-    .map((project) => ({
-      project,
-      threads: filteredThreads.filter(
-        (thread) => thread.projectId === project.id,
-      ),
-    }))
-    .filter((group) => group.threads.length > 0);
+  // Convert Convex projects to ChatProject format
+  const chatProjects =
+    projects?.map((project: Doc<"projects">) => ({
+      id: project._id,
+      title: project.title,
+      icon: project.icon,
+    })) ?? [];
+
+  // Project groups: Non-pinned threads grouped by their projects
+  const groupedByProject =
+    projects
+      ?.map((project: Doc<"projects">) => ({
+        project: {
+          id: project._id,
+          title: project.title,
+          icon: project.icon,
+        },
+        threads: filteredThreads.filter(
+          (thread) => thread.projectId === project._id && !thread.pinned,
+        ),
+      }))
+      .filter((group: { threads: ChatThread[] }) => group.threads.length > 0) ??
+    [];
 
   const handleStartEdit = (thread: ChatThread) => {
     setEditingThreadId(thread.id);
@@ -300,6 +321,7 @@ export function ChatSidebar({ onBackToWorkspace }: ChatSidebarProps) {
           pinnedThreads={pinnedThreads}
           recentThreads={recentThreads}
           groupedByProject={groupedByProject}
+          projects={chatProjects}
           activeThreadId={activeThreadId}
           editingThreadId={editingThreadId}
           editingTitle={editingTitle}

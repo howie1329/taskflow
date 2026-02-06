@@ -41,6 +41,7 @@ interface ThreadsRailProps {
   pinnedThreads: ChatThread[];
   recentThreads: ChatThread[];
   groupedByProject: { project: ChatProject; threads: ChatThread[] }[];
+  projects?: ChatProject[];
   activeThreadId: string | null;
   editingThreadId: string | null;
   editingTitle: string;
@@ -63,6 +64,7 @@ export function ThreadsRail({
   pinnedThreads,
   recentThreads,
   groupedByProject,
+  projects = [],
   activeThreadId,
   editingThreadId,
   editingTitle,
@@ -73,6 +75,11 @@ export function ThreadsRail({
   onTogglePin,
   onDeleteRequest,
 }: ThreadsRailProps) {
+  // Helper to get project info for a thread
+  const getThreadProject = (thread: ChatThread) => {
+    if (!thread.projectId) return null;
+    return projects.find((p) => p.id === thread.projectId) || null;
+  };
   const projectThreadCount = groupedByProject.reduce(
     (total, group) => total + group.threads.length,
     0,
@@ -211,21 +218,25 @@ export function ThreadsRail({
                     }
                   />
                   <div className="space-y-0.5 w-full max-w-full">
-                    {pinnedThreads.map((thread) => (
-                      <ThreadRow
-                        key={thread.id}
-                        thread={thread}
-                        isActive={thread.id === activeThreadId}
-                        isEditing={editingThreadId === thread.id}
-                        editingTitle={editingTitle}
-                        onEditTitleChange={onEditTitleChange}
-                        onStartEdit={() => onStartEdit(thread)}
-                        onCancelEdit={onCancelEdit}
-                        onCommitEdit={onCommitEdit}
-                        onTogglePin={() => onTogglePin(thread.id)}
-                        onDeleteRequest={() => onDeleteRequest(thread.id)}
-                      />
-                    ))}
+                    {pinnedThreads.map((thread) => {
+                      const threadProject = getThreadProject(thread);
+                      return (
+                        <ThreadRow
+                          key={thread.id}
+                          thread={thread}
+                          isActive={thread.id === activeThreadId}
+                          isEditing={editingThreadId === thread.id}
+                          editingTitle={editingTitle}
+                          projectIcon={threadProject?.icon}
+                          onEditTitleChange={onEditTitleChange}
+                          onStartEdit={() => onStartEdit(thread)}
+                          onCancelEdit={onCancelEdit}
+                          onCommitEdit={onCommitEdit}
+                          onTogglePin={() => onTogglePin(thread.id)}
+                          onDeleteRequest={() => onDeleteRequest(thread.id)}
+                        />
+                      );
+                    })}
                   </div>
                 </div>
               )}
