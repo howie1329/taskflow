@@ -13,19 +13,19 @@ import {
   ChevronDownIcon,
   CircleIcon,
   ClockIcon,
-  WrenchIcon,
   XCircleIcon,
 } from "lucide-react";
 import type { ComponentProps, ReactNode } from "react";
 import { isValidElement } from "react";
 import { CodeBlock } from "./code-block";
+import { ProviderBadge, TimingBadge } from "./provider-badge";
 
 export type ToolProps = ComponentProps<typeof Collapsible>;
 
 export const Tool = ({ className, ...props }: ToolProps) => (
   <Collapsible
     className={cn(
-      "group not-prose w-full rounded-md border border-border/60",
+      "group not-prose w-full rounded-lg border border-border/60 bg-card",
       className,
     )}
     {...props}
@@ -33,18 +33,6 @@ export const Tool = ({ className, ...props }: ToolProps) => (
 );
 
 export type ToolPart = ToolUIPart | DynamicToolUIPart;
-
-export type ToolHeaderProps = {
-  title?: string;
-  className?: string;
-} & (
-  | { type: ToolUIPart["type"]; state: ToolUIPart["state"]; toolName?: never }
-  | {
-      type: DynamicToolUIPart["type"];
-      state: DynamicToolUIPart["state"];
-      toolName: string;
-    }
-);
 
 export const getStatusBadge = (status: ToolPart["state"]) => {
   const labels: Record<ToolPart["state"], string> = {
@@ -67,9 +55,22 @@ export const getStatusBadge = (status: ToolPart["state"]) => {
     "output-denied": <XCircleIcon className="size-3" />,
   };
 
+  const variantMap: Record<ToolPart["state"], string> = {
+    "input-streaming": "bg-slate-100 text-slate-600 border-slate-200",
+    "input-available": "bg-amber-50 text-amber-600 border-amber-200",
+    "approval-requested": "bg-amber-50 text-amber-600 border-amber-200",
+    "approval-responded": "bg-emerald-50 text-emerald-600 border-emerald-200",
+    "output-available": "bg-emerald-50 text-emerald-600 border-emerald-200",
+    "output-error": "bg-rose-50 text-rose-600 border-rose-200",
+    "output-denied": "bg-rose-50 text-rose-600 border-rose-200",
+  };
+
   return (
     <Badge
-      className="gap-1 rounded-full text-[10px] px-2 h-5"
+      className={cn(
+        "gap-1 rounded-full text-[10px] px-2 h-5 border font-medium",
+        variantMap[status],
+      )}
       variant="outline"
     >
       {icons[status]}
@@ -77,6 +78,63 @@ export const getStatusBadge = (status: ToolPart["state"]) => {
     </Badge>
   );
 };
+
+// Enhanced Tool Header with timing and provider info
+export interface EnhancedToolHeaderProps {
+  toolName: string;
+  state: ToolPart["state"];
+  title?: string;
+  duration?: number;
+  className?: string;
+}
+
+export const EnhancedToolHeader = ({
+  toolName,
+  state,
+  title,
+  duration,
+  className,
+  ...props
+}: EnhancedToolHeaderProps) => {
+  const displayName =
+    title ??
+    toolName.replace(/([A-Z])/g, " $1").replace(/^./, (s) => s.toUpperCase());
+
+  return (
+    <CollapsibleTrigger
+      className={cn(
+        "flex w-full items-center justify-between gap-3 px-3 py-2.5 text-xs transition-colors hover:bg-muted/50",
+        className,
+      )}
+      {...props}
+    >
+      <div className="flex items-center gap-2 min-w-0">
+        <span className="font-medium truncate">{displayName}</span>
+      </div>
+      <div className="flex items-center gap-2 shrink-0">
+        {duration !== undefined && state === "output-available" && (
+          <TimingBadge duration={duration} />
+        )}
+        <ProviderBadge toolName={toolName} />
+        {getStatusBadge(state)}
+        <ChevronDownIcon className="size-3 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+      </div>
+    </CollapsibleTrigger>
+  );
+};
+
+// Legacy ToolHeader for backward compatibility
+export type ToolHeaderProps = {
+  title?: string;
+  className?: string;
+} & (
+  | { type: ToolUIPart["type"]; state: ToolUIPart["state"]; toolName?: never }
+  | {
+      type: DynamicToolUIPart["type"];
+      state: DynamicToolUIPart["state"];
+      toolName: string;
+    }
+);
 
 export const ToolHeader = ({
   className,
@@ -120,6 +178,85 @@ export const ToolContent = ({ className, ...props }: ToolContentProps) => (
     {...props}
   />
 );
+
+export type ToolSummaryBarProps = ComponentProps<"div"> & {
+  summary?: ReactNode;
+  label?: string;
+};
+
+export const ToolSummaryBar = ({
+  className,
+  summary,
+  label = "Summary",
+  ...props
+}: ToolSummaryBarProps) => {
+  if (!summary) return null;
+
+  return (
+    <div
+      className={cn(
+        "rounded-md border border-border/50 bg-muted/30 px-3 py-2",
+        "text-xs text-foreground",
+        className,
+      )}
+      {...props}
+    >
+      <div className="flex items-center gap-2">
+        <span className="text-muted-foreground uppercase tracking-wide text-[10px]">
+          {label}
+        </span>
+        <span className="font-medium truncate">{summary}</span>
+      </div>
+    </div>
+  );
+};
+
+export type ToolMetaItem = {
+  label: string;
+  value: ReactNode;
+};
+
+export type ToolMetaPanelProps = ComponentProps<"div"> & {
+  title?: string;
+  items: ToolMetaItem[];
+};
+
+export const ToolMetaPanel = ({
+  className,
+  title = "Metadata",
+  items,
+  ...props
+}: ToolMetaPanelProps) => {
+  if (!items.length) return null;
+
+  return (
+    <div
+      className={cn(
+        "rounded-md border border-border/50 bg-muted/20",
+        "px-3 py-2 text-xs",
+        className,
+      )}
+      {...props}
+    >
+      <div className="text-[10px] text-muted-foreground uppercase tracking-wide mb-2">
+        {title}
+      </div>
+      <div className="grid gap-2">
+        {items.map((item, index) => (
+          <div
+            key={`${item.label}-${index}`}
+            className="flex items-center justify-between gap-3"
+          >
+            <span className="text-muted-foreground">{item.label}</span>
+            <span className="font-medium text-foreground truncate">
+              {item.value}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 export type ToolInputProps = ComponentProps<"div"> & {
   input: ToolPart["input"];

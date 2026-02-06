@@ -68,11 +68,21 @@ import {
 } from "@/components/ai-elements/reasoning";
 import {
   ChainOfThought,
-  ChainOfThoughtHeader,
+  EnhancedChainOfThoughtHeader,
   ChainOfThoughtContent,
   ChainOfThoughtStep,
 } from "@/components/ai-elements/chain-of-thought";
-import { Tool, ToolHeader, ToolContent } from "@/components/ai-elements/tool";
+import {
+  Tool,
+  EnhancedToolHeader,
+  ToolContent,
+  ToolSummaryBar,
+  ToolMetaPanel,
+} from "@/components/ai-elements/tool";
+import {
+  detectProvider,
+  providerConfig,
+} from "@/components/ai-elements/provider-badge";
 import {
   Sources,
   SourcesTrigger,
@@ -206,7 +216,8 @@ function summarizeToolOutput(output: unknown): string | null {
 
   if (typeof output === "object" && !Array.isArray(output)) {
     const obj = output as Record<string, unknown>;
-    const entries = Object.entries(obj).filter(([_, value]) => {
+    const entries = Object.entries(obj).filter((entry) => {
+      const value = entry[1];
       if (value === null || value === undefined) return false;
       if (typeof value === "object" && !Array.isArray(value)) return false;
       if (typeof value === "string" && value.length > 100) return false;
@@ -235,6 +246,61 @@ function summarizeToolOutput(output: unknown): string | null {
   }
 
   return null;
+}
+
+function describeValue(value: unknown): string {
+  if (value === null) return "null";
+  if (value === undefined) return "—";
+  if (Array.isArray(value)) return `${value.length} items`;
+  if (typeof value === "object")
+    return `${Object.keys(value as object).length} fields`;
+  return String(value);
+}
+
+function getToolSummary(toolCall: ToolCall): string | null {
+  if (toolCall.toolName === "webSearch" && isWebSearchOutput(toolCall.output)) {
+    const output = toolCall.output as WebSearchOutput;
+    return `Found ${output.results.length} sources`;
+  }
+
+  const outputSummary = summarizeToolOutput(toolCall.output);
+  if (outputSummary) return outputSummary;
+
+  const inputSummary = getToolInputSummary(toolCall.input);
+  if (inputSummary) return inputSummary;
+
+  return null;
+}
+
+function getToolMetaItems(toolCall: ToolCall) {
+  const providerType = detectProvider(toolCall.toolName);
+  const providerName = providerConfig[providerType]?.name ?? "Unknown";
+
+  const items = [
+    { label: "Provider", value: providerName },
+    { label: "Tool", value: toolCall.toolName.replace(/^tool-/, "") },
+    { label: "Status", value: toolCall.state.replace(/-/g, " ") },
+  ];
+
+  if (toolCall.input && typeof toolCall.input === "object") {
+    items.push({
+      label: "Input",
+      value: describeValue(toolCall.input),
+    });
+  }
+
+  if (toolCall.output !== undefined) {
+    items.push({
+      label: "Output",
+      value: describeValue(toolCall.output),
+    });
+  }
+
+  if (toolCall.errorText) {
+    items.push({ label: "Error", value: "Yes" });
+  }
+
+  return items;
 }
 
 function renderToolContent(toolCall: ToolCall): React.ReactNode {
@@ -366,6 +432,9 @@ function ThreadPageContent() {
   const softDeleteThread = useMutation(api.chat.softDeleteThread);
   const setThreadScope = useMutation(api.chat.setThreadScope);
 
+  // Memoize uiMessages to ensure consistent hook order
+  const uiMessages = useMemo(() => messages ?? [], [messages]);
+
   const shouldShowNotFound =
     thread === null && messages.length === 0 && status === "ready";
 
@@ -433,8 +502,6 @@ function ThreadPageContent() {
       </div>
     );
   }
-
-  const uiMessages = useMemo(() => messages ?? [], [messages]);
 
   const handleSubmit = () => {
     if (!textInput.value.trim()) return;
@@ -658,9 +725,18 @@ function ThreadPageContent() {
                           preferences?.aiChatShowActions !== false && (
                             <>
                               <ChainOfThought defaultOpen={false}>
-                                <ChainOfThoughtHeader>
+                                <EnhancedChainOfThoughtHeader
+                                  totalSteps={toolCalls.length}
+                                  providers={toolCalls
+                                    .filter(
+                                      (tc) =>
+                                        tc.state === "output-available" ||
+                                        tc.state === "output-error",
+                                    )
+                                    .map((tc) => detectProvider(tc.toolName))}
+                                >
                                   Actions ({toolCalls.length})
-                                </ChainOfThoughtHeader>
+                                </EnhancedChainOfThoughtHeader>
                                 <ChainOfThoughtContent>
                                   {toolCalls.map((toolCall) => {
                                     const stateInfo = getToolStateInfo(
@@ -688,6 +764,7 @@ function ThreadPageContent() {
                                           summary ?? stateInfo.badgeLabel
                                         }
                                         status={stateInfo.stepStatus}
+                                        toolName={toolCall.toolName}
                                       />
                                     );
                                   })}
@@ -695,23 +772,22 @@ function ThreadPageContent() {
                               </ChainOfThought>
                               {preferences?.aiChatShowToolDetails !== false &&
                                 toolCalls.map((toolCall) => {
-                                  const isStandardTool =
-                                    toolCall.toolName.startsWith("tool-");
-                                  const headerProps = isStandardTool
-                                    ? {
-                                        type: toolCall.toolName as ToolUIPart["type"],
-                                        state: toolCall.state,
-                                      }
-                                    : {
-                                        type: "dynamic-tool" as const,
-                                        state: toolCall.state,
-                                        toolName: toolCall.toolName,
-                                      };
                                   return (
                                     <Tool key={toolCall.id}>
-                                      <ToolHeader {...headerProps} />
+                                      <EnhancedToolHeader
+                                        toolName={toolCall.toolName}
+                                        state={toolCall.state}
+                                      />
                                       <ToolContent>
-                                        {renderToolContent(toolCall)}
+                                        <div className="space-y-3 pt-2">
+                                          <ToolSummaryBar
+                                            summary={getToolSummary(toolCall)}
+                                          />
+                                          <ToolMetaPanel
+                                            items={getToolMetaItems(toolCall)}
+                                          />
+                                          {renderToolContent(toolCall)}
+                                        </div>
                                       </ToolContent>
                                     </Tool>
                                   );
