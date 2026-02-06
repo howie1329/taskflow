@@ -14,6 +14,7 @@ import type * as crons from "../crons.js";
 import type * as http from "../http.js";
 import type * as inbox from "../inbox.js";
 import type * as models from "../models.js";
+import type * as notes from "../notes.js";
 import type * as preferences from "../preferences.js";
 import type * as profiles from "../profiles.js";
 import type * as projects from "../projects.js";
@@ -35,6 +36,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   inbox: typeof inbox;
   models: typeof models;
+  notes: typeof notes;
   preferences: typeof preferences;
   profiles: typeof profiles;
   projects: typeof projects;
