@@ -68,7 +68,7 @@ export function NotesAppSidebar({ onBackToWorkspace }: NotesAppSidebarProps) {
     confirmDelete,
     cancelDelete,
     deleteDialogOpen,
-    mockProjects,
+    projects,
     projectForNote,
   } = useNotes();
 
@@ -270,7 +270,7 @@ export function NotesAppSidebar({ onBackToWorkspace }: NotesAppSidebarProps) {
             onMoveNote={moveNote}
             onDeleteNote={requestDeleteNote}
             projectForNote={projectForNote}
-            mockProjects={mockProjects}
+            projects={projects}
             searchInputRef={searchInputRef}
           />
         </div>

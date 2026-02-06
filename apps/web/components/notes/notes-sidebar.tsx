@@ -1,44 +1,43 @@
-"use client";
+"use client"
 
-import { useCallback } from "react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { Search01Icon, Add01Icon, NoteIcon } from "@hugeicons/core-free-icons";
-import { NotesList } from "./notes-list";
-import type { MockProject, MockNote, ViewMode } from "./types";
+} from "@/components/ui/select"
+import { Input } from "@/components/ui/input"
+import { Separator } from "@/components/ui/separator"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { Search01Icon, Add01Icon } from "@hugeicons/core-free-icons"
+import { NotesList } from "./notes-list"
+import type { NotesProject, Note, ViewMode } from "./types"
 
 interface NotesSidebarProps {
-  notes: MockNote[];
-  filteredNotes: MockNote[];
-  sortedNotes: MockNote[];
-  groupedNotes: { project: MockProject | null; notes: MockNote[] }[] | null;
-  selectedNoteId: string | null;
-  projectFilter: string;
-  searchQuery: string;
-  viewMode: ViewMode;
-  isMobile: boolean;
-  onProjectFilterChange: (value: string) => void;
-  onSearchQueryChange: (value: string) => void;
-  onViewModeChange: (value: ViewMode) => void;
-  onSelectNote: (noteId: string) => void;
-  onCreateNote: () => void;
-  onPinNote: (noteId: string) => void;
-  onMoveNote: (noteId: string, newProjectId: string) => void;
-  onDeleteNote: (noteId: string) => void;
-  projectForNote: (projectId: string) => MockProject | null;
-  mockProjects: MockProject[];
-  searchInputRef?: React.RefObject<HTMLInputElement | null>;
+  notes: Note[]
+  filteredNotes: Note[]
+  sortedNotes: Note[]
+  groupedNotes: { project: NotesProject | null; notes: Note[] }[] | null
+  selectedNoteId: string | null
+  projectFilter: string
+  searchQuery: string
+  viewMode: ViewMode
+  isMobile: boolean
+  onProjectFilterChange: (value: string) => void
+  onSearchQueryChange: (value: string) => void
+  onViewModeChange: (value: ViewMode) => void
+  onSelectNote: (noteId: string) => void
+  onCreateNote: () => void
+  onPinNote: (noteId: string) => void
+  onMoveNote: (noteId: string, newProjectId: string) => void
+  onDeleteNote: (noteId: string) => void
+  projectForNote: (projectId: string) => NotesProject | null
+  projects: NotesProject[]
+  searchInputRef?: React.RefObject<HTMLInputElement | null>
 }
 
 export function NotesSidebar({
@@ -60,7 +59,7 @@ export function NotesSidebar({
   onMoveNote,
   onDeleteNote,
   projectForNote,
-  mockProjects,
+  projects,
   searchInputRef,
 }: NotesSidebarProps) {
   return (
@@ -83,7 +82,7 @@ export function NotesSidebar({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All projects</SelectItem>
-            {mockProjects.map((project) => (
+            {projects.map((project) => (
               <SelectItem key={project._id} value={project._id}>
                 <span className="mr-2">{project.icon}</span>
                 {project.title}
@@ -174,9 +173,9 @@ export function NotesSidebar({
           onMoveNote={onMoveNote}
           onDeleteNote={onDeleteNote}
           projectForNote={projectForNote}
-          mockProjects={mockProjects}
+          projects={projects}
         />
       </div>
     </div>
-  );
+  )
 }

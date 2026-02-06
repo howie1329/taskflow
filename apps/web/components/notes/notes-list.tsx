@@ -1,8 +1,8 @@
-"use client";
+"use client"
 
-import { useCallback } from "react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { useCallback } from "react"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,15 +11,15 @@ import {
   DropdownMenuSub,
   DropdownMenuSubTrigger,
   DropdownMenuSubContent,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu"
 import {
   Empty,
   EmptyHeader,
   EmptyTitle,
   EmptyDescription,
   EmptyMedia,
-} from "@/components/ui/empty";
-import { HugeiconsIcon } from "@hugeicons/react";
+} from "@/components/ui/empty"
+import { HugeiconsIcon } from "@hugeicons/react"
 import {
   NoteIcon,
   Add01Icon,
@@ -27,33 +27,33 @@ import {
   MoreVerticalIcon,
   Delete01Icon,
   FolderManagementIcon,
-} from "@hugeicons/core-free-icons";
-import { cn } from "@/lib/utils";
-import type { MockProject, MockNote, ViewMode } from "./types";
+} from "@hugeicons/core-free-icons"
+import { cn } from "@/lib/utils"
+import type { NotesProject, Note, ViewMode } from "./types"
 
 interface NoteRowProps {
-  note: MockNote;
-  isSelected: boolean;
-  isMobile: boolean;
-  projectForNote: (projectId: string) => MockProject | null;
-  onSelect: (noteId: string) => void;
-  onPin: (noteId: string) => void;
-  onMove: (noteId: string, newProjectId: string) => void;
-  onDelete: (noteId: string) => void;
-  mockProjects: MockProject[];
+  note: Note
+  isSelected: boolean
+  isMobile: boolean
+  projectForNote: (projectId: string) => NotesProject | null
+  onSelect: (noteId: string) => void
+  onPin: (noteId: string) => void
+  onMove: (noteId: string, newProjectId: string) => void
+  onDelete: (noteId: string) => void
+  projects: NotesProject[]
 }
 
 function formatRelativeTime(timestamp: number): string {
-  const now = Date.now();
-  const diff = now - timestamp;
-  const minutes = Math.floor(diff / (1000 * 60));
-  const hours = Math.floor(diff / (1000 * 60 * 60));
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const now = Date.now()
+  const diff = now - timestamp
+  const minutes = Math.floor(diff / (1000 * 60))
+  const hours = Math.floor(diff / (1000 * 60 * 60))
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
 
-  if (minutes < 1) return "just now";
-  if (minutes < 60) return `${minutes}m ago`;
-  if (hours < 24) return `${hours}h ago`;
-  return `${days}d ago`;
+  if (minutes < 1) return "just now"
+  if (minutes < 60) return `${minutes}m ago`
+  if (hours < 24) return `${hours}h ago`
+  return `${days}d ago`
 }
 
 function NoteRow({
@@ -65,11 +65,12 @@ function NoteRow({
   onPin,
   onMove,
   onDelete,
-  mockProjects,
+  projects,
 }: NoteRowProps) {
-  const project = projectForNote(note.projectId);
+  const project = projectForNote(note.projectId)
   const snippet =
-    note.content.slice(0, 60) + (note.content.length > 60 ? "..." : "");
+    note.contentText.slice(0, 60) +
+    (note.contentText.length > 60 ? "..." : "")
 
   return (
     <div
@@ -104,8 +105,8 @@ function NoteRow({
               variant="ghost"
               size="icon-xs"
               onClick={(e) => {
-                e.stopPropagation();
-                onPin(note._id);
+                e.stopPropagation()
+                onPin(note._id)
               }}
               className={cn(note.pinned && "text-primary")}
             >
@@ -124,8 +125,8 @@ function NoteRow({
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem
                   onClick={(e) => {
-                    e.stopPropagation();
-                    onPin(note._id);
+                    e.stopPropagation()
+                    onPin(note._id)
                   }}
                 >
                   <HugeiconsIcon icon={PinIcon} className="size-4 mr-2" />
@@ -142,18 +143,18 @@ function NoteRow({
                   <DropdownMenuSubContent className="w-48">
                     <DropdownMenuItem
                       onClick={(e) => {
-                        e.stopPropagation();
-                        onMove(note._id, "__none__");
+                        e.stopPropagation()
+                        onMove(note._id, "__none__")
                       }}
                     >
                       No project
                     </DropdownMenuItem>
-                    {mockProjects.map((p) => (
+                    {projects.map((p) => (
                       <DropdownMenuItem
                         key={p._id}
                         onClick={(e) => {
-                          e.stopPropagation();
-                          onMove(note._id, p._id);
+                          e.stopPropagation()
+                          onMove(note._id, p._id)
                         }}
                       >
                         {p.icon} {p.title}
@@ -163,8 +164,8 @@ function NoteRow({
                 </DropdownMenuSub>
                 <DropdownMenuItem
                   onClick={(e) => {
-                    e.stopPropagation();
-                    onDelete(note._id);
+                    e.stopPropagation()
+                    onDelete(note._id)
                   }}
                   className="text-destructive"
                 >
@@ -190,24 +191,24 @@ function NoteRow({
         )}
       </div>
     </div>
-  );
+  )
 }
 
 interface NotesListProps {
-  sortedNotes: MockNote[];
-  groupedNotes: { project: MockProject | null; notes: MockNote[] }[] | null;
-  viewMode: ViewMode;
-  selectedNoteId: string | null;
-  projectFilter: string;
-  searchQuery: string;
-  isMobile: boolean;
-  onSelectNote: (noteId: string) => void;
-  onCreateNote: () => void;
-  onPinNote: (noteId: string) => void;
-  onMoveNote: (noteId: string, newProjectId: string) => void;
-  onDeleteNote: (noteId: string) => void;
-  projectForNote: (projectId: string) => MockProject | null;
-  mockProjects: MockProject[];
+  sortedNotes: Note[]
+  groupedNotes: { project: NotesProject | null; notes: Note[] }[] | null
+  viewMode: ViewMode
+  selectedNoteId: string | null
+  projectFilter: string
+  searchQuery: string
+  isMobile: boolean
+  onSelectNote: (noteId: string) => void
+  onCreateNote: () => void
+  onPinNote: (noteId: string) => void
+  onMoveNote: (noteId: string, newProjectId: string) => void
+  onDeleteNote: (noteId: string) => void
+  projectForNote: (projectId: string) => NotesProject | null
+  projects: NotesProject[]
 }
 
 export function NotesList({
@@ -224,10 +225,10 @@ export function NotesList({
   onMoveNote,
   onDeleteNote,
   projectForNote,
-  mockProjects,
+  projects,
 }: NotesListProps) {
   const renderNoteRow = useCallback(
-    (note: MockNote) => (
+    (note: Note) => (
       <NoteRow
         key={note._id}
         note={note}
@@ -238,7 +239,7 @@ export function NotesList({
         onPin={onPinNote}
         onMove={onMoveNote}
         onDelete={onDeleteNote}
-        mockProjects={mockProjects}
+        projects={projects}
       />
     ),
     [
@@ -249,9 +250,9 @@ export function NotesList({
       onPinNote,
       onMoveNote,
       onDeleteNote,
-      mockProjects,
+      projects,
     ],
-  );
+  )
 
   if (sortedNotes.length === 0) {
     return (
@@ -276,7 +277,7 @@ export function NotesList({
           </Button>
         )}
       </Empty>
-    );
+    )
   }
 
   if (viewMode === "byProject" && groupedNotes) {
@@ -305,8 +306,8 @@ export function NotesList({
           </div>
         ))}
       </div>
-    );
+    )
   }
 
-  return <div className="space-y-1.5">{sortedNotes.map(renderNoteRow)}</div>;
+  return <div className="space-y-1.5">{sortedNotes.map(renderNoteRow)}</div>
 }

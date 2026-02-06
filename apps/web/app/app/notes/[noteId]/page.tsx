@@ -1,57 +1,66 @@
-"use client";
+"use client"
 
-import { useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { useEffect } from "react"
+import { useParams, useRouter } from "next/navigation"
+import { Button } from "@/components/ui/button"
 import {
   Empty,
   EmptyHeader,
   EmptyTitle,
   EmptyDescription,
   EmptyMedia,
-} from "@/components/ui/empty";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { NoteIcon, ArrowLeft01Icon } from "@hugeicons/core-free-icons";
-import { NoteEditor } from "@/components/notes";
-import { useNotes } from "@/components/notes";
-import { useIsMobile } from "@/hooks/use-mobile";
+} from "@/components/ui/empty"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { NoteIcon, ArrowLeft01Icon } from "@hugeicons/core-free-icons"
+import { NoteEditor } from "@/components/notes"
+import { useNotes } from "@/components/notes"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 export default function NotePage() {
-  const params = useParams();
-  const router = useRouter();
-  const isMobile = useIsMobile();
-  const noteId = params.noteId as string;
+  const params = useParams()
+  const router = useRouter()
+  const isMobile = useIsMobile()
+  const noteId = params.noteId as string
 
   const {
     selectedNote,
     isSaved,
+    isLoading,
     updateNote,
     pinNote,
     moveNote,
     requestDeleteNote,
     createNote,
     closeEditor,
-    mockProjects,
+    projects,
     projectForNote,
-  } = useNotes();
+  } = useNotes()
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      const target = e.target as HTMLElement;
+      if (e.key !== "Escape") return
+      const target = e.target as HTMLElement
       if (
         target?.tagName === "INPUT" ||
         target?.tagName === "TEXTAREA" ||
         target?.isContentEditable
       ) {
-        return;
+        return
       }
-      router.push("/app/notes");
-    };
+      router.push("/app/notes")
+    }
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [router]);
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [router])
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
+        Loading note...
+      </div>
+    )
+  }
 
   if (!selectedNote || selectedNote._id !== noteId) {
     return (
@@ -95,7 +104,7 @@ export default function NotePage() {
           </Empty>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -122,7 +131,7 @@ export default function NotePage() {
           note={selectedNote}
           isSaved={isSaved}
           isInSheet={false}
-          mockProjects={mockProjects}
+          projects={projects}
           projectForNote={projectForNote}
           onUpdateNote={updateNote}
           onPinNote={pinNote}
@@ -133,5 +142,5 @@ export default function NotePage() {
         />
       </div>
     </div>
-  );
+  )
 }

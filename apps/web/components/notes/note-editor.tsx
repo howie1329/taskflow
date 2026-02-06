@@ -1,12 +1,11 @@
-"use client";
+"use client"
 
-import { useRef, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Kbd } from "@/components/ui/kbd";
+import { useCallback, useEffect, useRef } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
+import { Separator } from "@/components/ui/separator"
+import { Kbd } from "@/components/ui/kbd"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,15 +14,15 @@ import {
   DropdownMenuSub,
   DropdownMenuSubTrigger,
   DropdownMenuSubContent,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu"
 import {
   Empty,
   EmptyHeader,
   EmptyTitle,
   EmptyDescription,
   EmptyMedia,
-} from "@/components/ui/empty";
-import { HugeiconsIcon } from "@hugeicons/react";
+} from "@/components/ui/empty"
+import { HugeiconsIcon } from "@hugeicons/react"
 import {
   NoteIcon,
   Add01Icon,
@@ -33,62 +32,43 @@ import {
   ArrowLeft01Icon,
   FolderManagementIcon,
   CheckmarkCircle02Icon,
-} from "@hugeicons/core-free-icons";
-import { cn } from "@/lib/utils";
-import type { MockProject, MockNote } from "./types";
+} from "@hugeicons/core-free-icons"
+import { cn } from "@/lib/utils"
+import { NoteRichEditor } from "./note-rich-editor"
+import type { NotesProject, Note } from "./types"
 
 interface NoteEditorProps {
-  note: MockNote | null;
-  isSaved: boolean;
-  isInSheet?: boolean;
-  mockProjects: MockProject[];
-  projectForNote: (projectId: string) => MockProject | null;
-  onUpdateNote: (noteId: string, updates: Partial<MockNote>) => void;
-  onPinNote: (noteId: string) => void;
-  onMoveNote: (noteId: string, newProjectId: string) => void;
-  onDeleteNote: (noteId: string) => void;
-  onCreateNote: () => void;
-  onCloseSheet?: () => void;
+  note: Note | null
+  isSaved: boolean
+  isInSheet?: boolean
+  projects: NotesProject[]
+  projectForNote: (projectId: string) => NotesProject | null
+  onUpdateNote: (noteId: string, updates: Partial<Note>) => void
+  onPinNote: (noteId: string) => void
+  onMoveNote: (noteId: string, newProjectId: string) => void
+  onDeleteNote: (noteId: string) => void
+  onCreateNote: () => void
+  onCloseSheet?: () => void
 }
 
 function formatRelativeTime(timestamp: number): string {
-  const now = Date.now();
-  const diff = now - timestamp;
-  const minutes = Math.floor(diff / (1000 * 60));
-  const hours = Math.floor(diff / (1000 * 60 * 60));
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const now = Date.now()
+  const diff = now - timestamp
+  const minutes = Math.floor(diff / (1000 * 60))
+  const hours = Math.floor(diff / (1000 * 60 * 60))
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
 
-  if (minutes < 1) return "just now";
-  if (minutes < 60) return `${minutes}m ago`;
-  if (hours < 24) return `${hours}h ago`;
-  return `${days}d ago`;
-}
-
-// Auto-resize textarea hook
-function useAutoResizeTextarea(
-  ref: React.RefObject<HTMLTextAreaElement | null>,
-  value: string,
-  minHeight = 200,
-  maxHeight = 800,
-) {
-  useEffect(() => {
-    const textarea = ref.current;
-    if (!textarea) return;
-
-    textarea.style.height = "auto";
-    const newHeight = Math.min(
-      Math.max(textarea.scrollHeight, minHeight),
-      maxHeight,
-    );
-    textarea.style.height = `${newHeight}px`;
-  }, [value, ref, minHeight, maxHeight]);
+  if (minutes < 1) return "just now"
+  if (minutes < 60) return `${minutes}m ago`
+  if (hours < 24) return `${hours}h ago`
+  return `${days}d ago`
 }
 
 export function NoteEditor({
   note,
   isSaved,
   isInSheet = false,
-  mockProjects,
+  projects,
   projectForNote,
   onUpdateNote,
   onPinNote,
@@ -97,13 +77,33 @@ export function NoteEditor({
   onCreateNote,
   onCloseSheet,
 }: NoteEditorProps) {
-  const titleInputRef = useRef<HTMLInputElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const titleInputRef = useRef<HTMLInputElement>(null)
+  const contentUpdateRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Auto-resize textarea
-  useAutoResizeTextarea(textareaRef, note?.content || "", 300, 600);
+  useEffect(() => {
+    return () => {
+      if (contentUpdateRef.current) {
+        clearTimeout(contentUpdateRef.current)
+      }
+    }
+  }, [])
 
-  // Empty state
+  const handleContentChange = useCallback(
+    (value: string, textContent: string) => {
+      if (!note) return
+      if (contentUpdateRef.current) {
+        clearTimeout(contentUpdateRef.current)
+      }
+      contentUpdateRef.current = setTimeout(() => {
+        onUpdateNote(note._id, {
+          content: value,
+          contentText: textContent,
+        })
+      }, 400)
+    },
+    [note, onUpdateNote],
+  )
+
   if (!note) {
     return (
       <Empty className="min-h-[300px] h-full">
@@ -126,17 +126,16 @@ export function NoteEditor({
           <span>to create</span>
         </div>
       </Empty>
-    );
+    )
   }
 
-  const project = projectForNote(note.projectId);
+  const project = projectForNote(note.projectId)
+  const wordCount = note.contentText.split(/\s+/).filter(Boolean).length
 
-  // Mobile sheet layout
   if (isInSheet) {
     return (
       <div className="flex h-full flex-col gap-4">
-        {/* Mobile Header */}
-      <div className="shrink-0 border-b border-border/60 pb-4">
+        <div className="shrink-0 border-b border-border/60 pb-4">
           <div className="flex items-center justify-between mb-3">
             <Button
               variant="ghost"
@@ -181,7 +180,7 @@ export function NoteEditor({
                       >
                         No project
                       </DropdownMenuItem>
-                      {mockProjects.map((p) => (
+                      {projects.map((p) => (
                         <DropdownMenuItem
                           key={p._id}
                           onClick={() => onMoveNote(note._id, p._id)}
@@ -234,39 +233,31 @@ export function NoteEditor({
                 Saved
               </span>
             ) : (
-              <span className="text-[11px] text-muted-foreground">
-                Saving...
-              </span>
+              <span className="text-[11px] text-muted-foreground">Saving...</span>
             )}
           </div>
         </div>
 
-        {/* Mobile Body */}
-        <Textarea
-          ref={textareaRef}
+        <NoteRichEditor
+          key={note._id}
           value={note.content}
-          onChange={(e) => onUpdateNote(note._id, { content: e.target.value })}
+          onChange={handleContentChange}
           placeholder="Start writing..."
-          className="flex-1 min-h-0 resize-none border-0 bg-transparent px-0 shadow-none focus-visible:ring-0 text-base leading-relaxed"
+          editorClassName="min-h-[220px] border-0 bg-transparent px-0 text-base leading-relaxed"
         />
 
-        {/* Mobile Footer */}
         <div className="shrink-0 border-t border-border/60 pt-3 flex items-center justify-between text-xs text-muted-foreground">
           <div className="flex items-center gap-3">
-            <span>{note.content.length} chars</span>
-            <span>
-              {note.content.split(/\s+/).filter(Boolean).length} words
-            </span>
+            <span>{note.contentText.length} chars</span>
+            <span>{wordCount} words</span>
           </div>
         </div>
       </div>
-    );
+    )
   }
 
-  // Desktop layout
   return (
     <div className="flex h-full flex-col gap-4">
-      {/* Header */}
       <div className="shrink-0 rounded-lg border border-border/60 bg-muted/30 p-3 space-y-3">
         <Input
           ref={titleInputRef}
@@ -298,9 +289,7 @@ export function NoteEditor({
                 Saved
               </span>
             ) : (
-              <span className="text-[11px] text-muted-foreground">
-                Saving...
-              </span>
+              <span className="text-[11px] text-muted-foreground">Saving...</span>
             )}
           </div>
           <div className="flex items-center gap-1">
@@ -338,7 +327,7 @@ export function NoteEditor({
                     >
                       No project
                     </DropdownMenuItem>
-                    {mockProjects.map((p) => (
+                    {projects.map((p) => (
                       <DropdownMenuItem
                         key={p._id}
                         onClick={() => onMoveNote(note._id, p._id)}
@@ -363,20 +352,18 @@ export function NoteEditor({
 
       <Separator className="bg-border/60" />
 
-      {/* Body */}
-      <Textarea
-        ref={textareaRef}
+      <NoteRichEditor
+        key={note._id}
         value={note.content}
-        onChange={(e) => onUpdateNote(note._id, { content: e.target.value })}
+        onChange={handleContentChange}
         placeholder="Start writing..."
-        className="min-h-[300px] resize-none border-0 bg-transparent px-0 shadow-none focus-visible:ring-0 text-sm leading-relaxed"
+        editorClassName="min-h-[300px] border-0 bg-transparent px-0 text-sm leading-relaxed"
       />
 
-      {/* Footer */}
       <div className="shrink-0 border-t border-border/60 pt-3 flex items-center justify-between text-xs text-muted-foreground">
         <div className="flex items-center gap-3">
-          <span>{note.content.length} characters</span>
-          <span>{note.content.split(/\s+/).filter(Boolean).length} words</span>
+          <span>{note.contentText.length} characters</span>
+          <span>{wordCount} words</span>
         </div>
         <div className="flex items-center gap-2">
           <span>Press</span>
@@ -385,5 +372,5 @@ export function NoteEditor({
         </div>
       </div>
     </div>
-  );
+  )
 }

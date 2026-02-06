@@ -208,6 +208,29 @@ const schema = defineSchema({
       filterFields: ["userId"],
     }),
 
+  // Notes - Rich text notes with project association
+  notes: defineTable({
+    userId: v.id("users"),
+    title: v.string(),
+    content: v.string(),
+    contentText: v.string(),
+    pinned: v.boolean(),
+    projectId: v.optional(v.id("projects")),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_project", ["userId", "projectId"])
+    .index("by_user_pinned", ["userId", "pinned"])
+    .searchIndex("search_title", {
+      searchField: "title",
+      filterFields: ["userId"],
+    })
+    .searchIndex("search_content", {
+      searchField: "contentText",
+      filterFields: ["userId"],
+    }),
+
   // Inbox Items - Capture and triage
   inboxItems: defineTable({
     userId: v.id("users"),
