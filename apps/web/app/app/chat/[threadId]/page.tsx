@@ -337,6 +337,7 @@ function renderToolContent(toolCall: ToolCall): React.ReactNode {
     return <TavilyWebSearchCard {...output} />;
   }
 
+  //Might deprecate this as there are no tool calls called webSearch anymore
   if (toolCall.toolName === "webSearch" && isWebSearchOutput(toolCall.output)) {
     const output = toolCall.output as WebSearchOutput;
     return (
