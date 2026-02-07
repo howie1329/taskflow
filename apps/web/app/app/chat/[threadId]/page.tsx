@@ -108,6 +108,12 @@ import {
   Delete02Icon,
 } from "@hugeicons/core-free-icons";
 import type { UIMessage, ToolUIPart, DynamicToolUIPart } from "ai";
+import {
+  type TavilyWebSearchOutput,
+  isTavilyWebSearchOutput,
+  normalizeTavilyOutput,
+} from "@/lib/AITools/Tavily/types";
+import { TavilyWebSearchCard } from "@/components/ai-elements/tavily-web-search-card";
 import { useChatContext } from "../components/chat-provider";
 import { useViewer } from "@/components/settings/hooks/use-viewer";
 import { useMutation } from "convex/react";
@@ -317,6 +323,18 @@ function renderToolContent(toolCall: ToolCall): React.ReactNode {
 
   if (toolCall.errorText) {
     return <p className="text-destructive text-sm">{toolCall.errorText}</p>;
+  }
+
+  // Tavly-specific web search rendering with enhanced card UI
+  if (
+    toolCall.toolName === "tool-tavilyWebSearch" &&
+    isTavilyWebSearchOutput(toolCall.output)
+  ) {
+    // Normalize the output to handle both snake_case (API) and camelCase (schema) formats
+    const output = normalizeTavilyOutput(
+      toolCall.output as unknown as Record<string, unknown>,
+    );
+    return <TavilyWebSearchCard {...output} />;
   }
 
   if (toolCall.toolName === "webSearch" && isWebSearchOutput(toolCall.output)) {
@@ -714,9 +732,9 @@ function ThreadPageContent() {
                     className={cn(
                       "text-sm leading-6",
                       message.role === "assistant" &&
-                        "w-full border-l border-border/50 pl-6",
+                      "w-full border-l border-border/50 pl-6",
                       message.role === "user" &&
-                        "border border-border/60 bg-muted/40 px-4 py-3 max-w-[32rem] rounded-lg",
+                      "border border-border/60 bg-muted/40 px-4 py-3 max-w-[32rem] rounded-lg",
                     )}
                   >
                     {message.role === "assistant" ? (
@@ -748,14 +766,14 @@ function ThreadPageContent() {
                                     const displayName =
                                       toolCall.toolName.startsWith("tool-")
                                         ? getToolDisplayName({
-                                            type: toolCall.toolName,
-                                            state: toolCall.state,
-                                          } as ToolUIPart)
+                                          type: toolCall.toolName,
+                                          state: toolCall.state,
+                                        } as ToolUIPart)
                                         : getToolDisplayName({
-                                            type: "dynamic-tool",
-                                            toolName: toolCall.toolName,
-                                            state: toolCall.state,
-                                          } as DynamicToolUIPart);
+                                          type: "dynamic-tool",
+                                          toolName: toolCall.toolName,
+                                          state: toolCall.state,
+                                        } as DynamicToolUIPart);
                                     return (
                                       <ChainOfThoughtStep
                                         key={toolCall.id}
@@ -874,10 +892,10 @@ function ThreadPageContent() {
                     <span className="truncate max-w-[150px]">
                       {selectedProjectId
                         ? projects.find((p) => p._id === selectedProjectId)
-                            ?.icon +
-                            " " +
-                            projects.find((p) => p._id === selectedProjectId)
-                              ?.title || "Select project"
+                          ?.icon +
+                        " " +
+                        projects.find((p) => p._id === selectedProjectId)
+                          ?.title || "Select project"
                         : "No project"}
                     </span>
                   </ProjectSelectorTrigger>
