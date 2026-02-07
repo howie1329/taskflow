@@ -166,7 +166,7 @@ export async function POST(req: Request) {
             userId,
             token,
           },
-          tools: Tools,
+          tools: { ...Tools },
         });
 
         const stream = await agent.stream({ messages: modelMessages });
