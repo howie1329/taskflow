@@ -50,6 +50,21 @@ const schema = defineSchema({
     }),
     syncedAt: v.number(),
   }).index("by_modelId", ["modelId"]),
+  chatUsageTotals: defineTable({
+    userId: v.id("users"),
+    messagesSent: v.number(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_userId", ["userId"]),
+  chatUsageDaily: defineTable({
+    userId: v.id("users"),
+    day: v.string(),
+    messagesSent: v.number(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_userId_day", ["userId", "day"])
+    .index("by_userId", ["userId"]),
   // User identity information
   userProfiles: defineTable({
     userId: v.id("users"), // Reference to auth user

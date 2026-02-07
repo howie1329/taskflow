@@ -2,6 +2,58 @@ import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import type { Doc } from "./_generated/dataModel";
+import type { Id } from "./_generated/dataModel";
+import type { MutationCtx } from "./_generated/server";
+
+const getUtcDayKey = (timestamp: number) =>
+  new Date(timestamp).toISOString().slice(0, 10);
+
+const incrementChatUsage = async (
+  ctx: MutationCtx,
+  userId: Id<"users">,
+  now: number,
+) => {
+  const day = getUtcDayKey(now);
+
+  const totals = await ctx.db
+    .query("chatUsageTotals")
+    .withIndex("by_userId", (q) => q.eq("userId", userId))
+    .first();
+
+  if (!totals) {
+    await ctx.db.insert("chatUsageTotals", {
+      userId,
+      messagesSent: 1,
+      createdAt: now,
+      updatedAt: now,
+    });
+  } else {
+    await ctx.db.patch(totals._id, {
+      messagesSent: totals.messagesSent + 1,
+      updatedAt: now,
+    });
+  }
+
+  const daily = await ctx.db
+    .query("chatUsageDaily")
+    .withIndex("by_userId_day", (q) => q.eq("userId", userId).eq("day", day))
+    .first();
+
+  if (!daily) {
+    await ctx.db.insert("chatUsageDaily", {
+      userId,
+      day,
+      messagesSent: 1,
+      createdAt: now,
+      updatedAt: now,
+    });
+  } else {
+    await ctx.db.patch(daily._id, {
+      messagesSent: daily.messagesSent + 1,
+      updatedAt: now,
+    });
+  }
+};
 
 // ============================================================================
 // QUERIES
@@ -266,6 +318,10 @@ export const appendMessage = mutation({
     await ctx.db.patch(thread._id, {
       updatedAt: now,
     });
+
+    if (args.role === "user") {
+      await incrementChatUsage(ctx, userId, now);
+    }
 
     return { success: true };
   },

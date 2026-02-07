@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +16,7 @@ export function AITab() {
   const { models, isLoading, isEmpty, lastSyncedAt, count } =
     useAvailableModels();
   const { preferences } = useViewer();
+  const usage = useQuery(api.usage.getMyChatUsage);
   const updatePreferences = useMutation(api.preferences.updateMyPreferences);
 
   const [showActions, setShowActions] = useState(true);
@@ -101,6 +102,40 @@ export function AITab() {
 
   return (
     <div className="space-y-6">
+      {/* Usage Card */}
+      <Card className="p-6">
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <h2 className="text-base font-medium">Usage</h2>
+            <p className="text-sm text-muted-foreground">
+              Basic chat activity for your account.
+            </p>
+          </div>
+
+          {usage === undefined ? (
+            <div className="space-y-3">
+              <Skeleton className="h-5 w-56" />
+              <Skeleton className="h-5 w-48" />
+            </div>
+          ) : (
+            <div className="space-y-2 text-sm">
+              <p className="text-muted-foreground">
+                Messages sent today (UTC):{" "}
+                <span className="font-medium text-foreground">
+                  {usage?.messagesSentToday ?? 0}
+                </span>
+              </p>
+              <p className="text-muted-foreground">
+                Total messages sent:{" "}
+                <span className="font-medium text-foreground">
+                  {usage?.messagesSentTotal ?? 0}
+                </span>
+              </p>
+            </div>
+          )}
+        </div>
+      </Card>
+
       {/* AI Chat Card */}
       <Card className="p-6">
         <div className="space-y-6">
