@@ -16,7 +16,7 @@ export const ValyuFinanceSearch = tool({
             throw new Error("Valyu API key is not set");
         }
         try {
-            const results = await valyu.search(query, { "maxNumResults": 5, "isToolCall": true, searchType: "all", category: "financial information", includedSources: ["valyu/valyu-stocks", "valyu/valyu-statistics-US", "valyu/valyu-earnings-US", "valyu/valyu-insider-transactions-US"] });
+            const results = await valyu.search(query, { "maxNumResults": 5, "isToolCall": true, searchType: "all", category: "financial information", includedSources: ["valyu/valyu-stocks", "valyu/valyu-market-movers-US", "valyu/valyu-balance-sheet-US", "valyu/valyu-earnings-US", "valyu/valyu-income-statement-US", "valyu/valyu-cash-flow-US", "valyu/valyu-insider-transactions-US", "valyu/valyu-sec-filings", "valyu/valyu-fred", "valyu/valyu-bls", "valyu/valyu-usaspending", "valyu/valyu-forex", "valyu/valyu-crypto", "valyu/valyu-etfs", "valyu/valyu-commodities", "valyu/valyu-patents", "valyu/valyu-polymarket", "valyu/valyu-kalshi", "valyu/valyu-dividends-US", "valyu/valyu-statistics-US"] });
             console.log("Valyu Finance Search results:", results);
             return results;
         } catch (error) {
