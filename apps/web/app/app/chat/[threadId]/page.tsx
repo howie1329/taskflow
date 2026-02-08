@@ -107,6 +107,11 @@ import {
   EmptyDescription,
   EmptyMedia,
 } from "@/components/ui/empty";
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
@@ -118,6 +123,7 @@ import {
   PencilEdit01Icon,
   Delete02Icon,
 } from "@hugeicons/core-free-icons";
+import { ChevronDownIcon } from "lucide-react";
 import type { UIMessage, ToolUIPart, DynamicToolUIPart } from "ai";
 import {
   type TavilyWebSearchOutput,
@@ -803,28 +809,65 @@ function ThreadPageContent() {
                                   })}
                                 </ChainOfThoughtContent>
                               </ChainOfThought>
-                              {preferences?.aiChatShowToolDetails !== false &&
-                                toolCalls.map((toolCall) => {
-                                  return (
-                                    <Tool key={toolCall.id}>
-                                      <EnhancedToolHeader
-                                        toolName={toolCall.toolName}
-                                        state={toolCall.state}
-                                      />
-                                      <ToolContent>
-                                        <div className="space-y-3 pt-2">
-                                          <ToolSummaryBar
-                                            summary={getToolSummary(toolCall)}
-                                          />
-                                          <ToolMetaPanel
-                                            items={getToolMetaItems(toolCall)}
-                                          />
-                                          {renderToolContent(toolCall)}
-                                        </div>
-                                      </ToolContent>
-                                    </Tool>
-                                  );
-                                })}
+                              {preferences?.aiChatShowToolDetails !== false && (
+                                <>
+                                  {toolCalls.length > 2 ? (
+                                    <Collapsible defaultOpen={false}>
+                                      <CollapsibleTrigger className="flex items-center gap-2 w-full p-2 text-sm text-muted-foreground hover:text-foreground border rounded-lg">
+                                        <ChevronDownIcon className="size-4 transition-transform group-data-[state=open]:rotate-180" />
+                                        <span>
+                                          {toolCalls.length} tool calls
+                                        </span>
+                                      </CollapsibleTrigger>
+                                      <CollapsibleContent>
+                                        {toolCalls.map((toolCall) => (
+                                          <Tool key={toolCall.id}>
+                                            <EnhancedToolHeader
+                                              toolName={toolCall.toolName}
+                                              state={toolCall.state}
+                                            />
+                                            <ToolContent>
+                                              <div className="space-y-3 pt-2">
+                                                <ToolSummaryBar
+                                                  summary={getToolSummary(
+                                                    toolCall,
+                                                  )}
+                                                />
+                                                <ToolMetaPanel
+                                                  items={getToolMetaItems(
+                                                    toolCall,
+                                                  )}
+                                                />
+                                                {renderToolContent(toolCall)}
+                                              </div>
+                                            </ToolContent>
+                                          </Tool>
+                                        ))}
+                                      </CollapsibleContent>
+                                    </Collapsible>
+                                  ) : (
+                                    toolCalls.map((toolCall) => (
+                                      <Tool key={toolCall.id}>
+                                        <EnhancedToolHeader
+                                          toolName={toolCall.toolName}
+                                          state={toolCall.state}
+                                        />
+                                        <ToolContent>
+                                          <div className="space-y-3 pt-2">
+                                            <ToolSummaryBar
+                                              summary={getToolSummary(toolCall)}
+                                            />
+                                            <ToolMetaPanel
+                                              items={getToolMetaItems(toolCall)}
+                                            />
+                                            {renderToolContent(toolCall)}
+                                          </div>
+                                        </ToolContent>
+                                      </Tool>
+                                    ))
+                                  )}
+                                </>
+                              )}
                             </>
                           )}
                         {hasReasoning &&

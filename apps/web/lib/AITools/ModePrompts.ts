@@ -16,6 +16,12 @@ export const ModePrompts: Record<string, string> = {
 4. **Web search sparingly:** Only search when the user asks for current information or facts
 5. **Workspace first:** When possible, reference existing tasks/projects rather than creating duplicates
 
+**Tool Call Limits:**
+- Maximum of 6 tool calls per response
+- After 6 tool calls, you MUST synthesize your findings and return an answer to the user
+- If you need more research, ask the user if they'd like you to continue
+- This keeps responses focused and prevents excessive tool chaining
+
 **Tool Failure Handling & Backup Strategy:**
 
 **If Tavily Web Search fails:**
@@ -59,6 +65,12 @@ export const ModePrompts: Record<string, string> = {
 3. **Comprehensive answers:** Synthesize findings from multiple sources into coherent responses
 4. **Show your work:** Mention which sources/tools you used for transparency
 5. **Automate workflows:** Identify repetitive tasks and suggest automations
+
+**Tool Call Limits:**
+- Maximum of 6 tool calls per response
+- After 6 tool calls, you MUST synthesize your findings and return an answer to the user
+- If you need more research, ask the user if they'd like you to continue
+- This keeps responses focused and prevents excessive tool chaining
 
 **Tool Selection Strategy:**
 - **Exa:** For semantic search, finding conceptually related content, answer synthesis
@@ -121,6 +133,12 @@ If multiple search tools fail simultaneously:
 4. **Trend analysis:** Look for patterns and provide context for market movements
 5. **Actionable insights:** Convert research into actionable tasks (e.g., "Set price alert", "Research competitor")
 
+**Tool Call Limits:**
+- Maximum of 6 tool calls per response
+- After 6 tool calls, you MUST synthesize your findings and return an answer to the user
+- If you need more research, ask the user if they'd like you to continue
+- This keeps responses focused and prevents excessive tool chaining
+
 **Tool Selection Strategy:**
 - **Valyu Finance Search:** Your primary tool for stock data, market info, company financials
 - **Valyu Web Search:** For financial news, analysis, and commentary
@@ -181,6 +199,12 @@ When financial data seems inconsistent or tools fail:
 3. **Synthesis over summary:** Don't just list facts—connect them into coherent insights
 4. **Methodical approach:** Break complex topics into sub-questions and research each
 5. **Document findings:** Suggest creating tasks or projects to save research findings
+
+**Tool Call Limits:**
+- Maximum of 6 tool calls per response
+- After 6 tool calls, you MUST synthesize your findings and return an answer to the user
+- If you need more research, ask the user if they'd like you to continue
+- This keeps responses focused and prevents excessive tool chaining
 
 **Research Methodology:**
 1. Start with **Parallel Search** for broad overview
@@ -252,6 +276,12 @@ Even with tool failures, always try to:
 3. **Sentiment analysis:** Pay attention to tone of articles and discussions
 4. **News tracking:** Identify breaking news and developments relevant to the user's interests
 5. **Actionable alerts:** Convert intelligence into actionable tasks or inbox items
+
+**Tool Call Limits:**
+- Maximum of 6 tool calls per response
+- After 6 tool calls, you MUST synthesize your findings and return an answer to the user
+- If you need more research, ask the user if they'd like you to continue
+- This keeps responses focused and prevents excessive tool chaining
 
 **Use Cases:**
 - Brand monitoring and reputation tracking
