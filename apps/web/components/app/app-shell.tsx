@@ -160,18 +160,18 @@ export function AppShell({ children }: AppShellProps) {
       style={
         isChatRoute
           ? ({
-              "--sidebar-width": "18rem",
-              "--sidebar-width-mobile": "18rem",
-            } as React.CSSProperties)
+            "--sidebar-width": "16rem",
+            "--sidebar-width-mobile": "18rem",
+          } as React.CSSProperties)
           : isNotesRoute
             ? ({
-                "--sidebar-width": "20rem",
-                "--sidebar-width-mobile": "18rem",
-              } as React.CSSProperties)
+              "--sidebar-width": "20rem",
+              "--sidebar-width-mobile": "18rem",
+            } as React.CSSProperties)
             : undefined
       }
     >
-      <Sidebar variant="floating" collapsible="icon">
+      <Sidebar variant="sidebar" collapsible="icon">
         {isChatRoute && chatSidebarMode === "threads" ? (
           <ChatSidebar
             onBackToWorkspace={() => setChatSidebarMode("workspace")}
@@ -215,16 +215,16 @@ export function AppShell({ children }: AppShellProps) {
                       const handleChatClick =
                         isChatRoute && isChatItem
                           ? (event: React.MouseEvent<HTMLAnchorElement>) => {
-                              event.preventDefault();
-                              setChatSidebarMode("threads");
-                            }
+                            event.preventDefault();
+                            setChatSidebarMode("threads");
+                          }
                           : undefined;
                       const handleNotesClick =
                         isNotesRoute && isNotesItem
                           ? (event: React.MouseEvent<HTMLAnchorElement>) => {
-                              event.preventDefault();
-                              setNotesSidebarMode("notes");
-                            }
+                            event.preventDefault();
+                            setNotesSidebarMode("notes");
+                          }
                           : undefined;
 
                       return (

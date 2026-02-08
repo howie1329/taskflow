@@ -72,7 +72,7 @@ function ComposerWithScope() {
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex-1 min-h-0 flex items-center justify-center px-6 py-12">
-        <div className="w-full max-w-7xl rounded-md border border-border/60 bg-card/40 dark:bg-card/20 p-6">
+        <div className="w-full max-w-7xl rounded-md bg-card/40 dark:bg-card/20 p-6">
           <h1 className="text-center text-sm font-medium text-muted-foreground">
             Taskflow Chat Agent
           </h1>
@@ -143,10 +143,10 @@ function ComposerWithScope() {
                       <span className="truncate max-w-[150px]">
                         {selectedProjectId
                           ? projects.find((p) => p._id === selectedProjectId)
-                              ?.icon +
-                              " " +
-                              projects.find((p) => p._id === selectedProjectId)
-                                ?.title || "Select project"
+                            ?.icon +
+                          " " +
+                          projects.find((p) => p._id === selectedProjectId)
+                            ?.title || "Select project"
                           : "No project"}
                       </span>
                     </ProjectSelectorTrigger>

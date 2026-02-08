@@ -547,7 +547,7 @@ function ThreadPageContent() {
   return (
     <div className="flex flex-col h-[calc(100vh-2rem)] w-full overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border/60 bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60 shrink-0">
+      <div className="flex items-center justify-between px-2 py-1 border-b border-border/60 bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60 shrink-0">
         <div className="flex items-center gap-3 min-w-0">
           {/* Sidebar trigger for desktop */}
           <div className="hidden md:block">
