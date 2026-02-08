@@ -45,6 +45,7 @@
     "@streamdown/code": "^1.0.1",
     "@streamdown/math": "^1.0.1",
     "@streamdown/mermaid": "^1.0.1",
+    "@supermemory/tools": "^1.4.0",
     "@takoviz/ai-sdk": "^1.0.1",
     "@tavily/core": "^0.7.1",
     "@xyflow/react": "^12.10.0",
