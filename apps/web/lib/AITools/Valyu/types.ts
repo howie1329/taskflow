@@ -16,8 +16,8 @@ export interface SearchResponse {
 export interface SearchResult {
     title: string;
     url: string;
-    content: string;
-    description?: string;
+    content: unknown;
+    description?: unknown;
     source: string;
     price: number;
     length: number;
