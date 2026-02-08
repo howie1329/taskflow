@@ -16,7 +16,7 @@ export const ValyuFinanceSearch = tool({
             throw new Error("Valyu API key is not set");
         }
         try {
-            const results = await valyu.search(query, { "maxNumResults": 5, "isToolCall": true, searchType: "all", category: "financial information" });
+            const results = await valyu.search(query, { "maxNumResults": 5, "isToolCall": true, searchType: "all", category: "financial information", relevanceThreshold: 0.70 });
             console.log("Valyu Finance Search results:", results);
             return valyuSearchResponseSchema.parse(results);
         } catch (error) {

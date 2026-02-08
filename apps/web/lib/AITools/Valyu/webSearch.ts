@@ -16,7 +16,7 @@ export const ValyuWebSearch = tool({
             throw new Error("Valyu API key is not set");
         }
         try {
-            const results = await valyu.search(query, { "maxNumResults": 5, "isToolCall": true, searchType: "all", category: category || "all" });
+            const results = await valyu.search(query, { "maxNumResults": 5, "isToolCall": true, searchType: "all", category: category || "all", relevanceThreshold: 0.60 });
             console.log("Valyu Web Search results:", results);
             return valyuSearchResponseSchema.parse(results);
         } catch (error) {
