@@ -15,6 +15,7 @@ import type { Id } from "@/convex/_generated/dataModel";
 import { Tools } from "@/lib/AITools/index";
 import { buildSystemPrompt, type ProjectContext } from "@/lib/ai_context";
 import { supermemoryTools, withSupermemory } from '@supermemory/tools/ai-sdk'
+import { ModeMapping } from "@/lib/AITools/ModeMapping";
 
 const getFirstUserText = (messages: UIMessage[]) => {
   const firstUser = messages.find((message) => message.role === "user");
@@ -55,7 +56,7 @@ export async function POST(req: Request) {
   let messageId: string | undefined;
   let userId: string | undefined;
   let projectId: Id<"projects"> | undefined;
-
+  let mode: string;
   try {
     const body = await req.json();
     model = body.model;
@@ -64,6 +65,7 @@ export async function POST(req: Request) {
     messageId = body.messageId;
     userId = body.userId;
     projectId = body.projectId || undefined;
+    mode = body.mode || "Basic";
   } catch (error) {
     console.error("Error parsing request:", error);
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
@@ -162,6 +164,9 @@ export async function POST(req: Request) {
     }
   }
 
+  // Get the active tools for the model
+  const activeTools = ModeMapping[mode].activeTools;
+
   // Build system instructions with project context
   const instructions = buildSystemPrompt(projectContext ?? undefined);
 
@@ -179,6 +184,7 @@ export async function POST(req: Request) {
             token,
           },
           tools: { ...Tools, ...(supermemoryTools(process.env.SUPERMEMORY_API_KEY!, { containerTags: [userId] }) as unknown as typeof Tools) },
+          activeTools: [...activeTools],
         });
 
         const stream = await agent.stream({ messages: modelMessages });

@@ -4,31 +4,35 @@ import { taskflowToolsKeys } from "./Taskflow/Taskflow"
 import { TavilyToolsKeys } from "./Tavily"
 import { ValyuToolsKeys } from "./Valyu/index"
 import { ParallelToolsKeys } from "./ParallelAi"
+import { Tools } from "./index"
+
+type ToolKey = keyof typeof Tools
+
 type Mode = {
     name: string
-    activeTools: string[]
+    activeTools: ToolKey[]
 }
 
 
 export const ModeMapping: Record<string, Mode> = {
     "Basic": {
         name: "Basic",
-        activeTools: [...taskflowToolsKeys, ...TavilyToolsKeys, "firecrawlScrape"]
+        activeTools: [...taskflowToolsKeys, ...TavilyToolsKeys, "firecrawlScrape"] as ToolKey[]
     },
     "Advanced": {
         name: "Advanced",
-        activeTools: [...taskflowToolsKeys, ...FirecrawlToolsKeys, ...ExaToolsKeys, ...ParallelToolsKeys, "firecrawlScrape"]
+        activeTools: [...taskflowToolsKeys, ...FirecrawlToolsKeys, ...ExaToolsKeys, ...ParallelToolsKeys, "firecrawlScrape"] as ToolKey[]
     },
     "Finance": {
         name: "Finance",
-        activeTools: [...taskflowToolsKeys, ...ValyuToolsKeys, ...ParallelToolsKeys, "firecrawlScrape"]
+        activeTools: [...taskflowToolsKeys, ...ValyuToolsKeys, ...ParallelToolsKeys, "firecrawlScrape"] as ToolKey[]
     },
     "Research": {
         name: "Research",
-        activeTools: [...taskflowToolsKeys, ...ValyuToolsKeys, ...ParallelToolsKeys, ...ExaToolsKeys, "firecrawlScrape"]
+        activeTools: [...taskflowToolsKeys, ...ValyuToolsKeys, ...ParallelToolsKeys, ...ExaToolsKeys, "firecrawlScrape"] as ToolKey[]
     },
     "Social": {
         name: "Social",
-        activeTools: [...taskflowToolsKeys, ...ValyuToolsKeys, ...ParallelToolsKeys, "firecrawlScrape"]
+        activeTools: [...taskflowToolsKeys, ...ValyuToolsKeys, ...ParallelToolsKeys, "firecrawlScrape"] as ToolKey[]
     }
 }
