@@ -136,6 +136,12 @@ import { useViewer } from "@/components/settings/hooks/use-viewer";
 import { AVAILABLE_MODES, getModeDescription } from "@/lib/AITools/ModePrompts";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { Streamdown } from "streamdown";
+import { code } from "@streamdown/code";
+import { mermaid } from "@streamdown/mermaid";
+import { math } from "@streamdown/math";
+import { cjk } from "@streamdown/cjk";
+import "katex/dist/katex.min.css"
 
 type ToolCall = {
   id: string;
@@ -753,9 +759,9 @@ function ThreadPageContent() {
                     className={cn(
                       "text-sm leading-6",
                       message.role === "assistant" &&
-                        "w-full border-l border-border/50 pl-6",
+                      "w-full border-l border-border/50 pl-6",
                       message.role === "user" &&
-                        "border border-border/60 bg-muted/40 px-4 py-3 max-w-[32rem] rounded-lg",
+                      "border border-border/60 bg-muted/40 px-2 py-2 max-w-[32rem] rounded-md",
                     )}
                   >
                     {message.role === "assistant" ? (
@@ -787,14 +793,14 @@ function ThreadPageContent() {
                                     const displayName =
                                       toolCall.toolName.startsWith("tool-")
                                         ? getToolDisplayName({
-                                            type: toolCall.toolName,
-                                            state: toolCall.state,
-                                          } as ToolUIPart)
+                                          type: toolCall.toolName,
+                                          state: toolCall.state,
+                                        } as ToolUIPart)
                                         : getToolDisplayName({
-                                            type: "dynamic-tool",
-                                            toolName: toolCall.toolName,
-                                            state: toolCall.state,
-                                          } as DynamicToolUIPart);
+                                          type: "dynamic-tool",
+                                          toolName: toolCall.toolName,
+                                          state: toolCall.state,
+                                        } as DynamicToolUIPart);
                                     return (
                                       <ChainOfThoughtStep
                                         key={toolCall.id}
@@ -882,13 +888,15 @@ function ThreadPageContent() {
                               </ReasoningContent>
                             </Reasoning>
                           )}
-                        <MessageResponse className="text-sm leading-6">
+                        <Streamdown plugins={{ code, mermaid, math, cjk }} isAnimating={status === "streaming"}>
                           {renderMessageText(message)}
-                        </MessageResponse>
+                        </Streamdown>
                       </div>
                     ) : (
                       <div className="text-sm whitespace-pre-wrap">
-                        {renderMessageText(message)}
+                        <Streamdown plugins={{ code, mermaid, math, cjk }} isAnimating={status === "streaming"}>
+                          {renderMessageText(message)}
+                        </Streamdown>
                       </div>
                     )}
                   </MessageContent>
@@ -976,10 +984,10 @@ function ThreadPageContent() {
                     <span className="truncate max-w-[150px]">
                       {selectedProjectId
                         ? projects.find((p) => p._id === selectedProjectId)
-                            ?.icon +
-                            " " +
-                            projects.find((p) => p._id === selectedProjectId)
-                              ?.title || "Select project"
+                          ?.icon +
+                        " " +
+                        projects.find((p) => p._id === selectedProjectId)
+                          ?.title || "Select project"
                         : "No project"}
                     </span>
                   </ProjectSelectorTrigger>

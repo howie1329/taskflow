@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-
+@source "../node_modules/streamdown/dist/*.js";
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -213,6 +213,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {
@@ -233,10 +234,12 @@
 }
 
 @keyframes cursor-blink {
+
   0%,
   50% {
     opacity: 0.4;
   }
+
   51%,
   100% {
     opacity: 0;
@@ -248,10 +251,12 @@
 }
 
 @keyframes pulse-loader {
+
   0%,
   100% {
     transform: scale(1);
   }
+
   50% {
     transform: scale(1.08);
   }
