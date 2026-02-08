@@ -1,6 +1,9 @@
+import { ExaToolsKeys } from "./Exa"
+import { FirecrawlToolsKeys } from "./Firecrawl"
 import { taskflowToolsKeys } from "./Taskflow/Taskflow"
+import { TavilyToolsKeys } from "./Tavily"
 import { ValyuToolsKeys } from "./Valyu/index"
-
+import { ParallelToolsKeys } from "./ParallelAi"
 type Mode = {
     name: string
     activeTools: string[]
@@ -8,28 +11,24 @@ type Mode = {
 
 
 export const ModeMapping: Record<string, Mode> = {
-    "default": {
-        name: "Default",
-        activeTools: [...taskflowToolsKeys, "webSearch"]
-    },
-    "Web": {
-        name: "Web Search",
-        activeTools: [...taskflowToolsKeys, "webSearch"]
+    "Basic": {
+        name: "Basic",
+        activeTools: [...taskflowToolsKeys, ...TavilyToolsKeys, "firecrawlScrape"]
     },
     "Advanced": {
         name: "Advanced",
-        activeTools: [...taskflowToolsKeys, ...ValyuToolsKeys]
+        activeTools: [...taskflowToolsKeys, ...FirecrawlToolsKeys, ...ExaToolsKeys, ...ParallelToolsKeys, "firecrawlScrape"]
     },
     "Finance": {
         name: "Finance",
-        activeTools: ["webSearch"]
+        activeTools: [...taskflowToolsKeys, ...ValyuToolsKeys, ...ParallelToolsKeys, "firecrawlScrape"]
     },
-    "Health": {
-        name: "Health",
-        activeTools: ["webSearch"]
+    "Research": {
+        name: "Research",
+        activeTools: [...taskflowToolsKeys, ...ValyuToolsKeys, ...ParallelToolsKeys, ...ExaToolsKeys, "firecrawlScrape"]
     },
-    "Travel": {
-        name: "Travel",
-        activeTools: ["webSearch"]
+    "Social": {
+        name: "Social",
+        activeTools: [...taskflowToolsKeys, ...ValyuToolsKeys, ...ParallelToolsKeys, "firecrawlScrape"]
     }
 }

@@ -21,15 +21,13 @@ export const ParallelWebSearch = tool({
       .array(z.string())
       .min(1)
       .describe("Search queries to run against Parallel.ai"),
-    maxResults: z.number().int().min(1).max(20).optional(),
-    maxCharsPerResult: z.number().int().min(1).optional(),
+    maxResults: z.number().int().min(1).max(3).optional(),
   }),
   outputSchema: parallelSearchResponseSchema,
   execute: async ({
     objective,
     searchQueries,
     maxResults,
-    maxCharsPerResult,
   }) => {
     const apiKey = process.env.PARALLEL_API_KEY
     if (!apiKey) {
@@ -40,8 +38,7 @@ export const ParallelWebSearch = tool({
     const result = await client.beta.search({
       objective,
       search_queries: searchQueries,
-      max_results: maxResults,
-      excerpts: maxCharsPerResult ? { max_chars_per_result: maxCharsPerResult } : undefined,
+      max_results: maxResults || 3,
     })
 
     return parallelSearchResponseSchema.parse(result)

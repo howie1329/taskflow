@@ -20,17 +20,14 @@ export const ExaWebSearch = tool({
       .number()
       .int()
       .min(1)
-      .max(10)
+      .max(5)
       .optional()
       .describe("Number of results to return"),
+    category: z.enum(["company", "research paper", "news", "pdf", "tweet", "personal site", "financial report", "people"]).optional().describe("The category of the search"),
     includeDomains: z
       .array(z.string())
       .optional()
       .describe("Only include results from these domains"),
-    excludeDomains: z
-      .array(z.string())
-      .optional()
-      .describe("Exclude results from these domains"),
     startPublishedDate: z
       .string()
       .optional()
@@ -44,8 +41,8 @@ export const ExaWebSearch = tool({
   execute: async ({
     query,
     numResults,
+    category,
     includeDomains,
-    excludeDomains,
     startPublishedDate,
     endPublishedDate,
   }) => {
@@ -53,9 +50,9 @@ export const ExaWebSearch = tool({
     try {
       const results = await exa.search(query, {
         type: "auto",
-        numResults,
+        numResults: numResults || 5,
+        category,
         includeDomains,
-        excludeDomains,
         startPublishedDate,
         endPublishedDate,
         contents: {
