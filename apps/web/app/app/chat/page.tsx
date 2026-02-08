@@ -31,7 +31,19 @@ import {
   ModelSelectorGroup,
   ModelSelectorName,
 } from "@/components/ai-elements/model-selector";
+import {
+  ModeSelector,
+  ModeSelectorTrigger,
+  ModeSelectorContent,
+  ModeSelectorInput,
+  ModeSelectorList,
+  ModeSelectorItem,
+  ModeSelectorGroup,
+  ModeSelectorName,
+  ModeSelectorDescription,
+} from "@/components/ai-elements/mode-selector";
 import { useChatContext } from "./components/chat-provider";
+import { AVAILABLE_MODES, getModeDescription } from "@/lib/AITools/ModePrompts";
 
 const SUGGESTIONS = [
   { title: "Plan my day", value: "Plan my day" },
@@ -53,6 +65,8 @@ function ComposerWithScope() {
     setSelectedModelId,
     selectedProjectId,
     setSelectedProjectId,
+    selectedMode,
+    setSelectedMode,
     projects,
     availableModels,
   } = useChatContext();
@@ -137,16 +151,42 @@ function ComposerWithScope() {
                     </ModelSelectorContent>
                   </ModelSelector>
                 )}
+                <ModeSelector>
+                  <ModeSelectorTrigger className="h-7 text-[11px] px-2">
+                    <ModeSelectorName>{selectedMode}</ModeSelectorName>
+                  </ModeSelectorTrigger>
+                  <ModeSelectorContent>
+                    <ModeSelectorInput placeholder="Search modes..." />
+                    <ModeSelectorList>
+                      <ModeSelectorGroup heading="Available Modes">
+                        {AVAILABLE_MODES.map((mode) => (
+                          <ModeSelectorItem
+                            key={mode}
+                            value={mode}
+                            onSelect={() => setSelectedMode(mode)}
+                          >
+                            <div className="flex flex-col items-start">
+                              <ModeSelectorName>{mode}</ModeSelectorName>
+                              <ModeSelectorDescription>
+                                {getModeDescription(mode)}
+                              </ModeSelectorDescription>
+                            </div>
+                          </ModeSelectorItem>
+                        ))}
+                      </ModeSelectorGroup>
+                    </ModeSelectorList>
+                  </ModeSelectorContent>
+                </ModeSelector>
                 {projects.length > 0 && (
                   <ProjectSelector>
                     <ProjectSelectorTrigger className="h-7 text-[11px] px-2 flex items-center gap-1">
                       <span className="truncate max-w-[150px]">
                         {selectedProjectId
                           ? projects.find((p) => p._id === selectedProjectId)
-                            ?.icon +
-                          " " +
-                          projects.find((p) => p._id === selectedProjectId)
-                            ?.title || "Select project"
+                              ?.icon +
+                              " " +
+                              projects.find((p) => p._id === selectedProjectId)
+                                ?.title || "Select project"
                           : "No project"}
                       </span>
                     </ProjectSelectorTrigger>

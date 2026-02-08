@@ -16,6 +16,7 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Doc } from "@/convex/_generated/dataModel";
 import { useViewer } from "@/components/settings/hooks/use-viewer";
+import type { ModeName } from "@/lib/AITools/ModePrompts";
 
 type ChatContextValue = {
   activeThreadId: string;
@@ -29,6 +30,8 @@ type ChatContextValue = {
   setSelectedModelId: (value: string | null) => void;
   selectedProjectId: string | null;
   setSelectedProjectId: (value: string | null) => void;
+  selectedMode: ModeName;
+  setSelectedMode: (value: ModeName) => void;
   availableModels: Doc<"availableModels">[];
   projects: Doc<"projects">[];
   thread: Doc<"thread"> | null | undefined;
@@ -94,6 +97,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
     null,
   );
+  const [selectedMode, setSelectedMode] = useState<ModeName>("Basic");
   const hasUserSelectedModel = useRef(false);
   const previousThreadId = useRef(activeThreadId);
 
@@ -145,7 +149,12 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     await sendMessage(
       { text: trimmed },
       {
-        body: { model: selectedModelId, userId, projectId: selectedProjectId },
+        body: {
+          model: selectedModelId,
+          userId,
+          projectId: selectedProjectId,
+          mode: selectedMode,
+        },
       },
     );
   };
@@ -163,6 +172,8 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       setSelectedModelId: handleSetSelectedModelId,
       selectedProjectId,
       setSelectedProjectId,
+      selectedMode,
+      setSelectedMode,
       availableModels,
       projects: projects ?? [],
       thread,
@@ -178,6 +189,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       stop,
       selectedModelId,
       selectedProjectId,
+      selectedMode,
       availableModels,
       projects,
       thread,

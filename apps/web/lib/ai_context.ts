@@ -1,4 +1,5 @@
 import { MainAgentPrompt } from "./AiPrompts/MainAgent";
+import { getModePrompt, type ModeName } from "./AITools/ModePrompts";
 export interface ProjectContext {
   project: {
     id: string;
@@ -51,18 +52,27 @@ ${project.description ? `**Description**: ${project.description}\n` : ""}
   return prompt;
 }
 
-export const BASE_SYSTEM_INSTRUCTIONS = MainAgentPrompt
+export const BASE_SYSTEM_INSTRUCTIONS = MainAgentPrompt;
 
 export function buildSystemPrompt(
   projectContext?: ProjectContext,
+  modeName?: ModeName,
   customInstructions?: string,
 ): string {
   const baseInstructions = customInstructions || BASE_SYSTEM_INSTRUCTIONS;
+  const parts: string[] = [baseInstructions];
 
-  if (!projectContext) {
-    return baseInstructions;
+  // Add mode-specific instructions if mode is provided
+  if (modeName) {
+    const modePrompt = getModePrompt(modeName);
+    parts.push(modePrompt);
   }
 
-  const contextPrompt = buildProjectContextPrompt(projectContext);
-  return `${baseInstructions}\n\n${contextPrompt}`;
+  // Add project context if provided
+  if (projectContext) {
+    const contextPrompt = buildProjectContextPrompt(projectContext);
+    parts.push(contextPrompt);
+  }
+
+  return parts.join("\n\n");
 }

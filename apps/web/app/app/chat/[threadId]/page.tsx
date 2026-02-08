@@ -51,6 +51,17 @@ import {
   ModelSelectorName,
 } from "@/components/ai-elements/model-selector";
 import {
+  ModeSelector,
+  ModeSelectorTrigger,
+  ModeSelectorContent,
+  ModeSelectorInput,
+  ModeSelectorList,
+  ModeSelectorItem,
+  ModeSelectorGroup,
+  ModeSelectorName,
+  ModeSelectorDescription,
+} from "@/components/ai-elements/mode-selector";
+import {
   Conversation,
   ConversationContent,
   ConversationEmptyState,
@@ -116,6 +127,7 @@ import {
 import { TavilyWebSearchCard } from "@/components/ai-elements/tavily-web-search-card";
 import { useChatContext } from "../components/chat-provider";
 import { useViewer } from "@/components/settings/hooks/use-viewer";
+import { AVAILABLE_MODES, getModeDescription } from "@/lib/AITools/ModePrompts";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 
@@ -437,6 +449,8 @@ function ThreadPageContent() {
     setSelectedModelId,
     selectedProjectId,
     setSelectedProjectId,
+    selectedMode,
+    setSelectedMode,
     projects,
     availableModels,
   } = useChatContext();
@@ -733,9 +747,9 @@ function ThreadPageContent() {
                     className={cn(
                       "text-sm leading-6",
                       message.role === "assistant" &&
-                      "w-full border-l border-border/50 pl-6",
+                        "w-full border-l border-border/50 pl-6",
                       message.role === "user" &&
-                      "border border-border/60 bg-muted/40 px-4 py-3 max-w-[32rem] rounded-lg",
+                        "border border-border/60 bg-muted/40 px-4 py-3 max-w-[32rem] rounded-lg",
                     )}
                   >
                     {message.role === "assistant" ? (
@@ -767,14 +781,14 @@ function ThreadPageContent() {
                                     const displayName =
                                       toolCall.toolName.startsWith("tool-")
                                         ? getToolDisplayName({
-                                          type: toolCall.toolName,
-                                          state: toolCall.state,
-                                        } as ToolUIPart)
+                                            type: toolCall.toolName,
+                                            state: toolCall.state,
+                                          } as ToolUIPart)
                                         : getToolDisplayName({
-                                          type: "dynamic-tool",
-                                          toolName: toolCall.toolName,
-                                          state: toolCall.state,
-                                        } as DynamicToolUIPart);
+                                            type: "dynamic-tool",
+                                            toolName: toolCall.toolName,
+                                            state: toolCall.state,
+                                          } as DynamicToolUIPart);
                                     return (
                                       <ChainOfThoughtStep
                                         key={toolCall.id}
@@ -887,16 +901,42 @@ function ThreadPageContent() {
                   </ModelSelectorContent>
                 </ModelSelector>
               )}
+              <ModeSelector>
+                <ModeSelectorTrigger className="h-7 text-[11px] px-2">
+                  <ModeSelectorName>{selectedMode}</ModeSelectorName>
+                </ModeSelectorTrigger>
+                <ModeSelectorContent>
+                  <ModeSelectorInput placeholder="Search modes..." />
+                  <ModeSelectorList>
+                    <ModeSelectorGroup heading="Available Modes">
+                      {AVAILABLE_MODES.map((mode) => (
+                        <ModeSelectorItem
+                          key={mode}
+                          value={mode}
+                          onSelect={() => setSelectedMode(mode)}
+                        >
+                          <div className="flex flex-col items-start">
+                            <ModeSelectorName>{mode}</ModeSelectorName>
+                            <ModeSelectorDescription>
+                              {getModeDescription(mode)}
+                            </ModeSelectorDescription>
+                          </div>
+                        </ModeSelectorItem>
+                      ))}
+                    </ModeSelectorGroup>
+                  </ModeSelectorList>
+                </ModeSelectorContent>
+              </ModeSelector>
               {projects.length > 0 && (
                 <ProjectSelector>
                   <ProjectSelectorTrigger className="h-7 text-[11px] px-2 flex items-center gap-1">
                     <span className="truncate max-w-[150px]">
                       {selectedProjectId
                         ? projects.find((p) => p._id === selectedProjectId)
-                          ?.icon +
-                        " " +
-                        projects.find((p) => p._id === selectedProjectId)
-                          ?.title || "Select project"
+                            ?.icon +
+                            " " +
+                            projects.find((p) => p._id === selectedProjectId)
+                              ?.title || "Select project"
                         : "No project"}
                     </span>
                   </ProjectSelectorTrigger>
