@@ -16,7 +16,7 @@ export const ValyuWebSearch = tool({
             throw new Error("Valyu API key is not set");
         }
         try {
-            const results = await valyu.search(query, { "maxNumResults": 5, "isToolCall": true, searchType: "all", category: category || "all", includedSources: ["valyu/valyu-arxiv", "valyu/valyu-medrxiv", "wiley/wiley-finance-papers", "wiley/wiley-finance-books", "valyu/valyu-biorxiv", "valyu/valyu-pubmed", "valyu/valyu-who-health-data", "valyu/valyu-nih-grants", "valyu/valyu-who-icd", "valyu/valyu-npi-registry", "valyu/valyu-drugbank", "valyu/valyu-clinical-trials"] });
+            const results = await valyu.search(query, { "maxNumResults": 5, "isToolCall": true, searchType: "all", category: category || "all" });
             console.log("Valyu Web Search results:", results);
             return valyuSearchResponseSchema.parse(results);
         } catch (error) {
