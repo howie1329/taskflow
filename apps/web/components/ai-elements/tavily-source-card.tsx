@@ -1,23 +1,10 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import {
-  ExternalLink,
-  Check,
-  Copy,
-  ChevronDown,
-  ChevronUp,
-} from "lucide-react";
+import { ExternalLink, Check, Copy, ChevronDown, ChevronUp } from "lucide-react";
 import type { TavilyResult } from "@/lib/AITools/Tavily/types";
 
 interface TavilySourceCardProps {
@@ -72,129 +59,86 @@ export function TavilySourceCard({ result, index }: TavilySourceCardProps) {
   );
 
   return (
-    <TooltipProvider>
-      <Card
-        className={cn(
-          "group relative overflow-hidden transition-all duration-300 ease-out",
-          "hover:shadow-lg hover:border-primary/30 hover:-translate-y-0.5",
+    <article
+      className="group rounded-sm border border-border/50 bg-card/30 px-3 py-2.5 transition-colors hover:bg-muted/20"
+      role="article"
+      aria-label={`Source ${index + 1}: ${result.title}`}
+    >
+      <div className="flex items-start gap-2">
+        {!imageError && result.favicon ? (
+          <img
+            src={result.favicon}
+            alt=""
+            className="mt-0.5 h-4 w-4 rounded-sm flex-shrink-0"
+            onError={() => setImageError(true)}
+            loading="lazy"
+          />
+        ) : (
+          <div className="mt-0.5 flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-sm bg-muted">
+            <ExternalLink className="h-2.5 w-2.5 text-muted-foreground" />
+          </div>
         )}
-        role="article"
-        aria-label={`Source ${index + 1}: ${result.title}`}
+        <a
+          href={result.url}
+          target="_blank"
+          rel="noreferrer"
+          className="line-clamp-2 text-sm font-medium leading-5 hover:underline"
+        >
+          {result.title}
+        </a>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleCopyUrl}
+          className="ml-auto h-6 w-6 p-0 text-muted-foreground"
+          aria-label={copied ? "URL copied" : "Copy URL"}
+        >
+          {copied ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
+        </Button>
+      </div>
+
+      <div className="mt-2 flex items-center gap-2">
+        {result.score !== undefined ? (
+          <Badge variant="outline" className={cn("h-5 rounded-sm text-[10px]", getScoreColor(result.score))}>
+            {Math.round(result.score * 100)}%
+          </Badge>
+        ) : null}
+        {result.publishedDate ? (
+          <span className="text-[11px] text-muted-foreground">{formatDate(result.publishedDate)}</span>
+        ) : null}
+      </div>
+
+      <div
+        className={cn(
+          "mt-2 overflow-hidden text-xs leading-5 text-muted-foreground transition-all duration-200",
+          isExpanded ? "max-h-[360px]" : "max-h-10",
+        )}
+        role="region"
+        aria-expanded={isExpanded}
       >
-        <CardHeader className="pb-2 space-y-2">
-          {/* Title Row with Favicon */}
-          <div className="flex items-start gap-2">
-            {!imageError && result.favicon ? (
-              <img
-                src={result.favicon}
-                alt=""
-                className="w-5 h-5 rounded-sm flex-shrink-0 mt-0.5"
-                onError={() => setImageError(true)}
-                loading="lazy"
-              />
-            ) : (
-              <div className="w-5 h-5 rounded-sm bg-muted flex-shrink-0 mt-0.5 flex items-center justify-center">
-                <ExternalLink className="w-3 h-3 text-muted-foreground" />
-              </div>
-            )}
-            <a
-              href={result.url}
-              target="_blank"
-              rel="noreferrer"
-              className="font-medium text-sm line-clamp-2 hover:text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50 rounded"
-              tabIndex={0}
-            >
-              {result.title}
-            </a>
-          </div>
+        <p>{result.content}</p>
+      </div>
 
-          {/* Metadata Row */}
-          <div className="flex items-center gap-2 flex-wrap">
-            {result.score !== undefined && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Badge
-                    variant="outline"
-                    className={cn(
-                      "text-xs font-medium cursor-help",
-                      getScoreColor(result.score),
-                    )}
-                  >
-                    {Math.round(result.score * 100)}%
-                  </Badge>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Relevance score based on query match</p>
-                </TooltipContent>
-              </Tooltip>
-            )}
-            {result.publishedDate && (
-              <span className="text-xs text-muted-foreground">
-                {formatDate(result.publishedDate)}
-              </span>
-            )}
-
-            {/* Copy URL Button */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleCopyUrl}
-                  className="h-6 w-6 p-0 ml-auto opacity-0 group-hover:opacity-100 transition-opacity"
-                  aria-label={copied ? "URL copied" : "Copy URL"}
-                >
-                  {copied ? (
-                    <Check className="w-3 h-3 text-emerald-500" />
-                  ) : (
-                    <Copy className="w-3 h-3" />
-                  )}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{copied ? "Copied!" : "Copy URL"}</p>
-              </TooltipContent>
-            </Tooltip>
-          </div>
-        </CardHeader>
-
-        <CardContent className="pt-0 space-y-2">
-          {/* Content Preview */}
-          <div
-            className={cn(
-              "text-sm text-foreground/80 overflow-hidden transition-all duration-300 ease-in-out",
-              isExpanded ? "max-h-[500px]" : "max-h-[4.5rem]",
-            )}
-            role="region"
-            aria-expanded={isExpanded}
-          >
-            <p className="leading-relaxed">{result.content}</p>
-          </div>
-
-          {/* Expand Button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsExpanded(!isExpanded)}
-            onKeyDown={handleKeyDown}
-            className="text-xs text-primary hover:text-primary/80 h-auto py-1 px-0 flex items-center gap-1"
-            aria-expanded={isExpanded}
-            aria-controls={`content-${index}`}
-          >
-            {isExpanded ? (
-              <>
-                <ChevronUp className="w-3 h-3" />
-                Show less
-              </>
-            ) : (
-              <>
-                <ChevronDown className="w-3 h-3" />
-                Read more
-              </>
-            )}
-          </Button>
-        </CardContent>
-      </Card>
-    </TooltipProvider>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => setIsExpanded(!isExpanded)}
+        onKeyDown={handleKeyDown}
+        className="mt-1 h-6 px-1 text-[11px] text-muted-foreground hover:text-foreground"
+        aria-expanded={isExpanded}
+      >
+        {isExpanded ? (
+          <>
+            <ChevronUp className="mr-1 h-3 w-3" />
+            Show less
+          </>
+        ) : (
+          <>
+            <ChevronDown className="mr-1 h-3 w-3" />
+            Read more
+          </>
+        )}
+      </Button>
+    </article>
   );
 }

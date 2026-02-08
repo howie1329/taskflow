@@ -174,13 +174,15 @@ export async function POST(req: Request) {
     }
   }
 
+  const selectedMode = ModeMapping[mode] ? mode : "Basic";
+
   // Get the active tools for the model
-  const activeTools = ModeMapping[mode].activeTools;
+  const activeTools = ModeMapping[selectedMode].activeTools;
 
   // Build system instructions with project context and mode
   const instructions = buildSystemPrompt(
     projectContext ?? undefined,
-    mode as ModeName,
+    selectedMode as ModeName,
   );
 
   const response = createUIMessageStreamResponse({

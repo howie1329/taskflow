@@ -1,17 +1,7 @@
 import Parallel from "parallel-web"
 import { tool } from "ai"
 import { z } from "zod"
-
-const parallelSearchResultSchema = z.object({
-  title: z.string().optional(),
-  url: z.string().url().optional(),
-  excerpt: z.string().optional(),
-  source: z.string().optional(),
-})
-
-export const parallelSearchResponseSchema = z.object({
-  results: z.array(parallelSearchResultSchema).optional(),
-})
+import { parallelSearchResponseSchema } from "./types"
 
 export const ParallelWebSearch = tool({
   description: "Search the web using Parallel.ai",

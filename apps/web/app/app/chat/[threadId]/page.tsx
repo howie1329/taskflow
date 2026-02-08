@@ -126,20 +126,28 @@ import {
 import { ChevronDownIcon } from "lucide-react";
 import type { UIMessage, ToolUIPart, DynamicToolUIPart } from "ai";
 import {
-  type TavilyWebSearchOutput,
   isTavilyWebSearchOutput,
   normalizeTavilyOutput,
 } from "@/lib/AITools/Tavily/types";
 import { TavilyWebSearchCard } from "@/components/ai-elements/tavily-web-search-card";
+import { ExaWebSearchCard } from "@/components/ai-elements/exa-web-search-card";
+import { ExaAnswerCard } from "@/components/ai-elements/exa-answer-card";
+import { FirecrawlSearchCard } from "@/components/ai-elements/firecrawl-search-card";
+import { FirecrawlScrapeCard } from "@/components/ai-elements/firecrawl-scrape-card";
+import { ParallelWebSearchCard } from "@/components/ai-elements/parallel-web-search-card";
+import { ValyuWebSearchCard } from "@/components/ai-elements/valyu-web-search-card";
+import { ValyuFinanceSearchCard } from "@/components/ai-elements/valyu-finance-search-card";
+import { TaskflowToolResultCard } from "@/components/ai-elements/taskflow-tool-result-card";
 import { useChatContext } from "../components/chat-provider";
 import { useViewer } from "@/components/settings/hooks/use-viewer";
 import { AVAILABLE_MODES, getModeDescription } from "@/lib/AITools/ModePrompts";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { TASKFLOW_TOOL_KEYS } from "@/lib/AITools/taskflow-tool-keys";
 
 type ToolCall = {
   id: string;
-  toolName: string;
+  toolKey: string;
   state: ToolUIPart["state"];
   input?: unknown;
   output?: unknown;
@@ -152,17 +160,9 @@ type ToolStateInfo = {
   isError: boolean;
 };
 
-function getToolDisplayName(part: ToolUIPart | DynamicToolUIPart): string {
-  if (part.type === "dynamic-tool" && "toolName" in part) {
-    const name = part.toolName;
-    if (name === "webSearch") return "Web search";
-    return name
-      .replace(/([A-Z])/g, " $1")
-      .replace(/^./, (s) => s.toUpperCase());
-  }
-  const baseType = part.type.split("-").slice(1).join("-");
-  if (baseType === "webSearch") return "Web search";
-  return baseType
+function getToolDisplayNameFromKey(toolKey: string): string {
+  if (toolKey === "webSearch") return "Web search";
+  return toolKey
     .replace(/([A-Z])/g, " $1")
     .replace(/^./, (s) => s.toUpperCase());
 }
@@ -281,8 +281,57 @@ function describeValue(value: unknown): string {
   return String(value);
 }
 
+function getOutputArrayLength(output: unknown, key: string): number {
+  if (!output || typeof output !== "object") return 0;
+  const value = (output as Record<string, unknown>)[key];
+  return Array.isArray(value) ? value.length : 0;
+}
+
 function getToolSummary(toolCall: ToolCall): string | null {
-  if (toolCall.toolName === "webSearch" && isWebSearchOutput(toolCall.output)) {
+  if (toolCall.toolKey === "tavilyWebSearch" && isTavilyWebSearchOutput(toolCall.output)) {
+    const output = normalizeTavilyOutput(
+      toolCall.output as unknown as Record<string, unknown>,
+    );
+    return `Found ${output.results.length} sources`;
+  }
+
+  if (toolCall.toolKey === "exaWebSearch") {
+    const resultCount = getOutputArrayLength(toolCall.output, "results");
+    return `Found ${resultCount} Exa results`;
+  }
+
+  if (toolCall.toolKey === "exaAnswer") {
+    return "Generated answer with citations";
+  }
+
+  if (toolCall.toolKey === "firecrawlSearch") {
+    const resultCount = getOutputArrayLength(toolCall.output, "data");
+    return `Found ${resultCount} pages`;
+  }
+
+  if (toolCall.toolKey === "firecrawlScrape") {
+    return "Scraped page content";
+  }
+
+  if (toolCall.toolKey === "parallelWebSearch") {
+    const resultCount = getOutputArrayLength(toolCall.output, "results");
+    return `Found ${resultCount} aggregated results`;
+  }
+
+  if (toolCall.toolKey === "valyuWebSearch" || toolCall.toolKey === "valyuFinanceSearch") {
+    const resultCount = getOutputArrayLength(toolCall.output, "results");
+    return `Found ${resultCount} Valyu results`;
+  }
+
+  if (TASKFLOW_TOOL_KEYS.includes(toolCall.toolKey as (typeof TASKFLOW_TOOL_KEYS)[number])) {
+    if (toolCall.toolKey.startsWith("create")) return "Created successfully";
+    if (toolCall.toolKey.startsWith("update")) return "Updated successfully";
+    if (toolCall.toolKey.startsWith("delete")) return "Deleted successfully";
+    if (toolCall.toolKey.startsWith("list")) return "Listed records";
+    if (toolCall.toolKey.startsWith("get")) return "Fetched record";
+  }
+
+  if (toolCall.toolKey === "webSearch" && isWebSearchOutput(toolCall.output)) {
     const output = toolCall.output as WebSearchOutput;
     return `Found ${output.results.length} sources`;
   }
@@ -297,12 +346,12 @@ function getToolSummary(toolCall: ToolCall): string | null {
 }
 
 function getToolMetaItems(toolCall: ToolCall) {
-  const providerType = detectProvider(toolCall.toolName);
+  const providerType = detectProvider(toolCall.toolKey);
   const providerName = providerConfig[providerType]?.name ?? "Unknown";
 
   const items = [
     { label: "Provider", value: providerName },
-    { label: "Tool", value: toolCall.toolName.replace(/^tool-/, "") },
+    { label: "Tool", value: toolCall.toolKey },
     { label: "Status", value: toolCall.state.replace(/-/g, " ") },
   ];
 
@@ -343,20 +392,42 @@ function renderToolContent(toolCall: ToolCall): React.ReactNode {
     return <p className="text-destructive text-sm">{toolCall.errorText}</p>;
   }
 
-  // Tavly-specific web search rendering with enhanced card UI
-  if (
-    toolCall.toolName === "tool-tavilyWebSearch" &&
-    isTavilyWebSearchOutput(toolCall.output)
-  ) {
-    // Normalize the output to handle both snake_case (API) and camelCase (schema) formats
-    const output = normalizeTavilyOutput(
-      toolCall.output as unknown as Record<string, unknown>,
-    );
-    return <TavilyWebSearchCard {...output} />;
+  switch (toolCall.toolKey) {
+    case "tavilyWebSearch":
+      if (isTavilyWebSearchOutput(toolCall.output)) {
+        const output = normalizeTavilyOutput(
+          toolCall.output as unknown as Record<string, unknown>,
+        );
+        return <TavilyWebSearchCard {...output} />;
+      }
+      break;
+    case "exaWebSearch":
+      return <ExaWebSearchCard output={toolCall.output} />;
+    case "exaAnswer":
+      return <ExaAnswerCard output={toolCall.output} />;
+    case "firecrawlSearch":
+      return <FirecrawlSearchCard output={toolCall.output} />;
+    case "firecrawlScrape":
+      return <FirecrawlScrapeCard output={toolCall.output} />;
+    case "parallelWebSearch":
+      return <ParallelWebSearchCard output={toolCall.output} />;
+    case "valyuWebSearch":
+      return <ValyuWebSearchCard output={toolCall.output} />;
+    case "valyuFinanceSearch":
+      return <ValyuFinanceSearchCard output={toolCall.output} />;
+    default:
+      if (TASKFLOW_TOOL_KEYS.includes(toolCall.toolKey as (typeof TASKFLOW_TOOL_KEYS)[number])) {
+        return (
+          <TaskflowToolResultCard
+            toolKey={toolCall.toolKey}
+            input={toolCall.input}
+            output={toolCall.output}
+          />
+        );
+      }
   }
 
-  //Might deprecate this as there are no tool calls called webSearch anymore
-  if (toolCall.toolName === "webSearch" && isWebSearchOutput(toolCall.output)) {
+  if (toolCall.toolKey === "webSearch" && isWebSearchOutput(toolCall.output)) {
     const output = toolCall.output as WebSearchOutput;
     return (
       <div className="space-y-2">
@@ -397,17 +468,21 @@ function getToolCalls(message: UIMessage): ToolCall[] {
       if (typeof part.type !== "string") return false;
       return part.type.startsWith("tool-") || part.type === "dynamic-tool";
     })
-    .map((part) => ({
-      id: part.toolCallId ?? `tool-${Math.random().toString(36).slice(2)}`,
-      toolName:
+    .map((part) => {
+      const rawToolName =
         part.type === "dynamic-tool" && "toolName" in part
           ? part.toolName
-          : part.type,
-      state: part.state,
-      input: "input" in part ? part.input : undefined,
-      output: "output" in part ? part.output : undefined,
-      errorText: "errorText" in part ? part.errorText : undefined,
-    }));
+          : part.type;
+
+      return {
+        id: part.toolCallId ?? `tool-${Math.random().toString(36).slice(2)}`,
+        toolKey: rawToolName.replace(/^tool-/, ""),
+        state: part.state,
+        input: "input" in part ? part.input : undefined,
+        output: "output" in part ? part.output : undefined,
+        errorText: "errorText" in part ? part.errorText : undefined,
+      };
+    });
 }
 
 type WebSearchResult = {
@@ -772,7 +847,7 @@ function ThreadPageContent() {
                                         tc.state === "output-available" ||
                                         tc.state === "output-error",
                                     )
-                                    .map((tc) => detectProvider(tc.toolName))}
+                                    .map((tc) => detectProvider(tc.toolKey))}
                                 >
                                   Actions ({toolCalls.length})
                                 </EnhancedChainOfThoughtHeader>
@@ -785,16 +860,9 @@ function ThreadPageContent() {
                                       toolCall.input,
                                     );
                                     const displayName =
-                                      toolCall.toolName.startsWith("tool-")
-                                        ? getToolDisplayName({
-                                            type: toolCall.toolName,
-                                            state: toolCall.state,
-                                          } as ToolUIPart)
-                                        : getToolDisplayName({
-                                            type: "dynamic-tool",
-                                            toolName: toolCall.toolName,
-                                            state: toolCall.state,
-                                          } as DynamicToolUIPart);
+                                      getToolDisplayNameFromKey(
+                                        toolCall.toolKey,
+                                      );
                                     return (
                                       <ChainOfThoughtStep
                                         key={toolCall.id}
@@ -803,7 +871,7 @@ function ThreadPageContent() {
                                           summary ?? stateInfo.badgeLabel
                                         }
                                         status={stateInfo.stepStatus}
-                                        toolName={toolCall.toolName}
+                                        toolName={toolCall.toolKey}
                                       />
                                     );
                                   })}
@@ -823,7 +891,7 @@ function ThreadPageContent() {
                                         {toolCalls.map((toolCall) => (
                                           <Tool key={toolCall.id}>
                                             <EnhancedToolHeader
-                                              toolName={toolCall.toolName}
+                                              toolName={toolCall.toolKey}
                                               state={toolCall.state}
                                             />
                                             <ToolContent>
@@ -849,7 +917,7 @@ function ThreadPageContent() {
                                     toolCalls.map((toolCall) => (
                                       <Tool key={toolCall.id}>
                                         <EnhancedToolHeader
-                                          toolName={toolCall.toolName}
+                                          toolName={toolCall.toolKey}
                                           state={toolCall.state}
                                         />
                                         <ToolContent>

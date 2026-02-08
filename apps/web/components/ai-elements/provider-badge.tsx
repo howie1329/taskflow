@@ -1,15 +1,18 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { TASKFLOW_TOOL_KEYS } from "@/lib/AITools/taskflow-tool-keys";
 import { useMemo } from "react";
 import { Clock, Database, Globe, Search } from "lucide-react";
 
 export type ProviderType =
-  | "massive"
+  | "taskflow"
   | "exa"
   | "parallel"
   | "tavily"
   | "firecrawl"
+  | "valyu"
+  | "supermemory"
   | "github"
   | "unknown";
 
@@ -22,12 +25,12 @@ interface ProviderInfo {
 }
 
 const providerConfig: Record<ProviderType, ProviderInfo> = {
-  massive: {
-    name: "Massive",
-    type: "massive",
+  taskflow: {
+    name: "Taskflow",
+    type: "taskflow",
     icon: <Database className="size-3" />,
-    color: "text-blue-500",
-    bgColor: "bg-blue-500/10",
+    color: "text-sky-600",
+    bgColor: "bg-sky-500/10",
   },
   exa: {
     name: "Exa",
@@ -57,6 +60,20 @@ const providerConfig: Record<ProviderType, ProviderInfo> = {
     color: "text-orange-500",
     bgColor: "bg-orange-500/10",
   },
+  valyu: {
+    name: "Valyu",
+    type: "valyu",
+    icon: <Search className="size-3" />,
+    color: "text-cyan-600",
+    bgColor: "bg-cyan-500/10",
+  },
+  supermemory: {
+    name: "Supermemory",
+    type: "supermemory",
+    icon: <Database className="size-3" />,
+    color: "text-violet-600",
+    bgColor: "bg-violet-500/10",
+  },
   github: {
     name: "GitHub",
     type: "github",
@@ -65,7 +82,7 @@ const providerConfig: Record<ProviderType, ProviderInfo> = {
     bgColor: "bg-slate-500/10",
   },
   unknown: {
-    name: "Taskflow",
+    name: "Unknown",
     type: "unknown",
     icon: <Database className="size-3" />,
     color: "text-muted-foreground",
@@ -74,17 +91,18 @@ const providerConfig: Record<ProviderType, ProviderInfo> = {
 };
 
 function detectProvider(toolName: string): ProviderType {
-  const lower = toolName.toLowerCase();
-  if (
-    lower.includes("massive") ||
-    lower.includes("stock") ||
-    lower.includes("market")
-  )
-    return "massive";
-  if (lower.includes("exa")) return "exa";
-  if (lower.includes("parallel") || lower.includes("deep")) return "parallel";
-  if (lower.includes("tavily") || lower.includes("websearch")) return "tavily";
-  if (lower.includes("firecrawl")) return "firecrawl";
+  const toolKey = toolName.replace(/^tool-/, "");
+  const lower = toolKey.toLowerCase();
+
+  if (TASKFLOW_TOOL_KEYS.includes(toolKey as (typeof TASKFLOW_TOOL_KEYS)[number])) {
+    return "taskflow";
+  }
+  if (lower.startsWith("valyu")) return "valyu";
+  if (lower.startsWith("exa")) return "exa";
+  if (lower.startsWith("parallel")) return "parallel";
+  if (lower.startsWith("tavily")) return "tavily";
+  if (lower.startsWith("firecrawl")) return "firecrawl";
+  if (lower.startsWith("supermemory")) return "supermemory";
   if (lower.includes("github")) return "github";
   return "unknown";
 }

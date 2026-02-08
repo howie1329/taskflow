@@ -1,0 +1,17 @@
+export const TASKFLOW_TOOL_KEYS = [
+  "listTasks",
+  "getTask",
+  "createTask",
+  "updateTask",
+  "deleteTask",
+  "listProjects",
+  "getProject",
+  "createProject",
+  "updateProject",
+  "deleteProject",
+  "listInboxItems",
+  "getInboxItem",
+  "createInboxItem",
+  "updateInboxItem",
+  "deleteInboxItem",
+] as const;

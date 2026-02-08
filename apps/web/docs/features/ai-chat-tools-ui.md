@@ -6,6 +6,7 @@ This doc explains how tool calls and the Chain of Thought UI are rendered in the
 
 - Chat page rendering: `apps/web/app/app/chat/[threadId]/page.tsx`
 - Tool UI components: `apps/web/components/ai-elements/tool.tsx`
+- Dedicated tool result cards: `apps/web/components/ai-elements/*-card.tsx`
 - Chain of Thought UI: `apps/web/components/ai-elements/chain-of-thought.tsx`
 - Provider badges + detection: `apps/web/components/ai-elements/provider-badge.tsx`
 - Tool registration: `apps/web/lib/AITools/Tools.ts`
@@ -64,16 +65,46 @@ The chat page uses:
 
 - `getToolSummary()` to build a short summary.
 - `getToolMetaItems()` to build the metadata panel.
-- `renderToolContent()` for detailed output (including special web search rendering).
+- `renderToolContent()` with a `switch(toolKey)` mapping for custom renderers.
+
+### Tool key normalization
+
+- `ToolCall.toolKey` is normalized from raw tool names with `replace(/^tool-/, "")`.
+- Provider detection, metadata labels, and custom renderer dispatch all use `toolKey`.
+- This keeps behavior consistent between `tool-*` and `dynamic-tool` message parts.
+
+### Current custom render map
+
+- `tavilyWebSearch` → `TavilyWebSearchCard`
+- `exaWebSearch` → `ExaWebSearchCard`
+- `exaAnswer` → `ExaAnswerCard`
+- `firecrawlSearch` → `FirecrawlSearchCard`
+- `firecrawlScrape` → `FirecrawlScrapeCard`
+- `parallelWebSearch` → `ParallelWebSearchCard`
+- `valyuWebSearch` → `ValyuWebSearchCard`
+- `valyuFinanceSearch` → `ValyuFinanceSearchCard`
+- Taskflow tools (`listTasks`, `createTask`, etc.) → `TaskflowToolResultCard`
 
 ## Provider Badges
 
 Location: `apps/web/components/ai-elements/provider-badge.tsx`
 
-- `detectProvider(toolName)` maps a tool name to a provider type.
+- `detectProvider(toolName)` maps normalized tool keys to provider types.
 - `providerConfig` defines label, icon, and colors for each provider.
 - `ProviderBadge` renders the badge.
 - `TimingBadge` renders duration in milliseconds/seconds with color coding.
+
+Current provider types:
+
+- `taskflow`
+- `tavily`
+- `exa`
+- `parallel`
+- `firecrawl`
+- `valyu`
+- `supermemory`
+- `github`
+- `unknown`
 
 When adding a new provider or tool:
 
@@ -92,15 +123,16 @@ When adding a new provider or tool:
 5. For provider attribution:
    - Update `detectProvider()` and `providerConfig`.
 
-## Special Rendering (Example: Web Search)
+## Special Rendering
 
-`renderToolContent()` in `apps/web/app/app/chat/[threadId]/page.tsx` checks for `webSearch` output and renders sources via the `Sources` component.
+Most active tools now have dedicated cards. Unknown tools still use the generic summary/JSON fallback.
 
-If you add a new tool with structured output, follow the same pattern:
+If you add a new tool with structured output:
 
-- Create a type guard for the output
-- Render a tailored UI block
-- Fall back to `summarizeToolOutput()` for generic output
+- Add a card in `apps/web/components/ai-elements/`
+- Map it in `renderToolContent()` by `toolKey`
+- Add a summary rule in `getToolSummary()`
+- Keep generic fallback for shape drift or unknown tools
 
 ## Tool Summary + Metadata Logic
 

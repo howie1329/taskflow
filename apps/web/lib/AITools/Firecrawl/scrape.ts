@@ -1,22 +1,7 @@
 import Firecrawl from "@mendable/firecrawl-js"
 import { tool } from "ai"
 import { z } from "zod"
-
-const firecrawlScrapeDataSchema = z.object({
-  url: z.string().url().optional(),
-  markdown: z.string().optional(),
-  html: z.string().optional(),
-  text: z.string().optional(),
-  metadata: z.record(z.any()).optional(),
-})
-
-export const firecrawlScrapeResponseSchema = z.object({
-  success: z.boolean().optional(),
-  data: firecrawlScrapeDataSchema.optional(),
-  error: z.string().optional(),
-  warning: z.string().optional(),
-  creditsUsed: z.number().optional(),
-})
+import { firecrawlScrapeResponseSchema } from "./types"
 
 export const FirecrawlScrape = tool({
   description: "Scrape a web page using Firecrawl",

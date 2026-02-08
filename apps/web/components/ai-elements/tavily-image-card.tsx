@@ -71,16 +71,14 @@ export function TavilyImageCard({
   return (
     <TooltipProvider>
       <>
-        {/* Thumbnail Card */}
         <button
           onClick={() => setIsOpen(true)}
           onKeyDown={handleKeyDown}
           className={cn(
-            "relative group cursor-pointer overflow-hidden rounded-lg",
-            "w-72 h-48 md:w-80 md:h-52",
-            "bg-muted border border-border/50",
-            "hover:border-primary/30 transition-all duration-300 ease-out",
-            "hover:shadow-lg hover:scale-[1.02]",
+            "relative group cursor-pointer overflow-hidden rounded-sm",
+            "h-40 w-full max-w-[320px]",
+            "bg-muted/40 border border-border/50",
+            "transition-colors hover:bg-muted/60",
             "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2",
           )}
           aria-label={`View image: ${title || "Search result image"}`}
@@ -96,7 +94,7 @@ export function TavilyImageCard({
             alt={title || "Search result image"}
             className={cn(
               "w-full h-full object-cover transition-all duration-300",
-              "group-hover:scale-110",
+              "group-hover:scale-[1.02]",
               isLoaded ? "opacity-100" : "opacity-0",
             )}
             onLoad={() => setIsLoaded(true)}
@@ -104,23 +102,21 @@ export function TavilyImageCard({
             loading="lazy"
           />
 
-          {/* Hover Overlay */}
           <div
             className={cn(
-              "absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent",
-              "flex flex-col items-center justify-end pb-4",
+              "absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent",
+              "flex items-end justify-end p-3",
               "opacity-0 group-hover:opacity-100 group-focus:opacity-100",
               "transition-opacity duration-200",
             )}
           >
-            <div className="flex items-center gap-2 text-white">
-              <ZoomIn className="w-5 h-5" />
-              <span className="text-sm font-medium">Click to enlarge</span>
+            <div className="inline-flex items-center gap-1 rounded-sm bg-black/60 px-2 py-1 text-xs text-white">
+              <ZoomIn className="w-3 h-3" />
+              <span>Enlarge</span>
             </div>
           </div>
         </button>
 
-        {/* Full Size Modal */}
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogContent className="max-w-4xl w-[95vw] p-0 overflow-hidden bg-background">
             <DialogHeader className="p-4 pb-2 flex flex-row items-center justify-between">
