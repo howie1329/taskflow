@@ -284,7 +284,7 @@ export function AppShell({ children }: AppShellProps) {
             </div>
           </header>
         )}
-        <main className="flex flex-1 flex-col gap-4 p-4 md:gap-6 md:p-6 overflow-hidden">
+        <main className="flex flex-1 flex-col gap-2 p-2 md:gap-2 md:p-2 overflow-hidden border border-blue-500">
           {children}
         </main>
       </SidebarInset>

@@ -844,7 +844,7 @@ function ThreadPageContent() {
       </Conversation>
 
       {/* Composer */}
-      <div className="shrink-0 border-t border-border/60 bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+12px)]">
+      <div className="shrink-0 bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-16 py-3 pb-[calc(env(safe-area-inset-bottom)+2px)]">
         <label htmlFor="thread-message" className="sr-only">
           Message
         </label>
