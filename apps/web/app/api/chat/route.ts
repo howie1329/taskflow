@@ -7,6 +7,7 @@ import {
   createUIMessageStreamResponse,
   convertToModelMessages,
   type UIMessage,
+  pruneMessages,
 } from "ai";
 import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server";
 import { fetchMutation, fetchQuery } from "convex/nextjs";
@@ -157,6 +158,7 @@ export async function POST(req: Request) {
   }
 
   const modelMessages = await convertToModelMessages(messages);
+  const cleanedMessages = pruneMessages({ messages: modelMessages, reasoning: "before-last-message", toolCalls: "before-last-4-messages", emptyMessages: "remove" });
 
   // Fetch project context if projectId is provided
   let projectContext: ProjectContext | null = null;
@@ -204,7 +206,7 @@ export async function POST(req: Request) {
           activeTools: activeTools as any,
         });
 
-        const stream = await agent.stream({ messages: modelMessages });
+        const stream = await agent.stream({ messages: cleanedMessages });
         writer.merge(
           stream.toUIMessageStream({
             onFinish: async ({ messages: streamedMessages }) => {
