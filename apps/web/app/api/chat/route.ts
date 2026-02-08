@@ -14,6 +14,7 @@ import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { Tools } from "@/lib/AITools/index";
 import { buildSystemPrompt, type ProjectContext } from "@/lib/ai_context";
+import { supermemoryTools, withSupermemory } from '@supermemory/tools/ai-sdk'
 
 const getFirstUserText = (messages: UIMessage[]) => {
   const firstUser = messages.find((message) => message.role === "user");
@@ -67,6 +68,23 @@ export async function POST(req: Request) {
     console.error("Error parsing request:", error);
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
+
+  if (!userId) {
+    return NextResponse.json({ error: "User ID is required" }, { status: 400 });
+  }
+
+  // Creation of the supermemory tools
+  if (!process.env.SUPERMEMORY_API_KEY) {
+    return NextResponse.json({ error: "SuperMemory API key is required" }, { status: 400 });
+  }
+
+  const modelWithMemory = withSupermemory(openRouter(model, {
+    reasoning: { enabled: true, effort: "medium" },
+    parallelToolCalls: true,
+    usage: {
+      include: true,
+    },
+  }), userId, { mode: "full", apiKey: process.env.SUPERMEMORY_API_KEY! })
 
   if (
     !threadId ||
@@ -152,13 +170,7 @@ export async function POST(req: Request) {
     stream: createUIMessageStream({
       execute: async ({ writer }) => {
         const agent = new Agent({
-          model: openRouter.chat(model, {
-            reasoning: { enabled: true, effort: "medium" },
-            parallelToolCalls: true,
-            usage: {
-              include: true,
-            },
-          }),
+          model: modelWithMemory,
           instructions,
           stopWhen: stepCountIs(10),
           experimental_context: {
@@ -166,7 +178,7 @@ export async function POST(req: Request) {
             userId,
             token,
           },
-          tools: { ...Tools },
+          tools: { ...Tools, ...(supermemoryTools(process.env.SUPERMEMORY_API_KEY!, { containerTags: [userId] }) as unknown as typeof Tools) },
         });
 
         const stream = await agent.stream({ messages: modelMessages });
@@ -203,3 +215,5 @@ export async function POST(req: Request) {
   });
   return response;
 }
+
+
