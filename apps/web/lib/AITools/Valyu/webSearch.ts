@@ -16,6 +16,7 @@ export const ValyuWebSearch = tool({
         }
         try {
             const results = await valyu.search(query, { "maxNumResults": 5, "isToolCall": true });
+            console.log("Valyu Web Search results:", results);
             return results;
         } catch (error) {
             console.error(error);
