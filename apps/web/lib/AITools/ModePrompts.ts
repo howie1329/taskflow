@@ -1,5 +1,3 @@
-import { ModeMapping } from "./ModeMapping";
-
 // Mode-specific system prompts that guide AI behavior based on active tools
 export const ModePrompts: Record<string, string> = {
   Basic: `You are a helpful productivity assistant focused on task and project management.
@@ -306,26 +304,6 @@ For ongoing monitoring requests:
 // Helper function to get prompt for a specific mode
 export function getModePrompt(modeName: string): string {
   return ModePrompts[modeName] || ModePrompts.Basic;
-}
-
-// Helper to get mode with all metadata
-export function getModeWithPrompt(modeName: string) {
-  const mode = ModeMapping[modeName];
-  if (!mode) return null;
-
-  return {
-    ...mode,
-    systemPrompt: getModePrompt(modeName),
-  };
-}
-
-// List all available modes with their prompts
-export function listModes() {
-  return Object.keys(ModeMapping).map((modeName) => ({
-    name: modeName,
-    description: getModeDescription(modeName),
-    toolCount: ModeMapping[modeName].activeTools.length,
-  }));
 }
 
 export function getModeDescription(modeName: string): string {
