@@ -158,7 +158,7 @@ export async function POST(req: Request) {
   }
 
   const modelMessages = await convertToModelMessages(messages);
-  const cleanedMessages = pruneMessages({ messages: modelMessages, reasoning: "before-last-message", toolCalls: "before-last-4-messages", emptyMessages: "remove" });
+  const cleanedMessages = pruneMessages({ messages: modelMessages, reasoning: "before-last-message", toolCalls: "before-last-2-messages", emptyMessages: "remove" });
 
   // Fetch project context if projectId is provided
   let projectContext: ProjectContext | null = null;
