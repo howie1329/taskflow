@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -58,26 +58,32 @@ export default function InboxPage() {
   const { selectedItem, isOpen, openActions, closeActions } =
     useMobileActions();
 
-  // Derived state for filtered items
-  const openItems = items?.filter((item) => item.status === "open") ?? [];
-  const archivedItems =
-    items?.filter((item) => item.status === "archived") ?? [];
+  // Derived state for filtered items - memoized to prevent unnecessary re-filtering
+  const openItems = useMemo(
+    () => items?.filter((item) => item.status === "open") ?? [],
+    [items],
+  );
+  const archivedItems = useMemo(
+    () => items?.filter((item) => item.status === "archived") ?? [],
+    [items],
+  );
 
   // Client-side filtering for items not matching search (when server search is active)
-  const filteredOpenItems =
-    searchQuery && !debouncedSearchQuery
-      ? openItems.filter((item) =>
-          item.content.toLowerCase().includes(searchQuery.toLowerCase()),
-        )
-      : openItems;
-  const filteredArchivedItems =
-    searchQuery && !debouncedSearchQuery
-      ? archivedItems.filter((item) =>
-          item.content.toLowerCase().includes(searchQuery.toLowerCase()),
-        )
-      : archivedItems;
+  const filteredOpenItems = useMemo(() => {
+    if (!searchQuery || debouncedSearchQuery) return openItems;
+    return openItems.filter((item) =>
+      item.content.toLowerCase().includes(searchQuery.toLowerCase()),
+    );
+  }, [openItems, searchQuery, debouncedSearchQuery]);
 
-  // Handle capture with animation
+  const filteredArchivedItems = useMemo(() => {
+    if (!searchQuery || debouncedSearchQuery) return archivedItems;
+    return archivedItems.filter((item) =>
+      item.content.toLowerCase().includes(searchQuery.toLowerCase()),
+    );
+  }, [archivedItems, searchQuery, debouncedSearchQuery]);
+
+  // Handle capture with animation - memoized callback
   const handleCapture = useCallback(async () => {
     const newItem = await captureItem(captureText);
     if (newItem?._id) {
@@ -85,6 +91,11 @@ export default function InboxPage() {
       animateNewItem(String(newItem._id));
     }
   }, [captureText, captureItem, animateNewItem]);
+
+  // Memoized callback for clearing capture text
+  const handleClearCapture = useCallback(() => {
+    setCaptureText("");
+  }, []);
 
   // Handle convert with note support
   const handleConvert = useCallback(
@@ -181,7 +192,7 @@ export default function InboxPage() {
             onDelete={deleteItem}
             onConvert={handleConvert}
             onOpenActions={openActions}
-            onCaptureFocus={() => setCaptureText("")}
+            onCaptureFocus={handleClearCapture}
           />
         </div>
       </div>

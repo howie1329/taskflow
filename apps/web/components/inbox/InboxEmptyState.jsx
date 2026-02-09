@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
 import {
@@ -16,7 +17,11 @@ import {
   InboxDownloadIcon,
 } from "@hugeicons/core-free-icons";
 
-export function InboxEmptyState({ status, onCaptureFocus, searchQuery }) {
+export const InboxEmptyState = memo(function InboxEmptyState({
+  status,
+  onCaptureFocus,
+  searchQuery,
+}) {
   if (searchQuery) {
     return (
       <Empty className="min-h-[200px]">
@@ -67,4 +72,4 @@ export function InboxEmptyState({ status, onCaptureFocus, searchQuery }) {
       )}
     </Empty>
   );
-}
+});

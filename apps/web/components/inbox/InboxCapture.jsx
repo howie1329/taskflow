@@ -1,12 +1,12 @@
 "use client";
 
-import { useCallback, useRef, useEffect } from "react";
+import { memo, useCallback, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Kbd } from "@/components/ui/kbd";
 import { cn } from "@/lib/utils";
 
-// Auto-resize textarea hook
+// Auto-resize textarea hook - extracted for reuse
 function useAutoResizeTextarea(ref, value, minHeight = 80, maxHeight = 200) {
   useEffect(() => {
     const textarea = ref.current;
@@ -42,7 +42,7 @@ function useCaptureFocusShortcut(textareaRef) {
   }, [textareaRef]);
 }
 
-export function InboxCapture({
+export const InboxCapture = memo(function InboxCapture({
   value,
   onChange,
   onCapture,
@@ -127,4 +127,4 @@ export function InboxCapture({
       </div>
     </div>
   );
-}
+});

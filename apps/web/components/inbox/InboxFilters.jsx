@@ -1,12 +1,16 @@
 "use client";
 
-import { useCallback } from "react";
+import { memo, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Search01Icon } from "@hugeicons/core-free-icons";
 
-export function InboxFilters({ searchQuery, onSearchChange, className }) {
+export const InboxFilters = memo(function InboxFilters({
+  searchQuery,
+  onSearchChange,
+  className = "",
+}) {
   const handleClear = useCallback(() => {
     onSearchChange("");
   }, [onSearchChange]);
@@ -47,4 +51,4 @@ export function InboxFilters({ searchQuery, onSearchChange, className }) {
       </div>
     </div>
   );
-}
+});
