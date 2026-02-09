@@ -1,4 +1,4 @@
-import { MainAgentPrompt } from "./AiPrompts/MainAgent";
+import { MainAgentPrompt } from "./AiPrompts/main_prompt";
 import { getModePrompt, type ModeName } from "./AITools/ModePrompts";
 export interface ProjectContext {
   project: {
