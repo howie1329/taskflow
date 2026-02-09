@@ -1,9 +1,10 @@
-import { query, mutation } from "./_generated/server";
+import { query, mutation, internalAction, internalQuery, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import type { Doc } from "./_generated/dataModel";
 import type { Id } from "./_generated/dataModel";
 import type { MutationCtx } from "./_generated/server";
+import { api, internal } from "./_generated/api";
 
 const getUtcDayKey = (timestamp: number) =>
   new Date(timestamp).toISOString().slice(0, 10);
@@ -553,3 +554,46 @@ export const updateThreadSnippetAndTimestamps = mutation({
     return await ctx.db.get(thread._id);
   },
 });
+
+export const getAllThreads = internalQuery({
+  handler(ctx) {
+    return ctx.db.query("thread").filter((q) => q.neq(q.field("deletedAt"), undefined)
+    ).collect();
+  }
+})
+
+export const deleteThread = internalMutation({
+  args: {
+    threadId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.delete(args.threadId as Id<"thread">);
+    return true
+  }
+})
+
+export const deleteThreadMessages = internalMutation({
+  args: {
+    ownerThreadId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const messages = await ctx.db.query("threadMessages").withIndex("by_threadId", (q) => q.eq("threadId", args.ownerThreadId)).collect();
+    for (const message of messages) {
+      await ctx.db.delete(message._id);
+    }
+    return true
+  }
+})
+
+
+export const deleteOldThreadsAndMessages = internalAction({
+  handler: async (ctx) => {
+    const oldThreads = await ctx.runQuery(internal.chat.getAllThreads)
+
+    for (const thread of oldThreads) {
+      await ctx.runMutation(internal.chat.deleteThreadMessages, { ownerThreadId: thread.threadId });
+      await ctx.runMutation(internal.chat.deleteThread, { threadId: thread._id });
+    }
+    return true
+  },
+})
