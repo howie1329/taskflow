@@ -259,7 +259,11 @@ const schema = defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_user_status", ["userId", "status"])
-    .index("by_user_createdAt", ["userId", "createdAt"]),
+    .index("by_user_createdAt", ["userId", "createdAt"])
+    .searchIndex("search_content", {
+      searchField: "content",
+      filterFields: ["userId", "status"],
+    }),
 
   // Subtasks - Lightweight checklists under tasks
   subtasks: defineTable({

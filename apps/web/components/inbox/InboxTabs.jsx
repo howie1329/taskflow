@@ -12,6 +12,8 @@ export function InboxTabs({
   archivedItems,
   filteredOpenItems,
   filteredArchivedItems,
+  openCount,
+  archivedCount,
   newItemIds,
   searchQuery,
   onArchive,
@@ -21,6 +23,10 @@ export function InboxTabs({
   onOpenActions,
   onCaptureFocus,
 }) {
+  // Use total counts if provided, otherwise fall back to filtered items length
+  const displayOpenCount = openCount ?? openItems.length;
+  const displayArchivedCount = archivedCount ?? archivedItems.length;
+
   return (
     <Tabs
       value={activeTab}
@@ -34,7 +40,7 @@ export function InboxTabs({
             variant="secondary"
             className="rounded-md tabular-nums bg-muted/70"
           >
-            {openItems.length}
+            {displayOpenCount}
           </Badge>
         </TabsTrigger>
         <TabsTrigger value="archived" className="gap-2">
@@ -43,7 +49,7 @@ export function InboxTabs({
             variant="secondary"
             className="rounded-md tabular-nums bg-muted/70"
           >
-            {archivedItems.length}
+            {displayArchivedCount}
           </Badge>
         </TabsTrigger>
       </TabsList>

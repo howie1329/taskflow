@@ -24,31 +24,85 @@ const getInboxItemForUser = async (
 export const listMyInboxItems = query({
   args: {
     status: v.optional(inboxStatus),
+    searchQuery: v.optional(v.string()),
+    cursor: v.optional(v.string()),
+    limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) {
-      return [];
+      return { items: [], nextCursor: null };
     }
 
+    const limit = args.limit ?? 50;
     let items: Doc<"inboxItems">[];
 
-    if (args.status) {
+    // If search query is provided, use search index
+    if (args.searchQuery && args.searchQuery.trim()) {
+      const searchResults = await ctx.db
+        .query("inboxItems")
+        .withSearchIndex("search_content", (q) => {
+          const query = q
+            .search("content", args.searchQuery!)
+            .eq("userId", userId);
+          return query;
+        })
+        .take(limit + 1);
+
+      // Filter by status client-side if needed
+      items = args.status
+        ? searchResults.filter((item) => item.status === args.status)
+        : searchResults;
+    } else if (args.status) {
+      // Use status index for filtered queries
       const status = args.status;
       items = await ctx.db
         .query("inboxItems")
         .withIndex("by_user_status", (q) =>
           q.eq("userId", userId).eq("status", status),
         )
-        .collect();
+        .order("desc")
+        .take(limit + 1);
     } else {
+      // Use user index for all items
       items = await ctx.db
         .query("inboxItems")
-        .withIndex("by_user", (q) => q.eq("userId", userId))
-        .collect();
+        .withIndex("by_user_createdAt", (q) => q.eq("userId", userId))
+        .order("desc")
+        .take(limit + 1);
     }
 
-    return items.sort((a, b) => b.createdAt - a.createdAt);
+    // Check if there are more items
+    let nextCursor: string | null = null;
+    if (items.length > limit) {
+      const lastItem = items[limit - 1];
+      nextCursor = lastItem._id;
+      items = items.slice(0, limit);
+    }
+
+    return { items, nextCursor };
+  },
+});
+
+export const getInboxCounts = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      return { open: 0, archived: 0 };
+    }
+
+    const allItems = await ctx.db
+      .query("inboxItems")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
+
+    const open = allItems.filter((item) => item.status === "open").length;
+    const archived = allItems.filter(
+      (item) => item.status === "archived",
+    ).length;
+
+    return { open, archived };
   },
 });
 

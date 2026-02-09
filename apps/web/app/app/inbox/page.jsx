@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -12,8 +12,8 @@ import {
 } from "@/components/inbox";
 import {
   useInboxItems,
+  useInboxCounts,
   useInboxActions,
-  useInboxFilters,
   useNewItemsAnimation,
   useMobileActions,
 } from "@/hooks/inbox";
@@ -22,18 +22,28 @@ export default function InboxPage() {
   // State for capture input
   const [captureText, setCaptureText] = useState("");
 
+  // State for filtering
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState("open");
+
+  // Debounced search query for server-side search
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+
+  // Debounce search query to avoid excessive API calls
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   // Custom hooks
-  const { items, isLoading } = useInboxItems();
-  const {
-    searchQuery,
-    setSearchQuery,
-    activeTab,
-    setActiveTab,
-    openItems,
-    archivedItems,
-    filteredOpenItems,
-    filteredArchivedItems,
-  } = useInboxFilters(items);
+  const { items, isLoading: isItemsLoading } = useInboxItems({
+    status: activeTab,
+    searchQuery: debouncedSearchQuery,
+    limit: 50,
+  });
+  const { open, archived, isLoading: isCountsLoading } = useInboxCounts();
   const {
     captureItem,
     archiveItem,
@@ -47,6 +57,25 @@ export default function InboxPage() {
   const { newItemIds, animateNewItem } = useNewItemsAnimation();
   const { selectedItem, isOpen, openActions, closeActions } =
     useMobileActions();
+
+  // Derived state for filtered items
+  const openItems = items?.filter((item) => item.status === "open") ?? [];
+  const archivedItems =
+    items?.filter((item) => item.status === "archived") ?? [];
+
+  // Client-side filtering for items not matching search (when server search is active)
+  const filteredOpenItems =
+    searchQuery && !debouncedSearchQuery
+      ? openItems.filter((item) =>
+          item.content.toLowerCase().includes(searchQuery.toLowerCase()),
+        )
+      : openItems;
+  const filteredArchivedItems =
+    searchQuery && !debouncedSearchQuery
+      ? archivedItems.filter((item) =>
+          item.content.toLowerCase().includes(searchQuery.toLowerCase()),
+        )
+      : archivedItems;
 
   // Handle capture with animation
   const handleCapture = useCallback(async () => {
@@ -82,6 +111,8 @@ export default function InboxPage() {
     },
     [selectedItem, handleConvert, closeActions],
   );
+
+  const isLoading = isItemsLoading || isCountsLoading;
 
   // Loading state
   if (isLoading) {
@@ -141,6 +172,8 @@ export default function InboxPage() {
             archivedItems={archivedItems}
             filteredOpenItems={filteredOpenItems}
             filteredArchivedItems={filteredArchivedItems}
+            openCount={open}
+            archivedCount={archived}
             newItemIds={newItemIds}
             searchQuery={searchQuery}
             onArchive={archiveItem}

@@ -1,8 +1,12 @@
 export {
   useInboxItems,
+  useInboxCounts,
   type InboxItem,
   type InboxItemId,
   type InboxItemStatus,
+  type UseInboxItemsOptions,
+  type UseInboxItemsReturn,
+  type UseInboxCountsReturn,
 } from "./useInboxItems";
 export {
   useInboxActions,
