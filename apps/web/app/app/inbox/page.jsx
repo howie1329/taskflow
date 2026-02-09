@@ -1,7 +1,6 @@
 "use client";
-import { useState, useMemo, useCallback } from "react";
-import { useMutation, useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
+
+import { useState, useCallback } from "react";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -11,153 +10,80 @@ import {
   MobileActionSheet,
   Toast,
 } from "@/components/inbox";
+import {
+  useInboxItems,
+  useInboxActions,
+  useInboxFilters,
+  useNewItemsAnimation,
+  useMobileActions,
+} from "@/hooks/inbox";
 
 export default function InboxPage() {
+  // State for capture input
   const [captureText, setCaptureText] = useState("");
-  const [activeTab, setActiveTab] = useState("open");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [newItemIds, setNewItemIds] = useState(new Set());
-  const [mobileActionItem, setMobileActionItem] = useState(null);
-  const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false);
-  const [toast, setToast] = useState(null);
 
-  const createInboxItem = useMutation(api.inbox.createInboxItem);
-  const archiveInboxItem = useMutation(api.inbox.archiveInboxItem);
-  const unarchiveInboxItem = useMutation(api.inbox.unarchiveInboxItem);
-  const deleteInboxItem = useMutation(api.inbox.deleteInboxItem);
-  const convertInboxItemToTask = useMutation(api.inbox.convertInboxItemToTask);
-  const convertInboxItemToProject = useMutation(
-    api.inbox.convertInboxItemToProject,
-  );
+  // Custom hooks
+  const { items, isLoading } = useInboxItems();
+  const {
+    searchQuery,
+    setSearchQuery,
+    activeTab,
+    setActiveTab,
+    openItems,
+    archivedItems,
+    filteredOpenItems,
+    filteredArchivedItems,
+  } = useInboxFilters(items);
+  const {
+    captureItem,
+    archiveItem,
+    unarchiveItem,
+    deleteItem,
+    convertToTask,
+    convertToProject,
+    toast,
+    clearToast,
+  } = useInboxActions();
+  const { newItemIds, animateNewItem } = useNewItemsAnimation();
+  const { selectedItem, isOpen, openActions, closeActions } =
+    useMobileActions();
 
-  const items = useQuery(api.inbox.listMyInboxItems, {});
-  const isLoading = items === undefined;
-
-  const openItems = useMemo(() => {
-    if (!items) return [];
-    return items.filter((i) => i.status === "open");
-  }, [items]);
-
-  const archivedItems = useMemo(() => {
-    if (!items) return [];
-    return items.filter((i) => i.status === "archived");
-  }, [items]);
-
-  const filteredOpenItems = useMemo(() => {
-    if (!searchQuery.trim()) return openItems;
-    const query = searchQuery.toLowerCase();
-    return openItems.filter((item) =>
-      item.content.toLowerCase().includes(query),
-    );
-  }, [openItems, searchQuery]);
-
-  const filteredArchivedItems = useMemo(() => {
-    if (!searchQuery.trim()) return archivedItems;
-    const query = searchQuery.toLowerCase();
-    return archivedItems.filter((item) =>
-      item.content.toLowerCase().includes(query),
-    );
-  }, [archivedItems, searchQuery]);
-
+  // Handle capture with animation
   const handleCapture = useCallback(async () => {
-    const trimmed = captureText.trim();
-    if (!trimmed) return;
-
-    try {
-      const newItem = await createInboxItem({ content: trimmed });
+    const newItem = await captureItem(captureText);
+    if (newItem?._id) {
       setCaptureText("");
-      if (newItem?._id) {
-        setNewItemIds((prev) => new Set(prev).add(String(newItem._id)));
-        setTimeout(() => {
-          setNewItemIds((prev) => {
-            const next = new Set(prev);
-            next.delete(String(newItem._id));
-            return next;
-          });
-        }, 1000);
-      }
-      setToast({ message: "Item captured", type: "success" });
-    } catch (error) {
-      setToast({ message: "Failed to capture item", type: "info" });
+      animateNewItem(String(newItem._id));
     }
-  }, [captureText, createInboxItem]);
+  }, [captureText, captureItem, animateNewItem]);
 
-  const handleArchive = useCallback(
-    async (id) => {
-      try {
-        await archiveInboxItem({ inboxItemId: id });
-        setToast({ message: "Item archived", type: "success" });
-      } catch (error) {
-        setToast({ message: "Failed to archive item", type: "info" });
-      }
-    },
-    [archiveInboxItem],
-  );
-
-  const handleUnarchive = useCallback(
-    async (id) => {
-      try {
-        await unarchiveInboxItem({ inboxItemId: id });
-        setToast({ message: "Item unarchived", type: "success" });
-      } catch (error) {
-        setToast({ message: "Failed to unarchive item", type: "info" });
-      }
-    },
-    [unarchiveInboxItem],
-  );
-
-  const handleDelete = useCallback(
-    async (id) => {
-      try {
-        await deleteInboxItem({ inboxItemId: id });
-        setToast({ message: "Item deleted", type: "success" });
-      } catch (error) {
-        setToast({ message: "Failed to delete item", type: "info" });
-      }
-    },
-    [deleteInboxItem],
-  );
-
+  // Handle convert with note support
   const handleConvert = useCallback(
     async (id, type) => {
       if (type === "note") {
-        setToast({ message: "Convert to note coming soon", type: "info" });
+        // Note conversion not yet implemented
         return;
       }
-
-      try {
-        if (type === "task") {
-          await convertInboxItemToTask({ inboxItemId: id });
-          setToast({ message: "Converted to task", type: "success" });
-          return;
-        }
-        await convertInboxItemToProject({ inboxItemId: id });
-        setToast({ message: "Converted to project", type: "success" });
-      } catch (error) {
-        setToast({ message: "Failed to convert item", type: "info" });
+      if (type === "task") {
+        await convertToTask(id);
+      } else if (type === "project") {
+        await convertToProject(id);
       }
     },
-    [convertInboxItemToProject, convertInboxItemToTask],
+    [convertToTask, convertToProject],
   );
 
-  const handleOpenActions = useCallback((item) => {
-    setMobileActionItem(item);
-    setIsMobileSheetOpen(true);
-  }, []);
-
-  const handleTabChange = useCallback((value) => {
-    setActiveTab(value);
-  }, []);
-
+  // Handle mobile convert
   const handleMobileConvert = useCallback(
     (type) => {
-      if (!mobileActionItem) return;
-      handleConvert(mobileActionItem._id, type);
-      setIsMobileSheetOpen(false);
+      if (!selectedItem) return;
+      handleConvert(selectedItem._id, type);
+      closeActions();
     },
-    [mobileActionItem, handleConvert],
+    [selectedItem, handleConvert, closeActions],
   );
 
+  // Loading state
   if (isLoading) {
     return (
       <div className="flex h-full w-full min-h-0 flex-col overflow-hidden rounded-xl border border-border/60 bg-card/40 dark:bg-card/20">
@@ -210,18 +136,18 @@ export default function InboxPage() {
           {/* Tabs with items */}
           <InboxTabs
             activeTab={activeTab}
-            onTabChange={handleTabChange}
+            onTabChange={setActiveTab}
             openItems={openItems}
             archivedItems={archivedItems}
             filteredOpenItems={filteredOpenItems}
             filteredArchivedItems={filteredArchivedItems}
             newItemIds={newItemIds}
             searchQuery={searchQuery}
-            onArchive={handleArchive}
-            onUnarchive={handleUnarchive}
-            onDelete={handleDelete}
+            onArchive={archiveItem}
+            onUnarchive={unarchiveItem}
+            onDelete={deleteItem}
             onConvert={handleConvert}
-            onOpenActions={handleOpenActions}
+            onOpenActions={openActions}
             onCaptureFocus={() => setCaptureText("")}
           />
         </div>
@@ -229,22 +155,18 @@ export default function InboxPage() {
 
       {/* Mobile action sheet */}
       <MobileActionSheet
-        item={mobileActionItem}
-        open={isMobileSheetOpen}
-        onOpenChange={setIsMobileSheetOpen}
-        onArchive={handleArchive}
-        onUnarchive={handleUnarchive}
-        onDelete={handleDelete}
+        item={selectedItem}
+        open={isOpen}
+        onOpenChange={closeActions}
+        onArchive={archiveItem}
+        onUnarchive={unarchiveItem}
+        onDelete={deleteItem}
         onConvert={handleMobileConvert}
       />
 
       {/* Toast notification */}
       {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-        />
+        <Toast message={toast.message} type={toast.type} onClose={clearToast} />
       )}
     </div>
   );
