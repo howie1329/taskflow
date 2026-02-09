@@ -94,7 +94,7 @@ export async function POST(req: Request) {
       },
     }),
     userId,
-    { mode: "full", apiKey: process.env.SUPERMEMORY_API_KEY! },
+    { addMemory: "always", mode: "full", apiKey: process.env.SUPERMEMORY_API_KEY! },
   );
 
   if (
