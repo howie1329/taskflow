@@ -5,7 +5,7 @@ const crons = cronJobs();
 
 crons.interval(
   "sync models from OpenRouter",
-  { hours: 6 },
+  { hours: 12 },
   internal.models.syncModels,
 );
 
