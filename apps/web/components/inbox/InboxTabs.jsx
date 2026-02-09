@@ -1,11 +1,12 @@
 "use client";
 
+import { memo } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { InboxItemRow } from "./InboxItemRow";
 import { InboxEmptyState } from "./InboxEmptyState";
 
-export function InboxTabs({
+export const InboxTabs = memo(function InboxTabs({
   activeTab,
   onTabChange,
   openItems,
@@ -32,29 +33,49 @@ export function InboxTabs({
       value={activeTab}
       onValueChange={onTabChange}
       className="flex-1 flex flex-col min-h-0"
+      aria-label="Inbox tabs"
     >
-      <TabsList variant="line" className="mb-0">
-        <TabsTrigger value="open" className="gap-2">
+      <TabsList variant="line" className="mb-0" role="tablist">
+        <TabsTrigger
+          value="open"
+          className="gap-2"
+          role="tab"
+          aria-label={`Open items (${displayOpenCount})`}
+          aria-selected={activeTab === "open"}
+        >
           Open
           <Badge
             variant="secondary"
             className="rounded-md tabular-nums bg-muted/70"
+            aria-hidden="true"
           >
             {displayOpenCount}
           </Badge>
         </TabsTrigger>
-        <TabsTrigger value="archived" className="gap-2">
+        <TabsTrigger
+          value="archived"
+          className="gap-2"
+          role="tab"
+          aria-label={`Archived items (${displayArchivedCount})`}
+          aria-selected={activeTab === "archived"}
+        >
           Archived
           <Badge
             variant="secondary"
             className="rounded-md tabular-nums bg-muted/70"
+            aria-hidden="true"
           >
             {displayArchivedCount}
           </Badge>
         </TabsTrigger>
       </TabsList>
 
-      <TabsContent value="open" className="flex-1 overflow-y-auto min-h-0">
+      <TabsContent
+        value="open"
+        className="flex-1 overflow-y-auto min-h-0"
+        role="tabpanel"
+        aria-label="Open items"
+      >
         {filteredOpenItems.length === 0 ? (
           <InboxEmptyState
             status="open"
@@ -62,7 +83,11 @@ export function InboxTabs({
             searchQuery={searchQuery}
           />
         ) : (
-          <div className="space-y-2 pb-4">
+          <div
+            className="space-y-2 pb-4"
+            role="list"
+            aria-label={`${filteredOpenItems.length} open inbox items`}
+          >
             {filteredOpenItems.map((item) => (
               <InboxItemRow
                 key={item._id}
@@ -79,11 +104,20 @@ export function InboxTabs({
         )}
       </TabsContent>
 
-      <TabsContent value="archived" className="flex-1 overflow-y-auto min-h-0">
+      <TabsContent
+        value="archived"
+        className="flex-1 overflow-y-auto min-h-0"
+        role="tabpanel"
+        aria-label="Archived items"
+      >
         {filteredArchivedItems.length === 0 ? (
           <InboxEmptyState status="archived" searchQuery={searchQuery} />
         ) : (
-          <div className="space-y-2 pb-4">
+          <div
+            className="space-y-2 pb-4"
+            role="list"
+            aria-label={`${filteredArchivedItems.length} archived inbox items`}
+          >
             {filteredArchivedItems.map((item) => (
               <InboxItemRow
                 key={item._id}
@@ -100,4 +134,4 @@ export function InboxTabs({
       </TabsContent>
     </Tabs>
   );
-}
+});

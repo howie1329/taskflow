@@ -1,3 +1,5 @@
+import { InboxErrorBoundary } from "@/components/inbox";
+
 export const metadata = {
   title: "Inbox | Taskflow",
   description: "Capture fast, triage later",
@@ -8,5 +10,5 @@ export default function InboxLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return children;
+  return <InboxErrorBoundary>{children}</InboxErrorBoundary>;
 }

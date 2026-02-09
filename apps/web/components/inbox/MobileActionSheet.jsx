@@ -1,5 +1,6 @@
 "use client";
 
+import { memo, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -7,6 +8,7 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
+  SheetDescription,
 } from "@/components/ui/sheet";
 import {
   AlertDialog,
@@ -27,9 +29,10 @@ import {
   Task01Icon,
   NoteIcon,
   FolderManagementIcon,
+  Loading03Icon,
 } from "@hugeicons/core-free-icons";
 
-export function MobileActionSheet({
+export const MobileActionSheet = memo(function MobileActionSheet({
   item,
   open,
   onOpenChange,
@@ -38,80 +41,154 @@ export function MobileActionSheet({
   onDelete,
   onConvert,
 }) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [actionType, setActionType] = useState(null);
+
+  // Early return after all hooks are called
   if (!item) return null;
+
   const isArchived = item.status === "archived";
+
+  const handleConvert = useCallback(
+    async (type) => {
+      setIsLoading(true);
+      setActionType(`convert-${type}`);
+      try {
+        await onConvert(type);
+        onOpenChange(false);
+      } finally {
+        setIsLoading(false);
+        setActionType(null);
+      }
+    },
+    [onConvert, onOpenChange],
+  );
+
+  const handleArchive = useCallback(async () => {
+    setIsLoading(true);
+    setActionType("archive");
+    try {
+      await onArchive(item._id);
+      onOpenChange(false);
+    } finally {
+      setIsLoading(false);
+      setActionType(null);
+    }
+  }, [onArchive, item._id, onOpenChange]);
+
+  const handleUnarchive = useCallback(async () => {
+    setIsLoading(true);
+    setActionType("unarchive");
+    try {
+      await onUnarchive(item._id);
+      onOpenChange(false);
+    } finally {
+      setIsLoading(false);
+      setActionType(null);
+    }
+  }, [onUnarchive, item._id, onOpenChange]);
+
+  const handleDelete = useCallback(async () => {
+    setIsLoading(true);
+    setActionType("delete");
+    try {
+      await onDelete(item._id);
+      onOpenChange(false);
+    } finally {
+      setIsLoading(false);
+      setActionType(null);
+    }
+  }, [onDelete, item._id, onOpenChange]);
+
+  const getButtonContent = (icon, label, loadingKey) => {
+    const isBtnLoading = isLoading && actionType === loadingKey;
+    return (
+      <>
+        {isBtnLoading ? (
+          <HugeiconsIcon icon={Loading03Icon} className="size-4 animate-spin" />
+        ) : (
+          <HugeiconsIcon icon={icon} className="size-4" />
+        )}
+        {isBtnLoading ? `${label}...` : label}
+      </>
+    );
+  };
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="h-auto">
+      <SheetContent
+        side="bottom"
+        className="h-auto"
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Actions for inbox item: ${item.content.slice(0, 50)}${item.content.length > 50 ? "..." : ""}`}
+      >
         <SheetHeader className="text-left">
           <SheetTitle className="text-sm">Actions</SheetTitle>
+          <SheetDescription className="sr-only">
+            Choose an action to perform on this inbox item
+          </SheetDescription>
         </SheetHeader>
         <div className="flex flex-col gap-1 py-4">
           <Button
             variant="ghost"
-            className="justify-start gap-2 h-10"
-            onClick={() => {
-              onConvert("task");
-              onOpenChange(false);
-            }}
+            className="justify-start gap-2 h-12 touch-manipulation min-h-[44px]"
+            onClick={() => handleConvert("task")}
+            disabled={isLoading}
+            aria-busy={isLoading && actionType === "convert-task"}
           >
-            <HugeiconsIcon icon={Task01Icon} className="size-4" />
-            Convert to Task
+            {getButtonContent(Task01Icon, "Convert to Task", "convert-task")}
           </Button>
           <Button
             variant="ghost"
-            className="justify-start gap-2 h-10"
-            onClick={() => {
-              onConvert("note");
-              onOpenChange(false);
-            }}
+            className="justify-start gap-2 h-12 touch-manipulation min-h-[44px]"
+            onClick={() => handleConvert("note")}
+            disabled={isLoading}
+            aria-busy={isLoading && actionType === "convert-note"}
           >
-            <HugeiconsIcon icon={NoteIcon} className="size-4" />
-            Convert to Note
+            {getButtonContent(NoteIcon, "Convert to Note", "convert-note")}
           </Button>
           <Button
             variant="ghost"
-            className="justify-start gap-2 h-10"
-            onClick={() => {
-              onConvert("project");
-              onOpenChange(false);
-            }}
+            className="justify-start gap-2 h-12 touch-manipulation min-h-[44px]"
+            onClick={() => handleConvert("project")}
+            disabled={isLoading}
+            aria-busy={isLoading && actionType === "convert-project"}
           >
-            <HugeiconsIcon icon={FolderManagementIcon} className="size-4" />
-            Convert to Project
+            {getButtonContent(
+              FolderManagementIcon,
+              "Convert to Project",
+              "convert-project",
+            )}
           </Button>
           <Separator className="my-2" />
           {isArchived ? (
             <Button
               variant="ghost"
-              className="justify-start gap-2 h-10"
-              onClick={() => {
-                onUnarchive(item._id);
-                onOpenChange(false);
-              }}
+              className="justify-start gap-2 h-12 touch-manipulation min-h-[44px]"
+              onClick={handleUnarchive}
+              disabled={isLoading}
+              aria-busy={isLoading && actionType === "unarchive"}
             >
-              <HugeiconsIcon icon={Unarchive03Icon} className="size-4" />
-              Unarchive
+              {getButtonContent(Unarchive03Icon, "Unarchive", "unarchive")}
             </Button>
           ) : (
             <Button
               variant="ghost"
-              className="justify-start gap-2 h-10"
-              onClick={() => {
-                onArchive(item._id);
-                onOpenChange(false);
-              }}
+              className="justify-start gap-2 h-12 touch-manipulation min-h-[44px]"
+              onClick={handleArchive}
+              disabled={isLoading}
+              aria-busy={isLoading && actionType === "archive"}
             >
-              <HugeiconsIcon icon={ArchiveIcon} className="size-4" />
-              Archive
+              {getButtonContent(ArchiveIcon, "Archive", "archive")}
             </Button>
           )}
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button
                 variant="ghost"
-                className="justify-start gap-2 h-10 text-destructive hover:text-destructive"
+                className="justify-start gap-2 h-12 touch-manipulation min-h-[44px] text-destructive hover:text-destructive"
+                disabled={isLoading}
               >
                 <HugeiconsIcon icon={Delete01Icon} className="size-4" />
                 Delete
@@ -126,15 +203,26 @@ export function MobileActionSheet({
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogCancel disabled={isLoading}>
+                  Cancel
+                </AlertDialogCancel>
                 <AlertDialogAction
                   variant="destructive"
-                  onClick={() => {
-                    onDelete(item._id);
-                    onOpenChange(false);
-                  }}
+                  onClick={handleDelete}
+                  disabled={isLoading}
+                  aria-busy={isLoading && actionType === "delete"}
                 >
-                  Delete
+                  {isLoading && actionType === "delete" ? (
+                    <>
+                      <HugeiconsIcon
+                        icon={LoaderIcon}
+                        className="size-4 animate-spin mr-2"
+                      />
+                      Deleting...
+                    </>
+                  ) : (
+                    "Delete"
+                  )}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -143,4 +231,4 @@ export function MobileActionSheet({
       </SheetContent>
     </Sheet>
   );
-}
+});

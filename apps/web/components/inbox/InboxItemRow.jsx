@@ -41,6 +41,7 @@ import {
   Task01Icon,
   NoteIcon,
   FolderManagementIcon,
+  Loading03Icon,
 } from "@hugeicons/core-free-icons";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -66,50 +67,109 @@ export const InboxItemRow = memo(function InboxItemRow({
   onConvert,
   onOpenActions,
   isNew = false,
+  isLoading = false,
 }) {
   const [convertDialog, setConvertDialog] = useState({
     open: false,
     type: null,
   });
+  const [localLoading, setLocalLoading] = useState({
+    archive: false,
+    delete: false,
+    convert: false,
+  });
+
   const isMobile = useIsMobile();
   const isArchived = item.status === "archived";
 
   const handleConvert = useCallback(
-    (type) => {
+    async (type) => {
       if (type === "note") {
         setConvertDialog({ open: true, type });
         return;
       }
-      onConvert(item._id, type);
+      setLocalLoading((prev) => ({ ...prev, convert: true }));
+      try {
+        await onConvert(item._id, type);
+      } finally {
+        setLocalLoading((prev) => ({ ...prev, convert: false }));
+      }
     },
     [item._id, onConvert],
   );
+
+  const handleArchive = useCallback(async () => {
+    setLocalLoading((prev) => ({ ...prev, archive: true }));
+    try {
+      await onArchive(item._id);
+    } finally {
+      setLocalLoading((prev) => ({ ...prev, archive: false }));
+    }
+  }, [item._id, onArchive]);
+
+  const handleUnarchive = useCallback(async () => {
+    setLocalLoading((prev) => ({ ...prev, archive: true }));
+    try {
+      await onUnarchive(item._id);
+    } finally {
+      setLocalLoading((prev) => ({ ...prev, archive: false }));
+    }
+  }, [item._id, onUnarchive]);
+
+  const handleDelete = useCallback(async () => {
+    setLocalLoading((prev) => ({ ...prev, delete: true }));
+    try {
+      await onDelete(item._id);
+    } finally {
+      setLocalLoading((prev) => ({ ...prev, delete: false }));
+    }
+  }, [item._id, onDelete]);
+
+  const isAnyLoading = isLoading || Object.values(localLoading).some(Boolean);
 
   return (
     <>
       <div
         className={cn(
-          "group flex items-start gap-3 rounded-lg border border-border/60 bg-background/30 p-3 transition-[background-color,border-color,transform] duration-200 hover:border-border hover:bg-accent/25 hover:-translate-y-[1px]",
+          "group flex items-start gap-3 rounded-lg border border-border/60 bg-background/30 p-3 transition-[background-color,border-color,transform,opacity] duration-200 hover:border-border hover:bg-accent/25 hover:-translate-y-[1px]",
           isArchived && "opacity-60",
           isNew && "animate-in fade-in slide-in-from-top-2 duration-300",
+          isAnyLoading && "opacity-70 pointer-events-none",
         )}
+        role="listitem"
+        aria-busy={isAnyLoading}
       >
         <div className="flex-1 min-w-0 space-y-1">
-          <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">
+          <p
+            className="text-sm whitespace-pre-wrap break-words leading-relaxed"
+            id={`inbox-item-${item._id}-content`}
+          >
             {item.content}
           </p>
-          <p className="text-xs text-muted-foreground tabular-nums">
+          <p
+            className="text-xs text-muted-foreground tabular-nums"
+            id={`inbox-item-${item._id}-time`}
+          >
             {formatRelativeTime(item.createdAt)}
           </p>
         </div>
 
-        {isMobile ? (
+        {isAnyLoading ? (
+          <div className="shrink-0 p-2" aria-hidden="true">
+            <HugeiconsIcon
+              icon={Loading03Icon}
+              className="size-4 animate-spin text-muted-foreground"
+            />
+          </div>
+        ) : isMobile ? (
           <Button
             variant="ghost"
             size="icon-sm"
-            className="shrink-0"
+            className="shrink-0 touch-manipulation"
             onClick={() => onOpenActions(item)}
-            aria-label="Open actions menu"
+            aria-label={`Open actions for inbox item: ${item.content.slice(0, 50)}${item.content.length > 50 ? "..." : ""}`}
+            aria-haspopup="menu"
+            aria-expanded="false"
           >
             <HugeiconsIcon icon={MoreVerticalIcon} className="size-4" />
           </Button>
@@ -120,7 +180,8 @@ export const InboxItemRow = memo(function InboxItemRow({
                 variant="ghost"
                 size="icon-sm"
                 className="shrink-0 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
-                aria-label="Open actions menu"
+                aria-label={`Open actions for inbox item: ${item.content.slice(0, 50)}${item.content.length > 50 ? "..." : ""}`}
+                aria-haspopup="menu"
               >
                 <HugeiconsIcon icon={MoreVerticalIcon} className="size-4" />
               </Button>
@@ -129,20 +190,29 @@ export const InboxItemRow = memo(function InboxItemRow({
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
               <DropdownMenuSub>
-                <DropdownMenuSubTrigger>
+                <DropdownMenuSubTrigger aria-haspopup="menu">
                   <HugeiconsIcon icon={ArrowRight01Icon} className="size-4" />
                   Convert to
                 </DropdownMenuSubTrigger>
                 <DropdownMenuSubContent>
-                  <DropdownMenuItem onClick={() => handleConvert("task")}>
+                  <DropdownMenuItem
+                    onClick={() => handleConvert("task")}
+                    disabled={localLoading.convert}
+                  >
                     <HugeiconsIcon icon={Task01Icon} className="size-4" />
                     Task
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleConvert("note")}>
+                  <DropdownMenuItem
+                    onClick={() => handleConvert("note")}
+                    disabled={localLoading.convert}
+                  >
                     <HugeiconsIcon icon={NoteIcon} className="size-4" />
                     Note
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleConvert("project")}>
+                  <DropdownMenuItem
+                    onClick={() => handleConvert("project")}
+                    disabled={localLoading.convert}
+                  >
                     <HugeiconsIcon
                       icon={FolderManagementIcon}
                       className="size-4"
@@ -155,12 +225,18 @@ export const InboxItemRow = memo(function InboxItemRow({
               <DropdownMenuSeparator />
 
               {isArchived ? (
-                <DropdownMenuItem onClick={() => onUnarchive(item._id)}>
+                <DropdownMenuItem
+                  onClick={handleUnarchive}
+                  disabled={localLoading.archive}
+                >
                   <HugeiconsIcon icon={Unarchive03Icon} className="size-4" />
                   Unarchive
                 </DropdownMenuItem>
               ) : (
-                <DropdownMenuItem onClick={() => onArchive(item._id)}>
+                <DropdownMenuItem
+                  onClick={handleArchive}
+                  disabled={localLoading.archive}
+                >
                   <HugeiconsIcon icon={ArchiveIcon} className="size-4" />
                   Archive
                 </DropdownMenuItem>
@@ -171,6 +247,7 @@ export const InboxItemRow = memo(function InboxItemRow({
                   <DropdownMenuItem
                     variant="destructive"
                     onSelect={(e) => e.preventDefault()}
+                    disabled={localLoading.delete}
                   >
                     <HugeiconsIcon icon={Delete01Icon} className="size-4" />
                     Delete
@@ -188,9 +265,10 @@ export const InboxItemRow = memo(function InboxItemRow({
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction
                       variant="destructive"
-                      onClick={() => onDelete(item._id)}
+                      onClick={handleDelete}
+                      disabled={localLoading.delete}
                     >
-                      Delete
+                      {localLoading.delete ? "Deleting..." : "Delete"}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
