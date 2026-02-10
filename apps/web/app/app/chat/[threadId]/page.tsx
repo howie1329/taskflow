@@ -150,6 +150,7 @@ import { code } from "@streamdown/code";
 import { mermaid } from "@streamdown/mermaid";
 import { math } from "@streamdown/math";
 import { cjk } from "@streamdown/cjk";
+import "streamdown/styles.css";
 import "katex/dist/katex.min.css"
 type ToolCall = {
   id: string;
@@ -956,13 +957,13 @@ function ThreadPageContent() {
                               </ReasoningContent>
                             </Reasoning>
                           )}
-                        <Streamdown plugins={{ code, mermaid, math, cjk }} isAnimating={status === "streaming"}>
+                        <Streamdown plugins={{ code, mermaid, math, cjk }} isAnimating={status === "streaming"} animated>
                           {renderMessageText(message)}
                         </Streamdown>
                       </div>
                     ) : (
                       <div className="text-sm whitespace-pre-wrap">
-                        <Streamdown plugins={{ code, mermaid, math, cjk }} isAnimating={status === "streaming"}>
+                        <Streamdown plugins={{ code, mermaid, math, cjk }} isAnimating={status === "streaming"} animated>
                           {renderMessageText(message)}
                         </Streamdown>
                       </div>
