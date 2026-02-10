@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter } from "next/font/google";
+import { Geist, Geist_Mono, Inter, Be_Vietnam_Pro, Baumans } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
@@ -8,6 +8,17 @@ import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
+const beVietnamPro = Be_Vietnam_Pro({
+  subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  variable: "--font-be-vietnam-pro",
+});
+
+const baumans = Baumans({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-baumans",
+});
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -33,7 +44,7 @@ export default function RootLayout({
     <ConvexAuthNextjsServerProvider>
       <html lang="en" className={inter.variable} suppressHydrationWarning>
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+          className={`${beVietnamPro.variable} ${baumans.variable} antialiased`}
         >
           <ThemeProvider
             attribute="class"
