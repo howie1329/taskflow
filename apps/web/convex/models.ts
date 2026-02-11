@@ -10,6 +10,16 @@ type OpenRouterPricing = {
   image: string;
 };
 
+type OpenRouterArchitecture = {
+  modality?: string;
+  input_modalities?: string[];
+  output_modalities?: string[];
+};
+
+type OpenRouterTopProvider = {
+  max_completion_tokens?: number;
+};
+
 type OpenRouterModel = {
   id: string;
   canonical_slug: string;
@@ -17,6 +27,9 @@ type OpenRouterModel = {
   created: number;
   pricing: OpenRouterPricing;
   context_length: number;
+  architecture?: OpenRouterArchitecture;
+  top_provider?: OpenRouterTopProvider;
+  supported_parameters?: string[];
   description: string;
   expiration_date: number | null;
 };
@@ -27,12 +40,20 @@ type OpenRouterModelsResponse = {
 
 type ModelInfo = {
   id: string;
+  canonicalSlug: string;
+  provider: string;
   name: string;
   description: string;
   pricing: {
     prompt: string;
     completion: string;
   };
+  contextLength: number;
+  maxCompletionTokens?: number;
+  modality?: string;
+  inputModalities?: string[];
+  outputModalities?: string[];
+  supportedParameters?: string[];
 };
 
 // PUBLIC QUERIES
@@ -102,7 +123,7 @@ export const removeBaseModel = internalMutation({
 
 // Fetch models from OpenRouter API (internal action)
 export const fetchOpenRouterModels = internalAction({
-  handler: async (ctx): Promise<{ models: ModelInfo[] }> => {
+  handler: async (): Promise<{ models: ModelInfo[] }> => {
     const key = process.env.OPENROUTER_AI_KEY;
     if (!key) {
       throw new Error("OPENROUTER_API_KEY is not set");
@@ -137,12 +158,20 @@ export const fetchOpenRouterModels = internalAction({
     // Map with safe defaults
     const models: ModelInfo[] = data.data.map((model) => ({
       id: model.id,
+      canonicalSlug: model.canonical_slug ?? model.id,
+      provider: model.id.split("/")[0] ?? "unknown",
       name: model.name,
       description: model.description ?? "",
       pricing: {
         prompt: model.pricing?.prompt ?? "0",
         completion: model.pricing?.completion ?? "0",
       },
+      contextLength: model.context_length ?? 0,
+      maxCompletionTokens: model.top_provider?.max_completion_tokens,
+      modality: model.architecture?.modality,
+      inputModalities: model.architecture?.input_modalities,
+      outputModalities: model.architecture?.output_modalities,
+      supportedParameters: model.supported_parameters,
     }));
 
     return { models };
@@ -155,12 +184,20 @@ export const replaceAvailableModels = internalMutation({
     models: v.array(
       v.object({
         id: v.string(),
+        canonicalSlug: v.string(),
+        provider: v.string(),
         name: v.string(),
         description: v.string(),
         pricing: v.object({
           prompt: v.string(),
           completion: v.string(),
         }),
+        contextLength: v.number(),
+        maxCompletionTokens: v.optional(v.number()),
+        modality: v.optional(v.string()),
+        inputModalities: v.optional(v.array(v.string())),
+        outputModalities: v.optional(v.array(v.string())),
+        supportedParameters: v.optional(v.array(v.string())),
       }),
     ),
     syncedAt: v.number(),
@@ -176,9 +213,17 @@ export const replaceAvailableModels = internalMutation({
     for (const model of args.models) {
       await ctx.db.insert("availableModels", {
         modelId: model.id,
+        canonicalSlug: model.canonicalSlug,
+        provider: model.provider,
         name: model.name,
         description: model.description,
         pricing: model.pricing,
+        contextLength: model.contextLength,
+        maxCompletionTokens: model.maxCompletionTokens,
+        modality: model.modality,
+        inputModalities: model.inputModalities,
+        outputModalities: model.outputModalities,
+        supportedParameters: model.supportedParameters,
         syncedAt: args.syncedAt,
       });
     }

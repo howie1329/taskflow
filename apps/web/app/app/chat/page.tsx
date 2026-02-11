@@ -29,6 +29,7 @@ import {
   ModelSelectorList,
   ModelSelectorItem,
   ModelSelectorGroup,
+  ModelSelectorLogo,
   ModelSelectorName,
 } from "@/components/ai-elements/model-selector";
 import {
@@ -44,6 +45,14 @@ import {
 } from "@/components/ai-elements/mode-selector";
 import { useChatContext } from "./components/chat-provider";
 import { AVAILABLE_MODES, getModeDescription } from "@/lib/AITools/ModePrompts";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+
+
+const formatModelPrice = (price: string) => {
+  const parsed = Number(price)
+  if (Number.isNaN(parsed)) return "$0.00"
+  return `$${parsed.toFixed(2)}`
+}
 
 const SUGGESTIONS = [
   { title: "Plan my day", value: "Plan my day" },
@@ -136,15 +145,37 @@ function ComposerWithScope() {
                       <ModelSelectorList>
                         <ModelSelectorGroup heading="Available Models">
                           {availableModels.map((model) => (
-                            <ModelSelectorItem
-                              key={model.modelId}
-                              value={model.modelId}
-                              onSelect={() => setSelectedModelId(model.modelId)}
-                            >
-                              <ModelSelectorName>
-                                {model.name}
-                              </ModelSelectorName>
-                            </ModelSelectorItem>
+                            <Tooltip key={model.modelId}>
+                              <TooltipTrigger asChild>
+                                <ModelSelectorItem
+                                  value={`${model.modelId} ${model.name} ${model.provider ?? ""}`}
+                                  onSelect={() =>
+                                    setSelectedModelId(model.modelId)
+                                  }
+                                >
+                                  <div className="flex w-full items-center justify-between gap-3">
+                                    <div className="flex min-w-0 items-center gap-2">
+                                      {model.provider ? (
+                                        <ModelSelectorLogo provider={model.provider} />
+                                      ) : null}
+                                      <ModelSelectorName>{model.name}</ModelSelectorName>
+                                    </div>
+                                    <div className="shrink-0 text-[10px] text-muted-foreground">
+                                      {formatModelPrice(model.pricing.prompt)} / {formatModelPrice(model.pricing.completion)}
+                                    </div>
+                                  </div>
+                                </ModelSelectorItem>
+                              </TooltipTrigger>
+                              <TooltipContent side="right" className="max-w-sm">
+                                <p className="font-medium">{model.name}</p>
+                                <p className="mt-1 text-xs text-background/80">
+                                  {model.description || "No description available."}
+                                </p>
+                                <p className="mt-2 text-[10px] text-background/70">
+                                  {model.modelId}
+                                </p>
+                              </TooltipContent>
+                            </Tooltip>
                           ))}
                         </ModelSelectorGroup>
                       </ModelSelectorList>
