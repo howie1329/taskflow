@@ -5,6 +5,7 @@ import { TavilyToolsKeys } from "./Tavily"
 import { ValyuToolsKeys } from "./Valyu/index"
 import { ParallelToolsKeys } from "./ParallelAi"
 import { Tools } from "./index"
+import { CustomToolsKeys } from "./Custom"
 
 type ToolKey = keyof typeof Tools
 
@@ -21,7 +22,7 @@ export const ModeMapping: Record<string, Mode> = {
     },
     "Advanced": {
         name: "Advanced",
-        activeTools: [...taskflowToolsKeys, ...FirecrawlToolsKeys, ...ExaToolsKeys, ...ParallelToolsKeys, "firecrawlScrape"] as ToolKey[]
+        activeTools: [...taskflowToolsKeys, ...FirecrawlToolsKeys, ...ExaToolsKeys, ...ParallelToolsKeys, ...CustomToolsKeys, "firecrawlScrape"] as ToolKey[]
     },
     "Finance": {
         name: "Finance",

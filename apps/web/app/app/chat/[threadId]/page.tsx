@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Dialog,
   DialogContent,
@@ -20,6 +21,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
   PromptInput,
@@ -70,7 +78,6 @@ import {
 import {
   Message,
   MessageContent,
-  MessageResponse,
 } from "@/components/ai-elements/message";
 import {
   Reasoning,
@@ -123,7 +130,7 @@ import {
   PencilEdit01Icon,
   Delete02Icon,
 } from "@hugeicons/core-free-icons";
-import { ChevronDownIcon } from "lucide-react";
+import { ChevronDownIcon, CopyIcon, RefreshCwIcon, ActivityIcon } from "lucide-react";
 import type { UIMessage, ToolUIPart, DynamicToolUIPart } from "ai";
 import {
   isTavilyWebSearchOutput,
@@ -138,6 +145,7 @@ import { ParallelWebSearchCard } from "@/components/ai-elements/parallel-web-sea
 import { ValyuWebSearchCard } from "@/components/ai-elements/valyu-web-search-card";
 import { ValyuFinanceSearchCard } from "@/components/ai-elements/valyu-finance-search-card";
 import { TaskflowToolResultCard } from "@/components/ai-elements/taskflow-tool-result-card";
+import { ModernToolResult } from "@/components/ai-elements/modern-tool-result";
 import { useChatContext } from "../components/chat-provider";
 import { useViewer } from "@/components/settings/hooks/use-viewer";
 import { AVAILABLE_MODES, getModeDescription } from "@/lib/AITools/ModePrompts";
@@ -325,6 +333,11 @@ function getToolSummary(toolCall: ToolCall): string | null {
     return `Found ${resultCount} aggregated results`;
   }
 
+  if (toolCall.toolKey === "advancedResearch") {
+    const resultCount = getOutputArrayLength(toolCall.output, "sources");
+    return `Compiled ${resultCount} multi-source results`;
+  }
+
   if (toolCall.toolKey === "valyuWebSearch" || toolCall.toolKey === "valyuFinanceSearch") {
     const resultCount = getOutputArrayLength(toolCall.output, "results");
     return `Found ${resultCount} Valyu results`;
@@ -418,6 +431,12 @@ function renderToolContent(toolCall: ToolCall): React.ReactNode {
       return <FirecrawlScrapeCard output={toolCall.output} />;
     case "parallelWebSearch":
       return <ParallelWebSearchCard output={toolCall.output} />;
+    case "advancedResearch":
+      return (
+        <p className="text-sm text-muted-foreground">
+          Advanced research completed. Open enhanced details below for full source and scrape output.
+        </p>
+      );
     case "valyuWebSearch":
       return <ValyuWebSearchCard output={toolCall.output} />;
     case "valyuFinanceSearch":
@@ -531,6 +550,7 @@ function ThreadPageContent() {
     status,
     stop,
     sendText,
+    error,
     thread,
     project,
     selectedModelId,
@@ -548,6 +568,9 @@ function ThreadPageContent() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editTitle, setEditTitle] = useState(thread?.title || "");
+
+  const [messageDetailsId, setMessageDetailsId] = useState<string | null>(null);
+  const [clearedErrorMessage, setClearedErrorMessage] = useState<string | null>(null);
 
   const updateThreadTitle = useMutation(api.chat.updateThreadTitle);
   const softDeleteThread = useMutation(api.chat.softDeleteThread);
@@ -645,6 +668,40 @@ function ThreadPageContent() {
       .map((part) => (part as { type: "reasoning"; text: string }).text)
       .join("");
   };
+
+  const estimateTokens = (text: string) => Math.max(1, Math.ceil(text.length / 4));
+
+  const getMessageLengthLabel = (text: string) => {
+    const wordCount = text.trim().length ? text.trim().split(/\s+/).length : 0;
+    return `${wordCount} words · ${text.length} chars`;
+  };
+
+  const regenerateAssistantResponse = async (assistantMessageId: string) => {
+    const assistantIndex = uiMessages.findIndex((message) => message.id === assistantMessageId);
+    if (assistantIndex < 0) return;
+
+    const previousUser = [...uiMessages.slice(0, assistantIndex)]
+      .reverse()
+      .find((message) => message.role === "user");
+
+    if (!previousUser) return;
+
+    const previousText = renderMessageText(previousUser);
+    if (!previousText.trim()) return;
+
+    await sendText(previousText);
+  };
+
+  const copyAssistantMessage = async (messageText: string) => {
+    try {
+      await navigator.clipboard.writeText(messageText);
+    } catch (copyError) {
+      console.error("Failed to copy assistant message", copyError);
+    }
+  };
+
+  const selectedMessage = uiMessages.find((message) => message.id === messageDetailsId);
+  const selectedMessageText = selectedMessage ? renderMessageText(selectedMessage) : "";
 
   return (
     <div className="flex flex-col h-[calc(100vh-2rem)] w-full overflow-hidden">
@@ -749,6 +806,20 @@ function ThreadPageContent() {
         )}
       </div>
 
+      {error && error.message !== clearedErrorMessage && (
+        <div className="px-4 py-3">
+          <Alert variant="destructive" className="flex items-start justify-between gap-3">
+            <div>
+              <AlertTitle>Chat request failed</AlertTitle>
+              <AlertDescription>{error.message}</AlertDescription>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => setClearedErrorMessage(error.message)}>
+              Clear error
+            </Button>
+          </Alert>
+        </div>
+      )}
+
       {/* Edit Title Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent>
@@ -815,12 +886,17 @@ function ThreadPageContent() {
               description="Ask anything, or use a prompt suggestion"
             />
           ) : (
-            uiMessages.map((message) => {
+            uiMessages.map((message, index) => {
               const reasoningText = renderMessageReasoning(message);
               const hasReasoning = !!reasoningText;
               const toolCalls =
                 message.role === "assistant" ? getToolCalls(message) : [];
               const hasToolCalls = toolCalls.length > 0;
+              const messageText = renderMessageText(message);
+              const isStreamingMessage =
+                message.role === "assistant" &&
+                status === "streaming" &&
+                index === uiMessages.length - 1;
 
               return (
                 <Message
@@ -945,6 +1021,29 @@ function ThreadPageContent() {
                               )}
                             </>
                           )}
+
+                        {hasToolCalls && (
+                          <div className="space-y-2 rounded-lg border border-dashed border-border/60 p-3">
+                            <p className="text-xs font-medium text-muted-foreground">
+                              Enhanced tool results
+                            </p>
+                            {toolCalls.map((toolCall) => {
+                              const providerType = detectProvider(toolCall.toolKey);
+                              const providerName = providerConfig[providerType]?.name ?? "Unknown";
+                              return (
+                                <ModernToolResult
+                                  key={`modern-${toolCall.id}`}
+                                  toolName={toolCall.toolKey}
+                                  toolState={toolCall.state}
+                                  summary={getToolSummary(toolCall)}
+                                  provider={providerName}
+                                  input={toolCall.input}
+                                  output={toolCall.output}
+                                />
+                              );
+                            })}
+                          </div>
+                        )}
                         {hasReasoning &&
                           preferences?.aiChatShowReasoning !== false && (
                             <Reasoning
@@ -958,13 +1057,49 @@ function ThreadPageContent() {
                             </Reasoning>
                           )}
                         <Streamdown plugins={{ code, mermaid, math, cjk }} isAnimating={status === "streaming"} animated>
-                          {renderMessageText(message)}
+                          {messageText}
                         </Streamdown>
+
+                        {isStreamingMessage && (
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <ActivityIcon className="size-3.5 animate-pulse" />
+                            Streaming response...
+                          </div>
+                        )}
+
+                        <div className="flex flex-wrap items-center gap-2 pt-1">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 text-xs"
+                            onClick={() => void regenerateAssistantResponse(message.id)}
+                          >
+                            <RefreshCwIcon className="mr-1 size-3.5" />
+                            Regenerate
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 text-xs"
+                            onClick={() => void copyAssistantMessage(messageText)}
+                          >
+                            <CopyIcon className="mr-1 size-3.5" />
+                            Copy
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 text-xs"
+                            onClick={() => setMessageDetailsId(message.id)}
+                          >
+                            Details
+                          </Button>
+                        </div>
                       </div>
                     ) : (
                       <div className="text-sm whitespace-pre-wrap">
                         <Streamdown plugins={{ code, mermaid, math, cjk }} isAnimating={status === "streaming"} animated>
-                          {renderMessageText(message)}
+                          {messageText}
                         </Streamdown>
                       </div>
                     )}
@@ -976,6 +1111,29 @@ function ThreadPageContent() {
         </ConversationContent>
         <ConversationScrollButton />
       </Conversation>
+
+      <Sheet open={!!messageDetailsId} onOpenChange={(open) => !open && setMessageDetailsId(null)}>
+        <SheetContent side="right" className="w-full sm:max-w-md">
+          <SheetHeader>
+            <SheetTitle>Assistant message details</SheetTitle>
+            <SheetDescription>Token and size metrics for this response.</SheetDescription>
+          </SheetHeader>
+          <div className="space-y-3 py-4">
+            <div className="rounded-md border border-border/60 p-3">
+              <p className="text-xs text-muted-foreground">Estimated tokens</p>
+              <p className="text-lg font-semibold">{estimateTokens(selectedMessageText)}</p>
+            </div>
+            <div className="rounded-md border border-border/60 p-3">
+              <p className="text-xs text-muted-foreground">Length</p>
+              <p className="text-sm font-medium">{getMessageLengthLabel(selectedMessageText)}</p>
+            </div>
+            <div className="rounded-md border border-border/60 p-3">
+              <p className="text-xs text-muted-foreground">Preview</p>
+              <p className="mt-1 whitespace-pre-wrap text-sm">{selectedMessageText || "No text in this message."}</p>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
 
       {/* Composer */}
       <div className="shrink-0 bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-16 py-3 pb-[calc(env(safe-area-inset-bottom)+2px)]">

@@ -4,6 +4,7 @@ import { taskflowTools } from "./Taskflow/Taskflow"
 import { ValyuTools } from "./Valyu/index"
 import { ParallelTools } from "./ParallelAi/index"
 import { FirecrawlTools } from "./Firecrawl/index"
+import { CustomTools } from "./Custom"
 
 export const Tools = {
   ...ExaTools,
@@ -12,4 +13,5 @@ export const Tools = {
   ...ValyuTools,
   ...ParallelTools,
   ...FirecrawlTools,
+  ...CustomTools,
 } as const
