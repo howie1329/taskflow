@@ -8,7 +8,6 @@ import {
   Sun02Icon,
   Moon02Icon,
   SearchIcon,
-  Cancel01Icon,
   PlusSignIcon,
 } from "@hugeicons/core-free-icons";
 import {
@@ -22,11 +21,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group";
 import {
   SidebarContent,
   SidebarFooter,
@@ -74,7 +68,7 @@ export function ChatSidebar({ onBackToWorkspace }: ChatSidebarProps) {
   // Convert Convex threads to ChatThread format
   const threads = convexThreads.map(convertToChatThread);
 
-  const { state, isMobile } = useSidebar();
+  const { state, isMobile, setOpen } = useSidebar();
   const isCollapsed = state === "collapsed" && !isMobile;
 
   const isNewChat = pathname === "/app/chat";
@@ -182,70 +176,44 @@ export function ChatSidebar({ onBackToWorkspace }: ChatSidebarProps) {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton
-                tooltip="Back to workspace"
-                onClick={onBackToWorkspace}
+                tooltip="Open sidebar"
+                onClick={() => setOpen(true)}
+                className="justify-center"
               >
                 <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
-                <span>Back to workspace</span>
+                <span>Open sidebar</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                tooltip="Search threads"
+                onClick={() => setOpen(true)}
+                className="justify-center"
+              >
+                <HugeiconsIcon icon={SearchIcon} className="size-4" strokeWidth={2} />
+                <span>Search threads</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                tooltip="New chat"
+                isActive={isNewChat}
+                className={cn(
+                  "justify-center",
+                  isNewChat && "bg-sidebar-accent text-sidebar-accent-foreground",
+                )}
+              >
+                <Link href="/app/chat" aria-label="New chat">
+                  <HugeiconsIcon icon={PlusSignIcon} className="size-4" strokeWidth={2} />
+                  <span>New chat</span>
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarHeader>
 
-        <SidebarContent className="px-2">
-          <div className="space-y-2">
-            <Link href="/app/chat">
-              <Button
-                className={cn(
-                  "w-full h-7 rounded-md px-2 text-xs",
-                  isNewChat && "bg-accent text-accent-foreground",
-                )}
-                variant={isNewChat ? "secondary" : "default"}
-              >
-                <HugeiconsIcon
-                  icon={PlusSignIcon}
-                  className="size-3 mr-1"
-                  strokeWidth={2}
-                />
-                New
-              </Button>
-            </Link>
-
-            <InputGroup className="w-full">
-              <InputGroupAddon>
-                <HugeiconsIcon
-                  icon={SearchIcon}
-                  className="size-3.5"
-                  strokeWidth={2}
-                />
-              </InputGroupAddon>
-              <InputGroupInput
-                placeholder="Search threads..."
-                value={searchQuery}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setSearchQuery(e.target.value)
-                }
-                className="h-7 text-xs"
-              />
-              {searchQuery && (
-                <InputGroupAddon>
-                  <Button
-                    variant="ghost"
-                    size="icon-xs"
-                    onClick={() => setSearchQuery("")}
-                    className="h-5 w-5"
-                  >
-                    <HugeiconsIcon
-                      icon={Cancel01Icon}
-                      className="size-3"
-                      strokeWidth={2}
-                    />
-                  </Button>
-                </InputGroupAddon>
-              )}
-            </InputGroup>
-          </div>
-        </SidebarContent>
+        <SidebarContent className="px-2" />
 
         <SidebarFooter>
           <SidebarMenu>

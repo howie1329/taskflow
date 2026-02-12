@@ -1,14 +1,25 @@
 # Taskflow Web Docs
 
-Welcome to the documentation hub for the Convex-first Taskflow web app.
+This is the canonical documentation set for the main Taskflow app in `apps/web`.
 
-## Contents
+## Start Here
 
+- [UI Guidelines](./ui-guidelines.md)
 - [Architecture](./architecture/README.md)
 - [Features](./features/README.md)
+- [Feature Status](./features/status.md)
+- [Roadmap](./roadmap.md)
 
-## Quick Links
+## What This Docs Set Covers
 
-- [Routes](./architecture/routing.md)
-- [Data model (Convex)](./architecture/data-model.md)
-- [Feature status](./features/status.md)
+- Current route architecture in the Next.js App Router
+- Convex-backed data model and user-scoped access patterns
+- Implemented product surfaces: inbox, tasks, projects, notes, chat, settings, onboarding
+- AI chat rendering model (messages, tool calls, reasoning/action traces)
+- UI/UX standards for ongoing refresh work
+
+## Principles
+
+- Keep docs aligned with code reality in `apps/web`
+- Prefer concise implementation guidance over stale planning notes
+- Treat root `docs/` as product/legacy reference and `apps/web/docs` as execution source of truth

@@ -1,32 +1,21 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter, Be_Vietnam_Pro, Baumans } from "next/font/google";
+import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 import ConvexClientProvider from "@/components/convex/ConvexClientProvider";
 import { Toaster } from "@/components/ui/sonner";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
-
-const beVietnamPro = Be_Vietnam_Pro({
+const ibmPlexSans = IBM_Plex_Sans({
   subsets: ["latin"],
-  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
-  variable: "--font-be-vietnam-pro",
+  weight: ["400", "500", "600"],
+  variable: "--font-sans",
 });
 
-const baumans = Baumans({
+const ibmPlexMono = IBM_Plex_Mono({
   subsets: ["latin"],
-  weight: ["400"],
-  variable: "--font-baumans",
-});
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-mono",
 });
 
 export const metadata: Metadata = {
@@ -42,10 +31,12 @@ export default function RootLayout({
 }>) {
   return (
     <ConvexAuthNextjsServerProvider>
-      <html lang="en" className={inter.variable} suppressHydrationWarning>
-        <body
-          className={`${beVietnamPro.variable} ${baumans.variable} antialiased`}
-        >
+      <html
+        lang="en"
+        className={`${ibmPlexSans.variable} ${ibmPlexMono.variable}`}
+        suppressHydrationWarning
+      >
+        <body className="font-sans antialiased">
           <ThemeProvider
             attribute="class"
             defaultTheme="system"

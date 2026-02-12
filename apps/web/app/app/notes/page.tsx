@@ -16,8 +16,8 @@ export default function NotesPage() {
   const { createNote } = useNotes();
 
   return (
-    <div className="flex h-full w-full items-center justify-center p-6">
-      <Empty className="min-h-[300px]">
+    <div className="flex h-full w-full min-h-0 items-center justify-center px-4 py-3 md:px-6 md:py-4">
+      <Empty className="min-h-[240px]">
         <EmptyHeader>
           <EmptyMedia variant="icon">
             <HugeiconsIcon icon={NoteIcon} className="size-4" />

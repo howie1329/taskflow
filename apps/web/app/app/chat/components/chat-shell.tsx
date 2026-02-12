@@ -13,10 +13,10 @@ export function ChatShell({ children }: ChatShellProps) {
     pathname.startsWith("/app/chat/") && !pathname.endsWith("/app/chat");
 
   return (
-    <div className="flex flex-1 h-full overflow-hidden rounded-md bg-card/40 dark:bg-card/20">
+    <div className="flex h-full flex-1 overflow-hidden bg-background">
       <div
         className={cn(
-          "flex-1 min-w-0 h-full flex flex-col bg-background overflow-hidden",
+          "flex h-full min-w-0 flex-1 flex-col overflow-hidden bg-background",
           !isThreadRoute && "hidden md:flex",
         )}
       >

@@ -59,6 +59,7 @@ export async function POST(req: Request) {
   let userId: string | undefined;
   let projectId: Id<"projects"> | undefined;
   let mode: string;
+  let toolLock: string | undefined;
   try {
     const body = await req.json();
     model = body.model;
@@ -68,6 +69,7 @@ export async function POST(req: Request) {
     userId = body.userId;
     projectId = body.projectId || undefined;
     mode = body.mode || "Basic";
+    toolLock = body.toolLock || undefined;
   } catch (error) {
     console.error("Error parsing request:", error);
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
@@ -177,13 +179,33 @@ export async function POST(req: Request) {
   const selectedMode = ModeMapping[mode] ? mode : "Basic";
 
   // Get the active tools for the model
-  const activeTools = ModeMapping[selectedMode].activeTools;
+  let activeTools = ModeMapping[selectedMode].activeTools;
+  let validatedToolLock: keyof typeof Tools | null = null;
+
+  if (typeof toolLock === "string" && toolLock.length > 0) {
+    const isKnownTool = Object.prototype.hasOwnProperty.call(Tools, toolLock);
+    const isAllowedInMode = activeTools.includes(toolLock as keyof typeof Tools);
+
+    if (isKnownTool && isAllowedInMode) {
+      validatedToolLock = toolLock as keyof typeof Tools;
+      activeTools = [validatedToolLock];
+    }
+  }
 
   // Build system instructions with project context and mode
-  const instructions = buildSystemPrompt(
+  let instructions = buildSystemPrompt(
     projectContext ?? undefined,
     selectedMode as ModeName,
   );
+
+  if (validatedToolLock) {
+    instructions = `${instructions}
+
+## Tool Lock (User Selected)
+- Tool usage is locked to \`${validatedToolLock}\`
+- Only use this tool for tool calls in this response
+- If this tool cannot complete the request, explain the limitation and ask the user to clear the tool lock or choose another slash command`
+  }
 
   const response = createUIMessageStreamResponse({
     status: 200,

@@ -35,7 +35,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { useSidebar } from "@/components/ui/sidebar";
-import { NotesSidebar, useNotes } from "@/components/notes";
+import { NotesRail, useNotes } from "@/components/notes";
 import { useTheme } from "next-themes";
 
 interface NotesAppSidebarProps {
@@ -50,16 +50,9 @@ export function NotesAppSidebar({ onBackToWorkspace }: NotesAppSidebarProps) {
 
   const {
     notes,
-    filteredNotes,
-    sortedNotes,
-    groupedNotes,
     selectedNoteId,
-    projectFilter,
     searchQuery,
-    viewMode,
-    setProjectFilter,
     setSearchQuery,
-    setViewMode,
     createNote,
     selectNote,
     pinNote,
@@ -69,7 +62,6 @@ export function NotesAppSidebar({ onBackToWorkspace }: NotesAppSidebarProps) {
     cancelDelete,
     deleteDialogOpen,
     projects,
-    projectForNote,
   } = useNotes();
 
   const { setTheme, resolvedTheme } = useTheme();
@@ -138,7 +130,7 @@ export function NotesAppSidebar({ onBackToWorkspace }: NotesAppSidebarProps) {
         <SidebarContent className="px-2">
           <div className="space-y-2">
             <Button
-              className="w-full h-7 rounded-md px-2 text-xs"
+              className="h-7 w-full rounded-md px-2 text-xs"
               variant="default"
               onClick={handleCreateNote}
             >
@@ -165,7 +157,7 @@ export function NotesAppSidebar({ onBackToWorkspace }: NotesAppSidebarProps) {
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setSearchQuery(e.target.value)
                 }
-                className="h-7 text-xs"
+                className="h-7 border-border/50 text-xs"
               />
               {searchQuery && (
                 <InputGroupAddon>
@@ -249,27 +241,19 @@ export function NotesAppSidebar({ onBackToWorkspace }: NotesAppSidebarProps) {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent className="px-0 overflow-hidden">
-        <div className="h-full px-4 py-3">
-          <NotesSidebar
+      <SidebarContent className="overflow-hidden px-0">
+        <div className="flex h-full min-h-0 flex-col px-3 py-2">
+          <NotesRail
+            variant="sidebar"
             notes={notes}
-            filteredNotes={filteredNotes}
-            sortedNotes={sortedNotes}
-            groupedNotes={groupedNotes}
-            selectedNoteId={selectedNoteId}
-            projectFilter={projectFilter}
+            activeNoteId={selectedNoteId}
             searchQuery={searchQuery}
-            viewMode={viewMode}
-            isMobile={isMobile}
-            onProjectFilterChange={setProjectFilter}
             onSearchQueryChange={setSearchQuery}
-            onViewModeChange={setViewMode}
             onSelectNote={handleSelectNote}
             onCreateNote={handleCreateNote}
-            onPinNote={pinNote}
+            onTogglePin={pinNote}
             onMoveNote={moveNote}
             onDeleteNote={requestDeleteNote}
-            projectForNote={projectForNote}
             projects={projects}
             searchInputRef={searchInputRef}
           />

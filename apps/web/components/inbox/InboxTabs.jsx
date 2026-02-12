@@ -32,10 +32,14 @@ export const InboxTabs = memo(function InboxTabs({
     <Tabs
       value={activeTab}
       onValueChange={onTabChange}
-      className="flex-1 flex flex-col min-h-0"
+      className="flex-1 flex flex-col min-h-0 overflow-hidden"
       aria-label="Inbox tabs"
     >
-      <TabsList variant="line" className="mb-0" role="tablist">
+      <TabsList
+        variant="line"
+        className="mb-0 w-full justify-start gap-1 border-b border-border/50 bg-background/90 px-1 backdrop-blur supports-backdrop-filter:bg-background/80"
+        role="tablist"
+      >
         <TabsTrigger
           value="open"
           className="gap-2"
@@ -72,65 +76,73 @@ export const InboxTabs = memo(function InboxTabs({
 
       <TabsContent
         value="open"
-        className="flex-1 overflow-y-auto min-h-0"
+        className="mt-0 flex min-h-0 flex-1 flex-col pt-2"
         role="tabpanel"
         aria-label="Open items"
       >
-        {filteredOpenItems.length === 0 ? (
-          <InboxEmptyState
-            status="open"
-            onCaptureFocus={onCaptureFocus}
-            searchQuery={searchQuery}
-          />
-        ) : (
-          <div
-            className="space-y-2 pb-4"
-            role="list"
-            aria-label={`${filteredOpenItems.length} open inbox items`}
-          >
-            {filteredOpenItems.map((item) => (
-              <InboxItemRow
-                key={item._id}
-                item={item}
-                onArchive={onArchive}
-                onUnarchive={onUnarchive}
-                onDelete={onDelete}
-                onConvert={onConvert}
-                onOpenActions={onOpenActions}
-                isNew={newItemIds.has(String(item._id))}
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border/50 bg-background/60">
+          {filteredOpenItems.length === 0 ? (
+            <div className="flex min-h-0 flex-1 items-center justify-center p-2">
+              <InboxEmptyState
+                status="open"
+                onCaptureFocus={onCaptureFocus}
+                searchQuery={searchQuery}
               />
-            ))}
-          </div>
-        )}
+            </div>
+          ) : (
+            <div
+              className="min-h-0 flex-1 overflow-y-auto divide-y divide-border/50"
+              role="list"
+              aria-label={`${filteredOpenItems.length} open inbox items`}
+            >
+              {filteredOpenItems.map((item) => (
+                <InboxItemRow
+                  key={item._id}
+                  item={item}
+                  onArchive={onArchive}
+                  onUnarchive={onUnarchive}
+                  onDelete={onDelete}
+                  onConvert={onConvert}
+                  onOpenActions={onOpenActions}
+                  isNew={newItemIds.has(String(item._id))}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </TabsContent>
 
       <TabsContent
         value="archived"
-        className="flex-1 overflow-y-auto min-h-0"
+        className="mt-0 flex min-h-0 flex-1 flex-col pt-2"
         role="tabpanel"
         aria-label="Archived items"
       >
-        {filteredArchivedItems.length === 0 ? (
-          <InboxEmptyState status="archived" searchQuery={searchQuery} />
-        ) : (
-          <div
-            className="space-y-2 pb-4"
-            role="list"
-            aria-label={`${filteredArchivedItems.length} archived inbox items`}
-          >
-            {filteredArchivedItems.map((item) => (
-              <InboxItemRow
-                key={item._id}
-                item={item}
-                onArchive={onArchive}
-                onUnarchive={onUnarchive}
-                onDelete={onDelete}
-                onConvert={onConvert}
-                onOpenActions={onOpenActions}
-              />
-            ))}
-          </div>
-        )}
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border/50 bg-background/60">
+          {filteredArchivedItems.length === 0 ? (
+            <div className="flex min-h-0 flex-1 items-center justify-center p-2">
+              <InboxEmptyState status="archived" searchQuery={searchQuery} />
+            </div>
+          ) : (
+            <div
+              className="min-h-0 flex-1 overflow-y-auto divide-y divide-border/50"
+              role="list"
+              aria-label={`${filteredArchivedItems.length} archived inbox items`}
+            >
+              {filteredArchivedItems.map((item) => (
+                <InboxItemRow
+                  key={item._id}
+                  item={item}
+                  onArchive={onArchive}
+                  onUnarchive={onUnarchive}
+                  onDelete={onDelete}
+                  onConvert={onConvert}
+                  onOpenActions={onOpenActions}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </TabsContent>
     </Tabs>
   );

@@ -23,7 +23,6 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import type { ChatProject, ChatThread } from "./mock-data";
 import { ProjectThreadGroup } from "./project-thread-group";
@@ -92,16 +91,14 @@ export function ThreadsRail({
       aria-label="Threads"
       className={cn(
         "flex min-h-0 flex-col text-foreground",
-        isSidebar
-          ? "w-full flex-1 bg-transparent"
-          : "w-full md:w-[300px] shrink-0 border-r border-border/60 bg-background/40",
+        isSidebar ? "w-full flex-1 bg-transparent" : "w-full shrink-0 bg-background",
         className,
       )}
     >
       <div
         className={cn(
-          "sticky top-0 z-10 border-b border-border/60 bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60 space-y-2",
-          isSidebar ? "p-2" : "p-3",
+          "sticky top-0 z-10 bg-transparent space-y-2",
+          isSidebar ? "p-2.5" : "p-3",
         )}
       >
         <div className="flex items-center justify-between gap-2">
@@ -116,11 +113,11 @@ export function ThreadsRail({
           <Link href="/app/chat">
             <Button
               className={cn(
-                "rounded-md",
+                "rounded-lg",
                 isSidebar ? "h-7 px-2 text-xs" : "h-8 px-3 text-xs",
-                isNewChat && "bg-accent text-accent-foreground",
+                isNewChat && "bg-muted text-foreground",
               )}
-              variant={isNewChat ? "secondary" : "default"}
+              variant={isNewChat ? "secondary" : "outline"}
             >
               <HugeiconsIcon
                 icon={PlusSignIcon}
@@ -164,11 +161,11 @@ export function ThreadsRail({
         </InputGroup>
       </div>
 
-      <ScrollArea className="flex-1 min-h-0 [&>div>div]:!w-full">
+      <ScrollArea className="flex-1 min-h-0 [&>div>div]:w-full!">
         <div
           className={cn(
-            "space-y-4 w-full max-w-full",
-            isSidebar ? "p-2 space-y-3" : "p-3",
+            "w-full max-w-full",
+            isSidebar ? "space-y-2 p-2" : "space-y-3 p-3",
           )}
         >
           {threads.length === 0 ? (
@@ -205,7 +202,7 @@ export function ThreadsRail({
           ) : (
             <>
               {pinnedThreads.length > 0 && (
-                <div className="space-y-2 w-full max-w-full">
+                <div className="space-y-1.5 w-full max-w-full">
                   <ThreadSection
                     label="Pinned"
                     count={pinnedThreads.length}
@@ -242,8 +239,8 @@ export function ThreadsRail({
               )}
 
               {recentThreads.length > 0 && (
-                <div className="space-y-2 w-full max-w-full">
-                  <ThreadSection label="Recent" count={recentThreads.length} />
+                <div className="space-y-1.5 w-full max-w-full">
+                  <ThreadSection label="Latest" count={recentThreads.length} />
                   <div className="space-y-0.5 w-full max-w-full">
                     {recentThreads.map((thread) => (
                       <ThreadRow
@@ -265,47 +262,45 @@ export function ThreadsRail({
               )}
 
               {groupedByProject.length > 0 && (
-                <>
-                  {(pinnedThreads.length > 0 || recentThreads.length > 0) && (
-                    <Separator className="bg-sidebar-border/70" />
+                <div
+                  className={cn(
+                    "w-full max-w-full",
+                    pinnedThreads.length > 0 || recentThreads.length > 0
+                      ? "mt-3 pt-2"
+                      : "",
+                    isSidebar ? "space-y-2" : "space-y-2.5",
                   )}
-                  <div
-                    className={cn(
-                      "space-y-3 w-full max-w-full",
-                      isSidebar && "space-y-2",
-                    )}
-                  >
-                    <ThreadSection
-                      label="Projects"
-                      count={projectThreadCount}
-                    />
-                    <div className="space-y-0.5 w-full max-w-full">
-                      {groupedByProject.map((group) => (
-                        <ProjectThreadGroup
-                          key={group.project.id}
-                          project={group.project}
-                          threads={group.threads}
-                        >
-                          {group.threads.map((thread) => (
-                            <ThreadRow
-                              key={thread.id}
-                              thread={thread}
-                              isActive={thread.id === activeThreadId}
-                              isEditing={editingThreadId === thread.id}
-                              editingTitle={editingTitle}
-                              onEditTitleChange={onEditTitleChange}
-                              onStartEdit={() => onStartEdit(thread)}
-                              onCancelEdit={onCancelEdit}
-                              onCommitEdit={onCommitEdit}
-                              onTogglePin={() => onTogglePin(thread.id)}
-                              onDeleteRequest={() => onDeleteRequest(thread.id)}
-                            />
-                          ))}
-                        </ProjectThreadGroup>
-                      ))}
-                    </div>
+                >
+                  <ThreadSection
+                    label="Projects"
+                    count={projectThreadCount}
+                  />
+                  <div className="space-y-0.5 w-full max-w-full">
+                    {groupedByProject.map((group) => (
+                      <ProjectThreadGroup
+                        key={group.project.id}
+                        project={group.project}
+                        threads={group.threads}
+                      >
+                        {group.threads.map((thread) => (
+                          <ThreadRow
+                            key={thread.id}
+                            thread={thread}
+                            isActive={thread.id === activeThreadId}
+                            isEditing={editingThreadId === thread.id}
+                            editingTitle={editingTitle}
+                            onEditTitleChange={onEditTitleChange}
+                            onStartEdit={() => onStartEdit(thread)}
+                            onCancelEdit={onCancelEdit}
+                            onCommitEdit={onCommitEdit}
+                            onTogglePin={() => onTogglePin(thread.id)}
+                            onDeleteRequest={() => onDeleteRequest(thread.id)}
+                          />
+                        ))}
+                      </ProjectThreadGroup>
+                    ))}
                   </div>
-                </>
+                </div>
               )}
             </>
           )}

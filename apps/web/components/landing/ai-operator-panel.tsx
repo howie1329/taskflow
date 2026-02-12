@@ -1,70 +1,37 @@
-"use client";
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { UserIcon, SparklesIcon } from "@hugeicons/core-free-icons";
-
-const examples = [
-  {
-    user: "You",
-    message: "Create a task to review the Q4 roadmap",
-    icon: UserIcon,
-  },
-  {
-    user: "Taskflow AI",
-    message:
-      "Created 'Review Q4 roadmap'. Scheduled for today. Priority: High.",
-    icon: SparklesIcon,
-    actions: ["FileAddIcon", "Check"],
-  },
-  {
-    user: "You",
-    message: "Link my meeting notes to the Website Redesign project",
-    icon: UserIcon,
-  },
-  {
-    user: "Taskflow AI",
-    message:
-      "Linked 'Website Redesign Meeting Notes' to 'Website Redesign' project.",
-    icon: SparklesIcon,
-    actions: ["Link02Icon", "Check"],
-  },
-];
+import {
+  LandingSection,
+  LandingContainer,
+  LandingSectionHeader,
+} from "./index";
+import { aiExamples } from "./landing-content";
 
 export function AiOperatorPanel() {
   return (
-    <section id="ai" className="w-full px-4 py-16 lg:px-6 lg:py-24 border-t">
-      <div className="mx-auto w-full max-w-7xl">
-        <div className="mx-auto max-w-3xl text-center mb-12">
-          <Badge
-            variant="outline"
-            className="rounded-md mb-4 font-mono text-xs"
-          >
-            AI operator
-          </Badge>
-          <h2 className="text-balance text-2xl font-medium lg:text-3xl mb-4">
-            AI as workplace operator
-          </h2>
-          <p className="text-pretty text-muted-foreground text-sm">
-            Talk to your workspace. Create items, link them, find what you need.
-          </p>
-        </div>
+    <LandingSection id="ai" withBorder>
+      <LandingContainer size="sm">
+        <LandingSectionHeader
+          eyebrow="AI operator"
+          title="Natural language control for your workspace"
+          description="Use plain English to run day-to-day operations: create tasks, link context, and move work forward."
+        />
 
-        <Card className="mx-auto w-full max-w-5xl overflow-hidden border-border/60 bg-card/40 dark:bg-card/20">
-          <CardHeader className="border-b border-border/60 pb-4">
+        <Card className="mx-auto w-full max-w-4xl overflow-hidden rounded-2xl landing-surface">
+          <CardHeader className="border-b border-border/40 pb-4">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm">Example conversation</CardTitle>
-              <Badge variant="secondary" className="rounded-md text-[10px]">
-                AI chat
+              <CardTitle className="text-sm">Operator in action</CardTitle>
+              <Badge variant="secondary" className="rounded-full px-2.5 text-[10px]">
+                Example requests
               </Badge>
             </div>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="divide-y divide-border/60">
-              {examples.map((example, index) => (
-                <div key={index} className="flex gap-3 p-4">
+            <div className="divide-y divide-border/40">
+              {aiExamples.map((example, index) => (
+                <div key={index} className="flex gap-3 p-4 sm:p-5">
                   <div className="shrink-0">
                     <HugeiconsIcon
                       icon={example.icon}
@@ -79,22 +46,24 @@ export function AiOperatorPanel() {
                   </div>
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-medium">{example.user}</span>
+                      <span className="text-xs font-medium tracking-tight">
+                        {example.user}
+                      </span>
                     </div>
-                    <p className="text-pretty text-sm text-muted-foreground">
+                    <p className="text-pretty text-sm leading-relaxed text-muted-foreground">
                       {example.message}
                     </p>
                     {example.actions && (
                       <div className="flex items-center gap-2 pt-2">
                         <Badge
                           variant="outline"
-                          className="rounded-md text-[10px]"
+                          className="rounded-full border-border/50 px-2.5 text-[10px]"
                         >
                           Created task
                         </Badge>
                         <Badge
                           variant="outline"
-                          className="rounded-md text-[10px]"
+                          className="rounded-full border-border/50 px-2.5 text-[10px]"
                         >
                           Scheduled today
                         </Badge>
@@ -106,7 +75,7 @@ export function AiOperatorPanel() {
             </div>
           </CardContent>
         </Card>
-      </div>
-    </section>
+      </LandingContainer>
+    </LandingSection>
   );
 }

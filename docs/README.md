@@ -1,42 +1,26 @@
-# Taskflow Docs (Rewrite)
+# Taskflow Docs (Root Index)
 
-These docs describe the Convex-first rewrite (the new app lives in `apps/web`).
+Root docs are now intentionally minimal.
 
-Legacy code still exists for reference:
+The canonical product and implementation docs for the main app live in:
 
-- `apps/frontend` (legacy Next.js)
-- `apps/backend` (legacy Express/Drizzle/Redis/BullMQ)
+- `apps/web/docs`
 
-## Start Here
+## Start Here (Main App)
 
-- Roadmap: `docs/ROADMAP.md`
-- Feature index: `docs/FEATURES.md`
-- Architecture: `docs/ARCHITECTURE/overview.md`
-- UI guidelines: `docs/UI_GUIDELINES.md`
-- Key decisions (ADRs): `docs/DECISIONS/`
-- Legacy reference inventory: `docs/LEGACY/feature-inventory.md`
-- Source docs map: `docs/SOURCES.md`
+- `apps/web/docs/README.md`
+- `apps/web/docs/ui-guidelines.md`
+- `apps/web/docs/architecture/README.md`
+- `apps/web/docs/features/README.md`
+- `apps/web/docs/features/status.md`
+- `apps/web/docs/roadmap.md`
 
-## UI System (Rewrite)
+## What Remains in Root Docs
 
-The rewrite UI (`apps/web`) standardizes on a small set of reusable patterns (page shells, toolbar strips, calm list rows, wide kanban, centered chat reading column). These are codified in `docs/UI_GUIDELINES.md` under “Canonical UI Patterns (apps/web)”.
+- `docs/SOURCES.md`: map of docs across generations
+- `docs/LEGACY/feature-inventory.md`: legacy feature reference only
 
-## Product Definition (v1)
+## Legacy Code Areas
 
-Taskflow is a solo AI-assisted workplace.
-
-Core loop:
-
-1. Capture (Inbox)
-2. Organize (Projects / Tasks / Notes)
-3. Execute (Schedule)
-4. Assist (AI inside the workspace)
-
-Non-goals for v1:
-
-- Team collaboration
-- External calendar sync
-- Research library + daily digest
-- Mention system/backlinks (v1.1)
-- Semantic vector search (v1.1)
-- Full reminders engine (after schedule model is solid)
+- `apps/frontend` (legacy Next.js app)
+- `apps/backend` (legacy Express app)

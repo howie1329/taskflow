@@ -7,16 +7,18 @@ export const metadata = {
 
 export default function SettingsPage() {
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
+    <div className="flex h-full min-h-0 w-full flex-col px-3 py-3 md:px-5 md:py-5">
+      <div className="mb-5 flex items-center justify-between md:mb-6">
         <div>
-          <h1 className="text-lg font-semibold">Settings</h1>
+          <h1 className="text-xl font-semibold tracking-tight">Settings</h1>
           <p className="text-sm text-muted-foreground">
             Manage your profile, preferences, and AI settings
           </p>
         </div>
       </div>
-      <SettingsLayout />
+      <div className="min-h-0 flex-1">
+        <SettingsLayout />
+      </div>
     </div>
   );
 }

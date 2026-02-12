@@ -1,7 +1,6 @@
 "use client"
 
 import type { ReactNode } from "react"
-import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 
 interface ThreadSectionProps {
@@ -13,22 +12,16 @@ interface ThreadSectionProps {
 
 export function ThreadSection({
   label,
-  count,
+  count: _count,
   icon,
   className,
 }: ThreadSectionProps) {
   return (
-    <div className={cn("flex items-center gap-2 px-1", className)}>
+    <div className={cn("flex items-center gap-2 px-0.5", className)}>
       {icon}
-      <span className="text-xs font-medium text-muted-foreground">{label}</span>
-      {typeof count === "number" && (
-        <Badge
-          variant="secondary"
-          className="rounded-md text-[10px] h-4 px-1"
-        >
-          {count}
-        </Badge>
-      )}
+      <span className="text-[11px] font-medium text-muted-foreground/70">
+        {label}
+      </span>
     </div>
   )
 }

@@ -11,14 +11,10 @@ import {
   NoteIcon,
   SettingsIcon,
   CommandIcon,
-  Sun02Icon,
-  Moon02Icon,
   InboxDownloadIcon,
   NotificationIcon,
 } from "@hugeicons/core-free-icons";
-import { useTheme } from "next-themes";
 
-import { Button } from "@/components/ui/button";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { useViewer } from "@/components/settings/hooks/use-viewer";
 import {
@@ -93,24 +89,6 @@ interface AppShellProps {
   children: React.ReactNode;
 }
 
-function ThemeToggleMenuItem() {
-  const { setTheme, resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === "dark";
-
-  return (
-    <SidebarMenuButton
-      onClick={() => setTheme(isDark ? "light" : "dark")}
-      tooltip={isDark ? "Switch to light mode" : "Switch to dark mode"}
-    >
-      <HugeiconsIcon
-        icon={isDark ? Sun02Icon : Moon02Icon}
-        className="size-4"
-      />
-      <span>{isDark ? "Light mode" : "Dark mode"}</span>
-    </SidebarMenuButton>
-  );
-}
-
 export function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
   const pageTitle = getPageTitle(pathname);
@@ -127,6 +105,8 @@ export function AppShell({ children }: AppShellProps) {
   const isOnboarded = !!preferences?.onboardingCompletedAt;
   const isChatRoute = pathname.startsWith("/app/chat");
   const isNotesRoute = pathname.startsWith("/app/notes");
+  const isTasksRoute = pathname.startsWith("/app/tasks"); // Not used can be removed. Could be used for future tasks sidebar.
+  const isSettingsRoute = pathname.startsWith("/app/settings");
 
   useEffect(() => {
     if (isLoading) return;
@@ -165,13 +145,17 @@ export function AppShell({ children }: AppShellProps) {
           } as React.CSSProperties)
           : isNotesRoute
             ? ({
-              "--sidebar-width": "20rem",
+              "--sidebar-width": "16rem",
               "--sidebar-width-mobile": "18rem",
             } as React.CSSProperties)
             : undefined
       }
     >
-      <Sidebar variant="sidebar" collapsible="icon">
+      <Sidebar
+        variant="sidebar"
+        collapsible="icon"
+        className={isNotesRoute ? "border-r border-border/40" : undefined}
+      >
         {isChatRoute && chatSidebarMode === "threads" ? (
           <ChatSidebar
             onBackToWorkspace={() => setChatSidebarMode("workspace")}
@@ -255,9 +239,6 @@ export function AppShell({ children }: AppShellProps) {
             <SidebarFooter>
               <SidebarMenu>
                 <SidebarMenuItem>
-                  <ThemeToggleMenuItem />
-                </SidebarMenuItem>
-                <SidebarMenuItem>
                   <SignOutButton />
                 </SidebarMenuItem>
               </SidebarMenu>
@@ -267,24 +248,26 @@ export function AppShell({ children }: AppShellProps) {
         <SidebarRail />
       </Sidebar>
       <SidebarInset className="overflow-hidden">
-        {!isChatRoute && (
-          <header className="flex h-14 shrink-0 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <SidebarTrigger />
-            <div className="flex flex-1 items-center justify-between">
-              <h1 className="text-sm font-medium">{pageTitle}</h1>
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm" className="h-8 gap-2 text-xs">
-                  <HugeiconsIcon icon={CommandIcon} className="size-3" />
-                  <span className="hidden sm:inline">Search</span>
-                  <kbd className="pointer-events-none hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
-                    <span className="text-xs">⌘</span>K
-                  </kbd>
-                </Button>
+        {!isOnboardingRoute && (
+          <div className="md:hidden sticky top-0 z-20 flex h-10 items-center gap-2 px-2 bg-background/70 backdrop-blur supports-backdrop-filter:bg-background/50">
+            <SidebarTrigger className="-ml-1" />
+            <div className="min-w-0 flex-1">
+              <div className="truncate text-[11px] font-medium text-muted-foreground">
+                {pageTitle}
               </div>
             </div>
-          </header>
+            <div className="w-7" aria-hidden="true" />
+          </div>
         )}
-        <main className="flex flex-1 flex-col gap-2 p-2 md:gap-2 md:p-2 overflow-hidden">
+        <main
+          className={
+            isTasksRoute || isNotesRoute
+              ? "flex flex-1 flex-col overflow-hidden"
+              : isSettingsRoute
+                ? "flex flex-1 flex-col overflow-hidden"
+                : "flex flex-1 flex-col gap-2 p-2 md:gap-2 md:p-2 overflow-hidden"
+          }
+        >
           {children}
         </main>
       </SidebarInset>

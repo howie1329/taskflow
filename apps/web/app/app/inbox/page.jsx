@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useCallback, useEffect, useMemo } from "react";
-import { Separator } from "@/components/ui/separator";
+
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  InboxCapture,
-  InboxFilters,
-  InboxTabs,
+  InboxHeader,
+  InboxHeaderSkeleton,
+  InboxContent,
   MobileActionSheet,
   Toast,
 } from "@/components/inbox";
@@ -18,18 +18,39 @@ import {
   useMobileActions,
 } from "@/hooks/inbox";
 
-export default function InboxPage() {
-  // State for capture input
-  const [captureText, setCaptureText] = useState("");
+// Container component with loading state
+function InboxContainer({ children, isLoading }) {
+  if (isLoading) {
+    return (
+      <div className="flex h-full w-full min-h-0 flex-col overflow-hidden">
+        <div className="flex w-full flex-1 min-h-0 flex-col gap-3 px-3 py-3 md:px-4 md:py-4">
+          <InboxHeaderSkeleton />
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-9 w-full" />
+          <div className="space-y-3">
+            <Skeleton className="h-14 w-full" />
+            <Skeleton className="h-14 w-full" />
+            <Skeleton className="h-14 w-full" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-  // State for filtering
+  return (
+    <div className="flex h-full w-full min-h-0 flex-col overflow-hidden">
+      <div className="flex w-full flex-1 min-h-0 flex-col gap-3 px-3 py-3 md:px-4 md:py-4">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// Custom hook for search with debouncing
+function useSearchState() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState("open");
-
-  // Debounced search query for server-side search
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
 
-  // Debounce search query to avoid excessive API calls
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
@@ -37,13 +58,78 @@ export default function InboxPage() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Custom hooks
+  return { searchQuery, setSearchQuery, debouncedSearchQuery };
+}
+
+// Custom hook for capture state
+function useCaptureState() {
+  const [captureText, setCaptureText] = useState("");
+
+  const clearCapture = useCallback(() => {
+    setCaptureText("");
+  }, []);
+
+  return { captureText, setCaptureText, clearCapture };
+}
+
+// Custom hook for items filtering
+function useFilteredItems(items) {
+  return useMemo(() => {
+    const openItems = items?.filter((item) => item.status === "open") ?? [];
+    const archivedItems =
+      items?.filter((item) => item.status === "archived") ?? [];
+    return { openItems, archivedItems };
+  }, [items]);
+}
+
+// Custom hook for client-side filtering
+function useClientSideFiltering(
+  openItems,
+  archivedItems,
+  searchQuery,
+  debouncedSearchQuery,
+) {
+  return useMemo(() => {
+    if (!searchQuery || debouncedSearchQuery) {
+      return {
+        filteredOpenItems: openItems,
+        filteredArchivedItems: archivedItems,
+      };
+    }
+
+    const filterItems = (items) =>
+      items.filter((item) =>
+        item.content.toLowerCase().includes(searchQuery.toLowerCase()),
+      );
+
+    return {
+      filteredOpenItems: filterItems(openItems),
+      filteredArchivedItems: filterItems(archivedItems),
+    };
+  }, [openItems, archivedItems, searchQuery, debouncedSearchQuery]);
+}
+
+export default function InboxPage() {
+  const { captureText, setCaptureText, clearCapture } = useCaptureState();
+  const { searchQuery, setSearchQuery, debouncedSearchQuery } =
+    useSearchState();
+  const [activeTab, setActiveTab] = useState("open");
+
   const { items, isLoading: isItemsLoading } = useInboxItems({
     status: activeTab,
     searchQuery: debouncedSearchQuery,
     limit: 50,
   });
+
   const { open, archived, isLoading: isCountsLoading } = useInboxCounts();
+  const { openItems, archivedItems } = useFilteredItems(items);
+  const { filteredOpenItems, filteredArchivedItems } = useClientSideFiltering(
+    openItems,
+    archivedItems,
+    searchQuery,
+    debouncedSearchQuery,
+  );
+
   const {
     captureItem,
     archiveItem,
@@ -54,54 +140,22 @@ export default function InboxPage() {
     toast,
     clearToast,
   } = useInboxActions();
+
   const { newItemIds, animateNewItem } = useNewItemsAnimation();
   const { selectedItem, isOpen, openActions, closeActions } =
     useMobileActions();
 
-  // Derived state for filtered items - memoized to prevent unnecessary re-filtering
-  const openItems = useMemo(
-    () => items?.filter((item) => item.status === "open") ?? [],
-    [items],
-  );
-  const archivedItems = useMemo(
-    () => items?.filter((item) => item.status === "archived") ?? [],
-    [items],
-  );
-
-  // Client-side filtering for items not matching search (when server search is active)
-  const filteredOpenItems = useMemo(() => {
-    if (!searchQuery || debouncedSearchQuery) return openItems;
-    return openItems.filter((item) =>
-      item.content.toLowerCase().includes(searchQuery.toLowerCase()),
-    );
-  }, [openItems, searchQuery, debouncedSearchQuery]);
-
-  const filteredArchivedItems = useMemo(() => {
-    if (!searchQuery || debouncedSearchQuery) return archivedItems;
-    return archivedItems.filter((item) =>
-      item.content.toLowerCase().includes(searchQuery.toLowerCase()),
-    );
-  }, [archivedItems, searchQuery, debouncedSearchQuery]);
-
-  // Handle capture with animation - memoized callback
   const handleCapture = useCallback(async () => {
     const newItem = await captureItem(captureText);
     if (newItem?._id) {
       setCaptureText("");
       animateNewItem(String(newItem._id));
     }
-  }, [captureText, captureItem, animateNewItem]);
+  }, [captureText, captureItem, animateNewItem, setCaptureText]);
 
-  // Memoized callback for clearing capture text
-  const handleClearCapture = useCallback(() => {
-    setCaptureText("");
-  }, []);
-
-  // Handle convert with note support
   const handleConvert = useCallback(
     async (id, type) => {
       if (type === "note") {
-        // Note conversion not yet implemented
         return;
       }
       if (type === "task") {
@@ -113,7 +167,6 @@ export default function InboxPage() {
     [convertToTask, convertToProject],
   );
 
-  // Handle mobile convert
   const handleMobileConvert = useCallback(
     (type) => {
       if (!selectedItem) return;
@@ -125,79 +178,32 @@ export default function InboxPage() {
 
   const isLoading = isItemsLoading || isCountsLoading;
 
-  // Loading state
-  if (isLoading) {
-    return (
-      <div className="flex h-full w-full min-h-0 flex-col overflow-hidden rounded-xl border border-border/60 bg-card/40 dark:bg-card/20">
-        <div className="flex flex-1 min-h-0 flex-col gap-4 p-4">
-          <div className="flex items-center justify-between">
-            <Skeleton className="h-4 w-48" />
-          </div>
-          <Skeleton className="h-20 w-full" />
-          <div className="flex justify-between">
-            <Skeleton className="h-8 w-64" />
-            <Skeleton className="h-8 w-20" />
-          </div>
-          <Separator />
-          <div className="space-y-2">
-            <Skeleton className="h-16 w-full" />
-            <Skeleton className="h-16 w-full" />
-            <Skeleton className="h-16 w-full" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="flex h-full w-full min-h-0 flex-col overflow-hidden rounded-xl border border-border/60 bg-card/40 dark:bg-card/20">
-      <div className="flex flex-1 min-h-0 flex-col gap-4 p-4">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            Capture fast, triage later
-          </p>
-        </div>
-
-        {/* Capture composer */}
-        <InboxCapture
-          value={captureText}
-          onChange={setCaptureText}
-          onCapture={handleCapture}
-          disabled={isLoading}
-        />
-
-        {/* Toolbar */}
-        <div className="rounded-lg border border-border/60 bg-muted/30 p-2 space-y-2">
-          {/* Search bar */}
-          <InboxFilters
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-          />
-
-          {/* Tabs with items */}
-          <InboxTabs
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-            openItems={openItems}
-            archivedItems={archivedItems}
-            filteredOpenItems={filteredOpenItems}
-            filteredArchivedItems={filteredArchivedItems}
-            openCount={open}
-            archivedCount={archived}
-            newItemIds={newItemIds}
-            searchQuery={searchQuery}
-            onArchive={archiveItem}
-            onUnarchive={unarchiveItem}
-            onDelete={deleteItem}
-            onConvert={handleConvert}
-            onOpenActions={openActions}
-            onCaptureFocus={handleClearCapture}
-          />
-        </div>
-      </div>
-
-      {/* Mobile action sheet */}
+    <InboxContainer isLoading={isLoading}>
+      <InboxHeader />
+      <InboxContent
+        captureText={captureText}
+        setCaptureText={setCaptureText}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        openItems={openItems}
+        archivedItems={archivedItems}
+        filteredOpenItems={filteredOpenItems}
+        filteredArchivedItems={filteredArchivedItems}
+        openCount={open}
+        archivedCount={archived}
+        newItemIds={newItemIds}
+        isLoading={isLoading}
+        onCapture={handleCapture}
+        onClearCapture={clearCapture}
+        onArchive={archiveItem}
+        onUnarchive={unarchiveItem}
+        onDelete={deleteItem}
+        onConvert={handleConvert}
+        onOpenActions={openActions}
+      />
       <MobileActionSheet
         item={selectedItem}
         open={isOpen}
@@ -207,11 +213,9 @@ export default function InboxPage() {
         onDelete={deleteItem}
         onConvert={handleMobileConvert}
       />
-
-      {/* Toast notification */}
       {toast && (
         <Toast message={toast.message} type={toast.type} onClose={clearToast} />
       )}
-    </div>
+    </InboxContainer>
   );
 }

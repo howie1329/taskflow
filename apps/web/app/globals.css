@@ -8,7 +8,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-mono: var(--font-mono);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -80,9 +80,10 @@
   --sidebar-accent-foreground: oklch(0 0 0);
   --sidebar-border: oklch(0.94 0 0);
   --sidebar-ring: oklch(0 0 0);
-  --font-sans: Geist, sans-serif;
+  --font-sans:
+    system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-serif: Georgia, serif;
-  --font-mono: Geist Mono, monospace;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --radius: 0.5rem;
   --shadow-x: 0px;
   --shadow-y: 1px;
@@ -140,9 +141,10 @@
   --sidebar-accent-foreground: oklch(1 0 0);
   --sidebar-border: oklch(0.32 0 0);
   --sidebar-ring: oklch(0.72 0 0);
-  --font-sans: Geist, sans-serif;
+  --font-sans:
+    system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-serif: Georgia, serif;
-  --font-mono: Geist Mono, monospace;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --radius: 0.5rem;
   --shadow-x: 0px;
   --shadow-y: 1px;
@@ -175,13 +177,34 @@
   }
 }
 
+/* Landing page shared styles */
+@layer components {
+  .landing-surface {
+    @apply bg-card/55 ring-1 ring-border/45 dark:bg-card/35;
+  }
+
+  .landing-hairline {
+    @apply border-t border-border/40;
+  }
+}
+
 /* Subtle grid pattern overlay for hero sections */
 .landing-grid-bg {
   background-image:
     linear-gradient(to right, var(--border) 1px, transparent 1px),
     linear-gradient(to bottom, var(--border) 1px, transparent 1px);
-  background-size: 60px 60px;
+  background-size: 72px 72px;
   mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+  opacity: 0.22;
+}
+
+/* Radial wash background for landing sections */
+.landing-radial-wash {
+  background: radial-gradient(
+    ellipse at center top,
+    color-mix(in oklch, var(--muted) 70%, transparent) 0%,
+    transparent 72%
+  );
 }
 
 /* Motion-safe reveal animation */
@@ -213,7 +236,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-
   *,
   *::before,
   *::after {
@@ -234,7 +256,6 @@
 }
 
 @keyframes cursor-blink {
-
   0%,
   50% {
     opacity: 0.4;
@@ -251,7 +272,6 @@
 }
 
 @keyframes pulse-loader {
-
   0%,
   100% {
     transform: scale(1);

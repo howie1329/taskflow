@@ -57,15 +57,15 @@ export function TaskCard({
 
   return (
     <Card
-      className="p-2.5 cursor-pointer rounded-lg border border-border/60 bg-card/60 dark:bg-card/40 shadow-sm shadow-black/5 hover:bg-accent/40 hover:border-border transition-[transform,box-shadow,background-color,border-color] hover:-translate-y-[1px]"
+      className="group cursor-pointer rounded-none border-0 bg-transparent px-2.5 py-2 shadow-none ring-0 transition-colors hover:bg-muted/45 focus-visible:outline-none"
       onClick={() => onClick(task)}
     >
       {/* Top row: Project badge */}
-      <div className="flex items-center justify-between mb-1.5">
+      <div className="mb-1 flex items-center justify-between gap-2">
         {project ? (
           <Badge
             variant="outline"
-            className="text-[10px] px-1.5 py-0 h-4 border-border/60 text-foreground/80"
+            className="h-4 max-w-[55%] truncate border-border/40 px-1.5 py-0 text-[10px] text-foreground/75"
             style={{ borderColor: project.color, color: project.color }}
           >
             <span className="mr-1">{project.icon}</span>
@@ -74,19 +74,19 @@ export function TaskCard({
         ) : (
           <Badge
             variant="outline"
-            className="text-[10px] px-1.5 py-0 h-4 text-muted-foreground border-border/60"
+            className="h-4 border-border/40 px-1.5 py-0 text-[10px] text-muted-foreground"
           >
             No project
           </Badge>
         )}
 
         {/* Due date + Priority */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1">
           {task.dueDate && (
             <Badge
               variant="outline"
               className={cn(
-                "text-[10px] px-1 py-0 h-4 tabular-nums border-border/60 text-muted-foreground",
+                "h-4 shrink-0 border-border/40 px-1 py-0 text-[10px] tabular-nums text-muted-foreground",
                 isOverdue && "border-destructive text-destructive",
               )}
             >
@@ -95,7 +95,7 @@ export function TaskCard({
           )}
           <div
             className={cn(
-              "w-1.5 h-1.5 rounded-full opacity-80",
+              "h-1.5 w-1.5 rounded-full opacity-70",
               priorityColors[task.priority],
             )}
             title={`Priority: ${task.priority}`}
@@ -106,7 +106,7 @@ export function TaskCard({
       {/* Title */}
       <h4
         className={cn(
-          "text-[13px] font-medium leading-snug line-clamp-2 mb-1.5",
+          "mb-0.5 text-[13px] font-medium leading-snug line-clamp-2",
           isCompleted && "line-through text-muted-foreground",
         )}
       >
@@ -114,19 +114,19 @@ export function TaskCard({
       </h4>
 
       {/* Bottom row: Tags + Scheduled */}
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-1">
         {/* Tags */}
         {taskTags.length > 0 && (
-          <div className="flex items-center gap-1 flex-wrap flex-1">
+          <div className="flex flex-1 items-center gap-1 overflow-hidden">
             {taskTags.slice(0, 2).map((tag, idx) => (
               <Badge
                 key={idx}
                 variant="secondary"
-                className="text-[10px] px-1 py-0 h-4 border border-transparent"
+                className="h-4 max-w-[90px] truncate border border-transparent px-1 py-0 text-[10px]"
                 style={{
-                  backgroundColor: `${tag.color}20`,
+                  backgroundColor: `${tag.color}14`,
                   color: tag.color,
-                  borderColor: tag.color,
+                  borderColor: `${tag.color}66`,
                 }}
               >
                 {tag.name}
@@ -144,7 +144,7 @@ export function TaskCard({
         {task.scheduledDate && (
           <Badge
             variant="secondary"
-            className="text-[10px] px-1 py-0 h-4 shrink-0 text-muted-foreground"
+            className="h-4 shrink-0 px-1 py-0 text-[10px] text-muted-foreground/90"
           >
             {task.scheduledDate}
           </Badge>

@@ -4,7 +4,7 @@
 
 - **Example**: 
    - Valyu/
-     - webSearch.ts
+     - (legacy) webSearch.ts
      - financeSearch.ts
      - types.ts (shared types)
      - index.ts (main export)

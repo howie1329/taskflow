@@ -1,6 +1,7 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Collapsible,
   CollapsibleContent,
@@ -15,6 +16,7 @@ import {
   ClockIcon,
   XCircleIcon,
 } from "lucide-react";
+import { useState } from "react";
 import type { ComponentProps, ReactNode } from "react";
 import { isValidElement } from "react";
 import { CodeBlock } from "./code-block";
@@ -25,7 +27,7 @@ export type ToolProps = ComponentProps<typeof Collapsible>;
 export const Tool = ({ className, ...props }: ToolProps) => (
   <Collapsible
     className={cn(
-      "group not-prose w-full rounded-lg border border-border/60 bg-card",
+      "group not-prose w-full rounded-lg border border-border/45 bg-muted/15",
       className,
     )}
     {...props}
@@ -56,13 +58,13 @@ export const getStatusBadge = (status: ToolPart["state"]) => {
   };
 
   const variantMap: Record<ToolPart["state"], string> = {
-    "input-streaming": "bg-slate-100 text-slate-600 border-slate-200",
-    "input-available": "bg-amber-50 text-amber-600 border-amber-200",
-    "approval-requested": "bg-amber-50 text-amber-600 border-amber-200",
-    "approval-responded": "bg-emerald-50 text-emerald-600 border-emerald-200",
-    "output-available": "bg-emerald-50 text-emerald-600 border-emerald-200",
-    "output-error": "bg-rose-50 text-rose-600 border-rose-200",
-    "output-denied": "bg-rose-50 text-rose-600 border-rose-200",
+    "input-streaming": "bg-muted text-muted-foreground border-border/40",
+    "input-available": "bg-muted text-muted-foreground border-border/40",
+    "approval-requested": "bg-muted text-muted-foreground border-border/40",
+    "approval-responded": "bg-muted text-muted-foreground border-border/40",
+    "output-available": "bg-muted text-muted-foreground border-border/40",
+    "output-error": "bg-destructive/10 text-destructive border-destructive/20",
+    "output-denied": "bg-destructive/10 text-destructive border-destructive/20",
   };
 
   return (
@@ -103,7 +105,7 @@ export const EnhancedToolHeader = ({
   return (
     <CollapsibleTrigger
       className={cn(
-        "flex w-full items-center justify-between gap-3 px-3 py-2.5 text-xs transition-colors hover:bg-muted/50",
+          "flex w-full items-center justify-between gap-3 px-3 py-1.5 text-xs transition-colors hover:bg-muted/35",
         className,
       )}
       {...props}
@@ -171,7 +173,7 @@ export type ToolContentProps = ComponentProps<typeof CollapsibleContent>;
 export const ToolContent = ({ className, ...props }: ToolContentProps) => (
   <CollapsibleContent
     className={cn(
-      "px-3 pb-3",
+      "px-3 pb-2",
       "data-[state=closed]:animate-out data-[state=open]:animate-in",
       className,
     )}
@@ -195,7 +197,7 @@ export const ToolSummaryBar = ({
   return (
     <div
       className={cn(
-        "rounded-md border border-border/50 bg-muted/30 px-3 py-2",
+        "rounded-md border border-border/35 bg-muted/20 px-2.5 py-1.5",
         "text-xs text-foreground",
         className,
       )}
@@ -232,7 +234,7 @@ export const ToolMetaPanel = ({
   return (
     <div
       className={cn(
-        "rounded-md border border-border/50 bg-muted/20",
+        "rounded-md border border-border/40 bg-muted/10",
         "px-3 py-2 text-xs",
         className,
       )}
@@ -255,6 +257,75 @@ export const ToolMetaPanel = ({
         ))}
       </div>
     </div>
+  );
+};
+
+export type ToolRawPayloadProps = {
+  input?: unknown;
+  output?: unknown;
+  className?: string;
+};
+
+export const ToolRawPayload = ({
+  input,
+  output,
+  className,
+}: ToolRawPayloadProps) => {
+  const [activeTab, setActiveTab] = useState<"input" | "output">("output");
+  const hasInput = input !== undefined;
+  const hasOutput = output !== undefined;
+
+  if (!hasInput && !hasOutput) return null;
+
+  const resolvedTab =
+    activeTab === "input" && !hasInput
+      ? "output"
+      : activeTab === "output" && !hasOutput
+        ? "input"
+        : activeTab;
+
+  const code = JSON.stringify(
+    resolvedTab === "input" ? input ?? null : output ?? null,
+    null,
+    2,
+  );
+
+  return (
+    <Collapsible className={cn("group rounded-md border border-border/35", className)}>
+      <CollapsibleTrigger className="flex w-full items-center justify-between px-2.5 py-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground">
+        <span className="font-medium">Advanced: raw payload</span>
+        <ChevronDownIcon className="size-3.5 transition-transform group-data-[state=open]:rotate-180" />
+      </CollapsibleTrigger>
+      <CollapsibleContent className="space-y-2 px-2.5 pb-2.5">
+        <div className="flex items-center gap-1">
+          {hasOutput ? (
+            <Button
+              size="sm"
+              variant={resolvedTab === "output" ? "secondary" : "ghost"}
+              className="h-6 px-2 text-[11px]"
+              onClick={() => setActiveTab("output")}
+              type="button"
+            >
+              Output
+            </Button>
+          ) : null}
+          {hasInput ? (
+            <Button
+              size="sm"
+              variant={resolvedTab === "input" ? "secondary" : "ghost"}
+              className="h-6 px-2 text-[11px]"
+              onClick={() => setActiveTab("input")}
+              type="button"
+            >
+              Input
+            </Button>
+          ) : null}
+        </div>
+        <div className="overflow-hidden rounded-sm border border-border/50 bg-muted/20">
+          <CodeBlock code={code} language="json" />
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 };
 

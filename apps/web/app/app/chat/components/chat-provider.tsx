@@ -17,6 +17,10 @@ import { api } from "@/convex/_generated/api";
 import type { Doc } from "@/convex/_generated/dataModel";
 import { useViewer } from "@/components/settings/hooks/use-viewer";
 import type { ModeName } from "@/lib/AITools/ModePrompts";
+import {
+  getToolLockCommandsForMode,
+  type ToolKey,
+} from "@/lib/AITools/tool-lock-commands";
 
 type ChatContextValue = {
   activeThreadId: string;
@@ -32,6 +36,8 @@ type ChatContextValue = {
   setSelectedProjectId: (value: string | null) => void;
   selectedMode: ModeName;
   setSelectedMode: (value: ModeName) => void;
+  toolLock: ToolKey | null;
+  setToolLock: (value: ToolKey | null) => void;
   availableModels: Doc<"availableModels">[];
   projects: Doc<"projects">[];
   thread: Doc<"thread"> | null | undefined;
@@ -98,6 +104,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     null,
   );
   const [selectedMode, setSelectedMode] = useState<ModeName>("Basic");
+  const [toolLock, setToolLock] = useState<ToolKey | null>(null);
   const hasUserSelectedModel = useRef(false);
   const previousThreadId = useRef(activeThreadId);
 
@@ -108,6 +115,16 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       previousThreadId.current = activeThreadId;
     }
   }, [activeThreadId]);
+
+  const effectiveToolLock = useMemo(() => {
+    if (!toolLock) return null
+    const availableInMode = new Set(
+      getToolLockCommandsForMode(selectedMode)
+        .map((commandDef) => commandDef.toolKey)
+        .filter((toolKey): toolKey is ToolKey => toolKey !== null),
+    )
+    return availableInMode.has(toolLock) ? toolLock : null
+  }, [selectedMode, toolLock])
 
   // Sync model from thread only on initial load or thread change, not when user manually selects
   useEffect(() => {
@@ -154,6 +171,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
           userId,
           projectId: selectedProjectId,
           mode: selectedMode,
+          toolLock: effectiveToolLock,
         },
       },
     );
@@ -174,6 +192,8 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       setSelectedProjectId,
       selectedMode,
       setSelectedMode,
+      toolLock: effectiveToolLock,
+      setToolLock,
       availableModels,
       projects: projects ?? [],
       thread,
@@ -190,6 +210,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       selectedModelId,
       selectedProjectId,
       selectedMode,
+      effectiveToolLock,
       availableModels,
       projects,
       thread,

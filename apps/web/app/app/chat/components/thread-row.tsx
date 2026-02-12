@@ -50,18 +50,12 @@ export function ThreadRow({
     return (
       <div
         className={cn(
-          "flex items-center gap-2 rounded-md px-2 py-1.5 w-full max-w-full overflow-hidden",
+          "flex items-center gap-2 rounded-md px-2.5 py-2 w-full max-w-full overflow-hidden",
           isActive ? "bg-accent" : "bg-accent/40",
         )}
       >
-        <span
-          className={cn(
-            "absolute left-0 top-0 h-full w-0.5",
-            isActive ? "bg-primary" : "bg-transparent",
-          )}
-        />
         <Input
-          className="h-6 px-2 py-0 text-xs min-w-0 flex-1 w-full max-w-full"
+          className="h-7 px-2 py-0 text-[13px] min-w-0 flex-1 w-full max-w-full"
           value={editingTitle}
           onChange={(e) => onEditTitleChange(e.target.value)}
           onKeyDown={(e) => {
@@ -85,26 +79,19 @@ export function ThreadRow({
     <Link
       href={`/app/chat/${thread.id}`}
       className={cn(
-        "group relative flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors w-full max-w-full overflow-hidden",
-        "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+        "group relative flex items-center gap-2 rounded-md px-2.5 py-2 text-sm transition-colors w-full max-w-full overflow-hidden",
+        "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/60",
         isActive
-          ? "bg-accent text-accent-foreground"
-          : "text-foreground hover:bg-muted",
+          ? "bg-muted text-foreground"
+          : "text-foreground hover:bg-muted/50",
       )}
       aria-current={isActive ? "page" : undefined}
     >
-      <span
-        className={cn(
-          "absolute left-0 top-0 h-full w-0.5 rounded-l-md",
-          isActive ? "bg-primary" : "bg-transparent",
-        )}
-      />
-
       <div className="flex items-center gap-2 min-w-0 flex-1 w-full max-w-full">
         {thread.pinned && (
           <HugeiconsIcon
             icon={PinIcon}
-            className="size-3 shrink-0 text-muted-foreground"
+            className="size-3 shrink-0 text-muted-foreground/80"
             strokeWidth={2}
           />
         )}
@@ -113,7 +100,7 @@ export function ThreadRow({
             {projectIcon}
           </span>
         )}
-        <span className="truncate text-xs font-medium min-w-0">
+        <span className="truncate text-[13px] font-normal min-w-0">
           {thread.title || "Untitled chat"}
         </span>
       </div>
@@ -123,7 +110,7 @@ export function ThreadRow({
           <Button
             variant="ghost"
             size="icon-xs"
-            className="h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 transition-opacity flex-shrink-0"
+            className="h-6 w-6 shrink-0 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();

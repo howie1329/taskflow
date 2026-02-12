@@ -50,14 +50,14 @@ export function TodayBoardView({
   );
 
   return (
-    <div className="h-full w-full min-h-0 flex flex-col lg:flex-row gap-4 overflow-y-auto lg:overflow-hidden">
+    <div className="flex h-full w-full min-h-0 flex-col gap-3 overflow-y-auto lg:flex-row lg:overflow-hidden">
       {/* Today Lane - Left side */}
-      <div className="lg:w-[32%] xl:w-[28%] min-w-[260px] flex flex-col min-h-[200px] lg:min-h-0 rounded-xl border bg-card/40 dark:bg-card/20">
+      <div className="flex min-w-[260px] min-h-[200px] flex-col overflow-hidden rounded-xl border border-border/40 bg-background/50 lg:min-h-0 lg:w-[32%] xl:w-[28%]">
         {/* Today header */}
-        <div className="flex items-center justify-between px-3 py-2.5 border-b bg-background/40 backdrop-blur supports-[backdrop-filter]:bg-background/30 shrink-0">
+        <div className="sticky top-0 z-10 flex shrink-0 items-center justify-between border-b border-border/40 bg-background/80 px-3 py-2 backdrop-blur supports-backdrop-filter:bg-background/70">
           <div className="flex items-center gap-2">
             <h3 className="text-sm font-medium tracking-tight">Today</h3>
-            <span className="text-[11px] tabular-nums text-muted-foreground bg-muted/70 px-2 py-0.5 rounded-md">
+            <span className="rounded-md bg-muted/55 px-2 py-0.5 text-[11px] tabular-nums text-muted-foreground">
               {todayTasks.length}
             </span>
             <span className="text-[11px] text-muted-foreground">{today}</span>
@@ -75,7 +75,7 @@ export function TodayBoardView({
         </div>
 
         {/* Today task list with Add card */}
-        <div className="flex-1 min-h-0 space-y-2 px-3 py-2 lg:overflow-y-auto">
+        <div className="min-h-0 flex-1 divide-y divide-border/50 overflow-y-auto">
           {todayTasks.map((task) => (
             <TaskCard
               key={task._id}

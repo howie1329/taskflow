@@ -59,6 +59,29 @@ function formatRelativeTime(timestamp) {
   return `${days}d ago`;
 }
 
+function truncateWithEllipsis(text, maxLength) {
+  if (text.length <= maxLength) return text;
+  return `${text.slice(0, maxLength).trimEnd()}...`;
+}
+
+function getConversationRowCopy(content) {
+  const normalized = content.replace(/\s+/g, " ").trim();
+  const lines = content
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  const firstLine = lines[0] || normalized || "Inbox item";
+  const remainder = normalized.startsWith(firstLine)
+    ? normalized.slice(firstLine.length).trim()
+    : lines.slice(1).join(" ").trim();
+
+  return {
+    title: truncateWithEllipsis(firstLine, 64),
+    snippet: truncateWithEllipsis(remainder || "Captured note", 120),
+  };
+}
+
 export const InboxItemRow = memo(function InboxItemRow({
   item,
   onArchive,
@@ -81,6 +104,7 @@ export const InboxItemRow = memo(function InboxItemRow({
 
   const isMobile = useIsMobile();
   const isArchived = item.status === "archived";
+  const rowCopy = getConversationRowCopy(item.content);
 
   const handleConvert = useCallback(
     async (type) => {
@@ -131,23 +155,29 @@ export const InboxItemRow = memo(function InboxItemRow({
     <>
       <div
         className={cn(
-          "group flex items-start gap-3 rounded-lg border border-border/60 bg-background/30 p-3 transition-[background-color,border-color,transform,opacity] duration-200 hover:border-border hover:bg-accent/25 hover:-translate-y-[1px]",
-          isArchived && "opacity-60",
+          "group flex items-start gap-2.5 px-3 py-2.5 transition-colors hover:bg-muted/50",
+          isArchived && "opacity-70",
           isNew && "animate-in fade-in slide-in-from-top-2 duration-300",
           isAnyLoading && "opacity-70 pointer-events-none",
         )}
         role="listitem"
         aria-busy={isAnyLoading}
       >
-        <div className="flex-1 min-w-0 space-y-1">
+        <div className="flex-1 min-w-0 space-y-0.5 pr-1">
           <p
-            className="text-sm whitespace-pre-wrap break-words leading-relaxed"
+            className="text-[13px] font-medium truncate leading-5"
             id={`inbox-item-${item._id}-content`}
           >
-            {item.content}
+            {rowCopy.title}
           </p>
           <p
-            className="text-xs text-muted-foreground tabular-nums"
+            className="text-[11px] text-muted-foreground leading-4 line-clamp-1"
+            id={`inbox-item-${item._id}-snippet`}
+          >
+            {rowCopy.snippet}
+          </p>
+          <p
+            className="text-[11px] text-muted-foreground tabular-nums sm:hidden"
             id={`inbox-item-${item._id}-time`}
           >
             {formatRelativeTime(item.createdAt)}
@@ -174,18 +204,25 @@ export const InboxItemRow = memo(function InboxItemRow({
             <HugeiconsIcon icon={MoreVerticalIcon} className="size-4" />
           </Button>
         ) : (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                className="shrink-0 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
-                aria-label={`Open actions for inbox item: ${item.content.slice(0, 50)}${item.content.length > 50 ? "..." : ""}`}
-                aria-haspopup="menu"
-              >
-                <HugeiconsIcon icon={MoreVerticalIcon} className="size-4" />
-              </Button>
-            </DropdownMenuTrigger>
+          <div className="shrink-0 flex items-center gap-1">
+            <p
+              className="text-[11px] text-muted-foreground tabular-nums hidden sm:block"
+              id={`inbox-item-${item._id}-time-desktop`}
+            >
+              {formatRelativeTime(item.createdAt)}
+            </p>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  className="shrink-0 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+                  aria-label={`Open actions for inbox item: ${item.content.slice(0, 50)}${item.content.length > 50 ? "..." : ""}`}
+                  aria-haspopup="menu"
+                >
+                  <HugeiconsIcon icon={MoreVerticalIcon} className="size-4" />
+                </Button>
+              </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
@@ -274,7 +311,8 @@ export const InboxItemRow = memo(function InboxItemRow({
                 </AlertDialogContent>
               </AlertDialog>
             </DropdownMenuContent>
-          </DropdownMenu>
+            </DropdownMenu>
+          </div>
         )}
       </div>
 

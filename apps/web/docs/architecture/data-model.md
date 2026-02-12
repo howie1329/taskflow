@@ -12,7 +12,12 @@ The Taskflow web app is backed by Convex. The schema is defined in `convex/schem
 ### User Preferences
 - **Table**: `userPreferences`
 - **Purpose**: Stores onboarding state and UX preferences.
-- **Key fields**: `defaultAIModel`, `onboardingCompletedAt`, `taskDefaultView`, `hideCompletedTasks`, `notificationsEnabled`.
+- **Key fields**: `defaultAIModel`, `onboardingCompletedAt`, `taskDefaultView`, `hideCompletedTasks`, `notificationsEnabled`, `aiChatShowActions`, `aiChatShowToolDetails`, `aiChatShowReasoning`.
+
+### Notifications
+- **Table**: `notifications`
+- **Purpose**: Stores in-app notification records.
+- **Key fields**: `type`, `title`, `body`, `status`, `priority`, `data`, `createdAt`, `readAt`.
 
 ### Projects
 - **Table**: `projects`
@@ -27,13 +32,19 @@ The Taskflow web app is backed by Convex. The schema is defined in `convex/schem
 ### Tasks
 - **Table**: `tasks`
 - **Purpose**: Main work items with scheduling, status, and AI metadata.
-- **Key fields**: `title`, `description`, `status`, `priority`, `scheduledDate`, `dueDate`, `projectId`, `tagIds`, `parentTaskId`, `estimatedDuration`, `energyLevel`, `source`, `orderIndex`, `aiSummary`, `embedding`, `createdAt`, `updatedAt`.
+- **Key fields**: `title`, `description`, `notes`, `status`, `priority`, `scheduledDate`, `dueDate`, `projectId`, `tagIds`, `parentTaskId`, `estimatedDuration`, `actualDuration`, `energyLevel`, `source`, `orderIndex`, `aiSummary`, `aiContext`, `embedding`, `createdAt`, `updatedAt`.
 - **Indices**: per-user queries, scheduled/due views, search index on title.
 
 ### Subtasks
 - **Table**: `subtasks`
 - **Purpose**: Checklist items nested under tasks.
 - **Key fields**: `taskId`, `title`, `isComplete`, `orderIndex`.
+
+### Notes
+- **Table**: `notes`
+- **Purpose**: Rich text notes with optional project association.
+- **Key fields**: `title`, `content`, `contentText`, `pinned`, `projectId`, `createdAt`, `updatedAt`.
+- **Indices**: by user, by user+project, by user+pinned, search index on title/content text.
 
 ### Inbox Items
 - **Table**: `inboxItems`
@@ -49,3 +60,19 @@ The Taskflow web app is backed by Convex. The schema is defined in `convex/schem
 ### Available Models
 - **Table**: `availableModels`
 - **Purpose**: Stores model display info and pricing used by AI settings.
+
+## AI Chat Persistence
+
+### Threads
+- **Table**: `thread`
+- **Purpose**: Stores user chat thread metadata.
+- **Key fields**: `threadId`, `title`, `snippet`, `pinned`, `projectId`, `model`, `scope`, `deletedAt`, `createdAt`, `updatedAt`.
+
+### Thread Messages
+- **Table**: `threadMessages`
+- **Purpose**: Stores per-thread chat messages and parts payload.
+- **Key fields**: `threadId`, `messageId`, `role`, `model`, `content`, `createdAt`, `updatedAt`.
+
+### Usage Tracking
+- **Tables**: `chatUsageTotals`, `chatUsageDaily`
+- **Purpose**: Track message usage counters for chat behavior and limits.

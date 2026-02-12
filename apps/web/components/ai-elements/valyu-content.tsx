@@ -11,7 +11,7 @@ export function renderValyuField(value: unknown) {
 
   if (typeof value === "object") {
     return (
-      <div className="mt-1 rounded-sm border border-border/50 bg-muted/20">
+      <div className="mt-1 overflow-hidden rounded-sm bg-muted/20">
         <CodeBlock code={JSON.stringify(value, null, 2)} language="json" />
       </div>
     );
