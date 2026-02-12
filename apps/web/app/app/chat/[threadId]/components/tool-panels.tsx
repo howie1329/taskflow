@@ -4,7 +4,6 @@ import {
   ChainOfThoughtContent,
   ChainOfThoughtStep,
 } from "@/components/ai-elements/chain-of-thought"
-import { ModernToolResult } from "@/components/ai-elements/modern-tool-result"
 import {
   Tool,
   EnhancedToolHeader,
@@ -14,7 +13,6 @@ import {
 } from "@/components/ai-elements/tool"
 import {
   detectProvider,
-  providerConfig,
 } from "@/components/ai-elements/provider-badge"
 import {
   Collapsible,
@@ -127,27 +125,6 @@ export function ToolPanels({ toolCalls, preferences }: ToolPanelsProps) {
           )}
         </>
       )}
-
-      <div className="space-y-2 rounded-lg border border-dashed border-border/60 p-3">
-        <p className="text-xs font-medium text-muted-foreground">
-          Enhanced tool results
-        </p>
-        {toolCalls.map((toolCall) => {
-          const providerType = detectProvider(toolCall.toolKey)
-          const providerName = providerConfig[providerType]?.name ?? "Unknown"
-          return (
-            <ModernToolResult
-              key={`modern-${toolCall.id}`}
-              toolName={toolCall.toolKey}
-              toolState={toolCall.state}
-              summary={getToolSummary(toolCall)}
-              provider={providerName}
-              input={toolCall.input}
-              output={toolCall.output}
-            />
-          )
-        })}
-      </div>
     </>
   )
 }
