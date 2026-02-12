@@ -7,10 +7,8 @@ import { api } from "@/convex/_generated/api"
 import {
   PromptInput,
   PromptInputFooter,
-  PromptInputHeader,
   PromptInputSubmit,
   PromptInputTextarea,
-  PromptInputTools,
   usePromptInputController,
 } from "@/components/ai-elements/prompt-input"
 import { useChatContext } from "../../components/chat-provider"
@@ -53,22 +51,27 @@ export function ThreadComposerBar({ thread }: ThreadComposerBarProps) {
   const showPromptHeader = isToolCommandActive || !!toolLock
 
   return (
-    <div className="shrink-0 border-t border-border/50 bg-background/90 pb-[calc(env(safe-area-inset-bottom)+8px)] pt-3 backdrop-blur supports-backdrop-filter:bg-background/80">
+    <div className="shrink-0 bg-background/90 pb-[calc(env(safe-area-inset-bottom)+8px)] pt-3 backdrop-blur supports-backdrop-filter:bg-background/80">
       <div className="mx-auto w-full max-w-4xl px-4">
         <label htmlFor="thread-message" className="sr-only">
           Message
         </label>
+        <div
+          className={`grid overflow-hidden transition-all duration-200 ease-out ${
+            showPromptHeader
+              ? "mb-2 grid-rows-[1fr] opacity-100"
+              : "pointer-events-none mb-0 grid-rows-[0fr] opacity-0"
+          }`}
+          aria-hidden={!showPromptHeader}
+        >
+          <div className="overflow-hidden rounded-2xl border border-border/60 bg-background px-3 py-2 shadow-sm">
+            <ToolLockCommandMenu textareaRef={textareaRef} />
+          </div>
+        </div>
         <PromptInput
           onSubmit={handleSubmit}
           className="**:data-[slot=input-group]:rounded-3xl **:data-[slot=input-group]:border-border/60 **:data-[slot=input-group]:bg-background **:data-[slot=input-group]:shadow-sm **:data-[slot=input-group]:transition-colors **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:border-ring/50 **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:ring-2 **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:ring-ring/20"
         >
-          {showPromptHeader ? (
-            <PromptInputHeader className="border-b border-border/45 pb-2 pt-2.5">
-              <ToolLockCommandMenu textareaRef={textareaRef} />
-              <PromptInputTools />
-            </PromptInputHeader>
-          ) : null}
-
           <PromptInputTextarea
             id="thread-message"
             ref={textareaRef}
