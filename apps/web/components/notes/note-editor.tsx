@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
 import { Kbd } from "@/components/ui/kbd"
 import {
   DropdownMenu,
@@ -257,16 +256,9 @@ export function NoteEditor({
   }
 
   return (
-    <div className="flex h-full flex-col gap-4">
-      <div className="shrink-0 rounded-lg border border-border/60 bg-muted/30 p-3 space-y-3">
-        <Input
-          ref={titleInputRef}
-          value={note.title}
-          onChange={(e) => onUpdateNote(note._id, { title: e.target.value })}
-          placeholder="Note title"
-          className="border-0 bg-transparent px-0 text-lg font-semibold tracking-tight shadow-none focus-visible:ring-0 placeholder:text-muted-foreground/50"
-        />
-        <div className="flex items-center justify-between">
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="shrink-0 border-b border-border/60 px-1 pb-3">
+        <div className="mb-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="rounded-md text-[10px]">
               {project ? (
@@ -348,27 +340,35 @@ export function NoteEditor({
             </DropdownMenu>
           </div>
         </div>
+        <Input
+          ref={titleInputRef}
+          value={note.title}
+          onChange={(e) => onUpdateNote(note._id, { title: e.target.value })}
+          placeholder="Note title"
+          className="h-auto border-0 bg-transparent px-0 py-1 text-2xl font-semibold tracking-tight shadow-none focus-visible:ring-0 placeholder:text-muted-foreground/40 md:text-3xl"
+        />
       </div>
 
-      <Separator className="bg-border/60" />
+      <div className="flex-1 min-h-0 py-3">
+        <NoteRichEditor
+          key={note._id}
+          value={note.content}
+          onChange={handleContentChange}
+          placeholder="Start writing..."
+          className="h-full"
+          toolbarClassName="w-fit rounded-md border-0 bg-transparent p-0"
+          editorClassName="h-full min-h-0 border-0 bg-transparent px-1 py-2 text-base leading-7"
+        />
+      </div>
 
-      <NoteRichEditor
-        key={note._id}
-        value={note.content}
-        onChange={handleContentChange}
-        placeholder="Start writing..."
-        editorClassName="min-h-[300px] border-0 bg-transparent px-0 text-sm leading-relaxed"
-      />
-
-      <div className="shrink-0 border-t border-border/60 pt-3 flex items-center justify-between text-xs text-muted-foreground">
-        <div className="flex items-center gap-3">
+      <div className="shrink-0 border-t border-border/60 px-1 pt-2 text-xs text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <span>{note.contentText.length} characters</span>
           <span>{wordCount} words</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span>Press</span>
-          <Kbd>Esc</Kbd>
-          <span>to close</span>
+          <span className="inline-flex items-center gap-1">
+            <span>Esc</span>
+            <span>to close</span>
+          </span>
         </div>
       </div>
     </div>
