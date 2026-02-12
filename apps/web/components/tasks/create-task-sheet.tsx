@@ -279,210 +279,210 @@ export function CreateTaskSheet({
 
             <Separator />
 
-            <div className="space-y-4">
+            <div className="space-y-4 rounded-xl border border-border/60 p-4">
               <h3 className="text-sm font-medium text-muted-foreground">Options</h3>
 
               {/* Core metadata */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Project */}
-              <Field>
-                <FieldLabel
-                  htmlFor={ids.project}
-                  className="text-sm font-medium"
-                >
-                  Project
-                </FieldLabel>
-                <FieldContent>
-                  <Select
-                    value={projectId}
-                    onValueChange={(value) => setProjectId(value)}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Project */}
+                <Field>
+                  <FieldLabel
+                    htmlFor={ids.project}
+                    className="text-sm font-medium"
                   >
-                    <SelectTrigger
-                      id={ids.project}
-                      className="w-full h-9 text-sm"
+                    Project
+                  </FieldLabel>
+                  <FieldContent>
+                    <Select
+                      value={projectId}
+                      onValueChange={(value) => setProjectId(value)}
                     >
-                      <SelectValue placeholder="No project" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="__none__" className="text-sm">
-                        No project
-                      </SelectItem>
-                      {projects.map((project) => (
-                        <SelectItem
-                          key={project._id as string}
-                          value={project._id as string}
-                          className="text-sm"
-                        >
-                          <div className="flex items-center gap-2">
-                            <div
-                              className="w-2 h-2 rounded-full"
-                              style={{ backgroundColor: project.color }}
-                            />
-                            <span className="mr-1">{project.icon}</span>
-                            {project.title}
-                          </div>
+                      <SelectTrigger
+                        id={ids.project}
+                        className="w-full h-9 text-sm"
+                      >
+                        <SelectValue placeholder="No project" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__none__" className="text-sm">
+                          No project
                         </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FieldContent>
-              </Field>
+                        {projects.map((project) => (
+                          <SelectItem
+                            key={project._id as string}
+                            value={project._id as string}
+                            className="text-sm"
+                          >
+                            <div className="flex items-center gap-2">
+                              <div
+                                className="w-2 h-2 rounded-full"
+                                style={{ backgroundColor: project.color }}
+                              />
+                              <span className="mr-1">{project.icon}</span>
+                              {project.title}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FieldContent>
+                </Field>
 
-              {/* Status */}
-              <Field>
-                <FieldLabel
-                  htmlFor={ids.status}
-                  className="text-sm font-medium"
-                >
-                  Status
-                </FieldLabel>
-                <FieldContent>
-                  <Select
-                    value={status}
-                    onValueChange={(v) => setStatus(v as Task["status"])}
+                {/* Status */}
+                <Field>
+                  <FieldLabel
+                    htmlFor={ids.status}
+                    className="text-sm font-medium"
                   >
-                    <SelectTrigger
-                      id={ids.status}
-                      className="w-full h-9 text-sm"
+                    Status
+                  </FieldLabel>
+                  <FieldContent>
+                    <Select
+                      value={status}
+                      onValueChange={(v) => setStatus(v as Task["status"])}
                     >
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {statusOptions.map((s) => (
-                        <SelectItem key={s} value={s} className="text-sm">
-                          {s}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FieldContent>
-              </Field>
+                      <SelectTrigger
+                        id={ids.status}
+                        className="w-full h-9 text-sm"
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {statusOptions.map((s) => (
+                          <SelectItem key={s} value={s} className="text-sm">
+                            {s}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FieldContent>
+                </Field>
 
-              {/* Priority */}
-              <Field>
-                <FieldLabel
-                  htmlFor={ids.priority}
-                  className="text-sm font-medium"
-                >
-                  Priority
-                </FieldLabel>
-                <FieldContent>
-                  <Select
-                    value={priority}
-                    onValueChange={(v) => setPriority(v as Task["priority"])}
+                {/* Priority */}
+                <Field>
+                  <FieldLabel
+                    htmlFor={ids.priority}
+                    className="text-sm font-medium"
                   >
-                    <SelectTrigger
-                      id={ids.priority}
-                      className="w-full h-9 text-sm"
+                    Priority
+                  </FieldLabel>
+                  <FieldContent>
+                    <Select
+                      value={priority}
+                      onValueChange={(v) => setPriority(v as Task["priority"])}
                     >
-                      <SelectValue>
-                        <div className="flex items-center gap-2">
-                          <div
-                            className={cn(
-                              "w-1.5 h-1.5 rounded-full",
-                              priority === "high" && "bg-red-500",
-                              priority === "medium" && "bg-amber-500",
-                              priority === "low" && "bg-blue-500",
-                            )}
-                          />
-                          <span className="capitalize">{priority}</span>
-                        </div>
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      {priorityOptions.map((p) => (
-                        <SelectItem key={p} value={p} className="text-sm">
+                      <SelectTrigger
+                        id={ids.priority}
+                        className="w-full h-9 text-sm"
+                      >
+                        <SelectValue>
                           <div className="flex items-center gap-2">
                             <div
                               className={cn(
                                 "w-1.5 h-1.5 rounded-full",
-                                p === "high" && "bg-red-500",
-                                p === "medium" && "bg-amber-500",
-                                p === "low" && "bg-blue-500",
+                                priority === "high" && "bg-red-500",
+                                priority === "medium" && "bg-amber-500",
+                                priority === "low" && "bg-blue-500",
                               )}
                             />
-                            <span className="capitalize">{p}</span>
+                            <span className="capitalize">{priority}</span>
                           </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FieldContent>
-              </Field>
-            </div>
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {priorityOptions.map((p) => (
+                          <SelectItem key={p} value={p} className="text-sm">
+                            <div className="flex items-center gap-2">
+                              <div
+                                className={cn(
+                                  "w-1.5 h-1.5 rounded-full",
+                                  p === "high" && "bg-red-500",
+                                  p === "medium" && "bg-amber-500",
+                                  p === "low" && "bg-blue-500",
+                                )}
+                              />
+                              <span className="capitalize">{p}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FieldContent>
+                </Field>
+              </div>
 
-            {/* Dates */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Scheduled Date */}
+              {/* Dates */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Scheduled Date */}
+                <Field>
+                  <FieldLabel
+                    htmlFor={ids.scheduled}
+                    className="text-sm font-medium"
+                  >
+                    Scheduled
+                  </FieldLabel>
+                  <FieldContent>
+                    <Input
+                      id={ids.scheduled}
+                      type="date"
+                      value={scheduledDate}
+                      onChange={(e) => setScheduledDate(e.target.value)}
+                      className="h-9 text-sm"
+                    />
+                  </FieldContent>
+                </Field>
+
+                {/* Due Date */}
+                <Field>
+                  <FieldLabel htmlFor={ids.due} className="text-sm font-medium">
+                    Due Date
+                  </FieldLabel>
+                  <FieldContent>
+                    <Input
+                      id={ids.due}
+                      type="date"
+                      value={dueDate}
+                      onChange={(e) => setDueDate(e.target.value)}
+                      className="h-9 text-sm"
+                    />
+                  </FieldContent>
+                </Field>
+              </div>
+
+              {/* Tags */}
               <Field>
-                <FieldLabel
-                  htmlFor={ids.scheduled}
-                  className="text-sm font-medium"
-                >
-                  Scheduled
-                </FieldLabel>
+                <FieldLabel className="text-sm font-medium">Tags</FieldLabel>
                 <FieldContent>
-                  <Input
-                    id={ids.scheduled}
-                    type="date"
-                    value={scheduledDate}
-                    onChange={(e) => setScheduledDate(e.target.value)}
-                    className="h-9 text-sm"
-                  />
+                  {tags.length === 0 ? (
+                    <span className="text-sm text-muted-foreground">
+                      No tags available. Create tags in Settings.
+                    </span>
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      {tags.map((tag) => {
+                        const isSelected = tagIds.includes(tag._id as string);
+                        return (
+                          <Button
+                            key={tag._id as string}
+                            type="button"
+                            variant={isSelected ? "secondary" : "outline"}
+                            size="xs"
+                            onClick={() => toggleTag(tag._id as string)}
+                            aria-pressed={isSelected}
+                            className="h-8 px-3 text-sm rounded-lg"
+                          >
+                            <span
+                              className="inline-block w-1.5 h-1.5 rounded-full mr-1.5"
+                              style={{ backgroundColor: tag.color }}
+                            />
+                            {tag.name}
+                          </Button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </FieldContent>
               </Field>
-
-              {/* Due Date */}
-              <Field>
-                <FieldLabel htmlFor={ids.due} className="text-sm font-medium">
-                  Due Date
-                </FieldLabel>
-                <FieldContent>
-                  <Input
-                    id={ids.due}
-                    type="date"
-                    value={dueDate}
-                    onChange={(e) => setDueDate(e.target.value)}
-                    className="h-9 text-sm"
-                  />
-                </FieldContent>
-              </Field>
-            </div>
-
-            {/* Tags */}
-            <Field>
-              <FieldLabel className="text-sm font-medium">Tags</FieldLabel>
-              <FieldContent>
-                {tags.length === 0 ? (
-                  <span className="text-sm text-muted-foreground">
-                    No tags available. Create tags in Settings.
-                  </span>
-                ) : (
-                  <div className="flex flex-wrap gap-2">
-                    {tags.map((tag) => {
-                      const isSelected = tagIds.includes(tag._id as string);
-                      return (
-                        <Button
-                          key={tag._id as string}
-                          type="button"
-                          variant={isSelected ? "secondary" : "outline"}
-                          size="xs"
-                          onClick={() => toggleTag(tag._id as string)}
-                          aria-pressed={isSelected}
-                          className="h-8 px-3 text-sm rounded-lg"
-                        >
-                          <span
-                            className="inline-block w-1.5 h-1.5 rounded-full mr-1.5"
-                            style={{ backgroundColor: tag.color }}
-                          />
-                          {tag.name}
-                        </Button>
-                      );
-                    })}
-                  </div>
-                )}
-              </FieldContent>
-            </Field>
             </div>
 
             {/* Footer */}

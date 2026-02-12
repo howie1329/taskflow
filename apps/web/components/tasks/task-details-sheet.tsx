@@ -413,7 +413,7 @@ export function TaskDetailsSheet({
                   />
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-4 rounded-xl border border-border/60 p-4">
                   <h4 className="text-sm font-medium text-muted-foreground">
                     Options
                   </h4>
@@ -588,153 +588,153 @@ export function TaskDetailsSheet({
             {/* Subtasks Section */}
             {!isEditing && (
               <div>
-              <div className="flex items-center justify-between mb-3">
-                <h4 className="text-sm font-medium text-muted-foreground">
-                  Subtasks {subtaskProgress && `(${subtaskProgress})`}
-                </h4>
-                {totalSubtasks > 0 && (
-                  <button
-                    onClick={() =>
-                      setHideCompletedSubtasks(!hideCompletedSubtasks)
-                    }
-                    className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {hideCompletedSubtasks
-                      ? "Show completed"
-                      : "Hide completed"}
-                  </button>
-                )}
-              </div>
-
-              {/* Add new subtask */}
-              {onCreateSubtask && (
-                <div className="flex gap-2 mb-3">
-                  <Input
-                    value={newSubtaskTitle}
-                    onChange={(e) => setNewSubtaskTitle(e.target.value)}
-                    placeholder="Add a checklist item..."
-                    className="h-9 text-sm flex-1"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        handleAddSubtask();
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-sm font-medium text-muted-foreground">
+                    Subtasks {subtaskProgress && `(${subtaskProgress})`}
+                  </h4>
+                  {totalSubtasks > 0 && (
+                    <button
+                      onClick={() =>
+                        setHideCompletedSubtasks(!hideCompletedSubtasks)
                       }
-                    }}
-                  />
-                  <Button
-                    size="icon-sm"
-                    onClick={handleAddSubtask}
-                    disabled={!newSubtaskTitle.trim()}
-                    className="h-9 w-9"
-                  >
-                    <PlusIcon className="h-4 w-4" />
-                  </Button>
+                      className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {hideCompletedSubtasks
+                        ? "Show completed"
+                        : "Hide completed"}
+                    </button>
+                  )}
                 </div>
-              )}
 
-              {/* Subtasks list */}
-              <div className="space-y-2">
-                {visibleSubtasks.map((subtask) => (
-                  <div
-                    key={subtask._id as string}
-                    className="flex items-center gap-2 group rounded-lg px-1"
-                  >
-                    {editingSubtaskId === subtask._id ? (
-                      <div className="flex gap-2 flex-1">
-                        <Input
-                          value={editingSubtaskTitle}
-                          onChange={(e) =>
-                            setEditingSubtaskTitle(e.target.value)
-                          }
-                          className="h-8 text-sm flex-1"
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              handleSaveSubtask();
-                            } else if (e.key === "Escape") {
-                              handleCancelEditSubtask();
-                            }
-                          }}
-                          autoFocus
-                        />
-                        <Button
-                          size="icon-sm"
-                          onClick={handleSaveSubtask}
-                          className="h-8 w-8"
-                        >
-                          <CheckSquareIcon className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ) : (
-                      <>
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          onClick={() =>
-                            handleToggleSubtask(subtask._id as string)
-                          }
-                          className="h-7 w-7 shrink-0"
-                        >
-                          {subtask.isComplete ? (
-                            <CheckSquareIcon className="h-4 w-4 text-primary" />
-                          ) : (
-                            <SquareIcon className="h-4 w-4" />
-                          )}
-                        </Button>
-                        <span
-                          className={cn(
-                            "text-sm flex-1 cursor-pointer",
-                            subtask.isComplete &&
-                              "line-through text-muted-foreground",
-                          )}
-                          onClick={() =>
-                            onUpdateSubtask && handleEditSubtask(subtask)
-                          }
-                        >
-                          {subtask.title}
-                        </span>
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                          {onUpdateSubtask && (
-                            <Button
-                              variant="ghost"
-                              size="icon-sm"
-                              onClick={() => handleEditSubtask(subtask)}
-                            className="h-7 w-7"
-                            >
-                              <PencilIcon className="h-3.5 w-3.5" />
-                            </Button>
-                          )}
-                          {onDeleteSubtask && (
-                            <Button
-                              variant="ghost"
-                              size="icon-sm"
-                              onClick={() =>
-                                handleDeleteSubtask(subtask._id as string)
-                              }
-                              className="h-7 w-7 text-destructive"
-                            >
-                              <TrashIcon className="h-3.5 w-3.5" />
-                            </Button>
-                          )}
-                        </div>
-                      </>
-                    )}
+                {/* Add new subtask */}
+                {onCreateSubtask && (
+                  <div className="flex gap-2 mb-3">
+                    <Input
+                      value={newSubtaskTitle}
+                      onChange={(e) => setNewSubtaskTitle(e.target.value)}
+                      placeholder="Add a checklist item..."
+                      className="h-9 text-sm flex-1"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          handleAddSubtask();
+                        }
+                      }}
+                    />
+                    <Button
+                      size="icon-sm"
+                      onClick={handleAddSubtask}
+                      disabled={!newSubtaskTitle.trim()}
+                      className="h-9 w-9"
+                    >
+                      <PlusIcon className="h-4 w-4" />
+                    </Button>
                   </div>
-                ))}
-
-                {subtasks.length === 0 && (
-                  <p className="text-xs text-muted-foreground italic">
-                    No checklist items
-                  </p>
                 )}
 
-                {hideCompletedSubtasks &&
-                  subtasks.length > visibleSubtasks.length && (
-                    <p className="text-xs text-muted-foreground">
-                      {subtasks.length - visibleSubtasks.length} completed
-                      item(s) hidden
+                {/* Subtasks list */}
+                <div className="space-y-2">
+                  {visibleSubtasks.map((subtask) => (
+                    <div
+                      key={subtask._id as string}
+                      className="flex items-center gap-2 group rounded-lg px-1"
+                    >
+                      {editingSubtaskId === subtask._id ? (
+                        <div className="flex gap-2 flex-1">
+                          <Input
+                            value={editingSubtaskTitle}
+                            onChange={(e) =>
+                              setEditingSubtaskTitle(e.target.value)
+                            }
+                            className="h-8 text-sm flex-1"
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                handleSaveSubtask();
+                              } else if (e.key === "Escape") {
+                                handleCancelEditSubtask();
+                              }
+                            }}
+                            autoFocus
+                          />
+                          <Button
+                            size="icon-sm"
+                            onClick={handleSaveSubtask}
+                            className="h-8 w-8"
+                          >
+                            <CheckSquareIcon className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <>
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() =>
+                              handleToggleSubtask(subtask._id as string)
+                            }
+                            className="h-7 w-7 shrink-0"
+                          >
+                            {subtask.isComplete ? (
+                              <CheckSquareIcon className="h-4 w-4 text-primary" />
+                            ) : (
+                              <SquareIcon className="h-4 w-4" />
+                            )}
+                          </Button>
+                          <span
+                            className={cn(
+                              "text-sm flex-1 cursor-pointer",
+                              subtask.isComplete &&
+                                "line-through text-muted-foreground",
+                            )}
+                            onClick={() =>
+                              onUpdateSubtask && handleEditSubtask(subtask)
+                            }
+                          >
+                            {subtask.title}
+                          </span>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                            {onUpdateSubtask && (
+                              <Button
+                                variant="ghost"
+                                size="icon-sm"
+                                onClick={() => handleEditSubtask(subtask)}
+                                className="h-7 w-7"
+                              >
+                                <PencilIcon className="h-3.5 w-3.5" />
+                              </Button>
+                            )}
+                            {onDeleteSubtask && (
+                              <Button
+                                variant="ghost"
+                                size="icon-sm"
+                                onClick={() =>
+                                  handleDeleteSubtask(subtask._id as string)
+                                }
+                                className="h-7 w-7 text-destructive"
+                              >
+                                <TrashIcon className="h-3.5 w-3.5" />
+                              </Button>
+                            )}
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ))}
+
+                  {subtasks.length === 0 && (
+                    <p className="text-xs text-muted-foreground italic">
+                      No checklist items
                     </p>
                   )}
+
+                  {hideCompletedSubtasks &&
+                    subtasks.length > visibleSubtasks.length && (
+                      <p className="text-xs text-muted-foreground">
+                        {subtasks.length - visibleSubtasks.length} completed
+                        item(s) hidden
+                      </p>
+                    )}
+                </div>
               </div>
-            </div>
             )}
 
             {/* Tags */}
@@ -790,92 +790,92 @@ export function TaskDetailsSheet({
 
             {/* Scheduling Section */}
             {!isEditing && (
-              <div>
-              <h4 className="text-sm font-medium text-muted-foreground mb-3">
-                Scheduling
-              </h4>
-              <dl className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <dt className="text-muted-foreground">Scheduled</dt>
-                  <dd>{task.scheduledDate || "—"}</dd>
-                </div>
-                <div className="flex justify-between">
-                  <dt className="text-muted-foreground">Due</dt>
-                  <dd className={cn(isOverdue && "text-destructive")}>
-                    {task.dueDate ? formatDate(task.dueDate) : "—"}
-                  </dd>
-                </div>
-                {task.completionDate && (
+              <div className="pt-1 border-t border-border/60">
+                <h4 className="text-sm font-medium text-muted-foreground mb-3">
+                  Scheduling
+                </h4>
+                <dl className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <dt className="text-muted-foreground">Completed</dt>
-                    <dd>{formatDate(task.completionDate)}</dd>
+                    <dt className="text-muted-foreground">Scheduled</dt>
+                    <dd>{task.scheduledDate || "—"}</dd>
                   </div>
-                )}
-                <div className="flex justify-between">
-                  <dt className="text-muted-foreground">Last active</dt>
-                  <dd>{formatDate(task.lastActiveAt)}</dd>
-                </div>
-              </dl>
-            </div>
+                  <div className="flex justify-between">
+                    <dt className="text-muted-foreground">Due</dt>
+                    <dd className={cn(isOverdue && "text-destructive")}>
+                      {task.dueDate ? formatDate(task.dueDate) : "—"}
+                    </dd>
+                  </div>
+                  {task.completionDate && (
+                    <div className="flex justify-between">
+                      <dt className="text-muted-foreground">Completed</dt>
+                      <dd>{formatDate(task.completionDate)}</dd>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <dt className="text-muted-foreground">Last active</dt>
+                    <dd>{formatDate(task.lastActiveAt)}</dd>
+                  </div>
+                </dl>
+              </div>
             )}
 
             {/* Work & Metadata Section */}
             {!isEditing && (
               <div>
-              <h4 className="text-sm font-medium text-muted-foreground mb-3">
-                Work & Metadata
-              </h4>
-              <dl className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <dt className="text-muted-foreground">Energy</dt>
-                  <dd className="capitalize">{task.energyLevel}</dd>
-                </div>
-                <div className="flex justify-between">
-                  <dt className="text-muted-foreground">Difficulty</dt>
-                  <dd className="capitalize">{task.difficulty}</dd>
-                </div>
-                <div className="flex justify-between">
-                  <dt className="text-muted-foreground">Context</dt>
-                  <dd>{task.context.join(", ") || "—"}</dd>
-                </div>
-                {task.estimatedDuration && (
+                <h4 className="text-sm font-medium text-muted-foreground mb-3">
+                  Work & Metadata
+                </h4>
+                <dl className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <dt className="text-muted-foreground">Estimated</dt>
-                    <dd>
-                      {Math.round((task.estimatedDuration / 60) * 10) / 10}h
+                    <dt className="text-muted-foreground">Energy</dt>
+                    <dd className="capitalize">{task.energyLevel}</dd>
+                  </div>
+                  <div className="flex justify-between">
+                    <dt className="text-muted-foreground">Difficulty</dt>
+                    <dd className="capitalize">{task.difficulty}</dd>
+                  </div>
+                  <div className="flex justify-between gap-3">
+                    <dt className="text-muted-foreground">Context</dt>
+                    <dd className="text-right">{task.context.join(", ") || "—"}</dd>
+                  </div>
+                  {task.estimatedDuration && (
+                    <div className="flex justify-between">
+                      <dt className="text-muted-foreground">Estimated</dt>
+                      <dd>
+                        {Math.round((task.estimatedDuration / 60) * 10) / 10}h
+                      </dd>
+                    </div>
+                  )}
+                  {task.actualDuration && (
+                    <div className="flex justify-between">
+                      <dt className="text-muted-foreground">Actual</dt>
+                      <dd>{Math.round((task.actualDuration / 60) * 10) / 10}h</dd>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <dt className="text-muted-foreground">Source</dt>
+                    <dd className="capitalize">
+                      {task.source.replace("-", " ")}
                     </dd>
                   </div>
-                )}
-                {task.actualDuration && (
-                  <div className="flex justify-between">
-                    <dt className="text-muted-foreground">Actual</dt>
-                    <dd>{Math.round((task.actualDuration / 60) * 10) / 10}h</dd>
-                  </div>
-                )}
-                <div className="flex justify-between">
-                  <dt className="text-muted-foreground">Source</dt>
-                  <dd className="capitalize">
-                    {task.source.replace("-", " ")}
-                  </dd>
-                </div>
-              </dl>
-            </div>
+                </dl>
+              </div>
             )}
 
             {/* Timestamps Footer */}
             {!isEditing && (
               <div className="pt-2 mt-1">
-              <dl className="space-y-1 text-xs text-muted-foreground">
-                <div className="flex justify-between">
-                  <dt>Created</dt>
-                  <dd>{formatDate(task.createdAt)}</dd>
-                </div>
-                <div className="flex justify-between">
-                  <dt>Updated</dt>
-                  <dd>{formatDate(task.updatedAt)}</dd>
-                </div>
-              </dl>
-            </div>
+                <dl className="space-y-1 text-xs text-muted-foreground">
+                  <div className="flex justify-between">
+                    <dt>Created</dt>
+                    <dd>{formatDate(task.createdAt)}</dd>
+                  </div>
+                  <div className="flex justify-between">
+                    <dt>Updated</dt>
+                    <dd>{formatDate(task.updatedAt)}</dd>
+                  </div>
+                </dl>
+              </div>
             )}
           </div>
 
