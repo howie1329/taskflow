@@ -95,7 +95,7 @@ function NoteRow({
               className="size-3 shrink-0 text-primary"
             />
           )}
-          <span className="truncate text-sm font-medium">
+          <span className="truncate text-[13px] font-medium">
             {note.title || "Untitled"}
           </span>
         </div>
@@ -178,9 +178,9 @@ function NoteRow({
         )}
       </div>
       {snippet && (
-        <p className="line-clamp-1 text-xs text-muted-foreground">{snippet}</p>
+        <p className="line-clamp-1 text-[11px] text-muted-foreground">{snippet}</p>
       )}
-      <div className="flex items-center justify-between text-xs text-muted-foreground">
+      <div className="flex items-center justify-between text-[11px] text-muted-foreground">
         <span className="tabular-nums">
           {formatRelativeTime(note.updatedAt)}
         </span>
@@ -282,13 +282,13 @@ export function NotesList({
 
   if (viewMode === "byProject" && groupedNotes) {
     return (
-      <div className="space-y-3 p-2">
+      <div className="space-y-2 p-2">
         {groupedNotes.map((group) => (
           <div
             key={group.project?._id || "__none__"}
             className="overflow-hidden rounded-lg border border-border/40 bg-background/40"
           >
-            <div className="mb-2 flex items-center gap-2 px-1">
+            <div className="sticky top-0 z-10 flex items-center gap-2 border-b border-border/30 bg-background/70 px-2 py-1 backdrop-blur supports-backdrop-filter:bg-background/60">
               <span className="text-[11px] font-medium text-muted-foreground">
                 {group.project ? (
                   <>
@@ -300,7 +300,7 @@ export function NotesList({
               </span>
               <Badge
                 variant="secondary"
-                className="rounded-md bg-muted/60 text-[10px] tabular-nums"
+                className="rounded-md bg-muted/55 text-[10px] tabular-nums"
               >
                 {group.notes.length}
               </Badge>

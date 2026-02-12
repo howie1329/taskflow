@@ -1,6 +1,5 @@
 "use client";
 
-import { Card } from "@/components/ui/card";
 import { Field, FieldLabel, FieldDescription } from "@/components/ui/field";
 import {
   Select,
@@ -287,321 +286,306 @@ export function PreferencesTab() {
   };
 
   return (
-    <div className="space-y-6">
-      <Card className="p-6">
-        <div className="space-y-4">
-          <h2 className="text-base font-medium">General Preferences</h2>
-          <p className="text-sm text-muted-foreground">
-            Customize your workspace experience
-          </p>
+    <div className="space-y-8">
+      <div className="space-y-2">
+        <h2 className="text-base font-medium">General Preferences</h2>
+        <p className="text-sm text-muted-foreground">
+          Customize your workspace experience
+        </p>
+      </div>
 
-          <div className="space-y-6">
-            {/* Default AI Model Selection */}
-            <Field>
-              <FieldLabel>Default AI Model</FieldLabel>
-              {isLoadingViewer || isLoadingModels ? (
-                <Skeleton className="h-10 w-full" />
-              ) : isEmpty ? (
-                <div className="text-sm text-muted-foreground">
-                  <p className="italic">
-                    No models available yet. Models sync automatically every 6
-                    hours.
+      <div className="divide-y divide-border/60">
+        <section className="space-y-6 pb-8">
+          <Field>
+            <FieldLabel>Default AI Model</FieldLabel>
+            {isLoadingViewer || isLoadingModels ? (
+              <Skeleton className="h-10 w-full" />
+            ) : isEmpty ? (
+              <div className="text-sm text-muted-foreground">
+                <p className="italic">
+                  No models available yet. Models sync automatically every 6
+                  hours.
+                </p>
+                {lastSyncedAt && (
+                  <p className="mt-1 text-xs">
+                    Last synced: {formatSyncTime(lastSyncedAt)}
                   </p>
-                  {lastSyncedAt && (
-                    <p className="text-xs mt-1">
-                      Last synced: {formatSyncTime(lastSyncedAt)}
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <>
-                  <Select
-                    value={selectedModelId}
-                    onValueChange={setSelectedModelId}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select a default AI model" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {models.map((model) => (
-                        <SelectItem key={model.modelId} value={model.modelId}>
-                          <div className="flex flex-col">
-                            <span>{model.name}</span>
-                            <span className="text-xs text-muted-foreground">
-                              {model.modelId}
-                            </span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                )}
+              </div>
+            ) : (
+              <>
+                <Select
+                  value={selectedModelId}
+                  onValueChange={setSelectedModelId}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a default AI model" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {models.map((model) => (
+                      <SelectItem key={model.modelId} value={model.modelId}>
+                        <div className="flex flex-col">
+                          <span>{model.name}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {model.modelId}
+                          </span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
 
-                  {/* Show current default model info */}
-                  {currentDefaultModel && (
-                    <div className="text-sm">
-                      <span className="text-muted-foreground">
-                        Current default:{" "}
+                {currentDefaultModel && (
+                  <div className="text-sm">
+                    <span className="text-muted-foreground">
+                      Current default:{" "}
+                    </span>
+                    <span className="font-medium">{currentDefaultModel.name}</span>
+                    <span className="ml-2 text-xs text-muted-foreground">
+                      ({currentDefaultModel.modelId})
+                    </span>
+                    {!isModelInList && (
+                      <span className="ml-2 text-xs text-amber-600">
+                        (not in current available models)
                       </span>
-                      <span className="font-medium">
-                        {currentDefaultModel.name}
-                      </span>
-                      <span className="text-xs text-muted-foreground ml-2">
-                        ({currentDefaultModel.modelId})
-                      </span>
-                      {!isModelInList && (
-                        <span className="text-xs text-amber-600 ml-2">
-                          (not in current available models)
-                        </span>
-                      )}
-                    </div>
-                  )}
+                    )}
+                  </div>
+                )}
 
-                  <FieldDescription>
-                    Models are synced automatically every 6 hours. Last synced:{" "}
-                    {formatSyncTime(lastSyncedAt)}
-                  </FieldDescription>
-                </>
-              )}
-            </Field>
+                <FieldDescription>
+                  Models are synced automatically every 6 hours. Last synced:{" "}
+                  {formatSyncTime(lastSyncedAt)}
+                </FieldDescription>
+              </>
+            )}
+          </Field>
 
-            {/* Save Button */}
-            {!isEmpty && (
-              <div className="flex justify-end">
-                <Button
-                  onClick={handleSave}
-                  disabled={
-                    isSaving ||
-                    !selectedModelId ||
-                    (currentDefaultModel?.modelId === selectedModelId &&
-                      models.some((m) => m.modelId === selectedModelId))
+          {!isEmpty && (
+            <div className="flex justify-end">
+              <Button
+                onClick={handleSave}
+                disabled={
+                  isSaving ||
+                  !selectedModelId ||
+                  (currentDefaultModel?.modelId === selectedModelId &&
+                    models.some((m) => m.modelId === selectedModelId))
+                }
+              >
+                {isSaving ? "Saving..." : "Save Default Model"}
+              </Button>
+            </div>
+          )}
+        </section>
+
+        <section className="space-y-6 py-8">
+          <h3 className="text-sm font-medium">Tasks</h3>
+          <Field>
+            <FieldLabel>Default Task View</FieldLabel>
+            {isLoadingViewer ? (
+              <Skeleton className="h-10 w-full" />
+            ) : (
+              <>
+                <Select
+                  value={taskDefaultView}
+                  onValueChange={(value) =>
+                    setTaskDefaultView(value as "board" | "todayPlusBoard")
                   }
                 >
-                  {isSaving ? "Saving..." : "Save Default Model"}
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select default task view" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="board">Board (Classic Kanban)</SelectItem>
+                    <SelectItem value="todayPlusBoard">
+                      Today + Board (Split View)
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <div className="mt-2 text-sm">
+                  <span className="text-muted-foreground">Current default: </span>
+                  <span className="font-medium">
+                    {preferences?.taskDefaultView === "todayPlusBoard"
+                      ? "Today + Board"
+                      : "Board"}
+                  </span>
+                </div>
+
+                <FieldDescription>
+                  This determines which view is shown when you open the Tasks
+                  page
+                </FieldDescription>
+
+                <div className="mt-3 flex justify-end">
+                  <Button
+                    onClick={handleSaveTaskView}
+                    disabled={
+                      isSaving || preferences?.taskDefaultView === taskDefaultView
+                    }
+                  >
+                    {isSaving ? "Saving..." : "Save Default View"}
+                  </Button>
+                </div>
+              </>
+            )}
+          </Field>
+
+          <Field>
+            <div className="flex items-center justify-between gap-4">
+              <div className="space-y-1">
+                <FieldLabel>Hide completed tasks</FieldLabel>
+                <FieldDescription>
+                  Completed tasks won’t appear in lists by default
+                </FieldDescription>
+              </div>
+              {isLoadingViewer ? (
+                <Skeleton className="h-6 w-10" />
+              ) : (
+                <Switch
+                  checked={hideCompletedTasks}
+                  onCheckedChange={handleToggleHideCompleted}
+                  disabled={isSavingHideCompleted}
+                  aria-label="Hide completed tasks"
+                />
+              )}
+            </div>
+          </Field>
+        </section>
+
+        <section className="space-y-6 py-8">
+          <h3 className="text-sm font-medium">Notifications</h3>
+          <Field>
+            <div className="flex items-center justify-between gap-4">
+              <div className="space-y-1">
+                <FieldLabel>In-app notifications</FieldLabel>
+                <FieldDescription>
+                  Toggle updates like successful saves or reminders
+                </FieldDescription>
+              </div>
+              {isLoadingViewer ? (
+                <Skeleton className="h-6 w-10" />
+              ) : (
+                <Switch
+                  checked={notificationsEnabled}
+                  onCheckedChange={handleToggleNotifications}
+                  disabled={isSavingNotifications}
+                  aria-label="Enable in-app notifications"
+                />
+              )}
+            </div>
+          </Field>
+        </section>
+
+        <section className="space-y-6 py-8">
+          <h3 className="text-sm font-medium">Tags</h3>
+          <Field>
+            <FieldLabel>New tag</FieldLabel>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <Input
+                value={newTagName}
+                onChange={(e) => setNewTagName(e.target.value)}
+                placeholder="Tag name"
+                disabled={isCreatingTag}
+              />
+              <div className="flex items-center gap-2">
+                <Input
+                  type="color"
+                  value={newTagColor}
+                  onChange={(e) => setNewTagColor(e.target.value)}
+                  className="h-10 w-16 p-1"
+                  aria-label="Tag color"
+                  disabled={isCreatingTag}
+                />
+                <Button
+                  onClick={handleCreateTag}
+                  disabled={isCreatingTag || !newTagName.trim()}
+                  className="h-10"
+                >
+                  {isCreatingTag ? "Creating..." : "Create"}
                 </Button>
               </div>
-            )}
-
-            {/* Tasks Section */}
-            <div className="pt-4 border-t">
-              <h3 className="text-sm font-medium mb-3">Tasks</h3>
-              <Field>
-                <FieldLabel>Default Task View</FieldLabel>
-                {isLoadingViewer ? (
-                  <Skeleton className="h-10 w-full" />
-                ) : (
-                  <>
-                    <Select
-                      value={taskDefaultView}
-                      onValueChange={(value) =>
-                        setTaskDefaultView(value as "board" | "todayPlusBoard")
-                      }
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select default task view" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="board">
-                          Board (Classic Kanban)
-                        </SelectItem>
-                        <SelectItem value="todayPlusBoard">
-                          Today + Board (Split View)
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-
-                    {/* Show current default view */}
-                    <div className="text-sm mt-2">
-                      <span className="text-muted-foreground">
-                        Current default:{" "}
-                      </span>
-                      <span className="font-medium">
-                        {preferences?.taskDefaultView === "todayPlusBoard"
-                          ? "Today + Board"
-                          : "Board"}
-                      </span>
-                    </div>
-
-                    <FieldDescription>
-                      This determines which view is shown when you open the
-                      Tasks page
-                    </FieldDescription>
-
-                    {/* Save Button */}
-                    <div className="flex justify-end mt-3">
-                      <Button
-                        onClick={handleSaveTaskView}
-                        disabled={
-                          isSaving ||
-                          preferences?.taskDefaultView === taskDefaultView
-                        }
-                      >
-                        {isSaving ? "Saving..." : "Save Default View"}
-                      </Button>
-                    </div>
-                  </>
-                )}
-              </Field>
-
-              <Field>
-                <div className="flex items-center justify-between gap-4">
-                  <div className="space-y-1">
-                    <FieldLabel>Hide completed tasks</FieldLabel>
-                    <FieldDescription>
-                      Completed tasks won’t appear in lists by default
-                    </FieldDescription>
-                  </div>
-                  {isLoadingViewer ? (
-                    <Skeleton className="h-6 w-10" />
-                  ) : (
-                    <Switch
-                      checked={hideCompletedTasks}
-                      onCheckedChange={handleToggleHideCompleted}
-                      disabled={isSavingHideCompleted}
-                      aria-label="Hide completed tasks"
-                    />
-                  )}
-                </div>
-              </Field>
             </div>
+            <FieldDescription>
+              Tags help organize tasks and power quick filtering
+            </FieldDescription>
+          </Field>
 
-            <div className="pt-4 border-t">
-              <h3 className="text-sm font-medium mb-3">Notifications</h3>
-              <Field>
-                <div className="flex items-center justify-between gap-4">
-                  <div className="space-y-1">
-                    <FieldLabel>In-app notifications</FieldLabel>
-                    <FieldDescription>
-                      Toggle updates like successful saves or reminders
-                    </FieldDescription>
-                  </div>
-                  {isLoadingViewer ? (
-                    <Skeleton className="h-6 w-10" />
-                  ) : (
-                    <Switch
-                      checked={notificationsEnabled}
-                      onCheckedChange={handleToggleNotifications}
-                      disabled={isSavingNotifications}
-                      aria-label="Enable in-app notifications"
-                    />
-                  )}
-                </div>
-              </Field>
-            </div>
-
-            {/* Tags Section */}
-            <div className="pt-4 border-t">
-              <h3 className="text-sm font-medium mb-3">Tags</h3>
-              <Field>
-                <FieldLabel>New tag</FieldLabel>
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                  <Input
-                    value={newTagName}
-                    onChange={(e) => setNewTagName(e.target.value)}
-                    placeholder="Tag name"
-                    disabled={isCreatingTag}
-                  />
+          <div className="space-y-2">
+            {isLoadingTags ? (
+              <div className="space-y-2">
+                {[1, 2, 3].map((i) => (
+                  <Skeleton key={i} className="h-10 w-full" />
+                ))}
+              </div>
+            ) : tags.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No tags yet. Create your first tag above.
+              </p>
+            ) : (
+              tags.map((tag) => (
+                <div
+                  key={tag._id}
+                  className="flex items-center justify-between rounded-md border border-border px-3 py-2"
+                >
                   <div className="flex items-center gap-2">
-                    <Input
-                      type="color"
-                      value={newTagColor}
-                      onChange={(e) => setNewTagColor(e.target.value)}
-                      className="h-10 w-16 p-1"
-                      aria-label="Tag color"
-                      disabled={isCreatingTag}
+                    <span
+                      className="inline-block h-2.5 w-2.5 rounded-full"
+                      style={{ backgroundColor: tag.color }}
                     />
+                    <span className="text-sm font-medium">{tag.name}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
                     <Button
-                      onClick={handleCreateTag}
-                      disabled={isCreatingTag || !newTagName.trim()}
-                      className="h-10"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setEditingTag(tag)}
                     >
-                      {isCreatingTag ? "Creating..." : "Create"}
+                      Edit
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive hover:text-destructive"
+                      onClick={() => setTagToDelete(tag)}
+                    >
+                      Delete
                     </Button>
                   </div>
                 </div>
-                <FieldDescription>
-                  Tags help organize tasks and power quick filtering
-                </FieldDescription>
-              </Field>
-
-              <div className="space-y-2">
-                {isLoadingTags ? (
-                  <div className="space-y-2">
-                    {[1, 2, 3].map((i) => (
-                      <Skeleton key={i} className="h-10 w-full" />
-                    ))}
-                  </div>
-                ) : tags.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">
-                    No tags yet. Create your first tag above.
-                  </p>
-                ) : (
-                  tags.map((tag) => (
-                    <div
-                      key={tag._id}
-                      className="flex items-center justify-between rounded-md border border-border px-3 py-2"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span
-                          className="inline-block h-2.5 w-2.5 rounded-full"
-                          style={{ backgroundColor: tag.color }}
-                        />
-                        <span className="text-sm font-medium">{tag.name}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setEditingTag(tag)}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-destructive hover:text-destructive"
-                          onClick={() => setTagToDelete(tag)}
-                        >
-                          Delete
-                        </Button>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-
-            {/* Appearance Section */}
-            <div className="pt-4 border-t">
-              <h3 className="text-sm font-medium mb-3">Appearance</h3>
-              <Field>
-                <FieldLabel>Theme</FieldLabel>
-                {!theme ? (
-                  <Skeleton className="h-10 w-full" />
-                ) : (
-                  <Select
-                    value={themeValue}
-                    onValueChange={(value) =>
-                      setTheme(value as "system" | "light" | "dark")
-                    }
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select theme" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="system">System</SelectItem>
-                      <SelectItem value="light">Light</SelectItem>
-                      <SelectItem value="dark">Dark</SelectItem>
-                    </SelectContent>
-                  </Select>
-                )}
-                <FieldDescription>
-                  Applies to the entire workspace interface
-                </FieldDescription>
-              </Field>
-            </div>
+              ))
+            )}
           </div>
-        </div>
-      </Card>
+        </section>
+
+        <section className="space-y-6 pt-8">
+          <h3 className="text-sm font-medium">Appearance</h3>
+          <Field>
+            <FieldLabel>Theme</FieldLabel>
+            {!theme ? (
+              <Skeleton className="h-10 w-full" />
+            ) : (
+              <Select
+                value={themeValue}
+                onValueChange={(value) =>
+                  setTheme(value as "system" | "light" | "dark")
+                }
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select theme" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="system">System</SelectItem>
+                  <SelectItem value="light">Light</SelectItem>
+                  <SelectItem value="dark">Dark</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+            <FieldDescription>
+              Applies to the entire workspace interface
+            </FieldDescription>
+          </Field>
+        </section>
+      </div>
 
       <Dialog
         open={!!editingTag}

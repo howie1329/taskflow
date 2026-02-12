@@ -5,7 +5,6 @@ import { useMutation } from "convex/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FieldLabel, FieldDescription } from "@/components/ui/field";
-import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { api } from "@/convex/_generated/api";
 
@@ -69,62 +68,60 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
   };
 
   return (
-    <Card className="p-6">
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="space-y-4">
-          <h2 className="text-base font-medium">Profile Information</h2>
-          <p className="text-sm text-muted-foreground">
-            Manage your personal information
-          </p>
-        </div>
+    <form onSubmit={handleSubmit} className="space-y-8">
+      <div className="space-y-2">
+        <h2 className="text-base font-medium">Profile Information</h2>
+        <p className="text-sm text-muted-foreground">
+          Manage your personal information
+        </p>
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Field>
-            <FieldLabel>First Name</FieldLabel>
-            <Input
-              value={formData.firstName}
-              onChange={(e) => handleChange("firstName", e.target.value)}
-              placeholder="Enter your first name"
-              disabled={isSubmitting}
-              required
-            />
-            <FieldDescription>Max 50 characters</FieldDescription>
-          </Field>
-
-          <Field>
-            <FieldLabel>Last Name</FieldLabel>
-            <Input
-              value={formData.lastName}
-              onChange={(e) => handleChange("lastName", e.target.value)}
-              placeholder="Enter your last name"
-              disabled={isSubmitting}
-              required
-            />
-            <FieldDescription>Max 50 characters</FieldDescription>
-          </Field>
-        </div>
-
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <Field>
-          <FieldLabel>Contact Email</FieldLabel>
+          <FieldLabel>First Name</FieldLabel>
           <Input
-            type="email"
-            value={formData.email}
-            onChange={(e) => handleChange("email", e.target.value)}
-            placeholder="Enter your contact email"
+            value={formData.firstName}
+            onChange={(e) => handleChange("firstName", e.target.value)}
+            placeholder="Enter your first name"
             disabled={isSubmitting}
             required
           />
-          <FieldDescription>
-            Used for notifications and contact purposes
-          </FieldDescription>
+          <FieldDescription>Max 50 characters</FieldDescription>
         </Field>
 
-        <div className="flex justify-end">
-          <Button type="submit" disabled={isSubmitting} className="min-w-24">
-            {isSubmitting ? "Saving..." : "Save Changes"}
-          </Button>
-        </div>
-      </form>
-    </Card>
+        <Field>
+          <FieldLabel>Last Name</FieldLabel>
+          <Input
+            value={formData.lastName}
+            onChange={(e) => handleChange("lastName", e.target.value)}
+            placeholder="Enter your last name"
+            disabled={isSubmitting}
+            required
+          />
+          <FieldDescription>Max 50 characters</FieldDescription>
+        </Field>
+      </div>
+
+      <Field>
+        <FieldLabel>Contact Email</FieldLabel>
+        <Input
+          type="email"
+          value={formData.email}
+          onChange={(e) => handleChange("email", e.target.value)}
+          placeholder="Enter your contact email"
+          disabled={isSubmitting}
+          required
+        />
+        <FieldDescription>
+          Used for notifications and contact purposes
+        </FieldDescription>
+      </Field>
+
+      <div className="flex justify-end">
+        <Button type="submit" disabled={isSubmitting} className="min-w-24">
+          {isSubmitting ? "Saving..." : "Save Changes"}
+        </Button>
+      </div>
+    </form>
   );
 }

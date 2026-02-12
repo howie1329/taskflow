@@ -136,9 +136,9 @@ export function NotesAppSidebar({ onBackToWorkspace }: NotesAppSidebarProps) {
         </SidebarHeader>
 
         <SidebarContent className="px-2">
-          <div className="space-y-2">
+          <div className="space-y-2 rounded-lg border border-border/40 bg-background/50 p-1.5">
             <Button
-              className="w-full h-7 rounded-md px-2 text-xs"
+              className="h-7 w-full rounded-md px-2 text-xs"
               variant="default"
               onClick={handleCreateNote}
             >
@@ -165,7 +165,7 @@ export function NotesAppSidebar({ onBackToWorkspace }: NotesAppSidebarProps) {
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setSearchQuery(e.target.value)
                 }
-                className="h-7 text-xs"
+                className="h-7 border-border/50 text-xs"
               />
               {searchQuery && (
                 <InputGroupAddon>
@@ -249,8 +249,8 @@ export function NotesAppSidebar({ onBackToWorkspace }: NotesAppSidebarProps) {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent className="px-0 overflow-hidden">
-        <div className="h-full px-3 py-2">
+      <SidebarContent className="overflow-hidden px-0">
+        <div className="flex h-full min-h-0 flex-col px-3 py-2">
           <NotesSidebar
             notes={notes}
             filteredNotes={filteredNotes}
