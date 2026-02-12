@@ -97,7 +97,7 @@ export function AITab() {
   const formatPrice = (price: string) => {
     const num = parseFloat(price);
     if (isNaN(num)) return "$0.00";
-    return `$${num.toFixed(6)}`;
+    return `$${num.toFixed(2)}`;
   };
 
   return (

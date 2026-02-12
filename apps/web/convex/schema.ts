@@ -42,12 +42,20 @@ const schema = defineSchema({
     .index("by_messageId", ["messageId"]),
   availableModels: defineTable({
     modelId: v.string(),
+    canonicalSlug: v.optional(v.string()),
+    provider: v.optional(v.string()),
     name: v.string(),
     description: v.string(),
     pricing: v.object({
       prompt: v.string(),
       completion: v.string(),
     }),
+    contextLength: v.optional(v.number()),
+    maxCompletionTokens: v.optional(v.number()),
+    modality: v.optional(v.string()),
+    inputModalities: v.optional(v.array(v.string())),
+    outputModalities: v.optional(v.array(v.string())),
+    supportedParameters: v.optional(v.array(v.string())),
     syncedAt: v.number(),
   }).index("by_modelId", ["modelId"]),
   chatUsageTotals: defineTable({

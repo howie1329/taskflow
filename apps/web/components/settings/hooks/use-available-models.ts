@@ -8,12 +8,20 @@ export interface AvailableModel {
   _id: string;
   _creationTime: number;
   modelId: string;
+  canonicalSlug?: string;
+  provider?: string;
   name: string;
   description: string;
   pricing: {
     prompt: string;
     completion: string;
   };
+  contextLength?: number;
+  maxCompletionTokens?: number;
+  modality?: string;
+  inputModalities?: string[];
+  outputModalities?: string[];
+  supportedParameters?: string[];
   syncedAt: number;
 }
 
