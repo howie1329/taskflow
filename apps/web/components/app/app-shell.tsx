@@ -140,12 +140,12 @@ export function AppShell({ children }: AppShellProps) {
       style={
         isChatRoute
           ? ({
-            "--sidebar-width": "14rem",
+            "--sidebar-width": "16rem",
             "--sidebar-width-mobile": "18rem",
           } as React.CSSProperties)
           : isNotesRoute
             ? ({
-              "--sidebar-width": "14rem",
+              "--sidebar-width": "16rem",
               "--sidebar-width-mobile": "18rem",
             } as React.CSSProperties)
             : undefined
