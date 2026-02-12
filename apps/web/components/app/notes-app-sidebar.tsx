@@ -35,7 +35,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { useSidebar } from "@/components/ui/sidebar";
-import { NotesSidebar, useNotes } from "@/components/notes";
+import { NotesRail, useNotes } from "@/components/notes";
 import { useTheme } from "next-themes";
 
 interface NotesAppSidebarProps {
@@ -50,16 +50,9 @@ export function NotesAppSidebar({ onBackToWorkspace }: NotesAppSidebarProps) {
 
   const {
     notes,
-    filteredNotes,
-    sortedNotes,
-    groupedNotes,
     selectedNoteId,
-    projectFilter,
     searchQuery,
-    viewMode,
-    setProjectFilter,
     setSearchQuery,
-    setViewMode,
     createNote,
     selectNote,
     pinNote,
@@ -69,7 +62,6 @@ export function NotesAppSidebar({ onBackToWorkspace }: NotesAppSidebarProps) {
     cancelDelete,
     deleteDialogOpen,
     projects,
-    projectForNote,
   } = useNotes();
 
   const { setTheme, resolvedTheme } = useTheme();
@@ -251,25 +243,17 @@ export function NotesAppSidebar({ onBackToWorkspace }: NotesAppSidebarProps) {
       </SidebarHeader>
       <SidebarContent className="overflow-hidden px-0">
         <div className="flex h-full min-h-0 flex-col px-3 py-2">
-          <NotesSidebar
+          <NotesRail
+            variant="sidebar"
             notes={notes}
-            filteredNotes={filteredNotes}
-            sortedNotes={sortedNotes}
-            groupedNotes={groupedNotes}
-            selectedNoteId={selectedNoteId}
-            projectFilter={projectFilter}
+            activeNoteId={selectedNoteId}
             searchQuery={searchQuery}
-            viewMode={viewMode}
-            isMobile={isMobile}
-            onProjectFilterChange={setProjectFilter}
             onSearchQueryChange={setSearchQuery}
-            onViewModeChange={setViewMode}
             onSelectNote={handleSelectNote}
             onCreateNote={handleCreateNote}
-            onPinNote={pinNote}
+            onTogglePin={pinNote}
             onMoveNote={moveNote}
             onDeleteNote={requestDeleteNote}
-            projectForNote={projectForNote}
             projects={projects}
             searchInputRef={searchInputRef}
           />
