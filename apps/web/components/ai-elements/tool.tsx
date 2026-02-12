@@ -1,6 +1,7 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Collapsible,
   CollapsibleContent,
@@ -15,6 +16,7 @@ import {
   ClockIcon,
   XCircleIcon,
 } from "lucide-react";
+import { useState } from "react";
 import type { ComponentProps, ReactNode } from "react";
 import { isValidElement } from "react";
 import { CodeBlock } from "./code-block";
@@ -255,6 +257,75 @@ export const ToolMetaPanel = ({
         ))}
       </div>
     </div>
+  );
+};
+
+export type ToolRawPayloadProps = {
+  input?: unknown;
+  output?: unknown;
+  className?: string;
+};
+
+export const ToolRawPayload = ({
+  input,
+  output,
+  className,
+}: ToolRawPayloadProps) => {
+  const [activeTab, setActiveTab] = useState<"input" | "output">("output");
+  const hasInput = input !== undefined;
+  const hasOutput = output !== undefined;
+
+  if (!hasInput && !hasOutput) return null;
+
+  const resolvedTab =
+    activeTab === "input" && !hasInput
+      ? "output"
+      : activeTab === "output" && !hasOutput
+        ? "input"
+        : activeTab;
+
+  const code = JSON.stringify(
+    resolvedTab === "input" ? input ?? null : output ?? null,
+    null,
+    2,
+  );
+
+  return (
+    <Collapsible className={cn("group rounded-md border border-border/50", className)}>
+      <CollapsibleTrigger className="flex w-full items-center justify-between px-2.5 py-2 text-xs text-muted-foreground transition-colors hover:text-foreground">
+        <span className="font-medium">Raw payload</span>
+        <ChevronDownIcon className="size-3.5 transition-transform group-data-[state=open]:rotate-180" />
+      </CollapsibleTrigger>
+      <CollapsibleContent className="space-y-2 px-2.5 pb-2.5">
+        <div className="flex items-center gap-1">
+          {hasOutput ? (
+            <Button
+              size="sm"
+              variant={resolvedTab === "output" ? "secondary" : "ghost"}
+              className="h-6 px-2 text-[11px]"
+              onClick={() => setActiveTab("output")}
+              type="button"
+            >
+              Output
+            </Button>
+          ) : null}
+          {hasInput ? (
+            <Button
+              size="sm"
+              variant={resolvedTab === "input" ? "secondary" : "ghost"}
+              className="h-6 px-2 text-[11px]"
+              onClick={() => setActiveTab("input")}
+              type="button"
+            >
+              Input
+            </Button>
+          ) : null}
+        </div>
+        <div className="overflow-hidden rounded-sm border border-border/50 bg-muted/20">
+          <CodeBlock code={code} language="json" />
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 };
 

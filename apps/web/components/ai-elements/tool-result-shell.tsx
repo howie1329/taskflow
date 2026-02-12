@@ -11,7 +11,6 @@ export function ToolResultShell({
   return (
     <section
       className={cn(
-        "rounded-md border border-border/60 bg-card/40 p-3",
         "space-y-3",
         className,
       )}
@@ -29,7 +28,7 @@ export function ToolResultHeader({
 }) {
   return (
     <div className="flex items-center justify-between gap-3">
-      <h4 className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+      <h4 className="text-xs font-medium text-foreground/90">
         {title}
       </h4>
       {pills && pills.length > 0 ? (
@@ -57,7 +56,7 @@ export function ToolResultSection({
 }: ComponentProps<"div"> & { title: string }) {
   return (
     <div className={cn("space-y-1.5", className)} {...props}>
-      <div className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+      <div className="text-xs text-muted-foreground">
         {title}
       </div>
       <div className="text-sm text-foreground">{children}</div>
@@ -67,7 +66,7 @@ export function ToolResultSection({
 
 export function ToolEmptyState({ message }: { message: string }) {
   return (
-    <div className="rounded-md border border-border/60 bg-muted/20 p-2.5 text-sm text-muted-foreground">
+    <div className="rounded-sm bg-muted/20 px-2.5 py-2 text-sm text-muted-foreground">
       {message}
     </div>
   );

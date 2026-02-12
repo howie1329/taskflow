@@ -33,7 +33,7 @@ export function renderToolContent(toolCall: ToolCall): ReactNode {
   ) {
     return (
       <p className="text-sm text-muted-foreground">
-        {getToolStateInfo(toolCall.state).badgeLabel}...
+        {getToolStateInfo(toolCall.state).badgeLabel}
       </p>
     )
   }
@@ -64,8 +64,8 @@ export function renderToolContent(toolCall: ToolCall): ReactNode {
     case "advancedResearch":
       return (
         <p className="text-sm text-muted-foreground">
-          Advanced research completed. Open enhanced details below for full source
-          and scrape output.
+          Advanced research completed. Open raw payload for full sources and
+          scrape details.
         </p>
       )
     case "valyuWebSearch":
@@ -119,5 +119,5 @@ export function renderToolContent(toolCall: ToolCall): ReactNode {
     return <p className="text-sm">{summary}</p>
   }
 
-  return <p className="text-sm text-muted-foreground">Done</p>
+  return <p className="text-sm text-muted-foreground">Completed</p>
 }

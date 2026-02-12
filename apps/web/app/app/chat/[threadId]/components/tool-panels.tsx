@@ -9,7 +9,7 @@ import {
   EnhancedToolHeader,
   ToolContent,
   ToolSummaryBar,
-  ToolMetaPanel,
+  ToolRawPayload,
 } from "@/components/ai-elements/tool"
 import {
   detectProvider,
@@ -24,7 +24,6 @@ import type { ToolCall } from "./tool-types"
 import {
   getToolDisplayNameFromKey,
   getToolInputSummary,
-  getToolMetaItems,
   getToolStateInfo,
   getToolSummary,
 } from "./tool-meta"
@@ -42,6 +41,24 @@ interface ToolPanelsProps {
 
 export function ToolPanels({ toolCalls, preferences }: ToolPanelsProps) {
   if (toolCalls.length === 0) return null
+
+  const renderToolCard = (toolCall: ToolCall) => (
+    <Tool key={toolCall.id}>
+      <EnhancedToolHeader
+        toolName={toolCall.toolKey}
+        state={toolCall.state}
+      />
+      <ToolContent>
+        <div className="space-y-3 pt-2">
+          <ToolSummaryBar summary={getToolSummary(toolCall)} />
+          {renderToolContent(toolCall)}
+          {(toolCall.input !== undefined || toolCall.output !== undefined) && (
+            <ToolRawPayload input={toolCall.input} output={toolCall.output} />
+          )}
+        </div>
+      </ToolContent>
+    </Tool>
+  )
 
   return (
     <>
@@ -87,39 +104,11 @@ export function ToolPanels({ toolCalls, preferences }: ToolPanelsProps) {
                     <span>{toolCalls.length} tool calls</span>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
-                    {toolCalls.map((toolCall) => (
-                      <Tool key={toolCall.id}>
-                        <EnhancedToolHeader
-                          toolName={toolCall.toolKey}
-                          state={toolCall.state}
-                        />
-                        <ToolContent>
-                          <div className="space-y-3 pt-2">
-                            <ToolSummaryBar summary={getToolSummary(toolCall)} />
-                            <ToolMetaPanel items={getToolMetaItems(toolCall)} />
-                            {renderToolContent(toolCall)}
-                          </div>
-                        </ToolContent>
-                      </Tool>
-                    ))}
+                    {toolCalls.map((toolCall) => renderToolCard(toolCall))}
                   </CollapsibleContent>
                 </Collapsible>
               ) : (
-                toolCalls.map((toolCall) => (
-                  <Tool key={toolCall.id}>
-                    <EnhancedToolHeader
-                      toolName={toolCall.toolKey}
-                      state={toolCall.state}
-                    />
-                    <ToolContent>
-                      <div className="space-y-3 pt-2">
-                        <ToolSummaryBar summary={getToolSummary(toolCall)} />
-                        <ToolMetaPanel items={getToolMetaItems(toolCall)} />
-                        {renderToolContent(toolCall)}
-                      </div>
-                    </ToolContent>
-                  </Tool>
-                ))
+                toolCalls.map((toolCall) => renderToolCard(toolCall))
               )}
             </>
           )}

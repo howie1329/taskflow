@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { firecrawlScrapeResponseSchema } from "@/lib/AITools/Firecrawl/types";
 import { Button } from "@/components/ui/button";
 import { CodeBlock } from "./code-block";
@@ -19,10 +19,11 @@ export function FirecrawlScrapeCard({ output }: { output: unknown }) {
   const data = parsed.data;
   const scrapeData = data.data;
 
-  const formats = useMemo(() => {
-    if (!scrapeData) return [] as FormatKey[];
-    return (["markdown", "text", "html"] as const).filter((key) => Boolean(scrapeData[key]));
-  }, [scrapeData]);
+  const formats = !scrapeData
+    ? ([] as FormatKey[])
+    : (["markdown", "text", "html"] as const).filter((key) =>
+        Boolean(scrapeData[key]),
+      );
 
   const activeFormat = formats.includes(selectedFormat) ? selectedFormat : formats[0];
   const content = activeFormat && scrapeData ? scrapeData[activeFormat] : undefined;
@@ -77,7 +78,7 @@ export function FirecrawlScrapeCard({ output }: { output: unknown }) {
                 </Button>
               ))}
             </div>
-            <div className="rounded-sm border border-border/50 bg-muted/20">
+            <div className="overflow-hidden rounded-sm bg-muted/20">
               <CodeBlock code={content} language={activeFormat === "html" ? "html" : "markdown"} />
             </div>
           </div>

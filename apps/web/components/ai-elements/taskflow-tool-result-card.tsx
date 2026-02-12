@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { TASKFLOW_TOOL_KEYS } from "@/lib/AITools/taskflow-tool-keys";
 import { ToolEmptyState, ToolResultHeader, ToolResultSection, ToolResultShell } from "./tool-result-shell";
 
@@ -49,6 +51,8 @@ export function TaskflowToolResultCard({
   input,
   output,
 }: TaskflowToolResultCardProps) {
+  const [showAll, setShowAll] = useState(false);
+
   if (!TASKFLOW_TOOL_KEYS.includes(toolKey as TaskflowToolKey)) {
     return <ToolEmptyState message="This tool key is not a Taskflow tool." />;
   }
@@ -58,6 +62,11 @@ export function TaskflowToolResultCard({
   }
 
   const actionLabel = getActionLabel(toolKey as TaskflowToolKey);
+  const visibleItems = Array.isArray(output)
+    ? showAll
+      ? output
+      : output.slice(0, 5)
+    : [];
 
   return (
     <ToolResultShell>
@@ -70,17 +79,25 @@ export function TaskflowToolResultCard({
           {output.length === 0 ? (
             <ToolEmptyState message="No records returned." />
           ) : (
-            <div className="space-y-2">
-              {output.slice(0, 8).map((item, index) => (
-                <div
-                  key={index}
-                  className="rounded-sm border border-border/50 px-2.5 py-2 text-xs"
-                >
+            <div className="divide-y divide-border/60 rounded-sm border border-border/50">
+              {visibleItems.map((item, index) => (
+                <div key={index} className="px-2.5 py-2 text-xs">
                   {isRecord(item) ? renderObjectRows(item) : String(item)}
                 </div>
               ))}
             </div>
           )}
+          {output.length > 5 ? (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="mt-2 h-7 px-2 text-xs"
+              onClick={() => setShowAll((current) => !current)}
+            >
+              {showAll ? "Show less" : `Show all (${output.length})`}
+            </Button>
+          ) : null}
         </ToolResultSection>
       ) : isRecord(output) ? (
         <ToolResultSection title="Result">{renderObjectRows(output)}</ToolResultSection>

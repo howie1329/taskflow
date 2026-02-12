@@ -1,9 +1,12 @@
 "use client";
 
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { firecrawlSearchResponseSchema } from "@/lib/AITools/Firecrawl/types";
 import { ToolEmptyState, ToolResultHeader, ToolResultSection, ToolResultShell } from "./tool-result-shell";
 
 export function FirecrawlSearchCard({ output }: { output: unknown }) {
+  const [showAll, setShowAll] = useState(false);
   const parsed = firecrawlSearchResponseSchema.safeParse(output);
   if (!parsed.success) {
     return <ToolEmptyState message="Firecrawl search returned an unexpected response." />;
@@ -11,6 +14,7 @@ export function FirecrawlSearchCard({ output }: { output: unknown }) {
 
   const data = parsed.data;
   const results = data.data ?? [];
+  const visibleResults = showAll ? results : results.slice(0, 5);
 
   return (
     <ToolResultShell>
@@ -32,26 +36,37 @@ export function FirecrawlSearchCard({ output }: { output: unknown }) {
         </ToolResultSection>
       ) : null}
       <ToolResultSection title="Sources">
-        <div className="space-y-2">
-          {results.length === 0 ? (
-            <ToolEmptyState message="No pages were returned by Firecrawl search." />
-          ) : (
-            results.slice(0, 8).map((result, index) => (
+        {results.length === 0 ? (
+          <ToolEmptyState message="No pages were returned by Firecrawl search." />
+        ) : (
+          <div className="divide-y divide-border/60 rounded-sm border border-border/50">
+            {visibleResults.map((result, index) => (
               <a
                 key={`${result.url ?? index}-${index}`}
                 href={result.url}
                 target="_blank"
                 rel="noreferrer"
-                className="block rounded-sm border border-border/50 px-2.5 py-2 transition-colors hover:bg-muted/30"
+                className="block px-2.5 py-2 transition-colors hover:bg-muted/20"
               >
                 <div className="text-sm font-medium">{result.title ?? result.url ?? "Untitled page"}</div>
                 {result.description ? (
                   <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{result.description}</p>
                 ) : null}
               </a>
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        )}
+        {results.length > 5 ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="mt-2 h-7 px-2 text-xs"
+            onClick={() => setShowAll((current) => !current)}
+          >
+            {showAll ? "Show less" : `Show all (${results.length})`}
+          </Button>
+        ) : null}
       </ToolResultSection>
     </ToolResultShell>
   );
