@@ -19,9 +19,12 @@ export function LandingNavbar() {
         Skip to content
       </a>
       <div className="w-full px-4 lg:px-6">
-        <div className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between">
+        <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between">
           <Link href="/" className="flex items-center gap-2 font-medium">
-            <Badge variant="secondary" className="rounded-md font-mono text-xs">
+            <Badge
+              variant="secondary"
+              className="rounded-full px-2.5 font-mono text-[11px]"
+            >
               Taskflow
             </Badge>
           </Link>
@@ -31,7 +34,7 @@ export function LandingNavbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                className="text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               >
                 {link.label}
               </Link>

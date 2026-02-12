@@ -6,11 +6,14 @@ import { landingFooterLinks } from "./landing-links";
 
 export function LandingFooter() {
   return (
-    <footer className="border-t">
+    <footer className="border-t border-border/40">
       <LandingContainer className="py-8">
         <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
           <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="rounded-md font-mono text-xs">
+            <Badge
+              variant="secondary"
+              className="rounded-full px-2.5 font-mono text-[11px]"
+            >
               Taskflow
             </Badge>
             <span className="text-xs text-muted-foreground">v1 rewrite</span>
@@ -21,7 +24,7 @@ export function LandingFooter() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                className="text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               >
                 {link.label}
               </Link>

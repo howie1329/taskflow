@@ -138,11 +138,11 @@ export default function RoadmapPage() {
           Skip to content
         </a>
         <div className="w-full px-4 lg:px-6">
-          <div className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between">
+          <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between">
             <Link href="/" className="flex items-center gap-2 font-medium">
               <Badge
                 variant="secondary"
-                className="rounded-md font-mono text-xs"
+                className="rounded-full px-2.5 font-mono text-[11px]"
               >
                 Taskflow
               </Badge>
@@ -161,22 +161,21 @@ export default function RoadmapPage() {
         {/* Hero */}
         <section
           id="main"
-          className="relative w-full px-4 py-16 lg:px-6 lg:py-24"
+          className="relative w-full px-4 py-20 lg:px-6 lg:py-28"
         >
-          <div className="absolute inset-0 landing-radial-wash" />
-          <div className="absolute inset-0 landing-grid-bg opacity-50" />
+          <div className="pointer-events-none absolute inset-0 landing-radial-wash" />
 
-          <div className="relative mx-auto w-full max-w-7xl">
-            <div className="mx-auto flex max-w-3xl flex-col items-center gap-6 text-center">
-              <div className="flex items-center gap-2">
+          <div className="relative mx-auto w-full max-w-6xl">
+            <div className="mx-auto flex max-w-3xl flex-col items-center gap-7 text-center">
+              <div className="flex items-center gap-3">
                 <Badge
                   variant="outline"
-                  className="rounded-md font-mono text-xs"
+                  className="rounded-full border-border/50 px-2.5 font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground"
                 >
                   <HugeiconsIcon
                     icon={RocketIcon}
                     aria-hidden="true"
-                    className="h-3 w-3 mr-1"
+                    className="mr-1 h-3 w-3"
                   />
                   v1
                 </Badge>
@@ -185,47 +184,46 @@ export default function RoadmapPage() {
                 </span>
               </div>
 
-              <h1 className="text-balance text-3xl font-medium tracking-tight lg:text-4xl xl:text-5xl">
+              <h1 className="text-balance text-4xl font-medium tracking-tight lg:text-5xl">
                 MVP Roadmap
               </h1>
 
-              <p className="max-w-[600px] text-muted-foreground text-sm lg:text-base leading-relaxed">
-                Solo productivity system: capture ideas, organize projects and
-                tasks, manage notes, schedule your day, and get AI help without
-                tab-hopping.
+              <p className="max-w-[62ch] text-pretty text-base leading-7 text-muted-foreground">
+                A focused path to Taskflow v1: capture, organize, execute, and
+                operate with AI in one calm workspace.
               </p>
             </div>
           </div>
         </section>
 
         {/* MVP Scope */}
-        <section className="w-full px-4 py-8 lg:px-6 border-t">
-          <div className="mx-auto w-full max-w-7xl">
-            <div className="mx-auto max-w-3xl text-center mb-8">
+        <section className="w-full border-t border-border/40 px-4 py-12 lg:px-6">
+          <div className="mx-auto w-full max-w-6xl">
+            <div className="mx-auto mb-9 max-w-3xl text-center">
               <Badge
                 variant="outline"
-                className="rounded-md mb-4 font-mono text-xs"
+                className="mb-4 rounded-full border-border/50 px-2.5 font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground"
               >
                 <HugeiconsIcon
                   icon={CheckListIcon}
                   aria-hidden="true"
-                  className="h-3 w-3 mr-1"
+                  className="mr-1 h-3 w-3"
                 />
                 MVP Scope
               </Badge>
-              <h2 className="text-balance text-xl font-medium tracking-tight lg:text-2xl mb-2">
+              <h2 className="mb-3 text-balance text-[1.8rem] font-medium leading-tight tracking-tight lg:text-[2.1rem]">
                 Core entities
               </h2>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-pretty text-sm leading-relaxed text-muted-foreground">
                 The foundational building blocks of your AI-assisted workplace.
               </p>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mx-auto grid max-w-5xl gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {mvpScope.map((item) => (
                 <Card
                   key={item.title}
-                  className="border-border/60 bg-card/40 dark:bg-card/20"
+                  className="rounded-xl border-border/40 bg-card/55 dark:bg-card/35"
                 >
                   <CardHeader className="pb-3">
                     <HugeiconsIcon
@@ -247,46 +245,46 @@ export default function RoadmapPage() {
         </section>
 
         {/* Phases */}
-        <section className="w-full px-4 py-8 lg:px-6 border-t">
-          <div className="mx-auto w-full max-w-7xl">
-            <div className="mx-auto max-w-3xl text-center mb-8">
+        <section className="w-full border-t border-border/40 px-4 py-12 lg:px-6">
+          <div className="mx-auto w-full max-w-6xl">
+            <div className="mx-auto mb-9 max-w-3xl text-center">
               <Badge
                 variant="outline"
-                className="rounded-md mb-4 font-mono text-xs"
+                className="mb-4 rounded-full border-border/50 px-2.5 font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground"
               >
                 <HugeiconsIcon
                   icon={Layers01Icon}
                   aria-hidden="true"
-                  className="h-3 w-3 mr-1"
+                  className="mr-1 h-3 w-3"
                 />
                 Development phases
               </Badge>
-              <h2 className="text-balance text-xl font-medium tracking-tight lg:text-2xl mb-2">
+              <h2 className="mb-3 text-balance text-[1.8rem] font-medium leading-tight tracking-tight lg:text-[2.1rem]">
                 From foundation to AI operator
               </h2>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-pretty text-sm leading-relaxed text-muted-foreground">
                 Five weeks to a cohesive personal workflow loop.
               </p>
             </div>
 
-            <div className="mx-auto w-full max-w-5xl space-y-6">
+            <div className="mx-auto w-full max-w-4xl space-y-4">
               {phases.map((phase, index) => (
                 <Card
                   key={phase.phase}
-                  className="relative border-border/60 bg-card/40 dark:bg-card/20"
+                  className="relative rounded-xl border-border/40 bg-card/55 dark:bg-card/35"
                 >
-                  <CardHeader className="pb-4">
+                  <CardHeader className="border-b border-border/35 pb-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <Badge
                           variant="secondary"
-                          className="rounded-md font-mono text-xs"
+                          className="rounded-full px-2.5 font-mono text-[11px]"
                         >
                           {phase.phase}
                         </Badge>
                         <CardTitle className="text-sm">{phase.title}</CardTitle>
                       </div>
-                      <span className="text-xs text-muted-foreground font-mono">
+                      <span className="font-mono text-xs text-muted-foreground">
                         {phase.timeline}
                       </span>
                     </div>
@@ -316,33 +314,33 @@ export default function RoadmapPage() {
         </section>
 
         {/* Backlog */}
-        <section className="w-full px-4 py-8 lg:px-6 border-t">
-          <div className="mx-auto w-full max-w-7xl">
-            <div className="mx-auto max-w-3xl text-center mb-8">
+        <section className="w-full border-t border-border/40 px-4 py-12 lg:px-6">
+          <div className="mx-auto w-full max-w-6xl">
+            <div className="mx-auto mb-9 max-w-3xl text-center">
               <Badge
                 variant="outline"
-                className="rounded-md mb-4 font-mono text-xs"
+                className="mb-4 rounded-full border-border/50 px-2.5 font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground"
               >
                 <HugeiconsIcon
                   icon={SparklesIcon}
                   aria-hidden="true"
-                  className="h-3 w-3 mr-1"
+                  className="mr-1 h-3 w-3"
                 />
                 v1.1+
               </Badge>
-              <h2 className="text-balance text-xl font-medium tracking-tight lg:text-2xl mb-2">
+              <h2 className="mb-3 text-balance text-[1.8rem] font-medium leading-tight tracking-tight lg:text-[2.1rem]">
                 Backlog
               </h2>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-pretty text-sm leading-relaxed text-muted-foreground">
                 Features planned for future releases.
               </p>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="mx-auto grid max-w-5xl gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {backlog.map((item) => (
                 <div
                   key={item.text}
-                  className="flex items-center gap-3 rounded-lg border border-border/60 bg-background/30 p-3 text-sm text-muted-foreground"
+                  className="flex items-center gap-3 rounded-xl border border-border/40 bg-card/55 p-3 text-sm text-muted-foreground dark:bg-card/35"
                 >
                   <HugeiconsIcon
                     icon={item.icon}
@@ -357,23 +355,23 @@ export default function RoadmapPage() {
         </section>
 
         {/* Non-goals */}
-        <section className="w-full px-4 py-8 lg:px-6 border-t">
-          <div className="mx-auto w-full max-w-7xl">
+        <section className="w-full border-t border-border/40 px-4 py-12 lg:px-6">
+          <div className="mx-auto w-full max-w-6xl">
             <div className="mx-auto max-w-3xl">
-              <div className="flex items-center gap-2 mb-4">
+              <div className="mb-4 flex items-center gap-2">
                 <Badge
                   variant="outline"
-                  className="rounded-md font-mono text-xs"
+                  className="rounded-full border-border/50 px-2.5 font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground"
                 >
                   <HugeiconsIcon
                     icon={Flag03Icon}
                     aria-hidden="true"
-                    className="h-3 w-3 mr-1"
+                    className="mr-1 h-3 w-3"
                   />
                   Non-goals
                 </Badge>
               </div>
-              <p className="text-sm text-muted-foreground mb-4">
+              <p className="mb-4 text-sm text-muted-foreground">
                 Intentionally out of scope for v1:
               </p>
               <div className="flex flex-wrap gap-2">
@@ -381,7 +379,7 @@ export default function RoadmapPage() {
                   <Badge
                     key={goal}
                     variant="secondary"
-                    className="rounded-md text-[10px]"
+                    className="rounded-full px-2.5 text-[10px]"
                   >
                     {goal}
                   </Badge>
@@ -391,12 +389,12 @@ export default function RoadmapPage() {
           </div>
         </section>
 
-        <Separator className="mx-auto w-full max-w-7xl" />
+        <Separator className="mx-auto w-full max-w-6xl" />
       </main>
 
       {/* Footer */}
-      <footer className="w-full px-4 py-8 lg:px-6">
-        <div className="mx-auto w-full max-w-7xl">
+      <footer className="w-full border-t border-border/40 px-4 py-8 lg:px-6">
+        <div className="mx-auto w-full max-w-6xl">
           <div className="mx-auto flex max-w-3xl flex-col items-center gap-4 text-center">
             <p className="text-xs text-muted-foreground">
               Taskflow v1 — Solo AI-assisted workplace. Built with Next.js,
