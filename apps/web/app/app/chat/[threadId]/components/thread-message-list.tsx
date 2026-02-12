@@ -1,18 +1,22 @@
 import type { UIMessage } from "ai"
-import { Message, MessageContent } from "@/components/ai-elements/message"
+import {
+  Message,
+  MessageAction,
+  MessageActions,
+  MessageContent,
+} from "@/components/ai-elements/message"
 import {
   Reasoning,
   ReasoningContent,
   ReasoningTrigger,
 } from "@/components/ai-elements/reasoning"
-import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { Streamdown } from "streamdown"
 import { code } from "@streamdown/code"
 import { mermaid } from "@streamdown/mermaid"
 import { math } from "@streamdown/math"
 import { cjk } from "@streamdown/cjk"
-import { ActivityIcon, CopyIcon, RefreshCwIcon } from "lucide-react"
+import { ActivityIcon, CopyIcon, EllipsisIcon, RefreshCwIcon } from "lucide-react"
 import { getMessageReasoning, getMessageText } from "./message-parts"
 import { getToolCalls } from "./tool-calls"
 import { ToolPanels } from "./tool-panels"
@@ -58,17 +62,15 @@ export function ThreadMessageList({
             key={message.id}
             from={message.role}
             className={cn(
-              "max-w-none gap-1.5",
+              "max-w-none gap-2",
               message.role === "user" && "justify-end",
             )}
           >
             <MessageContent
               className={cn(
                 "text-sm leading-6",
-                message.role === "assistant" &&
-                  "w-full border-l border-border/50 pl-6",
-                message.role === "user" &&
-                  "max-w-[32rem] rounded-md border border-border/60 bg-muted/40 px-2 py-2",
+                message.role === "assistant" && "w-full",
+                message.role === "user" && "max-w-xl",
               )}
             >
               {message.role === "assistant" ? (
@@ -97,34 +99,29 @@ export function ThreadMessageList({
                     </div>
                   )}
 
-                  <div className="flex flex-wrap items-center gap-2 pt-1">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-7 text-xs"
+                  <MessageActions className="opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
+                    <MessageAction
+                      tooltip="Regenerate"
+                      label="Regenerate"
                       onClick={() => onRegenerate(message.id)}
                     >
-                      <RefreshCwIcon className="mr-1 size-3.5" />
-                      Regenerate
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-7 text-xs"
+                      <RefreshCwIcon className="size-3.5" />
+                    </MessageAction>
+                    <MessageAction
+                      tooltip="Copy"
+                      label="Copy"
                       onClick={() => onCopy(messageText)}
                     >
-                      <CopyIcon className="mr-1 size-3.5" />
-                      Copy
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-7 text-xs"
+                      <CopyIcon className="size-3.5" />
+                    </MessageAction>
+                    <MessageAction
+                      tooltip="Details"
+                      label="Details"
                       onClick={() => onOpenDetails(message.id)}
                     >
-                      Details
-                    </Button>
-                  </div>
+                      <EllipsisIcon className="size-3.5" />
+                    </MessageAction>
+                  </MessageActions>
                 </div>
               ) : (
                 <div className="whitespace-pre-wrap text-sm">

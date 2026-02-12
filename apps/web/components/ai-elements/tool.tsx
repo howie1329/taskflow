@@ -27,7 +27,7 @@ export type ToolProps = ComponentProps<typeof Collapsible>;
 export const Tool = ({ className, ...props }: ToolProps) => (
   <Collapsible
     className={cn(
-      "group not-prose w-full rounded-lg border border-border/60 bg-card",
+      "group not-prose w-full rounded-md border border-border/50 bg-background/40",
       className,
     )}
     {...props}
@@ -58,13 +58,13 @@ export const getStatusBadge = (status: ToolPart["state"]) => {
   };
 
   const variantMap: Record<ToolPart["state"], string> = {
-    "input-streaming": "bg-slate-100 text-slate-600 border-slate-200",
-    "input-available": "bg-amber-50 text-amber-600 border-amber-200",
-    "approval-requested": "bg-amber-50 text-amber-600 border-amber-200",
-    "approval-responded": "bg-emerald-50 text-emerald-600 border-emerald-200",
-    "output-available": "bg-emerald-50 text-emerald-600 border-emerald-200",
-    "output-error": "bg-rose-50 text-rose-600 border-rose-200",
-    "output-denied": "bg-rose-50 text-rose-600 border-rose-200",
+    "input-streaming": "bg-muted text-muted-foreground border-border/40",
+    "input-available": "bg-muted text-muted-foreground border-border/40",
+    "approval-requested": "bg-muted text-muted-foreground border-border/40",
+    "approval-responded": "bg-muted text-muted-foreground border-border/40",
+    "output-available": "bg-muted text-muted-foreground border-border/40",
+    "output-error": "bg-destructive/10 text-destructive border-destructive/20",
+    "output-denied": "bg-destructive/10 text-destructive border-destructive/20",
   };
 
   return (
@@ -105,7 +105,7 @@ export const EnhancedToolHeader = ({
   return (
     <CollapsibleTrigger
       className={cn(
-        "flex w-full items-center justify-between gap-3 px-3 py-2.5 text-xs transition-colors hover:bg-muted/50",
+        "flex w-full items-center justify-between gap-3 px-3 py-2 text-xs transition-colors hover:bg-muted/40",
         className,
       )}
       {...props}
@@ -173,7 +173,7 @@ export type ToolContentProps = ComponentProps<typeof CollapsibleContent>;
 export const ToolContent = ({ className, ...props }: ToolContentProps) => (
   <CollapsibleContent
     className={cn(
-      "px-3 pb-3",
+      "px-3 pb-2.5",
       "data-[state=closed]:animate-out data-[state=open]:animate-in",
       className,
     )}
@@ -197,7 +197,7 @@ export const ToolSummaryBar = ({
   return (
     <div
       className={cn(
-        "rounded-md border border-border/50 bg-muted/30 px-3 py-2",
+        "rounded-md border border-border/40 bg-muted/20 px-3 py-1.5",
         "text-xs text-foreground",
         className,
       )}
@@ -234,7 +234,7 @@ export const ToolMetaPanel = ({
   return (
     <div
       className={cn(
-        "rounded-md border border-border/50 bg-muted/20",
+        "rounded-md border border-border/40 bg-muted/10",
         "px-3 py-2 text-xs",
         className,
       )}
@@ -291,9 +291,9 @@ export const ToolRawPayload = ({
   );
 
   return (
-    <Collapsible className={cn("group rounded-md border border-border/50", className)}>
+    <Collapsible className={cn("group rounded-md border border-border/40", className)}>
       <CollapsibleTrigger className="flex w-full items-center justify-between px-2.5 py-2 text-xs text-muted-foreground transition-colors hover:text-foreground">
-        <span className="font-medium">Raw payload</span>
+        <span className="font-medium">Advanced: raw payload</span>
         <ChevronDownIcon className="size-3.5 transition-transform group-data-[state=open]:rotate-180" />
       </CollapsibleTrigger>
       <CollapsibleContent className="space-y-2 px-2.5 pb-2.5">

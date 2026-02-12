@@ -35,7 +35,7 @@ export function ThreadHeader({
   onOpenDeleteThread,
 }: ThreadHeaderProps) {
   return (
-    <div className="shrink-0 border-b border-border/60 bg-background/70 px-2 py-1 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <div className="shrink-0 border-b border-border/50 bg-background/80 px-2 py-1.5 backdrop-blur supports-backdrop-filter:bg-background/70">
       <div className="flex items-center justify-between">
         <div className="flex min-w-0 items-center gap-3">
           <div className="hidden md:block">
@@ -57,12 +57,15 @@ export function ThreadHeader({
           </Button>
 
           <div className="min-w-0">
-            <h2 className="truncate text-sm font-medium">
+            <h2 className="truncate text-sm font-medium tracking-tight">
               {thread?.title || "New chat"}
             </h2>
-            <div className="mt-0.5 flex items-center gap-2">
+            <div className="mt-0.5 flex items-center gap-2 text-[11px] text-muted-foreground">
               {project ? (
-                <Badge variant="outline" className="h-4 rounded-md px-1 text-[10px]">
+                <Badge
+                  variant="secondary"
+                  className="h-4 rounded-sm border-0 bg-transparent px-0 text-[10px] font-normal"
+                >
                   <HugeiconsIcon
                     icon={FolderManagementIcon}
                     className="mr-1 size-3"
@@ -71,7 +74,10 @@ export function ThreadHeader({
                   {project.icon} {project.title}
                 </Badge>
               ) : (
-                <Badge variant="outline" className="h-4 rounded-md px-1 text-[10px]">
+                <Badge
+                  variant="secondary"
+                  className="h-4 rounded-sm border-0 bg-transparent px-0 text-[10px] font-normal"
+                >
                   <HugeiconsIcon
                     icon={GlobalIcon}
                     className="mr-1 size-3"

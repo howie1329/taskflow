@@ -2,7 +2,6 @@
 
 import { useRef } from "react"
 import { useRouter } from "next/navigation"
-import { Separator } from "@/components/ui/separator"
 import {
   PromptInput,
   PromptInputHeader,
@@ -59,30 +58,26 @@ export function NewChatComposer() {
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="flex min-h-0 flex-1 items-center justify-center px-6 py-12">
-        <div className="w-full max-w-7xl rounded-md bg-card/40 p-6 dark:bg-card/20">
-          <h1 className="text-center text-sm font-medium text-muted-foreground">
-            Taskflow Chat Agent
+      <div className="flex min-h-0 flex-1 items-center justify-center px-4 py-10">
+        <div className="w-full max-w-3xl space-y-6">
+          <h1 className="text-center text-3xl font-medium tracking-tight text-foreground">
+            Ready to dive in?
           </h1>
 
-          <div className="mb-3 mt-4">
-            <Suggestions className="justify-center">
-              {SUGGESTIONS.map((suggestion) => (
-                <Suggestion
-                  key={suggestion.value}
-                  suggestion={suggestion.value}
-                  onClick={handleSuggestionSelect}
-                  variant="outline"
-                  size="sm"
-                  className="rounded-full px-4 text-xs"
-                >
-                  {suggestion.title}
-                </Suggestion>
-              ))}
-            </Suggestions>
-          </div>
-
-          <Separator className="my-3" />
+          <Suggestions className="mx-auto w-full max-w-2xl justify-center">
+            {SUGGESTIONS.map((suggestion) => (
+              <Suggestion
+                key={suggestion.value}
+                suggestion={suggestion.value}
+                onClick={handleSuggestionSelect}
+                variant="outline"
+                size="sm"
+                className="rounded-full border-border/70 bg-background/60 px-4 text-xs text-muted-foreground hover:text-foreground"
+              >
+                {suggestion.title}
+              </Suggestion>
+            ))}
+          </Suggestions>
 
           <label htmlFor="new-chat-message" className="sr-only">
             Message
@@ -99,7 +94,7 @@ export function NewChatComposer() {
               placeholder="Message Taskflow..."
             />
 
-            <PromptInputFooter>
+            <PromptInputFooter className="text-muted-foreground">
               <div className="flex items-center gap-2">
                 <ModelSelectorMenu
                   availableModels={availableModels}

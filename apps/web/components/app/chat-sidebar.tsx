@@ -197,10 +197,10 @@ export function ChatSidebar({ onBackToWorkspace }: ChatSidebarProps) {
             <Link href="/app/chat">
               <Button
                 className={cn(
-                  "w-full h-7 rounded-md px-2 text-xs",
-                  isNewChat && "bg-accent text-accent-foreground",
+                  "w-full h-7 rounded-lg px-2 text-xs",
+                  isNewChat && "bg-muted text-foreground",
                 )}
-                variant={isNewChat ? "secondary" : "default"}
+                variant={isNewChat ? "secondary" : "outline"}
               >
                 <HugeiconsIcon
                   icon={PlusSignIcon}

@@ -132,7 +132,7 @@ function ThreadPageContent() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-1rem)] w-full flex-col overflow-hidden">
+    <div className="flex h-dvh min-h-0 w-full flex-col overflow-hidden">
       <ThreadHeader
         thread={thread}
         project={project}
@@ -174,7 +174,7 @@ function ThreadPageContent() {
       />
 
       <Conversation className="flex-1">
-        <ConversationContent className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-3 py-6">
+        <ConversationContent className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8">
           {uiMessages.length === 0 ? (
             <ConversationEmptyState
               title="Start a new conversation"
@@ -184,7 +184,7 @@ function ThreadPageContent() {
             <ThreadMessageList
               uiMessages={uiMessages as UIMessage[]}
               status={status}
-              preferences={preferences}
+              preferences={preferences ?? undefined}
               onRegenerate={(assistantMessageId) =>
                 void regenerateAssistantResponse(assistantMessageId)
               }

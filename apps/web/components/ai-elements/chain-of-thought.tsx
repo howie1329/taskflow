@@ -1,7 +1,6 @@
 "use client";
 
 import { useControllableState } from "@radix-ui/react-use-controllable-state";
-import { Badge } from "@/components/ui/badge";
 import {
   Collapsible,
   CollapsibleContent,
@@ -67,7 +66,7 @@ export const ChainOfThought = memo(
 
     return (
       <ChainOfThoughtContext.Provider value={chainOfThoughtContext}>
-        <div className={cn("not-prose max-w-prose", className)} {...props}>
+        <div className={cn("not-prose w-full max-w-none", className)} {...props}>
           {children}
         </div>
       </ChainOfThoughtContext.Provider>
@@ -107,7 +106,7 @@ export const EnhancedChainOfThoughtHeader = memo(
       <Collapsible onOpenChange={setIsOpen} open={isOpen}>
         <CollapsibleTrigger
           className={cn(
-            "flex w-full items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground",
+            "flex w-full items-center gap-2 rounded-md py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground",
             className,
           )}
           {...props}
@@ -120,12 +119,9 @@ export const EnhancedChainOfThoughtHeader = memo(
           />
           <span className="flex-1 text-left text-xs flex items-center gap-2">
             {children ?? "Actions"}
-            <Badge
-              className="rounded-full px-1.5 py-0 text-[10px] font-medium"
-              variant="secondary"
-            >
-              {totalSteps}
-            </Badge>
+            <span className="text-[10px] text-muted-foreground/80">
+              {totalSteps} steps
+            </span>
             {totalDuration !== undefined && (
               <span className="font-mono text-[10px] tabular-nums text-muted-foreground/70">
                 · {Math.round((totalDuration / 1000) * 10) / 10}s total
@@ -133,20 +129,9 @@ export const EnhancedChainOfThoughtHeader = memo(
             )}
           </span>
           {uniqueProviders.length > 0 && (
-            <div className="flex items-center gap-1 shrink-0">
-              {uniqueProviders.slice(0, 3).map((provider, i) => (
-                <ProviderBadge
-                  key={i}
-                  toolName={provider}
-                  showName={false}
-                  size="sm"
-                />
-              ))}
-              {uniqueProviders.length > 3 && (
-                <span className="text-[10px] text-muted-foreground">
-                  +{uniqueProviders.length - 3}
-                </span>
-              )}
+            <div className="flex items-center gap-1 shrink-0 text-[10px] text-muted-foreground/80">
+              via {uniqueProviders.length} provider
+              {uniqueProviders.length > 1 ? "s" : ""}
             </div>
           )}
         </CollapsibleTrigger>
@@ -163,7 +148,7 @@ export const ChainOfThoughtHeader = memo(
       <Collapsible onOpenChange={setIsOpen} open={isOpen}>
         <CollapsibleTrigger
           className={cn(
-            "flex w-full items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground",
+            "flex w-full items-center gap-2 rounded-md py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground",
             className,
           )}
           {...props}
@@ -199,11 +184,11 @@ const StatusIcon = ({
 }) => {
   switch (status) {
     case "complete":
-      return <CheckCircle2 className="size-3.5 text-emerald-500" />;
+      return <CheckCircle2 className="size-3.5 text-muted-foreground" />;
     case "active":
-      return <Loader2 className="size-3.5 text-amber-500 animate-spin" />;
+      return <Loader2 className="size-3.5 animate-spin text-muted-foreground" />;
     case "pending":
-      return <Circle className="size-3.5 text-slate-400" />;
+      return <Circle className="size-3.5 text-muted-foreground/60" />;
     default:
       return <DotIcon className="size-3.5" />;
   }
@@ -224,15 +209,14 @@ export const ChainOfThoughtStep = memo(
     const statusStyles = {
       complete: "text-foreground",
       active: "text-foreground",
-      pending: "text-muted-foreground/50",
+      pending: "text-muted-foreground/70",
     };
 
     return (
       <div
         className={cn(
-          "flex gap-2 text-xs py-1",
+          "flex gap-2 py-1 text-xs",
           statusStyles[status],
-          "fade-in animate-in",
           className,
         )}
         {...props}
@@ -255,7 +239,7 @@ export const ChainOfThoughtStep = memo(
             )}
           </div>
           {description && (
-            <div className="text-muted-foreground/80">{description}</div>
+            <div className="truncate text-muted-foreground/80">{description}</div>
           )}
           {children}
         </div>
@@ -275,17 +259,13 @@ export const ChainOfThoughtSearchResults = memo(
   ),
 );
 
-export type ChainOfThoughtSearchResultProps = ComponentProps<typeof Badge>;
+export type ChainOfThoughtSearchResultProps = ComponentProps<"div">;
 
 export const ChainOfThoughtSearchResult = memo(
   ({ className, children, ...props }: ChainOfThoughtSearchResultProps) => (
-    <Badge
-      className={cn("gap-1 px-2 py-0.5 font-normal text-xs", className)}
-      variant="secondary"
-      {...props}
-    >
+    <div className={cn("rounded-md bg-muted/50 px-2 py-0.5 text-xs", className)} {...props}>
       {children}
-    </Badge>
+    </div>
   ),
 );
 
@@ -321,7 +301,7 @@ export type ChainOfThoughtImageProps = ComponentProps<"div"> & {
 export const ChainOfThoughtImage = memo(
   ({ className, children, caption, ...props }: ChainOfThoughtImageProps) => (
     <div className={cn("mt-2 space-y-2", className)} {...props}>
-      <div className="relative flex max-h-[22rem] items-center justify-center overflow-hidden rounded-lg bg-muted p-3">
+      <div className="relative flex max-h-88 items-center justify-center overflow-hidden rounded-lg bg-muted p-3">
         {children}
       </div>
       {caption && <p className="text-muted-foreground text-xs">{caption}</p>}
