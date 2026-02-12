@@ -180,7 +180,11 @@
 /* Landing page shared styles */
 @layer components {
   .landing-surface {
-    @apply bg-card/40 ring-1 ring-border/60 dark:bg-card/20;
+    @apply bg-card/55 ring-1 ring-border/45 dark:bg-card/35;
+  }
+
+  .landing-hairline {
+    @apply border-t border-border/40;
   }
 }
 
@@ -189,16 +193,17 @@
   background-image:
     linear-gradient(to right, var(--border) 1px, transparent 1px),
     linear-gradient(to bottom, var(--border) 1px, transparent 1px);
-  background-size: 60px 60px;
+  background-size: 72px 72px;
   mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+  opacity: 0.22;
 }
 
 /* Radial wash background for landing sections */
 .landing-radial-wash {
   background: radial-gradient(
     ellipse at center top,
-    var(--muted) 0%,
-    transparent 70%
+    color-mix(in oklch, var(--muted) 70%, transparent) 0%,
+    transparent 72%
   );
 }
 

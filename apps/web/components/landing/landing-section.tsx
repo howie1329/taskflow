@@ -12,8 +12,8 @@ interface LandingSectionProps {
 
 const variantClasses = {
   default: "py-16 lg:py-24",
-  hero: "pt-16 pb-20 lg:pt-20 lg:pb-28",
-  compact: "py-12 lg:py-16",
+  hero: "pt-20 pb-24 lg:pt-24 lg:pb-32",
+  compact: "py-12 lg:py-20",
 };
 
 export function LandingSection({
@@ -29,7 +29,7 @@ export function LandingSection({
       id={id}
       className={cn(
         "relative w-full",
-        withBorder && "border-t",
+        withBorder && "border-t border-border/40",
         variantClasses[variant],
         className,
       )}

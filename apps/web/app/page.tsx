@@ -2,7 +2,6 @@ import {
   LandingNavbar,
   Hero,
   Workflow,
-  FeatureGrid,
   AiOperatorPanel,
   LandingFooter,
 } from "@/components/landing";
@@ -13,7 +12,6 @@ export default function HomePage() {
       <LandingNavbar />
       <Hero />
       <Workflow />
-      <FeatureGrid />
       <AiOperatorPanel />
       <LandingFooter />
     </main>

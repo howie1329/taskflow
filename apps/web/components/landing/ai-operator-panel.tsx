@@ -12,26 +12,26 @@ import { aiExamples } from "./landing-content";
 export function AiOperatorPanel() {
   return (
     <LandingSection id="ai" withBorder>
-      <LandingContainer>
+      <LandingContainer size="sm">
         <LandingSectionHeader
           eyebrow="AI operator"
-          title="AI as workplace operator"
-          description="Talk to your workspace. Create items, link them, find what you need."
+          title="Natural language control for your workspace"
+          description="Use plain English to run day-to-day operations: create tasks, link context, and move work forward."
         />
 
-        <Card className="mx-auto w-full max-w-5xl overflow-hidden landing-surface">
-          <CardHeader className="border-b border-border/60 pb-4">
+        <Card className="mx-auto w-full max-w-4xl overflow-hidden rounded-2xl landing-surface">
+          <CardHeader className="border-b border-border/40 pb-4">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm">Example conversation</CardTitle>
-              <Badge variant="secondary" className="rounded-md text-[10px]">
-                AI chat
+              <CardTitle className="text-sm">Operator in action</CardTitle>
+              <Badge variant="secondary" className="rounded-full px-2.5 text-[10px]">
+                Example requests
               </Badge>
             </div>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="divide-y divide-border/60">
+            <div className="divide-y divide-border/40">
               {aiExamples.map((example, index) => (
-                <div key={index} className="flex gap-3 p-4">
+                <div key={index} className="flex gap-3 p-4 sm:p-5">
                   <div className="shrink-0">
                     <HugeiconsIcon
                       icon={example.icon}
@@ -46,24 +46,24 @@ export function AiOperatorPanel() {
                   </div>
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-medium">
+                      <span className="text-xs font-medium tracking-tight">
                         {example.user}
                       </span>
                     </div>
-                    <p className="text-pretty text-sm text-muted-foreground">
+                    <p className="text-pretty text-sm leading-relaxed text-muted-foreground">
                       {example.message}
                     </p>
                     {example.actions && (
                       <div className="flex items-center gap-2 pt-2">
                         <Badge
                           variant="outline"
-                          className="rounded-md text-[10px]"
+                          className="rounded-full border-border/50 px-2.5 text-[10px]"
                         >
                           Created task
                         </Badge>
                         <Badge
                           variant="outline"
-                          className="rounded-md text-[10px]"
+                          className="rounded-full border-border/50 px-2.5 text-[10px]"
                         >
                           Scheduled today
                         </Badge>

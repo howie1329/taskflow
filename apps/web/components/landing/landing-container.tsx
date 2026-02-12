@@ -8,7 +8,7 @@ interface LandingContainerProps {
 }
 
 const sizeClasses = {
-  default: "max-w-7xl",
+  default: "max-w-6xl",
   sm: "max-w-4xl",
   lg: "max-w-[90rem]",
 };
