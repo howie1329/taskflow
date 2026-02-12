@@ -27,15 +27,23 @@ export const InboxContent = memo(function InboxContent({
   onOpenActions,
 }) {
   return (
-    <div className="space-y-6">
-      <InboxCapture
-        value={captureText}
-        onChange={setCaptureText}
-        onCapture={onCapture}
-        disabled={isLoading}
-      />
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className="-mx-4 mb-3 border-b border-border/50 bg-background/80 px-4 pb-4 backdrop-blur supports-backdrop-filter:bg-background/70">
+        <div className="space-y-3">
+          <InboxCapture
+            value={captureText}
+            onChange={setCaptureText}
+            onCapture={onCapture}
+            disabled={isLoading}
+          />
 
-      <InboxFilters searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+          <InboxFilters
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            className="pb-1"
+          />
+        </div>
+      </div>
 
       <InboxTabs
         activeTab={activeTab}
