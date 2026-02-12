@@ -35,7 +35,7 @@ export const InboxTabs = memo(function InboxTabs({
       className="flex-1 flex flex-col min-h-0"
       aria-label="Inbox tabs"
     >
-      <TabsList variant="line" className="mb-0" role="tablist">
+      <TabsList variant="line" className="mb-2" role="tablist">
         <TabsTrigger
           value="open"
           className="gap-2"
@@ -84,7 +84,7 @@ export const InboxTabs = memo(function InboxTabs({
           />
         ) : (
           <div
-            className="space-y-2 pb-4"
+            className="space-y-3"
             role="list"
             aria-label={`${filteredOpenItems.length} open inbox items`}
           >
@@ -114,7 +114,7 @@ export const InboxTabs = memo(function InboxTabs({
           <InboxEmptyState status="archived" searchQuery={searchQuery} />
         ) : (
           <div
-            className="space-y-2 pb-4"
+            className="space-y-3"
             role="list"
             aria-label={`${filteredArchivedItems.length} archived inbox items`}
           >

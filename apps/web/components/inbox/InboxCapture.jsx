@@ -103,10 +103,7 @@ export const InboxCapture = memo(function InboxCapture({
 
   return (
     <div
-      className={cn(
-        "rounded-lg border border-border/60 bg-background/30 p-3 space-y-2",
-        className,
-      )}
+      className={cn("rounded-lg shadow-sm bg-card/50 p-5 space-y-3", className)}
       role="form"
       aria-label="Capture new inbox item"
     >
@@ -118,7 +115,7 @@ export const InboxCapture = memo(function InboxCapture({
           onKeyDown={handleKeyDown}
           placeholder="What's on your mind?"
           className={cn(
-            "min-h-[80px] resize-none pr-12 border-border/60 focus-visible:ring-[3px] focus-visible:ring-ring/50",
+            "min-h-[96px] resize-none pr-12 border-border/50 focus-visible:ring-[3px] focus-visible:ring-ring/50",
             isNearLimit && "border-yellow-500/50",
             isAtLimit && "border-red-500/50",
           )}

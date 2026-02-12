@@ -24,24 +24,24 @@ export const InboxFilters = memo(function InboxFilters({
 
   return (
     <div className={className}>
-      <div className="relative flex-1">
+      <div className="relative w-full">
         <HugeiconsIcon
           icon={Search01Icon}
-          className="absolute left-2 top-1/2 -translate-y-1/2 size-4 text-muted-foreground"
+          className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground"
         />
         <Input
           type="text"
           placeholder="Search inbox..."
           value={searchQuery}
           onChange={handleChange}
-          className="pl-8 h-9 text-xs"
+          className="pl-10 h-10 text-sm border-border/50 focus-visible:ring-ring/50"
           aria-label="Search inbox items"
         />
         {searchQuery && (
           <Button
             variant="ghost"
             size="icon-xs"
-            className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6"
+            className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6"
             onClick={handleClear}
             aria-label="Clear search"
           >

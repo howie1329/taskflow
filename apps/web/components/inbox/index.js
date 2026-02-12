@@ -6,3 +6,5 @@ export { InboxEmptyState } from "./InboxEmptyState";
 export { MobileActionSheet } from "./MobileActionSheet";
 export { Toast } from "./Toast";
 export { InboxErrorBoundary } from "./InboxErrorBoundary";
+export { InboxHeader, InboxHeaderSkeleton } from "./InboxHeader";
+export { InboxContent } from "./InboxContent";

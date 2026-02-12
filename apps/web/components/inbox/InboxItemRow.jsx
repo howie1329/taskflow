@@ -131,7 +131,7 @@ export const InboxItemRow = memo(function InboxItemRow({
     <>
       <div
         className={cn(
-          "group flex items-start gap-3 rounded-lg border border-border/60 bg-background/30 p-3 transition-[background-color,border-color,transform,opacity] duration-200 hover:border-border hover:bg-accent/25 hover:-translate-y-[1px]",
+          "group flex items-start gap-4 rounded-xl bg-card/30 p-4 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 hover:bg-card/50",
           isArchived && "opacity-60",
           isNew && "animate-in fade-in slide-in-from-top-2 duration-300",
           isAnyLoading && "opacity-70 pointer-events-none",
