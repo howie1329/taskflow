@@ -51,9 +51,10 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 const formatModelPrice = (price: string) => {
   const parsed = Number(price)
   if (Number.isNaN(parsed)) return "$0.00"
-  return `$${parsed.toFixed(2)}`
+  return `$${parsed.toFixed(3)}`
 }
 
+// TODO: Make this dynamic based on the user's supermemory and make ai generated suggestions
 const SUGGESTIONS = [
   { title: "Plan my day", value: "Plan my day" },
   { title: "Break this into tasks", value: "Break this into tasks" },
@@ -214,10 +215,10 @@ function ComposerWithScope() {
                       <span className="truncate max-w-[150px]">
                         {selectedProjectId
                           ? projects.find((p) => p._id === selectedProjectId)
-                              ?.icon +
-                              " " +
-                              projects.find((p) => p._id === selectedProjectId)
-                                ?.title || "Select project"
+                            ?.icon +
+                          " " +
+                          projects.find((p) => p._id === selectedProjectId)
+                            ?.title || "Select project"
                           : "No project"}
                       </span>
                     </ProjectSelectorTrigger>
