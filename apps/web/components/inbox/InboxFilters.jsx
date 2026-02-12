@@ -34,7 +34,7 @@ export const InboxFilters = memo(function InboxFilters({
           placeholder="Search inbox..."
           value={searchQuery}
           onChange={handleChange}
-          className="pl-10 h-10 text-sm border-border/50 focus-visible:ring-ring/50"
+          className="pl-9 h-9 text-xs border-border/50 focus-visible:ring-ring/50"
           aria-label="Search inbox items"
         />
         {searchQuery && (

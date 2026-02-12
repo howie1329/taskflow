@@ -155,23 +155,23 @@ export const InboxItemRow = memo(function InboxItemRow({
     <>
       <div
         className={cn(
-          "group flex items-start gap-3 px-4 py-3 transition-colors hover:bg-muted/50",
-          isArchived && "opacity-60",
+          "group flex items-start gap-2.5 px-3 py-2.5 transition-colors hover:bg-muted/50",
+          isArchived && "opacity-70",
           isNew && "animate-in fade-in slide-in-from-top-2 duration-300",
           isAnyLoading && "opacity-70 pointer-events-none",
         )}
         role="listitem"
         aria-busy={isAnyLoading}
       >
-        <div className="flex-1 min-w-0 space-y-0.5">
+        <div className="flex-1 min-w-0 space-y-0.5 pr-1">
           <p
-            className="text-sm font-medium truncate leading-5"
+            className="text-[13px] font-medium truncate leading-5"
             id={`inbox-item-${item._id}-content`}
           >
             {rowCopy.title}
           </p>
           <p
-            className="text-xs text-muted-foreground leading-5 line-clamp-1"
+            className="text-[11px] text-muted-foreground leading-4 line-clamp-1"
             id={`inbox-item-${item._id}-snippet`}
           >
             {rowCopy.snippet}

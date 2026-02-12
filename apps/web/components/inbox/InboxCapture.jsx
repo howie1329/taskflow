@@ -104,7 +104,7 @@ export const InboxCapture = memo(function InboxCapture({
   return (
     <div
       className={cn(
-        "rounded-xl border border-border/60 bg-background/60 p-4 space-y-3",
+        "rounded-xl border border-border/60 bg-background/60 p-3 space-y-2.5",
         className,
       )}
       role="form"
@@ -118,7 +118,7 @@ export const InboxCapture = memo(function InboxCapture({
           onKeyDown={handleKeyDown}
           placeholder="What's on your mind?"
           className={cn(
-            "min-h-[96px] resize-none pr-12 border-border/60 bg-transparent focus-visible:ring-[3px] focus-visible:ring-ring/50",
+            "min-h-[88px] resize-none pr-12 border-border/60 bg-transparent focus-visible:ring-[3px] focus-visible:ring-ring/50",
             isNearLimit && "border-yellow-500/50",
             isAtLimit && "border-red-500/50",
           )}
@@ -145,7 +145,7 @@ export const InboxCapture = memo(function InboxCapture({
       </div>
       <div
         id="capture-help"
-        className="flex items-center justify-between text-xs text-muted-foreground"
+        className="flex items-center justify-between text-[11px] text-muted-foreground"
       >
         <div className="flex items-center gap-3 flex-wrap">
           <span className="flex items-center gap-1">
@@ -154,10 +154,10 @@ export const InboxCapture = memo(function InboxCapture({
           <span className="flex items-center gap-1">
             <Kbd>Shift</Kbd> + <Kbd>Enter</Kbd> for new line
           </span>
-          <span className="flex items-center gap-1 hidden sm:inline-flex">
+          <span className="hidden items-center gap-1 sm:inline-flex">
             <Kbd>Esc</Kbd> to clear
           </span>
-          <span className="flex items-center gap-1 hidden sm:inline-flex">
+          <span className="hidden items-center gap-1 sm:inline-flex">
             <Kbd>C</Kbd> to focus
           </span>
         </div>

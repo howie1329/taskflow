@@ -37,7 +37,7 @@ export const InboxTabs = memo(function InboxTabs({
     >
       <TabsList
         variant="line"
-        className="mb-0 w-full justify-start gap-2 border-b border-border/50 bg-background/90 px-1 backdrop-blur supports-backdrop-filter:bg-background/80"
+        className="mb-0 w-full justify-start gap-1 border-b border-border/50 bg-background/90 px-1 backdrop-blur supports-backdrop-filter:bg-background/80"
         role="tablist"
       >
         <TabsTrigger
@@ -76,13 +76,13 @@ export const InboxTabs = memo(function InboxTabs({
 
       <TabsContent
         value="open"
-        className="mt-0 flex-1 overflow-y-auto min-h-0 pt-3"
+        className="mt-0 flex min-h-0 flex-1 flex-col pt-2"
         role="tabpanel"
         aria-label="Open items"
       >
-        <div className="overflow-hidden rounded-xl border border-border/50 bg-background/60">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border/50 bg-background/60">
           {filteredOpenItems.length === 0 ? (
-            <div className="p-2">
+            <div className="flex min-h-0 flex-1 items-center justify-center p-2">
               <InboxEmptyState
                 status="open"
                 onCaptureFocus={onCaptureFocus}
@@ -91,7 +91,7 @@ export const InboxTabs = memo(function InboxTabs({
             </div>
           ) : (
             <div
-              className="divide-y divide-border/50"
+              className="min-h-0 flex-1 overflow-y-auto divide-y divide-border/50"
               role="list"
               aria-label={`${filteredOpenItems.length} open inbox items`}
             >
@@ -114,18 +114,18 @@ export const InboxTabs = memo(function InboxTabs({
 
       <TabsContent
         value="archived"
-        className="mt-0 flex-1 overflow-y-auto min-h-0 pt-3"
+        className="mt-0 flex min-h-0 flex-1 flex-col pt-2"
         role="tabpanel"
         aria-label="Archived items"
       >
-        <div className="overflow-hidden rounded-xl border border-border/50 bg-background/60">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border/50 bg-background/60">
           {filteredArchivedItems.length === 0 ? (
-            <div className="p-2">
+            <div className="flex min-h-0 flex-1 items-center justify-center p-2">
               <InboxEmptyState status="archived" searchQuery={searchQuery} />
             </div>
           ) : (
             <div
-              className="divide-y divide-border/50"
+              className="min-h-0 flex-1 overflow-y-auto divide-y divide-border/50"
               role="list"
               aria-label={`${filteredArchivedItems.length} archived inbox items`}
             >

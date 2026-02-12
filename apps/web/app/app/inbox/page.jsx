@@ -23,7 +23,7 @@ function InboxContainer({ children, isLoading }) {
   if (isLoading) {
     return (
       <div className="flex h-full w-full min-h-0 flex-col overflow-hidden">
-        <div className="mx-auto flex w-full max-w-3xl flex-1 min-h-0 flex-col gap-4 px-4 py-6 md:py-8">
+        <div className="flex w-full flex-1 min-h-0 flex-col gap-3 px-3 py-3 md:px-4 md:py-4">
           <InboxHeaderSkeleton />
           <Skeleton className="h-24 w-full" />
           <Skeleton className="h-9 w-full" />
@@ -39,7 +39,7 @@ function InboxContainer({ children, isLoading }) {
 
   return (
     <div className="flex h-full w-full min-h-0 flex-col overflow-hidden">
-      <div className="mx-auto flex w-full max-w-3xl flex-1 min-h-0 flex-col gap-6 px-4 py-6 md:py-8">
+      <div className="flex w-full flex-1 min-h-0 flex-col gap-3 px-3 py-3 md:px-4 md:py-4">
         {children}
       </div>
     </div>
