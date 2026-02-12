@@ -167,7 +167,8 @@ export const fetchOpenRouterModels = internalAction({
         completion: model.pricing?.completion ?? "0",
       },
       contextLength: model.context_length ?? 0,
-      maxCompletionTokens: model.top_provider?.max_completion_tokens,
+      maxCompletionTokens:
+        model.top_provider?.max_completion_tokens ?? undefined,
       modality: model.architecture?.modality,
       inputModalities: model.architecture?.input_modalities,
       outputModalities: model.architecture?.output_modalities,
