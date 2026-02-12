@@ -2,16 +2,20 @@
 
 This repo contains multiple generations of documentation. Use this map to find what you need.
 
-## Rewrite Docs (Canonical)
+## Canonical (Current App)
 
-- `docs/ROADMAP.md`
-- `docs/FEATURES.md`
-- `docs/FEATURES/`
-- `docs/UI_GUIDELINES.md`
-- `docs/ARCHITECTURE/`
-- `docs/DECISIONS/`
+- `apps/web/docs/README.md`
+- `apps/web/docs/ui-guidelines.md`
+- `apps/web/docs/roadmap.md`
+- `apps/web/docs/architecture/`
+- `apps/web/docs/features/`
 
-## Legacy Docs (Reference)
+## Root Docs (Index + Legacy Reference)
+
+- `docs/README.md`
+- `docs/LEGACY/feature-inventory.md`
+
+## Legacy App Docs (Reference)
 
 Frontend legacy docs:
 
@@ -28,7 +32,3 @@ Backend legacy docs:
 - `apps/backend/docs/ARTIFACT_SYSTEM.md`
 - `apps/backend/docs/CHAT_HISTORY_ANALYSIS.md`
 - `apps/backend/docs/CHAT_HISTORY_RECOMMENDATIONS.md`
-
-Third bucket (older review dumps):
-
-- `review_docs/`
