@@ -712,7 +712,7 @@ function ThreadPageContent() {
   const selectedMessageText = selectedMessage ? renderMessageText(selectedMessage) : "";
 
   return (
-    <div className="flex flex-col h-[calc(100vh-2rem)] w-full overflow-hidden">
+    <div className="flex flex-col h-[calc(100vh-1rem)] w-full overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between px-2 py-1 border-b border-border/60 bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60 shrink-0">
         <div className="flex items-center gap-3 min-w-0">
@@ -886,7 +886,7 @@ function ThreadPageContent() {
       </Dialog>
 
       {/* Conversation */}
-      <Conversation className="flex-1">
+      <Conversation className="flex-1 ">
         <ConversationContent className="mx-auto w-full max-w-6xl px-3 py-6 gap-4">
           {uiMessages.length === 0 ? (
             <ConversationEmptyState
