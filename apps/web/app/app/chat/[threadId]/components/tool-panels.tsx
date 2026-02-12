@@ -42,6 +42,15 @@ interface ToolPanelsProps {
 export function ToolPanels({ toolCalls, preferences }: ToolPanelsProps) {
   if (toolCalls.length === 0) return null
 
+  const compactToolSummary = toolCalls.map((toolCall) => {
+    const stateInfo = getToolStateInfo(toolCall.state)
+    return {
+      id: toolCall.id,
+      label: getToolDisplayNameFromKey(toolCall.toolKey),
+      stateLabel: stateInfo.badgeLabel,
+    }
+  })
+
   const renderToolCard = (toolCall: ToolCall) => (
     <Tool key={toolCall.id}>
       <EnhancedToolHeader
@@ -62,6 +71,20 @@ export function ToolPanels({ toolCalls, preferences }: ToolPanelsProps) {
 
   return (
     <>
+      <div className="-mb-1 overflow-x-auto pb-1">
+        <div className="flex min-w-max items-center gap-1 whitespace-nowrap">
+          {compactToolSummary.map((summary) => (
+            <span
+              key={summary.id}
+              className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-muted/35 px-2 py-0.5 text-[10px] text-muted-foreground"
+            >
+              <span className="font-medium text-foreground">{summary.label}</span>
+              <span className="text-muted-foreground/90">{summary.stateLabel}</span>
+            </span>
+          ))}
+        </div>
+      </div>
+
       {preferences?.aiChatShowActions !== false && (
         <ChainOfThought defaultOpen={false}>
           <EnhancedChainOfThoughtHeader
@@ -96,7 +119,7 @@ export function ToolPanels({ toolCalls, preferences }: ToolPanelsProps) {
               <Collapsible defaultOpen={false}>
                 <CollapsibleTrigger className="group flex w-full items-center gap-2 rounded-md py-1 text-xs text-muted-foreground hover:text-foreground">
                   <ChevronDownIcon className="size-3.5 transition-transform group-data-[state=open]:rotate-180" />
-                  <span>Show tool details</span>
+                  <span>View tool details</span>
                 </CollapsibleTrigger>
                 <CollapsibleContent className="space-y-2 pt-2">
                   {toolCalls.map((toolCall) => renderToolCard(toolCall))}

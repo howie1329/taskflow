@@ -62,13 +62,13 @@ export function ThreadMessageList({
             key={message.id}
             from={message.role}
             className={cn(
-              "max-w-none gap-2",
+              "max-w-none gap-1.5",
               message.role === "user" && "justify-end",
             )}
           >
             <MessageContent
               className={cn(
-                "text-sm leading-6",
+                "text-[15px] leading-7",
                 message.role === "assistant" && "w-full",
                 message.role === "user" && "max-w-xl",
               )}
@@ -124,7 +124,7 @@ export function ThreadMessageList({
                   </MessageActions>
                 </div>
               ) : (
-                <div className="whitespace-pre-wrap text-sm">
+                <div className="whitespace-pre-wrap text-[15px] leading-7">
                   <Streamdown
                     plugins={{ code, mermaid, math, cjk }}
                     isAnimating={status === "streaming"}

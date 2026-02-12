@@ -58,9 +58,9 @@ export function NewChatComposer() {
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="flex min-h-0 flex-1 items-center justify-center px-4 py-10">
-        <div className="w-full max-w-3xl space-y-6">
-          <h1 className="text-center text-3xl font-medium tracking-tight text-foreground">
+      <div className="flex min-h-0 flex-1 items-center justify-center px-4 py-8 md:py-10">
+        <div className="w-full max-w-3xl space-y-5">
+          <h1 className="text-center text-2xl font-medium tracking-tight text-foreground md:text-3xl">
             Ready to dive in?
           </h1>
 
@@ -82,8 +82,11 @@ export function NewChatComposer() {
           <label htmlFor="new-chat-message" className="sr-only">
             Message
           </label>
-          <PromptInput onSubmit={handleSubmit}>
-            <PromptInputHeader>
+          <PromptInput
+            onSubmit={handleSubmit}
+            className="**:data-[slot=input-group]:rounded-3xl **:data-[slot=input-group]:border-border/60 **:data-[slot=input-group]:bg-background **:data-[slot=input-group]:shadow-sm **:data-[slot=input-group]:transition-colors **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:border-ring/50 **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:ring-2 **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:ring-ring/20"
+          >
+            <PromptInputHeader className="border-b border-border/45 pb-2 pt-2.5">
               <ToolLockCommandMenu textareaRef={textareaRef} />
               <PromptInputTools />
             </PromptInputHeader>
@@ -92,10 +95,11 @@ export function NewChatComposer() {
               id="new-chat-message"
               ref={textareaRef}
               placeholder="Message Taskflow..."
+              className="min-h-[72px] max-h-56 px-3 py-2.5 text-[15px] leading-7"
             />
 
-            <PromptInputFooter className="text-muted-foreground">
-              <div className="flex items-center gap-2">
+            <PromptInputFooter className="border-t border-border/45 pb-2.5 pt-2 text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-1.5">
                 <ModelSelectorMenu
                   availableModels={availableModels}
                   selectedModelId={selectedModelId}
@@ -112,7 +116,12 @@ export function NewChatComposer() {
                   onSelectProjectId={setSelectedProjectId}
                 />
               </div>
-              <PromptInputSubmit status={status} onStop={stop} />
+              <PromptInputSubmit
+                status={status}
+                onStop={stop}
+                size="icon-sm"
+                className="size-8 rounded-full"
+              />
             </PromptInputFooter>
           </PromptInput>
         </div>

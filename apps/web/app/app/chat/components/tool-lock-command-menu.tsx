@@ -141,7 +141,7 @@ export function ToolLockCommandMenu({
         <div className="flex items-center">
           <Badge
             variant="secondary"
-            className="flex items-center gap-1 rounded-full px-3 py-1 text-[11px]"
+            className="flex items-center gap-1 rounded-full border border-border/60 bg-muted/25 px-2.5 py-0.5 text-[11px] font-normal"
           >
             <span className="text-muted-foreground">Locked:</span>{" "}
             {lockedCommand?.command ?? toolLock}

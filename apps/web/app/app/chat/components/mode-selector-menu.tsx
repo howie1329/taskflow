@@ -23,7 +23,7 @@ interface ModeSelectorMenuProps {
 export function ModeSelectorMenu({
   selectedMode,
   onSelectMode,
-  triggerClassName = "h-7 px-2 text-[11px]",
+  triggerClassName = "h-7 rounded-full border border-border/60 bg-muted/30 px-2.5 text-xs font-medium text-foreground hover:bg-muted/60",
 }: ModeSelectorMenuProps) {
   return (
     <ModeSelector>

@@ -27,7 +27,7 @@ export type ToolProps = ComponentProps<typeof Collapsible>;
 export const Tool = ({ className, ...props }: ToolProps) => (
   <Collapsible
     className={cn(
-      "group not-prose w-full rounded-md border border-border/50 bg-background/40",
+      "group not-prose w-full rounded-lg border border-border/45 bg-muted/15",
       className,
     )}
     {...props}
@@ -105,7 +105,7 @@ export const EnhancedToolHeader = ({
   return (
     <CollapsibleTrigger
       className={cn(
-        "flex w-full items-center justify-between gap-3 px-3 py-2 text-xs transition-colors hover:bg-muted/40",
+          "flex w-full items-center justify-between gap-3 px-3 py-1.5 text-xs transition-colors hover:bg-muted/35",
         className,
       )}
       {...props}
@@ -173,7 +173,7 @@ export type ToolContentProps = ComponentProps<typeof CollapsibleContent>;
 export const ToolContent = ({ className, ...props }: ToolContentProps) => (
   <CollapsibleContent
     className={cn(
-      "px-3 pb-2.5",
+      "px-3 pb-2",
       "data-[state=closed]:animate-out data-[state=open]:animate-in",
       className,
     )}
@@ -197,7 +197,7 @@ export const ToolSummaryBar = ({
   return (
     <div
       className={cn(
-        "rounded-md border border-border/40 bg-muted/20 px-3 py-1.5",
+        "rounded-md border border-border/35 bg-muted/20 px-2.5 py-1.5",
         "text-xs text-foreground",
         className,
       )}
@@ -291,8 +291,8 @@ export const ToolRawPayload = ({
   );
 
   return (
-    <Collapsible className={cn("group rounded-md border border-border/40", className)}>
-      <CollapsibleTrigger className="flex w-full items-center justify-between px-2.5 py-2 text-xs text-muted-foreground transition-colors hover:text-foreground">
+    <Collapsible className={cn("group rounded-md border border-border/35", className)}>
+      <CollapsibleTrigger className="flex w-full items-center justify-between px-2.5 py-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground">
         <span className="font-medium">Advanced: raw payload</span>
         <ChevronDownIcon className="size-3.5 transition-transform group-data-[state=open]:rotate-180" />
       </CollapsibleTrigger>

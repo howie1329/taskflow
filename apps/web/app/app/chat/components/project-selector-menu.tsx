@@ -23,7 +23,7 @@ export function ProjectSelectorMenu({
   projects,
   selectedProjectId,
   onSelectProjectId,
-  triggerClassName = "h-7 px-2 text-[11px] flex items-center gap-1",
+  triggerClassName = "flex h-7 items-center gap-1 rounded-full border border-border/60 bg-muted/30 px-2.5 text-xs font-medium text-foreground hover:bg-muted/60",
   maxLabelWidthClassName = "max-w-[150px]",
 }: ProjectSelectorMenuProps) {
   if (projects.length === 0) return null

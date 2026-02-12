@@ -174,7 +174,7 @@ function ThreadPageContent() {
       />
 
       <Conversation className="flex-1">
-        <ConversationContent className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8">
+        <ConversationContent className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-6 md:py-7">
           {uiMessages.length === 0 ? (
             <ConversationEmptyState
               title="Start a new conversation"

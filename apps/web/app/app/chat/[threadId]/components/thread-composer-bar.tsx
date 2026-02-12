@@ -49,13 +49,16 @@ export function ThreadComposerBar({ thread }: ThreadComposerBarProps) {
   }
 
   return (
-    <div className="shrink-0 border-t border-border/50 bg-background/80 pb-[calc(env(safe-area-inset-bottom)+4px)] pt-3 backdrop-blur supports-backdrop-filter:bg-background/70">
+    <div className="shrink-0 border-t border-border/50 bg-background/90 pb-[calc(env(safe-area-inset-bottom)+8px)] pt-3 backdrop-blur supports-backdrop-filter:bg-background/80">
       <div className="mx-auto w-full max-w-3xl px-4">
         <label htmlFor="thread-message" className="sr-only">
           Message
         </label>
-        <PromptInput onSubmit={handleSubmit}>
-          <PromptInputHeader>
+        <PromptInput
+          onSubmit={handleSubmit}
+          className="**:data-[slot=input-group]:rounded-3xl **:data-[slot=input-group]:border-border/60 **:data-[slot=input-group]:bg-background **:data-[slot=input-group]:shadow-sm **:data-[slot=input-group]:transition-colors **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:border-ring/50 **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:ring-2 **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:ring-ring/20"
+        >
+          <PromptInputHeader className="border-b border-border/45 pb-2 pt-2.5">
             <ToolLockCommandMenu textareaRef={textareaRef} />
             <PromptInputTools />
           </PromptInputHeader>
@@ -64,10 +67,11 @@ export function ThreadComposerBar({ thread }: ThreadComposerBarProps) {
             id="thread-message"
             ref={textareaRef}
             placeholder="Continue the conversation..."
+            className="min-h-[72px] max-h-56 px-3 py-2.5 text-[15px] leading-7"
           />
 
-          <PromptInputFooter className="text-muted-foreground">
-            <div className="flex items-center gap-2">
+          <PromptInputFooter className="border-t border-border/45 pb-2.5 pt-2 text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-1.5">
               <ModelSelectorMenu
                 availableModels={availableModels}
                 selectedModelId={selectedModelId}
@@ -101,7 +105,12 @@ export function ThreadComposerBar({ thread }: ThreadComposerBarProps) {
                 }}
               />
             </div>
-            <PromptInputSubmit status={status} onStop={stop} />
+            <PromptInputSubmit
+              status={status}
+              onStop={stop}
+              size="icon-sm"
+              className="size-8 rounded-full"
+            />
           </PromptInputFooter>
         </PromptInput>
       </div>
