@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useConvexAuth } from "convex/react";
+import { landingNavLinks } from "./landing-links";
 
 export function LandingNavbar() {
   const { isAuthenticated } = useConvexAuth();
@@ -26,33 +27,15 @@ export function LandingNavbar() {
           </Link>
 
           <nav className="hidden items-center gap-6 text-xs font-medium md:flex">
-            {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-            <a
-              href="/#workflow"
-              className="text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-            >
-              Workflow
-            </a>
-            {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-            <a
-              href="/#features"
-              className="text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-            >
-              Features
-            </a>
-            {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-            <a
-              href="/#ai"
-              className="text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-            >
-              AI
-            </a>
-            <Link
-              href="/roadmap"
-              className="text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-            >
-              Roadmap
-            </Link>
+            {landingNavLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              >
+                {link.label}
+              </Link>
+            ))}
           </nav>
 
           <div className="flex items-center gap-2">

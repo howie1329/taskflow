@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Card,
   CardContent,
@@ -7,64 +5,27 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
-  InboxDownloadIcon,
-  FolderManagementIcon,
-  CheckListIcon,
-  ArtificialIntelligence04Icon,
-} from "@hugeicons/core-free-icons";
-
-const workflowSteps = [
-  {
-    icon: InboxDownloadIcon,
-    title: "Capture",
-    description: "Dump ideas into inbox. No structure needed yet.",
-  },
-  {
-    icon: FolderManagementIcon,
-    title: "Organize",
-    description: "Convert inbox items into projects, tasks, and notes.",
-  },
-  {
-    icon: CheckListIcon,
-    title: "Execute",
-    description: "Schedule tasks, track progress, ship work.",
-  },
-  {
-    icon: ArtificialIntelligence04Icon,
-    title: "Assist",
-    description: "Ask AI to create, link, or find anything in your workspace.",
-  },
-];
+  LandingSection,
+  LandingContainer,
+  LandingSectionHeader,
+} from "./index";
+import { workflowSteps } from "./landing-content";
 
 export function Workflow() {
   return (
-    <section id="workflow" className="w-full px-4 py-16 lg:px-6 lg:py-24">
-      <div className="mx-auto w-full max-w-7xl">
-        <div className="mx-auto mb-12 max-w-3xl text-center">
-          <Badge
-            variant="outline"
-            className="rounded-md mb-4 font-mono text-xs"
-          >
-            The loop
-          </Badge>
-          <h2 className="text-balance text-2xl font-medium lg:text-3xl mb-4">
-            Solo workflow, amplified
-          </h2>
-          <p className="text-pretty text-muted-foreground text-sm">
-            One seamless cycle from capture to completion, with AI as your
-            copilot.
-          </p>
-        </div>
+    <LandingSection id="workflow">
+      <LandingContainer>
+        <LandingSectionHeader
+          eyebrow="The loop"
+          title="Solo workflow, amplified"
+          description="One seamless cycle from capture to completion, with AI as your copilot."
+        />
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {workflowSteps.map((step, index) => (
-            <Card
-              key={step.title}
-              className="relative border-border/60 bg-card/40 dark:bg-card/20"
-            >
+            <Card key={step.title} className="relative landing-surface">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <HugeiconsIcon
@@ -86,7 +47,7 @@ export function Workflow() {
             </Card>
           ))}
         </div>
-      </div>
-    </section>
+      </LandingContainer>
+    </LandingSection>
   );
 }
