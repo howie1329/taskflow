@@ -199,7 +199,8 @@ function ThreadPageContent() {
       <MessageDetailsSheet
         open={!!messageDetailsId}
         onOpenChange={(open) => !open && setMessageDetailsId(null)}
-        messageText={selectedMessageText}
+        message={selectedMessage ?? null}
+        onCopy={copyAssistantMessage}
       />
 
       <ThreadComposerBar thread={thread} />
