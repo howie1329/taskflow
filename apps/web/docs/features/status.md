@@ -9,8 +9,8 @@ This snapshot reflects the current code in `apps/web`.
 | Inbox | ✅ Convex-backed | Capture, archive, delete, convert to task/project/note. |
 | Tasks | ✅ Convex-backed | Board + Today+ board, filters, subtasks, tags, scheduling, task details. |
 | Projects | ✅ Convex-backed | Create/edit/archive/delete projects; project detail view with task board. |
-| Notes | 🧪 UI-only | Notes list/editor uses local mock state and URL sync. |
-| AI Chat | 🧪 UI-only | Threads + messages powered by mock data; creates temp thread IDs. |
+| Notes | ✅ Convex-backed | Notes provider uses Convex queries/mutations with URL-synced filters and editor routing. |
+| AI Chat | ✅ Convex-backed | Threads and messages are loaded from Convex; chat streams through `/api/chat`. |
 
 ## Onboarding & Settings
 
@@ -18,6 +18,7 @@ This snapshot reflects the current code in `apps/web`.
 | --- | --- | --- |
 | Onboarding | ✅ Convex-backed | Writes preferences and onboarding completion. |
 | Settings | ✅ Convex-backed | Profile + preference management powered by Convex. |
+| Notifications | 🚧 Placeholder UI | Route exists with empty state; no full notification feed workflow yet. |
 
 ## Marketing
 
@@ -28,5 +29,5 @@ This snapshot reflects the current code in `apps/web`.
 
 ## Upcoming Integrations
 
-- Replace notes mock state with Convex persistence.
-- Connect AI chat to Convex conversations and AI actions.
+- Wire project detail Notes tab to full notes flows.
+- Expand notifications from placeholder to persisted read/unread feed behavior.

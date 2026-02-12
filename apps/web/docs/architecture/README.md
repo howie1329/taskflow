@@ -1,6 +1,9 @@
 # Architecture
 
-This section captures how the web app is organized at a high level.
+This section captures how `apps/web` is structured and how data flows through the app.
 
+- [Overview](./overview.md)
 - [Routing](./routing.md)
-- [Convex data model](./data-model.md)
+- [Convex Data Model](./data-model.md)
+- [AI Architecture](./ai.md)
+- [Security Model](./security.md)
