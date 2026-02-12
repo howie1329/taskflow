@@ -17,9 +17,9 @@ export function ThreadSection({
   className,
 }: ThreadSectionProps) {
   return (
-    <div className={cn("flex items-center gap-2 px-1", className)}>
+    <div className={cn("flex items-center gap-2 px-0.5", className)}>
       {icon}
-      <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground/80">
+      <span className="text-[11px] font-medium text-muted-foreground/70">
         {label}
       </span>
     </div>

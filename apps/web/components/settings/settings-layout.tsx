@@ -40,35 +40,44 @@ export function SettingsLayout() {
         >
           <TabsTrigger
             value="profile"
-            className="h-auto justify-start px-3 py-2.5 text-sm font-medium text-muted-foreground data-active:bg-muted/40 data-active:text-foreground"
+            className="h-auto justify-start rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted/25 hover:text-foreground data-active:bg-muted/40 data-active:text-foreground"
           >
             Profile
           </TabsTrigger>
           <TabsTrigger
             value="preferences"
-            className="h-auto justify-start px-3 py-2.5 text-sm font-medium text-muted-foreground data-active:bg-muted/40 data-active:text-foreground"
+            className="h-auto justify-start rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted/25 hover:text-foreground data-active:bg-muted/40 data-active:text-foreground"
           >
             Preferences
           </TabsTrigger>
           <TabsTrigger
             value="ai"
-            className="h-auto justify-start px-3 py-2.5 text-sm font-medium text-muted-foreground data-active:bg-muted/40 data-active:text-foreground"
+            className="h-auto justify-start rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted/25 hover:text-foreground data-active:bg-muted/40 data-active:text-foreground"
           >
             AI Settings
           </TabsTrigger>
         </TabsList>
       </div>
 
-      <div className="min-h-0 rounded-xl border border-border/60 bg-background p-6 md:p-8">
-        <TabsContent value="profile" className="mt-0 text-sm">
+      <div className="min-h-0 rounded-xl border border-border/60 bg-background p-6 md:flex md:h-full md:flex-col md:p-8">
+        <TabsContent
+          value="profile"
+          className="mt-0 text-sm md:min-h-0 md:flex-1 md:overflow-y-auto md:pr-1"
+        >
           <ProfileTab />
         </TabsContent>
 
-        <TabsContent value="preferences" className="mt-0 text-sm">
+        <TabsContent
+          value="preferences"
+          className="mt-0 text-sm md:min-h-0 md:flex-1 md:overflow-y-auto md:pr-1"
+        >
           <PreferencesTab />
         </TabsContent>
 
-        <TabsContent value="ai" className="mt-0 text-sm">
+        <TabsContent
+          value="ai"
+          className="mt-0 text-sm md:min-h-0 md:flex-1 md:overflow-y-auto md:pr-1"
+        >
           <AITab />
         </TabsContent>
       </div>

@@ -16,7 +16,9 @@ export default function SettingsPage() {
           </p>
         </div>
       </div>
-      <SettingsLayout />
+      <div className="min-h-0 flex-1">
+        <SettingsLayout />
+      </div>
     </div>
   );
 }

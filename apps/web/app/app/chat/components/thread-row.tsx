@@ -50,12 +50,12 @@ export function ThreadRow({
     return (
       <div
         className={cn(
-          "flex items-center gap-2 rounded-lg px-2 py-1.5 w-full max-w-full overflow-hidden",
+          "flex items-center gap-2 rounded-md px-2.5 py-2 w-full max-w-full overflow-hidden",
           isActive ? "bg-accent" : "bg-accent/40",
         )}
       >
         <Input
-          className="h-6 px-2 py-0 text-xs min-w-0 flex-1 w-full max-w-full"
+          className="h-7 px-2 py-0 text-[13px] min-w-0 flex-1 w-full max-w-full"
           value={editingTitle}
           onChange={(e) => onEditTitleChange(e.target.value)}
           onKeyDown={(e) => {
@@ -79,11 +79,11 @@ export function ThreadRow({
     <Link
       href={`/app/chat/${thread.id}`}
       className={cn(
-        "group relative flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition-colors w-full max-w-full overflow-hidden",
+        "group relative flex items-center gap-2 rounded-md px-2.5 py-2 text-sm transition-colors w-full max-w-full overflow-hidden",
         "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/60",
         isActive
           ? "bg-muted text-foreground"
-          : "text-foreground hover:bg-muted/70",
+          : "text-foreground hover:bg-muted/50",
       )}
       aria-current={isActive ? "page" : undefined}
     >
@@ -100,7 +100,7 @@ export function ThreadRow({
             {projectIcon}
           </span>
         )}
-        <span className="truncate text-xs font-medium min-w-0">
+        <span className="truncate text-[13px] font-normal min-w-0">
           {thread.title || "Untitled chat"}
         </span>
       </div>

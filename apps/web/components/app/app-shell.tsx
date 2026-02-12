@@ -260,7 +260,7 @@ export function AppShell({ children }: AppShellProps) {
             isTasksRoute || isNotesRoute
               ? "flex flex-1 flex-col overflow-hidden"
               : isSettingsRoute
-                ? "flex flex-1 flex-col overflow-y-auto"
+                ? "flex flex-1 flex-col overflow-hidden"
               : "flex flex-1 flex-col gap-2 p-2 md:gap-2 md:p-2 overflow-hidden"
           }
         >
