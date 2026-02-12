@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import type { RefObject } from "react"
 import { XIcon } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
@@ -43,6 +43,8 @@ export function ToolLockCommandMenu({
 
   const showCommandMenu = textInput.value.trimStart().startsWith("/")
   const queryText = textInput.value.trimStart().slice(1).toLowerCase()
+  const [activeIndex, setActiveIndex] = useState(0)
+  const itemRefs = useRef<Record<string, HTMLDivElement | null>>({})
   const filteredCommands = useMemo(() => {
     if (!showCommandMenu) return []
     if (!queryText) return modeCommands
@@ -55,10 +57,11 @@ export function ToolLockCommandMenu({
       )
     })
   }, [modeCommands, queryText, showCommandMenu])
+  const activeCommand = filteredCommands[activeIndex] ?? filteredCommands[0]
 
   const lockedCommand = toolLock ? findToolLockCommandByToolKey(toolLock) : null
 
-  const handleSelect = (command: (typeof modeCommands)[number]) => {
+  const handleSelect = useCallback((command: (typeof modeCommands)[number]) => {
     if (command.toolKey === null) {
       setToolLock(null)
     } else {
@@ -67,7 +70,65 @@ export function ToolLockCommandMenu({
 
     textInput.setInput(stripLeadingSlashCommand(textInput.value))
     textareaRef?.current?.focus()
-  }
+  }, [setToolLock, textInput, textareaRef])
+
+  useEffect(() => {
+    setActiveIndex(0)
+  }, [queryText, selectedMode, showCommandMenu])
+
+  useEffect(() => {
+    if (!showCommandMenu) return
+
+    setActiveIndex((current) => {
+      if (filteredCommands.length === 0) return 0
+      return Math.min(current, filteredCommands.length - 1)
+    })
+  }, [filteredCommands, showCommandMenu])
+
+  useEffect(() => {
+    if (!showCommandMenu || !activeCommand) return
+    const activeElement = itemRefs.current[activeCommand.command]
+    activeElement?.scrollIntoView({ block: "nearest" })
+  }, [activeCommand, showCommandMenu])
+
+  useEffect(() => {
+    const textarea = textareaRef?.current
+    if (!textarea || !showCommandMenu) return
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!showCommandMenu || filteredCommands.length === 0) return
+
+      if (event.key === "ArrowDown") {
+        event.preventDefault()
+        setActiveIndex((current) => (current + 1) % filteredCommands.length)
+        return
+      }
+
+      if (event.key === "ArrowUp") {
+        event.preventDefault()
+        setActiveIndex((current) =>
+          (current - 1 + filteredCommands.length) % filteredCommands.length,
+        )
+        return
+      }
+
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault()
+        handleSelect(activeCommand)
+      }
+    }
+
+    textarea.addEventListener("keydown", handleKeyDown)
+    return () => {
+      textarea.removeEventListener("keydown", handleKeyDown)
+    }
+  }, [
+    activeCommand,
+    filteredCommands.length,
+    handleSelect,
+    showCommandMenu,
+    textareaRef,
+  ])
 
   const clearToolLock = () => {
     setToolLock(null)
@@ -107,8 +168,16 @@ export function ToolLockCommandMenu({
                 {filteredCommands.map((commandDef) => (
                   <PromptInputCommandItem
                     key={commandDef.command}
+                    ref={(node) => {
+                      itemRefs.current[commandDef.command] = node
+                    }}
                     value={`${commandDef.command} ${commandDef.label}`}
                     onSelect={() => handleSelect(commandDef)}
+                    className={
+                      activeCommand?.command === commandDef.command
+                        ? "bg-accent text-accent-foreground"
+                        : undefined
+                    }
                   >
                     <div className="flex w-full flex-col">
                       <span className="font-medium text-xs">{commandDef.command}</span>
