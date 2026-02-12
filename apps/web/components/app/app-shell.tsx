@@ -11,14 +11,10 @@ import {
   NoteIcon,
   SettingsIcon,
   CommandIcon,
-  Sun02Icon,
-  Moon02Icon,
   InboxDownloadIcon,
   NotificationIcon,
 } from "@hugeicons/core-free-icons";
-import { useTheme } from "next-themes";
 
-import { Button } from "@/components/ui/button";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { useViewer } from "@/components/settings/hooks/use-viewer";
 import {
@@ -91,24 +87,6 @@ function getPageTitle(pathname: string): string {
 
 interface AppShellProps {
   children: React.ReactNode;
-}
-
-function ThemeToggleMenuItem() {
-  const { setTheme, resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === "dark";
-
-  return (
-    <SidebarMenuButton
-      onClick={() => setTheme(isDark ? "light" : "dark")}
-      tooltip={isDark ? "Switch to light mode" : "Switch to dark mode"}
-    >
-      <HugeiconsIcon
-        icon={isDark ? Sun02Icon : Moon02Icon}
-        className="size-4"
-      />
-      <span>{isDark ? "Light mode" : "Dark mode"}</span>
-    </SidebarMenuButton>
-  );
 }
 
 export function AppShell({ children }: AppShellProps) {
@@ -255,9 +233,6 @@ export function AppShell({ children }: AppShellProps) {
             <SidebarFooter>
               <SidebarMenu>
                 <SidebarMenuItem>
-                  <ThemeToggleMenuItem />
-                </SidebarMenuItem>
-                <SidebarMenuItem>
                   <SignOutButton />
                 </SidebarMenuItem>
               </SidebarMenu>
@@ -268,7 +243,7 @@ export function AppShell({ children }: AppShellProps) {
       </Sidebar>
       <SidebarInset className="overflow-hidden">
         {!isOnboardingRoute && (
-          <div className="md:hidden sticky top-0 z-20 flex h-10 items-center gap-2 px-2 bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/50">
+          <div className="md:hidden sticky top-0 z-20 flex h-10 items-center gap-2 px-2 bg-background/70 backdrop-blur supports-backdrop-filter:bg-background/50">
             <SidebarTrigger className="-ml-1" />
             <div className="min-w-0 flex-1">
               <div className="truncate text-[11px] font-medium text-muted-foreground">

@@ -33,31 +33,45 @@ export function SignInForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-3">
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="email" className="sr-only">
+          Email
+        </Label>
         <Input
           id="email"
           name="email"
           type="email"
-          placeholder="you@example.com"
+          inputMode="email"
+          autoComplete="email"
+          placeholder="Email address"
+          className="h-11 px-3 text-sm"
           required
           disabled={isLoading}
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
+        <Label htmlFor="password" className="sr-only">
+          Password
+        </Label>
         <Input
           id="password"
           name="password"
           type="password"
-          placeholder="Enter your password"
+          autoComplete="current-password"
+          placeholder="Password"
+          className="h-11 px-3 text-sm"
           required
           disabled={isLoading}
         />
       </div>
-      <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? "Signing in..." : "Sign in"}
+      <Button
+        type="submit"
+        size="lg"
+        className="h-11 w-full rounded-full text-sm"
+        disabled={isLoading}
+      >
+        {isLoading ? "Signing in..." : "Continue"}
       </Button>
 
       <div className="text-center text-xs text-muted-foreground pt-2">
