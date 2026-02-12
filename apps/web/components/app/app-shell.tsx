@@ -105,7 +105,7 @@ export function AppShell({ children }: AppShellProps) {
   const isOnboarded = !!preferences?.onboardingCompletedAt;
   const isChatRoute = pathname.startsWith("/app/chat");
   const isNotesRoute = pathname.startsWith("/app/notes");
-  const isTasksRoute = pathname.startsWith("/app/tasks");
+  const isTasksRoute = pathname.startsWith("/app/tasks"); // Not used can be removed. Could be used for future tasks sidebar.
 
   useEffect(() => {
     if (isLoading) return;
@@ -139,14 +139,14 @@ export function AppShell({ children }: AppShellProps) {
       style={
         isChatRoute
           ? ({
-              "--sidebar-width": "16rem",
-              "--sidebar-width-mobile": "18rem",
-            } as React.CSSProperties)
+            "--sidebar-width": "16rem",
+            "--sidebar-width-mobile": "18rem",
+          } as React.CSSProperties)
           : isNotesRoute
             ? ({
-                "--sidebar-width": "20rem",
-                "--sidebar-width-mobile": "18rem",
-              } as React.CSSProperties)
+              "--sidebar-width": "20rem",
+              "--sidebar-width-mobile": "18rem",
+            } as React.CSSProperties)
             : undefined
       }
     >
@@ -194,16 +194,16 @@ export function AppShell({ children }: AppShellProps) {
                       const handleChatClick =
                         isChatRoute && isChatItem
                           ? (event: React.MouseEvent<HTMLAnchorElement>) => {
-                              event.preventDefault();
-                              setChatSidebarMode("threads");
-                            }
+                            event.preventDefault();
+                            setChatSidebarMode("threads");
+                          }
                           : undefined;
                       const handleNotesClick =
                         isNotesRoute && isNotesItem
                           ? (event: React.MouseEvent<HTMLAnchorElement>) => {
-                              event.preventDefault();
-                              setNotesSidebarMode("notes");
-                            }
+                            event.preventDefault();
+                            setNotesSidebarMode("notes");
+                          }
                           : undefined;
 
                       return (

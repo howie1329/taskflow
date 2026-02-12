@@ -60,15 +60,15 @@ export function BoardView({
           return (
             <div
               key={column.id}
-              className="flex min-w-0 flex-col overflow-hidden rounded-xl border border-border/50 bg-background/60 lg:min-h-0"
+              className="flex min-w-0 flex-col overflow-hidden rounded-xl border border-border/40 bg-background/50 lg:min-h-0"
             >
               {/* Column header */}
-              <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border/50 bg-background/85 px-3 py-2 backdrop-blur supports-backdrop-filter:bg-background/75">
+              <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border/40 bg-background/80 px-3 py-2 backdrop-blur supports-backdrop-filter:bg-background/70">
                 <div className="flex items-center gap-2">
                   <h3 className="text-sm font-medium tracking-tight">
                     {column.label}
                   </h3>
-                  <span className="text-[11px] tabular-nums text-muted-foreground bg-muted/70 px-2 py-0.5 rounded-md">
+                  <span className="rounded-md bg-muted/55 px-2 py-0.5 text-[11px] tabular-nums text-muted-foreground">
                     {columnTasks.length}
                   </span>
                 </div>
