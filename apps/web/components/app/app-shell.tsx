@@ -160,14 +160,14 @@ export function AppShell({ children }: AppShellProps) {
       style={
         isChatRoute
           ? ({
-            "--sidebar-width": "16rem",
-            "--sidebar-width-mobile": "18rem",
-          } as React.CSSProperties)
-          : isNotesRoute
-            ? ({
-              "--sidebar-width": "20rem",
+              "--sidebar-width": "16rem",
               "--sidebar-width-mobile": "18rem",
             } as React.CSSProperties)
+          : isNotesRoute
+            ? ({
+                "--sidebar-width": "20rem",
+                "--sidebar-width-mobile": "18rem",
+              } as React.CSSProperties)
             : undefined
       }
     >
@@ -215,16 +215,16 @@ export function AppShell({ children }: AppShellProps) {
                       const handleChatClick =
                         isChatRoute && isChatItem
                           ? (event: React.MouseEvent<HTMLAnchorElement>) => {
-                            event.preventDefault();
-                            setChatSidebarMode("threads");
-                          }
+                              event.preventDefault();
+                              setChatSidebarMode("threads");
+                            }
                           : undefined;
                       const handleNotesClick =
                         isNotesRoute && isNotesItem
                           ? (event: React.MouseEvent<HTMLAnchorElement>) => {
-                            event.preventDefault();
-                            setNotesSidebarMode("notes");
-                          }
+                              event.preventDefault();
+                              setNotesSidebarMode("notes");
+                            }
                           : undefined;
 
                       return (
@@ -267,22 +267,16 @@ export function AppShell({ children }: AppShellProps) {
         <SidebarRail />
       </Sidebar>
       <SidebarInset className="overflow-hidden">
-        {!isChatRoute && (
-          <header className="flex h-14 shrink-0 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <SidebarTrigger />
-            <div className="flex flex-1 items-center justify-between">
-              <h1 className="text-sm font-medium">{pageTitle}</h1>
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm" className="h-8 gap-2 text-xs">
-                  <HugeiconsIcon icon={CommandIcon} className="size-3" />
-                  <span className="hidden sm:inline">Search</span>
-                  <kbd className="pointer-events-none hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
-                    <span className="text-xs">⌘</span>K
-                  </kbd>
-                </Button>
+        {!isOnboardingRoute && (
+          <div className="md:hidden sticky top-0 z-20 flex h-10 items-center gap-2 px-2 bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/50">
+            <SidebarTrigger className="-ml-1" />
+            <div className="min-w-0 flex-1">
+              <div className="truncate text-[11px] font-medium text-muted-foreground">
+                {pageTitle}
               </div>
             </div>
-          </header>
+            <div className="w-7" aria-hidden="true" />
+          </div>
         )}
         <main className="flex flex-1 flex-col gap-2 p-2 md:gap-2 md:p-2 overflow-hidden">
           {children}
