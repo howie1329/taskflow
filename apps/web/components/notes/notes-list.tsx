@@ -211,22 +211,29 @@ interface NotesListProps {
   projects: NotesProject[]
 }
 
-export function NotesList({
-  sortedNotes,
-  groupedNotes,
-  viewMode,
+interface NotesRowsProps {
+  notes: Note[]
+  selectedNoteId: string | null
+  isMobile: boolean
+  onSelectNote: (noteId: string) => void
+  onPinNote: (noteId: string) => void
+  onMoveNote: (noteId: string, newProjectId: string) => void
+  onDeleteNote: (noteId: string) => void
+  projectForNote: (projectId: string) => NotesProject | null
+  projects: NotesProject[]
+}
+
+export function NotesRows({
+  notes,
   selectedNoteId,
-  projectFilter,
-  searchQuery,
   isMobile,
   onSelectNote,
-  onCreateNote,
   onPinNote,
   onMoveNote,
   onDeleteNote,
   projectForNote,
   projects,
-}: NotesListProps) {
+}: NotesRowsProps) {
   const renderNoteRow = useCallback(
     (note: Note) => (
       <NoteRow
@@ -254,6 +261,25 @@ export function NotesList({
     ],
   )
 
+  return <div className="divide-y divide-border/40">{notes.map(renderNoteRow)}</div>
+}
+
+export function NotesList({
+  sortedNotes,
+  groupedNotes,
+  viewMode,
+  selectedNoteId,
+  projectFilter,
+  searchQuery,
+  isMobile,
+  onSelectNote,
+  onCreateNote,
+  onPinNote,
+  onMoveNote,
+  onDeleteNote,
+  projectForNote,
+  projects,
+}: NotesListProps) {
   if (sortedNotes.length === 0) {
     return (
       <Empty className="min-h-[220px]">
@@ -282,13 +308,10 @@ export function NotesList({
 
   if (viewMode === "byProject" && groupedNotes) {
     return (
-      <div className="space-y-2 p-2">
+      <div>
         {groupedNotes.map((group) => (
-          <div
-            key={group.project?._id || "__none__"}
-            className="overflow-hidden rounded-lg border border-border/40 bg-background/40"
-          >
-            <div className="sticky top-0 z-10 flex items-center gap-2 border-b border-border/30 bg-background/70 px-2 py-1 backdrop-blur supports-backdrop-filter:bg-background/60">
+          <div key={group.project?._id || "__none__"}>
+            <div className="sticky top-0 z-10 flex items-center gap-2 border-b border-border/30 bg-background/80 px-3 py-1.5 backdrop-blur supports-backdrop-filter:bg-background/70">
               <span className="text-[11px] font-medium text-muted-foreground">
                 {group.project ? (
                   <>
@@ -300,17 +323,39 @@ export function NotesList({
               </span>
               <Badge
                 variant="secondary"
-                className="rounded-md bg-muted/55 text-[10px] tabular-nums"
+                className="rounded-md bg-muted/50 text-[10px] tabular-nums"
               >
                 {group.notes.length}
               </Badge>
             </div>
-            <div className="divide-y divide-border/40">{group.notes.map(renderNoteRow)}</div>
+            <NotesRows
+              notes={group.notes}
+              selectedNoteId={selectedNoteId}
+              isMobile={isMobile}
+              onSelectNote={onSelectNote}
+              onPinNote={onPinNote}
+              onMoveNote={onMoveNote}
+              onDeleteNote={onDeleteNote}
+              projectForNote={projectForNote}
+              projects={projects}
+            />
           </div>
         ))}
       </div>
     )
   }
 
-  return <div className="divide-y divide-border/40">{sortedNotes.map(renderNoteRow)}</div>
+  return (
+    <NotesRows
+      notes={sortedNotes}
+      selectedNoteId={selectedNoteId}
+      isMobile={isMobile}
+      onSelectNote={onSelectNote}
+      onPinNote={onPinNote}
+      onMoveNote={onMoveNote}
+      onDeleteNote={onDeleteNote}
+      projectForNote={projectForNote}
+      projects={projects}
+    />
+  )
 }

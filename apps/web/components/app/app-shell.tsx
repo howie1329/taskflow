@@ -151,7 +151,11 @@ export function AppShell({ children }: AppShellProps) {
             : undefined
       }
     >
-      <Sidebar variant="sidebar" collapsible="icon">
+      <Sidebar
+        variant="sidebar"
+        collapsible="icon"
+        className={isNotesRoute ? "border-r border-border/40" : undefined}
+      >
         {isChatRoute && chatSidebarMode === "threads" ? (
           <ChatSidebar
             onBackToWorkspace={() => setChatSidebarMode("workspace")}

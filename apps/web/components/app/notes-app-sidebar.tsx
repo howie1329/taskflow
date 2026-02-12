@@ -136,7 +136,7 @@ export function NotesAppSidebar({ onBackToWorkspace }: NotesAppSidebarProps) {
         </SidebarHeader>
 
         <SidebarContent className="px-2">
-          <div className="space-y-2 rounded-lg border border-border/40 bg-background/50 p-1.5">
+          <div className="space-y-2">
             <Button
               className="h-7 w-full rounded-md px-2 text-xs"
               variant="default"
