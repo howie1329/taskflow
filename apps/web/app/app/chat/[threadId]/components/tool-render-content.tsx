@@ -1,10 +1,4 @@
 import type { ReactNode } from "react"
-import {
-  Sources,
-  SourcesTrigger,
-  SourcesContent,
-  Source,
-} from "@/components/ai-elements/sources"
 import { ExaAnswerCard } from "@/components/ai-elements/exa-answer-card"
 import { ExaWebSearchCard } from "@/components/ai-elements/exa-web-search-card"
 import { FirecrawlScrapeCard } from "@/components/ai-elements/firecrawl-scrape-card"
@@ -22,7 +16,6 @@ import { TASKFLOW_TOOL_KEYS } from "@/lib/AITools/taskflow-tool-keys"
 import type { ToolCall } from "./tool-types"
 import {
   getToolStateInfo,
-  isWebSearchOutput,
   summarizeToolOutput,
 } from "./tool-meta"
 
@@ -86,32 +79,6 @@ export function renderToolContent(toolCall: ToolCall): ReactNode {
           />
         )
       }
-  }
-
-  if (toolCall.toolKey === "webSearch" && isWebSearchOutput(toolCall.output)) {
-    return (
-      <div className="space-y-2">
-        {toolCall.output.results.length > 0 && (
-          <p className="text-xs text-muted-foreground">
-            Found {toolCall.output.results.length} source
-            {toolCall.output.results.length !== 1 ? "s" : ""}
-          </p>
-        )}
-        {toolCall.output.answer && <p className="text-sm">{toolCall.output.answer}</p>}
-        {toolCall.output.results.length > 0 && (
-          <Sources>
-            <SourcesTrigger count={toolCall.output.results.length} />
-            <SourcesContent>
-              {toolCall.output.results.slice(0, 5).map((result, index) => (
-                <Source key={index} href={result.url} title={result.title}>
-                  {result.title}
-                </Source>
-              ))}
-            </SourcesContent>
-          </Sources>
-        )}
-      </div>
-    )
   }
 
   const summary = summarizeToolOutput(toolCall.output)

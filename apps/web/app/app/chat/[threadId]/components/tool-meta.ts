@@ -10,40 +10,7 @@ import {
 import { TASKFLOW_TOOL_KEYS } from "@/lib/AITools/taskflow-tool-keys"
 import type { ToolCall, ToolStateInfo } from "./tool-types"
 
-export type WebSearchResult = {
-  title: string
-  url: string
-  content: string
-  score: number
-  raw_content: string | null
-  favicon?: string
-}
-
-export type WebSearchOutput = {
-  query: string
-  answer: string
-  images: string[]
-  results: WebSearchResult[]
-  response_time: string
-  auto_parameters: {
-    topic: string
-    search_depth: string
-  }
-}
-
-export function isWebSearchOutput(output: unknown): output is WebSearchOutput {
-  if (!output || typeof output !== "object") return false
-  const obj = output as Record<string, unknown>
-  return (
-    "query" in obj &&
-    "answer" in obj &&
-    "results" in obj &&
-    Array.isArray(obj.results)
-  )
-}
-
 export function getToolDisplayNameFromKey(toolKey: string): string {
-  if (toolKey === "webSearch") return "Web search"
   return toolKey
     .replace(/([A-Z])/g, " $1")
     .replace(/^./, (value) => value.toUpperCase())
@@ -226,10 +193,6 @@ export function getToolSummary(toolCall: ToolCall): string | null {
     if (toolCall.toolKey.startsWith("delete")) return "Deleted successfully"
     if (toolCall.toolKey.startsWith("list")) return "Listed records"
     if (toolCall.toolKey.startsWith("get")) return "Fetched record"
-  }
-
-  if (toolCall.toolKey === "webSearch" && isWebSearchOutput(toolCall.output)) {
-    return `Found ${toolCall.output.results.length} sources`
   }
 
   const outputSummary = summarizeToolOutput(toolCall.output)
