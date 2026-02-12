@@ -14,52 +14,52 @@ export function SettingsLayout() {
       value={activeTab}
       onValueChange={setActiveTab}
       orientation="vertical"
-      className="w-full gap-4 md:grid md:grid-cols-[220px_1fr] md:gap-8"
+      className="h-full min-h-0 w-full gap-4 md:grid md:grid-cols-[240px_1fr] md:gap-8"
     >
       <div className="md:hidden">
         <TabsList
           variant="line"
           className="grid h-auto w-full grid-cols-3 rounded-lg border border-border/60 bg-background p-1"
         >
-          <TabsTrigger value="profile" className="py-1.5 text-sm">
+          <TabsTrigger value="profile" className="py-2 text-sm font-medium">
             Profile
           </TabsTrigger>
-          <TabsTrigger value="preferences" className="py-1.5 text-sm">
+          <TabsTrigger value="preferences" className="py-2 text-sm font-medium">
             Preferences
           </TabsTrigger>
-          <TabsTrigger value="ai" className="py-1.5 text-sm">
+          <TabsTrigger value="ai" className="py-2 text-sm font-medium">
             AI Settings
           </TabsTrigger>
         </TabsList>
       </div>
 
-      <div className="hidden md:block md:sticky md:top-6 md:h-fit md:border-r md:border-border/60 md:pr-6">
+      <div className="hidden md:block md:sticky md:top-4 md:h-fit md:border-r md:border-border/60 md:pr-6">
         <TabsList
           variant="line"
           className="h-auto w-full flex-col items-stretch gap-1 bg-transparent p-0 text-sm"
         >
           <TabsTrigger
             value="profile"
-            className="h-auto justify-start px-3 py-2.5 text-sm data-active:bg-muted/40"
+            className="h-auto justify-start px-3 py-2.5 text-sm font-medium text-muted-foreground data-active:bg-muted/40 data-active:text-foreground"
           >
             Profile
           </TabsTrigger>
           <TabsTrigger
             value="preferences"
-            className="h-auto justify-start px-3 py-2.5 text-sm data-active:bg-muted/40"
+            className="h-auto justify-start px-3 py-2.5 text-sm font-medium text-muted-foreground data-active:bg-muted/40 data-active:text-foreground"
           >
             Preferences
           </TabsTrigger>
           <TabsTrigger
             value="ai"
-            className="h-auto justify-start px-3 py-2.5 text-sm data-active:bg-muted/40"
+            className="h-auto justify-start px-3 py-2.5 text-sm font-medium text-muted-foreground data-active:bg-muted/40 data-active:text-foreground"
           >
             AI Settings
           </TabsTrigger>
         </TabsList>
       </div>
 
-      <div className="rounded-xl border border-border/60 bg-background p-6 md:p-8">
+      <div className="min-h-0 rounded-xl border border-border/60 bg-background p-6 md:p-8">
         <TabsContent value="profile" className="mt-0 text-sm">
           <ProfileTab />
         </TabsContent>

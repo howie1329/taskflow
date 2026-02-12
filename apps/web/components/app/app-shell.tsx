@@ -106,6 +106,7 @@ export function AppShell({ children }: AppShellProps) {
   const isChatRoute = pathname.startsWith("/app/chat");
   const isNotesRoute = pathname.startsWith("/app/notes");
   const isTasksRoute = pathname.startsWith("/app/tasks"); // Not used can be removed. Could be used for future tasks sidebar.
+  const isSettingsRoute = pathname.startsWith("/app/settings");
 
   useEffect(() => {
     if (isLoading) return;
@@ -258,6 +259,8 @@ export function AppShell({ children }: AppShellProps) {
           className={
             isTasksRoute || isNotesRoute
               ? "flex flex-1 flex-col overflow-hidden"
+              : isSettingsRoute
+                ? "flex flex-1 flex-col overflow-y-auto"
               : "flex flex-1 flex-col gap-2 p-2 md:gap-2 md:p-2 overflow-hidden"
           }
         >
