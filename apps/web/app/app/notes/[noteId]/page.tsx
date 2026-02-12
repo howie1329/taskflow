@@ -108,9 +108,9 @@ export default function NotePage() {
   }
 
   return (
-    <div className="flex h-full w-full min-h-0 flex-col px-3 pb-2 pt-3 md:px-6 md:pb-4 md:pt-4">
+    <div className="flex h-full w-full min-h-0 flex-col overflow-hidden">
       {isMobile && (
-        <div className="flex items-center gap-2 pb-4 border-b md:hidden">
+        <div className="flex items-center gap-2 border-b border-border/40 px-3 py-2 md:hidden">
           <Button
             variant="ghost"
             size="icon-sm"
@@ -126,7 +126,7 @@ export default function NotePage() {
         </div>
       )}
 
-      <div className="flex-1 min-h-0 pt-3 md:pt-2">
+      <div className="flex-1 min-h-0">
         <NoteEditor
           note={selectedNote}
           isSaved={isSaved}

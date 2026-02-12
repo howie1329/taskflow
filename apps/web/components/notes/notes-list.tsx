@@ -76,15 +76,15 @@ function NoteRow({
     <div
       onClick={() => onSelect(note._id)}
       className={cn(
-        "group relative flex cursor-pointer flex-col gap-1 rounded-lg border border-border/60 bg-background/30 p-3 transition-[background-color,border-color,transform] duration-200",
-        "hover:border-border hover:bg-accent/25 hover:-translate-y-[1px]",
-        isSelected && "border-border bg-accent/35",
+        "group relative flex cursor-pointer flex-col gap-1 px-3 py-2.5 transition-colors",
+        "hover:bg-muted/45",
+        isSelected && "bg-muted/55",
       )}
     >
       <span
         className={cn(
           "absolute left-0 top-0 h-full w-0.5 bg-transparent",
-          isSelected && "bg-primary/80",
+          isSelected && "bg-primary/65",
         )}
       />
       <div className="flex items-start justify-between gap-2">
@@ -256,7 +256,7 @@ export function NotesList({
 
   if (sortedNotes.length === 0) {
     return (
-      <Empty className="min-h-[200px]">
+      <Empty className="min-h-[220px]">
         <EmptyHeader>
           <EmptyMedia variant="icon">
             <HugeiconsIcon icon={NoteIcon} className="size-4" />
@@ -282,9 +282,12 @@ export function NotesList({
 
   if (viewMode === "byProject" && groupedNotes) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-3 p-2">
         {groupedNotes.map((group) => (
-          <div key={group.project?._id || "__none__"}>
+          <div
+            key={group.project?._id || "__none__"}
+            className="overflow-hidden rounded-lg border border-border/40 bg-background/40"
+          >
             <div className="mb-2 flex items-center gap-2 px-1">
               <span className="text-[11px] font-medium text-muted-foreground">
                 {group.project ? (
@@ -297,17 +300,17 @@ export function NotesList({
               </span>
               <Badge
                 variant="secondary"
-                className="rounded-md text-[10px] tabular-nums bg-muted/70"
+                className="rounded-md bg-muted/60 text-[10px] tabular-nums"
               >
                 {group.notes.length}
               </Badge>
             </div>
-            <div className="space-y-1.5">{group.notes.map(renderNoteRow)}</div>
+            <div className="divide-y divide-border/40">{group.notes.map(renderNoteRow)}</div>
           </div>
         ))}
       </div>
     )
   }
 
-  return <div className="space-y-1.5">{sortedNotes.map(renderNoteRow)}</div>
+  return <div className="divide-y divide-border/40">{sortedNotes.map(renderNoteRow)}</div>
 }

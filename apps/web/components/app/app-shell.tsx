@@ -256,7 +256,7 @@ export function AppShell({ children }: AppShellProps) {
         )}
         <main
           className={
-            isTasksRoute
+            isTasksRoute || isNotesRoute
               ? "flex flex-1 flex-col overflow-hidden"
               : "flex flex-1 flex-col gap-2 p-2 md:gap-2 md:p-2 overflow-hidden"
           }

@@ -133,8 +133,8 @@ export function NoteEditor({
 
   if (isInSheet) {
     return (
-      <div className="flex h-full flex-col gap-4">
-        <div className="shrink-0 border-b border-border/60 pb-4">
+      <div className="flex h-full flex-col gap-3">
+        <div className="sticky top-0 z-10 shrink-0 border-b border-border/40 bg-background/80 pb-3 backdrop-blur supports-backdrop-filter:bg-background/70">
           <div className="flex items-center justify-between mb-3">
             <Button
               variant="ghost"
@@ -210,8 +210,11 @@ export function NoteEditor({
             placeholder="Note title"
             className="border-0 bg-transparent px-0 text-lg font-semibold tracking-tight shadow-none focus-visible:ring-0 placeholder:text-muted-foreground/50"
           />
-          <div className="flex items-center gap-2 mt-2">
-            <Badge variant="outline" className="rounded-md text-[10px]">
+          <div className="mt-2 flex items-center gap-2">
+            <Badge
+              variant="outline"
+              className="rounded-md border-border/40 bg-background/70 text-[10px]"
+            >
               {project ? (
                 <>
                   {project.icon} {project.title}
@@ -245,7 +248,7 @@ export function NoteEditor({
           editorClassName="min-h-[220px] border-0 bg-transparent px-0 text-base leading-relaxed"
         />
 
-        <div className="shrink-0 border-t border-border/60 pt-3 flex items-center justify-between text-xs text-muted-foreground">
+        <div className="shrink-0 flex items-center justify-between border-t border-border/40 pt-2 text-xs text-muted-foreground">
           <div className="flex items-center gap-3">
             <span>{note.contentText.length} chars</span>
             <span>{wordCount} words</span>
@@ -257,10 +260,13 @@ export function NoteEditor({
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="shrink-0 border-b border-border/60 px-1 pb-3">
+      <div className="sticky top-0 z-10 shrink-0 border-b border-border/40 bg-background/80 px-3 pb-2 pt-2 backdrop-blur supports-backdrop-filter:bg-background/70">
         <div className="mb-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="rounded-md text-[10px]">
+            <Badge
+              variant="outline"
+              className="rounded-md border-border/40 bg-background/70 text-[10px]"
+            >
               {project ? (
                 <>
                   {project.icon} {project.title}
@@ -345,11 +351,11 @@ export function NoteEditor({
           value={note.title}
           onChange={(e) => onUpdateNote(note._id, { title: e.target.value })}
           placeholder="Note title"
-          className="h-auto border-0 bg-transparent px-0 py-1 text-2xl font-semibold tracking-tight shadow-none focus-visible:ring-0 placeholder:text-muted-foreground/40 md:text-3xl"
+          className="h-auto border-0 bg-transparent px-0 py-1 text-2xl font-semibold tracking-tight shadow-none focus-visible:ring-0 placeholder:text-muted-foreground/40 md:text-[2rem]"
         />
       </div>
 
-      <div className="flex-1 min-h-0 py-3">
+      <div className="flex-1 min-h-0 px-3 py-2">
         <NoteRichEditor
           key={note._id}
           value={note.content}
@@ -357,11 +363,11 @@ export function NoteEditor({
           placeholder="Start writing..."
           className="h-full"
           toolbarClassName="w-fit rounded-md border-0 bg-transparent p-0"
-          editorClassName="h-full min-h-0 border-0 bg-transparent px-1 py-2 text-base leading-7"
+          editorClassName="h-full min-h-0 border-0 bg-transparent px-0 py-1 text-base leading-7"
         />
       </div>
 
-      <div className="shrink-0 border-t border-border/60 px-1 pt-2 text-xs text-muted-foreground">
+      <div className="shrink-0 border-t border-border/40 px-3 py-2 text-xs text-muted-foreground">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <span>{note.contentText.length} characters</span>
           <span>{wordCount} words</span>

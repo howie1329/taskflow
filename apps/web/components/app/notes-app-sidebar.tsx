@@ -250,7 +250,7 @@ export function NotesAppSidebar({ onBackToWorkspace }: NotesAppSidebarProps) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent className="px-0 overflow-hidden">
-        <div className="h-full px-4 py-3">
+        <div className="h-full px-3 py-2">
           <NotesSidebar
             notes={notes}
             filteredNotes={filteredNotes}

@@ -63,7 +63,7 @@ export function NotesSidebar({
   searchInputRef,
 }: NotesSidebarProps) {
   return (
-    <div className="flex h-full flex-col gap-3">
+    <div className="flex h-full flex-col gap-2">
       {/* Header */}
       <div className="flex shrink-0 items-center justify-between">
         <p className="text-sm text-muted-foreground">Organize your thoughts</p>
@@ -74,10 +74,10 @@ export function NotesSidebar({
       </div>
 
       {/* Controls */}
-      <div className="shrink-0 rounded-lg border border-border/60 bg-muted/30 p-2 space-y-3">
+      <div className="shrink-0 rounded-lg border border-border/50 bg-background/60 p-2 space-y-2">
         {/* Project Filter */}
         <Select value={projectFilter} onValueChange={onProjectFilterChange}>
-          <SelectTrigger className="h-8 text-xs">
+          <SelectTrigger className="h-8 border-border/50 text-xs">
             <SelectValue placeholder="All projects" />
           </SelectTrigger>
           <SelectContent>
@@ -104,7 +104,7 @@ export function NotesSidebar({
             placeholder="Search notes..."
             value={searchQuery}
             onChange={(e) => onSearchQueryChange(e.target.value)}
-            className="h-8 pl-8 text-xs"
+            className="h-8 border-border/50 pl-8 text-xs"
           />
           {searchQuery && (
             <Button
@@ -123,7 +123,10 @@ export function NotesSidebar({
           value={viewMode}
           onValueChange={(v) => onViewModeChange(v as ViewMode)}
         >
-          <TabsList variant="line" className="w-full">
+          <TabsList
+            variant="line"
+            className="w-full justify-start gap-1 border-b border-border/50 bg-transparent px-0"
+          >
             <TabsTrigger value="byProject" className="flex-1">
               By project
               <Badge
@@ -155,26 +158,28 @@ export function NotesSidebar({
         </Tabs>
       </div>
 
-      <Separator className="bg-border/60" />
+      <Separator className="bg-border/50" />
 
       {/* Notes List */}
-      <div className="min-h-0 flex-1 overflow-y-auto">
-        <NotesList
-          sortedNotes={sortedNotes}
-          groupedNotes={groupedNotes}
-          viewMode={viewMode}
-          selectedNoteId={selectedNoteId}
-          projectFilter={projectFilter}
-          searchQuery={searchQuery}
-          isMobile={isMobile}
-          onSelectNote={onSelectNote}
-          onCreateNote={onCreateNote}
-          onPinNote={onPinNote}
-          onMoveNote={onMoveNote}
-          onDeleteNote={onDeleteNote}
-          projectForNote={projectForNote}
-          projects={projects}
-        />
+      <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-border/40 bg-background/50">
+        <div className="h-full overflow-y-auto">
+          <NotesList
+            sortedNotes={sortedNotes}
+            groupedNotes={groupedNotes}
+            viewMode={viewMode}
+            selectedNoteId={selectedNoteId}
+            projectFilter={projectFilter}
+            searchQuery={searchQuery}
+            isMobile={isMobile}
+            onSelectNote={onSelectNote}
+            onCreateNote={onCreateNote}
+            onPinNote={onPinNote}
+            onMoveNote={onMoveNote}
+            onDeleteNote={onDeleteNote}
+            projectForNote={projectForNote}
+            projects={projects}
+          />
+        </div>
       </div>
     </div>
   )
