@@ -140,12 +140,12 @@ export function AppShell({ children }: AppShellProps) {
       style={
         isChatRoute
           ? ({
-            "--sidebar-width": "16rem",
+            "--sidebar-width": "14rem",
             "--sidebar-width-mobile": "18rem",
           } as React.CSSProperties)
           : isNotesRoute
             ? ({
-              "--sidebar-width": "20rem",
+              "--sidebar-width": "14rem",
               "--sidebar-width-mobile": "18rem",
             } as React.CSSProperties)
             : undefined
@@ -265,7 +265,7 @@ export function AppShell({ children }: AppShellProps) {
               ? "flex flex-1 flex-col overflow-hidden"
               : isSettingsRoute
                 ? "flex flex-1 flex-col overflow-hidden"
-              : "flex flex-1 flex-col gap-2 p-2 md:gap-2 md:p-2 overflow-hidden"
+                : "flex flex-1 flex-col gap-2 p-2 md:gap-2 md:p-2 overflow-hidden"
           }
         >
           {children}
