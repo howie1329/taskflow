@@ -11,11 +11,13 @@ interface AddTaskCardProps {
 export function AddTaskCard({ onClick }: AddTaskCardProps) {
   return (
     <Card
-      className="p-2 cursor-pointer border border-dashed border-border/70 bg-transparent flex items-center gap-2 text-muted-foreground hover:text-foreground hover:bg-accent/30 transition-colors rounded-lg"
+      className="cursor-pointer rounded-none border-0 border-dashed border-border/70 bg-transparent px-3 py-2.5 text-muted-foreground ring-0 transition-colors hover:bg-muted/40 hover:text-foreground"
       onClick={onClick}
     >
-      <HugeiconsIcon icon={Add01Icon} className="size-4" />
-      <span className="text-sm">Add task</span>
+      <div className="flex items-center gap-2">
+        <HugeiconsIcon icon={Add01Icon} className="size-4" />
+        <span className="text-xs">Add task</span>
+      </div>
     </Card>
   );
 }

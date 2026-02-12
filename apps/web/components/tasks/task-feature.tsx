@@ -956,15 +956,15 @@ function TaskFilterControls() {
 }
 
 function TaskFeatureFrame({ children }: { children: ReactNode }) {
-  return <div className="flex flex-col gap-4 h-full w-full">{children}</div>;
+  return <div className="flex h-full w-full min-h-0 flex-col overflow-hidden">{children}</div>;
 }
 
 function TaskFeatureToolbar() {
   const { state, actions, meta } = useTaskFeature();
 
   return (
-    <div className="flex flex-col gap-3 shrink-0">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-4">
+    <div className="flex shrink-0 flex-col gap-2">
+      <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:gap-3">
         <p className="text-sm text-muted-foreground">Organize and track your work</p>
 
         <div className="w-full flex-1 min-w-0">
@@ -1032,9 +1032,13 @@ function TaskFeatureToolbar() {
             value={state.currentView}
             onValueChange={(value) => actions.setView(value as TaskView)}
           >
-            <TabsList>
-              <TabsTrigger value="board">Board</TabsTrigger>
-              <TabsTrigger value="todayPlusBoard">Today + Board</TabsTrigger>
+            <TabsList variant="line" className="gap-1 bg-transparent p-0">
+              <TabsTrigger value="board" className="px-2 py-1 text-xs">
+                Board
+              </TabsTrigger>
+              <TabsTrigger value="todayPlusBoard" className="px-2 py-1 text-xs">
+                Today + Board
+              </TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
@@ -1082,7 +1086,7 @@ function TaskFeatureFilters() {
   }
 
   return (
-    <div className="rounded-lg border border-border/60 bg-muted/30 p-2">
+    <div className="rounded-lg border border-border/50 bg-background/60 p-2">
       <TaskFilterControls />
     </div>
   );
@@ -1093,7 +1097,7 @@ function TaskFeatureContent() {
 
   if (meta.isLoading) {
     return (
-      <div className="flex flex-col gap-4 h-full">
+      <div className="flex h-full min-h-0 flex-col gap-3 overflow-hidden px-3 py-2 md:px-4">
         <div className="flex items-center justify-between shrink-0">
           <p className="text-sm text-muted-foreground">Organize and track your work</p>
         </div>
@@ -1105,9 +1109,9 @@ function TaskFeatureContent() {
   }
 
   return (
-    <div className="flex-1 min-h-0 w-full">
+    <div className="flex h-full w-full flex-1 min-h-0 flex-col overflow-hidden px-3 py-2 md:px-4">
       {state.isEmptyState ? (
-        <div className="flex-1 min-h-0 flex items-center justify-center">
+        <div className="flex flex-1 min-h-0 items-center justify-center">
           <div className="flex flex-col items-center justify-center gap-2 text-center max-w-sm">
             <h3 className="text-sm font-medium">No tasks yet</h3>
             <p className="text-xs text-muted-foreground">
@@ -1131,7 +1135,7 @@ function TaskFeatureContent() {
           </div>
         </div>
       ) : state.showNoResults ? (
-        <div className="flex-1 min-h-0 flex items-center justify-center">
+        <div className="flex flex-1 min-h-0 items-center justify-center">
           <div className="flex flex-col items-center justify-center gap-2 text-center max-w-sm">
             <h3 className="text-sm font-medium">No matching tasks</h3>
             <p className="text-xs text-muted-foreground">

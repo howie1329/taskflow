@@ -6,8 +6,12 @@ export default function TasksPage() {
   return (
     <TaskFeature.Provider>
       <TaskFeature.Frame>
-        <TaskFeature.Toolbar />
-        <TaskFeature.Filters />
+        <div className="sticky top-0 z-10 border-b border-border/50 bg-background/85 px-3 py-2 backdrop-blur supports-backdrop-filter:bg-background/75 md:px-4">
+          <div className="space-y-2">
+            <TaskFeature.Toolbar />
+            <TaskFeature.Filters />
+          </div>
+        </div>
         <TaskFeature.Content />
         <TaskFeature.DetailsSheet />
         <TaskFeature.CreateSheet />

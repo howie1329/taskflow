@@ -105,6 +105,7 @@ export function AppShell({ children }: AppShellProps) {
   const isOnboarded = !!preferences?.onboardingCompletedAt;
   const isChatRoute = pathname.startsWith("/app/chat");
   const isNotesRoute = pathname.startsWith("/app/notes");
+  const isTasksRoute = pathname.startsWith("/app/tasks");
 
   useEffect(() => {
     if (isLoading) return;
@@ -253,7 +254,13 @@ export function AppShell({ children }: AppShellProps) {
             <div className="w-7" aria-hidden="true" />
           </div>
         )}
-        <main className="flex flex-1 flex-col gap-2 p-2 md:gap-2 md:p-2 overflow-hidden">
+        <main
+          className={
+            isTasksRoute
+              ? "flex flex-1 flex-col overflow-hidden"
+              : "flex flex-1 flex-col gap-2 p-2 md:gap-2 md:p-2 overflow-hidden"
+          }
+        >
           {children}
         </main>
       </SidebarInset>
