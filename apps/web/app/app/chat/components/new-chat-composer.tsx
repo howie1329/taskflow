@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation"
 import { Separator } from "@/components/ui/separator"
 import {
   PromptInput,
+  PromptInputHeader,
   PromptInputTextarea,
   PromptInputSubmit,
   PromptInputFooter,
+  PromptInputTools,
   usePromptInputController,
 } from "@/components/ai-elements/prompt-input"
 import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion"
@@ -15,6 +17,7 @@ import { useChatContext } from "./chat-provider"
 import { ModelSelectorMenu } from "./model-selector-menu"
 import { ModeSelectorMenu } from "./mode-selector-menu"
 import { ProjectSelectorMenu } from "./project-selector-menu"
+import { ToolLockCommandMenu } from "./tool-lock-command-menu"
 
 const SUGGESTIONS = [
   { title: "Plan my day", value: "Plan my day" },
@@ -85,6 +88,11 @@ export function NewChatComposer() {
             Message
           </label>
           <PromptInput onSubmit={handleSubmit}>
+            <PromptInputHeader>
+              <ToolLockCommandMenu textareaRef={textareaRef} />
+              <PromptInputTools />
+            </PromptInputHeader>
+
             <PromptInputTextarea
               id="new-chat-message"
               ref={textareaRef}
