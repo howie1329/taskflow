@@ -44,7 +44,7 @@ interface NotesAppSidebarProps {
 }
 
 export function NotesAppSidebar({ onBackToWorkspace }: NotesAppSidebarProps) {
-  const { state, isMobile, setOpenMobile } = useSidebar();
+  const { state, isMobile, setOpen, setOpenMobile } = useSidebar();
   const isCollapsed = state === "collapsed" && !isMobile;
   const searchInputRef = useRef<HTMLInputElement>(null);
   const didAutoOpenRef = useRef(false);
@@ -118,11 +118,11 @@ export function NotesAppSidebar({ onBackToWorkspace }: NotesAppSidebarProps) {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton
-                tooltip="Back to workspace"
-                onClick={onBackToWorkspace}
+                tooltip="Open sidebar"
+                onClick={() => setOpen(true)}
               >
                 <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
-                <span>Back to workspace</span>
+                <span>Open sidebar</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
