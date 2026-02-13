@@ -18,6 +18,8 @@ import {
 
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { useViewer } from "@/components/settings/hooks/use-viewer";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import {
   Sidebar,
   SidebarContent,
@@ -89,6 +91,7 @@ function getPageTitle(pathname: string): string {
 
 interface AppShellProps {
   children: React.ReactNode;
+  right?: React.ReactNode;
 }
 
 interface WorkspaceSidebarContentProps {
@@ -205,7 +208,14 @@ function WorkspaceSidebarContent({
   );
 }
 
-export function AppShell({ children }: AppShellProps) {
+const shouldIgnoreShortcut = (event: KeyboardEvent) => {
+  const target = event.target as HTMLElement | null;
+  if (!target) return false;
+  if (target.isContentEditable) return true;
+  return !!target.closest('input, textarea, select, [contenteditable="true"]');
+};
+
+export function AppShell({ children, right }: AppShellProps) {
   const pathname = usePathname();
   const pageTitle = getPageTitle(pathname);
   const router = useRouter();
@@ -216,6 +226,8 @@ export function AppShell({ children }: AppShellProps) {
   const [notesSidebarMode, setNotesSidebarMode] = useState<
     "notes" | "workspace"
   >("notes");
+  const [isRightOpen, setIsRightOpen] = useState(false);
+  const [isRightMobileOpen, setIsRightMobileOpen] = useState(false);
 
   const isOnboardingRoute = pathname === "/app/onboarding";
   const isOnboarded = !!preferences?.onboardingCompletedAt;
@@ -223,6 +235,7 @@ export function AppShell({ children }: AppShellProps) {
   const isNotesRoute = pathname.startsWith("/app/notes");
   const isTasksRoute = pathname.startsWith("/app/tasks"); // Not used can be removed. Could be used for future tasks sidebar.
   const isSettingsRoute = pathname.startsWith("/app/settings");
+  const hasRightSlot = pathname.startsWith("/app/chat/");
 
   useEffect(() => {
     if (isLoading) return;
@@ -242,6 +255,31 @@ export function AppShell({ children }: AppShellProps) {
       setNotesSidebarMode("notes");
     }
   }, [isNotesRoute]);
+
+  useEffect(() => {
+    if (!hasRightSlot) {
+      setIsRightOpen(false);
+      setIsRightMobileOpen(false);
+    }
+  }, [hasRightSlot, pathname]);
+
+  useEffect(() => {
+    if (!hasRightSlot) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== "i") {
+        return;
+      }
+
+      if (shouldIgnoreShortcut(event)) return;
+
+      event.preventDefault();
+      setIsRightOpen((open) => !open);
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [hasRightSlot]);
 
   if (!isOnboardingRoute && !isOnboarded) {
     return (
@@ -291,7 +329,7 @@ export function AppShell({ children }: AppShellProps) {
         )}
         <SidebarRail />
       </Sidebar>
-      <SidebarInset className="overflow-hidden">
+      <SidebarInset className="min-w-0 overflow-hidden">
         {!isOnboardingRoute && (
           <div className="md:hidden sticky top-0 z-20 flex h-10 items-center gap-2 px-2 bg-background/70 backdrop-blur supports-backdrop-filter:bg-background/50">
             <SidebarTrigger className="-ml-1" />
@@ -300,21 +338,71 @@ export function AppShell({ children }: AppShellProps) {
                 {pageTitle}
               </div>
             </div>
-            <div className="w-7" aria-hidden="true" />
+            {hasRightSlot ? (
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => setIsRightMobileOpen(true)}
+                aria-label="Open inspector"
+              >
+                <HugeiconsIcon icon={SidebarLeftIcon} className="size-4 rotate-180" />
+              </Button>
+            ) : (
+              <div className="w-7" aria-hidden="true" />
+            )}
           </div>
         )}
         <main
           className={
             isTasksRoute || isNotesRoute
-              ? "flex flex-1 flex-col overflow-hidden"
+              ? "relative flex flex-1 flex-col overflow-hidden"
               : isSettingsRoute
-                ? "flex flex-1 flex-col overflow-hidden"
-                : "flex flex-1 flex-col gap-2 p-2 md:gap-2 md:p-2 overflow-hidden"
+                ? "relative flex flex-1 flex-col overflow-hidden"
+                : "relative flex flex-1 flex-col gap-2 overflow-hidden p-2 md:gap-2 md:p-2"
           }
         >
+          {hasRightSlot && !isRightOpen && (
+            <div className="pointer-events-none absolute right-3 top-3 z-20 hidden md:flex">
+              <Button
+                variant="outline"
+                size="icon-sm"
+                className="pointer-events-auto"
+                onClick={() => setIsRightOpen(true)}
+                aria-label="Open inspector"
+              >
+                <HugeiconsIcon icon={SidebarLeftIcon} className="size-4 rotate-180" />
+              </Button>
+            </div>
+          )}
           {children}
         </main>
       </SidebarInset>
+      {hasRightSlot && isRightOpen && (
+        <aside className="hidden h-svh w-[22rem] shrink-0 flex-col border-l border-border/40 bg-background md:flex">
+          <div className="flex h-11 items-center justify-between border-b border-border/40 px-3">
+            <span className="text-sm font-medium">Inspector</span>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => setIsRightOpen(false)}
+              aria-label="Close inspector"
+            >
+              <HugeiconsIcon icon={SidebarLeftIcon} className="size-4" />
+            </Button>
+          </div>
+          <div className="min-h-0 flex-1 overflow-y-auto">{right}</div>
+        </aside>
+      )}
+      {hasRightSlot && (
+        <Sheet open={isRightMobileOpen} onOpenChange={setIsRightMobileOpen}>
+          <SheetContent side="right" className="w-[22rem] p-0 sm:w-[22rem]">
+            <SheetHeader className="border-b border-border/40 px-4 py-3">
+              <SheetTitle>Inspector</SheetTitle>
+            </SheetHeader>
+            <div className="min-h-0 flex-1 overflow-y-auto p-4">{right}</div>
+          </SheetContent>
+        </Sheet>
+      )}
     </SidebarProvider>
   );
 

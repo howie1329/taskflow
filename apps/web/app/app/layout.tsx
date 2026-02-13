@@ -4,12 +4,14 @@ import { isAuthenticatedNextjs } from "@convex-dev/auth/nextjs/server";
 
 export default async function AppLayout({
   children,
+  right,
 }: {
   children: React.ReactNode;
+  right: React.ReactNode;
 }) {
   if (!(await isAuthenticatedNextjs())) {
     return redirect("/sign-in");
   }
 
-  return <AppShell>{children}</AppShell>;
+  return <AppShell right={right}>{children}</AppShell>;
 }
