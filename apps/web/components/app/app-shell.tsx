@@ -11,6 +11,7 @@ import {
   NoteIcon,
   SettingsIcon,
   CommandIcon,
+  SidebarLeftIcon,
   InboxDownloadIcon,
   NotificationIcon,
 } from "@hugeicons/core-free-icons";
@@ -32,6 +33,7 @@ import {
   SidebarProvider,
   SidebarRail,
   SidebarTrigger,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { ChatSidebar } from "@/components/app/chat-sidebar";
 import { NotesAppSidebar } from "@/components/app/notes-app-sidebar";
@@ -87,6 +89,117 @@ function getPageTitle(pathname: string): string {
 
 interface AppShellProps {
   children: React.ReactNode;
+}
+
+interface WorkspaceSidebarContentProps {
+  pathname: string;
+  isChatRoute: boolean;
+  isNotesRoute: boolean;
+  setChatSidebarMode: React.Dispatch<React.SetStateAction<"threads" | "workspace">>;
+  setNotesSidebarMode: React.Dispatch<React.SetStateAction<"notes" | "workspace">>;
+}
+
+function WorkspaceSidebarContent({
+  pathname,
+  isChatRoute,
+  isNotesRoute,
+  setChatSidebarMode,
+  setNotesSidebarMode,
+}: WorkspaceSidebarContentProps) {
+  const { state, isMobile, toggleSidebar } = useSidebar();
+  const isCollapsed = state === "collapsed" && !isMobile;
+
+  return (
+    <>
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            {isCollapsed ? (
+              <SidebarMenuButton
+                size="lg"
+                tooltip="Open sidebar"
+                className="group/sidebar-toggle"
+                onClick={toggleSidebar}
+              >
+                <div className="relative flex aspect-square size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                  <HugeiconsIcon
+                    icon={CommandIcon}
+                    className="size-4 transition-opacity group-hover/sidebar-toggle:opacity-0"
+                  />
+                  <HugeiconsIcon
+                    icon={SidebarLeftIcon}
+                    className="absolute size-4 opacity-0 transition-opacity group-hover/sidebar-toggle:opacity-100"
+                  />
+                </div>
+                <span className="sr-only">Open sidebar</span>
+              </SidebarMenuButton>
+            ) : (
+              <SidebarMenuButton size="lg" asChild>
+                <Link href="/app">
+                  <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                    <HugeiconsIcon icon={CommandIcon} className="size-4" />
+                  </div>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-semibold">Taskflow</span>
+                    <span className="truncate text-xs text-muted-foreground">
+                      Workspace
+                    </span>
+                  </div>
+                </Link>
+              </SidebarMenuButton>
+            )}
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Workspace</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {navItems.map((item) => {
+                const isChatItem = item.href === "/app/chat";
+                const isNotesItem = item.href === "/app/notes";
+                const isActive =
+                  pathname === item.href || pathname.startsWith(`${item.href}/`);
+                const handleChatClick =
+                  isChatRoute && isChatItem
+                    ? (event: React.MouseEvent<HTMLAnchorElement>) => {
+                      event.preventDefault();
+                      setChatSidebarMode("threads");
+                    }
+                    : undefined;
+                const handleNotesClick =
+                  isNotesRoute && isNotesItem
+                    ? (event: React.MouseEvent<HTMLAnchorElement>) => {
+                      event.preventDefault();
+                      setNotesSidebarMode("notes");
+                    }
+                    : undefined;
+
+                return (
+                  <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton asChild isActive={isActive} tooltip={item.title}>
+                      <Link href={item.href} onClick={handleChatClick ?? handleNotesClick}>
+                        <HugeiconsIcon icon={item.icon} className="size-4" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SignOutButton />
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+    </>
+  );
 }
 
 export function AppShell({ children }: AppShellProps) {
@@ -165,85 +278,13 @@ export function AppShell({ children }: AppShellProps) {
             onBackToWorkspace={() => setNotesSidebarMode("workspace")}
           />
         ) : (
-          <>
-            <SidebarHeader>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton size="lg" asChild>
-                    <Link href="/app">
-                      <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-                        <HugeiconsIcon icon={CommandIcon} className="size-4" />
-                      </div>
-                      <div className="grid flex-1 text-left text-sm leading-tight">
-                        <span className="truncate font-semibold">Taskflow</span>
-                        <span className="truncate text-xs text-muted-foreground">
-                          Workspace
-                        </span>
-                      </div>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarHeader>
-            <SidebarContent>
-              <SidebarGroup>
-                <SidebarGroupLabel>Workspace</SidebarGroupLabel>
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {navItems.map((item) => {
-                      const isChatItem = item.href === "/app/chat";
-                      const isNotesItem = item.href === "/app/notes";
-                      const isActive =
-                        pathname === item.href ||
-                        pathname.startsWith(`${item.href}/`);
-                      const handleChatClick =
-                        isChatRoute && isChatItem
-                          ? (event: React.MouseEvent<HTMLAnchorElement>) => {
-                            event.preventDefault();
-                            setChatSidebarMode("threads");
-                          }
-                          : undefined;
-                      const handleNotesClick =
-                        isNotesRoute && isNotesItem
-                          ? (event: React.MouseEvent<HTMLAnchorElement>) => {
-                            event.preventDefault();
-                            setNotesSidebarMode("notes");
-                          }
-                          : undefined;
-
-                      return (
-                        <SidebarMenuItem key={item.href}>
-                          <SidebarMenuButton
-                            asChild
-                            isActive={isActive}
-                            tooltip={item.title}
-                          >
-                            <Link
-                              href={item.href}
-                              onClick={handleChatClick ?? handleNotesClick}
-                            >
-                              <HugeiconsIcon
-                                icon={item.icon}
-                                className="size-4"
-                              />
-                              <span>{item.title}</span>
-                            </Link>
-                          </SidebarMenuButton>
-                        </SidebarMenuItem>
-                      );
-                    })}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </SidebarGroup>
-            </SidebarContent>
-            <SidebarFooter>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SignOutButton />
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarFooter>
-          </>
+          <WorkspaceSidebarContent
+            pathname={pathname}
+            isChatRoute={isChatRoute}
+            isNotesRoute={isNotesRoute}
+            setChatSidebarMode={setChatSidebarMode}
+            setNotesSidebarMode={setNotesSidebarMode}
+          />
         )}
         <SidebarRail />
       </Sidebar>
