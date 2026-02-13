@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Cancel01Icon,
+  ArrowDown01Icon,
   MessageQuestionIcon,
   PinIcon,
   PlusSignIcon,
@@ -23,6 +25,11 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import type { ChatProject, ChatThread } from "./mock-data";
 import { ProjectThreadGroup } from "./project-thread-group";
@@ -74,6 +81,9 @@ export function ThreadsRail({
   onTogglePin,
   onDeleteRequest,
 }: ThreadsRailProps) {
+  const [isPinnedOpen, setIsPinnedOpen] = useState(true);
+  const [isProjectsOpen, setIsProjectsOpen] = useState(true);
+
   // Helper to get project info for a thread
   const getThreadProject = (thread: ChatThread) => {
     if (!thread.projectId) return null;
@@ -202,19 +212,32 @@ export function ThreadsRail({
           ) : (
             <>
               {pinnedThreads.length > 0 && (
-                <div className="space-y-1.5 w-full max-w-full">
-                  <ThreadSection
-                    label="Pinned"
-                    count={pinnedThreads.length}
-                    icon={
+                <Collapsible
+                  open={isPinnedOpen}
+                  onOpenChange={setIsPinnedOpen}
+                  className="space-y-1.5 w-full max-w-full"
+                >
+                  <CollapsibleTrigger className="group w-full rounded-sm px-1 py-1 text-left hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background">
+                    <div className="flex items-center justify-between">
+                      <ThreadSection
+                        label="Pinned"
+                        count={pinnedThreads.length}
+                        icon={
+                          <HugeiconsIcon
+                            icon={PinIcon}
+                            className="size-3 text-muted-foreground"
+                            strokeWidth={2}
+                          />
+                        }
+                      />
                       <HugeiconsIcon
-                        icon={PinIcon}
-                        className="size-3 text-muted-foreground"
+                        icon={ArrowDown01Icon}
+                        className="size-3 text-muted-foreground transition-transform group-data-[state=open]:rotate-180"
                         strokeWidth={2}
                       />
-                    }
-                  />
-                  <div className="space-y-0.5 w-full max-w-full">
+                    </div>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="space-y-0.5 w-full max-w-full">
                     {pinnedThreads.map((thread) => {
                       const threadProject = getThreadProject(thread);
                       return (
@@ -234,48 +257,36 @@ export function ThreadsRail({
                         />
                       );
                     })}
-                  </div>
-                </div>
-              )}
-
-              {recentThreads.length > 0 && (
-                <div className="space-y-1.5 w-full max-w-full">
-                  <ThreadSection label="Latest" count={recentThreads.length} />
-                  <div className="space-y-0.5 w-full max-w-full">
-                    {recentThreads.map((thread) => (
-                      <ThreadRow
-                        key={thread.id}
-                        thread={thread}
-                        isActive={thread.id === activeThreadId}
-                        isEditing={editingThreadId === thread.id}
-                        editingTitle={editingTitle}
-                        onEditTitleChange={onEditTitleChange}
-                        onStartEdit={() => onStartEdit(thread)}
-                        onCancelEdit={onCancelEdit}
-                        onCommitEdit={onCommitEdit}
-                        onTogglePin={() => onTogglePin(thread.id)}
-                        onDeleteRequest={() => onDeleteRequest(thread.id)}
-                      />
-                    ))}
-                  </div>
-                </div>
+                  </CollapsibleContent>
+                </Collapsible>
               )}
 
               {groupedByProject.length > 0 && (
-                <div
+                <Collapsible
+                  open={isProjectsOpen}
+                  onOpenChange={setIsProjectsOpen}
                   className={cn(
                     "w-full max-w-full",
-                    pinnedThreads.length > 0 || recentThreads.length > 0
+                    pinnedThreads.length > 0
                       ? "mt-3 pt-2"
                       : "",
                     isSidebar ? "space-y-2" : "space-y-2.5",
                   )}
                 >
-                  <ThreadSection
-                    label="Projects"
-                    count={projectThreadCount}
-                  />
-                  <div className="space-y-0.5 w-full max-w-full">
+                  <CollapsibleTrigger className="group w-full rounded-sm px-1 py-1 text-left hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background">
+                    <div className="flex items-center justify-between">
+                      <ThreadSection
+                        label="Projects"
+                        count={projectThreadCount}
+                      />
+                      <HugeiconsIcon
+                        icon={ArrowDown01Icon}
+                        className="size-3 text-muted-foreground transition-transform group-data-[state=open]:rotate-180"
+                        strokeWidth={2}
+                      />
+                    </div>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="space-y-0.5 w-full max-w-full">
                     {groupedByProject.map((group) => (
                       <ProjectThreadGroup
                         key={group.project.id}
@@ -298,6 +309,29 @@ export function ThreadsRail({
                           />
                         ))}
                       </ProjectThreadGroup>
+                    ))}
+                  </CollapsibleContent>
+                </Collapsible>
+              )}
+
+              {recentThreads.length > 0 && (
+                <div className="space-y-1.5 w-full max-w-full">
+                  <ThreadSection label="Latest" count={recentThreads.length} />
+                  <div className="space-y-0.5 w-full max-w-full">
+                    {recentThreads.map((thread) => (
+                      <ThreadRow
+                        key={thread.id}
+                        thread={thread}
+                        isActive={thread.id === activeThreadId}
+                        isEditing={editingThreadId === thread.id}
+                        editingTitle={editingTitle}
+                        onEditTitleChange={onEditTitleChange}
+                        onStartEdit={() => onStartEdit(thread)}
+                        onCancelEdit={onCancelEdit}
+                        onCommitEdit={onCommitEdit}
+                        onTogglePin={() => onTogglePin(thread.id)}
+                        onDeleteRequest={() => onDeleteRequest(thread.id)}
+                      />
                     ))}
                   </div>
                 </div>

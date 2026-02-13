@@ -1,8 +1,9 @@
 "use client"
 
-import type { RefObject } from "react"
+import { useState, type RefObject } from "react"
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
+  ArrowDown01Icon,
   Cancel01Icon,
   NoteIcon,
   PinIcon,
@@ -23,6 +24,11 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
 import { cn } from "@/lib/utils"
 import type { Note, NotesProject } from "./types"
 import { NoteRow } from "./note-row"
@@ -60,6 +66,9 @@ export function NotesRail({
   onDeleteNote,
   searchInputRef,
 }: NotesRailProps) {
+  const [isPinnedOpen, setIsPinnedOpen] = useState(true)
+  const [isProjectsOpen, setIsProjectsOpen] = useState(true)
+
   const normalizedQuery = searchQuery.trim().toLowerCase()
 
   const filteredNotes = normalizedQuery
@@ -80,14 +89,15 @@ export function NotesRail({
     .filter((note) => !note.pinned)
     .sort(sortByUpdatedAtDesc)
 
+  const projectNotes = nonPinnedNotes.filter((note) => note.projectId !== "__none__")
+  const restNotes = nonPinnedNotes.filter((note) => note.projectId === "__none__")
+
   const projectGroups = projects
     .map((project) => ({
       project,
-      notes: nonPinnedNotes.filter((note) => note.projectId === project._id),
+      notes: projectNotes.filter((note) => note.projectId === project._id),
     }))
     .filter((group) => group.notes.length > 0)
-
-  const latestNotes = nonPinnedNotes
 
   const isSidebar = variant === "sidebar"
 
@@ -202,42 +212,57 @@ export function NotesRail({
           ) : (
             <>
               {pinnedNotes.length > 0 && (
-                <div className="w-full max-w-full space-y-1.5">
-                  <NoteSection
-                    label="Pinned"
-                    icon={
+                <Collapsible
+                  open={isPinnedOpen}
+                  onOpenChange={setIsPinnedOpen}
+                  className="w-full max-w-full space-y-1.5"
+                >
+                  <CollapsibleTrigger className="group w-full rounded-sm px-1 py-1 text-left hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background">
+                    <div className="flex items-center justify-between">
+                      <NoteSection
+                        label="Pinned"
+                        icon={
+                          <HugeiconsIcon
+                            icon={PinIcon}
+                            className="size-3 text-muted-foreground"
+                            strokeWidth={2}
+                          />
+                        }
+                      />
                       <HugeiconsIcon
-                        icon={PinIcon}
-                        className="size-3 text-muted-foreground"
+                        icon={ArrowDown01Icon}
+                        className="size-3 text-muted-foreground transition-transform group-data-[state=open]:rotate-180"
                         strokeWidth={2}
                       />
-                    }
-                  />
-                  <div className="w-full max-w-full space-y-0.5">
+                    </div>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="w-full max-w-full space-y-0.5">
                     {pinnedNotes.map((note) => renderNoteRow(note))}
-                  </div>
-                </div>
-              )}
-
-              {latestNotes.length > 0 && (
-                <div className="w-full max-w-full space-y-1.5">
-                  <NoteSection label="Latest" />
-                  <div className="w-full max-w-full space-y-0.5">
-                    {latestNotes.map((note) => renderNoteRow(note))}
-                  </div>
-                </div>
+                  </CollapsibleContent>
+                </Collapsible>
               )}
 
               {projectGroups.length > 0 && (
-                <div
+                <Collapsible
+                  open={isProjectsOpen}
+                  onOpenChange={setIsProjectsOpen}
                   className={cn(
                     "w-full max-w-full",
-                    pinnedNotes.length > 0 || latestNotes.length > 0 ? "mt-3 pt-2" : "",
+                    pinnedNotes.length > 0 ? "mt-3 pt-2" : "",
                     isSidebar ? "space-y-2" : "space-y-2.5",
                   )}
                 >
-                  <NoteSection label="Projects" />
-                  <div className="w-full max-w-full space-y-0.5">
+                  <CollapsibleTrigger className="group w-full rounded-sm px-1 py-1 text-left hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background">
+                    <div className="flex items-center justify-between">
+                      <NoteSection label="Projects" />
+                      <HugeiconsIcon
+                        icon={ArrowDown01Icon}
+                        className="size-3 text-muted-foreground transition-transform group-data-[state=open]:rotate-180"
+                        strokeWidth={2}
+                      />
+                    </div>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="w-full max-w-full space-y-0.5">
                     {projectGroups.map((group) => (
                       <ProjectNoteGroup
                         key={group.project._id}
@@ -247,6 +272,15 @@ export function NotesRail({
                         {group.notes.map((note) => renderNoteRow(note, group.project.icon))}
                       </ProjectNoteGroup>
                     ))}
+                  </CollapsibleContent>
+                </Collapsible>
+              )}
+
+              {restNotes.length > 0 && (
+                <div className="w-full max-w-full space-y-1.5">
+                  <NoteSection label="Latest" />
+                  <div className="w-full max-w-full space-y-0.5">
+                    {restNotes.map((note) => renderNoteRow(note))}
                   </div>
                 </div>
               )}
