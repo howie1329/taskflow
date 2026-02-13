@@ -134,19 +134,22 @@ function WorkspaceSidebarContent({
                 <span className="sr-only">Open sidebar</span>
               </SidebarMenuButton>
             ) : (
-              <SidebarMenuButton size="lg" asChild>
-                <Link href="/app">
-                  <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-                    <HugeiconsIcon icon={CommandIcon} className="size-4" />
-                  </div>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">Taskflow</span>
-                    <span className="truncate text-xs text-muted-foreground">
-                      Workspace
-                    </span>
-                  </div>
-                </Link>
-              </SidebarMenuButton>
+              <div className="flex items-center gap-1">
+                <SidebarMenuButton size="lg" asChild className="flex-1">
+                  <Link href="/app">
+                    <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                      <HugeiconsIcon icon={CommandIcon} className="size-4" />
+                    </div>
+                    <div className="grid flex-1 text-left text-sm leading-tight">
+                      <span className="truncate font-semibold">Taskflow</span>
+                      <span className="truncate text-xs text-muted-foreground">
+                        Workspace
+                      </span>
+                    </div>
+                  </Link>
+                </SidebarMenuButton>
+                <SidebarTrigger className="size-8 shrink-0" />
+              </div>
             )}
           </SidebarMenuItem>
         </SidebarMenu>

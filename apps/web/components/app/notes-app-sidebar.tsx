@@ -33,6 +33,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { useSidebar } from "@/components/ui/sidebar";
 import { NotesRail, useNotes } from "@/components/notes";
@@ -231,13 +232,17 @@ export function NotesAppSidebar({ onBackToWorkspace }: NotesAppSidebarProps) {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              tooltip="Back to workspace"
-              onClick={onBackToWorkspace}
-            >
-              <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
-              <span>Back to workspace</span>
-            </SidebarMenuButton>
+            <div className="flex items-center gap-1">
+              <SidebarMenuButton
+                tooltip="Back to workspace"
+                onClick={onBackToWorkspace}
+                className="flex-1"
+              >
+                <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
+                <span>Back to workspace</span>
+              </SidebarMenuButton>
+              <SidebarTrigger className="size-8 shrink-0" />
+            </div>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
