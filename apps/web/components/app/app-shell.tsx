@@ -17,9 +17,8 @@ import {
 } from "@hugeicons/core-free-icons";
 
 import { SignOutButton } from "@/components/auth/sign-out-button";
+import { InspectorComingSoon } from "@/components/app/inspector/coming-soon";
 import { useViewer } from "@/components/settings/hooks/use-viewer";
-import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import {
   Sidebar,
   SidebarContent,
@@ -208,12 +207,22 @@ function WorkspaceSidebarContent({
   );
 }
 
-const shouldIgnoreShortcut = (event: KeyboardEvent) => {
-  const target = event.target as HTMLElement | null;
-  if (!target) return false;
-  if (target.isContentEditable) return true;
-  return !!target.closest('input, textarea, select, [contenteditable="true"]');
-};
+function InspectorDesktopTrigger({ enabled }: { enabled: boolean }) {
+  const { open } = useSidebar("inspector");
+
+  if (!enabled || open) return null;
+
+  return (
+    <div className="pointer-events-none absolute right-3 top-3 z-20 hidden md:flex">
+      <SidebarTrigger
+        scope="inspector"
+        variant="outline"
+        className="pointer-events-auto [&_svg]:rotate-180"
+        aria-label="Open inspector"
+      />
+    </div>
+  );
+}
 
 export function AppShell({ children, right }: AppShellProps) {
   const pathname = usePathname();
@@ -226,8 +235,6 @@ export function AppShell({ children, right }: AppShellProps) {
   const [notesSidebarMode, setNotesSidebarMode] = useState<
     "notes" | "workspace"
   >("notes");
-  const [isRightOpen, setIsRightOpen] = useState(false);
-  const [isRightMobileOpen, setIsRightMobileOpen] = useState(false);
 
   const isOnboardingRoute = pathname === "/app/onboarding";
   const isOnboarded = !!preferences?.onboardingCompletedAt;
@@ -235,7 +242,7 @@ export function AppShell({ children, right }: AppShellProps) {
   const isNotesRoute = pathname.startsWith("/app/notes");
   const isTasksRoute = pathname.startsWith("/app/tasks"); // Not used can be removed. Could be used for future tasks sidebar.
   const isSettingsRoute = pathname.startsWith("/app/settings");
-  const hasRightSlot = pathname.startsWith("/app/chat/");
+  const showInspector = !isOnboardingRoute && !isSettingsRoute;
 
   useEffect(() => {
     if (isLoading) return;
@@ -246,40 +253,17 @@ export function AppShell({ children, right }: AppShellProps) {
 
   useEffect(() => {
     if (isChatRoute) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reset left sidebar mode when entering chat routes
       setChatSidebarMode("threads");
     }
   }, [isChatRoute]);
 
   useEffect(() => {
     if (isNotesRoute) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reset left sidebar mode when entering notes routes
       setNotesSidebarMode("notes");
     }
   }, [isNotesRoute]);
-
-  useEffect(() => {
-    if (!hasRightSlot) {
-      setIsRightOpen(false);
-      setIsRightMobileOpen(false);
-    }
-  }, [hasRightSlot, pathname]);
-
-  useEffect(() => {
-    if (!hasRightSlot) return;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== "i") {
-        return;
-      }
-
-      if (shouldIgnoreShortcut(event)) return;
-
-      event.preventDefault();
-      setIsRightOpen((open) => !open);
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [hasRightSlot]);
 
   if (!isOnboardingRoute && !isOnboarded) {
     return (
@@ -291,6 +275,7 @@ export function AppShell({ children, right }: AppShellProps) {
 
   const shell = (
     <SidebarProvider
+      defaultOpenInspector={false}
       style={
         isChatRoute
           ? ({
@@ -306,6 +291,7 @@ export function AppShell({ children, right }: AppShellProps) {
       }
     >
       <Sidebar
+        scope="primary"
         variant="sidebar"
         collapsible="icon"
         className={isNotesRoute ? "border-r border-border/40" : undefined}
@@ -327,7 +313,7 @@ export function AppShell({ children, right }: AppShellProps) {
             setNotesSidebarMode={setNotesSidebarMode}
           />
         )}
-        <SidebarRail />
+        <SidebarRail scope="primary" />
       </Sidebar>
       <SidebarInset className="min-w-0 overflow-hidden">
         {!isOnboardingRoute && (
@@ -338,15 +324,12 @@ export function AppShell({ children, right }: AppShellProps) {
                 {pageTitle}
               </div>
             </div>
-            {hasRightSlot ? (
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                onClick={() => setIsRightMobileOpen(true)}
+            {showInspector ? (
+              <SidebarTrigger
+                scope="inspector"
+                className="[&_svg]:rotate-180"
                 aria-label="Open inspector"
-              >
-                <HugeiconsIcon icon={SidebarLeftIcon} className="size-4 rotate-180" />
-              </Button>
+              />
             ) : (
               <div className="w-7" aria-hidden="true" />
             )}
@@ -361,47 +344,37 @@ export function AppShell({ children, right }: AppShellProps) {
                 : "relative flex flex-1 flex-col gap-2 overflow-hidden p-2 md:gap-2 md:p-2"
           }
         >
-          {hasRightSlot && !isRightOpen && (
-            <div className="pointer-events-none absolute right-3 top-3 z-20 hidden md:flex">
-              <Button
-                variant="outline"
-                size="icon-sm"
-                className="pointer-events-auto"
-                onClick={() => setIsRightOpen(true)}
-                aria-label="Open inspector"
-              >
-                <HugeiconsIcon icon={SidebarLeftIcon} className="size-4 rotate-180" />
-              </Button>
-            </div>
-          )}
+          <InspectorDesktopTrigger enabled={showInspector} />
           {children}
         </main>
       </SidebarInset>
-      {hasRightSlot && isRightOpen && (
-        <aside className="hidden h-svh w-[22rem] shrink-0 flex-col border-l border-border/40 bg-background md:flex">
-          <div className="flex h-11 items-center justify-between border-b border-border/40 px-3">
-            <span className="text-sm font-medium">Inspector</span>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              onClick={() => setIsRightOpen(false)}
-              aria-label="Close inspector"
-            >
-              <HugeiconsIcon icon={SidebarLeftIcon} className="size-4" />
-            </Button>
-          </div>
-          <div className="min-h-0 flex-1 overflow-y-auto">{right}</div>
-        </aside>
-      )}
-      {hasRightSlot && (
-        <Sheet open={isRightMobileOpen} onOpenChange={setIsRightMobileOpen}>
-          <SheetContent side="right" className="w-[22rem] p-0 sm:w-[22rem]">
-            <SheetHeader className="border-b border-border/40 px-4 py-3">
-              <SheetTitle>Inspector</SheetTitle>
-            </SheetHeader>
-            <div className="min-h-0 flex-1 overflow-y-auto p-4">{right}</div>
-          </SheetContent>
-        </Sheet>
+      {showInspector && (
+        <Sidebar
+          scope="inspector"
+          side="right"
+          variant="sidebar"
+          collapsible="offcanvas"
+          className="border-l border-border/40"
+          style={
+            {
+              "--sidebar-width": "22rem",
+              "--sidebar-width-mobile": "22rem",
+            } as React.CSSProperties
+          }
+        >
+          <SidebarHeader className="border-b border-border/40">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium">Inspector</span>
+              <SidebarTrigger scope="inspector" aria-label="Close inspector" />
+            </div>
+          </SidebarHeader>
+          <SidebarContent className="p-4">
+            <div className="min-h-0 flex-1 overflow-y-auto">
+              {right ?? <InspectorComingSoon />}
+            </div>
+          </SidebarContent>
+          <SidebarRail scope="inspector" />
+        </Sidebar>
       )}
     </SidebarProvider>
   );
