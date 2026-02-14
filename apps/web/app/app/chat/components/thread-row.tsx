@@ -87,7 +87,7 @@ export function ThreadRow({
       )}
       aria-current={isActive ? "page" : undefined}
     >
-      <div className="flex items-center gap-2 min-w-0 flex-1 w-full max-w-full">
+      <div className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
         {thread.pinned && (
           <HugeiconsIcon
             icon={PinIcon}
@@ -100,7 +100,7 @@ export function ThreadRow({
             {projectIcon}
           </span>
         )}
-        <span className="truncate text-[13px] font-normal min-w-0">
+        <span className="block min-w-0 flex-1 truncate text-[13px] font-normal">
           {thread.title || "Untitled chat"}
         </span>
       </div>

@@ -8,6 +8,7 @@ import {
   convertToModelMessages,
   type UIMessage,
   pruneMessages,
+  generateText,
 } from "ai";
 import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server";
 import { fetchMutation, fetchQuery } from "convex/nextjs";
@@ -19,20 +20,36 @@ import { supermemoryTools, withSupermemory } from "@supermemory/tools/ai-sdk";
 import { ModeMapping } from "@/lib/AITools/ModeMapping";
 import type { ModeName } from "@/lib/AITools/ModePrompts";
 
-const getFirstUserText = (messages: UIMessage[]) => {
-  const firstUser = messages.find((message) => message.role === "user");
-  if (!firstUser) return "";
-  return firstUser.parts
-    .filter((part) => part.type === "text")
-    .map((part) => part.text)
-    .join("");
+
+const createTitle = async (messages: UIMessage[]) => {
+  const openRouter = createOpenRouter({
+    apiKey: process.env.OPENROUTER_AI_KEY,
+  });
+
+  if (!openRouter) {
+    console.error("OpenRouter not initialized in createTitle");
+    return "";
+  }
+
+  const initialMessage = messages[0].parts[0].type === "text" ? messages[0].parts[0].text : "";
+
+
+  const { text } = await generateText({
+    model: openRouter("openai/gpt-oss-120b:free", {
+      extraBody: {
+        models: ["arcee-ai/trinity-large-preview:free", "openrouter/aurora-alpha"],
+      },
+    }),
+    system: "You are a title generation agent. You are tasked with generating a title for a conversation based on the initial message.",
+    prompt: `Generate a title for a conversation based on the initial message: ${initialMessage}.
+    The title should be a single sentence and should be no more than 100 characters.
+    You must return text.`,
+    temperature: 0.9,
+    maxRetries: 2,
+  });
+  return text;
 };
 
-const getTrimmedTitle = (text: string) => {
-  const cleaned = text.replace(/\s+/g, " ").trim();
-  if (!cleaned) return "Untitled chat";
-  return cleaned.length > 60 ? `${cleaned.slice(0, 60)}...` : cleaned;
-};
 
 export async function POST(req: Request) {
   const token = await convexAuthNextjsToken();
@@ -111,7 +128,7 @@ export async function POST(req: Request) {
   let thread = await fetchQuery(api.chat.getThread, { threadId }, { token });
 
   if (!thread) {
-    const title = getTrimmedTitle(getFirstUserText(messages));
+    const title = await createTitle(messages);
     try {
       thread = await fetchMutation(
         api.chat.createThread,

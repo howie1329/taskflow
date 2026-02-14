@@ -27,9 +27,9 @@ export function ProjectThreadGroup({
   return (
     <Collapsible defaultOpen className={cn("space-y-1", className)}>
       <CollapsibleTrigger className="group flex w-full items-center justify-between gap-2 rounded-sm px-2 py-2 text-left text-[11px] font-medium text-muted-foreground/80 transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background">
-        <span className="flex items-center gap-2 min-w-0">
+        <span className="flex min-w-0 flex-1 items-center gap-2">
           <span className="shrink-0">{project.icon}</span>
-          <span className="truncate">{project.title}</span>
+          <span className="min-w-0 flex-1 truncate">{project.title}</span>
           <Badge
             variant="secondary"
             className="h-4 rounded-sm border-0 bg-transparent px-0.5 text-[10px] text-muted-foreground"
