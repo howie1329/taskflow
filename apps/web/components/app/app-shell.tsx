@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Task01Icon,
@@ -11,18 +11,12 @@ import {
   NoteIcon,
   SettingsIcon,
   CommandIcon,
-  SidebarLeftIcon,
   InboxDownloadIcon,
   NotificationIcon,
 } from "@hugeicons/core-free-icons";
 
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { InspectorComingSoon } from "@/components/app/inspector/coming-soon";
-import {
-  InspectorPortalProvider,
-  InspectorPortalTarget,
-  useInspectorPortalState,
-} from "@/components/app/inspector/inspector-portal";
 import { useViewer } from "@/components/settings/hooks/use-viewer";
 import {
   Sidebar,
@@ -212,17 +206,25 @@ function WorkspaceSidebarContent({
   );
 }
 
-function InspectorSidebarContent({ right }: { right?: React.ReactNode }) {
-  const { activeCount } = useInspectorPortalState();
-  const shouldShowFallback = activeCount === 0 && !right;
+function InspectorRouteSync({
+  hasRightContent,
+}: {
+  hasRightContent: boolean;
+}) {
+  const { open, setOpen } = useSidebar("inspector");
+  const lastHadRightContentRef = useRef(hasRightContent);
 
-  return (
-    <SidebarContent className="p-4">
-      <InspectorPortalTarget className="min-h-0 flex-1 overflow-y-auto" />
-      {right ? <div className="min-h-0 flex-1 overflow-y-auto">{right}</div> : null}
-      {shouldShowFallback ? <InspectorComingSoon /> : null}
-    </SidebarContent>
-  );
+  useEffect(() => {
+    if (hasRightContent && !open) {
+      setOpen(true);
+    }
+    if (!hasRightContent && lastHadRightContentRef.current && open) {
+      setOpen(false);
+    }
+    lastHadRightContentRef.current = hasRightContent;
+  }, [hasRightContent, open, setOpen]);
+
+  return null;
 }
 
 export function AppShell({ children, right }: AppShellProps) {
@@ -241,9 +243,9 @@ export function AppShell({ children, right }: AppShellProps) {
   const isOnboarded = !!preferences?.onboardingCompletedAt;
   const isChatRoute = pathname.startsWith("/app/chat");
   const isNotesRoute = pathname.startsWith("/app/notes");
-  const isTasksRoute = pathname.startsWith("/app/tasks"); // Not used can be removed. Could be used for future tasks sidebar.
+  const isTasksRoute = pathname.startsWith("/app/tasks");
   const isSettingsRoute = pathname.startsWith("/app/settings");
-  const showInspector = !isOnboardingRoute && !isSettingsRoute;
+  const showInspector = !isOnboardingRoute && !isSettingsRoute && (isChatRoute || isNotesRoute);
 
   useEffect(() => {
     if (isLoading) return;
@@ -275,8 +277,7 @@ export function AppShell({ children, right }: AppShellProps) {
   }
 
   const shell = (
-    <InspectorPortalProvider>
-      <SidebarProvider
+    <SidebarProvider
       defaultOpenInspector={false}
       style={
         isChatRoute
@@ -317,6 +318,7 @@ export function AppShell({ children, right }: AppShellProps) {
         )}
         <SidebarRail scope="primary" />
       </Sidebar>
+      <InspectorRouteSync hasRightContent={!!right && showInspector} />
       <SidebarInset className="min-w-0 overflow-hidden">
         {!isOnboardingRoute && (
           <div className="md:hidden sticky top-0 z-20 flex h-10 items-center gap-2 px-2 bg-background/70 backdrop-blur supports-backdrop-filter:bg-background/50">
@@ -369,12 +371,15 @@ export function AppShell({ children, right }: AppShellProps) {
               <SidebarTrigger scope="inspector" aria-label="Close inspector" />
             </div>
           </SidebarHeader>
-          <InspectorSidebarContent right={right} />
+          <SidebarContent className="p-4">
+            <div className="min-h-0 flex-1 overflow-y-auto">
+              {right ?? <InspectorComingSoon />}
+            </div>
+          </SidebarContent>
           <SidebarRail scope="inspector" />
         </Sidebar>
       )}
-      </SidebarProvider>
-    </InspectorPortalProvider>
+    </SidebarProvider>
   );
 
   if (isNotesRoute) {
