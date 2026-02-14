@@ -16,10 +16,12 @@ import { useMutation, useQuery } from "convex/react";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
 import { api } from "@/convex/_generated/api";
 import { useViewer } from "@/components/settings/hooks/use-viewer";
+import { InspectorPortal } from "@/components/app/inspector/inspector-portal";
 import { BoardView } from "@/components/tasks/board-view";
 import { TodayBoardView } from "@/components/tasks/today-board-view";
 import { TaskDetailsSheet } from "@/components/tasks/task-details-sheet";
 import { CreateTaskSheet } from "@/components/tasks/create-task-sheet";
+import { useSidebar } from "@/components/ui/sidebar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   InputGroup,
@@ -197,6 +199,8 @@ function TaskFeatureProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { viewer, isLoading: isViewerLoading } = useViewer();
+  const { open: isInspectorOpen, setOpen: setInspectorOpen } =
+    useSidebar("inspector");
 
   const updatePreferences = useMutation(api.preferences.updateMyPreferences);
   const createTaskMutation = useMutation(api.tasks.createTask);
@@ -549,11 +553,13 @@ function TaskFeatureProvider({ children }: { children: ReactNode }) {
   const openDetails = (task: Task) => {
     setSelectedTaskId(String(task._id));
     setIsDetailsOpen(true);
+    setInspectorOpen(true);
   };
 
   const openCreate = (defaults: TaskCreateDefaults) => {
     setCreateDefaults(defaults);
     setIsCreateOpen(true);
+    setInspectorOpen(true);
   };
 
   const createTask = async (draft: TaskCreateDraft) => {
@@ -579,10 +585,9 @@ function TaskFeatureProvider({ children }: { children: ReactNode }) {
       });
 
       setIsCreateOpen(false);
-      if (createdTask) {
-        setSelectedTaskId(String(createdTask._id));
-        setIsDetailsOpen(true);
-      }
+      setIsDetailsOpen(false);
+      setSelectedTaskId(createdTask ? String(createdTask._id) : null);
+      setInspectorOpen(false);
     } catch (error) {
       console.error("Failed to create task:", error);
       toast.error("Failed to create task");
@@ -632,6 +637,7 @@ function TaskFeatureProvider({ children }: { children: ReactNode }) {
       });
       setIsDetailsOpen(false);
       setSelectedTaskId(null);
+      setInspectorOpen(false);
     } catch (error) {
       console.error("Failed to delete task:", error);
       toast.error("Failed to delete task");
@@ -720,6 +726,20 @@ function TaskFeatureProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const closeDetails = () => {
+    setIsDetailsOpen(false);
+    if (!isCreateOpen && isInspectorOpen) {
+      setInspectorOpen(false);
+    }
+  };
+
+  const closeCreate = () => {
+    setIsCreateOpen(false);
+    if (!isDetailsOpen && isInspectorOpen) {
+      setInspectorOpen(false);
+    }
+  };
+
   const value = useMemo<TaskFeatureContextValue>(
     () => ({
       state: {
@@ -763,9 +783,9 @@ function TaskFeatureProvider({ children }: { children: ReactNode }) {
         setScheduleFilter,
         clearFilters,
         openDetails,
-        closeDetails: () => setIsDetailsOpen(false),
+        closeDetails,
         openCreate,
-        closeCreate: () => setIsCreateOpen(false),
+        closeCreate,
         createTask,
         updateTask,
         toggleComplete,
@@ -827,6 +847,7 @@ function TaskFeatureProvider({ children }: { children: ReactNode }) {
       isProjectsLoading,
       isTagsLoading,
       isSearchLoading,
+      isInspectorOpen,
     ],
   );
 
@@ -1001,6 +1022,7 @@ function TaskFeatureToolbar() {
             </InputGroup>
           ) : (
             <Button
+              // eslint-disable-next-line react-hooks/refs -- forwarded ref object for focus restore outside render
               ref={meta.searchButtonRef}
               variant="outline"
               size="sm"
@@ -1222,6 +1244,83 @@ function TaskFeatureCreateSheet() {
   );
 }
 
+function TaskFeatureInspector() {
+  const { state, actions } = useTaskFeature();
+  const { open: isInspectorOpen, setOpen: setInspectorOpen } =
+    useSidebar("inspector");
+  const showCreatePanel = state.isCreateOpen;
+  const showDetailsPanel = state.isDetailsOpen && !!state.selectedTask;
+
+  useEffect(() => {
+    if (showCreatePanel || showDetailsPanel) {
+      setInspectorOpen(true);
+    }
+  }, [showCreatePanel, showDetailsPanel, setInspectorOpen]);
+
+  useEffect(() => {
+    if (!isInspectorOpen) {
+      if (showCreatePanel) {
+        actions.closeCreate();
+      }
+      if (showDetailsPanel) {
+        actions.closeDetails();
+      }
+    }
+  }, [
+    isInspectorOpen,
+    showCreatePanel,
+    showDetailsPanel,
+    actions,
+  ]);
+
+  if (!showCreatePanel && !showDetailsPanel) {
+    return null;
+  }
+
+  return (
+    <InspectorPortal>
+      {showCreatePanel ? (
+        <CreateTaskSheet
+          open={showCreatePanel}
+          onOpenChange={(open) => {
+            if (!open) {
+              actions.closeCreate();
+            }
+          }}
+          defaults={state.createDefaults}
+          onCreate={actions.createTask}
+          projects={state.projects}
+          tags={state.tags}
+          renderInSidebar
+          autoFocusTitle={false}
+        />
+      ) : (
+        <TaskDetailsSheet
+          task={state.selectedTask}
+          open={showDetailsPanel}
+          onOpenChange={(open) => {
+            if (!open) {
+              actions.closeDetails();
+            }
+          }}
+          onDelete={actions.deleteTask}
+          onUpdate={actions.updateTask}
+          onToggleComplete={actions.toggleComplete}
+          projects={state.projects}
+          tags={state.tags}
+          subtasks={state.subtasks}
+          onCreateSubtask={actions.createSubtask}
+          onToggleSubtask={actions.toggleSubtask}
+          onDeleteSubtask={actions.deleteSubtask}
+          onUpdateSubtask={actions.updateSubtask}
+          onCreateTag={actions.createTag}
+          renderInSidebar
+        />
+      )}
+    </InspectorPortal>
+  );
+}
+
 function TaskFeatureCreateTagDialog() {
   const { state, actions } = useTaskFeature();
 
@@ -1283,5 +1382,6 @@ export const TaskFeature = {
   Content: TaskFeatureContent,
   DetailsSheet: TaskFeatureDetailsSheet,
   CreateSheet: TaskFeatureCreateSheet,
+  Inspector: TaskFeatureInspector,
   CreateTagDialog: TaskFeatureCreateTagDialog,
 };

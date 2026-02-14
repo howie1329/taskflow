@@ -18,6 +18,11 @@ import {
 
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { InspectorComingSoon } from "@/components/app/inspector/coming-soon";
+import {
+  InspectorPortalProvider,
+  InspectorPortalTarget,
+  useInspectorPortalState,
+} from "@/components/app/inspector/inspector-portal";
 import { useViewer } from "@/components/settings/hooks/use-viewer";
 import {
   Sidebar,
@@ -207,20 +212,16 @@ function WorkspaceSidebarContent({
   );
 }
 
-function InspectorDesktopTrigger({ enabled }: { enabled: boolean }) {
-  const { open } = useSidebar("inspector");
-
-  if (!enabled || open) return null;
+function InspectorSidebarContent({ right }: { right?: React.ReactNode }) {
+  const { activeCount } = useInspectorPortalState();
+  const shouldShowFallback = activeCount === 0 && !right;
 
   return (
-    <div className="pointer-events-none absolute right-3 top-3 z-20 hidden md:flex">
-      <SidebarTrigger
-        scope="inspector"
-        variant="outline"
-        className="pointer-events-auto [&_svg]:rotate-180"
-        aria-label="Open inspector"
-      />
-    </div>
+    <SidebarContent className="p-4">
+      <InspectorPortalTarget className="min-h-0 flex-1 overflow-y-auto" />
+      {right ? <div className="min-h-0 flex-1 overflow-y-auto">{right}</div> : null}
+      {shouldShowFallback ? <InspectorComingSoon /> : null}
+    </SidebarContent>
   );
 }
 
@@ -274,7 +275,8 @@ export function AppShell({ children, right }: AppShellProps) {
   }
 
   const shell = (
-    <SidebarProvider
+    <InspectorPortalProvider>
+      <SidebarProvider
       defaultOpenInspector={false}
       style={
         isChatRoute
@@ -344,7 +346,6 @@ export function AppShell({ children, right }: AppShellProps) {
                 : "relative flex flex-1 flex-col gap-2 overflow-hidden p-2 md:gap-2 md:p-2"
           }
         >
-          <InspectorDesktopTrigger enabled={showInspector} />
           {children}
         </main>
       </SidebarInset>
@@ -368,15 +369,12 @@ export function AppShell({ children, right }: AppShellProps) {
               <SidebarTrigger scope="inspector" aria-label="Close inspector" />
             </div>
           </SidebarHeader>
-          <SidebarContent className="p-4">
-            <div className="min-h-0 flex-1 overflow-y-auto">
-              {right ?? <InspectorComingSoon />}
-            </div>
-          </SidebarContent>
+          <InspectorSidebarContent right={right} />
           <SidebarRail scope="inspector" />
         </Sidebar>
       )}
-    </SidebarProvider>
+      </SidebarProvider>
+    </InspectorPortalProvider>
   );
 
   if (isNotesRoute) {

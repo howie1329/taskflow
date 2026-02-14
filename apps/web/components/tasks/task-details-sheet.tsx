@@ -74,6 +74,7 @@ interface TaskDetailsSheetProps {
   onDeleteSubtask?: (subtaskId: string) => void;
   onUpdateSubtask?: (subtaskId: string, title: string) => void;
   onCreateTag?: (name: string) => Promise<Tag | null>;
+  renderInSidebar?: boolean;
 }
 
 export function TaskDetailsSheet({
@@ -91,6 +92,7 @@ export function TaskDetailsSheet({
   onDeleteSubtask,
   onUpdateSubtask,
   onCreateTag,
+  renderInSidebar = false,
 }: TaskDetailsSheetProps) {
   const isMobile = useIsMobile();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -277,13 +279,8 @@ export function TaskDetailsSheet({
     ? subtasks.filter((s) => !s.isComplete)
     : subtasks;
 
-  return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent
-        side={isMobile ? "bottom" : "right"}
-        className={cn("sm:max-w-md", isMobile && "h-[85vh]")}
-      >
-        <div className="flex flex-col h-full">
+  const panelContent = (
+    <div className="flex h-full flex-col">
           {/* Header Block */}
           <SheetHeader className="pt-8 pb-4">
             {/* Top row: Project + Status + Actions */}
@@ -343,14 +340,25 @@ export function TaskDetailsSheet({
 
             {!isEditing ? (
               <>
-                <SheetTitle
-                  className={cn(
-                    "text-lg font-medium leading-snug",
-                    isCompleted && "line-through text-muted-foreground",
-                  )}
-                >
-                  {task.title}
-                </SheetTitle>
+                {renderInSidebar ? (
+                  <h2
+                    className={cn(
+                      "text-foreground text-lg font-medium leading-snug",
+                      isCompleted && "line-through text-muted-foreground",
+                    )}
+                  >
+                    {task.title}
+                  </h2>
+                ) : (
+                  <SheetTitle
+                    className={cn(
+                      "text-lg font-medium leading-snug",
+                      isCompleted && "line-through text-muted-foreground",
+                    )}
+                  >
+                    {task.title}
+                  </SheetTitle>
+                )}
 
                 {/* Meta row: Scheduled / Due / Priority */}
                 <div className="flex items-center gap-2 mt-3 text-sm">
@@ -382,7 +390,11 @@ export function TaskDetailsSheet({
                 </div>
               </>
             ) : (
-              <SheetTitle className="text-base font-medium">Edit task</SheetTitle>
+              renderInSidebar ? (
+                <h2 className="text-foreground text-base font-medium">Edit task</h2>
+              ) : (
+                <SheetTitle className="text-base font-medium">Edit task</SheetTitle>
+              )
             )}
           </SheetHeader>
 
@@ -918,9 +930,10 @@ export function TaskDetailsSheet({
               )}
             </SheetFooter>
           )}
-        </div>
-      </SheetContent>
-      {/* Create tag dialog */}
+    </div>
+  );
+
+  const createTagDialog = (
       <Dialog
         open={isCreateTagDialogOpen}
         onOpenChange={setIsCreateTagDialogOpen}
@@ -967,6 +980,30 @@ export function TaskDetailsSheet({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+  );
+
+  if (!open) {
+    return null;
+  }
+
+  if (renderInSidebar) {
+    return (
+      <>
+        {panelContent}
+        {createTagDialog}
+      </>
+    );
+  }
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent
+        side={isMobile ? "bottom" : "right"}
+        className={cn("sm:max-w-md", isMobile && "h-[85vh]")}
+      >
+        {panelContent}
+      </SheetContent>
+      {createTagDialog}
     </Sheet>
   );
 }

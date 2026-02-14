@@ -45,6 +45,8 @@ interface CreateTaskSheetProps {
   onCreate: (draft: TaskDraft) => void;
   projects?: Project[];
   tags?: Tag[];
+  renderInSidebar?: boolean;
+  autoFocusTitle?: boolean;
 }
 
 // Draft for creating a task (all fields user can set, excluding server-managed ones)
@@ -92,6 +94,8 @@ export function CreateTaskSheet({
   onCreate,
   projects = [],
   tags = [],
+  renderInSidebar = false,
+  autoFocusTitle = true,
 }: CreateTaskSheetProps) {
   const isMobile = useIsMobile();
   const baseId = useId();
@@ -125,6 +129,7 @@ export function CreateTaskSheet({
   // Reset form when opening with new defaults
   useEffect(() => {
     if (open) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reset local draft fields when panel opens
       setTitle("");
       setDescription("");
       setProjectId(defaults.projectId ?? "__none__");
@@ -144,7 +149,7 @@ export function CreateTaskSheet({
 
   // Focus title on open
   useEffect(() => {
-    if (open) {
+    if (open && autoFocusTitle) {
       const timeout = setTimeout(() => {
         const titleInput = document.getElementById(
           ids.title,
@@ -153,7 +158,7 @@ export function CreateTaskSheet({
       }, 100);
       return () => clearTimeout(timeout);
     }
-  }, [open, ids.title]);
+  }, [open, autoFocusTitle, ids.title]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -213,32 +218,33 @@ export function CreateTaskSheet({
     }
   };
 
-  return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent
-        side={isMobile ? "bottom" : "right"}
-        className={cn("sm:max-w-md", isMobile && "h-[85vh]")}
-      >
-        <div className="flex flex-col h-full">
-          {/* Header */}
-          <SheetHeader className="pt-7 pb-3 shrink-0">
-            <SheetTitle className="text-sm text-muted-foreground font-medium">
-              New task
-            </SheetTitle>
-            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-              <Kbd>Enter</Kbd>
-              <span>to create</span>
-              <span className="mx-1">·</span>
-              <Kbd>Esc</Kbd>
-              <span>to close</span>
-            </div>
-          </SheetHeader>
+  if (!open) {
+    return null;
+  }
 
-          {/* Body */}
-          <form
-            onSubmit={handleSubmit}
-            className="flex-1 overflow-y-auto px-5 py-5 space-y-6"
-          >
+  const content = (
+    <div className="flex h-full flex-col">
+      <SheetHeader className="shrink-0 pt-7 pb-3">
+        {renderInSidebar ? (
+          <h2 className="text-sm font-medium text-muted-foreground">New task</h2>
+        ) : (
+          <SheetTitle className="text-sm text-muted-foreground font-medium">
+            New task
+          </SheetTitle>
+        )}
+        <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+          <Kbd>Enter</Kbd>
+          <span>to create</span>
+          <span className="mx-1">·</span>
+          <Kbd>Esc</Kbd>
+          <span>to close</span>
+        </div>
+      </SheetHeader>
+
+      <form
+        onSubmit={handleSubmit}
+        className="flex-1 overflow-y-auto px-5 py-5 space-y-6"
+      >
             {/* Title - Required */}
             <Field>
               <FieldLabel htmlFor={ids.title} className="sr-only">
@@ -503,8 +509,21 @@ export function CreateTaskSheet({
                 Create
               </Button>
             </SheetFooter>
-          </form>
-        </div>
+      </form>
+    </div>
+  );
+
+  if (renderInSidebar) {
+    return content;
+  }
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent
+        side={isMobile ? "bottom" : "right"}
+        className={cn("sm:max-w-md", isMobile && "h-[85vh]")}
+      >
+        {content}
       </SheetContent>
     </Sheet>
   );
