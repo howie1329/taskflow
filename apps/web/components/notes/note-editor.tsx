@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Kbd } from "@/components/ui/kbd"
+import { SidebarTrigger } from "@/components/ui/sidebar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -291,6 +292,11 @@ export function NoteEditor({
             )}
           </div>
           <div className="flex items-center gap-1">
+            <SidebarTrigger
+              scope="inspector"
+              className="[&_svg]:rotate-180"
+              aria-label="Toggle inspector"
+            />
             <Button
               variant="ghost"
               size="icon-sm"

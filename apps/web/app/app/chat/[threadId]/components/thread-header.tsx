@@ -91,40 +91,47 @@ export function ThreadHeader({
         </div>
 
         {thread && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon-sm">
-                <HugeiconsIcon
-                  icon={MoreHorizontalIcon}
-                  className="size-4"
-                  strokeWidth={2}
-                />
-                <span className="sr-only">Conversation actions</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={onOpenEditTitle}>
-                <HugeiconsIcon
-                  icon={PencilEdit01Icon}
-                  className="mr-2 size-4"
-                  strokeWidth={2}
-                />
-                Edit title
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={onOpenDeleteThread}
-                className="text-destructive focus:text-destructive"
-              >
-                <HugeiconsIcon
-                  icon={Delete02Icon}
-                  className="mr-2 size-4"
-                  strokeWidth={2}
-                />
-                Delete thread
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex items-center gap-1">
+            <SidebarTrigger
+              scope="inspector"
+              className="[&_svg]:rotate-180"
+              aria-label="Toggle inspector"
+            />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon-sm">
+                  <HugeiconsIcon
+                    icon={MoreHorizontalIcon}
+                    className="size-4"
+                    strokeWidth={2}
+                  />
+                  <span className="sr-only">Conversation actions</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={onOpenEditTitle}>
+                  <HugeiconsIcon
+                    icon={PencilEdit01Icon}
+                    className="mr-2 size-4"
+                    strokeWidth={2}
+                  />
+                  Edit title
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={onOpenDeleteThread}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <HugeiconsIcon
+                    icon={Delete02Icon}
+                    className="mr-2 size-4"
+                    strokeWidth={2}
+                  />
+                  Delete thread
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         )}
       </div>
     </div>

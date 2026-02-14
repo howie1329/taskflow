@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Task01Icon,
@@ -11,12 +11,12 @@ import {
   NoteIcon,
   SettingsIcon,
   CommandIcon,
+  SidebarLeftIcon,
   InboxDownloadIcon,
   NotificationIcon,
 } from "@hugeicons/core-free-icons";
 
 import { SignOutButton } from "@/components/auth/sign-out-button";
-import { InspectorComingSoon } from "@/components/app/inspector/coming-soon";
 import { useViewer } from "@/components/settings/hooks/use-viewer";
 import {
   Sidebar,
@@ -206,27 +206,6 @@ function WorkspaceSidebarContent({
   );
 }
 
-function InspectorRouteSync({
-  hasRightContent,
-}: {
-  hasRightContent: boolean;
-}) {
-  const { open, setOpen } = useSidebar("inspector");
-  const lastHadRightContentRef = useRef(hasRightContent);
-
-  useEffect(() => {
-    if (hasRightContent && !open) {
-      setOpen(true);
-    }
-    if (!hasRightContent && lastHadRightContentRef.current && open) {
-      setOpen(false);
-    }
-    lastHadRightContentRef.current = hasRightContent;
-  }, [hasRightContent, open, setOpen]);
-
-  return null;
-}
-
 export function AppShell({ children, right }: AppShellProps) {
   const pathname = usePathname();
   const pageTitle = getPageTitle(pathname);
@@ -318,7 +297,6 @@ export function AppShell({ children, right }: AppShellProps) {
         )}
         <SidebarRail scope="primary" />
       </Sidebar>
-      <InspectorRouteSync hasRightContent={!!right && showInspector} />
       <SidebarInset className="min-w-0 overflow-hidden">
         {!isOnboardingRoute && (
           <div className="md:hidden sticky top-0 z-20 flex h-10 items-center gap-2 px-2 bg-background/70 backdrop-blur supports-backdrop-filter:bg-background/50">
@@ -372,9 +350,7 @@ export function AppShell({ children, right }: AppShellProps) {
             </div>
           </SidebarHeader>
           <SidebarContent className="p-4">
-            <div className="min-h-0 flex-1 overflow-y-auto">
-              {right ?? <InspectorComingSoon />}
-            </div>
+            <div className="min-h-0 flex-1 overflow-y-auto">{right}</div>
           </SidebarContent>
           <SidebarRail scope="inspector" />
         </Sidebar>
