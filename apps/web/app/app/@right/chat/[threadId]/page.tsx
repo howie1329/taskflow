@@ -1,9 +1,10 @@
 import { ChatInspector } from "@/components/app/inspector/chat-inspector";
 
-export default function ChatThreadInspectorPage({
+export default async function ChatThreadInspectorPage({
   params,
 }: {
-  params: { threadId: string };
+  params: Promise<{ threadId: string }>;
 }) {
-  return <ChatInspector threadId={params.threadId} />;
+  const { threadId } = await params;
+  return <ChatInspector threadId={threadId} />;
 }
