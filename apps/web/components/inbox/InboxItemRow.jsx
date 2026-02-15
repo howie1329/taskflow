@@ -140,21 +140,20 @@ export const InboxItemRow = memo(function InboxItemRow({
   const isAnyLoading = isLoading || Object.values(localLoading).some(Boolean);
 
   return (
-    <>
-      <motion.div
-        initial={
-          isNew && !prefersReducedMotion ? { opacity: 0, y: 8 } : false
-        }
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.2, ease: "easeOut" }}
-        className={cn(
-          "group flex items-start gap-2.5 px-3 py-2.5 transition-colors hover:bg-muted/50",
-          isArchived && "opacity-70",
-          isAnyLoading && "opacity-70",
-        )}
-        role="listitem"
-        aria-busy={isAnyLoading}
-      >
+    <motion.div
+      initial={
+        isNew && !prefersReducedMotion ? { opacity: 0, y: 8 } : false
+      }
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
+      className={cn(
+        "group flex items-start gap-2.5 px-3 py-2.5 transition-colors hover:bg-muted/50",
+        isArchived && "opacity-70",
+        isAnyLoading && "opacity-70",
+      )}
+      role="listitem"
+      aria-busy={isAnyLoading}
+    >
         <div className="flex-1 min-w-0 space-y-0.5 pr-1">
           <p
             className="text-[13px] font-medium truncate leading-5"
@@ -217,7 +216,7 @@ export const InboxItemRow = memo(function InboxItemRow({
                   <HugeiconsIcon icon={MoreVerticalIcon} className="size-4" />
                 </Button>
               </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
               <DropdownMenuSub>
@@ -306,11 +305,10 @@ export const InboxItemRow = memo(function InboxItemRow({
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
-            </DropdownMenuContent>
+              </DropdownMenuContent>
             </DropdownMenu>
           </div>
         )}
-      </motion.div>
-    </>
+    </motion.div>
   );
 });
