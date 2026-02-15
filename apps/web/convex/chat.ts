@@ -555,6 +555,41 @@ export const updateThreadSnippetAndTimestamps = mutation({
   },
 });
 
+export const setThreadSummary = mutation({
+  args: {
+    threadId: v.string(),
+    summary: v.object({
+      schemaVersion: v.number(),
+      summaryText: v.string(),
+      summarizedThroughMessageId: v.string(),
+      updatedAt: v.number(),
+    }),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx)
+    if (!userId) {
+      throw new Error("Not authenticated")
+    }
+
+    const thread = await ctx.db
+      .query("thread")
+      .withIndex("by_threadId", (q) => q.eq("threadId", args.threadId))
+      .filter((q) => q.eq(q.field("userId"), userId))
+      .first()
+
+    if (!thread || thread.deletedAt !== undefined) {
+      throw new Error("Thread not found or access denied")
+    }
+
+    await ctx.db.patch(thread._id, {
+      summary: args.summary,
+      updatedAt: Date.now(),
+    })
+
+    return await ctx.db.get(thread._id)
+  },
+})
+
 export const getAllThreads = internalQuery({
   handler(ctx) {
     return ctx.db.query("thread").filter((q) => q.neq(q.field("deletedAt"), undefined)

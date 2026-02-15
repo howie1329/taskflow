@@ -19,7 +19,10 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@taskflow/chat-content": [
+        "../../packages/Taskflow-Chat-Content/dist/index.js"
+      ]
     }
   },
   "include": [

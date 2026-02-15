@@ -11,6 +11,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@taskflow/chat-content": "1.0.0",
     "@ai-sdk/react": "^3.0.74",
     "@auth/core": "^0.34.3",
     "@base-ui/react": "^1.1.0",

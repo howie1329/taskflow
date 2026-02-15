@@ -17,6 +17,14 @@ const schema = defineSchema({
     model: v.optional(v.string()),
     scope: v.optional(v.union(v.literal("workspace"), v.literal("project"))),
     deletedAt: v.optional(v.number()),
+    summary: v.optional(
+      v.object({
+        schemaVersion: v.number(),
+        summaryText: v.string(),
+        summarizedThroughMessageId: v.string(),
+        updatedAt: v.number(),
+      }),
+    ),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
