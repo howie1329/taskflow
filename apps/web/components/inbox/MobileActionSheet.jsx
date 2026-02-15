@@ -43,11 +43,14 @@ export const MobileActionSheet = memo(function MobileActionSheet({
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const [actionType, setActionType] = useState(null);
+  const isArchived = item?.status === "archived";
 
-  // Early return after all hooks are called
-  if (!item) return null;
-
-  const isArchived = item.status === "archived";
+  const handleSheetOpenChange = useCallback(
+    (nextOpen) => {
+      onOpenChange(nextOpen);
+    },
+    [onOpenChange],
+  );
 
   const handleConvert = useCallback(
     async (type) => {
@@ -55,50 +58,53 @@ export const MobileActionSheet = memo(function MobileActionSheet({
       setActionType(`convert-${type}`);
       try {
         await onConvert(type);
-        onOpenChange(false);
+        handleSheetOpenChange(false);
       } finally {
         setIsLoading(false);
         setActionType(null);
       }
     },
-    [onConvert, onOpenChange],
+    [onConvert, handleSheetOpenChange],
   );
 
   const handleArchive = useCallback(async () => {
+    if (!item) return;
     setIsLoading(true);
     setActionType("archive");
     try {
       await onArchive(item._id);
-      onOpenChange(false);
+      handleSheetOpenChange(false);
     } finally {
       setIsLoading(false);
       setActionType(null);
     }
-  }, [onArchive, item._id, onOpenChange]);
+  }, [onArchive, item, handleSheetOpenChange]);
 
   const handleUnarchive = useCallback(async () => {
+    if (!item) return;
     setIsLoading(true);
     setActionType("unarchive");
     try {
       await onUnarchive(item._id);
-      onOpenChange(false);
+      handleSheetOpenChange(false);
     } finally {
       setIsLoading(false);
       setActionType(null);
     }
-  }, [onUnarchive, item._id, onOpenChange]);
+  }, [onUnarchive, item, handleSheetOpenChange]);
 
   const handleDelete = useCallback(async () => {
+    if (!item) return;
     setIsLoading(true);
     setActionType("delete");
     try {
       await onDelete(item._id);
-      onOpenChange(false);
+      handleSheetOpenChange(false);
     } finally {
       setIsLoading(false);
       setActionType(null);
     }
-  }, [onDelete, item._id, onOpenChange]);
+  }, [onDelete, item, handleSheetOpenChange]);
 
   const getButtonContent = (icon, label, loadingKey) => {
     const isBtnLoading = isLoading && actionType === loadingKey;
@@ -114,8 +120,10 @@ export const MobileActionSheet = memo(function MobileActionSheet({
     );
   };
 
+  if (!item) return null;
+
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={handleSheetOpenChange}>
       <SheetContent
         side="bottom"
         className="h-auto"
@@ -142,11 +150,12 @@ export const MobileActionSheet = memo(function MobileActionSheet({
           <Button
             variant="ghost"
             className="justify-start gap-2 h-12 touch-manipulation min-h-[44px]"
-            onClick={() => handleConvert("note")}
-            disabled={isLoading}
-            aria-busy={isLoading && actionType === "convert-note"}
+            disabled
+            aria-disabled="true"
           >
-            {getButtonContent(NoteIcon, "Convert to Note", "convert-note")}
+            <HugeiconsIcon icon={NoteIcon} className="size-4" />
+            Convert to Note
+            <span className="ml-auto text-[10px] text-muted-foreground">Soon</span>
           </Button>
           <Button
             variant="ghost"
@@ -215,7 +224,7 @@ export const MobileActionSheet = memo(function MobileActionSheet({
                   {isLoading && actionType === "delete" ? (
                     <>
                       <HugeiconsIcon
-                        icon={LoaderIcon}
+                        icon={Loading03Icon}
                         className="size-4 animate-spin mr-2"
                       />
                       Deleting...

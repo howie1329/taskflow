@@ -1,17 +1,13 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useCallback } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Doc } from "@/convex/_generated/dataModel";
+import { toast } from "sonner";
 
 export type InboxItem = Doc<"inboxItems">;
 export type InboxItemId = InboxItem["_id"];
-
-export interface ToastMessage {
-  message: string;
-  type: "success" | "info";
-}
 
 export interface UseInboxActionsReturn {
   captureItem: (content: string) => Promise<InboxItem | null>;
@@ -20,13 +16,9 @@ export interface UseInboxActionsReturn {
   deleteItem: (id: InboxItemId) => Promise<void>;
   convertToTask: (id: InboxItemId) => Promise<void>;
   convertToProject: (id: InboxItemId) => Promise<void>;
-  toast: ToastMessage | null;
-  clearToast: () => void;
 }
 
 export function useInboxActions(): UseInboxActionsReturn {
-  const [toast, setToast] = useState<ToastMessage | null>(null);
-
   const createInboxItem = useMutation(api.inbox.createInboxItem);
   const archiveInboxItem = useMutation(api.inbox.archiveInboxItem);
   const unarchiveInboxItem = useMutation(api.inbox.unarchiveInboxItem);
@@ -43,10 +35,10 @@ export function useInboxActions(): UseInboxActionsReturn {
 
       try {
         const newItem = await createInboxItem({ content: trimmed });
-        setToast({ message: "Item captured", type: "success" });
+        toast.success("Item captured");
         return newItem;
       } catch {
-        setToast({ message: "Failed to capture item", type: "info" });
+        toast.error("Failed to capture item");
         return null;
       }
     },
@@ -57,21 +49,33 @@ export function useInboxActions(): UseInboxActionsReturn {
     async (id: InboxItemId) => {
       try {
         await archiveInboxItem({ inboxItemId: id });
-        setToast({ message: "Item archived", type: "success" });
+        toast.success("Item archived", {
+          action: {
+            label: "Undo",
+            onClick: async () => {
+              try {
+                await unarchiveInboxItem({ inboxItemId: id });
+                toast.success("Archive undone");
+              } catch {
+                toast.error("Failed to undo archive");
+              }
+            },
+          },
+        });
       } catch {
-        setToast({ message: "Failed to archive item", type: "info" });
+        toast.error("Failed to archive item");
       }
     },
-    [archiveInboxItem],
+    [archiveInboxItem, unarchiveInboxItem],
   );
 
   const unarchiveItem = useCallback(
     async (id: InboxItemId) => {
       try {
         await unarchiveInboxItem({ inboxItemId: id });
-        setToast({ message: "Item unarchived", type: "success" });
+        toast.success("Item unarchived");
       } catch {
-        setToast({ message: "Failed to unarchive item", type: "info" });
+        toast.error("Failed to unarchive item");
       }
     },
     [unarchiveInboxItem],
@@ -81,9 +85,9 @@ export function useInboxActions(): UseInboxActionsReturn {
     async (id: InboxItemId) => {
       try {
         await deleteInboxItem({ inboxItemId: id });
-        setToast({ message: "Item deleted", type: "success" });
+        toast.success("Item deleted");
       } catch {
-        setToast({ message: "Failed to delete item", type: "info" });
+        toast.error("Failed to delete item");
       }
     },
     [deleteInboxItem],
@@ -93,9 +97,9 @@ export function useInboxActions(): UseInboxActionsReturn {
     async (id: InboxItemId) => {
       try {
         await convertInboxItemToTask({ inboxItemId: id });
-        setToast({ message: "Converted to task", type: "success" });
+        toast.success("Converted to task");
       } catch {
-        setToast({ message: "Failed to convert item", type: "info" });
+        toast.error("Failed to convert item");
       }
     },
     [convertInboxItemToTask],
@@ -105,17 +109,13 @@ export function useInboxActions(): UseInboxActionsReturn {
     async (id: InboxItemId) => {
       try {
         await convertInboxItemToProject({ inboxItemId: id });
-        setToast({ message: "Converted to project", type: "success" });
+        toast.success("Converted to project");
       } catch {
-        setToast({ message: "Failed to convert item", type: "info" });
+        toast.error("Failed to convert item");
       }
     },
     [convertInboxItemToProject],
   );
-
-  const clearToast = useCallback(() => {
-    setToast(null);
-  }, []);
 
   return {
     captureItem,
@@ -124,7 +124,5 @@ export function useInboxActions(): UseInboxActionsReturn {
     deleteItem,
     convertToTask,
     convertToProject,
-    toast,
-    clearToast,
   };
 }

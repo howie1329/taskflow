@@ -23,6 +23,7 @@ export const InboxTabs = memo(function InboxTabs({
   onConvert,
   onOpenActions,
   onCaptureFocus,
+  activeMobileItemId,
 }) {
   // Use total counts if provided, otherwise fall back to filtered items length
   const displayOpenCount = openCount ?? openItems.length;
@@ -105,6 +106,9 @@ export const InboxTabs = memo(function InboxTabs({
                   onConvert={onConvert}
                   onOpenActions={onOpenActions}
                   isNew={newItemIds.has(String(item._id))}
+                  isMobileActionsOpen={
+                    activeMobileItemId === String(item._id)
+                  }
                 />
               ))}
             </div>
@@ -138,6 +142,9 @@ export const InboxTabs = memo(function InboxTabs({
                   onDelete={onDelete}
                   onConvert={onConvert}
                   onOpenActions={onOpenActions}
+                  isMobileActionsOpen={
+                    activeMobileItemId === String(item._id)
+                  }
                 />
               ))}
             </div>
