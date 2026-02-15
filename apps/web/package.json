@@ -11,7 +11,6 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@taskflow/chat-content": "1.0.0",
     "@ai-sdk/react": "^3.0.74",
     "@auth/core": "^0.34.3",
     "@base-ui/react": "^1.1.0",
@@ -51,9 +50,10 @@
     "@streamdown/mermaid": "^1.0.2",
     "@supermemory/tools": "^1.4.0",
     "@takoviz/ai-sdk": "^1.0.1",
+    "@taskflow/chat-content": "1.0.0",
     "@tavily/core": "^0.7.1",
     "@xyflow/react": "^12.10.0",
-    "ai": "^6.0.70",
+    "ai": "^6.0.86",
     "ansi-to-react": "^6.2.6",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
