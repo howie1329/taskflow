@@ -14,13 +14,6 @@ import {
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -45,6 +38,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { motion, useReducedMotion } from "motion/react";
 
 function formatRelativeTime(timestamp) {
   const now = Date.now();
@@ -91,11 +85,8 @@ export const InboxItemRow = memo(function InboxItemRow({
   onOpenActions,
   isNew = false,
   isLoading = false,
+  isMobileActionsOpen = false,
 }) {
-  const [convertDialog, setConvertDialog] = useState({
-    open: false,
-    type: null,
-  });
   const [localLoading, setLocalLoading] = useState({
     archive: false,
     delete: false,
@@ -103,15 +94,12 @@ export const InboxItemRow = memo(function InboxItemRow({
   });
 
   const isMobile = useIsMobile();
+  const prefersReducedMotion = useReducedMotion();
   const isArchived = item.status === "archived";
   const rowCopy = getConversationRowCopy(item.content);
 
   const handleConvert = useCallback(
     async (type) => {
-      if (type === "note") {
-        setConvertDialog({ open: true, type });
-        return;
-      }
       setLocalLoading((prev) => ({ ...prev, convert: true }));
       try {
         await onConvert(item._id, type);
@@ -153,12 +141,16 @@ export const InboxItemRow = memo(function InboxItemRow({
 
   return (
     <>
-      <div
+      <motion.div
+        initial={
+          isNew && !prefersReducedMotion ? { opacity: 0, y: 8 } : false
+        }
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.2, ease: "easeOut" }}
         className={cn(
           "group flex items-start gap-2.5 px-3 py-2.5 transition-colors hover:bg-muted/50",
           isArchived && "opacity-70",
-          isNew && "animate-in fade-in slide-in-from-top-2 duration-300",
-          isAnyLoading && "opacity-70 pointer-events-none",
+          isAnyLoading && "opacity-70",
         )}
         role="listitem"
         aria-busy={isAnyLoading}
@@ -199,7 +191,8 @@ export const InboxItemRow = memo(function InboxItemRow({
             onClick={() => onOpenActions(item)}
             aria-label={`Open actions for inbox item: ${item.content.slice(0, 50)}${item.content.length > 50 ? "..." : ""}`}
             aria-haspopup="menu"
-            aria-expanded="false"
+            aria-expanded={isMobileActionsOpen}
+            disabled={isAnyLoading}
           >
             <HugeiconsIcon icon={MoreVerticalIcon} className="size-4" />
           </Button>
@@ -219,6 +212,7 @@ export const InboxItemRow = memo(function InboxItemRow({
                   className="shrink-0 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
                   aria-label={`Open actions for inbox item: ${item.content.slice(0, 50)}${item.content.length > 50 ? "..." : ""}`}
                   aria-haspopup="menu"
+                  disabled={isAnyLoading}
                 >
                   <HugeiconsIcon icon={MoreVerticalIcon} className="size-4" />
                 </Button>
@@ -240,11 +234,13 @@ export const InboxItemRow = memo(function InboxItemRow({
                     Task
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onClick={() => handleConvert("note")}
-                    disabled={localLoading.convert}
+                    disabled
                   >
                     <HugeiconsIcon icon={NoteIcon} className="size-4" />
                     Note
+                    <span className="ml-auto text-[10px] text-muted-foreground">
+                      Soon
+                    </span>
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => handleConvert("project")}
@@ -314,40 +310,7 @@ export const InboxItemRow = memo(function InboxItemRow({
             </DropdownMenu>
           </div>
         )}
-      </div>
-
-      {/* Coming soon dialog for convert */}
-      <Dialog
-        open={convertDialog.open}
-        onOpenChange={(open) =>
-          setConvertDialog({ open, type: open ? convertDialog.type : null })
-        }
-      >
-        <DialogContent className="sm:max-w-sm">
-          <DialogHeader>
-            <DialogTitle>
-              Convert to{" "}
-              {convertDialog.type
-                ? convertDialog.type.charAt(0).toUpperCase() +
-                  convertDialog.type.slice(1)
-                : ""}
-            </DialogTitle>
-            <DialogDescription>
-              This feature is coming soon. Once implemented, this will create a
-              new {convertDialog.type} from this inbox item and archive it.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-end">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setConvertDialog({ open: false, type: null })}
-            >
-              Close
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      </motion.div>
     </>
   );
 });

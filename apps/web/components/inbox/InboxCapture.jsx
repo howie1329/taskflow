@@ -5,7 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Kbd } from "@/components/ui/kbd";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Loading03Icon } from "@hugeicons/core-free-icons";
+import {
+  Loading03Icon,
+  CheckmarkCircle02Icon,
+} from "@hugeicons/core-free-icons";
+import { motion, useReducedMotion } from "motion/react";
 
 import { cn } from "@/lib/utils";
 
@@ -53,9 +57,33 @@ export const InboxCapture = memo(function InboxCapture({
   onCapture,
   disabled = false,
   className = "",
+  inputRef = null,
 }) {
   const textareaRef = useRef(null);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [isCaptured, setIsCaptured] = useState(false);
+  const captureStateTimerRef = useRef(null);
+  const prefersReducedMotion = useReducedMotion();
+
+  const setTextareaRef = useCallback(
+    (node) => {
+      textareaRef.current = node;
+      if (typeof inputRef === "function") {
+        inputRef(node);
+      } else if (inputRef) {
+        inputRef.current = node;
+      }
+    },
+    [inputRef],
+  );
+
+  useEffect(() => {
+    return () => {
+      if (captureStateTimerRef.current) {
+        clearTimeout(captureStateTimerRef.current);
+      }
+    };
+  }, []);
 
   // Auto-resize textarea
   useAutoResizeTextarea(textareaRef, value, 80, 200);
@@ -69,7 +97,16 @@ export const InboxCapture = memo(function InboxCapture({
 
     setIsCapturing(true);
     try {
-      await onCapture();
+      const wasCaptured = await onCapture();
+      if (wasCaptured) {
+        setIsCaptured(true);
+        if (captureStateTimerRef.current) {
+          clearTimeout(captureStateTimerRef.current);
+        }
+        captureStateTimerRef.current = setTimeout(() => {
+          setIsCaptured(false);
+        }, 800);
+      }
     } finally {
       setIsCapturing(false);
     }
@@ -112,7 +149,7 @@ export const InboxCapture = memo(function InboxCapture({
     >
       <div className="relative">
         <Textarea
-          ref={textareaRef}
+          ref={setTextareaRef}
           value={value}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
@@ -161,24 +198,43 @@ export const InboxCapture = memo(function InboxCapture({
             <Kbd>C</Kbd> to focus
           </span>
         </div>
-        <Button
-          size="sm"
-          onClick={handleCaptureClick}
-          disabled={isDisabled || !value.trim() || isAtLimit}
-          aria-busy={isCapturing}
+        <motion.div
+          whileHover={
+            prefersReducedMotion || isDisabled || !value.trim() || isAtLimit
+              ? undefined
+              : { scale: 1.01 }
+          }
+          whileTap={
+            prefersReducedMotion || isDisabled || !value.trim() || isAtLimit
+              ? undefined
+              : { scale: 0.98 }
+          }
+          transition={{ duration: 0.14, ease: "easeOut" }}
         >
-          {isCapturing ? (
-            <>
-              <HugeiconsIcon
-                icon={Loading03Icon}
-                className="size-4 animate-spin mr-2"
-              />
-              Capturing...
-            </>
-          ) : (
-            "Capture"
-          )}
-        </Button>
+          <Button
+            size="sm"
+            onClick={handleCaptureClick}
+            disabled={isDisabled || !value.trim() || isAtLimit}
+            aria-busy={isCapturing}
+          >
+            {isCapturing ? (
+              <>
+                <HugeiconsIcon
+                  icon={Loading03Icon}
+                  className={cn("size-4 mr-2", !prefersReducedMotion && "animate-spin")}
+                />
+                Capturing...
+              </>
+            ) : isCaptured ? (
+              <>
+                <HugeiconsIcon icon={CheckmarkCircle02Icon} className="size-4 mr-2" />
+                Captured
+              </>
+            ) : (
+              "Capture"
+            )}
+          </Button>
+        </motion.div>
       </div>
     </div>
   );
