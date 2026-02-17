@@ -10,7 +10,7 @@ import {
 } from "react";
 import { useParams, usePathname } from "next/navigation";
 import { useChat } from "@ai-sdk/react";
-import type { ChatStatus, UIMessage } from "ai";
+import type { ChatStatus, FileUIPart, UIMessage } from "ai";
 import { nanoid } from "nanoid";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -44,6 +44,7 @@ type ChatContextValue = {
   messages: UIMessage[];
   status: ChatStatus;
   error: Error | undefined;
+  sendPrompt: (message: { text: string; files: FileUIPart[] }) => Promise<void>;
   sendText: (text: string) => Promise<void>;
   stop: () => Promise<void>;
   selectedModelId: string | null;
@@ -180,11 +181,19 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     setMessages(serverMessages);
   }, [messages.length, serverMessages, setMessages, status]);
 
-  const sendText = async (text: string) => {
-    const trimmed = text.trim();
-    if (!trimmed || !selectedModelId || !userId) return;
+  const sendPrompt = async ({
+    text,
+    files,
+  }: {
+    text: string
+    files: FileUIPart[]
+  }) => {
+    const trimmed = text.trim()
+    const hasFiles = files.length > 0
+    if ((!trimmed && !hasFiles) || !selectedModelId || !userId) return
+
     await sendMessage(
-      { text: trimmed },
+      { text: trimmed, files },
       {
         body: {
           model: selectedModelId,
@@ -195,7 +204,11 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         },
       },
     );
-  };
+  }
+
+  const sendText = async (text: string) => {
+    await sendPrompt({ text, files: [] })
+  }
 
   const value = useMemo<ChatContextValue>(
     () => ({
@@ -204,6 +217,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       messages,
       status,
       error,
+      sendPrompt,
       sendText,
       stop,
       selectedModelId,
@@ -225,6 +239,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       messages,
       status,
       error,
+      sendPrompt,
       sendText,
       stop,
       selectedModelId,

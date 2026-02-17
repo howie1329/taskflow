@@ -2,13 +2,26 @@
 
 import { useRef } from "react"
 import { useRouter } from "next/navigation"
+import type { FileUIPart } from "ai"
+import { toast } from "sonner"
 import {
+  PromptInputActionAddAttachments,
+  PromptInputActionMenu,
+  PromptInputActionMenuContent,
+  PromptInputActionMenuTrigger,
   PromptInput,
   PromptInputTextarea,
   PromptInputSubmit,
   PromptInputFooter,
   usePromptInputController,
+  usePromptInputAttachments,
 } from "@/components/ai-elements/prompt-input"
+import {
+  Attachment,
+  AttachmentPreview,
+  AttachmentRemove,
+  Attachments,
+} from "@/components/ai-elements/attachments"
 import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion"
 import { useChatContext } from "./chat-provider"
 import { ModelSelectorMenu } from "./model-selector-menu"
@@ -29,7 +42,7 @@ export function NewChatComposer() {
   const { textInput } = usePromptInputController()
   const {
     activeThreadId,
-    sendText,
+    sendPrompt,
     status,
     stop,
     selectedModelId,
@@ -43,10 +56,16 @@ export function NewChatComposer() {
     availableModels,
   } = useChatContext()
 
-  const handleSubmit = () => {
-    if (!textInput.value.trim() || !selectedModelId) return
+  const handleSubmit = ({
+    text,
+    files,
+  }: {
+    text: string
+    files: FileUIPart[]
+  }) => {
+    if ((!text.trim() && files.length === 0) || !selectedModelId) return
     router.push(`/app/chat/${activeThreadId}`)
-    void sendText(textInput.value)
+    void sendPrompt({ text, files })
     textInput.clear()
   }
 
@@ -98,8 +117,14 @@ export function NewChatComposer() {
           </div>
           <PromptInput
             onSubmit={handleSubmit}
+            accept="image/*"
+            multiple
+            maxFiles={4}
+            maxFileSize={1_000_000}
+            onError={(error) => toast.error(error.message)}
             className="**:data-[slot=input-group]:rounded-3xl **:data-[slot=input-group]:border-border/60 **:data-[slot=input-group]:bg-background **:data-[slot=input-group]:shadow-sm **:data-[slot=input-group]:transition-colors **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:border-ring/50 **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:ring-2 **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:ring-ring/20"
           >
+            <ComposerAttachmentsPreview />
             <PromptInputTextarea
               id="new-chat-message"
               ref={textareaRef}
@@ -109,6 +134,17 @@ export function NewChatComposer() {
 
             <PromptInputFooter className="border-t border-border/45 pb-2.5 pt-2 text-muted-foreground">
               <div className="flex flex-wrap items-center gap-1.5">
+                <PromptInputActionMenu>
+                  <PromptInputActionMenuTrigger
+                    className="h-7 rounded-full border border-border/60 bg-muted/30 px-2.5 text-xs font-medium text-foreground hover:bg-muted/60"
+                    size="sm"
+                  >
+                    Add image
+                  </PromptInputActionMenuTrigger>
+                  <PromptInputActionMenuContent>
+                    <PromptInputActionAddAttachments label="Add image" />
+                  </PromptInputActionMenuContent>
+                </PromptInputActionMenu>
                 <ModelSelectorMenu
                   availableModels={availableModels}
                   selectedModelId={selectedModelId}
@@ -135,6 +171,28 @@ export function NewChatComposer() {
           </PromptInput>
         </div>
       </div>
+    </div>
+  )
+}
+
+function ComposerAttachmentsPreview() {
+  const attachments = usePromptInputAttachments()
+  if (attachments.files.length === 0) return null
+
+  return (
+    <div className="px-3 pt-3">
+      <Attachments variant="inline" className="mr-auto">
+        {attachments.files.map((file) => (
+          <Attachment
+            key={file.id}
+            data={file}
+            onRemove={() => attachments.remove(file.id)}
+          >
+            <AttachmentPreview />
+            <AttachmentRemove />
+          </Attachment>
+        ))}
+      </Attachments>
     </div>
   )
 }

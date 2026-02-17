@@ -1,16 +1,29 @@
 "use client"
 
 import { useRef } from "react"
+import type { FileUIPart } from "ai"
+import { toast } from "sonner"
 import type { Doc, Id } from "@/convex/_generated/dataModel"
 import { useMutation } from "convex/react"
 import { api } from "@/convex/_generated/api"
 import {
+  PromptInputActionAddAttachments,
+  PromptInputActionMenu,
+  PromptInputActionMenuContent,
+  PromptInputActionMenuTrigger,
   PromptInput,
   PromptInputFooter,
   PromptInputSubmit,
   PromptInputTextarea,
   usePromptInputController,
+  usePromptInputAttachments,
 } from "@/components/ai-elements/prompt-input"
+import {
+  Attachment,
+  AttachmentPreview,
+  AttachmentRemove,
+  Attachments,
+} from "@/components/ai-elements/attachments"
 import { useChatContext } from "../../components/chat-provider"
 import { ModelSelectorMenu } from "../../components/model-selector-menu"
 import { ModeSelectorMenu } from "../../components/mode-selector-menu"
@@ -25,7 +38,7 @@ export function ThreadComposerBar({ thread }: ThreadComposerBarProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const { textInput } = usePromptInputController()
   const {
-    sendText,
+    sendPrompt,
     status,
     stop,
     selectedModelId,
@@ -41,9 +54,15 @@ export function ThreadComposerBar({ thread }: ThreadComposerBarProps) {
 
   const setThreadScope = useMutation(api.chat.setThreadScope)
 
-  const handleSubmit = () => {
-    if (!textInput.value.trim()) return
-    void sendText(textInput.value)
+  const handleSubmit = ({
+    text,
+    files,
+  }: {
+    text: string
+    files: FileUIPart[]
+  }) => {
+    if (!text.trim() && files.length === 0) return
+    void sendPrompt({ text, files })
     textInput.clear()
   }
 
@@ -70,8 +89,14 @@ export function ThreadComposerBar({ thread }: ThreadComposerBarProps) {
         </div>
         <PromptInput
           onSubmit={handleSubmit}
+          accept="image/*"
+          multiple
+          maxFiles={4}
+          maxFileSize={1_000_000}
+          onError={(error) => toast.error(error.message)}
           className="**:data-[slot=input-group]:rounded-3xl **:data-[slot=input-group]:border-border/60 **:data-[slot=input-group]:bg-background **:data-[slot=input-group]:shadow-sm **:data-[slot=input-group]:transition-colors **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:border-ring/50 **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:ring-2 **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:ring-ring/20"
         >
+          <ComposerAttachmentsPreview />
           <PromptInputTextarea
             id="thread-message"
             ref={textareaRef}
@@ -81,6 +106,17 @@ export function ThreadComposerBar({ thread }: ThreadComposerBarProps) {
 
           <PromptInputFooter className="border-t border-border/45 pb-2.5 pt-2 text-muted-foreground">
             <div className="flex flex-wrap items-center gap-1.5">
+              <PromptInputActionMenu>
+                <PromptInputActionMenuTrigger
+                  className="h-7 rounded-full border border-border/60 bg-muted/30 px-2.5 text-xs font-medium text-foreground hover:bg-muted/60"
+                  size="sm"
+                >
+                  Add image
+                </PromptInputActionMenuTrigger>
+                <PromptInputActionMenuContent>
+                  <PromptInputActionAddAttachments label="Add image" />
+                </PromptInputActionMenuContent>
+              </PromptInputActionMenu>
               <ModelSelectorMenu
                 availableModels={availableModels}
                 selectedModelId={selectedModelId}
@@ -123,6 +159,28 @@ export function ThreadComposerBar({ thread }: ThreadComposerBarProps) {
           </PromptInputFooter>
         </PromptInput>
       </div>
+    </div>
+  )
+}
+
+function ComposerAttachmentsPreview() {
+  const attachments = usePromptInputAttachments()
+  if (attachments.files.length === 0) return null
+
+  return (
+    <div className="px-3 pt-3">
+      <Attachments variant="inline" className="mr-auto">
+        {attachments.files.map((file) => (
+          <Attachment
+            key={file.id}
+            data={file}
+            onRemove={() => attachments.remove(file.id)}
+          >
+            <AttachmentPreview />
+            <AttachmentRemove />
+          </Attachment>
+        ))}
+      </Attachments>
     </div>
   )
 }
