@@ -17,7 +17,12 @@ import { mermaid } from "@streamdown/mermaid"
 import { math } from "@streamdown/math"
 import { cjk } from "@streamdown/cjk"
 import { ActivityIcon, CopyIcon, EllipsisIcon, RefreshCwIcon } from "lucide-react"
-import { getMessageReasoning, getMessageText } from "./message-parts"
+import {
+  Attachment,
+  AttachmentPreview,
+  Attachments,
+} from "@/components/ai-elements/attachments"
+import { getMessageFiles, getMessageReasoning, getMessageText } from "./message-parts"
 import { getToolCalls } from "./tool-calls"
 import { ToolPanels } from "./tool-panels"
 
@@ -52,6 +57,8 @@ export function ThreadMessageList({
         const toolCalls = message.role === "assistant" ? getToolCalls(message) : []
         const hasToolCalls = toolCalls.length > 0
         const messageText = getMessageText(message)
+        const messageFiles = getMessageFiles(message)
+        const hasFiles = messageFiles.length > 0
         const isStreamingMessage =
           message.role === "assistant" &&
           status === "streaming" &&
@@ -75,6 +82,18 @@ export function ThreadMessageList({
             >
               {message.role === "assistant" ? (
                 <div className="flex flex-col gap-4">
+                  {hasFiles && (
+                    <Attachments variant="inline" className="mr-auto">
+                      {messageFiles.map((file, fileIndex) => (
+                        <Attachment
+                          key={`${message.id}-${file.filename ?? "file"}-${fileIndex}`}
+                          data={{ ...file, id: `${message.id}-${fileIndex}` }}
+                        >
+                          <AttachmentPreview />
+                        </Attachment>
+                      ))}
+                    </Attachments>
+                  )}
                   {hasToolCalls && (
                     <ToolPanels toolCalls={toolCalls} preferences={preferences} />
                   )}
@@ -125,6 +144,18 @@ export function ThreadMessageList({
                 </div>
               ) : (
                 <div className="whitespace-pre-wrap text-[15px] leading-7">
+                  {hasFiles && (
+                    <Attachments variant="inline" className="mb-2">
+                      {messageFiles.map((file, fileIndex) => (
+                        <Attachment
+                          key={`${message.id}-${file.filename ?? "file"}-${fileIndex}`}
+                          data={{ ...file, id: `${message.id}-${fileIndex}` }}
+                        >
+                          <AttachmentPreview />
+                        </Attachment>
+                      ))}
+                    </Attachments>
+                  )}
                   <Streamdown
                     plugins={{ code, mermaid, math, cjk }}
                     isAnimating={status === "streaming"}
