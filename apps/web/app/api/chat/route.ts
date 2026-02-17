@@ -84,7 +84,7 @@ const createRollingSummary = async ({
       "You maintain a rolling conversation summary used for context compression. Keep it concise, factual, and action-oriented.",
     prompt: `Update the rolling summary.\n\nExisting summary:\n${previousSummary || "None"}\n\nNew transcript segment:\n${transcript}\n\nReturn only the updated summary text. Keep critical user preferences, decisions, open tasks, and unresolved questions.`,
     temperature: 0.2,
-    maxRetries: 2,
+    maxRetries: 3,
   })
 
   return text.trim()
