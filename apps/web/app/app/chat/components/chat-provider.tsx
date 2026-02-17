@@ -22,6 +22,22 @@ import {
   type ToolKey,
 } from "@/lib/AITools/tool-lock-commands";
 
+type PersistedUsage = {
+  inputTokens: number
+  outputTokens: number
+  totalTokens?: number
+}
+
+type ChatMessageMetadata = {
+  usage?: PersistedUsage
+  costUsdMicros?: number
+}
+
+type PersistedMessageFields = {
+  usage?: PersistedUsage
+  costUsdMicros?: number
+}
+
 type ChatContextValue = {
   activeThreadId: string;
   isThreadRoute: boolean;
@@ -144,12 +160,16 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     setSelectedModelId(value);
   };
 
-  const serverMessages = useMemo<UIMessage[]>(() => {
+  const serverMessages = useMemo<UIMessage<ChatMessageMetadata>[]>(() => {
     if (!threadMessages) return [];
     return threadMessages.map((message) => ({
       id: message.messageId,
       role: message.role,
       parts: message.content,
+      metadata: {
+        usage: (message as unknown as PersistedMessageFields).usage,
+        costUsdMicros: (message as unknown as PersistedMessageFields).costUsdMicros,
+      },
     }));
   }, [threadMessages]);
 

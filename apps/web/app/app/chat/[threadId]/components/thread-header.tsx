@@ -27,6 +27,10 @@ interface ThreadHeaderProps {
   onOpenDeleteThread: () => void
 }
 
+type ThreadUsageTotals = {
+  totalCostUsdMicros?: number
+}
+
 export function ThreadHeader({
   thread,
   project,
@@ -34,6 +38,17 @@ export function ThreadHeader({
   onOpenEditTitle,
   onOpenDeleteThread,
 }: ThreadHeaderProps) {
+  const totalCostUsdMicros = (
+    thread as (Doc<"thread"> & { usageTotals?: ThreadUsageTotals }) | null | undefined
+  )?.usageTotals?.totalCostUsdMicros
+  const formattedTotalCost =
+    totalCostUsdMicros === undefined
+      ? null
+      : new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD",
+        }).format(totalCostUsdMicros / 1_000_000)
+
   return (
     <div className="shrink-0 border-b border-border/50 bg-background/90 px-2 py-2 backdrop-blur supports-backdrop-filter:bg-background/80">
       <div className="flex items-center justify-between gap-3">
@@ -60,6 +75,14 @@ export function ThreadHeader({
             <h2 className="truncate text-[15px] font-medium tracking-tight">
               {thread?.title || "New chat"}
             </h2>
+            {formattedTotalCost && (
+              <Badge
+                variant="secondary"
+                className="h-6 rounded-full border border-border/60 bg-muted/35 px-2.5 text-[11px] font-normal text-muted-foreground"
+              >
+                {formattedTotalCost}
+              </Badge>
+            )}
             {project ? (
               <Badge
                 variant="secondary"

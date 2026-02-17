@@ -25,6 +25,14 @@ const schema = defineSchema({
         updatedAt: v.number(),
       }),
     ),
+    usageTotals: v.optional(
+      v.object({
+        inputTokens: v.number(),
+        outputTokens: v.number(),
+        totalTokens: v.number(),
+        totalCostUsdMicros: v.number(),
+      }),
+    ),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
@@ -42,6 +50,14 @@ const schema = defineSchema({
     ),
     model: v.string(),
     content: v.any(),
+    usage: v.optional(
+      v.object({
+        inputTokens: v.number(),
+        outputTokens: v.number(),
+        totalTokens: v.optional(v.number()),
+      }),
+    ),
+    costUsdMicros: v.optional(v.number()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })

@@ -30,8 +30,8 @@ import { ModeMapping } from "@/lib/AITools/ModeMapping";
 import type { ModeName } from "@/lib/AITools/ModePrompts";
 
 const CHAT_SUMMARIZATION_OPTIONS = {
-  trigger: { kind: "either", maxTokens: 12000, maxMessages: 40 } as const,
-  keepLastN: 6,
+  trigger: { kind: "either", maxTokens: 6000, maxMessages: 20 } as const,
+  keepLastN: 8,
   includeToolText: false,
   maxCharsPerMessage: 8000,
 }
@@ -50,7 +50,7 @@ const createTitle = async (messages: UIMessage[]) => {
 
 
   const { text } = await generateText({
-    model: openRouter("openai/gpt-oss-120b:free", {
+    model: openRouter("arcee-ai/trinity-large-preview:free", {
       extraBody: {
         models: ["arcee-ai/trinity-large-preview:free", "openrouter/aurora-alpha"],
       },
@@ -75,7 +75,7 @@ const createRollingSummary = async ({
   transcript: string
 }) => {
   const { text } = await generateText({
-    model: openRouter("openai/gpt-oss-120b:free", {
+    model: openRouter("arcee-ai/trinity-large-preview:free", {
       extraBody: {
         models: ["arcee-ai/trinity-large-preview:free", "openrouter/aurora-alpha"],
       },
@@ -380,6 +380,28 @@ export async function POST(req: Request) {
 
               const agentMessage =
                 streamedMessages[streamedMessages.length - 1];
+              let usagePayload:
+                | {
+                  inputTokens: number
+                  outputTokens: number
+                  totalTokens?: number
+                }
+                | undefined;
+
+              try {
+                const totalUsage = await stream.totalUsage;
+                usagePayload = {
+                  inputTokens: totalUsage.inputTokens ?? 0,
+                  outputTokens: totalUsage.outputTokens ?? 0,
+                  totalTokens:
+                    totalUsage.totalTokens ??
+                    (totalUsage.inputTokens ?? 0) +
+                    (totalUsage.outputTokens ?? 0),
+                };
+              } catch (error) {
+                console.error("Error reading stream usage:", error);
+              }
+
               try {
                 await fetchMutation(
                   api.chat.appendMessage,
@@ -389,6 +411,7 @@ export async function POST(req: Request) {
                     messageId: crypto.randomUUID(),
                     role: "assistant",
                     parts: agentMessage.parts,
+                    usage: usagePayload,
                   },
                   { token },
                 );
