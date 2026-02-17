@@ -43,3 +43,10 @@ coverage/
 
 # Clerk
 .clerk/
+
+# skills
+.agents
+.cursor
+
+# Opencode
+.opencode
