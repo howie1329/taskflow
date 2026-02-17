@@ -365,6 +365,7 @@ export async function POST(req: Request) {
               containerTags: [userId],
             }) as unknown as typeof Tools),
           },
+          maxOutputTokens: 10000, // 10000 tokens is the max output tokens for the model
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           activeTools: activeTools as any,
         });
