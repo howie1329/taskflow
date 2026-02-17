@@ -13,8 +13,7 @@ export default function TasksPage() {
           </div>
         </div>
         <TaskFeature.Content />
-        <TaskFeature.DetailsSheet />
-        <TaskFeature.CreateSheet />
+        <TaskFeature.Sheets />
         <TaskFeature.CreateTagDialog />
       </TaskFeature.Frame>
     </TaskFeature.Provider>

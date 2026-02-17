@@ -196,6 +196,7 @@ function TaskFeatureProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const isTasksIndexRoute = pathname === "/app/tasks";
   const { viewer, isLoading: isViewerLoading } = useViewer();
 
   const updatePreferences = useMutation(api.preferences.updateMyPreferences);
@@ -306,6 +307,10 @@ function TaskFeatureProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    if (!isTasksIndexRoute) {
+      return;
+    }
+
     const queryFromUrl = searchParams.get("q") ?? "";
     const statusValue = searchParams.get("status") ?? "all";
     const priorityValue = searchParams.get("priority") ?? "all";
@@ -363,9 +368,13 @@ function TaskFeatureProvider({ children }: { children: ReactNode }) {
     }
 
     setTagFilter("all");
-  }, [searchParams, projects, tags]);
+  }, [isTasksIndexRoute, searchParams, projects, tags]);
 
   useEffect(() => {
+    if (!isTasksIndexRoute) {
+      return;
+    }
+
     const queryString = toQueryString({
       searchQuery,
       statusFilter,
@@ -384,6 +393,7 @@ function TaskFeatureProvider({ children }: { children: ReactNode }) {
       scroll: false,
     });
   }, [
+    isTasksIndexRoute,
     searchQuery,
     statusFilter,
     priorityFilter,
@@ -579,10 +589,8 @@ function TaskFeatureProvider({ children }: { children: ReactNode }) {
       });
 
       setIsCreateOpen(false);
-      if (createdTask) {
-        setSelectedTaskId(String(createdTask._id));
-        setIsDetailsOpen(true);
-      }
+      setSelectedTaskId(createdTask ? String(createdTask._id) : null);
+      setIsDetailsOpen(!!createdTask);
     } catch (error) {
       console.error("Failed to create task:", error);
       toast.error("Failed to create task");
@@ -827,6 +835,7 @@ function TaskFeatureProvider({ children }: { children: ReactNode }) {
       isProjectsLoading,
       isTagsLoading,
       isSearchLoading,
+      router,
     ],
   );
 
@@ -1001,6 +1010,7 @@ function TaskFeatureToolbar() {
             </InputGroup>
           ) : (
             <Button
+              // eslint-disable-next-line react-hooks/refs -- forwarded ref object for focus restore outside render
               ref={meta.searchButtonRef}
               variant="outline"
               size="sm"
@@ -1176,49 +1186,40 @@ function TaskFeatureContent() {
   );
 }
 
-function TaskFeatureDetailsSheet() {
+function TaskFeatureSheets() {
   const { state, actions } = useTaskFeature();
 
   return (
-    <TaskDetailsSheet
-      task={state.selectedTask}
-      open={state.isDetailsOpen}
-      onOpenChange={(open) => {
-        if (!open) {
-          actions.closeDetails();
-        }
-      }}
-      onDelete={actions.deleteTask}
-      onUpdate={actions.updateTask}
-      onToggleComplete={actions.toggleComplete}
-      projects={state.projects}
-      tags={state.tags}
-      subtasks={state.subtasks}
-      onCreateSubtask={actions.createSubtask}
-      onToggleSubtask={actions.toggleSubtask}
-      onDeleteSubtask={actions.deleteSubtask}
-      onUpdateSubtask={actions.updateSubtask}
-      onCreateTag={actions.createTag}
-    />
-  );
-}
-
-function TaskFeatureCreateSheet() {
-  const { state, actions } = useTaskFeature();
-
-  return (
-    <CreateTaskSheet
-      open={state.isCreateOpen}
-      onOpenChange={(open) => {
-        if (!open) {
-          actions.closeCreate();
-        }
-      }}
-      defaults={state.createDefaults}
-      onCreate={actions.createTask}
-      projects={state.projects}
-      tags={state.tags}
-    />
+    <>
+      <CreateTaskSheet
+        open={state.isCreateOpen}
+        onOpenChange={(open) => {
+          if (!open) actions.closeCreate();
+        }}
+        defaults={state.createDefaults}
+        onCreate={actions.createTask}
+        projects={state.projects}
+        tags={state.tags}
+      />
+      <TaskDetailsSheet
+        task={state.selectedTask}
+        open={state.isDetailsOpen}
+        onOpenChange={(open) => {
+          if (!open) actions.closeDetails();
+        }}
+        onDelete={actions.deleteTask}
+        onUpdate={actions.updateTask}
+        onToggleComplete={actions.toggleComplete}
+        projects={state.projects}
+        tags={state.tags}
+        subtasks={state.subtasks}
+        onCreateSubtask={actions.createSubtask}
+        onToggleSubtask={actions.toggleSubtask}
+        onDeleteSubtask={actions.deleteSubtask}
+        onUpdateSubtask={actions.updateSubtask}
+        onCreateTag={actions.createTag}
+      />
+    </>
   );
 }
 
@@ -1281,7 +1282,6 @@ export const TaskFeature = {
   Toolbar: TaskFeatureToolbar,
   Filters: TaskFeatureFilters,
   Content: TaskFeatureContent,
-  DetailsSheet: TaskFeatureDetailsSheet,
-  CreateSheet: TaskFeatureCreateSheet,
+  Sheets: TaskFeatureSheets,
   CreateTagDialog: TaskFeatureCreateTagDialog,
 };

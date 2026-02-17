@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -8,7 +8,6 @@ import {
   InboxHeaderSkeleton,
   InboxContent,
   MobileActionSheet,
-  Toast,
 } from "@/components/inbox";
 import {
   useInboxItems,
@@ -19,8 +18,8 @@ import {
 } from "@/hooks/inbox";
 
 // Container component with loading state
-function InboxContainer({ children, isLoading }) {
-  if (isLoading) {
+function InboxContainer({ children, isInitialLoading }) {
+  if (isInitialLoading) {
     return (
       <div className="flex h-full w-full min-h-0 flex-col overflow-hidden">
         <div className="flex w-full flex-1 min-h-0 flex-col gap-3 px-3 py-3 md:px-4 md:py-4">
@@ -61,17 +60,6 @@ function useSearchState() {
   return { searchQuery, setSearchQuery, debouncedSearchQuery };
 }
 
-// Custom hook for capture state
-function useCaptureState() {
-  const [captureText, setCaptureText] = useState("");
-
-  const clearCapture = useCallback(() => {
-    setCaptureText("");
-  }, []);
-
-  return { captureText, setCaptureText, clearCapture };
-}
-
 // Custom hook for items filtering
 function useFilteredItems(items) {
   return useMemo(() => {
@@ -90,40 +78,71 @@ function useClientSideFiltering(
   debouncedSearchQuery,
 ) {
   return useMemo(() => {
-    if (!searchQuery || debouncedSearchQuery) {
+    const normalizedSearch = searchQuery.trim().toLowerCase();
+    const normalizedDebounced = debouncedSearchQuery.trim().toLowerCase();
+    const isTypingAhead = Boolean(normalizedSearch) && normalizedSearch !== normalizedDebounced;
+
+    if (!isTypingAhead) {
       return {
         filteredOpenItems: openItems,
         filteredArchivedItems: archivedItems,
+        isTypingAhead: false,
       };
     }
 
     const filterItems = (items) =>
       items.filter((item) =>
-        item.content.toLowerCase().includes(searchQuery.toLowerCase()),
+        item.content.toLowerCase().includes(normalizedSearch),
       );
 
     return {
       filteredOpenItems: filterItems(openItems),
       filteredArchivedItems: filterItems(archivedItems),
+      isTypingAhead: true,
     };
   }, [openItems, archivedItems, searchQuery, debouncedSearchQuery]);
 }
 
 export default function InboxPage() {
-  const { captureText, setCaptureText, clearCapture } = useCaptureState();
+  const [captureText, setCaptureText] = useState("");
   const { searchQuery, setSearchQuery, debouncedSearchQuery } =
     useSearchState();
   const [activeTab, setActiveTab] = useState("open");
+  const captureInputRef = useRef(null);
+  const lastItemsRef = useRef(null);
+  const lastCountsRef = useRef({ open: 0, archived: 0 });
 
   const { items, isLoading: isItemsLoading } = useInboxItems({
     status: activeTab,
     searchQuery: debouncedSearchQuery,
     limit: 50,
   });
-
   const { open, archived, isLoading: isCountsLoading } = useInboxCounts();
-  const { openItems, archivedItems } = useFilteredItems(items);
-  const { filteredOpenItems, filteredArchivedItems } = useClientSideFiltering(
+
+  useEffect(() => {
+    if (items !== undefined) {
+      lastItemsRef.current = items;
+    }
+  }, [items]);
+
+  useEffect(() => {
+    if (!isCountsLoading) {
+      lastCountsRef.current = { open, archived };
+    }
+  }, [open, archived, isCountsLoading]);
+
+  const visibleItems = items ?? lastItemsRef.current ?? [];
+  const visibleOpenCount = isCountsLoading ? lastCountsRef.current.open : open;
+  const visibleArchivedCount = isCountsLoading
+    ? lastCountsRef.current.archived
+    : archived;
+
+  const { openItems, archivedItems } = useFilteredItems(visibleItems);
+  const {
+    filteredOpenItems,
+    filteredArchivedItems,
+    isTypingAhead,
+  } = useClientSideFiltering(
     openItems,
     archivedItems,
     searchQuery,
@@ -137,8 +156,6 @@ export default function InboxPage() {
     deleteItem,
     convertToTask,
     convertToProject,
-    toast,
-    clearToast,
   } = useInboxActions();
 
   const { newItemIds, animateNewItem } = useNewItemsAnimation();
@@ -150,8 +167,10 @@ export default function InboxPage() {
     if (newItem?._id) {
       setCaptureText("");
       animateNewItem(String(newItem._id));
+      return true;
     }
-  }, [captureText, captureItem, animateNewItem, setCaptureText]);
+    return false;
+  }, [captureText, captureItem, animateNewItem]);
 
   const handleConvert = useCallback(
     async (id, type) => {
@@ -168,22 +187,37 @@ export default function InboxPage() {
   );
 
   const handleMobileConvert = useCallback(
-    (type) => {
+    async (type) => {
       if (!selectedItem) return;
-      handleConvert(selectedItem._id, type);
-      closeActions();
+      await handleConvert(selectedItem._id, type);
     },
-    [selectedItem, handleConvert, closeActions],
+    [selectedItem, handleConvert],
   );
 
-  const isLoading = isItemsLoading || isCountsLoading;
+  const handleCaptureFocus = useCallback(() => {
+    captureInputRef.current?.focus();
+  }, []);
+
+  const handleMobileActionOpenChange = useCallback(
+    (nextOpen) => {
+      if (!nextOpen) {
+        closeActions();
+      }
+    },
+    [closeActions],
+  );
+
+  const isInitialLoading = isItemsLoading && !lastItemsRef.current;
+  const isRefreshing = isItemsLoading && !!lastItemsRef.current;
+  const isSearching = isTypingAhead || (searchQuery !== debouncedSearchQuery && isItemsLoading);
 
   return (
-    <InboxContainer isLoading={isLoading}>
+    <InboxContainer isInitialLoading={isInitialLoading}>
       <InboxHeader />
       <InboxContent
         captureText={captureText}
         setCaptureText={setCaptureText}
+        captureInputRef={captureInputRef}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         activeTab={activeTab}
@@ -192,30 +226,30 @@ export default function InboxPage() {
         archivedItems={archivedItems}
         filteredOpenItems={filteredOpenItems}
         filteredArchivedItems={filteredArchivedItems}
-        openCount={open}
-        archivedCount={archived}
+        openCount={visibleOpenCount}
+        archivedCount={visibleArchivedCount}
         newItemIds={newItemIds}
-        isLoading={isLoading}
+        isLoading={isInitialLoading}
+        isRefreshing={isRefreshing}
+        isSearching={isSearching}
+        activeMobileItemId={isOpen && selectedItem ? String(selectedItem._id) : null}
         onCapture={handleCapture}
-        onClearCapture={clearCapture}
         onArchive={archiveItem}
         onUnarchive={unarchiveItem}
         onDelete={deleteItem}
         onConvert={handleConvert}
         onOpenActions={openActions}
+        onCaptureFocus={handleCaptureFocus}
       />
       <MobileActionSheet
         item={selectedItem}
         open={isOpen}
-        onOpenChange={closeActions}
+        onOpenChange={handleMobileActionOpenChange}
         onArchive={archiveItem}
         onUnarchive={unarchiveItem}
         onDelete={deleteItem}
         onConvert={handleMobileConvert}
       />
-      {toast && (
-        <Toast message={toast.message} type={toast.type} onClose={clearToast} />
-      )}
     </InboxContainer>
   );
 }

@@ -20,7 +20,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
 import {
   SidebarContent,
   SidebarFooter,
@@ -60,7 +59,6 @@ export function ChatSidebar({ onBackToWorkspace }: ChatSidebarProps) {
   // Fetch threads from Convex
   const {
     threads: convexThreads,
-    isLoading,
     updateTitle,
     togglePin,
     softDelete,
@@ -282,7 +280,7 @@ export function ChatSidebar({ onBackToWorkspace }: ChatSidebarProps) {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent className="px-0 overflow-hidden">
+      <SidebarContent className="min-w-0 px-0 overflow-hidden">
         <ThreadsRail
           className="w-full"
           variant="sidebar"

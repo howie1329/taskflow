@@ -27,6 +27,10 @@ interface ThreadHeaderProps {
   onOpenDeleteThread: () => void
 }
 
+type ThreadUsageTotals = {
+  totalCostUsdMicros?: number
+}
+
 export function ThreadHeader({
   thread,
   project,
@@ -34,6 +38,17 @@ export function ThreadHeader({
   onOpenEditTitle,
   onOpenDeleteThread,
 }: ThreadHeaderProps) {
+  const totalCostUsdMicros = (
+    thread as (Doc<"thread"> & { usageTotals?: ThreadUsageTotals }) | null | undefined
+  )?.usageTotals?.totalCostUsdMicros
+  const formattedTotalCost =
+    totalCostUsdMicros === undefined
+      ? null
+      : new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD",
+        }).format(totalCostUsdMicros / 1_000_000)
+
   return (
     <div className="shrink-0 border-b border-border/50 bg-background/90 px-2 py-2 backdrop-blur supports-backdrop-filter:bg-background/80">
       <div className="flex items-center justify-between gap-3">
@@ -60,6 +75,14 @@ export function ThreadHeader({
             <h2 className="truncate text-[15px] font-medium tracking-tight">
               {thread?.title || "New chat"}
             </h2>
+            {formattedTotalCost && (
+              <Badge
+                variant="secondary"
+                className="h-6 rounded-full border border-border/60 bg-muted/35 px-2.5 text-[11px] font-normal text-muted-foreground"
+              >
+                {formattedTotalCost}
+              </Badge>
+            )}
             {project ? (
               <Badge
                 variant="secondary"
@@ -91,40 +114,47 @@ export function ThreadHeader({
         </div>
 
         {thread && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon-sm">
-                <HugeiconsIcon
-                  icon={MoreHorizontalIcon}
-                  className="size-4"
-                  strokeWidth={2}
-                />
-                <span className="sr-only">Conversation actions</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={onOpenEditTitle}>
-                <HugeiconsIcon
-                  icon={PencilEdit01Icon}
-                  className="mr-2 size-4"
-                  strokeWidth={2}
-                />
-                Edit title
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={onOpenDeleteThread}
-                className="text-destructive focus:text-destructive"
-              >
-                <HugeiconsIcon
-                  icon={Delete02Icon}
-                  className="mr-2 size-4"
-                  strokeWidth={2}
-                />
-                Delete thread
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex items-center gap-1">
+            <SidebarTrigger
+              scope="inspector"
+              className="[&_svg]:rotate-180"
+              aria-label="Toggle inspector"
+            />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon-sm">
+                  <HugeiconsIcon
+                    icon={MoreHorizontalIcon}
+                    className="size-4"
+                    strokeWidth={2}
+                  />
+                  <span className="sr-only">Conversation actions</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={onOpenEditTitle}>
+                  <HugeiconsIcon
+                    icon={PencilEdit01Icon}
+                    className="mr-2 size-4"
+                    strokeWidth={2}
+                  />
+                  Edit title
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={onOpenDeleteThread}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <HugeiconsIcon
+                    icon={Delete02Icon}
+                    className="mr-2 size-4"
+                    strokeWidth={2}
+                  />
+                  Delete thread
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         )}
       </div>
     </div>

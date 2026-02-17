@@ -4,10 +4,128 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 import type { Doc } from "./_generated/dataModel";
 import type { Id } from "./_generated/dataModel";
 import type { MutationCtx } from "./_generated/server";
-import { api, internal } from "./_generated/api";
+import { internal } from "./_generated/api";
+
+const USAGE_MICROS_MULTIPLIER = 1_000_000;
+
+type MessageUsage = {
+  inputTokens: number;
+  outputTokens: number;
+  totalTokens?: number;
+};
+
+type CostComputationResult = {
+  usage: MessageUsage;
+  costUsdMicros: number;
+};
+
+type ThreadUsageTotals = {
+  inputTokens: number;
+  outputTokens: number;
+  totalTokens: number;
+  totalCostUsdMicros: number;
+};
 
 const getUtcDayKey = (timestamp: number) =>
   new Date(timestamp).toISOString().slice(0, 10);
+
+const toNonNegativeInteger = (value: number | undefined) => {
+  if (!Number.isFinite(value)) {
+    return 0;
+  }
+  return Math.max(0, Math.round(value ?? 0));
+};
+
+const normalizeUsage = (usage: MessageUsage): MessageUsage => {
+  const inputTokens = toNonNegativeInteger(usage.inputTokens);
+  const outputTokens = toNonNegativeInteger(usage.outputTokens);
+  const computedTotalTokens = inputTokens + outputTokens;
+  const totalTokens =
+    usage.totalTokens === undefined
+      ? computedTotalTokens
+      : toNonNegativeInteger(usage.totalTokens);
+
+  return {
+    inputTokens,
+    outputTokens,
+    totalTokens,
+  };
+};
+
+const parseUsdPerMillionToMicros = (value: string | undefined) => {
+  const parsed = Number(value ?? "0");
+  if (!Number.isFinite(parsed) || parsed < 0) {
+    return 0;
+  }
+  return Math.round(parsed * USAGE_MICROS_MULTIPLIER);
+};
+
+const computeAssistantUsageAndCost = async (
+  ctx: MutationCtx,
+  modelId: string,
+  usage: MessageUsage,
+): Promise<CostComputationResult> => {
+  const normalizedUsage = normalizeUsage(usage);
+
+  const availableModel = await ctx.db
+    .query("availableModels")
+    .withIndex("by_modelId", (q) => q.eq("modelId", modelId))
+    .first();
+
+  const promptMicrosPerMillion = parseUsdPerMillionToMicros(
+    availableModel?.pricing?.prompt,
+  );
+  const completionMicrosPerMillion = parseUsdPerMillionToMicros(
+    availableModel?.pricing?.completion,
+  );
+  const totalMicros = Math.round(
+    (normalizedUsage.inputTokens * promptMicrosPerMillion +
+      normalizedUsage.outputTokens * completionMicrosPerMillion) /
+      USAGE_MICROS_MULTIPLIER,
+  );
+
+  return {
+    usage: normalizedUsage,
+    costUsdMicros: Math.max(0, totalMicros),
+  };
+};
+
+const applyThreadUsageTotals = async (
+  ctx: MutationCtx,
+  thread: Doc<"thread">,
+  usage: MessageUsage,
+  costUsdMicros: number,
+  now: number,
+) => {
+  const currentTotals =
+    (
+      thread as unknown as {
+        usageTotals?: ThreadUsageTotals;
+      }
+    ).usageTotals ?? {
+      inputTokens: 0,
+      outputTokens: 0,
+      totalTokens: 0,
+      totalCostUsdMicros: 0,
+    };
+
+  const nextTotals: ThreadUsageTotals = {
+    inputTokens: currentTotals.inputTokens + usage.inputTokens,
+    outputTokens: currentTotals.outputTokens + usage.outputTokens,
+    totalTokens:
+      currentTotals.totalTokens +
+      (usage.totalTokens ?? usage.inputTokens + usage.outputTokens),
+    totalCostUsdMicros: currentTotals.totalCostUsdMicros + costUsdMicros,
+  };
+
+  await ctx.db.patch(
+    thread._id,
+    {
+      updatedAt: now,
+      usageTotals: nextTotals,
+    } as unknown as Partial<Doc<"thread">>,
+  );
+};
 
 const incrementChatUsage = async (
   ctx: MutationCtx,
@@ -274,20 +392,18 @@ export const appendMessage = mutation({
     ),
     model: v.string(),
     parts: v.any(),
+    usage: v.optional(
+      v.object({
+        inputTokens: v.number(),
+        outputTokens: v.number(),
+        totalTokens: v.optional(v.number()),
+      }),
+    ),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) {
       throw new Error("Not authenticated");
-    }
-
-    const existingMessage = await ctx.db
-      .query("threadMessages")
-      .withIndex("by_messageId", (q) => q.eq("messageId", args.messageId))
-      .first();
-
-    if (existingMessage) {
-      return { success: true, deduped: true };
     }
 
     // Verify thread exists and belongs to user
@@ -301,7 +417,63 @@ export const appendMessage = mutation({
       throw new Error("Thread not found or access denied");
     }
 
+    const assistantUsage = args.role === "assistant" ? args.usage : undefined;
+
+    const existingMessage = await ctx.db
+      .query("threadMessages")
+      .withIndex("by_messageId", (q) => q.eq("messageId", args.messageId))
+      .first();
+
+    if (existingMessage) {
+      if (
+        existingMessage.userId !== userId ||
+        existingMessage.threadId !== args.threadId
+      ) {
+        throw new Error("Message ID conflict");
+      }
+
+      if (
+        assistantUsage !== undefined &&
+        existingMessage.usage === undefined &&
+        existingMessage.costUsdMicros === undefined
+      ) {
+        const now = Date.now();
+        const usageAndCost = await computeAssistantUsageAndCost(
+          ctx,
+          args.model,
+          assistantUsage,
+        );
+
+        await ctx.db.patch(
+          existingMessage._id,
+          {
+            usage: usageAndCost.usage,
+            costUsdMicros: usageAndCost.costUsdMicros,
+            updatedAt: now,
+          } as unknown as Partial<Doc<"threadMessages">>,
+        );
+
+        await applyThreadUsageTotals(
+          ctx,
+          thread,
+          usageAndCost.usage,
+          usageAndCost.costUsdMicros,
+          now,
+        );
+      }
+
+      return { success: true, deduped: true };
+    }
+
     const now = Date.now();
+    let usageAndCost: CostComputationResult | null = null;
+    if (assistantUsage !== undefined) {
+      usageAndCost = await computeAssistantUsageAndCost(
+        ctx,
+        args.model,
+        assistantUsage,
+      );
+    }
 
     // Insert the message
     await ctx.db.insert("threadMessages", {
@@ -311,17 +483,30 @@ export const appendMessage = mutation({
       role: args.role,
       model: args.model,
       content: args.parts, // Store parts array in content field
+      usage: usageAndCost?.usage,
+      costUsdMicros: usageAndCost?.costUsdMicros,
       createdAt: now,
       updatedAt: now,
     });
 
-    // Update thread's updatedAt timestamp
-    await ctx.db.patch(thread._id, {
-      updatedAt: now,
-    });
-
     if (args.role === "user") {
+      // Preserve existing "messages sent" counters for settings usage metrics.
       await incrementChatUsage(ctx, userId, now);
+    }
+
+    if (usageAndCost) {
+      await applyThreadUsageTotals(
+        ctx,
+        thread,
+        usageAndCost.usage,
+        usageAndCost.costUsdMicros,
+        now,
+      );
+    } else {
+      // Update thread's updatedAt timestamp for non-tracked message roles.
+      await ctx.db.patch(thread._id, {
+        updatedAt: now,
+      });
     }
 
     return { success: true };
@@ -554,6 +739,41 @@ export const updateThreadSnippetAndTimestamps = mutation({
     return await ctx.db.get(thread._id);
   },
 });
+
+export const setThreadSummary = mutation({
+  args: {
+    threadId: v.string(),
+    summary: v.object({
+      schemaVersion: v.number(),
+      summaryText: v.string(),
+      summarizedThroughMessageId: v.string(),
+      updatedAt: v.number(),
+    }),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx)
+    if (!userId) {
+      throw new Error("Not authenticated")
+    }
+
+    const thread = await ctx.db
+      .query("thread")
+      .withIndex("by_threadId", (q) => q.eq("threadId", args.threadId))
+      .filter((q) => q.eq(q.field("userId"), userId))
+      .first()
+
+    if (!thread || thread.deletedAt !== undefined) {
+      throw new Error("Thread not found or access denied")
+    }
+
+    await ctx.db.patch(thread._id, {
+      summary: args.summary,
+      updatedAt: Date.now(),
+    })
+
+    return await ctx.db.get(thread._id)
+  },
+})
 
 export const getAllThreads = internalQuery({
   handler(ctx) {

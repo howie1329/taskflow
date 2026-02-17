@@ -26,120 +26,203 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { SidebarLeftIcon } from "@hugeicons/core-free-icons";
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
+const INSPECTOR_COOKIE_NAME = "inspector_sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 const SIDEBAR_WIDTH = "12rem";
 const SIDEBAR_WIDTH_MOBILE = "16rem";
 const SIDEBAR_WIDTH_ICON = "3rem";
 const SIDEBAR_KEYBOARD_SHORTCUT = "b";
+const INSPECTOR_KEYBOARD_SHORTCUT = "i";
 
-type SidebarContextProps = {
+type SidebarScope = "primary" | "inspector";
+const DEFAULT_SIDEBAR_SCOPE: SidebarScope = "primary";
+
+type ScopedSidebarState = {
   state: "expanded" | "collapsed";
   open: boolean;
-  setOpen: (open: boolean) => void;
+  setOpen: (open: boolean | ((open: boolean) => boolean)) => void;
   openMobile: boolean;
-  setOpenMobile: (open: boolean) => void;
-  isMobile: boolean;
-  toggleSidebar: () => void;
+  setOpenMobile: (open: boolean | ((open: boolean) => boolean)) => void;
   mobileSidebarWidth: string;
+};
+
+type SidebarContextProps = {
+  isMobile: boolean;
+  sidebars: Record<SidebarScope, ScopedSidebarState>;
+  toggleSidebar: (scope: SidebarScope) => void;
 };
 
 const SidebarContext = React.createContext<SidebarContextProps | null>(null);
 
-function useSidebar() {
+function useSidebar(scope: SidebarScope = DEFAULT_SIDEBAR_SCOPE) {
   const context = React.useContext(SidebarContext);
   if (!context) {
     throw new Error("useSidebar must be used within a SidebarProvider.");
   }
 
-  return context;
+  const scopedState = context.sidebars[scope];
+
+  return {
+    ...scopedState,
+    isMobile: context.isMobile,
+    toggleSidebar: () => context.toggleSidebar(scope),
+  };
 }
 
 function SidebarProvider({
   defaultOpen = true,
+  defaultOpenInspector = false,
   open: openProp,
+  openInspector: openInspectorProp,
   onOpenChange: setOpenProp,
+  onOpenChangeInspector: setOpenInspectorProp,
   className,
   style,
   children,
   ...props
 }: React.ComponentProps<"div"> & {
   defaultOpen?: boolean;
+  defaultOpenInspector?: boolean;
   open?: boolean;
+  openInspector?: boolean;
   onOpenChange?: (open: boolean) => void;
+  onOpenChangeInspector?: (open: boolean) => void;
 }) {
   const isMobile = useIsMobile();
-  const [openMobile, setOpenMobile] = React.useState(false);
-
-  const mobileSidebarWidth =
-    (style as any)?.["--sidebar-width-mobile"] ??
-    (style as any)?.["--sidebar-width"] ??
+  const primaryMobileSidebarWidth =
+    (style as Record<string, string>)?.["--sidebar-width-mobile"] ??
+    (style as Record<string, string>)?.["--sidebar-width"] ??
+    SIDEBAR_WIDTH_MOBILE;
+  const inspectorMobileSidebarWidth =
+    (style as Record<string, string>)?.["--sidebar-width-mobile-inspector"] ??
+    (style as Record<string, string>)?.["--sidebar-width-inspector"] ??
     SIDEBAR_WIDTH_MOBILE;
 
-  // This is the internal state of the sidebar.
-  // We use openProp and setOpenProp for control from outside the component.
+  const [openMobile, setOpenMobile] = React.useState(false);
+  const [openInspectorMobile, setOpenInspectorMobile] = React.useState(false);
+
   const [_open, _setOpen] = React.useState(defaultOpen);
-  const open = openProp ?? _open;
-  const setOpen = React.useCallback(
+  const primaryOpen = openProp ?? _open;
+  const [_openInspector, _setOpenInspector] = React.useState(defaultOpenInspector);
+  const inspectorOpen = openInspectorProp ?? _openInspector;
+
+  const setPrimaryOpen = React.useCallback(
     (value: boolean | ((value: boolean) => boolean)) => {
-      const openState = typeof value === "function" ? value(open) : value;
+      const openState = typeof value === "function" ? value(primaryOpen) : value;
       if (setOpenProp) {
         setOpenProp(openState);
       } else {
         _setOpen(openState);
       }
 
-      // This sets the cookie to keep the sidebar state.
       document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`;
     },
-    [setOpenProp, open],
+    [setOpenProp, primaryOpen],
   );
 
-  // Helper to toggle the sidebar.
-  const toggleSidebar = React.useCallback(() => {
-    return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open);
-  }, [isMobile, setOpen, setOpenMobile]);
+  const setInspectorOpen = React.useCallback(
+    (value: boolean | ((value: boolean) => boolean)) => {
+      const openState = typeof value === "function" ? value(inspectorOpen) : value;
+      if (setOpenInspectorProp) {
+        setOpenInspectorProp(openState);
+      } else {
+        _setOpenInspector(openState);
+      }
 
-  // Adds a keyboard shortcut to toggle the sidebar.
+      document.cookie = `${INSPECTOR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`;
+    },
+    [setOpenInspectorProp, inspectorOpen],
+  );
+
+  const shouldIgnoreShortcut = React.useCallback((event: KeyboardEvent) => {
+    const target = event.target as HTMLElement | null;
+    if (!target) return false;
+    if (target.isContentEditable) return true;
+    return !!target.closest('input, textarea, select, [contenteditable="true"]');
+  }, []);
+
+  const toggleSidebar = React.useCallback(
+    (scope: SidebarScope) => {
+      const isInspector = scope === "inspector";
+      if (isMobile) {
+        if (isInspector) {
+          setOpenInspectorMobile((open) => !open);
+          return;
+        }
+        setOpenMobile((open) => !open);
+        return;
+      }
+
+      if (isInspector) {
+        setInspectorOpen((open) => !open);
+        return;
+      }
+
+      setPrimaryOpen((open) => !open);
+    },
+    [isMobile, setPrimaryOpen, setInspectorOpen],
+  );
+
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (
-        event.key === SIDEBAR_KEYBOARD_SHORTCUT &&
-        (event.metaKey || event.ctrlKey)
-      ) {
+      if (!(event.metaKey || event.ctrlKey)) return;
+      if (shouldIgnoreShortcut(event)) return;
+
+      const key = event.key.toLowerCase();
+      if (key === SIDEBAR_KEYBOARD_SHORTCUT) {
         event.preventDefault();
-        toggleSidebar();
+        toggleSidebar("primary");
+      }
+      if (key === INSPECTOR_KEYBOARD_SHORTCUT) {
+        event.preventDefault();
+        toggleSidebar("inspector");
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [toggleSidebar]);
+  }, [shouldIgnoreShortcut, toggleSidebar]);
 
-  // We add a state so that we can do data-state="expanded" or "collapsed".
-  // This makes it easier to style the sidebar with Tailwind classes.
-  const state = open ? "expanded" : "collapsed";
+  const sidebars = React.useMemo<Record<SidebarScope, ScopedSidebarState>>(
+    () => ({
+      primary: {
+        state: primaryOpen ? "expanded" : "collapsed",
+        open: primaryOpen,
+        setOpen: setPrimaryOpen,
+        openMobile,
+        setOpenMobile,
+        mobileSidebarWidth: primaryMobileSidebarWidth,
+      },
+      inspector: {
+        state: inspectorOpen ? "expanded" : "collapsed",
+        open: inspectorOpen,
+        setOpen: setInspectorOpen,
+        openMobile: openInspectorMobile,
+        setOpenMobile: setOpenInspectorMobile,
+        mobileSidebarWidth: inspectorMobileSidebarWidth,
+      },
+    }),
+    [
+      primaryOpen,
+      setPrimaryOpen,
+      openMobile,
+      setOpenMobile,
+      primaryMobileSidebarWidth,
+      inspectorOpen,
+      setInspectorOpen,
+      openInspectorMobile,
+      setOpenInspectorMobile,
+      inspectorMobileSidebarWidth,
+    ],
+  );
 
   const contextValue = React.useMemo<SidebarContextProps>(
     () => ({
-      state,
-      open,
-      setOpen,
       isMobile,
-      openMobile,
-      setOpenMobile,
+      sidebars,
       toggleSidebar,
-      mobileSidebarWidth,
     }),
-    [
-      state,
-      open,
-      setOpen,
-      isMobile,
-      openMobile,
-      setOpenMobile,
-      toggleSidebar,
-      mobileSidebarWidth,
-    ],
+    [isMobile, sidebars, toggleSidebar],
   );
 
   return (
@@ -149,6 +232,7 @@ function SidebarProvider({
         style={
           {
             "--sidebar-width": SIDEBAR_WIDTH,
+            "--sidebar-width-inspector": SIDEBAR_WIDTH,
             "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
             ...style,
           } as React.CSSProperties
@@ -166,20 +250,27 @@ function SidebarProvider({
 }
 
 function Sidebar({
+  scope = DEFAULT_SIDEBAR_SCOPE,
   side = "left",
   variant = "sidebar",
   collapsible = "offcanvas",
   className,
   children,
   dir,
+  style,
   ...props
 }: React.ComponentProps<"div"> & {
+  scope?: SidebarScope;
   side?: "left" | "right";
   variant?: "sidebar" | "floating" | "inset";
   collapsible?: "offcanvas" | "icon" | "none";
 }) {
   const { isMobile, state, openMobile, setOpenMobile, mobileSidebarWidth } =
-    useSidebar();
+    useSidebar(scope);
+  const resolvedMobileSidebarWidth =
+    (style as Record<string, string>)?.["--sidebar-width-mobile"] ??
+    (style as Record<string, string>)?.["--sidebar-width"] ??
+    mobileSidebarWidth;
 
   if (collapsible === "none") {
     return (
@@ -189,6 +280,7 @@ function Sidebar({
           "bg-sidebar text-sidebar-foreground flex h-full w-(--sidebar-width) flex-col",
           className,
         )}
+        style={style}
         {...props}
       >
         {children}
@@ -198,7 +290,7 @@ function Sidebar({
 
   if (isMobile) {
     return (
-      <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
+      <Sheet open={openMobile} onOpenChange={setOpenMobile}>
         <SheetContent
           dir={dir}
           data-sidebar="sidebar"
@@ -207,7 +299,8 @@ function Sidebar({
           className="bg-sidebar text-sidebar-foreground w-(--sidebar-width) p-0 [&>button]:hidden"
           style={
             {
-              "--sidebar-width": mobileSidebarWidth,
+              "--sidebar-width": resolvedMobileSidebarWidth,
+              ...style,
             } as React.CSSProperties
           }
           side={side}
@@ -230,6 +323,7 @@ function Sidebar({
       data-variant={variant}
       data-side={side}
       data-slot="sidebar"
+      style={style}
     >
       {/* This is what handles the sidebar gap on desktop */}
       <div
@@ -269,11 +363,14 @@ function Sidebar({
 }
 
 function SidebarTrigger({
+  scope = DEFAULT_SIDEBAR_SCOPE,
   className,
   onClick,
   ...props
-}: React.ComponentProps<typeof Button>) {
-  const { toggleSidebar } = useSidebar();
+}: React.ComponentProps<typeof Button> & {
+  scope?: SidebarScope;
+}) {
+  const { toggleSidebar } = useSidebar(scope);
 
   return (
     <Button
@@ -294,8 +391,14 @@ function SidebarTrigger({
   );
 }
 
-function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
-  const { toggleSidebar } = useSidebar();
+function SidebarRail({
+  scope = DEFAULT_SIDEBAR_SCOPE,
+  className,
+  ...props
+}: React.ComponentProps<"button"> & {
+  scope?: SidebarScope;
+}) {
+  const { toggleSidebar } = useSidebar(scope);
 
   return (
     <button
@@ -324,7 +427,7 @@ function SidebarInset({ className, ...props }: React.ComponentProps<"main">) {
     <main
       data-slot="sidebar-inset"
       className={cn(
-        "bg-background md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-lg md:peer-data-[variant=inset]:shadow-sm md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2 relative flex w-full flex-1 flex-col",
+        "bg-background md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-lg md:peer-data-[variant=inset]:shadow-sm md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2 relative flex min-w-0 flex-1 flex-col",
         className,
       )}
       {...props}

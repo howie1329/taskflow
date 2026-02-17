@@ -8,7 +8,17 @@ import {
   convertToModelMessages,
   type UIMessage,
   pruneMessages,
+  generateText,
 } from "ai";
+import {
+  safeParseUIMessages,
+  normalizeUIMessages,
+  getInitialUserText,
+  getLatestUserMessage,
+  planSummarization,
+  formatMessagesForSummarizer,
+  injectRollingSummary,
+} from "@taskflow/chat-content";
 import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server";
 import { fetchMutation, fetchQuery } from "convex/nextjs";
 import { api } from "@/convex/_generated/api";
@@ -19,20 +29,67 @@ import { supermemoryTools, withSupermemory } from "@supermemory/tools/ai-sdk";
 import { ModeMapping } from "@/lib/AITools/ModeMapping";
 import type { ModeName } from "@/lib/AITools/ModePrompts";
 
-const getFirstUserText = (messages: UIMessage[]) => {
-  const firstUser = messages.find((message) => message.role === "user");
-  if (!firstUser) return "";
-  return firstUser.parts
-    .filter((part) => part.type === "text")
-    .map((part) => part.text)
-    .join("");
+const CHAT_SUMMARIZATION_OPTIONS = {
+  trigger: { kind: "either", maxTokens: 6000, maxMessages: 20 } as const,
+  keepLastN: 8,
+  includeToolText: false,
+  maxCharsPerMessage: 8000,
+}
+
+const createTitle = async (messages: UIMessage[]) => {
+  const openRouter = createOpenRouter({
+    apiKey: process.env.OPENROUTER_AI_KEY,
+  });
+
+  if (!openRouter) {
+    console.error("OpenRouter not initialized in createTitle");
+    return "";
+  }
+
+  const initialMessage = getInitialUserText(messages);
+
+
+  const { text } = await generateText({
+    model: openRouter("arcee-ai/trinity-large-preview:free", {
+      extraBody: {
+        models: ["arcee-ai/trinity-large-preview:free", "openrouter/aurora-alpha"],
+      },
+    }),
+    system: "You are a title generation agent. You are tasked with generating a title for a conversation based on the initial message.",
+    prompt: `Generate a title for a conversation based on the initial message: ${initialMessage}.
+    The title should be a single sentence and should be no more than 100 characters.
+    You must return text.`,
+    temperature: 0.9,
+    maxRetries: 2,
+  });
+  return text;
 };
 
-const getTrimmedTitle = (text: string) => {
-  const cleaned = text.replace(/\s+/g, " ").trim();
-  if (!cleaned) return "Untitled chat";
-  return cleaned.length > 60 ? `${cleaned.slice(0, 60)}...` : cleaned;
-};
+const createRollingSummary = async ({
+  openRouter,
+  previousSummary,
+  transcript,
+}: {
+  openRouter: ReturnType<typeof createOpenRouter>
+  previousSummary: string
+  transcript: string
+}) => {
+  const { text } = await generateText({
+    model: openRouter("arcee-ai/trinity-large-preview:free", {
+      extraBody: {
+        models: ["arcee-ai/trinity-large-preview:free", "openrouter/aurora-alpha"],
+      },
+    }),
+    system:
+      "You maintain a rolling conversation summary used for context compression. Keep it concise, factual, and action-oriented.",
+    prompt: `Update the rolling summary.\n\nExisting summary:\n${previousSummary || "None"}\n\nNew transcript segment:\n${transcript}\n\nReturn only the updated summary text. Keep critical user preferences, decisions, open tasks, and unresolved questions.`,
+    temperature: 0.2,
+    maxRetries: 2,
+  })
+
+  return text.trim()
+}
+
 
 export async function POST(req: Request) {
   const token = await convexAuthNextjsToken();
@@ -54,7 +111,7 @@ export async function POST(req: Request) {
 
   let model: string;
   let threadId: string;
-  let messages: UIMessage[];
+  let rawMessages: unknown;
   let messageId: string | undefined;
   let userId: string | undefined;
   let projectId: Id<"projects"> | undefined;
@@ -64,7 +121,7 @@ export async function POST(req: Request) {
     const body = await req.json();
     model = body.model;
     threadId = body.id;
-    messages = body.messages;
+    rawMessages = body.messages;
     messageId = body.messageId;
     userId = body.userId;
     projectId = body.projectId || undefined;
@@ -101,17 +158,23 @@ export async function POST(req: Request) {
 
   if (
     !threadId ||
-    !Array.isArray(messages) ||
+    !Array.isArray(rawMessages) ||
     !model ||
     typeof userId !== "string"
   ) {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
 
+  const parsedMessages = safeParseUIMessages(rawMessages);
+  if (!parsedMessages.success) {
+    return NextResponse.json({ error: "Invalid messages payload" }, { status: 400 });
+  }
+  const messages = normalizeUIMessages(parsedMessages.data);
+
   let thread = await fetchQuery(api.chat.getThread, { threadId }, { token });
 
   if (!thread) {
-    const title = getTrimmedTitle(getFirstUserText(messages));
+    const title = await createTitle(messages);
     try {
       thread = await fetchMutation(
         api.chat.createThread,
@@ -133,11 +196,9 @@ export async function POST(req: Request) {
     }
   }
 
-  const lastMessage =
-    messages.find((msg) => msg.id === messageId) ??
-    messages[messages.length - 1];
+  const lastMessage = getLatestUserMessage(messages, messageId);
 
-  if (lastMessage?.role === "user") {
+  if (lastMessage) {
     try {
       await fetchMutation(
         api.chat.appendMessage,
@@ -159,8 +220,86 @@ export async function POST(req: Request) {
     }
   }
 
-  const modelMessages = await convertToModelMessages(messages);
-  const cleanedMessages = pruneMessages({ messages: modelMessages, reasoning: "before-last-message", toolCalls: "before-last-2-messages", emptyMessages: "remove" });
+  const existingSummary =
+    thread && "summary" in thread
+      ? (thread.summary as
+        | {
+          schemaVersion: number
+          summaryText: string
+          summarizedThroughMessageId: string
+          updatedAt: number
+        }
+        | undefined)
+      : undefined;
+
+  const summaryPlan = planSummarization({
+    messages,
+    previousSummary: existingSummary
+      ? {
+        schemaVersion: 1,
+        summaryText: existingSummary.summaryText,
+        summarizedThroughMessageId: existingSummary.summarizedThroughMessageId,
+        updatedAt: existingSummary.updatedAt,
+      }
+      : null,
+    options: CHAT_SUMMARIZATION_OPTIONS,
+  });
+
+  let summaryTextForContext = existingSummary?.summaryText ?? "";
+  let messagesForModelContext = messages;
+
+  if (summaryPlan.shouldSummarize && summaryPlan.nextCursorMessageId) {
+    const transcript = formatMessagesForSummarizer(
+      summaryPlan.messagesToSummarize,
+      CHAT_SUMMARIZATION_OPTIONS,
+    );
+
+    if (transcript) {
+      try {
+        const updatedSummary = await createRollingSummary({
+          openRouter,
+          previousSummary: summaryTextForContext,
+          transcript,
+        });
+
+        if (updatedSummary) {
+          await fetchMutation(
+            // Convex generated types may lag behind schema changes in CI/local restricted environments.
+            (api as any).chat.setThreadSummary,
+            {
+              threadId,
+              summary: {
+                schemaVersion: 1,
+                summaryText: updatedSummary,
+                summarizedThroughMessageId: summaryPlan.nextCursorMessageId,
+                updatedAt: Date.now(),
+              },
+            },
+            { token },
+          );
+          summaryTextForContext = updatedSummary;
+          messagesForModelContext = summaryPlan.messagesToKeep;
+        }
+      } catch (error) {
+        console.error("Error creating rolling summary:", error);
+      }
+    }
+  }
+
+  if (summaryTextForContext) {
+    messagesForModelContext = injectRollingSummary({
+      summaryText: summaryTextForContext,
+      messagesToKeep: messagesForModelContext,
+    });
+  }
+
+  const modelMessages = await convertToModelMessages(messagesForModelContext);
+  const cleanedMessages = pruneMessages({
+    messages: modelMessages,
+    reasoning: "before-last-message",
+    toolCalls: "before-last-2-messages",
+    emptyMessages: "remove",
+  });
 
   // Fetch project context if projectId is provided
   let projectContext: ProjectContext | null = null;
@@ -241,6 +380,28 @@ export async function POST(req: Request) {
 
               const agentMessage =
                 streamedMessages[streamedMessages.length - 1];
+              let usagePayload:
+                | {
+                  inputTokens: number
+                  outputTokens: number
+                  totalTokens?: number
+                }
+                | undefined;
+
+              try {
+                const totalUsage = await stream.totalUsage;
+                usagePayload = {
+                  inputTokens: totalUsage.inputTokens ?? 0,
+                  outputTokens: totalUsage.outputTokens ?? 0,
+                  totalTokens:
+                    totalUsage.totalTokens ??
+                    (totalUsage.inputTokens ?? 0) +
+                    (totalUsage.outputTokens ?? 0),
+                };
+              } catch (error) {
+                console.error("Error reading stream usage:", error);
+              }
+
               try {
                 await fetchMutation(
                   api.chat.appendMessage,
@@ -250,6 +411,7 @@ export async function POST(req: Request) {
                     messageId: crypto.randomUUID(),
                     role: "assistant",
                     parts: agentMessage.parts,
+                    usage: usagePayload,
                   },
                   { token },
                 );

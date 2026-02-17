@@ -17,7 +17,6 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Empty,
   EmptyDescription,
@@ -100,7 +99,7 @@ export function ThreadsRail({
     <nav
       aria-label="Threads"
       className={cn(
-        "flex min-h-0 flex-col text-foreground",
+        "flex min-h-0 min-w-0 flex-col overflow-hidden text-foreground",
         isSidebar ? "w-full flex-1 bg-transparent" : "w-full shrink-0 bg-background",
         className,
       )}
@@ -171,10 +170,10 @@ export function ThreadsRail({
         </InputGroup>
       </div>
 
-      <ScrollArea className="flex-1 min-h-0 [&>div>div]:w-full!">
+      <div className="no-scrollbar flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden">
         <div
           className={cn(
-            "w-full max-w-full",
+            "w-full max-w-full min-w-0",
             isSidebar ? "space-y-2 p-2" : "space-y-3 p-3",
           )}
         >
@@ -339,7 +338,7 @@ export function ThreadsRail({
             </>
           )}
         </div>
-      </ScrollArea>
+      </div>
     </nav>
   );
 }

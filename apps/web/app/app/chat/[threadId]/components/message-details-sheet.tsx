@@ -29,6 +29,15 @@ interface MessageDetailsSheetProps {
   onCopy?: (text: string) => void
 }
 
+type PersistedMessageMetadata = {
+  usage?: {
+    inputTokens: number
+    outputTokens: number
+    totalTokens?: number
+  }
+  costUsdMicros?: number
+}
+
 function estimateTokens(text: string) {
   return Math.max(1, Math.ceil(text.length / 4))
 }
@@ -50,6 +59,9 @@ export function MessageDetailsSheet({
   onCopy,
 }: MessageDetailsSheetProps) {
   const messageText = message ? getMessageText(message) : ""
+  const metadata = message?.metadata as PersistedMessageMetadata | undefined
+  const persistedUsage = metadata?.usage
+  const persistedCostUsdMicros = metadata?.costUsdMicros
   const reasoningText =
     message?.role === "assistant" ? getMessageReasoning(message) : null
   const toolCalls =
@@ -57,6 +69,18 @@ export function MessageDetailsSheet({
   const hasReasoning = !!reasoningText?.trim()
   const hasToolCalls = toolCalls.length > 0
   const canCopy = !!message && !!onCopy
+  const totalTokens =
+    persistedUsage?.totalTokens ??
+    (persistedUsage
+      ? persistedUsage.inputTokens + persistedUsage.outputTokens
+      : undefined)
+  const formattedCost =
+    persistedCostUsdMicros === undefined
+      ? null
+      : new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD",
+        }).format(persistedCostUsdMicros / 1_000_000)
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -89,12 +113,45 @@ export function MessageDetailsSheet({
                 </div>
               )}
 
-              <div className={blockClassName}>
-                <p className={labelClassName}>Estimated tokens</p>
-                <p className={cn(valueClassName, "font-semibold mt-0.5")}>
-                  {estimateTokens(messageText)}
-                </p>
-              </div>
+              {persistedUsage ? (
+                <>
+                  <div className={blockClassName}>
+                    <p className={labelClassName}>Input tokens</p>
+                    <p className={cn(valueClassName, "font-semibold mt-0.5")}>
+                      {persistedUsage.inputTokens}
+                    </p>
+                  </div>
+                  <div className={blockClassName}>
+                    <p className={labelClassName}>Output tokens</p>
+                    <p className={cn(valueClassName, "font-semibold mt-0.5")}>
+                      {persistedUsage.outputTokens}
+                    </p>
+                  </div>
+                  {totalTokens !== undefined && (
+                    <div className={blockClassName}>
+                      <p className={labelClassName}>Total tokens</p>
+                      <p className={cn(valueClassName, "font-semibold mt-0.5")}>
+                        {totalTokens}
+                      </p>
+                    </div>
+                  )}
+                  {formattedCost && (
+                    <div className={blockClassName}>
+                      <p className={labelClassName}>Estimated cost</p>
+                      <p className={cn(valueClassName, "font-semibold mt-0.5")}>
+                        {formattedCost}
+                      </p>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className={blockClassName}>
+                  <p className={labelClassName}>Estimated tokens</p>
+                  <p className={cn(valueClassName, "font-semibold mt-0.5")}>
+                    {estimateTokens(messageText)}
+                  </p>
+                </div>
+              )}
 
               <div className={blockClassName}>
                 <p className={labelClassName}>Length</p>
