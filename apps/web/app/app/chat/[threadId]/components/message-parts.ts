@@ -1,4 +1,4 @@
-import type { UIMessage } from "ai"
+import type { FileUIPart, UIMessage } from "ai"
 
 export function getMessageText(message: UIMessage) {
   return message.parts
@@ -14,4 +14,10 @@ export function getMessageReasoning(message: UIMessage): string | null {
   return reasoningParts
     .map((part) => (part as { type: "reasoning"; text: string }).text)
     .join("")
+}
+
+export function getMessageFiles(message: UIMessage): FileUIPart[] {
+  return message.parts
+    .filter((part) => part.type === "file")
+    .map((part) => part as FileUIPart)
 }
