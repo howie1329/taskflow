@@ -154,7 +154,6 @@ export function NewChatComposer() {
                   availableModels={availableModels}
                   selectedModelId={selectedModelId}
                   onSelectModelId={setSelectedModelId}
-                  priceDecimals={3}
                 />
                 <ModeSelectorMenu
                   selectedMode={selectedMode}

@@ -121,7 +121,6 @@ export function ThreadComposerBar({ thread }: ThreadComposerBarProps) {
                 availableModels={availableModels}
                 selectedModelId={selectedModelId}
                 onSelectModelId={setSelectedModelId}
-                priceDecimals={2}
               />
               <ModeSelectorMenu
                 selectedMode={selectedMode}
