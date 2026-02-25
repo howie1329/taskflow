@@ -14,7 +14,13 @@ import {
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ChevronDownIcon, CopyIcon } from "lucide-react"
-import { getMessageReasoning, getMessageText } from "./message-parts"
+import {
+  Attachment,
+  AttachmentInfo,
+  AttachmentPreview,
+  Attachments,
+} from "@/components/ai-elements/attachments"
+import { getMessageFiles, getMessageReasoning, getMessageText } from "./message-parts"
 import { getToolCalls } from "./tool-calls"
 import {
   getToolDisplayNameFromKey,
@@ -64,9 +70,11 @@ export function MessageDetailsSheet({
   const persistedCostUsdMicros = metadata?.costUsdMicros
   const reasoningText =
     message?.role === "assistant" ? getMessageReasoning(message) : null
+  const messageFiles = message ? getMessageFiles(message) : []
   const toolCalls =
     message?.role === "assistant" ? getToolCalls(message) : []
   const hasReasoning = !!reasoningText?.trim()
+  const hasAttachments = messageFiles.length > 0
   const hasToolCalls = toolCalls.length > 0
   const canCopy = !!message && !!onCopy
   const totalTokens =
@@ -159,6 +167,34 @@ export function MessageDetailsSheet({
                   {getMessageLengthLabel(messageText)}
                 </p>
               </div>
+
+              {hasAttachments && (
+                <div className={blockClassName}>
+                  <p className={labelClassName}>Attachments</p>
+                  <Attachments variant="list" className="mt-3">
+                    {messageFiles.map((file, fileIndex) => (
+                      <Attachment
+                        key={`${message!.id}-${file.filename ?? "file"}-${fileIndex}`}
+                        data={{ ...file, id: `${message!.id}-${fileIndex}` }}
+                      >
+                        <AttachmentPreview />
+                        <AttachmentInfo showMediaType />
+                        {file.url ? (
+                          <Button asChild size="sm" variant="outline">
+                            <a
+                              href={file.url}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              Open
+                            </a>
+                          </Button>
+                        ) : null}
+                      </Attachment>
+                    ))}
+                  </Attachments>
+                </div>
+              )}
 
               {message.role === "assistant" && hasReasoning && (
                 <div className={blockClassName}>
