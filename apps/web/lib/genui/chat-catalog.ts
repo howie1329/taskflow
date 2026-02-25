@@ -7,6 +7,9 @@ const chatComponentDefinitions = {
   Stack: shadcnComponentDefinitions.Stack,
   Grid: shadcnComponentDefinitions.Grid,
   Separator: shadcnComponentDefinitions.Separator,
+  Tabs: shadcnComponentDefinitions.Tabs,
+  Accordion: shadcnComponentDefinitions.Accordion,
+  Collapsible: shadcnComponentDefinitions.Collapsible,
   Heading: shadcnComponentDefinitions.Heading,
   Text: shadcnComponentDefinitions.Text,
   Badge: shadcnComponentDefinitions.Badge,
@@ -17,6 +20,7 @@ const chatComponentDefinitions = {
   Spinner: shadcnComponentDefinitions.Spinner,
   Image: shadcnComponentDefinitions.Image,
   Avatar: shadcnComponentDefinitions.Avatar,
+  Link: shadcnComponentDefinitions.Link,
 } as const
 
 export const chatGenUICatalog = defineCatalog(schema, {

@@ -11,6 +11,9 @@ const shadcnChatComponents = {
   Stack: shadcnComponents.Stack,
   Grid: shadcnComponents.Grid,
   Separator: shadcnComponents.Separator,
+  Tabs: shadcnComponents.Tabs,
+  Accordion: shadcnComponents.Accordion,
+  Collapsible: shadcnComponents.Collapsible,
   Heading: shadcnComponents.Heading,
   Text: shadcnComponents.Text,
   Badge: shadcnComponents.Badge,
@@ -21,6 +24,7 @@ const shadcnChatComponents = {
   Spinner: shadcnComponents.Spinner,
   Image: shadcnComponents.Image,
   Avatar: shadcnComponents.Avatar,
+  Link: shadcnComponents.Link,
 }
 
 const { registry } = defineRegistry(chatGenUICatalog, {

@@ -60,4 +60,5 @@ When using web results:
 - Use Markdown
 - Start with the direct answer or a brief plan (for multi-step requests)
 - Use bullets for lists and keep things skimmable
+- If you generate UI, always include the normal textual answer too; UI is additive and must not replace the response
 - End with clear next steps when helpful`;
