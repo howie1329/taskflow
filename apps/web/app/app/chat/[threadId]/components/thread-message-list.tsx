@@ -1,4 +1,5 @@
 import type { UIMessage } from "ai"
+import { useJsonRenderMessage } from "@json-render/react"
 import {
   Message,
   MessageAction,
@@ -23,6 +24,7 @@ import {
   Attachments,
 } from "@/components/ai-elements/attachments"
 import { getMessageFiles, getMessageReasoning, getMessageText } from "./message-parts"
+import { MessageGenUIPanel } from "./message-genui-panel"
 import { getToolCalls } from "./tool-calls"
 import { ToolPanels } from "./tool-panels"
 
@@ -81,67 +83,21 @@ export function ThreadMessageList({
               )}
             >
               {message.role === "assistant" ? (
-                <div className="flex flex-col gap-4">
-                  {hasFiles && (
-                    <Attachments variant="inline" className="mr-auto">
-                      {messageFiles.map((file, fileIndex) => (
-                        <Attachment
-                          key={`${message.id}-${file.filename ?? "file"}-${fileIndex}`}
-                          data={{ ...file, id: `${message.id}-${fileIndex}` }}
-                        >
-                          <AttachmentPreview />
-                        </Attachment>
-                      ))}
-                    </Attachments>
-                  )}
-                  {hasToolCalls && (
-                    <ToolPanels toolCalls={toolCalls} preferences={preferences} />
-                  )}
-                  {hasReasoning && preferences?.aiChatShowReasoning !== false && (
-                    <Reasoning isStreaming={status === "streaming"} defaultOpen={false}>
-                      <ReasoningTrigger />
-                      <ReasoningContent>{reasoningText}</ReasoningContent>
-                    </Reasoning>
-                  )}
-                  <Streamdown
-                    plugins={{ code, mermaid, math, cjk }}
-                    isAnimating={status === "streaming"}
-                    animated
-                  >
-                    {messageText}
-                  </Streamdown>
-
-                  {isStreamingMessage && (
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <ActivityIcon className="size-3.5 animate-pulse" />
-                      Streaming response...
-                    </div>
-                  )}
-
-                  <MessageActions className="opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
-                    <MessageAction
-                      tooltip="Regenerate"
-                      label="Regenerate"
-                      onClick={() => onRegenerate(message.id)}
-                    >
-                      <RefreshCwIcon className="size-3.5" />
-                    </MessageAction>
-                    <MessageAction
-                      tooltip="Copy"
-                      label="Copy"
-                      onClick={() => onCopy(messageText)}
-                    >
-                      <CopyIcon className="size-3.5" />
-                    </MessageAction>
-                    <MessageAction
-                      tooltip="Details"
-                      label="Details"
-                      onClick={() => onOpenDetails(message.id)}
-                    >
-                      <EllipsisIcon className="size-3.5" />
-                    </MessageAction>
-                  </MessageActions>
-                </div>
+                <AssistantMessageBody
+                  message={message}
+                  messageFiles={messageFiles}
+                  toolCalls={toolCalls}
+                  hasToolCalls={hasToolCalls}
+                  hasReasoning={hasReasoning}
+                  reasoningText={reasoningText}
+                  preferences={preferences}
+                  status={status}
+                  isStreamingMessage={isStreamingMessage}
+                  plainMessageText={messageText}
+                  onRegenerate={onRegenerate}
+                  onCopy={onCopy}
+                  onOpenDetails={onOpenDetails}
+                />
               ) : (
                 <div className="whitespace-pre-wrap text-[15px] leading-7">
                   {hasFiles && (
@@ -170,5 +126,112 @@ export function ThreadMessageList({
         )
       })}
     </>
+  )
+}
+
+interface AssistantMessageBodyProps {
+  message: UIMessage
+  messageFiles: ReturnType<typeof getMessageFiles>
+  toolCalls: ReturnType<typeof getToolCalls>
+  hasToolCalls: boolean
+  hasReasoning: boolean
+  reasoningText: string | null
+  preferences: PreferencesLike | undefined
+  status: string
+  isStreamingMessage: boolean
+  plainMessageText: string
+  onRegenerate: (assistantMessageId: string) => void
+  onCopy: (messageText: string) => void
+  onOpenDetails: (messageId: string) => void
+}
+
+function AssistantMessageBody({
+  message,
+  messageFiles,
+  toolCalls,
+  hasToolCalls,
+  hasReasoning,
+  reasoningText,
+  preferences,
+  status,
+  isStreamingMessage,
+  plainMessageText,
+  onRegenerate,
+  onCopy,
+  onOpenDetails,
+}: AssistantMessageBodyProps) {
+  const { spec, text: renderedText, hasSpec } = useJsonRenderMessage(
+    message.parts as Parameters<typeof useJsonRenderMessage>[0],
+  )
+
+  return (
+    <div className="flex flex-col gap-4">
+      {messageFiles.length > 0 && (
+        <Attachments variant="inline" className="mr-auto">
+          {messageFiles.map((file, fileIndex) => (
+            <Attachment
+              key={`${message.id}-${file.filename ?? "file"}-${fileIndex}`}
+              data={{ ...file, id: `${message.id}-${fileIndex}` }}
+            >
+              <AttachmentPreview />
+            </Attachment>
+          ))}
+        </Attachments>
+      )}
+
+      {hasToolCalls && (
+        <ToolPanels toolCalls={toolCalls} preferences={preferences} />
+      )}
+
+      {hasReasoning && preferences?.aiChatShowReasoning !== false && reasoningText && (
+        <Reasoning isStreaming={status === "streaming"} defaultOpen={false}>
+          <ReasoningTrigger />
+          <ReasoningContent>{reasoningText}</ReasoningContent>
+        </Reasoning>
+      )}
+
+      {hasSpec && spec && <MessageGenUIPanel spec={spec} />}
+
+      {renderedText && (
+        <Streamdown
+          plugins={{ code, mermaid, math, cjk }}
+          isAnimating={status === "streaming"}
+          animated
+        >
+          {renderedText}
+        </Streamdown>
+      )}
+
+      {isStreamingMessage && (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <ActivityIcon className="size-3.5 animate-pulse" />
+          Streaming response...
+        </div>
+      )}
+
+      <MessageActions className="opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
+        <MessageAction
+          tooltip="Regenerate"
+          label="Regenerate"
+          onClick={() => onRegenerate(message.id)}
+        >
+          <RefreshCwIcon className="size-3.5" />
+        </MessageAction>
+        <MessageAction
+          tooltip="Copy"
+          label="Copy"
+          onClick={() => onCopy(plainMessageText)}
+        >
+          <CopyIcon className="size-3.5" />
+        </MessageAction>
+        <MessageAction
+          tooltip="Details"
+          label="Details"
+          onClick={() => onOpenDetails(message.id)}
+        >
+          <EllipsisIcon className="size-3.5" />
+        </MessageAction>
+      </MessageActions>
+    </div>
   )
 }

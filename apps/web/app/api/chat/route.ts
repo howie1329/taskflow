@@ -19,6 +19,7 @@ import {
   formatMessagesForSummarizer,
   injectRollingSummary,
 } from "@taskflow/chat-content";
+import { pipeJsonRender } from "@json-render/core"
 import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server";
 import { fetchMutation, fetchQuery } from "convex/nextjs";
 import { api } from "@/convex/_generated/api";
@@ -28,6 +29,7 @@ import { buildSystemPrompt, type ProjectContext } from "@/lib/ai_context";
 import { supermemoryTools, withSupermemory } from "@supermemory/tools/ai-sdk";
 import { ModeMapping } from "@/lib/AITools/ModeMapping";
 import type { ModeName } from "@/lib/AITools/ModePrompts";
+import { getChatGenUISystemPrompt } from "@/lib/genui/chat-prompt"
 
 const CHAT_SUMMARIZATION_OPTIONS = {
   trigger: { kind: "either", maxTokens: 6000, maxMessages: 20 } as const,
@@ -346,6 +348,10 @@ export async function POST(req: Request) {
 - If this tool cannot complete the request, explain the limitation and ask the user to clear the tool lock or choose another slash command`
   }
 
+  instructions = `${instructions}
+
+${getChatGenUISystemPrompt()}`
+
   const response = createUIMessageStreamResponse({
     status: 200,
     stream: createUIMessageStream({
@@ -372,55 +378,57 @@ export async function POST(req: Request) {
 
         const stream = await agent.stream({ messages: cleanedMessages });
         writer.merge(
-          stream.toUIMessageStream({
-            onFinish: async ({ messages: streamedMessages }) => {
-              if (!streamedMessages.length) {
-                console.error("No messages returned from agent");
-                return;
-              }
-
-              const agentMessage =
-                streamedMessages[streamedMessages.length - 1];
-              let usagePayload:
-                | {
-                  inputTokens: number
-                  outputTokens: number
-                  totalTokens?: number
+          pipeJsonRender(
+            stream.toUIMessageStream({
+              onFinish: async ({ messages: streamedMessages }) => {
+                if (!streamedMessages.length) {
+                  console.error("No messages returned from agent");
+                  return;
                 }
-                | undefined;
 
-              try {
-                const totalUsage = await stream.totalUsage;
-                usagePayload = {
-                  inputTokens: totalUsage.inputTokens ?? 0,
-                  outputTokens: totalUsage.outputTokens ?? 0,
-                  totalTokens:
-                    totalUsage.totalTokens ??
-                    (totalUsage.inputTokens ?? 0) +
-                    (totalUsage.outputTokens ?? 0),
-                };
-              } catch (error) {
-                console.error("Error reading stream usage:", error);
-              }
+                const agentMessage =
+                  streamedMessages[streamedMessages.length - 1];
+                let usagePayload:
+                  | {
+                    inputTokens: number
+                    outputTokens: number
+                    totalTokens?: number
+                  }
+                  | undefined;
 
-              try {
-                await fetchMutation(
-                  api.chat.appendMessage,
-                  {
-                    threadId,
-                    model,
-                    messageId: crypto.randomUUID(),
-                    role: "assistant",
-                    parts: agentMessage.parts,
-                    usage: usagePayload,
-                  },
-                  { token },
-                );
-              } catch (error) {
-                console.error("Error appending assistant message:", error);
-              }
-            },
-          }),
+                try {
+                  const totalUsage = await stream.totalUsage;
+                  usagePayload = {
+                    inputTokens: totalUsage.inputTokens ?? 0,
+                    outputTokens: totalUsage.outputTokens ?? 0,
+                    totalTokens:
+                      totalUsage.totalTokens ??
+                      (totalUsage.inputTokens ?? 0) +
+                      (totalUsage.outputTokens ?? 0),
+                  };
+                } catch (error) {
+                  console.error("Error reading stream usage:", error);
+                }
+
+                try {
+                  await fetchMutation(
+                    api.chat.appendMessage,
+                    {
+                      threadId,
+                      model,
+                      messageId: crypto.randomUUID(),
+                      role: "assistant",
+                      parts: agentMessage.parts,
+                      usage: usagePayload,
+                    },
+                    { token },
+                  );
+                } catch (error) {
+                  console.error("Error appending assistant message:", error);
+                }
+              },
+            }),
+          ),
         );
       },
     }),
