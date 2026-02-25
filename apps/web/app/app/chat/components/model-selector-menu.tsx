@@ -1,6 +1,7 @@
 "use client"
 
 import type { Doc } from "@/convex/_generated/dataModel"
+import { CircleHelp } from "lucide-react"
 import {
   ModelSelector,
   ModelSelectorTrigger,
@@ -47,25 +48,37 @@ export function ModelSelectorMenu({
 
               return (
                 <Tooltip key={model.modelId}>
-                  <TooltipTrigger asChild>
-                    <ModelSelectorItem
-                      value={`${model.modelId} ${model.name} ${model.provider ?? ""}`}
-                      onSelect={() => onSelectModelId(model.modelId)}
-                    >
-                      <div className="flex w-full items-center justify-between gap-3">
-                        <div className="flex min-w-0 items-center gap-2">
-                          {model.provider ? (
-                            <ModelSelectorLogo provider={model.provider} />
-                          ) : null}
-                          <ModelSelectorName>{model.name}</ModelSelectorName>
-                        </div>
-                        <div className="shrink-0 text-[10px] text-muted-foreground">
+                  <ModelSelectorItem
+                    value={`${model.modelId} ${model.name} ${model.provider ?? ""}`}
+                    onSelect={() => onSelectModelId(model.modelId)}
+                  >
+                    <div className="flex w-full items-center justify-between gap-3">
+                      <div className="flex min-w-0 items-center gap-2">
+                        {model.provider ? (
+                          <ModelSelectorLogo provider={model.provider} />
+                        ) : null}
+                        <ModelSelectorName>{model.name}</ModelSelectorName>
+                      </div>
+                      <div className="flex shrink-0 items-center gap-1.5 text-[10px] text-muted-foreground">
+                        <span>
                           {formatModelPrice(model.pricing.prompt)} in /{" "}
                           {formatModelPrice(model.pricing.completion)} out
-                        </div>
+                        </span>
+                        <TooltipTrigger asChild>
+                          <button
+                            type="button"
+                            aria-label={`Show details for ${model.name}`}
+                            className="inline-flex size-4 items-center justify-center rounded-sm text-muted-foreground/80 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                            onPointerDown={(event) => event.stopPropagation()}
+                            onClick={(event) => event.stopPropagation()}
+                            onKeyDown={(event) => event.stopPropagation()}
+                          >
+                            <CircleHelp className="size-3" />
+                          </button>
+                        </TooltipTrigger>
                       </div>
-                    </ModelSelectorItem>
-                  </TooltipTrigger>
+                    </div>
+                  </ModelSelectorItem>
                   <TooltipContent side="right" className="max-w-sm">
                     <p className="font-medium">{model.name}</p>
                     <p className="mt-1 text-xs text-background/80">
