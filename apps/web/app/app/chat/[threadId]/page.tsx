@@ -132,7 +132,7 @@ function ThreadPageContent() {
   }
 
   return (
-    <div className="flex h-dvh min-h-0 w-full flex-col overflow-hidden">
+    <div className="flex h-full min-h-0 w-full flex-col overflow-hidden">
       <ThreadHeader
         thread={thread}
         project={project}
