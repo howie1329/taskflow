@@ -371,7 +371,7 @@ ${getChatGenUISystemPrompt()}`
               containerTags: [userId],
             }) as unknown as typeof Tools),
           },
-          maxOutputTokens: 3500, // Balanced default to reduce runaway completions
+          maxOutputTokens: 4500, // Balanced default to reduce runaway completions
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           activeTools: activeTools as any,
         });
