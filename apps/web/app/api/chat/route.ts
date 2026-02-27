@@ -9,6 +9,7 @@ import {
   type UIMessage,
   pruneMessages,
   generateText,
+  type AssistantModelMessage,
 } from "ai";
 import {
   safeParseUIMessages,
@@ -19,7 +20,7 @@ import {
   formatMessagesForSummarizer,
   injectRollingSummary,
 } from "@taskflow/chat-content";
-import { pipeJsonRender } from "@json-render/core"
+import { pipeJsonRender } from "@json-render/core";
 import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server";
 import { fetchMutation, fetchQuery } from "convex/nextjs";
 import { api } from "@/convex/_generated/api";
@@ -29,14 +30,14 @@ import { buildSystemPrompt, type ProjectContext } from "@/lib/ai_context";
 import { supermemoryTools, withSupermemory } from "@supermemory/tools/ai-sdk";
 import { ModeMapping } from "@/lib/AITools/ModeMapping";
 import type { ModeName } from "@/lib/AITools/ModePrompts";
-import { getChatGenUISystemPrompt } from "@/lib/genui/chat-prompt"
+import { getChatGenUISystemPrompt } from "@/lib/genui/chat-prompt";
 
 const CHAT_SUMMARIZATION_OPTIONS = {
   trigger: { kind: "either", maxTokens: 6000, maxMessages: 20 } as const,
   keepLastN: 8,
   includeToolText: false,
   maxCharsPerMessage: 8000,
-}
+};
 
 const createTitle = async (messages: UIMessage[]) => {
   const openRouter = createOpenRouter({
@@ -50,14 +51,17 @@ const createTitle = async (messages: UIMessage[]) => {
 
   const initialMessage = getInitialUserText(messages);
 
-
   const { text } = await generateText({
     model: openRouter("arcee-ai/trinity-large-preview:free", {
       extraBody: {
-        models: ["arcee-ai/trinity-large-preview:free", "openrouter/aurora-alpha"],
+        models: [
+          "arcee-ai/trinity-large-preview:free",
+          "openrouter/aurora-alpha",
+        ],
       },
     }),
-    system: "You are a title generation agent. You are tasked with generating a title for a conversation based on the initial message.",
+    system:
+      "You are a title generation agent. You are tasked with generating a title for a conversation based on the initial message.",
     prompt: `Generate a title for a conversation based on the initial message: ${initialMessage}.
     The title should be a single sentence and should be no more than 100 characters.
     You must return text.`,
@@ -72,14 +76,17 @@ const createRollingSummary = async ({
   previousSummary,
   transcript,
 }: {
-  openRouter: ReturnType<typeof createOpenRouter>
-  previousSummary: string
-  transcript: string
+  openRouter: ReturnType<typeof createOpenRouter>;
+  previousSummary: string;
+  transcript: string;
 }) => {
   const { text } = await generateText({
     model: openRouter("arcee-ai/trinity-large-preview:free", {
       extraBody: {
-        models: ["arcee-ai/trinity-large-preview:free", "openrouter/aurora-alpha"],
+        models: [
+          "arcee-ai/trinity-large-preview:free",
+          "openrouter/aurora-alpha",
+        ],
       },
     }),
     system:
@@ -87,11 +94,10 @@ const createRollingSummary = async ({
     prompt: `Update the rolling summary.\n\nExisting summary:\n${previousSummary || "None"}\n\nNew transcript segment:\n${transcript}\n\nReturn only the updated summary text. Keep critical user preferences, decisions, open tasks, and unresolved questions.`,
     temperature: 0.2,
     maxRetries: 3,
-  })
+  });
 
-  return text.trim()
-}
-
+  return text.trim();
+};
 
 export async function POST(req: Request) {
   const token = await convexAuthNextjsToken();
@@ -155,7 +161,11 @@ export async function POST(req: Request) {
       },
     }),
     userId,
-    { addMemory: "always", mode: "profile", apiKey: process.env.SUPERMEMORY_API_KEY! },
+    {
+      addMemory: "always",
+      mode: "profile",
+      apiKey: process.env.SUPERMEMORY_API_KEY!,
+    },
   );
 
   if (
@@ -169,7 +179,10 @@ export async function POST(req: Request) {
 
   const parsedMessages = safeParseUIMessages(rawMessages);
   if (!parsedMessages.success) {
-    return NextResponse.json({ error: "Invalid messages payload" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Invalid messages payload" },
+      { status: 400 },
+    );
   }
   const messages = normalizeUIMessages(parsedMessages.data);
 
@@ -225,24 +238,25 @@ export async function POST(req: Request) {
   const existingSummary =
     thread && "summary" in thread
       ? (thread.summary as
-        | {
-          schemaVersion: number
-          summaryText: string
-          summarizedThroughMessageId: string
-          updatedAt: number
-        }
-        | undefined)
+          | {
+              schemaVersion: number;
+              summaryText: string;
+              summarizedThroughMessageId: string;
+              updatedAt: number;
+            }
+          | undefined)
       : undefined;
 
   const summaryPlan = planSummarization({
     messages,
     previousSummary: existingSummary
       ? {
-        schemaVersion: 1,
-        summaryText: existingSummary.summaryText,
-        summarizedThroughMessageId: existingSummary.summarizedThroughMessageId,
-        updatedAt: existingSummary.updatedAt,
-      }
+          schemaVersion: 1,
+          summaryText: existingSummary.summaryText,
+          summarizedThroughMessageId:
+            existingSummary.summarizedThroughMessageId,
+          updatedAt: existingSummary.updatedAt,
+        }
       : null,
     options: CHAT_SUMMARIZATION_OPTIONS,
   });
@@ -325,7 +339,9 @@ export async function POST(req: Request) {
 
   if (typeof toolLock === "string" && toolLock.length > 0) {
     const isKnownTool = Object.prototype.hasOwnProperty.call(Tools, toolLock);
-    const isAllowedInMode = activeTools.includes(toolLock as keyof typeof Tools);
+    const isAllowedInMode = activeTools.includes(
+      toolLock as keyof typeof Tools,
+    );
 
     if (isKnownTool && isAllowedInMode) {
       validatedToolLock = toolLock as keyof typeof Tools;
@@ -345,12 +361,12 @@ export async function POST(req: Request) {
 ## Tool Lock (User Selected)
 - Tool usage is locked to \`${validatedToolLock}\`
 - Only use this tool for tool calls in this response
-- If this tool cannot complete the request, explain the limitation and ask the user to clear the tool lock or choose another slash command`
+- If this tool cannot complete the request, explain the limitation and ask the user to clear the tool lock or choose another slash command`;
   }
 
   instructions = `${instructions}
 
-${getChatGenUISystemPrompt()}`
+${getChatGenUISystemPrompt()}`;
 
   const response = createUIMessageStreamResponse({
     status: 200,
@@ -377,59 +393,59 @@ ${getChatGenUISystemPrompt()}`
         });
 
         const stream = await agent.stream({ messages: cleanedMessages });
-        writer.merge(
-          pipeJsonRender(
-            stream.toUIMessageStream({
-              onFinish: async ({ messages: streamedMessages }) => {
-                if (!streamedMessages.length) {
-                  console.error("No messages returned from agent");
-                  return;
-                }
+        const uiStream = stream.toUIMessageStream();
 
-                const agentMessage =
-                  streamedMessages[streamedMessages.length - 1];
-                let usagePayload:
-                  | {
-                    inputTokens: number
-                    outputTokens: number
-                    totalTokens?: number
-                  }
-                  | undefined;
+        writer.merge(pipeJsonRender(uiStream));
 
-                try {
-                  const totalUsage = await stream.totalUsage;
-                  usagePayload = {
-                    inputTokens: totalUsage.inputTokens ?? 0,
-                    outputTokens: totalUsage.outputTokens ?? 0,
-                    totalTokens:
-                      totalUsage.totalTokens ??
-                      (totalUsage.inputTokens ?? 0) +
-                      (totalUsage.outputTokens ?? 0),
-                  };
-                } catch (error) {
-                  console.error("Error reading stream usage:", error);
-                }
+        const response = await stream.response;
+        const messages = response.messages;
 
-                try {
-                  await fetchMutation(
-                    api.chat.appendMessage,
-                    {
-                      threadId,
-                      model,
-                      messageId: crypto.randomUUID(),
-                      role: "assistant",
-                      parts: agentMessage.parts,
-                      usage: usagePayload,
-                    },
-                    { token },
-                  );
-                } catch (error) {
-                  console.error("Error appending assistant message:", error);
-                }
-              },
-            }),
-          ),
-        );
+        if (!messages || messages.length === 0) {
+          console.error("No messages returned from agent");
+          return;
+        }
+
+        const agentMessage = messages[
+          messages.length - 1
+        ] as AssistantModelMessage;
+
+        let usagePayload:
+          | {
+              inputTokens: number;
+              outputTokens: number;
+              totalTokens?: number;
+            }
+          | undefined;
+
+        try {
+          const totalUsage = await stream.totalUsage;
+          usagePayload = {
+            inputTokens: totalUsage.inputTokens ?? 0,
+            outputTokens: totalUsage.outputTokens ?? 0,
+            totalTokens:
+              totalUsage.totalTokens ??
+              (totalUsage.inputTokens ?? 0) + (totalUsage.outputTokens ?? 0),
+          };
+        } catch (error) {
+          console.error("Error reading stream usage:", error);
+        }
+
+        try {
+          await fetchMutation(
+            api.chat.appendMessage,
+            {
+              threadId,
+              model,
+              messageId: crypto.randomUUID(),
+              role: "assistant",
+              parts: agentMessage.content,
+              usage: usagePayload,
+            },
+            { token },
+          );
+        } catch (error) {
+          console.error("Error appending assistant message:", error);
+        }
       },
     }),
   });
