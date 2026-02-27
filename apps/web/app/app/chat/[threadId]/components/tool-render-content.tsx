@@ -13,7 +13,6 @@ import {
   normalizeTavilyOutput,
 } from "@/lib/AITools/Tavily/types"
 import { TASKFLOW_TOOL_KEYS } from "@/lib/AITools/taskflow-tool-keys"
-import { isToolProgress } from "@/lib/AITools/tool-progress"
 import type { ToolCall } from "./tool-types"
 import {
   getToolStateInfo,
@@ -21,17 +20,13 @@ import {
 } from "./tool-meta"
 
 export function renderToolContent(toolCall: ToolCall): ReactNode {
-  if (toolCall.preliminary && isToolProgress(toolCall.output)) {
-    return <p className="text-sm text-muted-foreground">{toolCall.output.message}</p>
-  }
-
   if (
     toolCall.state !== "output-available" &&
     toolCall.state !== "output-error"
   ) {
     return (
       <p className="text-sm text-muted-foreground">
-        {getToolStateInfo(toolCall.state, toolCall.preliminary).badgeLabel}
+        {getToolStateInfo(toolCall.state).badgeLabel}
       </p>
     )
   }

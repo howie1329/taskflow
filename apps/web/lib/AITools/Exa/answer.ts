@@ -2,7 +2,6 @@ import Exa from "exa-js"
 import { tool } from "ai"
 import { z } from "zod"
 import { exaAnswerResponseSchema } from "./types"
-import { toolProgress, withToolProgressSchema } from "@/lib/AITools/tool-progress"
 
 const createExaClient = () => {
   const apiKey = process.env.EXA_API_KEY
@@ -22,9 +21,8 @@ export const ExaAnswer = tool({
       .optional()
       .describe("Include source text in citations"),
   }),
-  outputSchema: withToolProgressSchema(exaAnswerResponseSchema),
-  execute: async function* ({ question, includeText }) {
-    yield toolProgress(`Answering "${question}"`)
+  outputSchema: exaAnswerResponseSchema,
+  execute: async ({ question, includeText }) => {
     const exa = createExaClient()
     try {
       const response = await exa.answer(question, {

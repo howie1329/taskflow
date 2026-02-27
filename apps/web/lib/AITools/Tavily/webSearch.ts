@@ -1,7 +1,6 @@
 import { tool } from "ai";
 import { z } from "zod";
 import { tavily } from "@tavily/core";
-import { toolProgress, withToolProgressSchema } from "@/lib/AITools/tool-progress"
 
 // Used to search the web and provide information
 
@@ -30,9 +29,8 @@ export const TavilyWebSearch = tool({
     inputSchema: z.object({
         query: z.string().describe("The query to search the web for"),
     }),
-    outputSchema: withToolProgressSchema(tavilySearchResponseSchema),
-    execute: async function* ({ query }: { query: string }) {
-        yield toolProgress(`Searching the web for "${query}"`)
+    outputSchema: tavilySearchResponseSchema,     // <-- use the same schema
+    execute: async ({ query }: { query: string }) => {
         try {
             const client = tavily({ apiKey: process.env.TAVILY_API_KEY! })
             const results = await client.search(query)

@@ -2,7 +2,6 @@ import Parallel from "parallel-web"
 import { tool } from "ai"
 import { z } from "zod"
 import { parallelSearchResponseSchema } from "./types"
-import { toolProgress, withToolProgressSchema } from "@/lib/AITools/tool-progress"
 
 export const ParallelWebSearch = tool({
   description: "Search the web using Parallel.ai",
@@ -14,13 +13,12 @@ export const ParallelWebSearch = tool({
       .describe("Search queries to run against Parallel.ai"),
     maxResults: z.number().int().min(1).max(3).optional(),
   }),
-  outputSchema: withToolProgressSchema(parallelSearchResponseSchema),
-  execute: async function* ({
+  outputSchema: parallelSearchResponseSchema,
+  execute: async ({
     objective,
     searchQueries,
     maxResults,
-  }) {
-    yield toolProgress(`Searching the web for "${searchQueries[0] ?? objective}"`)
+  }) => {
     const apiKey = process.env.PARALLEL_API_KEY
     if (!apiKey) {
       throw new Error("PARALLEL_API_KEY is not set")
