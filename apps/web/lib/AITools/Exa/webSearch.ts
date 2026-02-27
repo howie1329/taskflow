@@ -2,6 +2,7 @@ import Exa from "exa-js"
 import { tool } from "ai"
 import { z } from "zod"
 import { exaSearchResponseSchema } from "./types"
+import { toolProgress, withToolProgressSchema } from "@/lib/AITools/tool-progress"
 
 const createExaClient = () => {
   const apiKey = process.env.EXA_API_KEY
@@ -37,15 +38,16 @@ export const ExaWebSearch = tool({
       .optional()
       .describe("End date filter in YYYY-MM-DD format"),
   }),
-  outputSchema: exaSearchResponseSchema,
-  execute: async ({
+  outputSchema: withToolProgressSchema(exaSearchResponseSchema),
+  execute: async function* ({
     query,
     numResults,
     category,
     includeDomains,
     startPublishedDate,
     endPublishedDate,
-  }) => {
+  }) {
+    yield toolProgress(`Searching the web for "${query}"`)
     const exa = createExaClient()
     try {
       const results = await exa.search(query, {

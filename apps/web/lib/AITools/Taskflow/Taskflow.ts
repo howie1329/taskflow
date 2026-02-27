@@ -3,6 +3,7 @@ import { z } from "zod"
 import { ConvexHttpClient } from "convex/browser"
 import { api } from "@/convex/_generated/api"
 import type { Id } from "@/convex/_generated/dataModel"
+import { toolProgress, withToolProgressSchema } from "@/lib/AITools/tool-progress"
 
 const taskStatusSchema = z.enum([
   "Not Started",
@@ -101,11 +102,12 @@ export const taskflowTools = {
       hideCompleted: z.boolean().optional(),
       scheduledDate: z.union([z.string(), z.null()]).optional(),
     }),
-    outputSchema: z.array(taskSchema),
-    execute: async (
+    outputSchema: withToolProgressSchema(z.array(taskSchema)),
+    execute: async function* (
       { status, projectId, hideCompleted, scheduledDate },
       { experimental_context },
-    ) => {
+    ) {
+      yield toolProgress("Listing tasks")
       const { token } = getToolContext(experimental_context)
       const client = createClient(token)
       return await client.query(api.tasks.listMyTasks, {
@@ -121,8 +123,9 @@ export const taskflowTools = {
     inputSchema: z.object({
       taskId: z.string(),
     }),
-    outputSchema: z.union([taskSchema, z.null()]),
-    execute: async ({ taskId }, { experimental_context }) => {
+    outputSchema: withToolProgressSchema(z.union([taskSchema, z.null()])),
+    execute: async function* ({ taskId }, { experimental_context }) {
+      yield toolProgress(`Fetching task "${taskId}"`)
       const { token } = getToolContext(experimental_context)
       const client = createClient(token)
       return await client.query(api.tasks.getMyTask, {
@@ -146,8 +149,8 @@ export const taskflowTools = {
       energyLevel: taskEnergySchema.optional(),
       difficulty: taskDifficultySchema.optional(),
     }),
-    outputSchema: taskSchema,
-    execute: async (
+    outputSchema: withToolProgressSchema(taskSchema),
+    execute: async function* (
       {
         title,
         description,
@@ -163,7 +166,8 @@ export const taskflowTools = {
         difficulty,
       },
       { experimental_context },
-    ) => {
+    ) {
+      yield toolProgress(`Creating the task "${title}"`)
       const { token } = getToolContext(experimental_context)
       const client = createClient(token)
       return await client.mutation(api.tasks.createTask, {
@@ -199,8 +203,8 @@ export const taskflowTools = {
       energyLevel: taskEnergySchema.optional(),
       difficulty: taskDifficultySchema.optional(),
     }),
-    outputSchema: taskSchema,
-    execute: async (
+    outputSchema: withToolProgressSchema(taskSchema),
+    execute: async function* (
       {
         taskId,
         title,
@@ -217,7 +221,10 @@ export const taskflowTools = {
         difficulty,
       },
       { experimental_context },
-    ) => {
+    ) {
+      yield toolProgress(
+        title ? `Updating the task "${title}"` : `Updating task "${taskId}"`,
+      )
       const { token } = getToolContext(experimental_context)
       const client = createClient(token)
       return await client.mutation(api.tasks.updateTask, {
@@ -242,8 +249,9 @@ export const taskflowTools = {
     inputSchema: z.object({
       taskId: z.string(),
     }),
-    outputSchema: successSchema,
-    execute: async ({ taskId }, { experimental_context }) => {
+    outputSchema: withToolProgressSchema(successSchema),
+    execute: async function* ({ taskId }, { experimental_context }) {
+      yield toolProgress(`Deleting task "${taskId}"`)
       const { token } = getToolContext(experimental_context)
       const client = createClient(token)
       return await client.mutation(api.tasks.deleteTask, {
@@ -256,8 +264,9 @@ export const taskflowTools = {
     inputSchema: z.object({
       status: projectStatusSchema.optional(),
     }),
-    outputSchema: z.array(projectSchema),
-    execute: async ({ status }, { experimental_context }) => {
+    outputSchema: withToolProgressSchema(z.array(projectSchema)),
+    execute: async function* ({ status }, { experimental_context }) {
+      yield toolProgress("Listing projects")
       const { token } = getToolContext(experimental_context)
       const client = createClient(token)
       return await client.query(api.projects.listMyProjects, { status })
@@ -268,8 +277,9 @@ export const taskflowTools = {
     inputSchema: z.object({
       projectId: z.string(),
     }),
-    outputSchema: z.union([projectSchema, z.null()]),
-    execute: async ({ projectId }, { experimental_context }) => {
+    outputSchema: withToolProgressSchema(z.union([projectSchema, z.null()])),
+    execute: async function* ({ projectId }, { experimental_context }) {
+      yield toolProgress(`Fetching project "${projectId}"`)
       const { token } = getToolContext(experimental_context)
       const client = createClient(token)
       return await client.query(api.projects.getMyProject, {
@@ -285,11 +295,12 @@ export const taskflowTools = {
       color: z.string().optional(),
       icon: z.string().optional(),
     }),
-    outputSchema: projectSchema,
-    execute: async (
+    outputSchema: withToolProgressSchema(projectSchema),
+    execute: async function* (
       { title, description, color, icon },
       { experimental_context },
-    ) => {
+    ) {
+      yield toolProgress(`Creating the project "${title}"`)
       const { token } = getToolContext(experimental_context)
       const client = createClient(token)
       return await client.mutation(api.projects.createProject, {
@@ -310,11 +321,16 @@ export const taskflowTools = {
       icon: z.string().optional(),
       status: projectStatusSchema.optional(),
     }),
-    outputSchema: projectSchema,
-    execute: async (
+    outputSchema: withToolProgressSchema(projectSchema),
+    execute: async function* (
       { projectId, title, description, color, icon, status },
       { experimental_context },
-    ) => {
+    ) {
+      yield toolProgress(
+        title
+          ? `Updating the project "${title}"`
+          : `Updating project "${projectId}"`,
+      )
       const { token } = getToolContext(experimental_context)
       const client = createClient(token)
       return await client.mutation(api.projects.updateProject, {
@@ -332,8 +348,9 @@ export const taskflowTools = {
     inputSchema: z.object({
       projectId: z.string(),
     }),
-    outputSchema: successSchema,
-    execute: async ({ projectId }, { experimental_context }) => {
+    outputSchema: withToolProgressSchema(successSchema),
+    execute: async function* ({ projectId }, { experimental_context }) {
+      yield toolProgress(`Deleting project "${projectId}"`)
       const { token } = getToolContext(experimental_context)
       const client = createClient(token)
       return await client.mutation(api.projects.deleteProject, {
@@ -346,8 +363,9 @@ export const taskflowTools = {
     inputSchema: z.object({
       status: inboxStatusSchema.optional(),
     }),
-    outputSchema: z.array(inboxItemSchema),
-    execute: async ({ status }, { experimental_context }) => {
+    outputSchema: withToolProgressSchema(z.array(inboxItemSchema)),
+    execute: async function* ({ status }, { experimental_context }) {
+      yield toolProgress("Listing inbox items")
       const { token } = getToolContext(experimental_context)
       const client = createClient(token)
       return await client.query(api.inbox.listMyInboxItems, { status })
@@ -358,8 +376,9 @@ export const taskflowTools = {
     inputSchema: z.object({
       inboxItemId: z.string(),
     }),
-    outputSchema: z.union([inboxItemSchema, z.null()]),
-    execute: async ({ inboxItemId }, { experimental_context }) => {
+    outputSchema: withToolProgressSchema(z.union([inboxItemSchema, z.null()])),
+    execute: async function* ({ inboxItemId }, { experimental_context }) {
+      yield toolProgress(`Fetching inbox item "${inboxItemId}"`)
       const { token } = getToolContext(experimental_context)
       const client = createClient(token)
       return await client.query(api.inbox.getMyInboxItem, {
@@ -372,8 +391,9 @@ export const taskflowTools = {
     inputSchema: z.object({
       content: z.string(),
     }),
-    outputSchema: inboxItemSchema,
-    execute: async ({ content }, { experimental_context }) => {
+    outputSchema: withToolProgressSchema(inboxItemSchema),
+    execute: async function* ({ content }, { experimental_context }) {
+      yield toolProgress("Creating an inbox item")
       const { token } = getToolContext(experimental_context)
       const client = createClient(token)
       return await client.mutation(api.inbox.createInboxItem, { content })
@@ -387,11 +407,12 @@ export const taskflowTools = {
       status: inboxStatusSchema.optional(),
       labels: z.union([z.array(z.string()), z.null()]).optional(),
     }),
-    outputSchema: inboxItemSchema,
-    execute: async (
+    outputSchema: withToolProgressSchema(inboxItemSchema),
+    execute: async function* (
       { inboxItemId, content, status, labels },
       { experimental_context },
-    ) => {
+    ) {
+      yield toolProgress(`Updating inbox item "${inboxItemId}"`)
       const { token } = getToolContext(experimental_context)
       const client = createClient(token)
       return await client.mutation(api.inbox.updateInboxItem, {
@@ -407,8 +428,9 @@ export const taskflowTools = {
     inputSchema: z.object({
       inboxItemId: z.string(),
     }),
-    outputSchema: successSchema,
-    execute: async ({ inboxItemId }, { experimental_context }) => {
+    outputSchema: withToolProgressSchema(successSchema),
+    execute: async function* ({ inboxItemId }, { experimental_context }) {
+      yield toolProgress(`Deleting inbox item "${inboxItemId}"`)
       const { token } = getToolContext(experimental_context)
       const client = createClient(token)
       return await client.mutation(api.inbox.deleteInboxItem, {

@@ -36,7 +36,13 @@ export const Tool = ({ className, ...props }: ToolProps) => (
 
 export type ToolPart = ToolUIPart | DynamicToolUIPart;
 
-export const getStatusBadge = (status: ToolPart["state"]) => {
+export const getStatusBadge = (
+  status: ToolPart["state"],
+  preliminary?: boolean,
+) => {
+  const normalizedStatus =
+    status === "output-available" && preliminary ? "input-available" : status
+
   const labels: Record<ToolPart["state"], string> = {
     "input-streaming": "Pending",
     "input-available": "Running",
@@ -71,12 +77,12 @@ export const getStatusBadge = (status: ToolPart["state"]) => {
     <Badge
       className={cn(
         "gap-1 rounded-full text-[10px] px-2 h-5 border font-medium",
-        variantMap[status],
+        variantMap[normalizedStatus],
       )}
       variant="outline"
     >
-      {icons[status]}
-      {labels[status]}
+      {icons[normalizedStatus]}
+      {labels[normalizedStatus]}
     </Badge>
   );
 };
@@ -85,6 +91,7 @@ export const getStatusBadge = (status: ToolPart["state"]) => {
 export interface EnhancedToolHeaderProps {
   toolName: string;
   state: ToolPart["state"];
+  preliminary?: boolean;
   title?: string;
   duration?: number;
   className?: string;
@@ -93,6 +100,7 @@ export interface EnhancedToolHeaderProps {
 export const EnhancedToolHeader = ({
   toolName,
   state,
+  preliminary,
   title,
   duration,
   className,
@@ -118,7 +126,7 @@ export const EnhancedToolHeader = ({
           <TimingBadge duration={duration} />
         )}
         <ProviderBadge toolName={toolName} />
-        {getStatusBadge(state)}
+        {getStatusBadge(state, preliminary)}
         <ChevronDownIcon className="size-3 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
       </div>
     </CollapsibleTrigger>

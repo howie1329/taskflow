@@ -180,7 +180,11 @@ function AssistantMessageBody({
       )}
 
       {hasToolCalls && (
-        <ToolPanels toolCalls={toolCalls} preferences={preferences} />
+        <ToolPanels
+          toolCalls={toolCalls}
+          preferences={preferences}
+          isStreaming={isStreamingMessage}
+        />
       )}
 
       {hasReasoning && preferences?.aiChatShowReasoning !== false && reasoningText && (

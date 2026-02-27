@@ -17,6 +17,7 @@ export function getToolCalls(message: UIMessage): ToolCall[] {
         id: part.toolCallId ?? `tool-${Math.random().toString(36).slice(2)}`,
         toolKey: rawToolName.replace(/^tool-/, ""),
         state: part.state,
+        preliminary: "preliminary" in part ? part.preliminary : undefined,
         input: "input" in part ? part.input : undefined,
         output: "output" in part ? part.output : undefined,
         errorText: "errorText" in part ? part.errorText : undefined,

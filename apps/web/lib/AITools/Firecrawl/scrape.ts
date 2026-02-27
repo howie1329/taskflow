@@ -2,6 +2,7 @@ import Firecrawl from "@mendable/firecrawl-js"
 import { tool } from "ai"
 import { z } from "zod"
 import { firecrawlScrapeResponseSchema } from "./types"
+import { toolProgress, withToolProgressSchema } from "@/lib/AITools/tool-progress"
 
 export const FirecrawlScrape = tool({
   description: "Scrape a web page using Firecrawl",
@@ -10,8 +11,9 @@ export const FirecrawlScrape = tool({
     formats: z.array(z.enum(["markdown", "html", "text"]).describe("Content format")).optional(),
     onlyMainContent: z.boolean().optional(),
   }),
-  outputSchema: firecrawlScrapeResponseSchema,
-  execute: async ({ url, formats, onlyMainContent }) => {
+  outputSchema: withToolProgressSchema(firecrawlScrapeResponseSchema),
+  execute: async function* ({ url, formats, onlyMainContent }) {
+    yield toolProgress(`Scraping "${url}"`)
     const apiKey = process.env.FIRECRAWL_API_KEY
     if (!apiKey) {
       throw new Error("FIRECRAWL_API_KEY is not set")

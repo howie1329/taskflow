@@ -4,6 +4,7 @@ export type ToolCall = {
   id: string
   toolKey: string
   state: ToolUIPart["state"]
+  preliminary?: boolean
   input?: unknown
   output?: unknown
   errorText?: string

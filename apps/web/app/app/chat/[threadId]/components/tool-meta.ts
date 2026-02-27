@@ -7,6 +7,7 @@ import {
   isTavilyWebSearchOutput,
   normalizeTavilyOutput,
 } from "@/lib/AITools/Tavily/types"
+import { isToolProgress } from "@/lib/AITools/tool-progress"
 import { TASKFLOW_TOOL_KEYS } from "@/lib/AITools/taskflow-tool-keys"
 import type { ToolCall, ToolStateInfo } from "./tool-types"
 
@@ -16,7 +17,18 @@ export function getToolDisplayNameFromKey(toolKey: string): string {
     .replace(/^./, (value) => value.toUpperCase())
 }
 
-export function getToolStateInfo(state: ToolUIPart["state"]): ToolStateInfo {
+export function getToolStateInfo(
+  state: ToolUIPart["state"],
+  preliminary?: boolean,
+): ToolStateInfo {
+  if (state === "output-available" && preliminary) {
+    return {
+      badgeLabel: "Running",
+      stepStatus: "active",
+      isError: false,
+    }
+  }
+
   const stateMap: Record<ToolUIPart["state"], ToolStateInfo> = {
     "input-streaming": {
       badgeLabel: "Pending",
@@ -137,6 +149,10 @@ function getOutputArrayLength(output: unknown, key: string): number {
 }
 
 export function getToolSummary(toolCall: ToolCall): string | null {
+  if (isToolProgress(toolCall.output)) {
+    return toolCall.output.message
+  }
+
   if (
     toolCall.toolKey === "tavilyWebSearch" &&
     isTavilyWebSearchOutput(toolCall.output)
@@ -149,29 +165,41 @@ export function getToolSummary(toolCall: ToolCall): string | null {
 
   if (toolCall.toolKey === "exaWebSearch") {
     const resultCount = getOutputArrayLength(toolCall.output, "results")
+    if (toolCall.preliminary) {
+      return "Searching Exa"
+    }
     return `Found ${resultCount} Exa results`
   }
 
   if (toolCall.toolKey === "exaAnswer") {
-    return "Generated answer with citations"
+    return toolCall.preliminary ? "Answering with Exa" : "Generated answer with citations"
   }
 
   if (toolCall.toolKey === "firecrawlSearch") {
     const resultCount = getOutputArrayLength(toolCall.output, "data")
+    if (toolCall.preliminary) {
+      return "Searching Firecrawl"
+    }
     return `Found ${resultCount} pages`
   }
 
   if (toolCall.toolKey === "firecrawlScrape") {
-    return "Scraped page content"
+    return toolCall.preliminary ? "Scraping page content" : "Scraped page content"
   }
 
   if (toolCall.toolKey === "parallelWebSearch") {
     const resultCount = getOutputArrayLength(toolCall.output, "results")
+    if (toolCall.preliminary) {
+      return "Searching with Parallel"
+    }
     return `Found ${resultCount} aggregated results`
   }
 
   if (toolCall.toolKey === "advancedResearch") {
     const resultCount = getOutputArrayLength(toolCall.output, "sources")
+    if (toolCall.preliminary) {
+      return "Compiling multi-source research"
+    }
     return `Compiled ${resultCount} multi-source results`
   }
 
@@ -180,6 +208,9 @@ export function getToolSummary(toolCall: ToolCall): string | null {
     toolCall.toolKey === "valyuFinanceSearch"
   ) {
     const resultCount = getOutputArrayLength(toolCall.output, "results")
+    if (toolCall.preliminary) {
+      return "Searching with Valyu"
+    }
     return `Found ${resultCount} Valyu results`
   }
 
@@ -188,11 +219,19 @@ export function getToolSummary(toolCall: ToolCall): string | null {
       toolCall.toolKey as (typeof TASKFLOW_TOOL_KEYS)[number],
     )
   ) {
-    if (toolCall.toolKey.startsWith("create")) return "Created successfully"
-    if (toolCall.toolKey.startsWith("update")) return "Updated successfully"
-    if (toolCall.toolKey.startsWith("delete")) return "Deleted successfully"
-    if (toolCall.toolKey.startsWith("list")) return "Listed records"
-    if (toolCall.toolKey.startsWith("get")) return "Fetched record"
+    if (toolCall.preliminary) {
+      if (toolCall.toolKey.startsWith("create")) return "Creating record"
+      if (toolCall.toolKey.startsWith("update")) return "Updating record"
+      if (toolCall.toolKey.startsWith("delete")) return "Deleting record"
+      if (toolCall.toolKey.startsWith("list")) return "Listing records"
+      if (toolCall.toolKey.startsWith("get")) return "Fetching record"
+    } else {
+      if (toolCall.toolKey.startsWith("create")) return "Created successfully"
+      if (toolCall.toolKey.startsWith("update")) return "Updated successfully"
+      if (toolCall.toolKey.startsWith("delete")) return "Deleted successfully"
+      if (toolCall.toolKey.startsWith("list")) return "Listed records"
+      if (toolCall.toolKey.startsWith("get")) return "Fetched record"
+    }
   }
 
   const outputSummary = summarizeToolOutput(toolCall.output)

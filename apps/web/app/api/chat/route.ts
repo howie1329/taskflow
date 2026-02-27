@@ -295,7 +295,9 @@ export async function POST(req: Request) {
     });
   }
 
-  const modelMessages = await convertToModelMessages(messagesForModelContext);
+  const modelMessages = await convertToModelMessages(messagesForModelContext, {
+    ignoreIncompleteToolCalls: true,
+  });
   const cleanedMessages = pruneMessages({
     messages: modelMessages,
     reasoning: "before-last-message",

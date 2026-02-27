@@ -221,7 +221,7 @@ export function MessageDetailsSheet({
                   <p className={labelClassName}>Tools used</p>
                   <ul className={cn("mt-2 space-y-2", valueClassName)}>
                     {toolCalls.map((tool) => {
-                      const stateInfo = getToolStateInfo(tool.state)
+                      const stateInfo = getToolStateInfo(tool.state, tool.preliminary)
                       return (
                         <li
                           key={tool.id}
