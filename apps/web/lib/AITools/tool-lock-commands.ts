@@ -6,6 +6,11 @@ export type ToolKey =
   | "createTask"
   | "updateTask"
   | "deleteTask"
+  | "listNotes"
+  | "getNote"
+  | "createNote"
+  | "updateNote"
+  | "deleteNote"
   | "listProjects"
   | "getProject"
   | "createProject"
@@ -140,6 +145,41 @@ const TASKFLOW_COMMANDS: ToolLockCommand[] = [
     label: "Inbox: Delete",
     description: "Delete an inbox item",
     toolKey: "deleteInboxItem",
+    allowedModes: ALL_MODES,
+  },
+  {
+    command: "/notes.list",
+    label: "Notes: List",
+    description: "List notes for the current user",
+    toolKey: "listNotes",
+    allowedModes: ALL_MODES,
+  },
+  {
+    command: "/notes.get",
+    label: "Notes: Get",
+    description: "Get a single note by ID",
+    toolKey: "getNote",
+    allowedModes: ALL_MODES,
+  },
+  {
+    command: "/notes.create",
+    label: "Notes: Create",
+    description: "Create a new note",
+    toolKey: "createNote",
+    allowedModes: ALL_MODES,
+  },
+  {
+    command: "/notes.update",
+    label: "Notes: Update",
+    description: "Update an existing note",
+    toolKey: "updateNote",
+    allowedModes: ALL_MODES,
+  },
+  {
+    command: "/notes.delete",
+    label: "Notes: Delete",
+    description: "Delete a note",
+    toolKey: "deleteNote",
     allowedModes: ALL_MODES,
   },
 ]

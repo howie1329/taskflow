@@ -57,6 +57,19 @@ const inboxItemSchema = z
   })
   .passthrough()
 
+const noteSchema = z
+  .object({
+    _id: z.string(),
+    title: z.string(),
+    content: z.string().optional(),
+    contentText: z.string().optional(),
+    pinned: z.boolean().optional(),
+    projectId: z.string().optional(),
+    createdAt: z.number().optional(),
+    updatedAt: z.number().optional(),
+  })
+  .passthrough()
+
 const listInboxItemsResponseSchema = z.object({
   items: z.array(inboxItemSchema),
   nextCursor: z.union([z.string(), z.null()]),
@@ -632,6 +645,159 @@ export const taskflowTools = {
         return result
       } catch (error) {
         emit("error", "Failed to delete inbox item.")
+        throw error
+      }
+    },
+  }),
+  listNotes: tool({
+    description: "List notes for the signed-in user",
+    inputSchema: z.object({}),
+    outputSchema: z.array(noteSchema),
+    execute: async (_input, { toolCallId, experimental_context }) => {
+      const emit = createProgressEmitter({
+        experimental_context,
+        toolKey: "listNotes",
+        toolCallId,
+      })
+      emit("running", "Loading your notes...")
+      const { token } = getToolContext(experimental_context)
+      const client = createClient(token)
+      try {
+        const notes = await client.query(api.notes.listMyNotes, {})
+        emit("done", `Loaded ${notes.length} notes.`)
+        return notes
+      } catch (error) {
+        emit("error", "Failed to load your notes.")
+        throw error
+      }
+    },
+  }),
+  getNote: tool({
+    description: "Get a single note by ID",
+    inputSchema: z.object({
+      noteId: z.string(),
+    }),
+    outputSchema: z.union([noteSchema, z.null()]),
+    execute: async ({ noteId }, { toolCallId, experimental_context }) => {
+      const emit = createProgressEmitter({
+        experimental_context,
+        toolKey: "getNote",
+        toolCallId,
+      })
+      emit("running", "Loading note...")
+      const { token } = getToolContext(experimental_context)
+      const client = createClient(token)
+      try {
+        const note = await client.query(api.notes.getMyNote, {
+          noteId: noteId as Id<"notes">,
+        })
+        emit("done", note ? "Note loaded." : "No note found.")
+        return note
+      } catch (error) {
+        emit("error", "Failed to load note.")
+        throw error
+      }
+    },
+  }),
+  createNote: tool({
+    description: "Create a new note",
+    inputSchema: z.object({
+      title: z.string().optional(),
+      content: z.string().optional(),
+      contentText: z.string().optional(),
+      projectId: z.string().optional(),
+    }),
+    outputSchema: noteSchema,
+    execute: async (
+      { title, content, contentText, projectId },
+      { toolCallId, experimental_context },
+    ) => {
+      const emit = createProgressEmitter({
+        experimental_context,
+        toolKey: "createNote",
+        toolCallId,
+      })
+      emit("running", `Creating note "${title || "Untitled"}"...`)
+      const { token } = getToolContext(experimental_context)
+      const client = createClient(token)
+      try {
+        const note = await client.mutation(api.notes.createNote, {
+          title,
+          content,
+          contentText,
+          projectId: projectId as Id<"projects"> | undefined,
+        })
+        emit("done", `Created note "${note?.title || title || "Untitled"}".`)
+        return note
+      } catch (error) {
+        emit("error", `Failed to create note "${title || "Untitled"}".`)
+        throw error
+      }
+    },
+  }),
+  updateNote: tool({
+    description: "Update an existing note",
+    inputSchema: z.object({
+      noteId: z.string(),
+      title: z.string().optional(),
+      content: z.string().optional(),
+      contentText: z.string().optional(),
+      pinned: z.boolean().optional(),
+      projectId: z.union([z.string(), z.null()]).optional(),
+    }),
+    outputSchema: noteSchema,
+    execute: async (
+      { noteId, title, content, contentText, pinned, projectId },
+      { toolCallId, experimental_context },
+    ) => {
+      const emit = createProgressEmitter({
+        experimental_context,
+        toolKey: "updateNote",
+        toolCallId,
+      })
+      emit("running", "Updating note...")
+      const { token } = getToolContext(experimental_context)
+      const client = createClient(token)
+      try {
+        const note = await client.mutation(api.notes.updateNote, {
+          noteId: noteId as Id<"notes">,
+          title,
+          content,
+          contentText,
+          pinned,
+          projectId: projectId as Id<"projects"> | null | undefined,
+        })
+        emit("done", `Updated note "${note?.title || title || "Untitled"}".`)
+        return note
+      } catch (error) {
+        emit("error", "Failed to update note.")
+        throw error
+      }
+    },
+  }),
+  deleteNote: tool({
+    description: "Delete a note",
+    inputSchema: z.object({
+      noteId: z.string(),
+    }),
+    outputSchema: successSchema,
+    execute: async ({ noteId }, { toolCallId, experimental_context }) => {
+      const emit = createProgressEmitter({
+        experimental_context,
+        toolKey: "deleteNote",
+        toolCallId,
+      })
+      emit("running", "Deleting note...")
+      const { token } = getToolContext(experimental_context)
+      const client = createClient(token)
+      try {
+        const result = await client.mutation(api.notes.deleteNote, {
+          noteId: noteId as Id<"notes">,
+        })
+        emit("done", "Note deleted.")
+        return result
+      } catch (error) {
+        emit("error", "Failed to delete note.")
         throw error
       }
     },
