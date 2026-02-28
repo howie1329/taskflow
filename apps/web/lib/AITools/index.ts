@@ -5,7 +5,6 @@ import { ValyuTools } from "./Valyu/index"
 import { ParallelTools } from "./ParallelAi/index"
 import { FirecrawlTools } from "./Firecrawl/index"
 import { CustomTools } from "./Custom"
-import { TestTools } from "./Test"
 
 export const Tools = {
   ...ExaTools,
@@ -15,5 +14,4 @@ export const Tools = {
   ...ParallelTools,
   ...FirecrawlTools,
   ...CustomTools,
-  ...TestTools,
 } as const

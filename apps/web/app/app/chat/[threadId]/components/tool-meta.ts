@@ -183,16 +183,6 @@ export function getToolSummary(toolCall: ToolCall): string | null {
     return `Found ${resultCount} Valyu results`
   }
 
-  if (toolCall.toolKey === "testWebSearch") {
-    const resultCount = getOutputArrayLength(toolCall.output, "sources")
-    return `Found ${resultCount} test sources`
-  }
-
-  if (toolCall.toolKey === "testUserTasks") {
-    const resultCount = getOutputArrayLength(toolCall.output, "tasks")
-    return `Loaded ${resultCount} tasks from DB`
-  }
-
   if (
     TASKFLOW_TOOL_KEYS.includes(
       toolCall.toolKey as (typeof TASKFLOW_TOOL_KEYS)[number],

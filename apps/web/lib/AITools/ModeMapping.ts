@@ -6,7 +6,6 @@ import { ValyuToolsKeys } from "./Valyu/index"
 import { ParallelToolsKeys } from "./ParallelAi"
 import { Tools } from "./index"
 import { CustomToolsKeys } from "./Custom"
-import { TestToolsKeys } from "./Test"
 
 type ToolKey = keyof typeof Tools
 
@@ -36,9 +35,5 @@ export const ModeMapping: Record<string, Mode> = {
     "Social": {
         name: "Social",
         activeTools: [...taskflowToolsKeys, ...ValyuToolsKeys, ...ParallelToolsKeys, "firecrawlScrape"] as ToolKey[]
-    },
-    "Test": {
-        name: "Test",
-        activeTools: [...TestToolsKeys] as ToolKey[]
     }
 }
