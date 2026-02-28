@@ -8,6 +8,7 @@ import { TaskflowToolResultCard } from "@/components/ai-elements/taskflow-tool-r
 import { TavilyWebSearchCard } from "@/components/ai-elements/tavily-web-search-card"
 import { ValyuFinanceSearchCard } from "@/components/ai-elements/valyu-finance-search-card"
 import { ValyuWebSearchCard } from "@/components/ai-elements/valyu-web-search-card"
+import { TestToolStatusCard } from "@/components/ai-elements/test-tool-status-card"
 import {
   isTavilyWebSearchOutput,
   normalizeTavilyOutput,
@@ -65,6 +66,9 @@ export function renderToolContent(toolCall: ToolCall): ReactNode {
       return <ValyuWebSearchCard output={toolCall.output} />
     case "valyuFinanceSearch":
       return <ValyuFinanceSearchCard output={toolCall.output} />
+    case "testWebSearch":
+    case "testUserTasks":
+      return <TestToolStatusCard output={toolCall.output} />
     default:
       if (
         TASKFLOW_TOOL_KEYS.includes(
