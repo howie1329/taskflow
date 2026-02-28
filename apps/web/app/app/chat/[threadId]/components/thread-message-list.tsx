@@ -17,7 +17,14 @@ import { code } from "@streamdown/code"
 import { mermaid } from "@streamdown/mermaid"
 import { math } from "@streamdown/math"
 import { cjk } from "@streamdown/cjk"
-import { ActivityIcon, CopyIcon, EllipsisIcon, RefreshCwIcon } from "lucide-react"
+import {
+  ActivityIcon,
+  AlertCircleIcon,
+  CheckCircle2Icon,
+  CopyIcon,
+  EllipsisIcon,
+  RefreshCwIcon,
+} from "lucide-react"
 import {
   Attachment,
   AttachmentPreview,
@@ -145,6 +152,58 @@ interface AssistantMessageBodyProps {
   onOpenDetails: (messageId: string) => void
 }
 
+type ToolProgressPart = {
+  type: "data-toolProgress"
+  id?: string
+  data: {
+    toolKey: string
+    toolCallId: string
+    status: "running" | "done" | "error"
+    text: string
+  }
+}
+
+function getMessageToolProgress(message: UIMessage): ToolProgressPart[] {
+  return message.parts.filter(
+    (part): part is ToolProgressPart => part.type === "data-toolProgress",
+  )
+}
+
+function formatToolProgressLabel(toolKey: string) {
+  return toolKey
+    .replace(/([A-Z])/g, " $1")
+    .replace(/^./, (value) => value.toUpperCase())
+}
+
+function ToolProgressList({ parts }: { parts: ToolProgressPart[] }) {
+  if (parts.length === 0) return null
+
+  return (
+    <div className="space-y-2">
+      {parts.map((part) => (
+        <div
+          key={part.id ?? part.data.toolCallId}
+          className="flex items-center gap-2 rounded-full border border-border/60 bg-muted/20 px-3 py-1.5 text-sm"
+        >
+          {part.data.status === "running" ? (
+            <ActivityIcon className="size-3.5 animate-pulse text-muted-foreground" />
+          ) : part.data.status === "done" ? (
+            <CheckCircle2Icon className="size-3.5 text-muted-foreground" />
+          ) : (
+            <AlertCircleIcon className="size-3.5 text-destructive" />
+          )}
+          <span className="font-medium text-foreground/85">
+            {formatToolProgressLabel(part.data.toolKey)}
+          </span>
+          <span className="min-w-0 truncate text-muted-foreground">
+            {part.data.text}
+          </span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 function AssistantMessageBody({
   message,
   messageFiles,
@@ -163,6 +222,7 @@ function AssistantMessageBody({
   const { spec, text: renderedText, hasSpec } = useJsonRenderMessage(
     message.parts as Parameters<typeof useJsonRenderMessage>[0],
   )
+  const progressParts = getMessageToolProgress(message)
 
   return (
     <div className="flex flex-col gap-4">
@@ -178,6 +238,8 @@ function AssistantMessageBody({
           ))}
         </Attachments>
       )}
+
+      <ToolProgressList parts={progressParts} />
 
       {hasToolCalls && (
         <ToolPanels toolCalls={toolCalls} preferences={preferences} />

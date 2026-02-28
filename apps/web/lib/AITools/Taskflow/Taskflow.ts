@@ -3,6 +3,7 @@ import { z } from "zod"
 import { ConvexHttpClient } from "convex/browser"
 import { api } from "@/convex/_generated/api"
 import type { Id } from "@/convex/_generated/dataModel"
+import { emitToolProgress } from "@/lib/AITools/progress"
 
 const taskStatusSchema = z.enum([
   "Not Started",
@@ -56,6 +57,11 @@ const inboxItemSchema = z
   })
   .passthrough()
 
+const listInboxItemsResponseSchema = z.object({
+  items: z.array(inboxItemSchema),
+  nextCursor: z.union([z.string(), z.null()]),
+})
+
 const successSchema = z.object({
   success: z.boolean(),
 })
@@ -92,6 +98,25 @@ const createClient = (token: string) => {
   return client
 }
 
+const createProgressEmitter = ({
+  experimental_context,
+  toolKey,
+  toolCallId,
+}: {
+  experimental_context: unknown
+  toolKey: string
+  toolCallId: string
+}) => {
+  return (status: "running" | "done" | "error", text: string) =>
+    emitToolProgress({
+      experimental_context,
+      toolKey,
+      toolCallId,
+      status,
+      text,
+    })
+}
+
 export const taskflowTools = {
   listTasks: tool({
     description: "List tasks for the signed-in user",
@@ -104,16 +129,29 @@ export const taskflowTools = {
     outputSchema: z.array(taskSchema),
     execute: async (
       { status, projectId, hideCompleted, scheduledDate },
-      { experimental_context },
+      { toolCallId, experimental_context },
     ) => {
+      const emit = createProgressEmitter({
+        experimental_context,
+        toolKey: "listTasks",
+        toolCallId,
+      })
+      emit("running", "Loading your tasks...")
       const { token } = getToolContext(experimental_context)
       const client = createClient(token)
-      return await client.query(api.tasks.listMyTasks, {
-        status,
-        projectId: projectId as Id<"projects"> | undefined,
-        hideCompleted,
-        scheduledDate,
-      })
+      try {
+        const tasks = await client.query(api.tasks.listMyTasks, {
+          status,
+          projectId: projectId as Id<"projects"> | undefined,
+          hideCompleted,
+          scheduledDate: scheduledDate as string | undefined,
+        })
+        emit("done", `Loaded ${tasks.length} tasks.`)
+        return tasks
+      } catch (error) {
+        emit("error", "Failed to load your tasks.")
+        throw error
+      }
     },
   }),
   getTask: tool({
@@ -122,12 +160,25 @@ export const taskflowTools = {
       taskId: z.string(),
     }),
     outputSchema: z.union([taskSchema, z.null()]),
-    execute: async ({ taskId }, { experimental_context }) => {
+    execute: async ({ taskId }, { toolCallId, experimental_context }) => {
+      const emit = createProgressEmitter({
+        experimental_context,
+        toolKey: "getTask",
+        toolCallId,
+      })
+      emit("running", "Loading task...")
       const { token } = getToolContext(experimental_context)
       const client = createClient(token)
-      return await client.query(api.tasks.getMyTask, {
-        taskId: taskId as Id<"tasks">,
-      })
+      try {
+        const task = await client.query(api.tasks.getMyTask, {
+          taskId: taskId as Id<"tasks">,
+        })
+        emit("done", task ? "Task loaded." : "No task found.")
+        return task
+      } catch (error) {
+        emit("error", "Failed to load task.")
+        throw error
+      }
     },
   }),
   createTask: tool({
@@ -162,24 +213,37 @@ export const taskflowTools = {
         energyLevel,
         difficulty,
       },
-      { experimental_context },
+      { toolCallId, experimental_context },
     ) => {
+      const emit = createProgressEmitter({
+        experimental_context,
+        toolKey: "createTask",
+        toolCallId,
+      })
+      emit("running", `Creating task "${title}"...`)
       const { token } = getToolContext(experimental_context)
       const client = createClient(token)
-      return await client.mutation(api.tasks.createTask, {
-        title,
-        description,
-        notes,
-        status,
-        priority,
-        dueDate,
-        scheduledDate,
-        projectId: projectId as Id<"projects"> | undefined,
-        tagIds: tagIds as Id<"tags">[] | undefined,
-        estimatedDuration,
-        energyLevel,
-        difficulty,
-      })
+      try {
+        const task = await client.mutation(api.tasks.createTask, {
+          title,
+          description,
+          notes,
+          status,
+          priority,
+          dueDate,
+          scheduledDate,
+          projectId: projectId as Id<"projects"> | undefined,
+          tagIds: tagIds as Id<"tags">[] | undefined,
+          estimatedDuration,
+          energyLevel,
+          difficulty,
+        })
+        emit("done", `Created task "${task?.title ?? title}".`)
+        return task
+      } catch (error) {
+        emit("error", `Failed to create task "${title}".`)
+        throw error
+      }
     },
   }),
   updateTask: tool({
@@ -216,25 +280,38 @@ export const taskflowTools = {
         energyLevel,
         difficulty,
       },
-      { experimental_context },
+      { toolCallId, experimental_context },
     ) => {
+      const emit = createProgressEmitter({
+        experimental_context,
+        toolKey: "updateTask",
+        toolCallId,
+      })
+      emit("running", "Updating task...")
       const { token } = getToolContext(experimental_context)
       const client = createClient(token)
-      return await client.mutation(api.tasks.updateTask, {
-        taskId: taskId as Id<"tasks">,
-        title,
-        description,
-        notes,
-        status,
-        priority,
-        dueDate,
-        scheduledDate,
-        projectId: projectId as Id<"projects"> | null | undefined,
-        tagIds: tagIds as Id<"tags">[] | null | undefined,
-        estimatedDuration,
-        energyLevel,
-        difficulty,
-      })
+      try {
+        const task = await client.mutation(api.tasks.updateTask, {
+          taskId: taskId as Id<"tasks">,
+          title,
+          description,
+          notes,
+          status,
+          priority,
+          dueDate,
+          scheduledDate,
+          projectId: projectId as Id<"projects"> | null | undefined,
+          tagIds: tagIds as Id<"tags">[] | null | undefined,
+          estimatedDuration,
+          energyLevel,
+          difficulty,
+        })
+        emit("done", "Task updated.")
+        return task
+      } catch (error) {
+        emit("error", "Failed to update task.")
+        throw error
+      }
     },
   }),
   deleteTask: tool({
@@ -243,12 +320,25 @@ export const taskflowTools = {
       taskId: z.string(),
     }),
     outputSchema: successSchema,
-    execute: async ({ taskId }, { experimental_context }) => {
+    execute: async ({ taskId }, { toolCallId, experimental_context }) => {
+      const emit = createProgressEmitter({
+        experimental_context,
+        toolKey: "deleteTask",
+        toolCallId,
+      })
+      emit("running", "Deleting task...")
       const { token } = getToolContext(experimental_context)
       const client = createClient(token)
-      return await client.mutation(api.tasks.deleteTask, {
-        taskId: taskId as Id<"tasks">,
-      })
+      try {
+        const result = await client.mutation(api.tasks.deleteTask, {
+          taskId: taskId as Id<"tasks">,
+        })
+        emit("done", "Task deleted.")
+        return result
+      } catch (error) {
+        emit("error", "Failed to delete task.")
+        throw error
+      }
     },
   }),
   listProjects: tool({
@@ -257,10 +347,23 @@ export const taskflowTools = {
       status: projectStatusSchema.optional(),
     }),
     outputSchema: z.array(projectSchema),
-    execute: async ({ status }, { experimental_context }) => {
+    execute: async ({ status }, { toolCallId, experimental_context }) => {
+      const emit = createProgressEmitter({
+        experimental_context,
+        toolKey: "listProjects",
+        toolCallId,
+      })
+      emit("running", "Loading your projects...")
       const { token } = getToolContext(experimental_context)
       const client = createClient(token)
-      return await client.query(api.projects.listMyProjects, { status })
+      try {
+        const projects = await client.query(api.projects.listMyProjects, { status })
+        emit("done", `Loaded ${projects.length} projects.`)
+        return projects
+      } catch (error) {
+        emit("error", "Failed to load your projects.")
+        throw error
+      }
     },
   }),
   getProject: tool({
@@ -269,12 +372,25 @@ export const taskflowTools = {
       projectId: z.string(),
     }),
     outputSchema: z.union([projectSchema, z.null()]),
-    execute: async ({ projectId }, { experimental_context }) => {
+    execute: async ({ projectId }, { toolCallId, experimental_context }) => {
+      const emit = createProgressEmitter({
+        experimental_context,
+        toolKey: "getProject",
+        toolCallId,
+      })
+      emit("running", "Loading project...")
       const { token } = getToolContext(experimental_context)
       const client = createClient(token)
-      return await client.query(api.projects.getMyProject, {
-        projectId: projectId as Id<"projects">,
-      })
+      try {
+        const project = await client.query(api.projects.getMyProject, {
+          projectId: projectId as Id<"projects">,
+        })
+        emit("done", project ? "Project loaded." : "No project found.")
+        return project
+      } catch (error) {
+        emit("error", "Failed to load project.")
+        throw error
+      }
     },
   }),
   createProject: tool({
@@ -288,16 +404,29 @@ export const taskflowTools = {
     outputSchema: projectSchema,
     execute: async (
       { title, description, color, icon },
-      { experimental_context },
+      { toolCallId, experimental_context },
     ) => {
+      const emit = createProgressEmitter({
+        experimental_context,
+        toolKey: "createProject",
+        toolCallId,
+      })
+      emit("running", `Creating project "${title}"...`)
       const { token } = getToolContext(experimental_context)
       const client = createClient(token)
-      return await client.mutation(api.projects.createProject, {
-        title,
-        description,
-        color,
-        icon,
-      })
+      try {
+        const project = await client.mutation(api.projects.createProject, {
+          title,
+          description,
+          color,
+          icon,
+        })
+        emit("done", `Created project "${project?.title ?? title}".`)
+        return project
+      } catch (error) {
+        emit("error", `Failed to create project "${title}".`)
+        throw error
+      }
     },
   }),
   updateProject: tool({
@@ -313,18 +442,31 @@ export const taskflowTools = {
     outputSchema: projectSchema,
     execute: async (
       { projectId, title, description, color, icon, status },
-      { experimental_context },
+      { toolCallId, experimental_context },
     ) => {
+      const emit = createProgressEmitter({
+        experimental_context,
+        toolKey: "updateProject",
+        toolCallId,
+      })
+      emit("running", "Updating project...")
       const { token } = getToolContext(experimental_context)
       const client = createClient(token)
-      return await client.mutation(api.projects.updateProject, {
-        projectId: projectId as Id<"projects">,
-        title,
-        description,
-        color,
-        icon,
-        status,
-      })
+      try {
+        const project = await client.mutation(api.projects.updateProject, {
+          projectId: projectId as Id<"projects">,
+          title,
+          description,
+          color,
+          icon,
+          status,
+        })
+        emit("done", "Project updated.")
+        return project
+      } catch (error) {
+        emit("error", "Failed to update project.")
+        throw error
+      }
     },
   }),
   deleteProject: tool({
@@ -333,12 +475,25 @@ export const taskflowTools = {
       projectId: z.string(),
     }),
     outputSchema: successSchema,
-    execute: async ({ projectId }, { experimental_context }) => {
+    execute: async ({ projectId }, { toolCallId, experimental_context }) => {
+      const emit = createProgressEmitter({
+        experimental_context,
+        toolKey: "deleteProject",
+        toolCallId,
+      })
+      emit("running", "Deleting project...")
       const { token } = getToolContext(experimental_context)
       const client = createClient(token)
-      return await client.mutation(api.projects.deleteProject, {
-        projectId: projectId as Id<"projects">,
-      })
+      try {
+        const result = await client.mutation(api.projects.deleteProject, {
+          projectId: projectId as Id<"projects">,
+        })
+        emit("done", "Project deleted.")
+        return result
+      } catch (error) {
+        emit("error", "Failed to delete project.")
+        throw error
+      }
     },
   }),
   listInboxItems: tool({
@@ -346,11 +501,24 @@ export const taskflowTools = {
     inputSchema: z.object({
       status: inboxStatusSchema.optional(),
     }),
-    outputSchema: z.array(inboxItemSchema),
-    execute: async ({ status }, { experimental_context }) => {
+    outputSchema: listInboxItemsResponseSchema,
+    execute: async ({ status }, { toolCallId, experimental_context }) => {
+      const emit = createProgressEmitter({
+        experimental_context,
+        toolKey: "listInboxItems",
+        toolCallId,
+      })
+      emit("running", "Loading inbox items...")
       const { token } = getToolContext(experimental_context)
       const client = createClient(token)
-      return await client.query(api.inbox.listMyInboxItems, { status })
+      try {
+        const result = await client.query(api.inbox.listMyInboxItems, { status })
+        emit("done", `Loaded ${result.items.length} inbox items.`)
+        return result
+      } catch (error) {
+        emit("error", "Failed to load inbox items.")
+        throw error
+      }
     },
   }),
   getInboxItem: tool({
@@ -359,12 +527,25 @@ export const taskflowTools = {
       inboxItemId: z.string(),
     }),
     outputSchema: z.union([inboxItemSchema, z.null()]),
-    execute: async ({ inboxItemId }, { experimental_context }) => {
+    execute: async ({ inboxItemId }, { toolCallId, experimental_context }) => {
+      const emit = createProgressEmitter({
+        experimental_context,
+        toolKey: "getInboxItem",
+        toolCallId,
+      })
+      emit("running", "Loading inbox item...")
       const { token } = getToolContext(experimental_context)
       const client = createClient(token)
-      return await client.query(api.inbox.getMyInboxItem, {
-        inboxItemId: inboxItemId as Id<"inboxItems">,
-      })
+      try {
+        const item = await client.query(api.inbox.getMyInboxItem, {
+          inboxItemId: inboxItemId as Id<"inboxItems">,
+        })
+        emit("done", item ? "Inbox item loaded." : "No inbox item found.")
+        return item
+      } catch (error) {
+        emit("error", "Failed to load inbox item.")
+        throw error
+      }
     },
   }),
   createInboxItem: tool({
@@ -373,10 +554,23 @@ export const taskflowTools = {
       content: z.string(),
     }),
     outputSchema: inboxItemSchema,
-    execute: async ({ content }, { experimental_context }) => {
+    execute: async ({ content }, { toolCallId, experimental_context }) => {
+      const emit = createProgressEmitter({
+        experimental_context,
+        toolKey: "createInboxItem",
+        toolCallId,
+      })
+      emit("running", "Creating inbox item...")
       const { token } = getToolContext(experimental_context)
       const client = createClient(token)
-      return await client.mutation(api.inbox.createInboxItem, { content })
+      try {
+        const item = await client.mutation(api.inbox.createInboxItem, { content })
+        emit("done", "Created inbox item.")
+        return item
+      } catch (error) {
+        emit("error", "Failed to create inbox item.")
+        throw error
+      }
     },
   }),
   updateInboxItem: tool({
@@ -390,16 +584,29 @@ export const taskflowTools = {
     outputSchema: inboxItemSchema,
     execute: async (
       { inboxItemId, content, status, labels },
-      { experimental_context },
+      { toolCallId, experimental_context },
     ) => {
+      const emit = createProgressEmitter({
+        experimental_context,
+        toolKey: "updateInboxItem",
+        toolCallId,
+      })
+      emit("running", "Updating inbox item...")
       const { token } = getToolContext(experimental_context)
       const client = createClient(token)
-      return await client.mutation(api.inbox.updateInboxItem, {
-        inboxItemId: inboxItemId as Id<"inboxItems">,
-        content,
-        status,
-        labels,
-      })
+      try {
+        const item = await client.mutation(api.inbox.updateInboxItem, {
+          inboxItemId: inboxItemId as Id<"inboxItems">,
+          content,
+          status,
+          labels,
+        })
+        emit("done", "Inbox item updated.")
+        return item
+      } catch (error) {
+        emit("error", "Failed to update inbox item.")
+        throw error
+      }
     },
   }),
   deleteInboxItem: tool({
@@ -408,12 +615,25 @@ export const taskflowTools = {
       inboxItemId: z.string(),
     }),
     outputSchema: successSchema,
-    execute: async ({ inboxItemId }, { experimental_context }) => {
+    execute: async ({ inboxItemId }, { toolCallId, experimental_context }) => {
+      const emit = createProgressEmitter({
+        experimental_context,
+        toolKey: "deleteInboxItem",
+        toolCallId,
+      })
+      emit("running", "Deleting inbox item...")
       const { token } = getToolContext(experimental_context)
       const client = createClient(token)
-      return await client.mutation(api.inbox.deleteInboxItem, {
-        inboxItemId: inboxItemId as Id<"inboxItems">,
-      })
+      try {
+        const result = await client.mutation(api.inbox.deleteInboxItem, {
+          inboxItemId: inboxItemId as Id<"inboxItems">,
+        })
+        emit("done", "Inbox item deleted.")
+        return result
+      } catch (error) {
+        emit("error", "Failed to delete inbox item.")
+        throw error
+      }
     },
   }),
 } as const

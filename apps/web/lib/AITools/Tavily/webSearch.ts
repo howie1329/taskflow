@@ -1,6 +1,7 @@
 import { tool } from "ai";
 import { z } from "zod";
 import { tavily } from "@tavily/core";
+import { emitToolProgress } from "@/lib/AITools/progress";
 
 // Used to search the web and provide information
 
@@ -30,15 +31,40 @@ export const TavilyWebSearch = tool({
         query: z.string().describe("The query to search the web for"),
     }),
     outputSchema: tavilySearchResponseSchema,     // <-- use the same schema
-    execute: async ({ query }: { query: string }) => {
+    execute: async (
+        { query }: { query: string },
+        { toolCallId, experimental_context },
+    ) => {
+        emitToolProgress({
+            experimental_context,
+            toolKey: "tavilyWebSearch",
+            toolCallId,
+            status: "running",
+            text: `Searching the web for "${query}"...`,
+        })
+
         try {
             const client = tavily({ apiKey: process.env.TAVILY_API_KEY! })
             const results = await client.search(query)
             console.log("results", results)
 
             const response = tavilySearchResponseSchema.parse(results)
+            emitToolProgress({
+                experimental_context,
+                toolKey: "tavilyWebSearch",
+                toolCallId,
+                status: "done",
+                text: `Found ${response.results.length} sources for "${query}".`,
+            })
             return response
         } catch (error) {
+            emitToolProgress({
+                experimental_context,
+                toolKey: "tavilyWebSearch",
+                toolCallId,
+                status: "error",
+                text: `Failed to search the web for "${query}".`,
+            })
             console.error(error)
             throw error
         }

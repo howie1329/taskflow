@@ -1,6 +1,7 @@
 import Parallel from "parallel-web"
 import { tool } from "ai"
 import { z } from "zod"
+import { emitToolProgress } from "@/lib/AITools/progress"
 import { parallelSearchResponseSchema } from "./types"
 
 export const ParallelWebSearch = tool({
@@ -18,19 +19,47 @@ export const ParallelWebSearch = tool({
     objective,
     searchQueries,
     maxResults,
-  }) => {
+  }, { toolCallId, experimental_context }) => {
     const apiKey = process.env.PARALLEL_API_KEY
     if (!apiKey) {
       throw new Error("PARALLEL_API_KEY is not set")
     }
 
-    const client = new Parallel({ apiKey })
-    const result = await client.beta.search({
-      objective,
-      search_queries: searchQueries,
-      max_results: maxResults || 3,
+    emitToolProgress({
+      experimental_context,
+      toolKey: "parallelWebSearch",
+      toolCallId,
+      status: "running",
+      text: `Searching the web for "${objective}"...`,
     })
 
-    return parallelSearchResponseSchema.parse(result)
+    const client = new Parallel({ apiKey })
+    try {
+      const result = await client.beta.search({
+        objective,
+        search_queries: searchQueries,
+        max_results: maxResults || 3,
+      })
+
+      const response = parallelSearchResponseSchema.parse(result)
+      emitToolProgress({
+        experimental_context,
+        toolKey: "parallelWebSearch",
+        toolCallId,
+        status: "done",
+        text: `Found ${response.results?.length ?? 0} results.`,
+      })
+
+      return response
+    } catch (error) {
+      emitToolProgress({
+        experimental_context,
+        toolKey: "parallelWebSearch",
+        toolCallId,
+        status: "error",
+        text: `Failed to search the web for "${objective}".`,
+      })
+      throw error
+    }
   },
 })

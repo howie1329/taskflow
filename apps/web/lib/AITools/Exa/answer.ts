@@ -1,6 +1,7 @@
 import Exa from "exa-js"
 import { tool } from "ai"
 import { z } from "zod"
+import { emitToolProgress } from "@/lib/AITools/progress"
 import { exaAnswerResponseSchema } from "./types"
 
 const createExaClient = () => {
@@ -22,15 +23,44 @@ export const ExaAnswer = tool({
       .describe("Include source text in citations"),
   }),
   outputSchema: exaAnswerResponseSchema,
-  execute: async ({ question, includeText }) => {
+  execute: async ({ question, includeText }, { toolCallId, experimental_context }) => {
     const exa = createExaClient()
+    emitToolProgress({
+      experimental_context,
+      toolKey: "exaAnswer",
+      toolCallId,
+      status: "running",
+      text: `Answering "${question}"...`,
+    })
+
     try {
       const response = await exa.answer(question, {
         text: includeText ?? true,
       })
 
-      return exaAnswerResponseSchema.parse(response)
+      const parsedResponse = exaAnswerResponseSchema.parse(response)
+      const citationCount = parsedResponse.citations?.length ?? 0
+
+      emitToolProgress({
+        experimental_context,
+        toolKey: "exaAnswer",
+        toolCallId,
+        status: "done",
+        text:
+          citationCount > 0
+            ? `Generated answer with ${citationCount} citations.`
+            : "Generated answer.",
+      })
+
+      return parsedResponse
     } catch (error) {
+      emitToolProgress({
+        experimental_context,
+        toolKey: "exaAnswer",
+        toolCallId,
+        status: "error",
+        text: `Failed to answer "${question}".`,
+      })
       console.error(error)
       throw error
     }

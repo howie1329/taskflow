@@ -1,6 +1,7 @@
 import Exa from "exa-js"
 import { tool } from "ai"
 import { z } from "zod"
+import { emitToolProgress } from "@/lib/AITools/progress"
 import { exaSearchResponseSchema } from "./types"
 
 const createExaClient = () => {
@@ -45,8 +46,16 @@ export const ExaWebSearch = tool({
     includeDomains,
     startPublishedDate,
     endPublishedDate,
-  }) => {
+  }, { toolCallId, experimental_context }) => {
     const exa = createExaClient()
+    emitToolProgress({
+      experimental_context,
+      toolKey: "exaWebSearch",
+      toolCallId,
+      status: "running",
+      text: `Searching the web for "${query}"...`,
+    })
+
     try {
       const results = await exa.search(query, {
         type: "auto",
@@ -62,8 +71,24 @@ export const ExaWebSearch = tool({
         },
       })
 
-      return exaSearchResponseSchema.parse(results)
+      const response = exaSearchResponseSchema.parse(results)
+      emitToolProgress({
+        experimental_context,
+        toolKey: "exaWebSearch",
+        toolCallId,
+        status: "done",
+        text: `Found ${response.results.length} results for "${query}".`,
+      })
+
+      return response
     } catch (error) {
+      emitToolProgress({
+        experimental_context,
+        toolKey: "exaWebSearch",
+        toolCallId,
+        status: "error",
+        text: `Failed to search the web for "${query}".`,
+      })
       console.error(error)
       throw error
     }

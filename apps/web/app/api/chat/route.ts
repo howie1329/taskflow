@@ -9,7 +9,6 @@ import {
   type UIMessage,
   pruneMessages,
   generateText,
-  type AssistantModelMessage,
 } from "ai";
 import {
   safeParseUIMessages,
@@ -37,6 +36,26 @@ const CHAT_SUMMARIZATION_OPTIONS = {
   keepLastN: 8,
   includeToolText: false,
   maxCharsPerMessage: 8000,
+};
+
+const chatApiWithSummary = api as typeof api & {
+  chat: typeof api.chat & {
+    setThreadSummary: unknown
+  }
+}
+
+const fetchMutationUnsafe = fetchMutation as unknown as (
+  mutationRef: unknown,
+  args: unknown,
+  options: { token: string },
+) => Promise<unknown>
+
+type ActiveAgentStream = {
+  totalUsage: Promise<{
+    inputTokens?: number;
+    outputTokens?: number;
+    totalTokens?: number;
+  }>;
 };
 
 const createTitle = async (messages: UIMessage[]) => {
@@ -279,9 +298,9 @@ export async function POST(req: Request) {
         });
 
         if (updatedSummary) {
-          await fetchMutation(
+          await fetchMutationUnsafe(
             // Convex generated types may lag behind schema changes in CI/local restricted environments.
-            (api as any).chat.setThreadSummary,
+            chatApiWithSummary.chat.setThreadSummary,
             {
               threadId,
               summary: {
@@ -368,46 +387,15 @@ export async function POST(req: Request) {
 
 ${getChatGenUISystemPrompt()}`;
 
+  let activeAgentStream: ActiveAgentStream | null = null;
+
   const response = createUIMessageStreamResponse({
     status: 200,
     stream: createUIMessageStream({
-      execute: async ({ writer }) => {
-        const agent = new Agent({
-          model: modelWithMemory,
-          instructions,
-          stopWhen: stepCountIs(10),
-          experimental_context: {
-            threadId,
-            userId,
-            token,
-          },
-          tools: {
-            ...Tools,
-            ...(supermemoryTools(process.env.SUPERMEMORY_API_KEY!, {
-              containerTags: [userId],
-            }) as unknown as typeof Tools),
-          },
-          maxOutputTokens: 4500, // Balanced default to reduce runaway completions
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          activeTools: activeTools as any,
-        });
-
-        const stream = await agent.stream({ messages: cleanedMessages });
-        const uiStream = stream.toUIMessageStream();
-
-        writer.merge(pipeJsonRender(uiStream));
-
-        const response = await stream.response;
-        const messages = response.messages;
-
-        if (!messages || messages.length === 0) {
-          console.error("No messages returned from agent");
+      onFinish: async ({ responseMessage, isAborted }) => {
+        if (isAborted) {
           return;
         }
-
-        const agentMessage = messages[
-          messages.length - 1
-        ] as AssistantModelMessage;
 
         let usagePayload:
           | {
@@ -418,14 +406,16 @@ ${getChatGenUISystemPrompt()}`;
           | undefined;
 
         try {
-          const totalUsage = await stream.totalUsage;
-          usagePayload = {
-            inputTokens: totalUsage.inputTokens ?? 0,
-            outputTokens: totalUsage.outputTokens ?? 0,
-            totalTokens:
-              totalUsage.totalTokens ??
-              (totalUsage.inputTokens ?? 0) + (totalUsage.outputTokens ?? 0),
-          };
+          const totalUsage = await activeAgentStream?.totalUsage;
+          if (totalUsage) {
+            usagePayload = {
+              inputTokens: totalUsage.inputTokens ?? 0,
+              outputTokens: totalUsage.outputTokens ?? 0,
+              totalTokens:
+                totalUsage.totalTokens ??
+                (totalUsage.inputTokens ?? 0) + (totalUsage.outputTokens ?? 0),
+            };
+          }
         } catch (error) {
           console.error("Error reading stream usage:", error);
         }
@@ -436,9 +426,9 @@ ${getChatGenUISystemPrompt()}`;
             {
               threadId,
               model,
-              messageId: crypto.randomUUID(),
+              messageId: responseMessage.id,
               role: "assistant",
-              parts: agentMessage.content,
+              parts: responseMessage.parts,
               usage: usagePayload,
             },
             { token },
@@ -446,6 +436,33 @@ ${getChatGenUISystemPrompt()}`;
         } catch (error) {
           console.error("Error appending assistant message:", error);
         }
+      },
+      execute: async ({ writer }) => {
+        const agent = new Agent({
+          model: modelWithMemory,
+          instructions,
+          stopWhen: stepCountIs(10),
+          experimental_context: {
+            threadId,
+            userId,
+            token,
+            uiWriter: writer,
+          },
+          tools: {
+            ...Tools,
+            ...(supermemoryTools(process.env.SUPERMEMORY_API_KEY!, {
+              containerTags: [userId],
+            }) as unknown as typeof Tools),
+          },
+          maxOutputTokens: 4500, // Balanced default to reduce runaway completions
+          activeTools: activeTools as Array<keyof typeof Tools>,
+        });
+
+        const stream = await agent.stream({ messages: cleanedMessages });
+        activeAgentStream = stream as unknown as ActiveAgentStream;
+        const uiStream = stream.toUIMessageStream();
+
+        writer.merge(pipeJsonRender(uiStream));
       },
     }),
   });
