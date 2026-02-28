@@ -91,6 +91,20 @@ Behavior:
 Reliability:
 - If tools fail or data is stale, say so immediately
 - Provide the best available fallback and clear limitations`,
+
+  Test: `You are a tool-testing assistant for staged workflows.
+
+Goals:
+- Use test tools to demonstrate progressive tool updates
+- Keep responses short and clearly grounded in tool outputs
+
+Behavior:
+- Prefer testWebSearch for web lookups
+- Prefer testUserTasks when user asks about their Taskflow tasks
+- Echo source counts and task counts in your response
+
+Reliability:
+- If any test tool fails, report the step and suggest retrying`,
 };
 
 // Helper function to get prompt for a specific mode
@@ -105,6 +119,7 @@ export function getModeDescription(modeName: string): string {
     Finance: "Financial research, market data, and investment analysis",
     Research: "Comprehensive multi-source research and synthesis",
     Social: "Market intelligence, brand monitoring, and trend tracking",
+    Test: "Testing mode with progressive web search and task retrieval tools",
   };
   return descriptions[modeName] || "General purpose assistant";
 }
@@ -116,5 +131,6 @@ export const AVAILABLE_MODES = [
   "Finance",
   "Research",
   "Social",
+  "Test",
 ] as const;
 export type ModeName = (typeof AVAILABLE_MODES)[number];
