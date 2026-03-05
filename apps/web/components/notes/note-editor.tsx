@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useRef } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -36,6 +36,8 @@ import {
 import { cn } from "@/lib/utils"
 import { NoteRichEditor } from "./note-rich-editor"
 import type { NotesProject, Note } from "./types"
+
+const TITLE_DEBOUNCE_MS = 400
 
 interface NoteEditorProps {
   note: Note | null
@@ -78,15 +80,87 @@ export function NoteEditor({
   onCloseSheet,
 }: NoteEditorProps) {
   const titleInputRef = useRef<HTMLInputElement>(null)
+  const titleUpdateRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const currentNoteIdRef = useRef<string | null>(null)
+  const pendingTitleRef = useRef<{ noteId: string; title: string } | null>(null)
   const contentUpdateRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [titlePendingNoteId, setTitlePendingNoteId] = useState<string | null>(
+    null,
+  )
+
+  const flushTitleUpdate = useCallback((inputTitle?: string) => {
+    if (!note) return
+
+    if (titleUpdateRef.current) {
+      clearTimeout(titleUpdateRef.current)
+      titleUpdateRef.current = null
+    }
+
+    const nextTitle = inputTitle ?? titleInputRef.current?.value ?? ""
+    if (nextTitle !== note.title) {
+      onUpdateNote(note._id, { title: nextTitle })
+    }
+
+    pendingTitleRef.current = null
+    setTitlePendingNoteId(null)
+  }, [note, onUpdateNote])
+
+  const queueTitleUpdate = useCallback(
+    (nextTitle: string) => {
+      if (!note) return
+
+      if (titleUpdateRef.current) {
+        clearTimeout(titleUpdateRef.current)
+      }
+
+      setTitlePendingNoteId(note._id)
+      pendingTitleRef.current = { noteId: note._id, title: nextTitle }
+      titleUpdateRef.current = setTimeout(() => {
+        if (currentNoteIdRef.current !== note._id) return
+        onUpdateNote(note._id, { title: nextTitle })
+        pendingTitleRef.current = null
+        titleUpdateRef.current = null
+        setTitlePendingNoteId(null)
+      }, TITLE_DEBOUNCE_MS)
+    },
+    [note, onUpdateNote],
+  )
+
+  useEffect(() => {
+    currentNoteIdRef.current = note?._id ?? null
+
+    if (titleUpdateRef.current) {
+      clearTimeout(titleUpdateRef.current)
+      titleUpdateRef.current = null
+    }
+    if (
+      note &&
+      pendingTitleRef.current &&
+      pendingTitleRef.current.title !== note.title
+    ) {
+      onUpdateNote(pendingTitleRef.current.noteId, {
+        title: pendingTitleRef.current.title,
+      })
+    }
+    pendingTitleRef.current = null
+  }, [note, onUpdateNote])
 
   useEffect(() => {
     return () => {
+      if (titleUpdateRef.current) {
+        clearTimeout(titleUpdateRef.current)
+      }
+      if (pendingTitleRef.current) {
+        onUpdateNote(pendingTitleRef.current.noteId, {
+          title: pendingTitleRef.current.title,
+        })
+      }
+      pendingTitleRef.current = null
       if (contentUpdateRef.current) {
         clearTimeout(contentUpdateRef.current)
       }
     }
-  }, [])
+  }, [onUpdateNote])
 
   const handleContentChange = useCallback(
     (value: string, textContent: string) => {
@@ -205,9 +279,13 @@ export function NoteEditor({
             </div>
           </div>
           <Input
+            key={note._id}
             ref={titleInputRef}
-            value={note.title}
-            onChange={(e) => onUpdateNote(note._id, { title: e.target.value })}
+            defaultValue={note.title}
+            onChange={(e) => {
+              queueTitleUpdate(e.target.value)
+            }}
+            onBlur={(e) => flushTitleUpdate(e.target.value)}
             placeholder="Note title"
             className="border-0 bg-transparent px-0 text-lg font-semibold tracking-tight shadow-none focus-visible:ring-0 placeholder:text-muted-foreground/50"
           />
@@ -227,7 +305,7 @@ export function NoteEditor({
             <span className="text-[11px] text-muted-foreground tabular-nums">
               {formatRelativeTime(note.updatedAt)}
             </span>
-            {isSaved ? (
+            {isSaved && titlePendingNoteId !== note._id ? (
               <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
                 <HugeiconsIcon
                   icon={CheckmarkCircle02Icon}
@@ -279,7 +357,7 @@ export function NoteEditor({
             <span className="text-[11px] text-muted-foreground tabular-nums">
               {formatRelativeTime(note.updatedAt)}
             </span>
-            {isSaved ? (
+            {isSaved && titlePendingNoteId !== note._id ? (
               <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
                 <HugeiconsIcon
                   icon={CheckmarkCircle02Icon}
@@ -353,9 +431,13 @@ export function NoteEditor({
           </div>
         </div>
         <Input
+          key={note._id}
           ref={titleInputRef}
-          value={note.title}
-          onChange={(e) => onUpdateNote(note._id, { title: e.target.value })}
+          defaultValue={note.title}
+          onChange={(e) => {
+            queueTitleUpdate(e.target.value)
+          }}
+          onBlur={(e) => flushTitleUpdate(e.target.value)}
           placeholder="Note title"
           className="h-auto border-0 bg-transparent px-0 py-1 text-2xl font-semibold tracking-tight shadow-none focus-visible:ring-0 placeholder:text-muted-foreground/40 md:text-[2rem]"
         />

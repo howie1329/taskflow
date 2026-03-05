@@ -4,8 +4,29 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { usePathname, useRouter, useSearchParams, useParams } from "next/navigation"
 import { useMutation, useQuery } from "convex/react"
 import { api } from "@/convex/_generated/api"
+import { useViewer } from "@/components/settings/hooks/use-viewer"
 import type { Doc } from "@/convex/_generated/dataModel"
-import type { NotesProject, Note, ViewMode } from "./types"
+import type {
+  NotesProject,
+  Note,
+  NoteCollabState,
+  NoteCollabSuggestion,
+  ViewMode,
+} from "./types"
+
+const NOTE_COLLAB_DEBOUNCE_MS = 1200
+const DEFAULT_NOTE_MODEL = "openai/gpt-4o-mini"
+
+function createEmptyCollabState(): NoteCollabState {
+  return {
+    status: "idle",
+    summary: "",
+    suggestions: [],
+    actionItems: [],
+    updatedAt: null,
+    error: null,
+  }
+}
 
 type NotesContextValue = {
   notes: Note[]
@@ -19,6 +40,7 @@ type NotesContextValue = {
   viewMode: ViewMode
   isSaved: boolean
   isLoading: boolean
+  collabByNoteId: Record<string, NoteCollabState>
   deleteDialogOpen: boolean
   noteToDelete: string | null
   projects: NotesProject[]
@@ -35,6 +57,8 @@ type NotesContextValue = {
   confirmDelete: () => void
   cancelDelete: () => void
   closeEditor: () => void
+  runCollabNow: (noteId: string) => void
+  clearCollab: (noteId: string) => void
 }
 
 const NotesContext = createContext<NotesContextValue | null>(null)
@@ -67,6 +91,7 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
   const searchParams = useSearchParams()
   const params = useParams()
 
+  const { preferences } = useViewer()
   const notesData = useQuery(api.notes.listMyNotes)
   const projectsData = useQuery(api.projects.listMyProjects, {
     status: "active",
@@ -85,9 +110,17 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
     getViewMode(searchParams.get("view")),
   )
   const [isSaved, setIsSaved] = useState(true)
+  const [collabByNoteId, setCollabByNoteId] = useState<
+    Record<string, NoteCollabState>
+  >({})
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [noteToDelete, setNoteToDelete] = useState<string | null>(null)
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const collabTimeoutsRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(
+    new Map(),
+  )
+  const collabAbortRef = useRef<Map<string, AbortController>>(new Map())
+  const collabInputRef = useRef<Map<string, string>>(new Map())
 
   const isLoading = notesData === undefined || projectsData === undefined
 
@@ -250,6 +283,149 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
     [buildNotesUrl, router],
   )
 
+  const setCollabState = useCallback(
+    (noteId: string, updates: Partial<NoteCollabState>) => {
+      setCollabByNoteId((prev) => ({
+        ...prev,
+        [noteId]: {
+          ...(prev[noteId] ?? createEmptyCollabState()),
+          ...updates,
+        },
+      }))
+    },
+    [],
+  )
+
+  const runCollabRequest = useCallback(
+    async ({
+      noteId,
+      title,
+      contentText,
+      model,
+    }: {
+      noteId: string
+      title: string
+      contentText: string
+      model: string
+    }) => {
+      const existingController = collabAbortRef.current.get(noteId)
+      if (existingController) {
+        existingController.abort()
+      }
+
+      const controller = new AbortController()
+      collabAbortRef.current.set(noteId, controller)
+
+      setCollabState(noteId, {
+        status: "running",
+        error: null,
+      })
+
+      try {
+        const response = await fetch("/api/note-collab", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          signal: controller.signal,
+          body: JSON.stringify({
+            model,
+            noteContext: {
+              noteId,
+              title,
+              contentText: contentText.slice(0, 10000),
+            },
+          }),
+        })
+
+        if (!response.ok) {
+          const data = await response.json().catch(() => null)
+          const message =
+            typeof data?.error === "string"
+              ? data.error
+              : "Failed to generate note suggestions"
+          throw new Error(message)
+        }
+
+        const data = (await response.json()) as {
+          summary?: string
+          suggestions?: NoteCollabSuggestion[]
+          actionItems?: string[]
+        }
+
+        setCollabState(noteId, {
+          status: "ready",
+          summary: data.summary ?? "",
+          suggestions: Array.isArray(data.suggestions) ? data.suggestions : [],
+          actionItems: Array.isArray(data.actionItems) ? data.actionItems : [],
+          updatedAt: Date.now(),
+          error: null,
+        })
+      } catch (error) {
+        if (controller.signal.aborted) return
+
+        setCollabState(noteId, {
+          status: "error",
+          error:
+            error instanceof Error
+              ? error.message
+              : "Failed to generate note suggestions",
+        })
+      } finally {
+        const activeController = collabAbortRef.current.get(noteId)
+        if (activeController === controller) {
+          collabAbortRef.current.delete(noteId)
+        }
+      }
+    },
+    [setCollabState],
+  )
+
+  const scheduleCollabRun = useCallback(
+    ({
+      noteId,
+      title,
+      contentText,
+      immediate = false,
+      force = false,
+    }: {
+      noteId: string
+      title: string
+      contentText: string
+      immediate?: boolean
+      force?: boolean
+    }) => {
+      const dedupeKey = `${title}|${contentText}`
+      if (!force) {
+        const lastInput = collabInputRef.current.get(noteId)
+        if (lastInput === dedupeKey) return
+      }
+      collabInputRef.current.set(noteId, dedupeKey)
+
+      const existingTimeout = collabTimeoutsRef.current.get(noteId)
+      if (existingTimeout) {
+        clearTimeout(existingTimeout)
+      }
+
+      const model = preferences?.defaultAIModel?.modelId ?? DEFAULT_NOTE_MODEL
+      const run = () => {
+        void runCollabRequest({ noteId, title, contentText, model })
+      }
+
+      if (immediate) {
+        run()
+        return
+      }
+
+      const timeout = setTimeout(() => {
+        collabTimeoutsRef.current.delete(noteId)
+        run()
+      }, NOTE_COLLAB_DEBOUNCE_MS)
+      collabTimeoutsRef.current.set(noteId, timeout)
+    },
+    [preferences?.defaultAIModel?.modelId, runCollabRequest],
+  )
+
   const updateNote = useCallback(
     async (noteId: string, updates: Partial<Note>) => {
       if (saveTimeoutRef.current) {
@@ -273,8 +449,18 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
               ? null
               : (updates.projectId as unknown as Doc<"projects">["_id"]),
       })
+
+      if (updates.contentText !== undefined) {
+        const note = notes.find((item) => item._id === noteId)
+        const nextTitle = updates.title ?? note?.title ?? ""
+        scheduleCollabRun({
+          noteId,
+          title: nextTitle,
+          contentText: updates.contentText,
+        })
+      }
     },
-    [updateNoteMutation],
+    [notes, scheduleCollabRun, updateNoteMutation],
   )
 
   const pinNote = useCallback(
@@ -319,6 +505,62 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
     router.push(buildNotesUrl(null))
   }, [router, buildNotesUrl])
 
+  const runCollabNow = useCallback(
+    (noteId: string) => {
+      const note = notes.find((item) => item._id === noteId)
+      if (!note) return
+
+      scheduleCollabRun({
+        noteId,
+        title: note.title,
+        contentText: note.contentText,
+        immediate: true,
+        force: true,
+      })
+    },
+    [notes, scheduleCollabRun],
+  )
+
+  const clearCollab = useCallback((noteId: string) => {
+    const timeout = collabTimeoutsRef.current.get(noteId)
+    if (timeout) {
+      clearTimeout(timeout)
+      collabTimeoutsRef.current.delete(noteId)
+    }
+
+    const controller = collabAbortRef.current.get(noteId)
+    if (controller) {
+      controller.abort()
+      collabAbortRef.current.delete(noteId)
+    }
+
+    collabInputRef.current.delete(noteId)
+    setCollabByNoteId((prev) => {
+      if (!prev[noteId]) return prev
+      const next = { ...prev }
+      delete next[noteId]
+      return next
+    })
+  }, [])
+
+  useEffect(() => {
+    const collabTimeouts = collabTimeoutsRef.current
+    const collabAborts = collabAbortRef.current
+    const collabInputs = collabInputRef.current
+
+    return () => {
+      collabTimeouts.forEach((timeout) => {
+        clearTimeout(timeout)
+      })
+      collabTimeouts.clear()
+      collabAborts.forEach((controller) => {
+        controller.abort()
+      })
+      collabAborts.clear()
+      collabInputs.clear()
+    }
+  }, [])
+
   const value = useMemo<NotesContextValue>(
     () => ({
       notes,
@@ -332,6 +574,7 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
       viewMode,
       isSaved,
       isLoading,
+      collabByNoteId,
       deleteDialogOpen,
       noteToDelete,
       projects,
@@ -348,6 +591,8 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
       confirmDelete,
       cancelDelete,
       closeEditor,
+      runCollabNow,
+      clearCollab,
     }),
     [
       notes,
@@ -361,6 +606,7 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
       viewMode,
       isSaved,
       isLoading,
+      collabByNoteId,
       deleteDialogOpen,
       noteToDelete,
       projects,
@@ -374,6 +620,8 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
       confirmDelete,
       cancelDelete,
       closeEditor,
+      runCollabNow,
+      clearCollab,
     ],
   )
 
