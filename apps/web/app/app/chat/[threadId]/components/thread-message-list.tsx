@@ -1,3 +1,4 @@
+import { memo, useMemo } from "react"
 import type { UIMessage } from "ai"
 import { useJsonRenderMessage } from "@json-render/react"
 import {
@@ -36,6 +37,8 @@ import { MessageGenUIPanel } from "./message-genui-panel"
 import { getToolCalls } from "./tool-calls"
 import { ToolPanels } from "./tool-panels"
 
+const STREAMDOWN_PLUGINS = { code, mermaid, math, cjk }
+
 interface PreferencesLike {
   aiChatShowReasoning?: boolean
   aiChatShowActions?: boolean
@@ -62,80 +65,115 @@ export function ThreadMessageList({
   return (
     <>
       {uiMessages.map((message, index) => {
-        const reasoningText = getMessageReasoning(message)
-        const hasReasoning = !!reasoningText
-        const toolCalls = message.role === "assistant" ? getToolCalls(message) : []
-        const hasToolCalls = toolCalls.length > 0
-        const messageText = getMessageText(message)
-        const messageFiles = getMessageFiles(message)
-        const hasFiles = messageFiles.length > 0
-        const isStreamingMessage =
-          message.role === "assistant" &&
-          status === "streaming" &&
-          index === uiMessages.length - 1
-
         return (
-          <Message
+          <ThreadMessageRow
             key={message.id}
-            from={message.role}
-            className={cn(
-              "max-w-none gap-1.5",
-              message.role === "user" && "justify-end",
-            )}
-          >
-            <MessageContent
-              className={cn(
-                "text-[15px] leading-7",
-                message.role === "assistant" && "w-full",
-                message.role === "user" && "max-w-xl",
-              )}
-            >
-              {message.role === "assistant" ? (
-                <AssistantMessageBody
-                  message={message}
-                  messageFiles={messageFiles}
-                  toolCalls={toolCalls}
-                  hasToolCalls={hasToolCalls}
-                  hasReasoning={hasReasoning}
-                  reasoningText={reasoningText}
-                  preferences={preferences}
-                  status={status}
-                  isStreamingMessage={isStreamingMessage}
-                  plainMessageText={messageText}
-                  onRegenerate={onRegenerate}
-                  onCopy={onCopy}
-                  onOpenDetails={onOpenDetails}
-                />
-              ) : (
-                <div className="whitespace-pre-wrap text-[15px] leading-7">
-                  {hasFiles && (
-                    <Attachments variant="inline" className="mb-2">
-                      {messageFiles.map((file, fileIndex) => (
-                        <Attachment
-                          key={`${message.id}-${file.filename ?? "file"}-${fileIndex}`}
-                          data={{ ...file, id: `${message.id}-${fileIndex}` }}
-                        >
-                          <AttachmentPreview />
-                        </Attachment>
-                      ))}
-                    </Attachments>
-                  )}
-                  <Streamdown
-                    plugins={{ code, mermaid, math, cjk }}
-                    isAnimating={status === "streaming"}
-                    animated
-                  >
-                    {messageText}
-                  </Streamdown>
-                </div>
-              )}
-            </MessageContent>
-          </Message>
+            message={message}
+            index={index}
+            totalMessages={uiMessages.length}
+            status={status}
+            preferences={preferences}
+            onRegenerate={onRegenerate}
+            onCopy={onCopy}
+            onOpenDetails={onOpenDetails}
+          />
         )
       })}
     </>
   )
 }
+
+interface ThreadMessageRowProps {
+  message: UIMessage
+  index: number
+  totalMessages: number
+  status: string
+  preferences: PreferencesLike | undefined
+  onRegenerate: (assistantMessageId: string) => void
+  onCopy: (messageText: string) => void
+  onOpenDetails: (messageId: string) => void
+}
+
+const ThreadMessageRow = memo(function ThreadMessageRow({
+  message,
+  index,
+  totalMessages,
+  status,
+  preferences,
+  onRegenerate,
+  onCopy,
+  onOpenDetails,
+}: ThreadMessageRowProps) {
+  const reasoningText = useMemo(() => getMessageReasoning(message), [message])
+  const hasReasoning = !!reasoningText
+  const toolCalls = useMemo(
+    () => (message.role === "assistant" ? getToolCalls(message) : []),
+    [message],
+  )
+  const hasToolCalls = toolCalls.length > 0
+  const messageText = useMemo(() => getMessageText(message), [message])
+  const messageFiles = useMemo(() => getMessageFiles(message), [message])
+  const hasFiles = messageFiles.length > 0
+  const isStreamingMessage =
+    message.role === "assistant" &&
+    status === "streaming" &&
+    index === totalMessages - 1
+
+  return (
+    <Message
+      from={message.role}
+      className={cn("max-w-none gap-1.5", message.role === "user" && "justify-end")}
+    >
+      <MessageContent
+        className={cn(
+          "text-[15px] leading-7",
+          message.role === "assistant" && "w-full",
+          message.role === "user" && "max-w-xl",
+        )}
+      >
+        {message.role === "assistant" ? (
+          <AssistantMessageBody
+            message={message}
+            messageFiles={messageFiles}
+            toolCalls={toolCalls}
+            hasToolCalls={hasToolCalls}
+            hasReasoning={hasReasoning}
+            reasoningText={reasoningText}
+            preferences={preferences}
+            status={status}
+            isStreamingMessage={isStreamingMessage}
+            plainMessageText={messageText}
+            onRegenerate={onRegenerate}
+            onCopy={onCopy}
+            onOpenDetails={onOpenDetails}
+          />
+        ) : (
+          <div className="whitespace-pre-wrap text-[15px] leading-7">
+            {hasFiles && (
+              <Attachments variant="inline" className="mb-2">
+                {messageFiles.map((file, fileIndex) => (
+                  <Attachment
+                    key={`${message.id}-${file.filename ?? "file"}-${fileIndex}`}
+                    data={{ ...file, id: `${message.id}-${fileIndex}` }}
+                  >
+                    <AttachmentPreview />
+                  </Attachment>
+                ))}
+              </Attachments>
+            )}
+            <Streamdown
+              plugins={STREAMDOWN_PLUGINS}
+              isAnimating={status === "streaming"}
+              animated
+            >
+              {messageText}
+            </Streamdown>
+          </div>
+        )}
+      </MessageContent>
+    </Message>
+  )
+})
 
 interface AssistantMessageBodyProps {
   message: UIMessage
@@ -223,7 +261,7 @@ function AssistantMessageBody({
   const { spec, text: renderedText, hasSpec } = useJsonRenderMessage(
     message.parts as Parameters<typeof useJsonRenderMessage>[0],
   )
-  const progressParts = getMessageToolProgress(message)
+  const progressParts = useMemo(() => getMessageToolProgress(message), [message])
 
   return (
     <div className="flex flex-col gap-4">
@@ -274,7 +312,7 @@ function AssistantMessageBody({
         renderedText && (
           <div>
             <Streamdown
-              plugins={{ code, mermaid, math, cjk }}
+              plugins={STREAMDOWN_PLUGINS}
               isAnimating={status === "streaming"}
               animated
             >

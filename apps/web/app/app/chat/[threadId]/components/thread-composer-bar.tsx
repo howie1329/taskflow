@@ -3,9 +3,7 @@
 import { useEffect, useRef } from "react"
 import type { FileUIPart } from "ai"
 import { toast } from "sonner"
-import type { Doc, Id } from "@/convex/_generated/dataModel"
-import { useMutation } from "convex/react"
-import { api } from "@/convex/_generated/api"
+import type { Id } from "@/convex/_generated/dataModel"
 import {
   PromptInputActionAddAttachments,
   PromptInputActionMenu,
@@ -32,7 +30,13 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { LightbulbIcon } from "lucide-react"
-import { useChatContext } from "../../components/chat-provider"
+import {
+  useChatConfig,
+  useChatConfigActions,
+  useChatMessages,
+  useChatMessagingActions,
+  useChatThreadActions,
+} from "../../components/chat-provider"
 import { ModelSelectorMenu } from "../../components/model-selector-menu"
 import { ModeSelectorMenu } from "../../components/mode-selector-menu"
 import { ProjectSelectorMenu } from "../../components/project-selector-menu"
@@ -41,29 +45,23 @@ import { ComposerHints } from "../../components/composer-hints"
 import { useChatComposerFocus } from "../../components/chat-composer-context"
 import { THREAD_COMPOSER_SUGGESTIONS } from "../../constants/suggestions"
 
-interface ThreadComposerBarProps {
-  thread: Doc<"thread"> | null | undefined
-}
-
-export function ThreadComposerBar({ thread }: ThreadComposerBarProps) {
+export function ThreadComposerBar() {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const { textInput } = usePromptInputController()
+  const { status } = useChatMessages()
+  const { sendPrompt, stop } = useChatMessagingActions()
   const {
-    sendPrompt,
-    status,
-    stop,
     selectedModelId,
-    setSelectedModelId,
     selectedProjectId,
-    setSelectedProjectId,
     selectedMode,
-    setSelectedMode,
     toolLock,
+    thread,
     projects,
     availableModels,
-  } = useChatContext()
-
-  const setThreadScope = useMutation(api.chat.setThreadScope)
+  } = useChatConfig()
+  const { setSelectedModelId, setSelectedProjectId, setSelectedMode } =
+    useChatConfigActions()
+  const { setScope } = useChatThreadActions()
   const composerFocus = useChatComposerFocus()
 
   useEffect(() => {
@@ -200,17 +198,15 @@ export function ThreadComposerBar({ thread }: ThreadComposerBarProps) {
                   if (!thread) return
 
                   if (projectId === null) {
-                    void setThreadScope({
-                      threadId: thread.threadId,
+                    void setScope({
                       scope: "workspace",
                     })
                     return
                   }
 
-                  void setThreadScope({
-                    threadId: thread.threadId,
+                  void setScope({
                     scope: "project",
-                  projectId: projectId as Id<"projects">,
+                    projectId: projectId as Id<"projects">,
                   })
                 }}
               />

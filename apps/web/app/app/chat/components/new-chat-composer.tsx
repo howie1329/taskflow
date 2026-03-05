@@ -23,7 +23,13 @@ import {
   Attachments,
 } from "@/components/ai-elements/attachments"
 import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion"
-import { useChatContext } from "./chat-provider"
+import {
+  useChatConfig,
+  useChatConfigActions,
+  useChatId,
+  useChatMessages,
+  useChatMessagingActions,
+} from "./chat-provider"
 import { ModelSelectorMenu } from "./model-selector-menu"
 import { ModeSelectorMenu } from "./mode-selector-menu"
 import { ProjectSelectorMenu } from "./project-selector-menu"
@@ -36,21 +42,19 @@ export function NewChatComposer() {
   const router = useRouter()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const { textInput } = usePromptInputController()
+  const { activeThreadId } = useChatId()
+  const { status } = useChatMessages()
+  const { sendPrompt, stop } = useChatMessagingActions()
   const {
-    activeThreadId,
-    sendPrompt,
-    status,
-    stop,
     selectedModelId,
-    setSelectedModelId,
     selectedProjectId,
-    setSelectedProjectId,
     selectedMode,
-    setSelectedMode,
     toolLock,
     projects,
     availableModels,
-  } = useChatContext()
+  } = useChatConfig()
+  const { setSelectedModelId, setSelectedProjectId, setSelectedMode } =
+    useChatConfigActions()
 
   const handleSubmit = ({
     text,

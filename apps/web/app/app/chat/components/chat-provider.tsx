@@ -1,26 +1,27 @@
-"use client";
+"use client"
 
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
   useRef,
   useState,
-} from "react";
-import { useParams, usePathname } from "next/navigation";
-import { useChat } from "@ai-sdk/react";
-import type { ChatStatus, FileUIPart, UIMessage } from "ai";
-import { nanoid } from "nanoid";
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import type { Doc } from "@/convex/_generated/dataModel";
-import { useViewer } from "@/components/settings/hooks/use-viewer";
-import type { ModeName } from "@/lib/AITools/ModePrompts";
+} from "react"
+import { useParams, usePathname } from "next/navigation"
+import { useChat } from "@ai-sdk/react"
+import type { ChatStatus, FileUIPart, UIMessage } from "ai"
+import { nanoid } from "nanoid"
+import { useMutation, useQuery } from "convex/react"
+import { api } from "@/convex/_generated/api"
+import type { Doc, Id } from "@/convex/_generated/dataModel"
+import { useViewer } from "@/components/settings/hooks/use-viewer"
+import type { ModeName } from "@/lib/AITools/ModePrompts"
 import {
   getToolLockCommandsForMode,
   type ToolKey,
-} from "@/lib/AITools/tool-lock-commands";
+} from "@/lib/AITools/tool-lock-commands"
 
 type PersistedUsage = {
   inputTokens: number
@@ -38,70 +39,117 @@ type PersistedMessageFields = {
   costUsdMicros?: number
 }
 
-type ChatContextValue = {
-  activeThreadId: string;
-  isThreadRoute: boolean;
-  messages: UIMessage[];
-  status: ChatStatus;
-  error: Error | undefined;
-  sendPrompt: (message: { text: string; files: FileUIPart[] }) => Promise<void>;
-  sendText: (text: string) => Promise<void>;
-  stop: () => Promise<void>;
-  selectedModelId: string | null;
-  setSelectedModelId: (value: string | null) => void;
-  selectedProjectId: string | null;
-  setSelectedProjectId: (value: string | null) => void;
-  selectedMode: ModeName;
-  setSelectedMode: (value: ModeName) => void;
-  toolLock: ToolKey | null;
-  setToolLock: (value: ToolKey | null) => void;
-  availableModels: Doc<"availableModels">[];
-  projects: Doc<"projects">[];
-  thread: Doc<"thread"> | null | undefined;
-  project: Doc<"projects"> | null | undefined;
-};
+type ChatSendPromptInput = {
+  text: string
+  files: FileUIPart[]
+}
 
-const ChatContext = createContext<ChatContextValue | null>(null);
+type ChatIdState = {
+  activeThreadId: string
+  isThreadRoute: boolean
+}
 
-const createDraftThreadId = () => `thread_${nanoid(10)}`;
+type ChatMessagesState = {
+  messages: UIMessage[]
+  status: ChatStatus
+  error: Error | undefined
+}
+
+type ChatMessagingActions = {
+  sendPrompt: (message: ChatSendPromptInput) => Promise<void>
+  sendText: (text: string) => Promise<void>
+  stop: () => void
+}
+
+type ChatConfigState = {
+  selectedModelId: string | null
+  selectedProjectId: string | null
+  selectedMode: ModeName
+  toolLock: ToolKey | null
+  availableModels: Doc<"availableModels">[]
+  projects: Doc<"projects">[]
+  thread: Doc<"thread"> | null | undefined
+  project: Doc<"projects"> | null | undefined
+}
+
+type ChatConfigActions = {
+  setSelectedModelId: (value: string | null) => void
+  setSelectedProjectId: (value: string | null) => void
+  setSelectedMode: (value: ModeName) => void
+  setToolLock: (value: ToolKey | null) => void
+}
+
+type SetThreadScopeInput =
+  | { scope: "workspace" }
+  | { scope: "project"; projectId: Id<"projects"> }
+
+type ChatThreadActions = {
+  updateTitle: (title: string) => Promise<void>
+  softDelete: () => Promise<void>
+  setScope: (input: SetThreadScopeInput) => Promise<void>
+}
+
+const ChatIdContext = createContext<ChatIdState | null>(null)
+const ChatMessagesContext = createContext<ChatMessagesState | null>(null)
+const ChatMessagingActionsContext = createContext<ChatMessagingActions | null>(null)
+const ChatConfigContext = createContext<ChatConfigState | null>(null)
+const ChatConfigActionsContext = createContext<ChatConfigActions | null>(null)
+const ChatThreadActionsContext = createContext<ChatThreadActions | null>(null)
+
+const createDraftThreadId = () => `thread_${nanoid(10)}`
+
+function useRequiredContext<T>(
+  context: React.Context<T | null>,
+  name: string,
+): T {
+  const value = useContext(context)
+  if (!value) {
+    throw new Error(`${name} must be used within ChatProvider`)
+  }
+  return value
+}
 
 export function ChatProvider({ children }: { children: React.ReactNode }) {
-  const params = useParams();
-  const pathname = usePathname();
+  const params = useParams()
+  const pathname = usePathname()
   const isThreadRoute =
-    typeof params.threadId === "string" && pathname.startsWith("/app/chat/");
+    typeof params.threadId === "string" && pathname.startsWith("/app/chat/")
 
-  const [draftThreadId, setDraftThreadId] = useState(createDraftThreadId);
-  const previousIsThreadRoute = useRef(isThreadRoute);
+  const [draftThreadId, setDraftThreadId] = useState(createDraftThreadId)
+  const previousIsThreadRoute = useRef(isThreadRoute)
 
   useEffect(() => {
     if (previousIsThreadRoute.current && !isThreadRoute) {
-      setDraftThreadId(createDraftThreadId());
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setDraftThreadId(createDraftThreadId())
     }
-    previousIsThreadRoute.current = isThreadRoute;
-  }, [isThreadRoute]);
+    previousIsThreadRoute.current = isThreadRoute
+  }, [isThreadRoute])
 
   const activeThreadId = isThreadRoute
     ? (params.threadId as string)
-    : draftThreadId;
+    : draftThreadId
 
   const { messages, setMessages, sendMessage, status, error, stop } = useChat({
     id: activeThreadId,
-  });
-  const { userId } = useViewer();
+  })
+  const { userId } = useViewer()
 
-  const thread = useQuery(api.chat.getThread, { threadId: activeThreadId });
+  const thread = useQuery(api.chat.getThread, { threadId: activeThreadId })
   const project = useQuery(
     api.projects.getMyProject,
     thread?.projectId ? { projectId: thread.projectId } : "skip",
-  );
-  const projects = useQuery(api.projects.listMyProjects, { status: "active" });
+  )
+  const projects = useQuery(api.projects.listMyProjects, { status: "active" })
   const threadMessages = useQuery(api.chat.listMessages, {
     threadId: activeThreadId,
-  });
-  const bootstrap = useQuery(api.chat.getChatBootstrap);
+  })
+  const bootstrap = useQuery(api.chat.getChatBootstrap)
 
-  const availableModels = bootstrap?.availableModels ?? [];
+  const availableModels = useMemo(
+    () => bootstrap?.availableModels ?? [],
+    [bootstrap?.availableModels],
+  )
 
   const defaultModelId = useMemo(() => {
     return (
@@ -109,29 +157,26 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       bootstrap?.preferences?.defaultAIModel?.modelId ??
       availableModels[0]?.modelId ??
       null
-    );
+    )
   }, [
     thread?.model,
     bootstrap?.preferences?.defaultAIModel?.modelId,
     availableModels,
-  ]);
+  ])
 
-  const [selectedModelId, setSelectedModelId] = useState<string | null>(null);
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
-    null,
-  );
-  const [selectedMode, setSelectedMode] = useState<ModeName>("Basic");
-  const [toolLock, setToolLock] = useState<ToolKey | null>(null);
-  const hasUserSelectedModel = useRef(false);
-  const previousThreadId = useRef(activeThreadId);
+  const [selectedModelId, setSelectedModelIdState] = useState<string | null>(null)
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null)
+  const [selectedMode, setSelectedMode] = useState<ModeName>("Basic")
+  const [toolLock, setToolLock] = useState<ToolKey | null>(null)
+  const hasUserSelectedModel = useRef(false)
+  const previousThreadId = useRef(activeThreadId)
 
-  // Reset user selection when switching threads
   useEffect(() => {
     if (previousThreadId.current !== activeThreadId) {
-      hasUserSelectedModel.current = false;
-      previousThreadId.current = activeThreadId;
+      hasUserSelectedModel.current = false
+      previousThreadId.current = activeThreadId
     }
-  }, [activeThreadId]);
+  }, [activeThreadId])
 
   const effectiveToolLock = useMemo(() => {
     if (!toolLock) return null
@@ -143,26 +188,24 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     return availableInMode.has(toolLock) ? toolLock : null
   }, [selectedMode, toolLock])
 
-  // Sync model from thread only on initial load or thread change, not when user manually selects
   useEffect(() => {
-    // Only auto-sync if user hasn't manually selected a model for this thread
     if (!hasUserSelectedModel.current) {
       if (thread?.model) {
-        setSelectedModelId(thread.model);
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setSelectedModelIdState(thread.model)
       } else if (defaultModelId) {
-        setSelectedModelId(defaultModelId);
+        setSelectedModelIdState(defaultModelId)
       }
     }
-  }, [thread?.model, defaultModelId]);
+  }, [thread?.model, defaultModelId])
 
-  // Wrapper to track user selection
-  const handleSetSelectedModelId = (value: string | null) => {
-    hasUserSelectedModel.current = true;
-    setSelectedModelId(value);
-  };
+  const setSelectedModelId = useCallback((value: string | null) => {
+    hasUserSelectedModel.current = true
+    setSelectedModelIdState(value)
+  }, [])
 
   const serverMessages = useMemo<UIMessage<ChatMessageMetadata>[]>(() => {
-    if (!threadMessages) return [];
+    if (!threadMessages) return []
     return threadMessages.map((message) => ({
       id: message.messageId,
       role: message.role,
@@ -171,77 +214,145 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         usage: (message as unknown as PersistedMessageFields).usage,
         costUsdMicros: (message as unknown as PersistedMessageFields).costUsdMicros,
       },
-    }));
-  }, [threadMessages]);
+    }))
+  }, [threadMessages])
 
   useEffect(() => {
-    if (status !== "ready") return;
-    if (messages.length > 0) return;
-    if (serverMessages.length === 0) return;
-    setMessages(serverMessages);
-  }, [messages.length, serverMessages, setMessages, status]);
+    if (status !== "ready") return
+    if (messages.length > 0) return
+    if (serverMessages.length === 0) return
+    setMessages(serverMessages)
+  }, [messages.length, serverMessages, setMessages, status])
 
-  const sendPrompt = async ({
-    text,
-    files,
-  }: {
-    text: string
-    files: FileUIPart[]
-  }) => {
-    const trimmed = text.trim()
-    const hasFiles = files.length > 0
-    if ((!trimmed && !hasFiles) || !selectedModelId || !userId) return
+  const selectedModelIdRef = useRef(selectedModelId)
+  const selectedProjectIdRef = useRef(selectedProjectId)
+  const selectedModeRef = useRef(selectedMode)
+  const effectiveToolLockRef = useRef(effectiveToolLock)
+  const userIdRef = useRef(userId)
 
-    await sendMessage(
-      { text: trimmed, files },
-      {
-        body: {
-          model: selectedModelId,
-          userId,
-          projectId: selectedProjectId,
-          mode: selectedMode,
-          toolLock: effectiveToolLock,
+  useEffect(() => {
+    selectedModelIdRef.current = selectedModelId
+  }, [selectedModelId])
+
+  useEffect(() => {
+    selectedProjectIdRef.current = selectedProjectId
+  }, [selectedProjectId])
+
+  useEffect(() => {
+    selectedModeRef.current = selectedMode
+  }, [selectedMode])
+
+  useEffect(() => {
+    effectiveToolLockRef.current = effectiveToolLock
+  }, [effectiveToolLock])
+
+  useEffect(() => {
+    userIdRef.current = userId
+  }, [userId])
+
+  const sendPrompt = useCallback(
+    async ({ text, files }: ChatSendPromptInput) => {
+      const trimmed = text.trim()
+      const hasFiles = files.length > 0
+      const currentModel = selectedModelIdRef.current
+      const currentUserId = userIdRef.current
+      if ((!trimmed && !hasFiles) || !currentModel || !currentUserId) return
+
+      await sendMessage(
+        { text: trimmed, files },
+        {
+          body: {
+            model: currentModel,
+            userId: currentUserId,
+            projectId: selectedProjectIdRef.current,
+            mode: selectedModeRef.current,
+            toolLock: effectiveToolLockRef.current,
+          },
         },
-      },
-    );
-  }
+      )
+    },
+    [sendMessage],
+  )
 
-  const sendText = async (text: string) => {
-    await sendPrompt({ text, files: [] })
-  }
+  const sendText = useCallback(
+    async (text: string) => {
+      await sendPrompt({ text, files: [] })
+    },
+    [sendPrompt],
+  )
 
-  const value = useMemo<ChatContextValue>(
+  const stopStreaming = useCallback(() => {
+    stop()
+  }, [stop])
+
+  const updateThreadTitleMutation = useMutation(api.chat.updateThreadTitle)
+  const softDeleteThreadMutation = useMutation(api.chat.softDeleteThread)
+  const setThreadScopeMutation = useMutation(api.chat.setThreadScope)
+
+  const updateTitle = useCallback(
+    async (title: string) => {
+      if (!thread || !title.trim()) return
+      await updateThreadTitleMutation({
+        threadId: thread.threadId,
+        title: title.trim(),
+      })
+    },
+    [thread, updateThreadTitleMutation],
+  )
+
+  const softDelete = useCallback(async () => {
+    if (!thread) return
+    await softDeleteThreadMutation({ threadId: thread.threadId })
+  }, [thread, softDeleteThreadMutation])
+
+  const setScope = useCallback(
+    async (input: SetThreadScopeInput) => {
+      if (!thread) return
+
+      if (input.scope === "workspace") {
+        await setThreadScopeMutation({
+          threadId: thread.threadId,
+          scope: "workspace",
+        })
+        return
+      }
+
+      await setThreadScopeMutation({
+        threadId: thread.threadId,
+        scope: "project",
+        projectId: input.projectId,
+      })
+    },
+    [thread, setThreadScopeMutation],
+  )
+
+  const idState = useMemo<ChatIdState>(
+    () => ({ activeThreadId, isThreadRoute }),
+    [activeThreadId, isThreadRoute],
+  )
+
+  const messagesState = useMemo<ChatMessagesState>(
+    () => ({ messages, status, error }),
+    [messages, status, error],
+  )
+
+  const messagingActions = useMemo<ChatMessagingActions>(
+    () => ({ sendPrompt, sendText, stop: stopStreaming }),
+    [sendPrompt, sendText, stopStreaming],
+  )
+
+  const configState = useMemo<ChatConfigState>(
     () => ({
-      activeThreadId,
-      isThreadRoute,
-      messages,
-      status,
-      error,
-      sendPrompt,
-      sendText,
-      stop,
       selectedModelId,
-      setSelectedModelId: handleSetSelectedModelId,
       selectedProjectId,
-      setSelectedProjectId,
       selectedMode,
-      setSelectedMode,
       toolLock: effectiveToolLock,
-      setToolLock,
       availableModels,
       projects: projects ?? [],
       thread,
       project,
     }),
     [
-      activeThreadId,
-      isThreadRoute,
-      messages,
-      status,
-      error,
-      sendPrompt,
-      sendText,
-      stop,
       selectedModelId,
       selectedProjectId,
       selectedMode,
@@ -251,15 +362,60 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       thread,
       project,
     ],
-  );
+  )
 
-  return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
+  const configActions = useMemo<ChatConfigActions>(
+    () => ({
+      setSelectedModelId,
+      setSelectedProjectId,
+      setSelectedMode,
+      setToolLock,
+    }),
+    [setSelectedModelId, setSelectedProjectId, setSelectedMode, setToolLock],
+  )
+
+  const threadActions = useMemo<ChatThreadActions>(
+    () => ({ updateTitle, softDelete, setScope }),
+    [updateTitle, softDelete, setScope],
+  )
+
+  return (
+    <ChatIdContext.Provider value={idState}>
+      <ChatMessagesContext.Provider value={messagesState}>
+        <ChatMessagingActionsContext.Provider value={messagingActions}>
+          <ChatConfigContext.Provider value={configState}>
+            <ChatConfigActionsContext.Provider value={configActions}>
+              <ChatThreadActionsContext.Provider value={threadActions}>
+                {children}
+              </ChatThreadActionsContext.Provider>
+            </ChatConfigActionsContext.Provider>
+          </ChatConfigContext.Provider>
+        </ChatMessagingActionsContext.Provider>
+      </ChatMessagesContext.Provider>
+    </ChatIdContext.Provider>
+  )
 }
 
-export function useChatContext() {
-  const ctx = useContext(ChatContext);
-  if (!ctx) {
-    throw new Error("useChatContext must be used within ChatProvider");
-  }
-  return ctx;
+export function useChatId() {
+  return useRequiredContext(ChatIdContext, "useChatId")
+}
+
+export function useChatMessages() {
+  return useRequiredContext(ChatMessagesContext, "useChatMessages")
+}
+
+export function useChatMessagingActions() {
+  return useRequiredContext(ChatMessagingActionsContext, "useChatMessagingActions")
+}
+
+export function useChatConfig() {
+  return useRequiredContext(ChatConfigContext, "useChatConfig")
+}
+
+export function useChatConfigActions() {
+  return useRequiredContext(ChatConfigActionsContext, "useChatConfigActions")
+}
+
+export function useChatThreadActions() {
+  return useRequiredContext(ChatThreadActionsContext, "useChatThreadActions")
 }

@@ -7,15 +7,16 @@ export function getToolCalls(message: UIMessage): ToolCall[] {
       if (typeof part.type !== "string") return false
       return part.type.startsWith("tool-") || part.type === "dynamic-tool"
     })
-    .map((part) => {
+    .map((part, index) => {
       const rawToolName =
         part.type === "dynamic-tool" && "toolName" in part
           ? part.toolName
           : part.type
+      const toolKey = rawToolName.replace(/^tool-/, "")
 
       return {
-        id: part.toolCallId ?? `tool-${Math.random().toString(36).slice(2)}`,
-        toolKey: rawToolName.replace(/^tool-/, ""),
+        id: part.toolCallId ?? `${message.id}:${toolKey}:${index}`,
+        toolKey,
         state: part.state,
         input: "input" in part ? part.input : undefined,
         output: "output" in part ? part.output : undefined,

@@ -1,13 +1,16 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useCallback, useState } from "react"
 import { useRouter } from "next/navigation"
-import { useMutation } from "convex/react"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { ArrowLeft01Icon, MessageQuestionIcon } from "@hugeicons/core-free-icons"
 import type { UIMessage } from "ai"
-import { api } from "@/convex/_generated/api"
-import { useChatContext } from "../components/chat-provider"
+import {
+  useChatConfig,
+  useChatMessages,
+  useChatMessagingActions,
+  useChatThreadActions,
+} from "../components/chat-provider"
 import { useViewer } from "@/components/settings/hooks/use-viewer"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -38,7 +41,10 @@ import "katex/dist/katex.min.css"
 
 function ThreadPageContent() {
   const router = useRouter()
-  const { messages, status, sendText, error, thread, project } = useChatContext()
+  const { messages, status, error } = useChatMessages()
+  const { sendText } = useChatMessagingActions()
+  const { thread, project } = useChatConfig()
+  const { updateTitle, softDelete } = useChatThreadActions()
   const { preferences } = useViewer()
 
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
@@ -47,30 +53,24 @@ function ThreadPageContent() {
   const [messageDetailsId, setMessageDetailsId] = useState<string | null>(null)
   const [clearedErrorMessage, setClearedErrorMessage] = useState<string | null>(null)
 
-  const updateThreadTitle = useMutation(api.chat.updateThreadTitle)
-  const softDeleteThread = useMutation(api.chat.softDeleteThread)
-
-  const uiMessages = useMemo(() => messages ?? [], [messages])
+  const uiMessages = messages
   const shouldShowNotFound =
     thread === null && messages.length === 0 && status === "ready"
 
   const handleEditTitle = async () => {
     if (!thread || !editTitle.trim()) return
-    await updateThreadTitle({
-      threadId: thread.threadId,
-      title: editTitle.trim(),
-    })
+    await updateTitle(editTitle)
     setIsEditDialogOpen(false)
   }
 
   const handleDeleteThread = async () => {
     if (!thread) return
-    await softDeleteThread({ threadId: thread.threadId })
+    await softDelete()
     setIsDeleteDialogOpen(false)
     router.push("/app/chat")
   }
 
-  const regenerateAssistantResponse = async (assistantMessageId: string) => {
+  const regenerateAssistantResponse = useCallback(async (assistantMessageId: string) => {
     const assistantIndex = uiMessages.findIndex((message) => message.id === assistantMessageId)
     if (assistantIndex < 0) return
 
@@ -84,18 +84,17 @@ function ThreadPageContent() {
     if (!previousText.trim()) return
 
     await sendText(previousText)
-  }
+  }, [sendText, uiMessages])
 
-  const copyAssistantMessage = async (messageText: string) => {
+  const copyAssistantMessage = useCallback(async (messageText: string) => {
     try {
       await navigator.clipboard.writeText(messageText)
     } catch (copyError) {
       console.error("Failed to copy assistant message", copyError)
     }
-  }
+  }, [])
 
   const selectedMessage = uiMessages.find((message) => message.id === messageDetailsId)
-  const selectedMessageText = selectedMessage ? getMessageText(selectedMessage) : ""
 
   if (shouldShowNotFound) {
     return (
@@ -202,7 +201,7 @@ function ThreadPageContent() {
           onCopy={copyAssistantMessage}
         />
 
-        <ThreadComposerBar thread={thread} />
+        <ThreadComposerBar />
       </div>
     </ChatComposerProvider>
   )

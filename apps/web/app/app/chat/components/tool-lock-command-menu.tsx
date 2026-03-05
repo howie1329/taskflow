@@ -18,7 +18,7 @@ import {
   findToolLockCommandByToolKey,
   getToolLockCommandsForMode,
 } from "@/lib/AITools/tool-lock-commands"
-import { useChatContext } from "./chat-provider"
+import { useChatConfig, useChatConfigActions } from "./chat-provider"
 
 interface ToolLockCommandMenuProps {
   textareaRef?: RefObject<HTMLTextAreaElement | null>
@@ -34,7 +34,8 @@ export function ToolLockCommandMenu({
   className,
 }: ToolLockCommandMenuProps) {
   const { textInput } = usePromptInputController()
-  const { selectedMode, toolLock, setToolLock } = useChatContext()
+  const { selectedMode, toolLock } = useChatConfig()
+  const { setToolLock } = useChatConfigActions()
 
   const modeCommands = useMemo(
     () => getToolLockCommandsForMode(selectedMode),
@@ -73,12 +74,14 @@ export function ToolLockCommandMenu({
   }, [setToolLock, textInput, textareaRef])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setActiveIndex(0)
   }, [queryText, selectedMode, showCommandMenu])
 
   useEffect(() => {
     if (!showCommandMenu) return
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setActiveIndex((current) => {
       if (filteredCommands.length === 0) return 0
       return Math.min(current, filteredCommands.length - 1)
