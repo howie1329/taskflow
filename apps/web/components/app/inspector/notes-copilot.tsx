@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -60,7 +61,9 @@ function NotesCopilotChat({
     setMessages,
   } = useChat({
     id: `note_copilot_${note._id}`,
-    api: "/api/note-copilot",
+    transport: new DefaultChatTransport({
+      api: "/api/note-copilot",
+    }),
   });
 
   const handleSubmit = async () => {
