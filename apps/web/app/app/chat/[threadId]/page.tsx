@@ -14,7 +14,6 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
   Conversation,
   ConversationContent,
-  ConversationEmptyState,
   ConversationScrollButton,
 } from "@/components/ai-elements/conversation"
 import { PromptInputProvider } from "@/components/ai-elements/prompt-input"
@@ -25,6 +24,8 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty"
+import { ChatComposerProvider } from "../components/chat-composer-context"
+import { ChatEmptyStateWithSuggestions } from "./components/chat-empty-state-suggestions"
 import { MessageDetailsSheet } from "./components/message-details-sheet"
 import { getMessageText } from "./components/message-parts"
 import { ThreadComposerBar } from "./components/thread-composer-bar"
@@ -132,19 +133,20 @@ function ThreadPageContent() {
   }
 
   return (
-    <div className="flex h-full min-h-0 w-full flex-col overflow-hidden">
-      <ThreadHeader
-        thread={thread}
-        project={project}
-        onBackToChats={() => router.push("/app/chat")}
-        onOpenEditTitle={() => {
-          setEditTitle(thread?.title || "")
-          setIsEditDialogOpen(true)
-        }}
-        onOpenDeleteThread={() => setIsDeleteDialogOpen(true)}
-      />
+    <ChatComposerProvider>
+      <div className="flex h-full min-h-0 w-full flex-col overflow-hidden">
+        <ThreadHeader
+          thread={thread}
+          project={project}
+          onBackToChats={() => router.push("/app/chat")}
+          onOpenEditTitle={() => {
+            setEditTitle(thread?.title || "")
+            setIsEditDialogOpen(true)
+          }}
+          onOpenDeleteThread={() => setIsDeleteDialogOpen(true)}
+        />
 
-      {error && error.message !== clearedErrorMessage && (
+        {error && error.message !== clearedErrorMessage && (
         <div className="px-4 py-3">
           <Alert variant="destructive" className="flex items-start justify-between gap-3">
             <div>
@@ -160,9 +162,9 @@ function ThreadPageContent() {
             </Button>
           </Alert>
         </div>
-      )}
+        )}
 
-      <ThreadDialogs
+        <ThreadDialogs
         isEditDialogOpen={isEditDialogOpen}
         setIsEditDialogOpen={setIsEditDialogOpen}
         isDeleteDialogOpen={isDeleteDialogOpen}
@@ -171,15 +173,12 @@ function ThreadPageContent() {
         setEditTitle={setEditTitle}
         onSaveTitle={() => void handleEditTitle()}
         onDeleteThread={() => void handleDeleteThread()}
-      />
+        />
 
-      <Conversation className="flex-1">
-        <ConversationContent className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-6 md:py-7">
+        <Conversation className="flex-1">
+          <ConversationContent className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-6 md:py-7">
           {uiMessages.length === 0 ? (
-            <ConversationEmptyState
-              title="Start a new conversation"
-              description="Ask anything, or use a prompt suggestion"
-            />
+            <ChatEmptyStateWithSuggestions />
           ) : (
             <ThreadMessageList
               uiMessages={uiMessages as UIMessage[]}
@@ -192,19 +191,20 @@ function ThreadPageContent() {
               onOpenDetails={setMessageDetailsId}
             />
           )}
-        </ConversationContent>
-        <ConversationScrollButton />
-      </Conversation>
+          </ConversationContent>
+          <ConversationScrollButton />
+        </Conversation>
 
-      <MessageDetailsSheet
-        open={!!messageDetailsId}
-        onOpenChange={(open) => !open && setMessageDetailsId(null)}
-        message={selectedMessage ?? null}
-        onCopy={copyAssistantMessage}
-      />
+        <MessageDetailsSheet
+          open={!!messageDetailsId}
+          onOpenChange={(open) => !open && setMessageDetailsId(null)}
+          message={selectedMessage ?? null}
+          onCopy={copyAssistantMessage}
+        />
 
-      <ThreadComposerBar thread={thread} />
-    </div>
+        <ThreadComposerBar thread={thread} />
+      </div>
+    </ChatComposerProvider>
   )
 }
 

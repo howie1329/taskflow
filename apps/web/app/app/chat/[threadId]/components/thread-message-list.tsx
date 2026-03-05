@@ -30,6 +30,7 @@ import {
   AttachmentPreview,
   Attachments,
 } from "@/components/ai-elements/attachments"
+import { Skeleton } from "@/components/ui/skeleton"
 import { getMessageFiles, getMessageReasoning, getMessageText } from "./message-parts"
 import { MessageGenUIPanel } from "./message-genui-panel"
 import { getToolCalls } from "./tool-calls"
@@ -254,20 +255,39 @@ function AssistantMessageBody({
 
       {hasSpec && spec && <MessageGenUIPanel spec={spec} />}
 
-      {renderedText && (
-        <Streamdown
-          plugins={{ code, mermaid, math, cjk }}
-          isAnimating={status === "streaming"}
-          animated
-        >
-          {renderedText}
-        </Streamdown>
+      {isStreamingMessage && !renderedText?.trim() ? (
+        <div className="flex flex-col gap-2">
+          <div className="flex gap-2">
+            <Skeleton className="h-4 w-full max-w-[85%] rounded" />
+            <Skeleton className="h-4 w-8 shrink-0 rounded" />
+          </div>
+          <div className="flex gap-2">
+            <Skeleton className="h-4 w-full max-w-[70%] rounded" />
+            <Skeleton className="h-4 w-12 shrink-0 rounded" />
+          </div>
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <span className="animate-pulse">Thinking...</span>
+            <span className="sr-only">Streaming response</span>
+          </div>
+        </div>
+      ) : (
+        renderedText && (
+          <div>
+            <Streamdown
+              plugins={{ code, mermaid, math, cjk }}
+              isAnimating={status === "streaming"}
+              animated
+            >
+              {renderedText}
+            </Streamdown>
+          </div>
+        )
       )}
 
-      {isStreamingMessage && (
+      {isStreamingMessage && renderedText?.trim() && (
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <ActivityIcon className="size-3.5 animate-pulse" />
-          Streaming response...
+          <span>Streaming...</span>
         </div>
       )}
 

@@ -34,10 +34,17 @@ export const ConversationContent = ({
   />
 );
 
+export type ConversationEmptyStateSuggestion = {
+  title: string;
+  value: string;
+};
+
 export type ConversationEmptyStateProps = ComponentProps<"div"> & {
   title?: string;
   description?: string;
   icon?: React.ReactNode;
+  suggestions?: ConversationEmptyStateSuggestion[];
+  onSuggestionSelect?: (value: string) => void;
 };
 
 export const ConversationEmptyState = ({
@@ -45,6 +52,8 @@ export const ConversationEmptyState = ({
   title = "No messages yet",
   description = "Start a conversation to see messages here",
   icon,
+  suggestions,
+  onSuggestionSelect,
   children,
   ...props
 }: ConversationEmptyStateProps) => (
@@ -64,6 +73,23 @@ export const ConversationEmptyState = ({
             <p className="text-muted-foreground text-sm">{description}</p>
           )}
         </div>
+        {suggestions && suggestions.length > 0 && onSuggestionSelect && (
+          <div className="mt-4 flex flex-wrap justify-center gap-2">
+            <p className="w-full text-xs text-muted-foreground">Try asking…</p>
+            {suggestions.map((s) => (
+              <Button
+                key={s.value}
+                type="button"
+                variant="outline"
+                size="sm"
+                className="rounded-full border-border/70 bg-background/60 px-3 text-xs text-muted-foreground hover:bg-muted/40 hover:border-border hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/30"
+                onClick={() => onSuggestionSelect(s.value)}
+              >
+                {s.title}
+              </Button>
+            ))}
+          </div>
+        )}
       </>
     )}
   </div>

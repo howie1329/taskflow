@@ -96,7 +96,26 @@ export function ToolLockCommandMenu({
     if (!textarea || !showCommandMenu) return
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (!showCommandMenu || filteredCommands.length === 0) return
+      if (!showCommandMenu) return
+
+      if (event.key === "Escape") {
+        event.preventDefault()
+        textInput.setInput(stripLeadingSlashCommand(textInput.value))
+        textareaRef?.current?.focus()
+        return
+      }
+
+      if (filteredCommands.length === 0) return
+
+      if (event.key === "Tab") {
+        event.preventDefault()
+        setActiveIndex((current) =>
+          event.shiftKey
+            ? (current - 1 + filteredCommands.length) % filteredCommands.length
+            : (current + 1) % filteredCommands.length,
+        )
+        return
+      }
 
       if (event.key === "ArrowDown") {
         event.preventDefault()
@@ -127,6 +146,7 @@ export function ToolLockCommandMenu({
     filteredCommands.length,
     handleSelect,
     showCommandMenu,
+    textInput,
     textareaRef,
   ])
 

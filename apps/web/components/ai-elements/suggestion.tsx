@@ -43,6 +43,7 @@ export const Suggestion = ({
       className={cn(
         "cursor-pointer rounded-full px-4 transition-all duration-150",
         "hover:scale-[1.02] active:scale-[0.98]",
+        "hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2",
         className,
       )}
       onClick={handleClick}

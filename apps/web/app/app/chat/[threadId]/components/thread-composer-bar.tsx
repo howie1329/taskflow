@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef } from "react"
+import { useEffect, useRef } from "react"
 import type { FileUIPart } from "ai"
 import { toast } from "sonner"
 import type { Doc, Id } from "@/convex/_generated/dataModel"
@@ -24,11 +24,22 @@ import {
   AttachmentRemove,
   Attachments,
 } from "@/components/ai-elements/attachments"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Button } from "@/components/ui/button"
+import { LightbulbIcon } from "lucide-react"
 import { useChatContext } from "../../components/chat-provider"
 import { ModelSelectorMenu } from "../../components/model-selector-menu"
 import { ModeSelectorMenu } from "../../components/mode-selector-menu"
 import { ProjectSelectorMenu } from "../../components/project-selector-menu"
 import { ToolLockCommandMenu } from "../../components/tool-lock-command-menu"
+import { ComposerHints } from "../../components/composer-hints"
+import { useChatComposerFocus } from "../../components/chat-composer-context"
+import { THREAD_COMPOSER_SUGGESTIONS } from "../../constants/suggestions"
 
 interface ThreadComposerBarProps {
   thread: Doc<"thread"> | null | undefined
@@ -53,6 +64,12 @@ export function ThreadComposerBar({ thread }: ThreadComposerBarProps) {
   } = useChatContext()
 
   const setThreadScope = useMutation(api.chat.setThreadScope)
+  const composerFocus = useChatComposerFocus()
+
+  useEffect(() => {
+    composerFocus?.registerFocus(() => textareaRef.current?.focus())
+    return () => composerFocus?.registerFocus(undefined)
+  }, [composerFocus])
 
   const handleSubmit = ({
     text,
@@ -68,6 +85,17 @@ export function ThreadComposerBar({ thread }: ThreadComposerBarProps) {
 
   const isToolCommandActive = textInput.value.trimStart().startsWith("/")
   const showPromptHeader = isToolCommandActive || !!toolLock
+
+  const handleSuggestionSelect = (value: string) => {
+    textInput.setInput(value)
+    textareaRef.current?.focus()
+  }
+
+  const openCommands = () => {
+    const v = textInput.value
+    textInput.setInput(v.trimStart().startsWith("/") ? v : `/${v}`)
+    textareaRef.current?.focus()
+  }
 
   return (
     <div className="shrink-0 bg-background/90 pb-[calc(env(safe-area-inset-bottom)+8px)] pt-3 backdrop-blur supports-backdrop-filter:bg-background/80">
@@ -106,6 +134,44 @@ export function ThreadComposerBar({ thread }: ThreadComposerBarProps) {
 
           <PromptInputFooter className="border-t border-border/45 pb-2.5 pt-2 text-muted-foreground">
             <div className="flex flex-wrap items-center gap-1.5">
+              <ComposerHints
+                show={!textInput.value.trim()}
+                toolLock={toolLock}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-7 rounded-full border-border/60 bg-muted/30 px-2.5 text-xs font-medium text-foreground hover:bg-muted/60"
+                onClick={openCommands}
+              >
+                /
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-7 rounded-full border-border/60 bg-muted/30 px-2.5 text-xs font-medium text-foreground hover:bg-muted/60"
+                  >
+                    <LightbulbIcon className="size-3.5" />
+                    <span className="sr-only md:not-sr-only md:ml-1.5">
+                      Examples
+                    </span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="max-h-64 overflow-y-auto">
+                  {THREAD_COMPOSER_SUGGESTIONS.map((s) => (
+                    <DropdownMenuItem
+                      key={s.value}
+                      onSelect={() => handleSuggestionSelect(s.value)}
+                    >
+                      {s.title}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
               <PromptInputActionMenu>
                 <PromptInputActionMenuTrigger
                   className="h-7 rounded-full border border-border/60 bg-muted/30 px-2.5 text-xs font-medium text-foreground hover:bg-muted/60"

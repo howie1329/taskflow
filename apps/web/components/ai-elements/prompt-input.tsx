@@ -823,25 +823,28 @@ export const PromptInputTextarea = ({
       return;
     }
 
-    if (e.key === "Enter") {
+    const isModifierEnter =
+      e.key === "Enter" && (e.metaKey || e.ctrlKey)
+    const isPlainEnter = e.key === "Enter" && !e.shiftKey && !e.metaKey && !e.ctrlKey
+
+    if (isModifierEnter || isPlainEnter) {
       if (isComposing || e.nativeEvent.isComposing) {
         return;
       }
-      if (e.shiftKey) {
+      if (e.key === "Enter" && e.shiftKey) {
         return;
       }
       e.preventDefault();
 
-      // Check if the submit button is disabled before submitting
-      const form = e.currentTarget.form;
+      const form = e.currentTarget.form
       const submitButton = form?.querySelector(
         'button[type="submit"]',
-      ) as HTMLButtonElement | null;
+      ) as HTMLButtonElement | null
       if (submitButton?.disabled) {
         return;
       }
 
-      form?.requestSubmit();
+      form?.requestSubmit()
     }
 
     // Remove last attachment when Backspace is pressed and textarea is empty

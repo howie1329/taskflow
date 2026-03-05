@@ -28,18 +28,9 @@ import { ModelSelectorMenu } from "./model-selector-menu"
 import { ModeSelectorMenu } from "./mode-selector-menu"
 import { ProjectSelectorMenu } from "./project-selector-menu"
 import { ToolLockCommandMenu } from "./tool-lock-command-menu"
-
-const SUGGESTIONS = [
-  { title: "Plan my day", value: "Plan my day" },
-  { title: "Break this into tasks", value: "Break this into tasks" },
-  { title: "Prioritize my backlog", value: "Prioritize my backlog" },
-  { title: "Create a project plan", value: "Create a project plan" },
-  {
-    title: "Generate UI summary card",
-    value:
-      "Create a compact UI summary card for my request using json-render components, with a title, short summary, and a small table if helpful.",
-  },
-]
+import { ComposerHints } from "./composer-hints"
+import { CHAT_SUGGESTIONS } from "../constants/suggestions"
+import { Button } from "@/components/ui/button"
 
 export function NewChatComposer() {
   const router = useRouter()
@@ -90,15 +81,19 @@ export function NewChatComposer() {
             Ready to dive in?
           </h1>
 
+          <p className="text-center text-xs text-muted-foreground">
+            Tasks · Notes · Projects · Inbox · Web search · Research
+          </p>
+
           <Suggestions className="mx-auto w-full max-w-2xl justify-center">
-            {SUGGESTIONS.map((suggestion) => (
+            {CHAT_SUGGESTIONS.map((suggestion) => (
               <Suggestion
                 key={suggestion.value}
                 suggestion={suggestion.value}
                 onClick={handleSuggestionSelect}
                 variant="outline"
                 size="sm"
-                className="rounded-full border-border/70 bg-background/60 px-4 text-xs text-muted-foreground hover:text-foreground"
+                className="rounded-full border-border/70 bg-background/60 px-4 text-xs text-muted-foreground hover:bg-muted/40 hover:border-border hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
               >
                 {suggestion.title}
               </Suggestion>
@@ -139,6 +134,23 @@ export function NewChatComposer() {
 
             <PromptInputFooter className="border-t border-border/45 pb-2.5 pt-2 text-muted-foreground">
               <div className="flex flex-wrap items-center gap-1.5">
+                <ComposerHints
+                  show={!textInput.value.trim()}
+                  toolLock={toolLock}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-7 rounded-full border-border/60 bg-muted/30 px-2.5 text-xs font-medium text-foreground hover:bg-muted/60"
+                  onClick={() => {
+                    const v = textInput.value
+                    textInput.setInput(v.trimStart().startsWith("/") ? v : `/${v}`)
+                    textareaRef.current?.focus()
+                  }}
+                >
+                  /
+                </Button>
                 <PromptInputActionMenu>
                   <PromptInputActionMenuTrigger
                     className="h-7 rounded-full border border-border/60 bg-muted/30 px-2.5 text-xs font-medium text-foreground hover:bg-muted/60"
