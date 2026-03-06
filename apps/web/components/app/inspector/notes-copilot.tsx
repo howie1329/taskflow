@@ -1,12 +1,22 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useChat } from "@ai-sdk/react"
 import {
   DefaultChatTransport,
   lastAssistantMessageIsCompleteWithApprovalResponses,
 } from "ai"
-import { Globe, FileText, Search, Sparkles, Wand2 } from "lucide-react"
+import {
+  AlertCircle,
+  CheckCircle2,
+  Clipboard,
+  FileText,
+  Globe,
+  Loader2,
+  Search,
+  Sparkles,
+  Wand2,
+} from "lucide-react"
 import { toast } from "sonner"
 import { useNotes } from "@/components/notes"
 import { Badge } from "@/components/ui/badge"
@@ -15,7 +25,11 @@ import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { useSidebar } from "@/components/ui/sidebar"
-import type { Note } from "@/components/notes/types"
+import {
+  createReviewerChatPrompt,
+  createReviewerSignature,
+} from "@/lib/notes/reviewer"
+import type { Note, NoteReviewerSuggestion } from "@/components/notes/types"
 
 type TextPart = {
   type: "text"
@@ -85,6 +99,18 @@ type MessagePart =
   | ReplaceCurrentNoteToolPart
   | SearchWebForNoteContextToolPart
   | { type: string }
+
+function isReplaceCurrentNoteToolPart(
+  part: MessagePart,
+): part is ReplaceCurrentNoteToolPart {
+  return part.type === "tool-replaceCurrentNote"
+}
+
+function isSearchWebToolPart(
+  part: MessagePart,
+): part is SearchWebForNoteContextToolPart {
+  return part.type === "tool-searchWebForNoteContext"
+}
 
 const promptSuggestions = [
   "Summarize this note",
@@ -377,6 +403,7 @@ function WebSearchToolCard({
 }
 
 function NotesMiniChat({ note }: { note: Note }) {
+  const { pendingChatPrompt, clearPendingChatPrompt } = useNotes()
   const [input, setInput] = useState("")
 
   const noteContext = useMemo(
@@ -452,6 +479,17 @@ function NotesMiniChat({ note }: { note: Note }) {
     setInput("")
   }
 
+  useEffect(() => {
+    if (!pendingChatPrompt || pendingChatPrompt.noteId !== note._id) return
+    const animationFrame = window.requestAnimationFrame(() => {
+      setInput(pendingChatPrompt.prompt)
+    })
+    clearPendingChatPrompt(note._id)
+    return () => {
+      window.cancelAnimationFrame(animationFrame)
+    }
+  }, [clearPendingChatPrompt, note._id, pendingChatPrompt])
+
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">
       <div className="space-y-2">
@@ -524,7 +562,7 @@ function NotesMiniChat({ note }: { note: Note }) {
                 </p>
                 {text ? <p className="whitespace-pre-wrap">{text}</p> : null}
                 {parts.map((part) => {
-                  if (part.type === "tool-replaceCurrentNote") {
+                  if (isReplaceCurrentNoteToolPart(part)) {
                     return (
                       <ReplaceNoteToolCard
                         key={part.toolCallId}
@@ -536,7 +574,7 @@ function NotesMiniChat({ note }: { note: Note }) {
                     )
                   }
 
-                  if (part.type === "tool-searchWebForNoteContext") {
+                  if (isSearchWebToolPart(part)) {
                     return (
                       <WebSearchToolCard
                         key={part.toolCallId}
@@ -587,6 +625,236 @@ function NotesMiniChat({ note }: { note: Note }) {
   )
 }
 
+function ReviewerScoreCard({
+  label,
+  value,
+}: {
+  label: string
+  value: number
+}) {
+  return (
+    <div className="rounded-md border border-border/60 bg-background px-2 py-2">
+      <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+        {label}
+      </p>
+      <p className="mt-1 text-sm font-medium text-foreground">{value}/5</p>
+    </div>
+  )
+}
+
+function ReviewerSuggestionCard({
+  suggestion,
+  onAskChat,
+}: {
+  suggestion: NoteReviewerSuggestion
+  onAskChat: (prompt: string) => void
+}) {
+  const prompt = createReviewerChatPrompt(suggestion.title, suggestion.detail)
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(prompt)
+      toast.success("Suggestion copied")
+    } catch {
+      toast.error("Failed to copy suggestion")
+    }
+  }
+
+  return (
+    <div className="rounded-lg border border-border/60 bg-background p-3">
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <p className="text-sm font-medium text-foreground">{suggestion.title}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{suggestion.detail}</p>
+        </div>
+        <Badge variant="outline" className="capitalize">
+          {suggestion.kind}
+        </Badge>
+      </div>
+      <div className="mt-3 flex items-center gap-2">
+        <Button
+          size="sm"
+          className="h-7 px-2 text-xs"
+          onClick={() => onAskChat(prompt)}
+        >
+          Ask chat
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-7 px-2 text-xs"
+          onClick={() => void handleCopy()}
+        >
+          <Clipboard className="mr-1 size-3.5" />
+          Copy
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+function NotesInspectorReviewer({
+  note,
+  onAskChat,
+}: {
+  note: Note
+  onAskChat: (prompt: string) => void
+}) {
+  const { reviewerRunStateByNoteId } = useNotes()
+  const runState = reviewerRunStateByNoteId[note._id]
+  const currentSignature = createReviewerSignature({
+    title: note.title,
+    contentText: note.contentText,
+  })
+  const reviewer =
+    note.reviewer?.contentSignature === currentSignature ? note.reviewer : undefined
+  const status = runState?.status ?? (reviewer ? "ready" : "idle")
+  const error = runState?.error ?? null
+
+  return (
+    <div className="space-y-4 text-sm">
+      <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-sm font-medium">Reviewer</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Runs after meaningful note saves and keeps the latest review for this note.
+            </p>
+          </div>
+          <Badge
+            variant={
+              status === "error"
+                ? "destructive"
+                : status === "reviewing"
+                  ? "secondary"
+                  : "outline"
+            }
+            className="capitalize"
+          >
+            {status === "reviewing" ? <Loader2 className="mr-1 size-3 animate-spin" /> : null}
+            {status}
+          </Badge>
+        </div>
+        <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
+          {status === "reviewing" ? <Loader2 className="size-3.5 animate-spin" /> : null}
+          {status === "ready" ? <CheckCircle2 className="size-3.5 text-emerald-600" /> : null}
+          {status === "error" ? <AlertCircle className="size-3.5 text-destructive" /> : null}
+          <span>
+            {reviewer
+              ? `Last reviewed ${formatTimestamp(reviewer.updatedAt)}`
+              : "No review has been generated yet."}
+          </span>
+        </div>
+        {error ? <p className="mt-2 text-xs text-destructive">{error}</p> : null}
+      </div>
+
+      {!reviewer ? (
+        <div className="rounded-xl border border-dashed border-border/70 bg-muted/20 p-4">
+          <p className="text-sm font-medium">Waiting for a meaningful save</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            The reviewer runs automatically after note content changes and saves.
+          </p>
+        </div>
+      ) : (
+        <>
+          <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+            <div className="flex items-center justify-between gap-2">
+              <p className="font-medium">Summary</p>
+              <Badge variant="outline">{reviewer.noteType}</Badge>
+            </div>
+            <p className="mt-2 text-sm text-muted-foreground">{reviewer.summary}</p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <ReviewerScoreCard label="Clarity" value={reviewer.scores.clarity} />
+            <ReviewerScoreCard label="Structure" value={reviewer.scores.structure} />
+            <ReviewerScoreCard
+              label="Scannability"
+              value={reviewer.scores.scannability}
+            />
+            <ReviewerScoreCard
+              label="Actionability"
+              value={reviewer.scores.actionability}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+              Top Issues
+            </p>
+            {reviewer.topIssues.length > 0 ? (
+              reviewer.topIssues.map((issue) => (
+                <div
+                  key={`${issue.title}_${issue.detail}`}
+                  className="rounded-lg border border-border/60 bg-background p-3"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm font-medium text-foreground">{issue.title}</p>
+                    <Badge variant="outline" className="capitalize">
+                      {issue.severity}
+                    </Badge>
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground">{issue.detail}</p>
+                </div>
+              ))
+            ) : (
+              <p className="text-xs text-muted-foreground">No major issues detected.</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+              Suggestions
+            </p>
+            {reviewer.suggestions.length > 0 ? (
+              reviewer.suggestions.map((suggestion) => (
+                <ReviewerSuggestionCard
+                  key={suggestion.id}
+                  suggestion={suggestion}
+                  onAskChat={onAskChat}
+                />
+              ))
+            ) : (
+              <p className="text-xs text-muted-foreground">No suggestions available.</p>
+            )}
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+              <p className="font-medium">Action items</p>
+              {reviewer.actionItems.length > 0 ? (
+                <ul className="mt-2 space-y-2 text-xs text-muted-foreground">
+                  {reviewer.actionItems.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  No action items extracted.
+                </p>
+              )}
+            </div>
+            <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+              <p className="font-medium">Open questions</p>
+              {reviewer.openQuestions.length > 0 ? (
+                <ul className="mt-2 space-y-2 text-xs text-muted-foreground">
+                  {reviewer.openQuestions.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  No open questions extracted.
+                </p>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
 function NotesInspectorInfo({ note }: { note: Note }) {
   const wordCount = note.contentText.split(/\s+/).filter(Boolean).length
   const lineCount = note.contentText.split(/\n/).filter(Boolean).length
@@ -599,7 +867,7 @@ function NotesInspectorInfo({ note }: { note: Note }) {
           Scope
         </div>
         <p className="mt-2 text-sm text-muted-foreground">
-          The mini chat starts with the current note only. Web context is added only after you approve a search.
+          The mini chat and reviewer use the current note only. Web search in chat is only used when you explicitly ask for outside information.
         </p>
       </div>
 
@@ -633,9 +901,10 @@ function NotesInspectorInfo({ note }: { note: Note }) {
 }
 
 export function NotesCopilot() {
-  const { selectedNote } = useNotes()
+  const { selectedNote, handoffReviewerSuggestionToChat } = useNotes()
   const { isMobile, open, openMobile } = useSidebar("inspector")
   const inspectorOpen = isMobile ? openMobile : open
+  const [activeTab, setActiveTab] = useState("chat")
 
   if (!selectedNote) {
     return (
@@ -646,10 +915,17 @@ export function NotesCopilot() {
   }
 
   return (
-    <Tabs defaultValue="chat" className="flex h-full min-h-0 flex-col gap-3">
+    <Tabs
+      value={activeTab}
+      onValueChange={setActiveTab}
+      className="flex h-full min-h-0 flex-col gap-3"
+    >
       <TabsList variant="line" className="w-full justify-start bg-transparent p-0">
         <TabsTrigger value="chat" className="max-w-[120px] px-0 py-1 text-xs">
           Chat
+        </TabsTrigger>
+        <TabsTrigger value="reviewer" className="max-w-[120px] px-0 py-1 text-xs">
+          Reviewer
         </TabsTrigger>
         <TabsTrigger value="info" className="max-w-[120px] px-0 py-1 text-xs">
           Info
@@ -659,6 +935,15 @@ export function NotesCopilot() {
         <NotesMiniChat
           key={`${selectedNote._id}_${inspectorOpen ? "open" : "closed"}`}
           note={selectedNote}
+        />
+      </TabsContent>
+      <TabsContent value="reviewer" className="mt-0 min-h-0 flex-1 overflow-y-auto">
+        <NotesInspectorReviewer
+          note={selectedNote}
+          onAskChat={(prompt) => {
+            handoffReviewerSuggestionToChat(selectedNote._id, prompt)
+            setActiveTab("chat")
+          }}
         />
       </TabsContent>
       <TabsContent value="info" className="mt-0 min-h-0 flex-1 overflow-y-auto">

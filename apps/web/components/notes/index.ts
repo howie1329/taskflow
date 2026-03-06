@@ -1,5 +1,13 @@
 // Types
-export type { NotesProject, Note, ViewMode } from "./types"
+export type {
+  NotesProject,
+  Note,
+  NoteReviewer,
+  NoteReviewerIssue,
+  NoteReviewerRunState,
+  NoteReviewerSuggestion,
+  ViewMode,
+} from "./types"
 
 export { NotesProvider, useNotes } from "./notes-provider"
 
