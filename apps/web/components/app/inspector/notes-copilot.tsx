@@ -2,22 +2,172 @@
 
 import { useMemo, useState } from "react";
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
+import {
+  DefaultChatTransport,
+  lastAssistantMessageIsCompleteWithApprovalResponses,
+} from "ai";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { useNotes } from "@/components/notes";
 import { useViewer } from "@/components/settings/hooks/use-viewer";
 import { useSidebar } from "@/components/ui/sidebar";
 import { toast } from "sonner";
 import type { Note, NoteCollabState } from "@/components/notes/types";
 
-function getMessageText(parts: { type: string; text?: string }[]) {
+type TextPart = {
+  type: "text";
+  text?: string;
+};
+
+type ToolApproval = {
+  id: string;
+};
+
+type ApplyCurrentNoteEditToolPart = {
+  type: "tool-applyCurrentNoteEdit";
+  state:
+    | "input-streaming"
+    | "input-available"
+    | "approval-requested"
+    | "approval-responded"
+    | "output-available"
+    | "output-error";
+  toolCallId: string;
+  input?: {
+    title?: string;
+    content?: string;
+  };
+  output?: {
+    ok?: boolean;
+    noteId?: string;
+    updatedAt?: number;
+    reason?: string;
+    message?: string;
+  };
+  errorText?: string;
+  approval?: ToolApproval;
+};
+
+type MessagePart = TextPart | ApplyCurrentNoteEditToolPart | { type: string };
+
+function getTextFromParts(parts: MessagePart[]) {
   return parts
-    .filter((part) => part.type === "text")
+    .filter((part): part is TextPart => part.type === "text")
     .map((part) => part.text ?? "")
     .join("");
+}
+
+function formatTimestamp(value?: number) {
+  if (!value) return "Unknown time";
+  try {
+    return new Date(value).toLocaleString();
+  } catch {
+    return "Unknown time";
+  }
+}
+
+function ApplyEditToolCard({
+  part,
+  onApprove,
+  onDeny,
+}: {
+  part: ApplyCurrentNoteEditToolPart;
+  onApprove: (approvalId: string) => Promise<void>;
+  onDeny: (approvalId: string) => Promise<void>;
+}) {
+  const proposedTitle =
+    part.input?.title && part.input.title.trim().length > 0
+      ? part.input.title
+      : null;
+  const proposedContent = part.input?.content ?? "";
+
+  if (part.state === "approval-requested") {
+    return (
+      <div className="mt-2 rounded-md border border-border/60 bg-muted/30 p-2">
+        <p className="text-xs font-medium">Apply proposed note edit?</p>
+        {proposedTitle ? (
+          <p className="mt-1 text-xs text-muted-foreground">
+            Title: {proposedTitle}
+          </p>
+        ) : null}
+        {proposedContent ? (
+          <pre className="mt-1 max-h-24 overflow-auto whitespace-pre-wrap text-xs text-muted-foreground">
+            {proposedContent}
+          </pre>
+        ) : null}
+        <div className="mt-2 flex items-center gap-2">
+          <Button
+            size="sm"
+            className="h-7 px-2 text-xs"
+            onClick={() => part.approval?.id && void onApprove(part.approval.id)}
+            disabled={!part.approval?.id}
+          >
+            Approve
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 px-2 text-xs"
+            onClick={() => part.approval?.id && void onDeny(part.approval.id)}
+            disabled={!part.approval?.id}
+          >
+            Deny
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (part.state === "output-available") {
+    const success = part.output?.ok === true;
+    return (
+      <div className="mt-2 rounded-md border border-border/60 bg-muted/30 p-2 text-xs">
+        {success ? (
+          <p className="font-medium">Applied to note</p>
+        ) : (
+          <p className="font-medium text-destructive">Edit not applied</p>
+        )}
+        <p className="mt-1 text-muted-foreground">
+          {part.output?.message ||
+            (success
+              ? `Updated at ${formatTimestamp(part.output?.updatedAt)}`
+              : "The edit could not be applied.")}
+        </p>
+        {part.output?.reason ? (
+          <p className="mt-1 text-muted-foreground">Reason: {part.output.reason}</p>
+        ) : null}
+      </div>
+    );
+  }
+
+  if (part.state === "output-error") {
+    return (
+      <div className="mt-2 rounded-md border border-destructive/40 bg-destructive/5 p-2 text-xs text-destructive">
+        {part.errorText || "Edit tool failed"}
+      </div>
+    );
+  }
+
+  if (part.state === "approval-responded") {
+    return (
+      <div className="mt-2 rounded-md border border-border/60 bg-muted/30 p-2 text-xs text-muted-foreground">
+        Applying edit...
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-2 rounded-md border border-border/60 bg-muted/30 p-2 text-xs text-muted-foreground">
+      Preparing edit…
+    </div>
+  );
 }
 
 const promptSuggestions = [
@@ -52,6 +202,10 @@ function NotesCopilotChat({
     }),
     [note],
   );
+  const [requestSnapshot, setRequestSnapshot] = useState(() => ({
+    model: modelId,
+    noteContext,
+  }));
 
   const {
     messages,
@@ -59,26 +213,92 @@ function NotesCopilotChat({
     error,
     sendMessage,
     setMessages,
+    addToolApprovalResponse,
   } = useChat({
     id: `note_copilot_${note._id}`,
     transport: new DefaultChatTransport({
       api: "/api/note-copilot",
+      prepareSendMessagesRequest: ({
+        id,
+        messages,
+        trigger,
+        messageId,
+        body,
+        headers,
+        credentials,
+      }) => {
+        const snapshotModel = requestSnapshot.model;
+        const snapshotNoteContext = requestSnapshot.noteContext;
+
+        if (!snapshotModel || !snapshotNoteContext?.noteId) {
+          toast.error("Missing request context, please resend your prompt.");
+          throw new Error("Missing request context for note copilot request");
+        }
+
+        return {
+          headers,
+          credentials,
+          body: {
+            id,
+            messages,
+            trigger,
+            messageId,
+            ...body,
+            model: snapshotModel,
+            noteContext: snapshotNoteContext,
+          },
+        };
+      },
     }),
+    sendAutomaticallyWhen:
+      lastAssistantMessageIsCompleteWithApprovalResponses,
   });
 
   const handleSubmit = async () => {
     const trimmed = input.trim();
     if (!trimmed || status === "streaming") return;
+    const snapshot = {
+      model: modelId,
+      noteContext: {
+        noteId: noteContext.noteId,
+        title: noteContext.title,
+        contentText: noteContext.contentText,
+      },
+    };
+    setRequestSnapshot(snapshot);
     setInput("");
     await sendMessage(
       { text: trimmed },
       {
         body: {
-          model: modelId,
-          noteContext,
+          model: snapshot.model,
+          noteContext: snapshot.noteContext,
         },
       },
     );
+  };
+
+  const handleApproval = async (approvalId: string, approved: boolean) => {
+    try {
+      await addToolApprovalResponse({
+        id: approvalId,
+        approved,
+      });
+    } catch {
+      toast.error("Failed to submit approval response");
+    }
+  };
+
+  const handleReset = () => {
+    setRequestSnapshot({
+      model: modelId,
+      noteContext: {
+        noteId: note._id,
+        title: note.title,
+        contentText: note.contentText.slice(0, 10000),
+      },
+    });
+    setMessages([]);
   };
 
   return (
@@ -95,7 +315,7 @@ function NotesCopilotChat({
             variant="ghost"
             size="sm"
             className="h-6 px-2 text-xs"
-            onClick={() => setMessages([])}
+            onClick={handleReset}
           >
             Reset
           </Button>
@@ -133,9 +353,34 @@ function NotesCopilotChat({
               <p className="mb-1 text-xs uppercase tracking-wide text-muted-foreground">
                 {message.role}
               </p>
-              <p className="whitespace-pre-wrap">
-                {getMessageText(message.parts as { type: string; text?: string }[])}
-              </p>
+              {(message.parts as MessagePart[]).map((part, index) => {
+                if (part.type === "text") {
+                  return (
+                    <p key={`${message.id}_text_${index}`} className="whitespace-pre-wrap">
+                      {part.text ?? ""}
+                    </p>
+                  );
+                }
+
+                if (part.type === "tool-applyCurrentNoteEdit") {
+                  return (
+                    <ApplyEditToolCard
+                      key={part.toolCallId}
+                      part={part}
+                      onApprove={(approvalId) => handleApproval(approvalId, true)}
+                      onDeny={(approvalId) => handleApproval(approvalId, false)}
+                    />
+                  );
+                }
+
+                return null;
+              })}
+              {!getTextFromParts(message.parts as MessagePart[]) &&
+              !(message.parts as MessagePart[]).some(
+                (part) => part.type === "tool-applyCurrentNoteEdit",
+              ) ? (
+                <p className="text-xs text-muted-foreground">No renderable content.</p>
+              ) : null}
             </div>
           ))
         )}
@@ -265,51 +510,65 @@ export function NotesCopilot() {
         </div>
       </div>
 
-      <div className="space-y-2 rounded-md border border-border/50 p-3">
-        {collabState.summary ? (
-          <p className="text-sm">{collabState.summary}</p>
-        ) : (
-          <p className="text-sm text-muted-foreground">
-            Suggestions appear after note content saves.
-          </p>
-        )}
-        {collabState.error ? (
-          <p className="text-xs text-destructive">{collabState.error}</p>
-        ) : null}
-        {collabState.suggestions.length > 0 ? (
-          <div className="space-y-2">
-            {collabState.suggestions.map((suggestion) => (
-              <div
-                key={suggestion.id}
-                className="rounded-md border border-border/50 px-2 py-1.5"
-              >
-                <div className="mb-1 flex items-center gap-2">
-                  <p className="text-xs font-medium">{suggestion.title}</p>
-                  <Badge variant="outline" className="h-5 text-[10px]">
-                    {suggestion.kind}
-                  </Badge>
-                </div>
-                <p className="text-xs text-muted-foreground">{suggestion.detail}</p>
-              </div>
-            ))}
-          </div>
-        ) : null}
-        {collabState.actionItems.length > 0 ? (
-          <div className="space-y-1">
-            <p className="text-xs font-medium">Action items</p>
-            {collabState.actionItems.map((item) => (
-              <p key={item} className="text-xs text-muted-foreground">
-                - {item}
+      <Collapsible key={selectedNote._id} defaultOpen>
+        <div className="rounded-md border border-border/50">
+          <CollapsibleTrigger className="flex w-full items-center justify-between px-3 py-2 text-left">
+            <p className="text-xs font-medium">AI Collab details</p>
+            <Badge variant="outline" className="h-5 text-[10px]">
+              Toggle
+            </Badge>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="space-y-2 border-t border-border/50 p-3">
+            {collabState.summary ? (
+              <p className="text-sm">{collabState.summary}</p>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Suggestions appear after note content saves.
               </p>
-            ))}
-          </div>
-        ) : null}
-      </div>
+            )}
+            {collabState.error ? (
+              <p className="text-xs text-destructive">{collabState.error}</p>
+            ) : null}
+            {collabState.suggestions.length > 0 ? (
+              <div className="space-y-2">
+                {collabState.suggestions.map((suggestion) => (
+                  <div
+                    key={suggestion.id}
+                    className="rounded-md border border-border/50 px-2 py-1.5"
+                  >
+                    <div className="mb-1 flex items-center gap-2">
+                      <p className="text-xs font-medium">{suggestion.title}</p>
+                      <Badge variant="outline" className="h-5 text-[10px]">
+                        {suggestion.kind}
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{suggestion.detail}</p>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+            {collabState.actionItems.length > 0 ? (
+              <div className="space-y-1">
+                <p className="text-xs font-medium">Action items</p>
+                {collabState.actionItems.map((item) => (
+                  <p key={item} className="text-xs text-muted-foreground">
+                    - {item}
+                  </p>
+                ))}
+              </div>
+            ) : null}
+          </CollapsibleContent>
+        </div>
+      </Collapsible>
 
       <Separator />
 
       {inspectorOpen ? (
-        <NotesCopilotChat note={selectedNote} modelId={modelId} />
+        <NotesCopilotChat
+          key={selectedNote._id}
+          note={selectedNote}
+          modelId={modelId}
+        />
       ) : (
         <p className="text-sm text-muted-foreground">
           Copilot chat resets while inspector is closed.
