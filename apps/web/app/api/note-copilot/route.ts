@@ -20,8 +20,9 @@ import {
 import { z } from "zod"
 import {
   lexicalJsonToMarkdown,
-  markdownToLexicalJson,
+  markdownToLexicalState,
   markdownToPlainText,
+  validateLexicalEditorState,
 } from "@/lib/notes/lexical-markdown"
 
 const googleProvider = createGoogleGenerativeAI({
@@ -292,7 +293,7 @@ Behavior rules:
         "Replace the current note with a complete approved markdown rewrite. Use only when the user explicitly wants the note edited.",
       inputSchema: z.object({
         title: z.string().optional(),
-        content: z.string().min(1),
+        content: z.string().min(1).describe("The new note content in markdown format"),
       }),
       outputSchema: noteEditResultSchema,
       needsApproval: true,
@@ -314,13 +315,58 @@ Behavior rules:
         }
 
         try {
-          const lexicalJsonContent = markdownToLexicalJson(content)
-          const contentText = markdownToPlainText(content)
+          if (!content.trim()) {
+            return {
+              ok: false,
+              noteId,
+              reason: "EMPTY_MARKDOWN",
+              message:
+                "The note was not updated because the generated edit was empty.",
+            }
+          }
+
+          const {
+            lexicalJson,
+            plainText,
+            hasMeaningfulContent,
+          } = markdownToLexicalState(content)
+          const validation = validateLexicalEditorState(lexicalJson)
+
+          if (!validation.isValid) {
+            return {
+              ok: false,
+              noteId,
+              reason: "INVALID_EDITOR_STATE",
+              message:
+                "The note was not updated because the generated edit could not be converted safely.",
+            }
+          }
+
+          if (!hasMeaningfulContent || !validation.hasMeaningfulContent) {
+            return {
+              ok: false,
+              noteId,
+              reason: "EMPTY_CONVERSION",
+              message:
+                "The note was not updated because the generated edit converted to an empty document.",
+            }
+          }
+
+          if (!plainText.trim()) {
+            return {
+              ok: false,
+              noteId,
+              reason: "EMPTY_TEXT_CONTENT",
+              message:
+                "The note was not updated because the generated edit did not produce any note text.",
+            }
+          }
+
           const updatedNote = await toolClient.mutation(api.notes.updateNote, {
             noteId: noteId as Id<"notes">,
             title: title !== undefined ? title : note.title,
-            content: lexicalJsonContent,
-            contentText,
+            content: lexicalJson,
+            contentText: plainText,
           })
 
           return {
