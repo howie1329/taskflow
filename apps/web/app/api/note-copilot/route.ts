@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server"
 import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server"
-import { createOpenRouter } from "@openrouter/ai-sdk-provider"
 import { createGoogleGenerativeAI } from "@ai-sdk/google"
 import { ConvexHttpClient } from "convex/browser"
+import Firecrawl from "@mendable/firecrawl-js"
+import Exa from "exa-js"
+import { tavily } from "@tavily/core"
 import { api } from "@/convex/_generated/api"
 import type { Id } from "@/convex/_generated/dataModel"
 import {
@@ -16,29 +18,17 @@ import {
   type UIMessage,
 } from "ai"
 import { z } from "zod"
-import { createEditor, $getRoot } from "lexical"
-import { $convertFromMarkdownString, TRANSFORMERS } from "@lexical/markdown"
-import { HeadingNode, QuoteNode } from "@lexical/rich-text"
-import { ListNode, ListItemNode } from "@lexical/list"
-import { CodeNode, CodeHighlightNode } from "@lexical/code"
-import { LinkNode, AutoLinkNode } from "@lexical/link"
+import {
+  lexicalJsonToMarkdown,
+  markdownToLexicalJson,
+  markdownToPlainText,
+} from "@/lib/notes/lexical-markdown"
 
 const googleProvider = createGoogleGenerativeAI({
   apiKey: process.env.GOOGLE_AI_KEY,
 })
 
 const googleModel = googleProvider("gemini-3.1-flash-lite-preview")
-
-type NoteContext = {
-  noteId?: string
-  title?: string
-  contentText?: string
-}
-
-type ToolContext = {
-  token: string
-  noteId: string
-}
 
 const noteEditResultSchema = z.object({
   ok: z.boolean(),
@@ -48,72 +38,44 @@ const noteEditResultSchema = z.object({
   message: z.string().optional(),
 })
 
+const webSearchResultItemSchema = z.object({
+  title: z.string(),
+  url: z.string().url(),
+  snippet: z.string(),
+})
+
+const webSearchResultSchema = z.object({
+  query: z.string(),
+  reason: z.string().optional(),
+  provider: z.enum(["firecrawl", "exa", "tavily"]),
+  results: z.array(webSearchResultItemSchema),
+  message: z.string().optional(),
+})
+
+type NoteContext = {
+  noteId?: string
+  title?: string
+}
+
+type ToolContext = {
+  token: string
+  noteId: string
+}
+
+type SearchResponse = z.infer<typeof webSearchResultSchema>
+
 function createClient(token: string) {
   const url = process.env.NEXT_PUBLIC_CONVEX_URL
   if (!url) {
     throw new Error("Missing NEXT_PUBLIC_CONVEX_URL")
   }
+
   const client = new ConvexHttpClient(url)
   client.setAuth(token)
   return client
 }
 
-function createMarkdownEditor() {
-  return createEditor({
-    nodes: [
-      HeadingNode,
-      QuoteNode,
-      ListNode,
-      ListItemNode,
-      CodeNode,
-      CodeHighlightNode,
-      LinkNode,
-      AutoLinkNode,
-    ],
-    onError: (error) => {
-      throw error
-    },
-  })
-}
-
-function markdownToLexicalJson(markdown: string) {
-  const editor = createMarkdownEditor()
-  let lexicalJson = ""
-
-  editor.update(
-    () => {
-      const root = $getRoot()
-      root.clear()
-      $convertFromMarkdownString(markdown, TRANSFORMERS)
-      lexicalJson = JSON.stringify(editor.getEditorState().toJSON())
-    },
-    { discrete: true },
-  )
-
-  if (!lexicalJson) {
-    throw new Error("Failed to convert markdown to lexical json")
-  }
-
-  return lexicalJson
-}
-
-function markdownToPlainText(markdown: string) {
-  const editor = createMarkdownEditor()
-  let text = ""
-  editor.update(
-    () => {
-      const root = $getRoot()
-      root.clear()
-      $convertFromMarkdownString(markdown, TRANSFORMERS)
-      text = root.getTextContent().replace(/\s+/g, " ").trim()
-    },
-    { discrete: true },
-  )
-
-  return text
-}
-
-const getToolContext = (context: unknown): ToolContext => {
+function getToolContext(context: unknown): ToolContext {
   if (!context || typeof context !== "object") {
     throw new Error("Missing tool context")
   }
@@ -126,34 +88,152 @@ const getToolContext = (context: unknown): ToolContext => {
   return { token, noteId }
 }
 
+async function searchWithFirecrawl(query: string, reason?: string): Promise<SearchResponse> {
+  const apiKey = process.env.FIRECRAWL_API_KEY
+  if (!apiKey) {
+    throw new Error("FIRECRAWL_API_KEY is not set")
+  }
+
+  const client = new Firecrawl({ apiKey })
+  const response = await client.search(query, { limit: 5 } as unknown as Parameters<Firecrawl["search"]>[1])
+  const results = Array.isArray(response.data)
+    ? response.data
+      .map((item) => ({
+        title: item.title ?? item.metadata?.title ?? item.url ?? "Untitled result",
+        url: item.url,
+        snippet:
+          item.description ??
+          item.markdown?.slice(0, 220) ??
+          item.metadata?.description ??
+          "No snippet available.",
+      }))
+      .filter((item) => item.url)
+    : []
+
+  return webSearchResultSchema.parse({
+    query,
+    reason,
+    provider: "firecrawl",
+    results,
+    message:
+      results.length > 0
+        ? `Found ${results.length} web results.`
+        : "No web results found.",
+  })
+}
+
+async function searchWithExa(query: string, reason?: string): Promise<SearchResponse> {
+  const apiKey = process.env.EXA_API_KEY
+  if (!apiKey) {
+    throw new Error("EXA_API_KEY is not set")
+  }
+
+  const client = new Exa(apiKey)
+  const response = await client.search(query, {
+    type: "auto",
+    numResults: 5,
+    contents: {
+      text: true,
+      summary: true,
+      highlights: true,
+    },
+  })
+
+  const results = Array.isArray(response.results)
+    ? response.results.map((item) => ({
+      title: item.title ?? item.url ?? "Untitled result",
+      url: item.url,
+      snippet:
+        item.summary ??
+        item.highlights?.[0] ??
+        item.text?.slice(0, 220) ??
+        "No snippet available.",
+    }))
+    : []
+
+  return webSearchResultSchema.parse({
+    query,
+    reason,
+    provider: "exa",
+    results,
+    message:
+      results.length > 0
+        ? `Found ${results.length} web results.`
+        : "No web results found.",
+  })
+}
+
+async function searchWithTavily(query: string, reason?: string): Promise<SearchResponse> {
+  const apiKey = process.env.TAVILY_API_KEY
+  if (!apiKey) {
+    throw new Error("TAVILY_API_KEY is not set")
+  }
+
+  const client = tavily({ apiKey })
+  const response = await client.search(query)
+  const results = Array.isArray(response.results)
+    ? response.results.slice(0, 5).map((item) => ({
+      title: item.title ?? item.url ?? "Untitled result",
+      url: item.url,
+      snippet: item.content ?? "No snippet available.",
+    }))
+    : []
+
+  return webSearchResultSchema.parse({
+    query,
+    reason,
+    provider: "tavily",
+    results,
+    message:
+      results.length > 0
+        ? `Found ${results.length} web results.`
+        : "No web results found.",
+  })
+}
+
+async function runBasicWebSearch(query: string, reason?: string) {
+  const candidates = [searchWithFirecrawl, searchWithExa, searchWithTavily]
+  let lastError: Error | null = null
+
+  for (const search of candidates) {
+    try {
+      return await search(query, reason)
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error("Search failed")
+    }
+  }
+
+  throw lastError ?? new Error("No search provider is configured")
+}
+
+function getNoteMarkdown(note: { content?: string; contentText?: string }) {
+  try {
+    const markdown = lexicalJsonToMarkdown(note.content ?? "")
+    return markdown.trim()
+  } catch {
+    return note.contentText?.trim() ?? ""
+  }
+}
+
 export async function POST(req: Request) {
   const token = await convexAuthNextjsToken()
   if (!token) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  let model: string
   let messages: UIMessage[]
   let noteContext: NoteContext | undefined
-  let trigger: string | undefined
+
   try {
     const body = await req.json()
-    model = body.model
     messages = body.messages
     noteContext = body.noteContext
-    trigger = typeof body.trigger === "string" ? body.trigger : undefined
   } catch (error) {
     console.error("Error parsing note copilot request:", error)
     return NextResponse.json({ error: "Invalid request" }, { status: 400 })
   }
 
-  if (!model) {
-    console.error("Note copilot request missing model", { trigger })
-    return NextResponse.json({ error: "Missing model" }, { status: 400 })
-  }
-
   if (!Array.isArray(messages)) {
-    console.error("Note copilot request missing/invalid messages", { trigger })
     return NextResponse.json(
       { error: "Missing or invalid messages" },
       { status: 400 },
@@ -161,24 +241,19 @@ export async function POST(req: Request) {
   }
 
   if (!noteContext?.noteId) {
-    console.error("Note copilot request missing note context noteId", {
-      trigger,
-    })
     return NextResponse.json(
       { error: "Missing note context noteId" },
       { status: 400 },
     )
   }
 
-  const openRouter = createOpenRouter({
-    apiKey: process.env.OPENROUTER_AI_KEY,
+  const client = createClient(token)
+  const currentNote = await client.query(api.notes.getMyNote, {
+    noteId: noteContext.noteId as Id<"notes">,
   })
 
-  if (!openRouter) {
-    return NextResponse.json(
-      { error: "OpenRouter not initialized" },
-      { status: 500 },
-    )
+  if (!currentNote) {
+    return NextResponse.json({ error: "Note not found" }, { status: 404 })
   }
 
   const modelMessages = await convertToModelMessages(messages)
@@ -187,42 +262,49 @@ export async function POST(req: Request) {
     emptyMessages: "remove",
   })
 
-  const noteTitle = noteContext.title?.trim() || "Untitled note"
-  const noteText = (noteContext.contentText || "").slice(0, 10000)
-  const instructions = `You are Note Copilot for Taskflow.
-You assist with exactly one note and can optionally apply edits with a tool.
+  const noteTitle = currentNote.title?.trim() || noteContext.title?.trim() || "Untitled note"
+  const noteMarkdown = getNoteMarkdown(currentNote)
+  const noteText = currentNote.contentText?.trim() || markdownToPlainText(noteMarkdown)
 
-Guidelines:
-- Keep responses concise and actionable.
-- Use bullets/checklists when useful.
-- When preparing edits, output clean markdown (paragraphs, headings, and lists).
-- Only call applyCurrentNoteEdit when the user clearly wants the note changed.
-- For rewrite/edit requests, prepare the complete updated content and call applyCurrentNoteEdit.
-- For summarize/explain requests, respond directly without tool calls.
+  const instructions = `You are the Taskflow Notes Mini Chat.
+You can only see the current note unless the user explicitly approves a web search.
 
-Current note title: ${noteTitle}
-Current note content:
-${noteText || "(empty note)"}`
+Visible context right now:
+- Current note title: ${noteTitle}
+- Current note markdown:
+${noteMarkdown || "(empty note)"}
+
+- Current note plain text:
+${noteText || "(empty note)"}
+
+Behavior rules:
+- Keep responses concise and useful inside a sidebar.
+- Say what you are about to do before you request any tool approval.
+- Only call replaceCurrentNote when the user clearly wants the note changed.
+- When rewriting the note, produce complete markdown for the updated note body.
+- Only call searchWebForNoteContext when the user asks for outside, current, or web information.
+- If the user asks a question answerable from the note alone, respond directly without tools.
+- Never imply you can see anything beyond the current note unless a search tool is approved.`
 
   const noteTools = {
-    applyCurrentNoteEdit: tool({
+    replaceCurrentNote: tool({
       description:
-        "Apply a full content/title edit to the current note in this session. Use only for explicit user-approved note modifications.",
+        "Replace the current note with a complete approved markdown rewrite. Use only when the user explicitly wants the note edited.",
       inputSchema: z.object({
         title: z.string().optional(),
-        content: z.string(),
+        content: z.string().min(1),
       }),
       outputSchema: noteEditResultSchema,
       needsApproval: true,
       execute: async ({ title, content }, { experimental_context }) => {
-        const { token, noteId } = getToolContext(experimental_context)
-        const client = createClient(token)
+        const { token: authToken, noteId } = getToolContext(experimental_context)
+        const toolClient = createClient(authToken)
 
-        const currentNote = await client.query(api.notes.getMyNote, {
+        const note = await toolClient.query(api.notes.getMyNote, {
           noteId: noteId as Id<"notes">,
         })
 
-        if (!currentNote) {
+        if (!note) {
           return {
             ok: false,
             noteId,
@@ -234,12 +316,9 @@ ${noteText || "(empty note)"}`
         try {
           const lexicalJsonContent = markdownToLexicalJson(content)
           const contentText = markdownToPlainText(content)
-          const nextTitle =
-            title !== undefined ? title : (currentNote.title ?? "Untitled note")
-
-          const updatedNote = await client.mutation(api.notes.updateNote, {
+          const updatedNote = await toolClient.mutation(api.notes.updateNote, {
             noteId: noteId as Id<"notes">,
-            title: nextTitle,
+            title: title !== undefined ? title : note.title,
             content: lexicalJsonContent,
             contentText,
           })
@@ -251,7 +330,7 @@ ${noteText || "(empty note)"}`
             message: "Note updated successfully.",
           }
         } catch (error) {
-          console.error("Failed to update note from copilot tool:", error)
+          console.error("Failed to update note from mini chat:", error)
           return {
             ok: false,
             noteId,
@@ -261,38 +340,41 @@ ${noteText || "(empty note)"}`
         }
       },
     }),
+    searchWebForNoteContext: tool({
+      description:
+        "Search the web for outside context when the user explicitly asks for current or external information.",
+      inputSchema: z.object({
+        query: z.string().min(1),
+        reason: z.string().optional(),
+      }),
+      outputSchema: webSearchResultSchema,
+      needsApproval: true,
+      execute: async ({ query, reason }) => {
+        return await runBasicWebSearch(query, reason)
+      },
+    }),
   } as const
 
-  const buildAgent = (agentModel: ReturnType<typeof openRouter> | typeof googleModel) =>
-    new Agent({
-      model: agentModel,
-      instructions,
-      stopWhen: stepCountIs(4),
-      tools: noteTools,
-      experimental_context: {
-        token,
-        noteId: noteContext.noteId,
-      },
-    })
+  const agent = new Agent({
+    model: googleModel,
+    instructions,
+    stopWhen: stepCountIs(5),
+    tools: noteTools,
+    experimental_context: {
+      token,
+      noteId: noteContext.noteId,
+    },
+  })
 
   return createUIMessageStreamResponse({
     status: 200,
     stream: createUIMessageStream({
       execute: async ({ writer }) => {
-        try {
-          const primaryAgent = buildAgent(googleModel)
-          const primaryStream = await primaryAgent.stream({
-            messages: cleanedMessages,
-          })
-          writer.merge(primaryStream.toUIMessageStream())
-        } catch (primaryError) {
-          console.error("Note copilot primary model failed:", primaryError)
-          const fallbackAgent = buildAgent(openRouter(model))
-          const fallbackStream = await fallbackAgent.stream({
-            messages: cleanedMessages,
-          })
-          writer.merge(fallbackStream.toUIMessageStream())
-        }
+        const result = await agent.stream({
+          messages: cleanedMessages,
+        })
+
+        writer.merge(result.toUIMessageStream())
       },
     }),
   })
