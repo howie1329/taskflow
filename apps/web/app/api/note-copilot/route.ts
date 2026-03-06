@@ -2,8 +2,6 @@ import { NextResponse } from "next/server"
 import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server"
 import { createGoogleGenerativeAI } from "@ai-sdk/google"
 import { ConvexHttpClient } from "convex/browser"
-import Firecrawl from "@mendable/firecrawl-js"
-import Exa from "exa-js"
 import { tavily } from "@tavily/core"
 import { api } from "@/convex/_generated/api"
 import type { Id } from "@/convex/_generated/dataModel"
@@ -48,7 +46,7 @@ const webSearchResultItemSchema = z.object({
 const webSearchResultSchema = z.object({
   query: z.string(),
   reason: z.string().optional(),
-  provider: z.enum(["firecrawl", "exa", "tavily"]),
+  provider: z.enum(["tavily"]),
   results: z.array(webSearchResultItemSchema),
   message: z.string().optional(),
 })
@@ -89,81 +87,6 @@ function getToolContext(context: unknown): ToolContext {
   return { token, noteId }
 }
 
-async function searchWithFirecrawl(query: string, reason?: string): Promise<SearchResponse> {
-  const apiKey = process.env.FIRECRAWL_API_KEY
-  if (!apiKey) {
-    throw new Error("FIRECRAWL_API_KEY is not set")
-  }
-
-  const client = new Firecrawl({ apiKey })
-  const response = await client.search(query, { limit: 5 } as unknown as Parameters<Firecrawl["search"]>[1])
-  const results = Array.isArray(response.data)
-    ? response.data
-      .map((item) => ({
-        title: item.title ?? item.metadata?.title ?? item.url ?? "Untitled result",
-        url: item.url,
-        snippet:
-          item.description ??
-          item.markdown?.slice(0, 220) ??
-          item.metadata?.description ??
-          "No snippet available.",
-      }))
-      .filter((item) => item.url)
-    : []
-
-  return webSearchResultSchema.parse({
-    query,
-    reason,
-    provider: "firecrawl",
-    results,
-    message:
-      results.length > 0
-        ? `Found ${results.length} web results.`
-        : "No web results found.",
-  })
-}
-
-async function searchWithExa(query: string, reason?: string): Promise<SearchResponse> {
-  const apiKey = process.env.EXA_API_KEY
-  if (!apiKey) {
-    throw new Error("EXA_API_KEY is not set")
-  }
-
-  const client = new Exa(apiKey)
-  const response = await client.search(query, {
-    type: "auto",
-    numResults: 5,
-    contents: {
-      text: true,
-      summary: true,
-      highlights: true,
-    },
-  })
-
-  const results = Array.isArray(response.results)
-    ? response.results.map((item) => ({
-      title: item.title ?? item.url ?? "Untitled result",
-      url: item.url,
-      snippet:
-        item.summary ??
-        item.highlights?.[0] ??
-        item.text?.slice(0, 220) ??
-        "No snippet available.",
-    }))
-    : []
-
-  return webSearchResultSchema.parse({
-    query,
-    reason,
-    provider: "exa",
-    results,
-    message:
-      results.length > 0
-        ? `Found ${results.length} web results.`
-        : "No web results found.",
-  })
-}
-
 async function searchWithTavily(query: string, reason?: string): Promise<SearchResponse> {
   const apiKey = process.env.TAVILY_API_KEY
   if (!apiKey) {
@@ -193,18 +116,7 @@ async function searchWithTavily(query: string, reason?: string): Promise<SearchR
 }
 
 async function runBasicWebSearch(query: string, reason?: string) {
-  const candidates = [searchWithFirecrawl, searchWithExa, searchWithTavily]
-  let lastError: Error | null = null
-
-  for (const search of candidates) {
-    try {
-      return await search(query, reason)
-    } catch (error) {
-      lastError = error instanceof Error ? error : new Error("Search failed")
-    }
-  }
-
-  throw lastError ?? new Error("No search provider is configured")
+  return await searchWithTavily(query, reason)
 }
 
 function getNoteMarkdown(note: { content?: string; contentText?: string }) {
@@ -394,7 +306,6 @@ Behavior rules:
         reason: z.string().optional(),
       }),
       outputSchema: webSearchResultSchema,
-      needsApproval: true,
       execute: async ({ query, reason }) => {
         return await runBasicWebSearch(query, reason)
       },

@@ -287,19 +287,15 @@ function ReplaceNoteToolCard({
 
 function WebSearchToolCard({
   part,
-  onApprove,
-  onDeny,
 }: {
   part: SearchWebForNoteContextToolPart
-  onApprove: (approvalId: string) => Promise<void>
-  onDeny: (approvalId: string) => Promise<void>
 }) {
-  if (part.state === "approval-requested") {
+  if (part.state === "input-available" || part.state === "input-streaming") {
     return (
       <div className="mt-2 rounded-lg border border-border/60 bg-muted/30 p-3 text-xs">
         <div className="flex items-center gap-2 font-medium text-foreground">
           <Search className="size-3.5" />
-          Search the web?
+          Searching the web
         </div>
         <div className="mt-3 space-y-2">
           <div>
@@ -313,33 +309,14 @@ function WebSearchToolCard({
             </p>
           </div>
         </div>
-        <div className="mt-3 flex items-center gap-2">
-          <Button
-            size="sm"
-            className="h-7 px-2 text-xs"
-            onClick={() => part.approval?.id && void onApprove(part.approval.id)}
-            disabled={!part.approval?.id}
-          >
-            Approve
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-7 px-2 text-xs"
-            onClick={() => part.approval?.id && void onDeny(part.approval.id)}
-            disabled={!part.approval?.id}
-          >
-            Deny
-          </Button>
-        </div>
       </div>
     )
   }
 
-  if (part.state === "approval-responded") {
+  if (part.state === "approval-requested" || part.state === "approval-responded") {
     return (
       <div className="mt-2 rounded-lg border border-border/60 bg-muted/30 p-3 text-xs text-muted-foreground">
-        Running approved web search...
+        Running web search...
       </div>
     )
   }
@@ -564,8 +541,6 @@ function NotesMiniChat({ note }: { note: Note }) {
                       <WebSearchToolCard
                         key={part.toolCallId}
                         part={part}
-                        onApprove={(approvalId) => handleApproval(approvalId, true)}
-                        onDeny={(approvalId) => handleApproval(approvalId, false)}
                       />
                     )
                   }
