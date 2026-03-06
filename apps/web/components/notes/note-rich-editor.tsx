@@ -4,6 +4,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
   type RefObject,
@@ -604,6 +605,39 @@ function CodeSyntaxHighlightPlugin() {
   return null
 }
 
+function ExternalEditorStateSyncPlugin({
+  value,
+}: {
+  value: string
+}) {
+  const [editor] = useLexicalComposerContext()
+  const lastAppliedValueRef = useRef(value || "")
+
+  useEffect(() => {
+    const nextValue = value || ""
+    const currentValue = JSON.stringify(editor.getEditorState().toJSON())
+
+    if (nextValue === lastAppliedValueRef.current) {
+      return
+    }
+
+    if (nextValue === currentValue) {
+      lastAppliedValueRef.current = nextValue
+      return
+    }
+
+    try {
+      const nextEditorState = editor.parseEditorState(nextValue || undefined)
+      editor.setEditorState(nextEditorState)
+      lastAppliedValueRef.current = nextValue
+    } catch (error) {
+      console.error("Failed to sync external note editor state", error)
+    }
+  }, [editor, value])
+
+  return null
+}
+
 function KeyboardShortcutsPlugin({
   onOpenLinkEditor,
 }: {
@@ -979,6 +1013,7 @@ export function NoteRichEditor({
           <CodeSyntaxHighlightPlugin />
           <TabIndentationPlugin />
           <MarkdownShortcutPlugin transformers={NOTE_MARKDOWN_TRANSFORMERS} />
+          <ExternalEditorStateSyncPlugin value={value} />
           <OnChangePlugin onChange={handleChange} />
           <SlashCommandPlugin />
           {autoFocus && <AutoFocusPlugin />}

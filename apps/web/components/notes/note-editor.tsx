@@ -84,6 +84,7 @@ export function NoteEditor({
   const currentNoteIdRef = useRef<string | null>(null)
   const pendingTitleRef = useRef<{ noteId: string; title: string } | null>(null)
   const contentUpdateRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const lastAppliedContentRef = useRef<string>("")
   const [titlePendingNoteId, setTitlePendingNoteId] = useState<string | null>(
     null,
   )
@@ -146,6 +147,26 @@ export function NoteEditor({
   }, [note, onUpdateNote])
 
   useEffect(() => {
+    const nextContent = note?.content ?? ""
+
+    if (!note) {
+      lastAppliedContentRef.current = ""
+      return
+    }
+
+    if (
+      contentUpdateRef.current &&
+      lastAppliedContentRef.current &&
+      nextContent !== lastAppliedContentRef.current
+    ) {
+      clearTimeout(contentUpdateRef.current)
+      contentUpdateRef.current = null
+    }
+
+    lastAppliedContentRef.current = nextContent
+  }, [note?.content, note])
+
+  useEffect(() => {
     return () => {
       if (titleUpdateRef.current) {
         clearTimeout(titleUpdateRef.current)
@@ -169,6 +190,7 @@ export function NoteEditor({
         clearTimeout(contentUpdateRef.current)
       }
       contentUpdateRef.current = setTimeout(() => {
+        lastAppliedContentRef.current = value
         onUpdateNote(note._id, {
           content: value,
           contentText: textContent,
