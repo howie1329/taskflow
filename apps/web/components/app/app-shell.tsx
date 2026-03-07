@@ -38,6 +38,7 @@ import {
 import { ChatSidebar } from "@/components/app/chat-sidebar";
 import { NotesAppSidebar } from "@/components/app/notes-app-sidebar";
 import { NotesProvider } from "@/components/notes";
+import { cn } from "@/lib/utils";
 
 const navItems = [
   {
@@ -258,6 +259,7 @@ export function AppShell({ children, right }: AppShellProps) {
   const shell = (
     <SidebarProvider
       defaultOpenInspector={false}
+      className={cn(isChatRoute && "h-svh overflow-hidden")}
       style={
         isChatRoute
           ? ({
@@ -297,7 +299,7 @@ export function AppShell({ children, right }: AppShellProps) {
         )}
         <SidebarRail scope="primary" />
       </Sidebar>
-      <SidebarInset className="min-w-0 overflow-hidden">
+      <SidebarInset className={cn("min-w-0 overflow-hidden", isChatRoute && "min-h-0")}>
         {!isOnboardingRoute && (
           <div className="md:hidden sticky top-0 z-20 flex h-10 items-center gap-2 px-2 bg-background/70 backdrop-blur supports-backdrop-filter:bg-background/50">
             <SidebarTrigger className="-ml-1" />
@@ -323,7 +325,7 @@ export function AppShell({ children, right }: AppShellProps) {
               ? "relative flex flex-1 flex-col overflow-hidden"
               : isSettingsRoute
                 ? "relative flex flex-1 flex-col overflow-hidden"
-                : "relative flex flex-1 flex-col gap-2 overflow-hidden p-2 md:gap-2 md:p-2"
+                : "relative flex min-h-0 flex-1 flex-col gap-2 overflow-hidden p-2 md:gap-2 md:p-2"
           }
         >
           {children}
