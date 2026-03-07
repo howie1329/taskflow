@@ -5,10 +5,6 @@ import type { FileUIPart } from "ai"
 import { toast } from "sonner"
 import type { Id } from "@/convex/_generated/dataModel"
 import {
-  PromptInputActionAddAttachments,
-  PromptInputActionMenu,
-  PromptInputActionMenuContent,
-  PromptInputActionMenuTrigger,
   PromptInput,
   PromptInputFooter,
   PromptInputSubmit,
@@ -29,7 +25,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
-import { LightbulbIcon } from "lucide-react"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { useIsMobile } from "@/hooks/use-mobile"
+import { ImagePlusIcon, LightbulbIcon } from "lucide-react"
 import {
   useChatConfig,
   useChatConfigActions,
@@ -37,9 +35,7 @@ import {
   useChatMessagingActions,
   useChatThreadActions,
 } from "../../components/chat-provider"
-import { ModelSelectorMenu } from "../../components/model-selector-menu"
-import { ModeSelectorMenu } from "../../components/mode-selector-menu"
-import { ProjectSelectorMenu } from "../../components/project-selector-menu"
+import { ChatSettingsChips } from "../../components/chat-settings-chips"
 import { ToolLockCommandMenu } from "../../components/tool-lock-command-menu"
 import { ComposerHints } from "../../components/composer-hints"
 import { useChatComposerFocus } from "../../components/chat-composer-context"
@@ -48,8 +44,10 @@ import { THREAD_COMPOSER_SUGGESTIONS } from "../../constants/suggestions"
 export function ThreadComposerBar() {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const { textInput } = usePromptInputController()
+  const attachments = usePromptInputAttachments()
   const { status } = useChatMessages()
   const { sendPrompt, stop } = useChatMessagingActions()
+  const isMobile = useIsMobile()
   const {
     selectedModelId,
     selectedProjectId,
@@ -102,7 +100,7 @@ export function ThreadComposerBar() {
           Message
         </label>
         <div
-          className={`grid overflow-hidden transition-all duration-200 ease-out ${
+          className={`grid overflow-hidden transition-[grid-template-rows,opacity,margin-bottom] duration-200 ease-out ${
             showPromptHeader
               ? "mb-2 grid-rows-[1fr] opacity-100"
               : "pointer-events-none mb-0 grid-rows-[0fr] opacity-0"
@@ -132,34 +130,52 @@ export function ThreadComposerBar() {
 
           <PromptInputFooter className="border-t border-border/45 pb-2.5 pt-2 text-muted-foreground">
             <div className="flex flex-wrap items-center gap-1.5">
-              <ComposerHints
-                show={!textInput.value.trim()}
-                toolLock={toolLock}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="h-7 rounded-full border-border/60 bg-muted/30 px-2.5 text-xs font-medium text-foreground hover:bg-muted/60"
-                onClick={openCommands}
-              >
-                /
-              </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
+              {isMobile ? null : (
+                <ComposerHints
+                  show={!textInput.value.trim()}
+                  toolLock={toolLock}
+                />
+              )}
+              <Tooltip>
+                <TooltipTrigger asChild>
                   <Button
                     type="button"
                     variant="outline"
-                    size="sm"
-                    className="h-7 rounded-full border-border/60 bg-muted/30 px-2.5 text-xs font-medium text-foreground hover:bg-muted/60"
+                    size="icon-sm"
+                    aria-label="Slash commands"
+                    className="size-7 rounded-full border-border/60 bg-background/70 text-foreground shadow-sm hover:bg-muted/70"
+                    onClick={openCommands}
                   >
-                    <LightbulbIcon className="size-3.5" />
-                    <span className="sr-only md:not-sr-only md:ml-1.5">
-                      Examples
-                    </span>
+                    <span className="text-[13px] font-semibold leading-none">/</span>
                   </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="max-h-64 overflow-y-auto">
+                </TooltipTrigger>
+                <TooltipContent sideOffset={6}>
+                  <p>Slash commands</p>
+                </TooltipContent>
+              </Tooltip>
+              <DropdownMenu>
+                <Tooltip>
+                  <DropdownMenuTrigger asChild>
+                    <TooltipTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon-sm"
+                        aria-label="Examples"
+                        className="size-7 rounded-full border-border/60 bg-background/70 text-foreground shadow-sm hover:bg-muted/70"
+                      >
+                        <LightbulbIcon className="size-3.5" />
+                      </Button>
+                    </TooltipTrigger>
+                  </DropdownMenuTrigger>
+                  <TooltipContent sideOffset={6}>
+                    <p>Examples</p>
+                  </TooltipContent>
+                </Tooltip>
+                <DropdownMenuContent
+                  align="start"
+                  className="w-64 overscroll-contain"
+                >
                   {THREAD_COMPOSER_SUGGESTIONS.map((s) => (
                     <DropdownMenuItem
                       key={s.value}
@@ -170,27 +186,12 @@ export function ThreadComposerBar() {
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
-              <PromptInputActionMenu>
-                <PromptInputActionMenuTrigger
-                  className="h-7 rounded-full border border-border/60 bg-muted/30 px-2.5 text-xs font-medium text-foreground hover:bg-muted/60"
-                  size="sm"
-                >
-                  Add image
-                </PromptInputActionMenuTrigger>
-                <PromptInputActionMenuContent>
-                  <PromptInputActionAddAttachments label="Add image" />
-                </PromptInputActionMenuContent>
-              </PromptInputActionMenu>
-              <ModelSelectorMenu
+              <ChatSettingsChips
                 availableModels={availableModels}
                 selectedModelId={selectedModelId}
                 onSelectModelId={setSelectedModelId}
-              />
-              <ModeSelectorMenu
                 selectedMode={selectedMode}
                 onSelectMode={setSelectedMode}
-              />
-              <ProjectSelectorMenu
                 projects={projects}
                 selectedProjectId={selectedProjectId}
                 onSelectProjectId={(projectId) => {
@@ -209,14 +210,43 @@ export function ThreadComposerBar() {
                     projectId: projectId as Id<"projects">,
                   })
                 }}
+                showImageAction={isMobile}
               />
+              {isMobile ? null : (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon-sm"
+                      aria-label="Add image"
+                      className="size-7 rounded-full border-border/60 bg-background/70 text-foreground shadow-sm hover:bg-muted/70"
+                      onClick={() => attachments.openFileDialog()}
+                    >
+                      <ImagePlusIcon className="size-3.5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent sideOffset={6}>
+                    <p>Add image</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
             </div>
-            <PromptInputSubmit
-              status={status}
-              onStop={stop}
-              size="icon-sm"
-              className="size-8 rounded-full"
-            />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <PromptInputSubmit
+                    status={status}
+                    onStop={stop}
+                    size="icon-sm"
+                    className="size-8 rounded-full"
+                  />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent sideOffset={6}>
+                <p>{status === "submitted" || status === "streaming" ? "Stop generating" : "Send message"}</p>
+              </TooltipContent>
+            </Tooltip>
           </PromptInputFooter>
         </PromptInput>
       </div>

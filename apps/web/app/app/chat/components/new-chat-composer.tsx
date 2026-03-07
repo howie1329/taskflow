@@ -5,10 +5,6 @@ import { useRouter } from "next/navigation"
 import type { FileUIPart } from "ai"
 import { toast } from "sonner"
 import {
-  PromptInputActionAddAttachments,
-  PromptInputActionMenu,
-  PromptInputActionMenuContent,
-  PromptInputActionMenuTrigger,
   PromptInput,
   PromptInputTextarea,
   PromptInputSubmit,
@@ -30,21 +26,24 @@ import {
   useChatMessages,
   useChatMessagingActions,
 } from "./chat-provider"
-import { ModelSelectorMenu } from "./model-selector-menu"
-import { ModeSelectorMenu } from "./mode-selector-menu"
-import { ProjectSelectorMenu } from "./project-selector-menu"
+import { ChatSettingsChips } from "./chat-settings-chips"
 import { ToolLockCommandMenu } from "./tool-lock-command-menu"
 import { ComposerHints } from "./composer-hints"
 import { CHAT_SUGGESTIONS } from "../constants/suggestions"
 import { Button } from "@/components/ui/button"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { useIsMobile } from "@/hooks/use-mobile"
+import { ImagePlusIcon } from "lucide-react"
 
 export function NewChatComposer() {
   const router = useRouter()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const { textInput } = usePromptInputController()
+  const attachments = usePromptInputAttachments()
   const { activeThreadId } = useChatId()
   const { status } = useChatMessages()
   const { sendPrompt, stop } = useChatMessagingActions()
+  const isMobile = useIsMobile()
   const {
     selectedModelId,
     selectedProjectId,
@@ -108,7 +107,7 @@ export function NewChatComposer() {
             Message
           </label>
           <div
-            className={`grid overflow-hidden transition-all duration-200 ease-out ${
+            className={`grid overflow-hidden transition-[grid-template-rows,opacity,margin-bottom] duration-200 ease-out ${
               showPromptHeader
                 ? "mb-2 grid-rows-[1fr] opacity-100"
                 : "pointer-events-none mb-0 grid-rows-[0fr] opacity-0"
@@ -138,55 +137,79 @@ export function NewChatComposer() {
 
             <PromptInputFooter className="border-t border-border/45 pb-2.5 pt-2 text-muted-foreground">
               <div className="flex flex-wrap items-center gap-1.5">
-                <ComposerHints
-                  show={!textInput.value.trim()}
-                  toolLock={toolLock}
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="h-7 rounded-full border-border/60 bg-muted/30 px-2.5 text-xs font-medium text-foreground hover:bg-muted/60"
-                  onClick={() => {
-                    const v = textInput.value
-                    textInput.setInput(v.trimStart().startsWith("/") ? v : `/${v}`)
-                    textareaRef.current?.focus()
-                  }}
-                >
-                  /
-                </Button>
-                <PromptInputActionMenu>
-                  <PromptInputActionMenuTrigger
-                    className="h-7 rounded-full border border-border/60 bg-muted/30 px-2.5 text-xs font-medium text-foreground hover:bg-muted/60"
-                    size="sm"
-                  >
-                    Add image
-                  </PromptInputActionMenuTrigger>
-                  <PromptInputActionMenuContent>
-                    <PromptInputActionAddAttachments label="Add image" />
-                  </PromptInputActionMenuContent>
-                </PromptInputActionMenu>
-                <ModelSelectorMenu
+                {isMobile ? null : (
+                  <ComposerHints
+                    show={!textInput.value.trim()}
+                    toolLock={toolLock}
+                  />
+                )}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon-sm"
+                      aria-label="Slash commands"
+                      className="size-7 rounded-full border-border/60 bg-background/70 text-foreground shadow-sm hover:bg-muted/70"
+                      onClick={() => {
+                        const v = textInput.value
+                        textInput.setInput(v.trimStart().startsWith("/") ? v : `/${v}`)
+                        textareaRef.current?.focus()
+                      }}
+                    >
+                      <span className="text-[13px] font-semibold leading-none">/</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent sideOffset={6}>
+                    <p>Slash commands</p>
+                  </TooltipContent>
+                </Tooltip>
+                <ChatSettingsChips
                   availableModels={availableModels}
                   selectedModelId={selectedModelId}
                   onSelectModelId={setSelectedModelId}
-                />
-                <ModeSelectorMenu
                   selectedMode={selectedMode}
                   onSelectMode={setSelectedMode}
-                />
-                <ProjectSelectorMenu
                   projects={projects}
                   selectedProjectId={selectedProjectId}
                   onSelectProjectId={setSelectedProjectId}
+                  showImageAction={isMobile}
                 />
+                {isMobile ? null : (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon-sm"
+                        aria-label="Add image"
+                        className="size-7 rounded-full border-border/60 bg-background/70 text-foreground shadow-sm hover:bg-muted/70"
+                        onClick={() => attachments.openFileDialog()}
+                      >
+                        <ImagePlusIcon className="size-3.5" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent sideOffset={6}>
+                      <p>Add image</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
               </div>
-              <PromptInputSubmit
-                status={status}
-                onStop={stop}
-                size="icon-sm"
-                className="size-8 rounded-full"
-              />
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div>
+                    <PromptInputSubmit
+                      status={status}
+                      onStop={stop}
+                      size="icon-sm"
+                      className="size-8 rounded-full"
+                    />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent sideOffset={6}>
+                  <p>{status === "submitted" || status === "streaming" ? "Stop generating" : "Send message"}</p>
+                </TooltipContent>
+              </Tooltip>
             </PromptInputFooter>
           </PromptInput>
         </div>
