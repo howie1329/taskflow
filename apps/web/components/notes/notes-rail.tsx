@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, type RefObject } from "react"
+import { motion, useReducedMotion } from "motion/react"
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
   ArrowDown01Icon,
@@ -36,6 +37,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 import { getAllTemplates } from "./note-templates"
 import type { Note, NotesProject } from "./types"
@@ -52,6 +55,7 @@ interface NotesRailProps {
   totalNotesCount?: number
   projects: NotesProject[]
   typeFilter: string
+  isLoading?: boolean
   onTypeFilterChange: (value: string) => void
   activeNoteId: string | null
   onCreateNote: () => void
@@ -71,6 +75,7 @@ export function NotesRail({
   totalNotesCount,
   projects,
   typeFilter,
+  isLoading = false,
   onTypeFilterChange,
   activeNoteId,
   onCreateNote,
@@ -82,7 +87,26 @@ export function NotesRail({
 }: NotesRailProps) {
   const [isPinnedOpen, setIsPinnedOpen] = useState(true)
   const [isProjectsOpen, setIsProjectsOpen] = useState(true)
+  const prefersReducedMotion = useReducedMotion()
   const typeOptions = getAllTemplates()
+  const primaryTypeKeys = ["all", "blank", "meeting", "research", "idea"]
+  const primaryTypeOptions = [
+    { key: "all", label: "All" },
+    ...typeOptions
+      .filter((template) => primaryTypeKeys.includes(template.key))
+      .map((template) => ({
+        key: template.noteType,
+        label: template.label,
+      })),
+  ]
+  const secondaryTypeOptions = typeOptions.filter(
+    (template) => !primaryTypeKeys.includes(template.key),
+  )
+  const activeSecondaryType =
+    typeFilter !== "all" &&
+    !primaryTypeOptions.some((option) => option.key === typeFilter)
+      ? typeOptions.find((template) => template.noteType === typeFilter) ?? null
+      : null
 
   const normalizedQuery = searchQuery.trim().toLowerCase()
 
@@ -117,17 +141,26 @@ export function NotesRail({
   const isSidebar = variant === "sidebar"
 
   const renderNoteRow = (note: Note, projectIcon?: string) => (
-    <NoteRow
+    <motion.div
       key={note._id}
-      note={note}
-      isActive={note._id === activeNoteId}
-      projectIcon={projectIcon}
-      onSelect={() => onSelectNote(note._id)}
-      onTogglePin={() => onTogglePin(note._id)}
-      onMove={(newProjectId) => onMoveNote(note._id, newProjectId)}
-      onDelete={() => onDeleteNote(note._id)}
-      projects={projects}
-    />
+      initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
+      animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+      transition={
+        prefersReducedMotion ? undefined : { duration: 0.2, ease: "easeOut" }
+      }
+    >
+      <NoteRow
+        note={note}
+        isActive={note._id === activeNoteId}
+        projectIcon={projectIcon}
+        showPreview={isSidebar}
+        onSelect={() => onSelectNote(note._id)}
+        onTogglePin={() => onTogglePin(note._id)}
+        onMove={(newProjectId) => onMoveNote(note._id, newProjectId)}
+        onDelete={() => onDeleteNote(note._id)}
+        projects={projects}
+      />
+    </motion.div>
   )
 
   return (
@@ -196,24 +229,66 @@ export function NotesRail({
           )}
         </InputGroup>
 
-        <Select value={typeFilter} onValueChange={onTypeFilterChange}>
-          <SelectTrigger size="sm" className="w-full justify-start">
-            <SelectValue placeholder="All types" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All types</SelectItem>
-            {typeOptions.map((template) => (
-              <SelectItem key={template.key} value={template.noteType}>
-                {template.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="space-y-2">
+          <Tabs value={typeFilter} onValueChange={onTypeFilterChange} className="gap-0">
+            <TabsList
+              variant="line"
+              className="h-auto w-full justify-start gap-1 overflow-x-auto rounded-none bg-transparent p-0"
+            >
+              {primaryTypeOptions.map((option) => (
+                <TabsTrigger
+                  key={option.key}
+                  value={option.key}
+                  className="h-7 flex-none rounded-full border border-border/50 bg-background px-2.5 text-[11px] data-active:border-border data-active:bg-muted"
+                >
+                  {option.label}
+                </TabsTrigger>
+              ))}
+              {activeSecondaryType ? (
+                <TabsTrigger
+                  value={activeSecondaryType.noteType}
+                  className="h-7 flex-none rounded-full border border-border/50 bg-background px-2.5 text-[11px] data-active:border-border data-active:bg-muted"
+                >
+                  {activeSecondaryType.label}
+                </TabsTrigger>
+              ) : null}
+            </TabsList>
+          </Tabs>
+
+          {secondaryTypeOptions.length > 0 ? (
+            <Select value={activeSecondaryType?.noteType ?? "all"} onValueChange={onTypeFilterChange}>
+              <SelectTrigger size="sm" className="w-full justify-start border-dashed">
+                <SelectValue placeholder="More types" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All types</SelectItem>
+                {secondaryTypeOptions.map((template) => (
+                  <SelectItem key={template.key} value={template.noteType}>
+                    {template.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : null}
+        </div>
       </div>
 
       <ScrollArea className="flex-1 min-h-0 [&>div>div]:w-full!">
         <div className={cn("w-full max-w-full", isSidebar ? "space-y-2 p-2" : "space-y-3 p-3")}>
-          {(totalNotesCount ?? notes.length) === 0 ? (
+          {isLoading ? (
+            <div className="space-y-2">
+              {Array.from({ length: 5 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="rounded-xl border border-border/50 bg-background/60 px-3 py-3"
+                >
+                  <Skeleton className="mb-2 h-3.5 w-2/3" />
+                  <Skeleton className="mb-2 h-3 w-full" />
+                  <Skeleton className="h-2.5 w-24" />
+                </div>
+              ))}
+            </div>
+          ) : (totalNotesCount ?? notes.length) === 0 ? (
             <Empty className="min-h-[260px]">
               <EmptyHeader>
                 <EmptyMedia variant="icon">
@@ -244,9 +319,9 @@ export function NotesRail({
                 <Collapsible
                   open={isPinnedOpen}
                   onOpenChange={setIsPinnedOpen}
-                  className="w-full max-w-full space-y-1.5"
+                  className="w-full max-w-full space-y-2"
                 >
-                  <CollapsibleTrigger className="group w-full rounded-sm px-1 py-1 text-left hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background">
+                  <CollapsibleTrigger className="group w-full rounded-lg border border-border/40 bg-muted/20 px-2 py-2 text-left hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background">
                     <div className="flex items-center justify-between">
                       <NoteSection
                         label="Pinned"
@@ -265,7 +340,7 @@ export function NotesRail({
                       />
                     </div>
                   </CollapsibleTrigger>
-                  <CollapsibleContent className="w-full max-w-full space-y-0.5">
+                  <CollapsibleContent className="w-full max-w-full space-y-1">
                     {pinnedNotes.map((note) => renderNoteRow(note))}
                   </CollapsibleContent>
                 </Collapsible>
@@ -277,11 +352,11 @@ export function NotesRail({
                   onOpenChange={setIsProjectsOpen}
                   className={cn(
                     "w-full max-w-full",
-                    pinnedNotes.length > 0 ? "mt-3 pt-2" : "",
+                    pinnedNotes.length > 0 ? "mt-4 border-t border-border/40 pt-4" : "",
                     isSidebar ? "space-y-2" : "space-y-2.5",
                   )}
                 >
-                  <CollapsibleTrigger className="group w-full rounded-sm px-1 py-1 text-left hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background">
+                  <CollapsibleTrigger className="group w-full rounded-lg px-2 py-2 text-left hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background">
                     <div className="flex items-center justify-between">
                       <NoteSection label="Projects" />
                       <HugeiconsIcon
@@ -291,7 +366,7 @@ export function NotesRail({
                       />
                     </div>
                   </CollapsibleTrigger>
-                  <CollapsibleContent className="w-full max-w-full space-y-0.5">
+                  <CollapsibleContent className="w-full max-w-full space-y-1">
                     {projectGroups.map((group) => (
                       <ProjectNoteGroup
                         key={group.project._id}
@@ -306,9 +381,16 @@ export function NotesRail({
               )}
 
               {restNotes.length > 0 && (
-                <div className="w-full max-w-full space-y-1.5">
+                <div
+                  className={cn(
+                    "w-full max-w-full space-y-2",
+                    projectGroups.length > 0 || pinnedNotes.length > 0
+                      ? "mt-4 border-t border-border/40 pt-4"
+                      : "",
+                  )}
+                >
                   <NoteSection label="Latest" />
-                  <div className="w-full max-w-full space-y-0.5">
+                  <div className="w-full max-w-full space-y-1">
                     {restNotes.map((note) => renderNoteRow(note))}
                   </div>
                 </div>

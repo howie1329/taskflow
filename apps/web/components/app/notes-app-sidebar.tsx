@@ -55,6 +55,7 @@ export function NotesAppSidebar({ onBackToWorkspace }: NotesAppSidebarProps) {
     selectedNoteId,
     typeFilter,
     searchQuery,
+    isLoading,
     setTypeFilter,
     setSearchQuery,
     openCreateNotePicker,
@@ -257,6 +258,7 @@ export function NotesAppSidebar({ onBackToWorkspace }: NotesAppSidebarProps) {
             totalNotesCount={notes.length}
             activeNoteId={selectedNoteId}
             typeFilter={typeFilter}
+            isLoading={isLoading}
             searchQuery={searchQuery}
             onTypeFilterChange={setTypeFilter}
             onSearchQueryChange={setSearchQuery}

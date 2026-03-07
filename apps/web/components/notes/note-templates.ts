@@ -26,6 +26,7 @@ export type NoteTemplate = {
   label: string
   description: string
   noteType: NoteType
+  category: "quick" | "structured"
   icon: TemplateIcon
   defaultTitle: string
   defaultContent: string
@@ -37,6 +38,7 @@ function createTemplate({
   label,
   description,
   icon,
+  category,
   defaultTitle,
   markdown,
 }: {
@@ -44,6 +46,7 @@ function createTemplate({
   label: string
   description: string
   icon: TemplateIcon
+  category: "quick" | "structured"
   defaultTitle: string
   markdown: string
 }): NoteTemplate {
@@ -54,6 +57,7 @@ function createTemplate({
     label,
     description,
     noteType: key,
+    category,
     icon,
     defaultTitle,
     defaultContent: state.lexicalJson,
@@ -66,6 +70,7 @@ const templateList = [
     key: "blank",
     label: "Blank",
     description: "Start with an empty page and shape it however you want.",
+    category: "quick",
     icon: NoteIcon,
     defaultTitle: "",
     markdown: "",
@@ -74,6 +79,7 @@ const templateList = [
     key: "meeting",
     label: "Meeting",
     description: "Capture agenda, discussion notes, decisions, and next steps.",
+    category: "quick",
     icon: ArrowRight01Icon,
     defaultTitle: "Meeting notes",
     markdown: `## Agenda
@@ -96,6 +102,7 @@ const templateList = [
     key: "research",
     label: "Research",
     description: "Collect findings, sources, open questions, and takeaways.",
+    category: "structured",
     icon: SearchIcon,
     defaultTitle: "Research notes",
     markdown: `## Question
@@ -117,6 +124,7 @@ const templateList = [
     key: "project_brief",
     label: "Project brief",
     description: "Outline goals, scope, milestones, risks, and success criteria.",
+    category: "structured",
     icon: FolderManagementIcon,
     defaultTitle: "Project brief",
     markdown: `## Goal
@@ -143,6 +151,7 @@ const templateList = [
     key: "decision_log",
     label: "Decision log",
     description: "Record a decision, the context, tradeoffs, and follow-up.",
+    category: "structured",
     icon: CheckmarkCircle02Icon,
     defaultTitle: "Decision log",
     markdown: `## Decision
@@ -167,6 +176,7 @@ const templateList = [
     key: "daily_note",
     label: "Daily note",
     description: "Track focus, wins, blockers, and notes from the day.",
+    category: "structured",
     icon: NoteIcon,
     defaultTitle: "Daily note",
     markdown: `## Focus
@@ -193,6 +203,7 @@ const templateList = [
     key: "idea",
     label: "Idea",
     description: "Jot down a concept, why it matters, and what to test next.",
+    category: "quick",
     icon: Add01Icon,
     defaultTitle: "New idea",
     markdown: `## Idea

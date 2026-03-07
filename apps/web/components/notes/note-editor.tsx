@@ -82,6 +82,10 @@ export function NoteEditor({
   onCreateNote,
   onCloseSheet,
 }: NoteEditorProps) {
+  const [isFocusMode, setIsFocusMode] = useState(() => {
+    if (typeof window === "undefined") return false
+    return window.localStorage.getItem("notes-focus-mode") === "true"
+  })
   const titleInputRef = useRef<HTMLInputElement>(null)
   const titleUpdateRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const currentNoteIdRef = useRef<string | null>(null)
@@ -129,6 +133,10 @@ export function NoteEditor({
     },
     [note, onUpdateNote],
   )
+
+  useEffect(() => {
+    window.localStorage.setItem("notes-focus-mode", String(isFocusMode))
+  }, [isFocusMode])
 
   useEffect(() => {
     currentNoteIdRef.current = note?._id ?? null
@@ -185,6 +193,29 @@ export function NoteEditor({
       }
     }
   }, [onUpdateNote])
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!(event.metaKey || event.ctrlKey) || !event.shiftKey || event.key.toLowerCase() !== "f") {
+        return
+      }
+
+      const target = event.target as HTMLElement | null
+      if (
+        target?.tagName === "INPUT" ||
+        target?.tagName === "TEXTAREA" ||
+        target?.isContentEditable
+      ) {
+        return
+      }
+
+      event.preventDefault()
+      setIsFocusMode((current) => !current)
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [])
 
   const handleContentChange = useCallback(
     (value: string, textContent: string) => {
@@ -254,6 +285,24 @@ export function NoteEditor({
         {noteTemplate.label}
       </Badge>
     </>
+  )
+
+  const saveStateLabel =
+    isSaved && titlePendingNoteId !== note._id ? (
+      <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+        <HugeiconsIcon icon={CheckmarkCircle02Icon} className="size-3" />
+        Saved
+      </span>
+    ) : (
+      <span className="text-[11px] text-muted-foreground">Saving...</span>
+    )
+
+  const detailsStrip = (
+    <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+      {metadataBadges}
+      <span className="tabular-nums">{formatRelativeTime(note.updatedAt)}</span>
+      {saveStateLabel}
+    </div>
   )
 
   const moreActionsMenu = (
@@ -337,6 +386,14 @@ export function NoteEditor({
             <div className="flex items-center gap-1">
               <Button
                 variant="ghost"
+                size="xs"
+                className="rounded-full px-2"
+                onClick={() => setIsFocusMode((current) => !current)}
+              >
+                {isFocusMode ? "Details" : "Focus"}
+              </Button>
+              <Button
+                variant="ghost"
                 size="icon-sm"
                 onClick={() => onPinNote(note._id)}
                 className={cn(note.pinned && "text-primary")}
@@ -357,23 +414,7 @@ export function NoteEditor({
             placeholder="Note title"
             className="border-0 bg-transparent px-0 text-lg font-semibold tracking-tight shadow-none focus-visible:ring-0 placeholder:text-muted-foreground/50"
           />
-          <div className="mt-2 flex items-center gap-2">
-            {metadataBadges}
-            <span className="text-[11px] text-muted-foreground tabular-nums">
-              {formatRelativeTime(note.updatedAt)}
-            </span>
-            {isSaved && titlePendingNoteId !== note._id ? (
-              <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
-                <HugeiconsIcon
-                  icon={CheckmarkCircle02Icon}
-                  className="size-3"
-                />
-                Saved
-              </span>
-            ) : (
-              <span className="text-[11px] text-muted-foreground">Saving...</span>
-            )}
-          </div>
+          {!isFocusMode ? <div className="mt-2">{detailsStrip}</div> : null}
         </div>
 
         <NoteRichEditor
@@ -381,41 +422,50 @@ export function NoteEditor({
           value={note.content}
           onChange={handleContentChange}
           placeholder="Start writing..."
+          toolbarClassName={cn(isFocusMode && "hidden")}
           editorClassName="min-h-[220px] border-0 bg-transparent px-0 text-base leading-relaxed"
         />
 
-        <div className="shrink-0 flex items-center justify-between border-t border-border/40 pt-2 text-xs text-muted-foreground">
-          <div className="flex items-center gap-3">
-            <span>{note.contentText.length} chars</span>
-            <span>{wordCount} words</span>
+        {!isFocusMode ? (
+          <div className="shrink-0 flex items-center justify-between border-t border-border/40 pt-2 text-xs text-muted-foreground">
+            <div className="flex items-center gap-3">
+              <span>{note.contentText.length} chars</span>
+              <span>{wordCount} words</span>
+            </div>
           </div>
-        </div>
+        ) : null}
       </div>
     )
   }
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="sticky top-0 z-10 shrink-0 border-b border-border/40 bg-background/80 px-3 pb-2 pt-2 backdrop-blur supports-backdrop-filter:bg-background/70">
-        <div className="mb-2 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            {metadataBadges}
-            <span className="text-[11px] text-muted-foreground tabular-nums">
-              {formatRelativeTime(note.updatedAt)}
-            </span>
-            {isSaved && titlePendingNoteId !== note._id ? (
-              <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
-                <HugeiconsIcon
-                  icon={CheckmarkCircle02Icon}
-                  className="size-3"
-                />
-                Saved
-              </span>
-            ) : (
-              <span className="text-[11px] text-muted-foreground">Saving...</span>
-            )}
+      <div className="sticky top-0 z-10 shrink-0 border-b border-border/40 bg-background/80 px-3 pb-3 pt-3 backdrop-blur supports-backdrop-filter:bg-background/70">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <Input
+              key={note._id}
+              ref={titleInputRef}
+              defaultValue={note.title}
+              onChange={(e) => {
+                queueTitleUpdate(e.target.value)
+              }}
+              onBlur={(e) => flushTitleUpdate(e.target.value)}
+              placeholder="Note title"
+              className="h-auto border-0 bg-transparent px-0 py-1 text-2xl font-semibold tracking-tight shadow-none focus-visible:ring-0 placeholder:text-muted-foreground/40 md:text-[2rem]"
+            />
+            {!isFocusMode ? <div className="mt-2">{detailsStrip}</div> : null}
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 pt-1">
+            <Button
+              variant="ghost"
+              size="xs"
+              className="rounded-full px-2"
+              onClick={() => setIsFocusMode((current) => !current)}
+              title={isFocusMode ? "Show details" : "Enter focus mode"}
+            >
+              {isFocusMode ? "Details" : "Focus"}
+            </Button>
             <SidebarTrigger
               scope="inspector"
               className="[&_svg]:rotate-180"
@@ -433,17 +483,6 @@ export function NoteEditor({
             {moreActionsMenu}
           </div>
         </div>
-        <Input
-          key={note._id}
-          ref={titleInputRef}
-          defaultValue={note.title}
-          onChange={(e) => {
-            queueTitleUpdate(e.target.value)
-          }}
-          onBlur={(e) => flushTitleUpdate(e.target.value)}
-          placeholder="Note title"
-          className="h-auto border-0 bg-transparent px-0 py-1 text-2xl font-semibold tracking-tight shadow-none focus-visible:ring-0 placeholder:text-muted-foreground/40 md:text-[2rem]"
-        />
       </div>
 
       <div className="flex-1 min-h-0 px-3 py-2">
@@ -453,21 +492,30 @@ export function NoteEditor({
           onChange={handleContentChange}
           placeholder="Start writing..."
           className="h-full"
-          toolbarClassName="w-fit rounded-md border-0 bg-transparent p-0"
+          toolbarClassName={cn(
+            "w-fit rounded-md border-0 bg-transparent p-0",
+            isFocusMode && "hidden",
+          )}
           editorClassName="h-full min-h-0 border-0 bg-transparent px-0 py-1 text-base leading-7"
         />
       </div>
 
-      <div className="shrink-0 border-t border-border/40 px-3 py-2 text-xs text-muted-foreground">
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-          <span>{note.contentText.length} characters</span>
-          <span>{wordCount} words</span>
-          <span className="inline-flex items-center gap-1">
-            <span>Esc</span>
-            <span>to close</span>
-          </span>
+      {!isFocusMode ? (
+        <div className="shrink-0 border-t border-border/40 px-3 py-2 text-xs text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span>{note.contentText.length} characters</span>
+            <span>{wordCount} words</span>
+            <span className="inline-flex items-center gap-1">
+              <span>Esc</span>
+              <span>to close</span>
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <Kbd>⌘</Kbd>
+              <span>⇧F focus</span>
+            </span>
+          </div>
         </div>
-      </div>
+      ) : null}
     </div>
   )
 }
