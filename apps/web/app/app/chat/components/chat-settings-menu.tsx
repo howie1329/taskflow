@@ -6,14 +6,7 @@ import { ModelSelectorLogo } from "@/components/ai-elements/model-selector"
 import type { ModeName } from "@/lib/AITools/ModePrompts"
 import { AVAILABLE_MODES, getModeDescription } from "@/lib/AITools/ModePrompts"
 import { formatModelPrice } from "./format-model-price"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { usePromptInputAttachments } from "@/components/ai-elements/prompt-input"
 import { cn } from "@/lib/utils"
@@ -21,13 +14,11 @@ import {
   CircleHelpIcon,
   CheckIcon,
   CpuIcon,
-  FolderCogIcon,
   FolderIcon,
   GlobeIcon,
   ImageIcon,
   SearchIcon,
   SparklesIcon,
-  SlidersHorizontalIcon,
   WandSparklesIcon,
 } from "lucide-react"
 
@@ -44,206 +35,11 @@ export interface ChatSettingsContentProps {
   onClose?: () => void
 }
 
-interface ChatSettingsMenuProps extends ChatSettingsContentProps {
-  triggerIcon?: ReactNode
-  triggerLabel?: string
-  triggerAriaLabel?: string
-  triggerClassName?: string
-  showSelectedModelInTrigger?: boolean
-}
-
 export const CHAT_SETTINGS_TRIGGER_CLASS_NAME =
   "rounded-full border border-border/60 bg-background/70 text-foreground shadow-sm hover:bg-muted/70"
 
 export const CHAT_SETTINGS_POPOVER_CLASS_NAME =
   "overflow-hidden rounded-[28px] bg-background/96 p-0 ring-1 ring-border/35 shadow-[0_18px_48px_-36px_rgba(15,23,42,0.45)] backdrop-blur-xl"
-
-export function ChatSettingsMenu({
-  availableModels,
-  selectedModelId,
-  onSelectModelId,
-  selectedMode,
-  onSelectMode,
-  projects,
-  selectedProjectId,
-  onSelectProjectId,
-  triggerIcon,
-  triggerLabel = "Settings",
-  triggerAriaLabel = "Chat settings",
-  triggerClassName = CHAT_SETTINGS_TRIGGER_CLASS_NAME,
-  showImageAction = false,
-  showSelectedModelInTrigger = false,
-}: ChatSettingsMenuProps) {
-  const [open, setOpen] = useState(false)
-  const [activeTab, setActiveTab] = useState<"models" | "modes" | "projects">("models")
-  const selectedModel =
-    availableModels.find((model) => model.modelId === selectedModelId) ?? null
-  const selectedProject =
-    projects.find((project) => project._id === selectedProjectId) ?? null
-  const triggerText = useMemo(() => {
-    if (showSelectedModelInTrigger) {
-      return selectedModel?.name ?? "Select model"
-    }
-
-    return triggerLabel
-  }, [selectedModel?.name, showSelectedModelInTrigger, triggerLabel])
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <Tooltip>
-        <PopoverTrigger asChild>
-          <TooltipTrigger asChild>
-            <Button
-              type="button"
-              variant="outline"
-              size={showSelectedModelInTrigger ? "sm" : "icon-sm"}
-              aria-label={triggerAriaLabel}
-              className={cn(
-                CHAT_SETTINGS_TRIGGER_CLASS_NAME,
-                showSelectedModelInTrigger
-                  ? "h-7 max-w-52 justify-start gap-2 px-2.5"
-                  : "size-7",
-                triggerClassName,
-              )}
-            >
-              {showSelectedModelInTrigger && selectedModel?.provider ? (
-                <ModelSelectorLogo provider={selectedModel.provider} className="size-3.5 shrink-0" />
-              ) : (
-                triggerIcon ?? <SlidersHorizontalIcon className="size-3.5 shrink-0" />
-              )}
-              {showSelectedModelInTrigger ? (
-                <span className="truncate text-xs font-medium">{triggerText}</span>
-              ) : null}
-            </Button>
-          </TooltipTrigger>
-        </PopoverTrigger>
-        <TooltipContent sideOffset={6}>
-          <p>{showSelectedModelInTrigger ? triggerText : triggerLabel}</p>
-        </TooltipContent>
-      </Tooltip>
-
-      <PopoverContent
-        align="end"
-        sideOffset={10}
-        className={cn("w-[min(92vw,34rem)]", CHAT_SETTINGS_POPOVER_CLASS_NAME)}
-      >
-        <div className="border-b border-border/20 px-4 py-3">
-          <div className="flex items-center gap-2">
-            <div className="flex size-8 items-center justify-center rounded-2xl bg-muted/45 text-foreground">
-              <SlidersHorizontalIcon className="size-4" />
-            </div>
-            <div className="min-w-0">
-              <h3 className="text-sm font-medium text-foreground">Chat Settings</h3>
-              <p className="text-xs text-muted-foreground">
-                Tune the model, mode, and scope.
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-3 grid gap-1.5 text-[11px] text-muted-foreground sm:grid-cols-3">
-            <SettingsSummaryPill
-              icon={
-                selectedModel?.provider ? (
-                  <ModelSelectorLogo provider={selectedModel.provider} className="size-3" />
-                ) : (
-                  <SparklesIcon className="size-3" />
-                )
-              }
-              label={selectedModel?.name ?? "Select model"}
-            />
-            <SettingsSummaryPill
-              icon={<WandSparklesIcon className="size-3" />}
-              label={selectedMode}
-            />
-            <SettingsSummaryPill
-              icon={selectedProject ? <FolderIcon className="size-3" /> : <GlobeIcon className="size-3" />}
-              label={selectedProject ? `${selectedProject.icon} ${selectedProject.title}` : "No project"}
-            />
-          </div>
-        </div>
-
-        <Tabs
-          value={activeTab}
-          onValueChange={(value) =>
-            setActiveTab(value as "models" | "modes" | "projects")
-          }
-          className="gap-0"
-        >
-          <div className="border-b border-border/20 px-3 py-2">
-            <TabsList
-              variant="line"
-              className="grid h-auto w-full grid-cols-3 rounded-2xl bg-muted/30 p-1"
-            >
-              <TabsTrigger
-                value="models"
-                className="rounded-xl px-2 py-2 text-xs data-active:bg-background/80"
-              >
-                <SparklesIcon className="size-3.5" />
-                Models
-              </TabsTrigger>
-              <TabsTrigger
-                value="modes"
-                className="rounded-xl px-2 py-2 text-xs data-active:bg-background/80"
-              >
-                <WandSparklesIcon className="size-3.5" />
-                Modes
-              </TabsTrigger>
-              <TabsTrigger
-                value="projects"
-                className="rounded-xl px-2 py-2 text-xs data-active:bg-background/80"
-              >
-                <FolderCogIcon className="size-3.5" />
-                Projects
-              </TabsTrigger>
-            </TabsList>
-          </div>
-
-          <TabsContent value="models" className="mt-0">
-            <ModelSettingsList
-              availableModels={availableModels}
-              selectedModelId={selectedModelId}
-              onSelectModelId={onSelectModelId}
-              onClose={() => setOpen(false)}
-            />
-          </TabsContent>
-
-          <TabsContent value="modes" className="mt-0">
-            <ModeSettingsList
-              selectedMode={selectedMode}
-              onSelectMode={onSelectMode}
-              onClose={() => setOpen(false)}
-            />
-          </TabsContent>
-
-          <TabsContent value="projects" className="mt-0">
-            <ProjectSettingsList
-              projects={projects}
-              selectedProjectId={selectedProjectId}
-              onSelectProjectId={onSelectProjectId}
-              showImageAction={showImageAction}
-              onClose={() => setOpen(false)}
-            />
-          </TabsContent>
-        </Tabs>
-      </PopoverContent>
-    </Popover>
-  )
-}
-
-function SettingsSummaryPill({
-  icon,
-  label,
-}: {
-  icon: ReactNode
-  label: string
-}) {
-  return (
-    <div className="flex min-w-0 items-center gap-1.5 rounded-full bg-muted/30 px-2.5 py-1.5">
-      <span className="shrink-0 text-foreground/80">{icon}</span>
-      <span className="truncate text-foreground/75">{label}</span>
-    </div>
-  )
-}
 
 export function SettingsSection({
   icon,
