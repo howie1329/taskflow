@@ -11,6 +11,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@ai-sdk/google": "^3.0.43",
     "@ai-sdk/react": "^3.0.74",
     "@auth/core": "^0.34.3",
     "@base-ui/react": "^1.1.0",
@@ -23,8 +24,8 @@
     "@json-render/react": "^0.6.1",
     "@json-render/shadcn": "^0.9.1",
     "@lexical/code": "^0.35.0",
-    "@lexical/list": "^0.35.0",
     "@lexical/link": "^0.35.0",
+    "@lexical/list": "^0.35.0",
     "@lexical/markdown": "^0.35.0",
     "@lexical/react": "^0.35.0",
     "@lexical/rich-text": "^0.35.0",

@@ -4,6 +4,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
   type RefObject,
@@ -49,42 +50,26 @@ import {
   $isListNode,
   INSERT_ORDERED_LIST_COMMAND,
   INSERT_UNORDERED_LIST_COMMAND,
-  ListItemNode,
-  ListNode,
   REMOVE_LIST_COMMAND,
 } from "@lexical/list"
 import {
   $convertToMarkdownString,
-  CODE,
-  HEADING,
-  INLINE_CODE,
-  LINK,
-  ORDERED_LIST,
-  QUOTE,
-  UNORDERED_LIST,
-  type Transformer,
 } from "@lexical/markdown"
 import { $setBlocksType } from "@lexical/selection"
 import { $findMatchingParent } from "@lexical/utils"
 import {
   $isLinkNode,
-  AutoLinkNode,
-  LinkNode,
   TOGGLE_LINK_COMMAND,
 } from "@lexical/link"
 import {
   $createHeadingNode,
   $isHeadingNode,
   $isQuoteNode,
-  HeadingNode,
-  QuoteNode,
   type HeadingTagType,
 } from "@lexical/rich-text"
 import {
   $createCodeNode,
   $isCodeNode,
-  CodeHighlightNode,
-  CodeNode,
   registerCodeHighlighting,
 } from "@lexical/code"
 import {
@@ -118,16 +103,10 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
-
-const MARKDOWN_TRANSFORMERS: Transformer[] = [
-  HEADING,
-  QUOTE,
-  UNORDERED_LIST,
-  ORDERED_LIST,
-  CODE,
-  INLINE_CODE,
-  LINK,
-]
+import {
+  NOTE_EDITOR_NODES,
+  NOTE_MARKDOWN_TRANSFORMERS,
+} from "@/lib/notes/lexical-markdown"
 
 const URL_MATCHER = createLinkMatcherWithRegExp(
   /((https?:\/\/)|(www\.))[^\s]+/,
@@ -626,6 +605,39 @@ function CodeSyntaxHighlightPlugin() {
   return null
 }
 
+function ExternalEditorStateSyncPlugin({
+  value,
+}: {
+  value: string
+}) {
+  const [editor] = useLexicalComposerContext()
+  const lastAppliedValueRef = useRef(value || "")
+
+  useEffect(() => {
+    const nextValue = value || ""
+    const currentValue = JSON.stringify(editor.getEditorState().toJSON())
+
+    if (nextValue === lastAppliedValueRef.current) {
+      return
+    }
+
+    if (nextValue === currentValue) {
+      lastAppliedValueRef.current = nextValue
+      return
+    }
+
+    try {
+      const nextEditorState = editor.parseEditorState(nextValue || undefined)
+      editor.setEditorState(nextEditorState)
+      lastAppliedValueRef.current = nextValue
+    } catch (error) {
+      console.error("Failed to sync external note editor state", error)
+    }
+  }, [editor, value])
+
+  return null
+}
+
 function KeyboardShortcutsPlugin({
   onOpenLinkEditor,
 }: {
@@ -768,7 +780,7 @@ function NoteEditorToolbar({ className }: { className?: string }) {
     let markdown = ""
 
     editor.getEditorState().read(() => {
-      markdown = $convertToMarkdownString(MARKDOWN_TRANSFORMERS)
+      markdown = $convertToMarkdownString(NOTE_MARKDOWN_TRANSFORMERS)
     })
 
     navigator.clipboard
@@ -951,16 +963,7 @@ export function NoteRichEditor({
   const initialConfig = useMemo(
     () => ({
       namespace: "notes-editor",
-      nodes: [
-        ListNode,
-        ListItemNode,
-        HeadingNode,
-        QuoteNode,
-        LinkNode,
-        AutoLinkNode,
-        CodeNode,
-        CodeHighlightNode,
-      ],
+      nodes: NOTE_EDITOR_NODES,
       theme: editorTheme,
       editorState: value || undefined,
       onError: (error: Error) => {
@@ -1009,7 +1012,8 @@ export function NoteRichEditor({
           <AutoLinkPlugin matchers={[URL_MATCHER, EMAIL_MATCHER]} />
           <CodeSyntaxHighlightPlugin />
           <TabIndentationPlugin />
-          <MarkdownShortcutPlugin transformers={MARKDOWN_TRANSFORMERS} />
+          <MarkdownShortcutPlugin transformers={NOTE_MARKDOWN_TRANSFORMERS} />
+          <ExternalEditorStateSyncPlugin value={value} />
           <OnChangePlugin onChange={handleChange} />
           <SlashCommandPlugin />
           {autoFocus && <AutoFocusPlugin />}

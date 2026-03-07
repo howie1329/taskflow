@@ -1,31 +1,46 @@
 "use client"
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react"
-import { usePathname, useRouter, useSearchParams, useParams } from "next/navigation"
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
+import { useRouter, useSearchParams, useParams } from "next/navigation"
 import { useMutation, useQuery } from "convex/react"
 import { api } from "@/convex/_generated/api"
-import { useViewer } from "@/components/settings/hooks/use-viewer"
 import type { Doc } from "@/convex/_generated/dataModel"
+import { createReviewerSignature } from "@/lib/notes/reviewer"
+import { CreateNoteDialog } from "./create-note-dialog"
+import {
+  getTemplateByKey,
+  getTemplateByNoteType,
+  type NoteType,
+} from "./note-templates"
 import type {
   NotesProject,
   Note,
-  NoteCollabState,
-  NoteCollabSuggestion,
+  NoteReviewerRunState,
   ViewMode,
 } from "./types"
 
-const NOTE_COLLAB_DEBOUNCE_MS = 1200
-const DEFAULT_NOTE_MODEL = "openai/gpt-4o-mini"
+const REVIEWER_DEBOUNCE_MS = 1400
+const REVIEWER_MIN_WORDS = 5
+const REVIEWER_MIN_LENGTH = 32
 
-function createEmptyCollabState(): NoteCollabState {
-  return {
-    status: "idle",
-    summary: "",
-    suggestions: [],
-    actionItems: [],
-    updatedAt: null,
-    error: null,
-  }
+type ReviewerRunStateMap = Record<string, NoteReviewerRunState>
+type PendingChatPrompt = {
+  noteId: string
+  prompt: string
+  nonce: number
+} | null
+type CreateNoteOptions = {
+  noteType?: NoteType
+  templateKey?: string
+  projectId?: string
 }
 
 type NotesContextValue = {
@@ -36,19 +51,23 @@ type NotesContextValue = {
   selectedNote: Note | null
   selectedNoteId: string | null
   projectFilter: string
+  typeFilter: string
   searchQuery: string
   viewMode: ViewMode
   isSaved: boolean
   isLoading: boolean
-  collabByNoteId: Record<string, NoteCollabState>
   deleteDialogOpen: boolean
   noteToDelete: string | null
   projects: NotesProject[]
+  reviewerRunStateByNoteId: ReviewerRunStateMap
+  pendingChatPrompt: PendingChatPrompt
   projectForNote: (projectId: string) => NotesProject | null
   setProjectFilter: (value: string) => void
+  setTypeFilter: (value: string) => void
   setSearchQuery: (value: string) => void
   setViewMode: (value: ViewMode) => void
-  createNote: () => void
+  openCreateNotePicker: () => void
+  createNote: (options?: CreateNoteOptions) => Promise<void>
   selectNote: (noteId: string) => void
   updateNote: (noteId: string, updates: Partial<Note>) => void
   pinNote: (noteId: string) => void
@@ -57,8 +76,8 @@ type NotesContextValue = {
   confirmDelete: () => void
   cancelDelete: () => void
   closeEditor: () => void
-  runCollabNow: (noteId: string) => void
-  clearCollab: (noteId: string) => void
+  handoffReviewerSuggestionToChat: (noteId: string, prompt: string) => void
+  clearPendingChatPrompt: (noteId: string) => void
 }
 
 const NotesContext = createContext<NotesContextValue | null>(null)
@@ -70,15 +89,18 @@ function getViewMode(value: string | null): ViewMode {
 
 function buildQueryString({
   projectFilter,
+  typeFilter,
   searchQuery,
   viewMode,
 }: {
   projectFilter: string
+  typeFilter: string
   searchQuery: string
   viewMode: ViewMode
 }) {
   const params = new URLSearchParams()
   if (projectFilter !== "all") params.set("project", projectFilter)
+  if (typeFilter !== "all") params.set("type", typeFilter)
   if (searchQuery) params.set("q", searchQuery)
   if (viewMode !== "byProject") params.set("view", viewMode)
   const queryString = params.toString()
@@ -87,11 +109,9 @@ function buildQueryString({
 
 export function NotesProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()
-  const pathname = usePathname()
   const searchParams = useSearchParams()
   const params = useParams()
 
-  const { preferences } = useViewer()
   const notesData = useQuery(api.notes.listMyNotes)
   const projectsData = useQuery(api.projects.listMyProjects, {
     status: "active",
@@ -100,27 +120,17 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
   const updateNoteMutation = useMutation(api.notes.updateNote)
   const deleteNoteMutation = useMutation(api.notes.deleteNote)
 
-  const [projectFilter, setProjectFilter] = useState<string>(
-    searchParams.get("project") || "all",
-  )
-  const [searchQuery, setSearchQuery] = useState<string>(
-    searchParams.get("q") || "",
-  )
-  const [viewMode, setViewMode] = useState<ViewMode>(
-    getViewMode(searchParams.get("view")),
-  )
   const [isSaved, setIsSaved] = useState(true)
-  const [collabByNoteId, setCollabByNoteId] = useState<
-    Record<string, NoteCollabState>
-  >({})
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [noteToDelete, setNoteToDelete] = useState<string | null>(null)
+  const [createNotePickerOpen, setCreateNotePickerOpen] = useState(false)
+  const [reviewerRunStateByNoteId, setReviewerRunStateByNoteId] =
+    useState<ReviewerRunStateMap>({})
+  const [pendingChatPrompt, setPendingChatPrompt] =
+    useState<PendingChatPrompt>(null)
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const collabTimeoutsRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(
-    new Map(),
-  )
-  const collabAbortRef = useRef<Map<string, AbortController>>(new Map())
-  const collabInputRef = useRef<Map<string, string>>(new Map())
+  const reviewerTimeoutsRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
+  const reviewerAbortControllersRef = useRef<Record<string, AbortController>>({})
 
   const isLoading = notesData === undefined || projectsData === undefined
 
@@ -132,9 +142,12 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
         title: note.title,
         content: note.content,
         contentText: note.contentText,
+        noteType: note.noteType ?? "blank",
+        templateKey: note.templateKey ?? null,
         pinned: note.pinned,
         createdAt: note.createdAt,
         updatedAt: note.updatedAt,
+        reviewer: note.reviewer,
       })),
     [notesData],
   )
@@ -151,6 +164,10 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
 
   const selectedNoteId =
     typeof params.noteId === "string" ? params.noteId : null
+  const projectFilter = searchParams.get("project") || "all"
+  const typeFilter = searchParams.get("type") || "all"
+  const searchQuery = searchParams.get("q") || ""
+  const viewMode = getViewMode(searchParams.get("view"))
 
   const selectedNote = useMemo(
     () => notes.find((n) => n._id === selectedNoteId) || null,
@@ -165,36 +182,13 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
     [projects],
   )
 
-  useEffect(() => {
-    const nextProject = searchParams.get("project") || "all"
-    const nextQuery = searchParams.get("q") || ""
-    const nextView = getViewMode(searchParams.get("view"))
-
-    setProjectFilter((prev) => (prev !== nextProject ? nextProject : prev))
-    setSearchQuery((prev) => (prev !== nextQuery ? nextQuery : prev))
-    setViewMode((prev) => (prev !== nextView ? nextView : prev))
-  }, [searchParams])
-
-  useEffect(() => {
-    const queryString = buildQueryString({
-      projectFilter,
-      searchQuery,
-      viewMode,
-    })
-    if (!pathname.startsWith("/app/notes")) return
-    const nextUrl = `${pathname}${queryString}`
-    router.replace(nextUrl, { scroll: false })
-  }, [projectFilter, searchQuery, viewMode, pathname, router])
-
-  useEffect(() => {
-    if (!selectedNoteId) return
-    setIsSaved(true)
-  }, [selectedNoteId])
-
   const filteredNotes = useMemo(() => {
     let filtered = notes
     if (projectFilter !== "all") {
       filtered = filtered.filter((n) => n.projectId === projectFilter)
+    }
+    if (typeFilter !== "all") {
+      filtered = filtered.filter((n) => (n.noteType ?? "blank") === typeFilter)
     }
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase()
@@ -205,7 +199,7 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
       )
     }
     return filtered
-  }, [notes, projectFilter, searchQuery])
+  }, [notes, projectFilter, typeFilter, searchQuery])
 
   const sortedNotes = useMemo(() => {
     let sorted = [...filteredNotes]
@@ -251,25 +245,99 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
   }, [sortedNotes, viewMode, projectFilter, projects])
 
   const buildNotesUrl = useCallback(
-    (noteId?: string | null) => {
+    (
+      noteId?: string | null,
+      overrides?: {
+        projectFilter?: string
+        typeFilter?: string
+        searchQuery?: string
+        viewMode?: ViewMode
+      },
+    ) => {
       const queryString = buildQueryString({
-        projectFilter,
-        searchQuery,
-        viewMode,
+        projectFilter: overrides?.projectFilter ?? projectFilter,
+        typeFilter: overrides?.typeFilter ?? typeFilter,
+        searchQuery: overrides?.searchQuery ?? searchQuery,
+        viewMode: overrides?.viewMode ?? viewMode,
       })
       if (!noteId) return `/app/notes${queryString}`
       return `/app/notes/${noteId}${queryString}`
     },
-    [projectFilter, searchQuery, viewMode],
+    [projectFilter, typeFilter, searchQuery, viewMode],
   )
 
-  const createNote = useCallback(async () => {
+  const setProjectFilter = useCallback(
+    (value: string) => {
+      router.replace(
+        buildNotesUrl(selectedNoteId ? selectedNoteId : null, {
+          projectFilter: value,
+        }),
+        { scroll: false },
+      )
+    },
+    [buildNotesUrl, router, selectedNoteId],
+  )
+
+  const setSearchQuery = useCallback(
+    (value: string) => {
+      router.replace(
+        buildNotesUrl(selectedNoteId ? selectedNoteId : null, {
+          searchQuery: value,
+        }),
+        { scroll: false },
+      )
+    },
+    [buildNotesUrl, router, selectedNoteId],
+  )
+
+  const setTypeFilter = useCallback(
+    (value: string) => {
+      router.replace(
+        buildNotesUrl(selectedNoteId ? selectedNoteId : null, {
+          typeFilter: value,
+        }),
+        { scroll: false },
+      )
+    },
+    [buildNotesUrl, router, selectedNoteId],
+  )
+
+  const setViewMode = useCallback(
+    (value: ViewMode) => {
+      router.replace(
+        buildNotesUrl(selectedNoteId ? selectedNoteId : null, {
+          viewMode: value,
+        }),
+        { scroll: false },
+      )
+    },
+    [buildNotesUrl, router, selectedNoteId],
+  )
+
+  const openCreateNotePicker = useCallback(() => {
+    setCreateNotePickerOpen(true)
+  }, [])
+
+  const createNote = useCallback(async (options?: CreateNoteOptions) => {
+    const template = options?.templateKey
+      ? getTemplateByKey(options.templateKey)
+      : getTemplateByNoteType(options?.noteType)
+    const projectId =
+      options?.projectId !== undefined
+        ? options.projectId
+        : projectFilter !== "all" && projectFilter !== "__none__"
+          ? projectFilter
+          : undefined
+
+    setIsSaved(true)
+    setCreateNotePickerOpen(false)
     const newNote = await createNoteMutation({
-      title: "",
-      projectId:
-        projectFilter !== "all" && projectFilter !== "__none__"
-          ? (projectFilter as unknown as Doc<"projects">["_id"])
-          : undefined,
+      title: template.defaultTitle,
+      content: template.defaultContent,
+      contentText: template.defaultContentText,
+      noteType: template.noteType,
+      templateKey: options?.templateKey ?? template.key,
+      projectId: projectId as Doc<"projects">["_id"] | undefined,
     })
     if (newNote?._id) {
       router.push(buildNotesUrl(String(newNote._id)))
@@ -278,156 +346,176 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
 
   const selectNote = useCallback(
     (noteId: string) => {
+      setIsSaved(true)
       router.push(buildNotesUrl(noteId))
     },
     [buildNotesUrl, router],
   )
 
-  const setCollabState = useCallback(
-    (noteId: string, updates: Partial<NoteCollabState>) => {
-      setCollabByNoteId((prev) => ({
-        ...prev,
-        [noteId]: {
-          ...(prev[noteId] ?? createEmptyCollabState()),
-          ...updates,
-        },
-      }))
+  const requestDeleteNote = useCallback((noteId: string) => {
+    setNoteToDelete(noteId)
+    setDeleteDialogOpen(true)
+  }, [])
+
+  const confirmDelete = useCallback(async () => {
+    if (!noteToDelete) return
+    await deleteNoteMutation({
+      noteId: noteToDelete as unknown as Doc<"notes">["_id"],
+    })
+    if (selectedNoteId === noteToDelete) {
+      setIsSaved(true)
+      router.push(buildNotesUrl(null))
+    }
+    setNoteToDelete(null)
+    setDeleteDialogOpen(false)
+  }, [noteToDelete, selectedNoteId, router, buildNotesUrl, deleteNoteMutation])
+
+  const cancelDelete = useCallback(() => {
+    setDeleteDialogOpen(false)
+    setNoteToDelete(null)
+  }, [])
+
+  const closeEditor = useCallback(() => {
+    setIsSaved(true)
+    router.push(buildNotesUrl(null))
+  }, [router, buildNotesUrl])
+
+  const updateReviewerRunState = useCallback(
+    (noteId: string, nextState: NoteReviewerRunState) => {
+      setReviewerRunStateByNoteId((current) => {
+        const previous = current[noteId]
+        if (
+          previous?.status === nextState.status &&
+          previous?.error === nextState.error
+        ) {
+          return current
+        }
+
+        return {
+          ...current,
+          [noteId]: nextState,
+        }
+      })
     },
     [],
   )
 
-  const runCollabRequest = useCallback(
-    async ({
-      noteId,
-      title,
-      contentText,
-      model,
-    }: {
-      noteId: string
-      title: string
-      contentText: string
-      model: string
-    }) => {
-      const existingController = collabAbortRef.current.get(noteId)
-      if (existingController) {
-        existingController.abort()
+  const runReviewer = useCallback(
+    async (noteId: string, signature: string) => {
+      const previousController = reviewerAbortControllersRef.current[noteId]
+      if (previousController) {
+        previousController.abort()
       }
 
       const controller = new AbortController()
-      collabAbortRef.current.set(noteId, controller)
-
-      setCollabState(noteId, {
-        status: "running",
+      reviewerAbortControllersRef.current[noteId] = controller
+      updateReviewerRunState(noteId, {
+        status: "reviewing",
         error: null,
       })
 
       try {
-        const response = await fetch("/api/note-collab", {
+        const response = await fetch("/api/note-reviewer", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          signal: controller.signal,
           body: JSON.stringify({
-            model,
-            noteContext: {
-              noteId,
-              title,
-              contentText: contentText.slice(0, 10000),
-            },
+            noteId,
+            signature,
           }),
+          signal: controller.signal,
         })
 
         if (!response.ok) {
-          const data = await response.json().catch(() => null)
-          const message =
-            typeof data?.error === "string"
-              ? data.error
-              : "Failed to generate note suggestions"
-          throw new Error(message)
+          const payload = (await response.json().catch(() => null)) as
+            | { error?: string }
+            | null
+          throw new Error(payload?.error || "Reviewer request failed")
         }
 
-        const data = (await response.json()) as {
-          summary?: string
-          suggestions?: NoteCollabSuggestion[]
-          actionItems?: string[]
-        }
-
-        setCollabState(noteId, {
+        updateReviewerRunState(noteId, {
           status: "ready",
-          summary: data.summary ?? "",
-          suggestions: Array.isArray(data.suggestions) ? data.suggestions : [],
-          actionItems: Array.isArray(data.actionItems) ? data.actionItems : [],
-          updatedAt: Date.now(),
           error: null,
         })
       } catch (error) {
-        if (controller.signal.aborted) return
+        if (controller.signal.aborted) {
+          return
+        }
 
-        setCollabState(noteId, {
+        updateReviewerRunState(noteId, {
           status: "error",
           error:
             error instanceof Error
               ? error.message
-              : "Failed to generate note suggestions",
+              : "Reviewer analysis failed.",
         })
       } finally {
-        const activeController = collabAbortRef.current.get(noteId)
-        if (activeController === controller) {
-          collabAbortRef.current.delete(noteId)
+        if (reviewerAbortControllersRef.current[noteId] === controller) {
+          delete reviewerAbortControllersRef.current[noteId]
         }
       }
     },
-    [setCollabState],
+    [updateReviewerRunState],
   )
 
-  const scheduleCollabRun = useCallback(
-    ({
-      noteId,
-      title,
-      contentText,
-      immediate = false,
-      force = false,
-    }: {
-      noteId: string
-      title: string
-      contentText: string
-      immediate?: boolean
-      force?: boolean
-    }) => {
-      const dedupeKey = `${title}|${contentText}`
-      if (!force) {
-        const lastInput = collabInputRef.current.get(noteId)
-        if (lastInput === dedupeKey) return
-      }
-      collabInputRef.current.set(noteId, dedupeKey)
+  const scheduleReviewer = useCallback(
+    (note: Note, nextTitle: string, nextContentText: string) => {
+      const normalizedText = nextContentText.replace(/\s+/g, " ").trim()
+      const wordCount = normalizedText.split(" ").filter(Boolean).length
+      const isMeaningful =
+        normalizedText.length >= REVIEWER_MIN_LENGTH ||
+        wordCount >= REVIEWER_MIN_WORDS
 
-      const existingTimeout = collabTimeoutsRef.current.get(noteId)
+      if (!isMeaningful) {
+        updateReviewerRunState(note._id, {
+          status: "idle",
+          error: null,
+        })
+        return
+      }
+
+      const nextSignature = createReviewerSignature({
+        title: nextTitle,
+        contentText: nextContentText,
+      })
+
+      if (note.reviewer?.contentSignature === nextSignature) {
+        updateReviewerRunState(note._id, {
+          status: "ready",
+          error: null,
+        })
+        return
+      }
+
+      const existingTimeout = reviewerTimeoutsRef.current[note._id]
       if (existingTimeout) {
         clearTimeout(existingTimeout)
       }
 
-      const model = preferences?.defaultAIModel?.modelId ?? DEFAULT_NOTE_MODEL
-      const run = () => {
-        void runCollabRequest({ noteId, title, contentText, model })
-      }
-
-      if (immediate) {
-        run()
-        return
-      }
-
-      const timeout = setTimeout(() => {
-        collabTimeoutsRef.current.delete(noteId)
-        run()
-      }, NOTE_COLLAB_DEBOUNCE_MS)
-      collabTimeoutsRef.current.set(noteId, timeout)
+      reviewerTimeoutsRef.current[note._id] = setTimeout(() => {
+        delete reviewerTimeoutsRef.current[note._id]
+        void runReviewer(note._id, nextSignature)
+      }, REVIEWER_DEBOUNCE_MS)
     },
-    [preferences?.defaultAIModel?.modelId, runCollabRequest],
+    [runReviewer, updateReviewerRunState],
   )
 
   const updateNote = useCallback(
     async (noteId: string, updates: Partial<Note>) => {
+      const currentNote = notes.find((item) => item._id === noteId)
+      const nextTitle = updates.title ?? currentNote?.title ?? ""
+      const nextContentText = updates.contentText ?? currentNote?.contentText ?? ""
+      const hasContentUpdate =
+        updates.content !== undefined || updates.contentText !== undefined
+      const contentChanged = Boolean(
+        currentNote &&
+          ((updates.content !== undefined &&
+            updates.content !== currentNote.content) ||
+            (updates.contentText !== undefined &&
+              updates.contentText !== currentNote.contentText)),
+      )
+
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current)
       }
@@ -436,11 +524,14 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
         setIsSaved(true)
       }, 900)
 
-      await updateNoteMutation({
+      const updatedNote = await updateNoteMutation({
         noteId: noteId as unknown as Doc<"notes">["_id"],
         title: updates.title,
         content: updates.content,
         contentText: updates.contentText,
+        noteType: updates.noteType,
+        templateKey:
+          updates.templateKey === undefined ? undefined : updates.templateKey,
         pinned: updates.pinned,
         projectId:
           updates.projectId === undefined
@@ -450,17 +541,21 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
               : (updates.projectId as unknown as Doc<"projects">["_id"]),
       })
 
-      if (updates.contentText !== undefined) {
-        const note = notes.find((item) => item._id === noteId)
-        const nextTitle = updates.title ?? note?.title ?? ""
-        scheduleCollabRun({
-          noteId,
-          title: nextTitle,
-          contentText: updates.contentText,
-        })
+      if (hasContentUpdate && contentChanged && currentNote) {
+        scheduleReviewer(
+          {
+            ...currentNote,
+            content: updates.content ?? currentNote.content,
+            contentText: nextContentText,
+            title: nextTitle,
+            reviewer: updatedNote?.reviewer,
+          },
+          nextTitle,
+          nextContentText,
+        )
       }
     },
-    [notes, scheduleCollabRun, updateNoteMutation],
+    [notes, scheduleReviewer, updateNoteMutation],
   )
 
   const pinNote = useCallback(
@@ -479,88 +574,6 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
     [updateNote],
   )
 
-  const requestDeleteNote = useCallback((noteId: string) => {
-    setNoteToDelete(noteId)
-    setDeleteDialogOpen(true)
-  }, [])
-
-  const confirmDelete = useCallback(async () => {
-    if (!noteToDelete) return
-    await deleteNoteMutation({
-      noteId: noteToDelete as unknown as Doc<"notes">["_id"],
-    })
-    if (selectedNoteId === noteToDelete) {
-      router.push(buildNotesUrl(null))
-    }
-    setNoteToDelete(null)
-    setDeleteDialogOpen(false)
-  }, [noteToDelete, selectedNoteId, router, buildNotesUrl, deleteNoteMutation])
-
-  const cancelDelete = useCallback(() => {
-    setDeleteDialogOpen(false)
-    setNoteToDelete(null)
-  }, [])
-
-  const closeEditor = useCallback(() => {
-    router.push(buildNotesUrl(null))
-  }, [router, buildNotesUrl])
-
-  const runCollabNow = useCallback(
-    (noteId: string) => {
-      const note = notes.find((item) => item._id === noteId)
-      if (!note) return
-
-      scheduleCollabRun({
-        noteId,
-        title: note.title,
-        contentText: note.contentText,
-        immediate: true,
-        force: true,
-      })
-    },
-    [notes, scheduleCollabRun],
-  )
-
-  const clearCollab = useCallback((noteId: string) => {
-    const timeout = collabTimeoutsRef.current.get(noteId)
-    if (timeout) {
-      clearTimeout(timeout)
-      collabTimeoutsRef.current.delete(noteId)
-    }
-
-    const controller = collabAbortRef.current.get(noteId)
-    if (controller) {
-      controller.abort()
-      collabAbortRef.current.delete(noteId)
-    }
-
-    collabInputRef.current.delete(noteId)
-    setCollabByNoteId((prev) => {
-      if (!prev[noteId]) return prev
-      const next = { ...prev }
-      delete next[noteId]
-      return next
-    })
-  }, [])
-
-  useEffect(() => {
-    const collabTimeouts = collabTimeoutsRef.current
-    const collabAborts = collabAbortRef.current
-    const collabInputs = collabInputRef.current
-
-    return () => {
-      collabTimeouts.forEach((timeout) => {
-        clearTimeout(timeout)
-      })
-      collabTimeouts.clear()
-      collabAborts.forEach((controller) => {
-        controller.abort()
-      })
-      collabAborts.clear()
-      collabInputs.clear()
-    }
-  }, [])
-
   const value = useMemo<NotesContextValue>(
     () => ({
       notes,
@@ -570,18 +583,22 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
       selectedNote,
       selectedNoteId,
       projectFilter,
+      typeFilter,
       searchQuery,
       viewMode,
       isSaved,
       isLoading,
-      collabByNoteId,
       deleteDialogOpen,
       noteToDelete,
       projects,
+      reviewerRunStateByNoteId,
+      pendingChatPrompt,
       projectForNote,
       setProjectFilter,
+      setTypeFilter,
       setSearchQuery,
       setViewMode,
+      openCreateNotePicker,
       createNote,
       selectNote,
       updateNote,
@@ -591,8 +608,21 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
       confirmDelete,
       cancelDelete,
       closeEditor,
-      runCollabNow,
-      clearCollab,
+      handoffReviewerSuggestionToChat: (noteId: string, prompt: string) => {
+        setPendingChatPrompt({
+          noteId,
+          prompt,
+          nonce: Date.now(),
+        })
+      },
+      clearPendingChatPrompt: (noteId: string) => {
+        setPendingChatPrompt((current) => {
+          if (!current || current.noteId !== noteId) {
+            return current
+          }
+          return null
+        })
+      },
     }),
     [
       notes,
@@ -602,15 +632,22 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
       selectedNote,
       selectedNoteId,
       projectFilter,
+      typeFilter,
       searchQuery,
       viewMode,
       isSaved,
       isLoading,
-      collabByNoteId,
       deleteDialogOpen,
       noteToDelete,
       projects,
+      reviewerRunStateByNoteId,
+      pendingChatPrompt,
       projectForNote,
+      setProjectFilter,
+      setTypeFilter,
+      setSearchQuery,
+      setViewMode,
+      openCreateNotePicker,
       createNote,
       selectNote,
       updateNote,
@@ -620,12 +657,35 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
       confirmDelete,
       cancelDelete,
       closeEditor,
-      runCollabNow,
-      clearCollab,
     ],
   )
 
-  return <NotesContext.Provider value={value}>{children}</NotesContext.Provider>
+  useEffect(() => {
+    const reviewerTimeouts = reviewerTimeoutsRef.current
+    const reviewerAbortControllers = reviewerAbortControllersRef.current
+
+    return () => {
+      Object.values(reviewerTimeouts).forEach((timeout) => {
+        clearTimeout(timeout)
+      })
+      Object.values(reviewerAbortControllers).forEach((controller) => {
+        controller.abort()
+      })
+    }
+  }, [])
+
+  return (
+    <NotesContext.Provider value={value}>
+      {children}
+      <CreateNoteDialog
+        open={createNotePickerOpen}
+        onOpenChange={setCreateNotePickerOpen}
+        onCreateNote={createNote}
+        projectFilter={projectFilter}
+        projects={projects}
+      />
+    </NotesContext.Provider>
+  )
 }
 
 export function useNotes() {

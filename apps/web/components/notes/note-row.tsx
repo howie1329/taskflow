@@ -13,12 +13,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
+import { getTemplateByNoteType } from "./note-templates"
 import type { Note, NotesProject } from "./types"
 
 interface NoteRowProps {
   note: Note
   isActive: boolean
   projectIcon?: string
+  showPreview?: boolean
   onSelect: () => void
   onTogglePin: () => void
   onMove: (newProjectId: string) => void
@@ -30,39 +32,67 @@ export function NoteRow({
   note,
   isActive,
   projectIcon,
+  showPreview = false,
   onSelect,
   onTogglePin,
   onMove,
   onDelete,
   projects,
 }: NoteRowProps) {
+  const noteTemplate = getTemplateByNoteType(note.noteType)
+  const showTypeIcon = noteTemplate.noteType !== "blank"
+  const preview = note.contentText.replace(/\s+/g, " ").trim()
+  const timeLabel = new Intl.DateTimeFormat("en", {
+    month: "short",
+    day: "numeric",
+  }).format(note.updatedAt)
+
   return (
     <button
       type="button"
       onClick={onSelect}
       className={cn(
-        "group relative flex w-full max-w-full items-center gap-2 overflow-hidden rounded-md px-2.5 py-2 text-sm transition-colors",
+        "group relative flex w-full max-w-full items-center gap-2 overflow-hidden rounded-lg px-2 py-1.5 text-left text-sm transition-colors duration-150",
         "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/60",
-        isActive ? "bg-muted text-foreground" : "text-foreground hover:bg-muted/50",
+        isActive
+          ? "bg-muted/80 text-foreground"
+          : "text-foreground hover:bg-muted/45",
       )}
       aria-current={isActive ? "page" : undefined}
     >
       <div className="flex min-w-0 w-full max-w-full flex-1 items-center gap-2">
-        {note.pinned && (
-          <HugeiconsIcon
-            icon={PinIcon}
-            className="size-3 shrink-0 text-muted-foreground/80"
-            strokeWidth={2}
-          />
-        )}
-        {projectIcon && (
-          <span className="shrink-0 text-xs" title="Project note">
-            {projectIcon}
-          </span>
-        )}
-        <span className="min-w-0 truncate text-[13px] font-normal">
-          {note.title || "Untitled note"}
-        </span>
+        <div className="flex min-w-0 flex-1 flex-col">
+          <div className="flex min-w-0 items-center gap-1.5">
+            {note.pinned && (
+              <HugeiconsIcon
+                icon={PinIcon}
+                className="size-3 shrink-0 text-muted-foreground/75"
+                strokeWidth={2}
+              />
+            )}
+            {projectIcon && (
+              <span className="shrink-0 text-[11px]" title="Project note">
+                {projectIcon}
+              </span>
+            )}
+            {showTypeIcon && (
+              <HugeiconsIcon
+                icon={noteTemplate.icon}
+                className="size-3 shrink-0 text-muted-foreground/65"
+                strokeWidth={2}
+              />
+            )}
+            <span className="min-w-0 truncate text-[12.5px] font-medium">
+              {note.title || "Untitled note"}
+            </span>
+          </div>
+          {showPreview ? (
+            <span className="mt-0.5 line-clamp-1 min-w-0 pr-2 text-[10.5px] leading-4 text-muted-foreground">
+              {preview || "No content yet"}
+            </span>
+          ) : null}
+        </div>
+        <span className="shrink-0 text-[10px] text-muted-foreground/75">{timeLabel}</span>
       </div>
 
       <DropdownMenu>
@@ -70,7 +100,7 @@ export function NoteRow({
           <Button
             variant="ghost"
             size="icon-xs"
-            className="h-6 w-6 shrink-0 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100"
+            className="h-5 w-5 shrink-0 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100"
             onClick={(e) => {
               e.preventDefault()
               e.stopPropagation()

@@ -3,6 +3,7 @@
 import { useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Empty,
   EmptyHeader,
@@ -30,7 +31,7 @@ export default function NotePage() {
     pinNote,
     moveNote,
     requestDeleteNote,
-    createNote,
+    openCreateNotePicker,
     closeEditor,
     projects,
     projectForNote,
@@ -56,8 +57,21 @@ export default function NotePage() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
-        Loading note...
+      <div className="flex h-full w-full min-h-0 flex-col overflow-hidden p-3">
+        <div className="rounded-2xl border border-border/50 bg-background/80 p-3">
+          <Skeleton className="mb-4 h-10 w-3/5" />
+          <div className="flex flex-wrap items-center gap-2">
+            <Skeleton className="h-5 w-24 rounded-full" />
+            <Skeleton className="h-5 w-20 rounded-full" />
+            <Skeleton className="h-4 w-16" />
+          </div>
+        </div>
+        <div className="flex-1 space-y-3 rounded-2xl border border-border/40 bg-background/60 p-3 mt-3">
+          <Skeleton className="h-9 w-72" />
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-24 w-4/5" />
+        </div>
       </div>
     )
   }
@@ -137,7 +151,7 @@ export default function NotePage() {
           onPinNote={pinNote}
           onMoveNote={moveNote}
           onDeleteNote={requestDeleteNote}
-          onCreateNote={createNote}
+          onCreateNote={openCreateNotePicker}
           onCloseSheet={closeEditor}
         />
       </div>

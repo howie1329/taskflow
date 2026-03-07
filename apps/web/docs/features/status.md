@@ -9,7 +9,7 @@ This snapshot reflects the current code in `apps/web`.
 | Inbox | ✅ Convex-backed | Capture, archive, delete, convert to task/project/note. |
 | Tasks | ✅ Convex-backed | Board + Today+ board, filters, subtasks, tags, scheduling, task details. |
 | Projects | ✅ Convex-backed | Create/edit/archive/delete projects; project detail view with task board. |
-| Notes | ✅ Convex-backed | Notes provider uses Convex queries/mutations with URL-synced filters and editor routing. |
+| Notes | ✅ Convex-backed | Notes provider uses Convex queries/mutations with template picker creation, subtle note types, and URL-synced filters. |
 | AI Chat | ✅ Convex-backed | Threads and messages are loaded from Convex; chat streams through `/api/chat`. |
 
 ## Onboarding & Settings

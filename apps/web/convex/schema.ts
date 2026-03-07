@@ -261,6 +261,49 @@ const schema = defineSchema({
     title: v.string(),
     content: v.string(),
     contentText: v.string(),
+    noteType: v.optional(v.string()),
+    templateKey: v.optional(v.string()),
+    reviewer: v.optional(
+      v.object({
+        schemaVersion: v.number(),
+        contentSignature: v.string(),
+        summary: v.string(),
+        noteType: v.string(),
+        scores: v.object({
+          clarity: v.number(),
+          structure: v.number(),
+          scannability: v.number(),
+          actionability: v.number(),
+        }),
+        topIssues: v.array(
+          v.object({
+            title: v.string(),
+            detail: v.string(),
+            severity: v.union(
+              v.literal("low"),
+              v.literal("medium"),
+              v.literal("high"),
+            ),
+          }),
+        ),
+        suggestions: v.array(
+          v.object({
+            id: v.string(),
+            title: v.string(),
+            detail: v.string(),
+            kind: v.union(
+              v.literal("clarity"),
+              v.literal("structure"),
+              v.literal("scannability"),
+              v.literal("actionability"),
+            ),
+          }),
+        ),
+        actionItems: v.array(v.string()),
+        openQuestions: v.array(v.string()),
+        updatedAt: v.number(),
+      }),
+    ),
     pinned: v.boolean(),
     projectId: v.optional(v.id("projects")),
     createdAt: v.number(),

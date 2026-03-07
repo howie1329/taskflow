@@ -2,6 +2,46 @@ import { v } from "convex/values"
 import { mutation, query } from "./_generated/server"
 import { getAuthUserId } from "@convex-dev/auth/server"
 
+const reviewerValue = v.object({
+  schemaVersion: v.number(),
+  contentSignature: v.string(),
+  summary: v.string(),
+  noteType: v.string(),
+  scores: v.object({
+    clarity: v.number(),
+    structure: v.number(),
+    scannability: v.number(),
+    actionability: v.number(),
+  }),
+  topIssues: v.array(
+    v.object({
+      title: v.string(),
+      detail: v.string(),
+      severity: v.union(
+        v.literal("low"),
+        v.literal("medium"),
+        v.literal("high"),
+      ),
+    }),
+  ),
+  suggestions: v.array(
+    v.object({
+      id: v.string(),
+      title: v.string(),
+      detail: v.string(),
+      kind: v.union(
+        v.literal("clarity"),
+        v.literal("structure"),
+        v.literal("scannability"),
+        v.literal("actionability"),
+      ),
+    }),
+  ),
+  actionItems: v.array(v.string()),
+  openQuestions: v.array(v.string()),
+  updatedAt: v.number(),
+})
+
 export const listMyNotes = query({
   args: {},
   handler: async (ctx) => {
@@ -41,6 +81,8 @@ export const createNote = mutation({
     title: v.optional(v.string()),
     content: v.optional(v.string()),
     contentText: v.optional(v.string()),
+    noteType: v.optional(v.string()),
+    templateKey: v.optional(v.string()),
     projectId: v.optional(v.id("projects")),
   },
   handler: async (ctx, args) => {
@@ -63,6 +105,8 @@ export const createNote = mutation({
       title: args.title ?? "",
       content: args.content ?? "",
       contentText: args.contentText ?? "",
+      noteType: args.noteType ?? "blank",
+      templateKey: args.templateKey,
       pinned: false,
       projectId: args.projectId,
       createdAt: now,
@@ -79,6 +123,8 @@ export const updateNote = mutation({
     title: v.optional(v.string()),
     content: v.optional(v.string()),
     contentText: v.optional(v.string()),
+    noteType: v.optional(v.string()),
+    templateKey: v.optional(v.union(v.string(), v.null())),
     pinned: v.optional(v.boolean()),
     projectId: v.optional(v.union(v.id("projects"), v.null())),
   },
@@ -104,6 +150,13 @@ export const updateNote = mutation({
       title: args.title ?? note.title,
       content: args.content ?? note.content,
       contentText: args.contentText ?? note.contentText,
+      noteType: args.noteType ?? note.noteType,
+      templateKey:
+        args.templateKey === undefined
+          ? note.templateKey
+          : args.templateKey === null
+            ? undefined
+            : args.templateKey,
       pinned: args.pinned ?? note.pinned,
       projectId:
         args.projectId === undefined
@@ -136,5 +189,29 @@ export const deleteNote = mutation({
 
     await ctx.db.delete(args.noteId)
     return { success: true }
+  },
+})
+
+export const setNoteReviewer = mutation({
+  args: {
+    noteId: v.id("notes"),
+    reviewer: reviewerValue,
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx)
+    if (!userId) {
+      throw new Error("Not authenticated")
+    }
+
+    const note = await ctx.db.get(args.noteId)
+    if (!note || note.userId !== userId) {
+      throw new Error("Note not found")
+    }
+
+    await ctx.db.patch(args.noteId, {
+      reviewer: args.reviewer,
+    })
+
+    return await ctx.db.get(args.noteId)
   },
 })
