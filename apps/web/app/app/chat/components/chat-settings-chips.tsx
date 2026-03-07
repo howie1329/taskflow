@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react"
 import type { Doc } from "@/convex/_generated/dataModel"
+import { ModelSelectorLogo } from "@/components/ai-elements/model-selector"
 import type { ModeName } from "@/lib/AITools/ModePrompts"
 import { Button } from "@/components/ui/button"
 import {
@@ -14,7 +15,7 @@ import { cn } from "@/lib/utils"
 import {
   FolderIcon,
   GlobeIcon,
-  SparklesIcon,
+  CpuIcon,
   WandSparklesIcon,
 } from "lucide-react"
 import {
@@ -75,7 +76,11 @@ export function ChatSettingsChips({
                   "h-7 max-w-44 justify-start gap-2 px-2.5 sm:max-w-52",
                 )}
               >
-                <SparklesIcon className="size-3.5 shrink-0" />
+                {selectedModel?.provider ? (
+                  <ModelSelectorLogo provider={selectedModel.provider} className="size-3.5 shrink-0" />
+                ) : (
+                  <CpuIcon className="size-3.5 shrink-0" />
+                )}
                 <span className="truncate text-xs font-medium">
                   {selectedModel?.name ?? "Select model"}
                 </span>
@@ -121,7 +126,7 @@ export function ChatSettingsChips({
           <PopoverContent
             align="start"
             sideOffset={10}
-            className={cn("w-[min(92vw,24rem)]", CHAT_SETTINGS_POPOVER_CLASS_NAME)}
+            className={cn("w-[min(92vw,28rem)]", CHAT_SETTINGS_POPOVER_CLASS_NAME)}
           >
             <ModeSettingsList
               selectedMode={selectedMode}
@@ -157,7 +162,7 @@ export function ChatSettingsChips({
           <PopoverContent
             align="start"
             sideOffset={10}
-            className={cn("w-[min(92vw,24rem)]", CHAT_SETTINGS_POPOVER_CLASS_NAME)}
+            className={cn("w-[min(92vw,28rem)]", CHAT_SETTINGS_POPOVER_CLASS_NAME)}
           >
             <ProjectSettingsList
               projects={projects}

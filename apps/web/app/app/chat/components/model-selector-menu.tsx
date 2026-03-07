@@ -1,13 +1,14 @@
 "use client"
 
 import type { Doc } from "@/convex/_generated/dataModel"
-import { CircleHelp } from "lucide-react"
+import { Check, CircleHelp } from "lucide-react"
 import {
   ModelSelector,
   ModelSelectorTrigger,
   ModelSelectorContent,
   ModelSelectorInput,
   ModelSelectorList,
+  ModelSelectorEmpty,
   ModelSelectorItem,
   ModelSelectorGroup,
   ModelSelectorLogo,
@@ -30,39 +31,48 @@ export function ModelSelectorMenu({
   triggerClassName = "h-7 rounded-full border border-border/60 bg-muted/30 px-2.5 text-xs font-medium text-foreground hover:bg-muted/60",
 }: ModelSelectorMenuProps) {
   if (availableModels.length === 0) return null
+  const selectedModel = availableModels.find((model) => model.modelId === selectedModelId)
 
   return (
     <ModelSelector>
       <ModelSelectorTrigger className={triggerClassName}>
-        <ModelSelectorName>
-          {availableModels.find((model) => model.modelId === selectedModelId)
-            ?.name ?? "Select model"}
-        </ModelSelectorName>
+        <div className="flex min-w-0 items-center gap-1.5">
+          {selectedModel?.provider ? (
+            <ModelSelectorLogo provider={selectedModel.provider} className="size-3.5" />
+          ) : null}
+          <ModelSelectorName>{selectedModel?.name ?? "Select model"}</ModelSelectorName>
+        </div>
       </ModelSelectorTrigger>
-      <ModelSelectorContent>
+      <ModelSelectorContent className="sm:max-w-2xl">
         <ModelSelectorInput placeholder="Search models..." />
         <ModelSelectorList>
+          <ModelSelectorEmpty>No models found</ModelSelectorEmpty>
           <ModelSelectorGroup heading="Available Models">
             {availableModels.map((model) => {
               const capabilityLabels = getCapabilityLabels(model.supportedParameters)
+              const compactInputOutput = formatCompactInputOutput(model)
+              const isSelected = model.modelId === selectedModelId
 
               return (
                 <Tooltip key={model.modelId}>
                   <ModelSelectorItem
-                    value={`${model.modelId} ${model.name} ${model.provider ?? ""}`}
+                    value={`${model.name} ${model.provider ?? ""}`}
                     onSelect={() => onSelectModelId(model.modelId)}
                   >
-                    <div className="flex w-full items-center justify-between gap-3">
-                      <div className="flex min-w-0 items-center gap-2">
+                    <div className="flex w-full items-center gap-3">
+                      <div className="flex min-w-0 flex-1 items-center gap-2">
                         {model.provider ? (
-                          <ModelSelectorLogo provider={model.provider} />
+                          <ModelSelectorLogo provider={model.provider} className="size-3.5" />
                         ) : null}
                         <ModelSelectorName>{model.name}</ModelSelectorName>
                       </div>
-                      <div className="flex shrink-0 items-center gap-1.5 text-[10px] text-muted-foreground">
-                        <span>
-                          {formatModelPrice(model.pricing.prompt)} in /{" "}
-                          {formatModelPrice(model.pricing.completion)} out
+                      <div className="flex shrink-0 items-center gap-2 text-[10px] text-muted-foreground tabular-nums">
+                        <span className="whitespace-nowrap">
+                          {formatModelPrice(model.pricing.prompt)} /{" "}
+                          {formatModelPrice(model.pricing.completion)}
+                        </span>
+                        <span className="max-w-36 truncate">
+                          {compactInputOutput}
                         </span>
                         <TooltipTrigger asChild>
                           <button
@@ -76,6 +86,7 @@ export function ModelSelectorMenu({
                             <CircleHelp className="size-3" />
                           </button>
                         </TooltipTrigger>
+                        {isSelected ? <Check className="size-3.5 shrink-0 text-foreground" /> : null}
                       </div>
                     </div>
                   </ModelSelectorItem>
@@ -166,4 +177,21 @@ function getCapabilityLabels(supportedParameters?: string[]): string[] {
   if (params.has("stop")) labels.push("Stop sequences")
 
   return labels
+}
+
+function formatCompactInputOutput(model: Doc<"availableModels">): string {
+  const context = model.contextLength ? formatTokenCount(model.contextLength) : ""
+  const inputModalities = model.inputModalities?.length
+    ? model.inputModalities.join(", ")
+    : ""
+  const outputModalities = model.outputModalities?.length
+    ? model.outputModalities.join(", ")
+    : ""
+  const modalities =
+    inputModalities && outputModalities
+      ? `${inputModalities}->${outputModalities}`
+      : inputModalities || outputModalities || ""
+
+  const parts = [context, modalities].filter(Boolean)
+  return parts.join(" · ") || "-"
 }

@@ -2,10 +2,12 @@
 
 import { useMemo, useState, type ReactNode } from "react"
 import type { Doc } from "@/convex/_generated/dataModel"
+import { ModelSelectorLogo } from "@/components/ai-elements/model-selector"
 import type { ModeName } from "@/lib/AITools/ModePrompts"
 import { AVAILABLE_MODES, getModeDescription } from "@/lib/AITools/ModePrompts"
 import { formatModelPrice } from "./format-model-price"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import {
   Popover,
   PopoverContent,
@@ -16,12 +18,14 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { usePromptInputAttachments } from "@/components/ai-elements/prompt-input"
 import { cn } from "@/lib/utils"
 import {
+  CircleHelpIcon,
   CheckIcon,
   CpuIcon,
   FolderCogIcon,
   FolderIcon,
   GlobeIcon,
   ImageIcon,
+  SearchIcon,
   SparklesIcon,
   SlidersHorizontalIcon,
   WandSparklesIcon,
@@ -102,7 +106,11 @@ export function ChatSettingsMenu({
                 triggerClassName,
               )}
             >
-              {triggerIcon ?? <SlidersHorizontalIcon className="size-3.5 shrink-0" />}
+              {showSelectedModelInTrigger && selectedModel?.provider ? (
+                <ModelSelectorLogo provider={selectedModel.provider} className="size-3.5 shrink-0" />
+              ) : (
+                triggerIcon ?? <SlidersHorizontalIcon className="size-3.5 shrink-0" />
+              )}
               {showSelectedModelInTrigger ? (
                 <span className="truncate text-xs font-medium">{triggerText}</span>
               ) : null}
@@ -134,7 +142,13 @@ export function ChatSettingsMenu({
 
           <div className="mt-3 grid gap-1.5 text-[11px] text-muted-foreground sm:grid-cols-3">
             <SettingsSummaryPill
-              icon={<SparklesIcon className="size-3" />}
+              icon={
+                selectedModel?.provider ? (
+                  <ModelSelectorLogo provider={selectedModel.provider} className="size-3" />
+                ) : (
+                  <SparklesIcon className="size-3" />
+                )
+              }
               label={selectedModel?.name ?? "Select model"}
             />
             <SettingsSummaryPill
@@ -241,9 +255,9 @@ export function SettingsSection({
   children: ReactNode
 }) {
   return (
-    <section className="border-b border-border/20 px-1 py-2 last:border-b-0" aria-label={title}>
-      <div className="px-2 pb-2 pt-1">
-        <div className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+    <section className="border-b border-border/20 px-1 py-1.5 last:border-b-0" aria-label={title}>
+      <div className="px-1.5 pb-1 pt-0.5">
+        <div className="flex items-center gap-1.5 text-[10px] font-medium uppercase text-muted-foreground">
           <span className="text-foreground/70">{icon}</span>
           <span>{title}</span>
         </div>
@@ -255,7 +269,7 @@ export function SettingsSection({
 
 export function SettingsEmptyState({ children }: { children: ReactNode }) {
   return (
-    <div className="rounded-2xl bg-muted/20 px-4 py-6 text-center text-xs text-muted-foreground">
+    <div className="rounded-xl bg-muted/20 px-3 py-4 text-center text-[11px] text-muted-foreground">
       {children}
     </div>
   )
@@ -346,23 +360,44 @@ export function ModelSettingsList({
   ChatSettingsContentProps,
   "availableModels" | "selectedModelId" | "onSelectModelId" | "onClose"
 >) {
+  const [searchQuery, setSearchQuery] = useState("")
+  const filteredModels = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase()
+    if (!query) return availableModels
+
+    return availableModels.filter((model) =>
+      `${model.name} ${model.provider ?? ""}`.toLowerCase().includes(query)
+    )
+  }, [availableModels, searchQuery])
+
   return (
-    <div className="max-h-[min(60vh,34rem)] overflow-y-auto overscroll-contain px-2 py-2">
+    <div className="max-h-[min(48vh,24rem)] overflow-y-auto overscroll-contain px-1 py-1">
+      <div className="px-1 pb-1 pt-0.5">
+        <div className="relative">
+          <SearchIcon className="pointer-events-none absolute left-2.5 top-1/2 size-3 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            type="search"
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="Search models..."
+            className="h-7 rounded-md border-border/40 bg-muted/20 pl-7"
+          />
+        </div>
+      </div>
       <SettingsSection
         icon={<SparklesIcon className="size-3.5" />}
         title="Model"
       >
-        {availableModels.length > 0 ? (
-          availableModels.map((model) => (
-            <SettingsOptionButton
+        {availableModels.length === 0 ? (
+          <SettingsEmptyState>
+            No models available right now.
+          </SettingsEmptyState>
+        ) : filteredModels.length > 0 ? (
+          filteredModels.map((model) => (
+            <ModelSettingsOptionButton
               key={model.modelId}
+              model={model}
               selected={model.modelId === selectedModelId}
-              leadingIcon={<CpuIcon className="size-3.5" />}
-              title={model.name}
-              description={model.description || "No description available."}
-              meta={buildModelMeta(model)}
-              tags={getCapabilityLabels(model.supportedParameters)}
-              detail={`${formatModelPrice(model.pricing.prompt)} in / ${formatModelPrice(model.pricing.completion)} out`}
               onClick={() => {
                 onSelectModelId(model.modelId)
                 onClose?.()
@@ -371,7 +406,7 @@ export function ModelSettingsList({
           ))
         ) : (
           <SettingsEmptyState>
-            No models available right now.
+            No models found
           </SettingsEmptyState>
         )}
       </SettingsSection>
@@ -384,25 +419,47 @@ export function ModeSettingsList({
   onSelectMode,
   onClose,
 }: Pick<ChatSettingsContentProps, "selectedMode" | "onSelectMode" | "onClose">) {
+  const [searchQuery, setSearchQuery] = useState("")
+  const filteredModes = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase()
+    if (!query) return AVAILABLE_MODES
+
+    return AVAILABLE_MODES.filter((mode) => mode.toLowerCase().includes(query))
+  }, [searchQuery])
+
   return (
-    <div className="max-h-[min(60vh,34rem)] overflow-y-auto overscroll-contain px-2 py-2">
+    <div className="max-h-[min(48vh,24rem)] overflow-y-auto overscroll-contain px-1 py-1">
+      <div className="px-1 pb-1 pt-0.5">
+        <div className="relative">
+          <SearchIcon className="pointer-events-none absolute left-2.5 top-1/2 size-3 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            type="search"
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="Search modes..."
+            className="h-7 rounded-md border-border/40 bg-muted/20 pl-7"
+          />
+        </div>
+      </div>
       <SettingsSection
         icon={<WandSparklesIcon className="size-3.5" />}
         title="Mode"
       >
-        {AVAILABLE_MODES.map((mode) => (
-          <SettingsOptionButton
-            key={mode}
-            selected={mode === selectedMode}
-            title={mode}
-            description={getModeDescription(mode)}
-            detail="Prompt behavior"
-            onClick={() => {
-              onSelectMode(mode)
-              onClose?.()
-            }}
-          />
-        ))}
+        {filteredModes.length > 0 ? (
+          filteredModes.map((mode) => (
+            <ModeSettingsOptionButton
+              key={mode}
+              mode={mode}
+              selected={mode === selectedMode}
+              onClick={() => {
+                onSelectMode(mode)
+                onClose?.()
+              }}
+            />
+          ))
+        ) : (
+          <SettingsEmptyState>No modes found</SettingsEmptyState>
+        )}
       </SettingsSection>
     </div>
   )
@@ -421,9 +478,28 @@ export function ProjectSettingsList({
   const attachments = usePromptInputAttachments()
   const selectedProject =
     projects.find((project) => project._id === selectedProjectId) ?? null
+  const [searchQuery, setSearchQuery] = useState("")
+  const filteredProjects = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase()
+    if (!query) return projects
+
+    return projects.filter((project) => project.title.toLowerCase().includes(query))
+  }, [projects, searchQuery])
 
   return (
-    <div className="max-h-[min(60vh,34rem)] overflow-y-auto overscroll-contain px-2 py-2">
+    <div className="max-h-[min(48vh,24rem)] overflow-y-auto overscroll-contain px-1 py-1">
+      <div className="px-1 pb-1 pt-0.5">
+        <div className="relative">
+          <SearchIcon className="pointer-events-none absolute left-2.5 top-1/2 size-3 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            type="search"
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="Search projects..."
+            className="h-7 rounded-md border-border/40 bg-muted/20 pl-7"
+          />
+        </div>
+      </div>
       <SettingsSection
         icon={
           selectedProject ? (
@@ -434,35 +510,41 @@ export function ProjectSettingsList({
         }
         title="Project"
       >
-        <SettingsOptionButton
+        <ProjectSettingsOptionButton
           selected={selectedProjectId === null}
+          icon={<GlobeIcon className="size-2.5" />}
           title="No project"
-          description="Use the full workspace"
-          detail="Workspace scope"
+          meta="Full workspace"
+          tooltipContent="Use the full workspace as context."
           onClick={() => {
             onSelectProjectId(null)
             onClose?.()
           }}
         />
-        {projects.map((project) => (
-          <SettingsOptionButton
-            key={project._id}
-            selected={project._id === selectedProjectId}
-            title={`${project.icon} ${project.title}`}
-            detail="Project scope"
-            onClick={() => {
-              onSelectProjectId(project._id)
-              onClose?.()
-            }}
-          />
-        ))}
+        {filteredProjects.length > 0 ? (
+          filteredProjects.map((project) => (
+            <ProjectSettingsOptionButton
+              key={project._id}
+              selected={project._id === selectedProjectId}
+              icon={<FolderIcon className="size-2.5" />}
+              title={`${project.icon} ${project.title}`}
+              meta="Project scope"
+              tooltipContent="Scope the chat to this project."
+              onClick={() => {
+                onSelectProjectId(project._id)
+                onClose?.()
+              }}
+            />
+          ))
+        ) : (
+          <SettingsEmptyState>No projects found</SettingsEmptyState>
+        )}
         {showImageAction ? (
-          <div className="mt-2 border-t border-border/15 px-2 pt-3">
-            <SettingsOptionButton
-              leadingIcon={<ImageIcon className="size-3.5" />}
+          <div className="mt-1.5 border-t border-border/15 px-1.5 pt-2">
+            <ProjectSettingsOptionButton
+              icon={<ImageIcon className="size-2.5" />}
               title="Add image"
-              description="Attach an image to your message"
-              detail="Upload"
+              meta="Upload"
               onClick={() => {
                 attachments.openFileDialog()
                 onClose?.()
@@ -520,4 +602,249 @@ export function getCapabilityLabels(supportedParameters?: string[]): string[] {
   if (params.has("stop")) labels.push("Stops")
 
   return labels
+}
+
+function ModelSettingsOptionButton({
+  model,
+  selected,
+  onClick,
+}: {
+  model: Doc<"availableModels">
+  selected: boolean
+  onClick: () => void
+}) {
+  const compactInputOutput = formatCompactInputOutput(model)
+  const capabilityLabels = getCapabilityLabels(model.supportedParameters)
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "flex w-full min-w-0 items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors duration-150 ease-out hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
+        selected ? "bg-muted/55" : "bg-transparent",
+      )}
+    >
+      <span
+        className={cn(
+          "flex size-4 shrink-0 items-center justify-center rounded-full bg-muted/35 text-foreground/75",
+          selected ? "bg-foreground/8 text-foreground" : null,
+        )}
+      >
+        {model.provider ? (
+          <ModelSelectorLogo provider={model.provider} className="size-2.5" />
+        ) : selected ? (
+          <CheckIcon className="size-2.5" />
+        ) : (
+          <CpuIcon className="size-2.5" />
+        )}
+      </span>
+
+      <span className="min-w-0 flex-1">
+        <span className="flex min-w-0 items-center gap-2">
+          <span className="truncate text-xs font-medium text-foreground">{model.name}</span>
+        </span>
+        <span className="mt-0.5 flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1 text-[10px] text-muted-foreground tabular-nums">
+          <span className="whitespace-nowrap">
+            {formatModelPrice(model.pricing.prompt)} / {formatModelPrice(model.pricing.completion)}
+          </span>
+          <span className="max-w-24 truncate">{compactInputOutput}</span>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span
+                aria-label={`Show details for ${model.name}`}
+                className="inline-flex size-4 cursor-help items-center justify-center rounded-sm text-muted-foreground/80 transition-colors hover:text-foreground"
+                onPointerDown={(event) => event.stopPropagation()}
+                onClick={(event) => event.stopPropagation()}
+                onKeyDown={(event) => event.stopPropagation()}
+              >
+                <CircleHelpIcon className="size-2.5" />
+              </span>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="max-w-sm">
+              <p className="font-medium">{model.name}</p>
+              <p className="mt-1 text-xs text-background/80">
+                {model.description || "No description available."}
+              </p>
+              <div className="mt-2 space-y-1 text-[11px] text-background/75">
+                <p>
+                  Pricing (per 1M tokens): {formatModelPrice(model.pricing.prompt)} in,{" "}
+                  {formatModelPrice(model.pricing.completion)} out
+                </p>
+                {model.modality ? <p>Modality: {model.modality}</p> : null}
+                {model.contextLength ? (
+                  <p>
+                    Context: {formatTokenCount(model.contextLength)}
+                    {model.maxCompletionTokens
+                      ? ` | Max output: ${formatTokenCount(model.maxCompletionTokens)}`
+                      : ""}
+                  </p>
+                ) : null}
+                {model.inputModalities?.length ? (
+                  <p>Input: {model.inputModalities.join(", ")}</p>
+                ) : null}
+                {model.outputModalities?.length ? (
+                  <p>Output: {model.outputModalities.join(", ")}</p>
+                ) : null}
+                {capabilityLabels.length ? (
+                  <div className="flex flex-wrap gap-1 pt-1">
+                    {capabilityLabels.map((label) => (
+                      <span
+                        key={label}
+                        className="rounded-full border border-background/25 px-1.5 py-0.5 text-[10px] text-background/80"
+                      >
+                        {label}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+              <p className="mt-2 text-[10px] text-background/70">{model.modelId}</p>
+            </TooltipContent>
+          </Tooltip>
+        </span>
+      </span>
+
+      {selected ? <CheckIcon className="size-2.5 shrink-0 text-foreground" /> : null}
+    </button>
+  )
+}
+
+function ModeSettingsOptionButton({
+  mode,
+  selected,
+  onClick,
+}: {
+  mode: ModeName
+  selected: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "flex w-full min-w-0 items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors duration-150 ease-out hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
+        selected ? "bg-muted/55" : "bg-transparent",
+      )}
+    >
+      <span
+        className={cn(
+          "flex size-4 shrink-0 items-center justify-center rounded-full bg-muted/35 text-foreground/75",
+          selected ? "bg-foreground/8 text-foreground" : null,
+        )}
+      >
+        {selected ? <CheckIcon className="size-2.5" /> : <WandSparklesIcon className="size-2.5" />}
+      </span>
+
+      <span className="min-w-0 flex-1">
+        <span className="truncate text-xs font-medium text-foreground">{mode}</span>
+        <span className="mt-0.5 flex min-w-0 items-center gap-1.5 text-[10px] text-muted-foreground">
+          <span className="truncate">Prompt behavior</span>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span
+                aria-label={`Show details for ${mode}`}
+                className="inline-flex size-4 cursor-help items-center justify-center rounded-sm text-muted-foreground/80 transition-colors hover:text-foreground"
+                onPointerDown={(event) => event.stopPropagation()}
+                onClick={(event) => event.stopPropagation()}
+                onKeyDown={(event) => event.stopPropagation()}
+              >
+                <CircleHelpIcon className="size-2.5" />
+              </span>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="max-w-sm">
+              <p className="font-medium">{mode}</p>
+              <p className="mt-1 text-xs text-background/80">{getModeDescription(mode)}</p>
+            </TooltipContent>
+          </Tooltip>
+        </span>
+      </span>
+
+      {selected ? <CheckIcon className="size-2.5 shrink-0 text-foreground" /> : null}
+    </button>
+  )
+}
+
+function ProjectSettingsOptionButton({
+  icon,
+  title,
+  meta,
+  tooltipContent,
+  selected = false,
+  onClick,
+}: {
+  icon: ReactNode
+  title: string
+  meta?: string
+  tooltipContent?: string
+  selected?: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "flex w-full min-w-0 items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors duration-150 ease-out hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
+        selected ? "bg-muted/55" : "bg-transparent",
+      )}
+    >
+      <span
+        className={cn(
+          "flex size-4 shrink-0 items-center justify-center rounded-full bg-muted/35 text-foreground/75",
+          selected ? "bg-foreground/8 text-foreground" : null,
+        )}
+      >
+        {icon}
+      </span>
+
+      <span className="min-w-0 flex-1">
+        <span className="truncate text-xs font-medium text-foreground">{title}</span>
+        {meta ? (
+          <span className="mt-0.5 flex min-w-0 items-center gap-1.5 text-[10px] text-muted-foreground">
+            <span className="truncate">{meta}</span>
+            {tooltipContent ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span
+                    aria-label={`Show details for ${title}`}
+                    className="inline-flex size-4 cursor-help items-center justify-center rounded-sm text-muted-foreground/80 transition-colors hover:text-foreground"
+                    onPointerDown={(event) => event.stopPropagation()}
+                    onClick={(event) => event.stopPropagation()}
+                    onKeyDown={(event) => event.stopPropagation()}
+                  >
+                    <CircleHelpIcon className="size-2.5" />
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-sm">
+                  <p className="font-medium">{title}</p>
+                  <p className="mt-1 text-xs text-background/80">{tooltipContent}</p>
+                </TooltipContent>
+              </Tooltip>
+            ) : null}
+          </span>
+        ) : null}
+      </span>
+
+      {selected ? <CheckIcon className="size-2.5 shrink-0 text-foreground" /> : null}
+    </button>
+  )
+}
+
+function formatCompactInputOutput(model: Doc<"availableModels">): string {
+  const context = model.contextLength ? formatTokenCount(model.contextLength) : ""
+  const inputModalities = model.inputModalities?.length
+    ? model.inputModalities.join(", ")
+    : ""
+  const outputModalities = model.outputModalities?.length
+    ? model.outputModalities.join(", ")
+    : ""
+  const modalities =
+    inputModalities && outputModalities
+      ? `${inputModalities}->${outputModalities}`
+      : inputModalities || outputModalities || ""
+
+  const parts = [context, modalities].filter(Boolean)
+  return parts.join(" · ") || "-"
 }
