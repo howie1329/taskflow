@@ -132,6 +132,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
 
   const { messages, setMessages, sendMessage, status, error, stop } = useChat({
     id: activeThreadId,
+    experimental_throttle: 100
   })
   const { userId } = useViewer()
 
