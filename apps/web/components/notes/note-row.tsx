@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
+import { getTemplateByNoteType } from "./note-templates"
 import type { Note, NotesProject } from "./types"
 
 interface NoteRowProps {
@@ -36,6 +37,9 @@ export function NoteRow({
   onDelete,
   projects,
 }: NoteRowProps) {
+  const noteTemplate = getTemplateByNoteType(note.noteType)
+  const showTypeIcon = noteTemplate.noteType !== "blank"
+
   return (
     <button
       type="button"
@@ -59,6 +63,13 @@ export function NoteRow({
           <span className="shrink-0 text-xs" title="Project note">
             {projectIcon}
           </span>
+        )}
+        {showTypeIcon && (
+          <HugeiconsIcon
+            icon={noteTemplate.icon}
+            className="size-3 shrink-0 text-muted-foreground/70"
+            strokeWidth={2}
+          />
         )}
         <span className="min-w-0 truncate text-[13px] font-normal">
           {note.title || "Untitled note"}

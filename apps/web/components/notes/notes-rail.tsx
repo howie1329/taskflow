@@ -29,7 +29,15 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { cn } from "@/lib/utils"
+import { getAllTemplates } from "./note-templates"
 import type { Note, NotesProject } from "./types"
 import { NoteRow } from "./note-row"
 import { NoteSection } from "./note-section"
@@ -41,7 +49,10 @@ interface NotesRailProps {
   searchQuery: string
   onSearchQueryChange: (value: string) => void
   notes: Note[]
+  totalNotesCount?: number
   projects: NotesProject[]
+  typeFilter: string
+  onTypeFilterChange: (value: string) => void
   activeNoteId: string | null
   onCreateNote: () => void
   onSelectNote: (noteId: string) => void
@@ -57,7 +68,10 @@ export function NotesRail({
   searchQuery,
   onSearchQueryChange,
   notes,
+  totalNotesCount,
   projects,
+  typeFilter,
+  onTypeFilterChange,
   activeNoteId,
   onCreateNote,
   onSelectNote,
@@ -68,6 +82,7 @@ export function NotesRail({
 }: NotesRailProps) {
   const [isPinnedOpen, setIsPinnedOpen] = useState(true)
   const [isProjectsOpen, setIsProjectsOpen] = useState(true)
+  const typeOptions = getAllTemplates()
 
   const normalizedQuery = searchQuery.trim().toLowerCase()
 
@@ -180,11 +195,25 @@ export function NotesRail({
             </InputGroupAddon>
           )}
         </InputGroup>
+
+        <Select value={typeFilter} onValueChange={onTypeFilterChange}>
+          <SelectTrigger size="sm" className="w-full justify-start">
+            <SelectValue placeholder="All types" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All types</SelectItem>
+            {typeOptions.map((template) => (
+              <SelectItem key={template.key} value={template.noteType}>
+                {template.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <ScrollArea className="flex-1 min-h-0 [&>div>div]:w-full!">
         <div className={cn("w-full max-w-full", isSidebar ? "space-y-2 p-2" : "space-y-3 p-3")}>
-          {notes.length === 0 ? (
+          {(totalNotesCount ?? notes.length) === 0 ? (
             <Empty className="min-h-[260px]">
               <EmptyHeader>
                 <EmptyMedia variant="icon">

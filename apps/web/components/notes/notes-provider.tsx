@@ -14,6 +14,12 @@ import { useMutation, useQuery } from "convex/react"
 import { api } from "@/convex/_generated/api"
 import type { Doc } from "@/convex/_generated/dataModel"
 import { createReviewerSignature } from "@/lib/notes/reviewer"
+import { CreateNoteDialog } from "./create-note-dialog"
+import {
+  getTemplateByKey,
+  getTemplateByNoteType,
+  type NoteType,
+} from "./note-templates"
 import type {
   NotesProject,
   Note,
@@ -31,6 +37,11 @@ type PendingChatPrompt = {
   prompt: string
   nonce: number
 } | null
+type CreateNoteOptions = {
+  noteType?: NoteType
+  templateKey?: string
+  projectId?: string
+}
 
 type NotesContextValue = {
   notes: Note[]
@@ -40,6 +51,7 @@ type NotesContextValue = {
   selectedNote: Note | null
   selectedNoteId: string | null
   projectFilter: string
+  typeFilter: string
   searchQuery: string
   viewMode: ViewMode
   isSaved: boolean
@@ -51,9 +63,11 @@ type NotesContextValue = {
   pendingChatPrompt: PendingChatPrompt
   projectForNote: (projectId: string) => NotesProject | null
   setProjectFilter: (value: string) => void
+  setTypeFilter: (value: string) => void
   setSearchQuery: (value: string) => void
   setViewMode: (value: ViewMode) => void
-  createNote: () => void
+  openCreateNotePicker: () => void
+  createNote: (options?: CreateNoteOptions) => Promise<void>
   selectNote: (noteId: string) => void
   updateNote: (noteId: string, updates: Partial<Note>) => void
   pinNote: (noteId: string) => void
@@ -75,15 +89,18 @@ function getViewMode(value: string | null): ViewMode {
 
 function buildQueryString({
   projectFilter,
+  typeFilter,
   searchQuery,
   viewMode,
 }: {
   projectFilter: string
+  typeFilter: string
   searchQuery: string
   viewMode: ViewMode
 }) {
   const params = new URLSearchParams()
   if (projectFilter !== "all") params.set("project", projectFilter)
+  if (typeFilter !== "all") params.set("type", typeFilter)
   if (searchQuery) params.set("q", searchQuery)
   if (viewMode !== "byProject") params.set("view", viewMode)
   const queryString = params.toString()
@@ -106,6 +123,7 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
   const [isSaved, setIsSaved] = useState(true)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [noteToDelete, setNoteToDelete] = useState<string | null>(null)
+  const [createNotePickerOpen, setCreateNotePickerOpen] = useState(false)
   const [reviewerRunStateByNoteId, setReviewerRunStateByNoteId] =
     useState<ReviewerRunStateMap>({})
   const [pendingChatPrompt, setPendingChatPrompt] =
@@ -124,6 +142,8 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
         title: note.title,
         content: note.content,
         contentText: note.contentText,
+        noteType: note.noteType ?? "blank",
+        templateKey: note.templateKey ?? null,
         pinned: note.pinned,
         createdAt: note.createdAt,
         updatedAt: note.updatedAt,
@@ -145,6 +165,7 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
   const selectedNoteId =
     typeof params.noteId === "string" ? params.noteId : null
   const projectFilter = searchParams.get("project") || "all"
+  const typeFilter = searchParams.get("type") || "all"
   const searchQuery = searchParams.get("q") || ""
   const viewMode = getViewMode(searchParams.get("view"))
 
@@ -166,6 +187,9 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
     if (projectFilter !== "all") {
       filtered = filtered.filter((n) => n.projectId === projectFilter)
     }
+    if (typeFilter !== "all") {
+      filtered = filtered.filter((n) => (n.noteType ?? "blank") === typeFilter)
+    }
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase()
       filtered = filtered.filter(
@@ -175,7 +199,7 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
       )
     }
     return filtered
-  }, [notes, projectFilter, searchQuery])
+  }, [notes, projectFilter, typeFilter, searchQuery])
 
   const sortedNotes = useMemo(() => {
     let sorted = [...filteredNotes]
@@ -225,19 +249,21 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
       noteId?: string | null,
       overrides?: {
         projectFilter?: string
+        typeFilter?: string
         searchQuery?: string
         viewMode?: ViewMode
       },
     ) => {
       const queryString = buildQueryString({
         projectFilter: overrides?.projectFilter ?? projectFilter,
+        typeFilter: overrides?.typeFilter ?? typeFilter,
         searchQuery: overrides?.searchQuery ?? searchQuery,
         viewMode: overrides?.viewMode ?? viewMode,
       })
       if (!noteId) return `/app/notes${queryString}`
       return `/app/notes/${noteId}${queryString}`
     },
-    [projectFilter, searchQuery, viewMode],
+    [projectFilter, typeFilter, searchQuery, viewMode],
   )
 
   const setProjectFilter = useCallback(
@@ -264,6 +290,18 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
     [buildNotesUrl, router, selectedNoteId],
   )
 
+  const setTypeFilter = useCallback(
+    (value: string) => {
+      router.replace(
+        buildNotesUrl(selectedNoteId ? selectedNoteId : null, {
+          typeFilter: value,
+        }),
+        { scroll: false },
+      )
+    },
+    [buildNotesUrl, router, selectedNoteId],
+  )
+
   const setViewMode = useCallback(
     (value: ViewMode) => {
       router.replace(
@@ -276,14 +314,30 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
     [buildNotesUrl, router, selectedNoteId],
   )
 
-  const createNote = useCallback(async () => {
+  const openCreateNotePicker = useCallback(() => {
+    setCreateNotePickerOpen(true)
+  }, [])
+
+  const createNote = useCallback(async (options?: CreateNoteOptions) => {
+    const template = options?.templateKey
+      ? getTemplateByKey(options.templateKey)
+      : getTemplateByNoteType(options?.noteType)
+    const projectId =
+      options?.projectId !== undefined
+        ? options.projectId
+        : projectFilter !== "all" && projectFilter !== "__none__"
+          ? projectFilter
+          : undefined
+
     setIsSaved(true)
+    setCreateNotePickerOpen(false)
     const newNote = await createNoteMutation({
-      title: "",
-      projectId:
-        projectFilter !== "all" && projectFilter !== "__none__"
-          ? (projectFilter as unknown as Doc<"projects">["_id"])
-          : undefined,
+      title: template.defaultTitle,
+      content: template.defaultContent,
+      contentText: template.defaultContentText,
+      noteType: template.noteType,
+      templateKey: options?.templateKey ?? template.key,
+      projectId: projectId as Doc<"projects">["_id"] | undefined,
     })
     if (newNote?._id) {
       router.push(buildNotesUrl(String(newNote._id)))
@@ -475,6 +529,9 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
         title: updates.title,
         content: updates.content,
         contentText: updates.contentText,
+        noteType: updates.noteType,
+        templateKey:
+          updates.templateKey === undefined ? undefined : updates.templateKey,
         pinned: updates.pinned,
         projectId:
           updates.projectId === undefined
@@ -526,6 +583,7 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
       selectedNote,
       selectedNoteId,
       projectFilter,
+      typeFilter,
       searchQuery,
       viewMode,
       isSaved,
@@ -537,8 +595,10 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
       pendingChatPrompt,
       projectForNote,
       setProjectFilter,
+      setTypeFilter,
       setSearchQuery,
       setViewMode,
+      openCreateNotePicker,
       createNote,
       selectNote,
       updateNote,
@@ -572,6 +632,7 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
       selectedNote,
       selectedNoteId,
       projectFilter,
+      typeFilter,
       searchQuery,
       viewMode,
       isSaved,
@@ -583,8 +644,10 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
       pendingChatPrompt,
       projectForNote,
       setProjectFilter,
+      setTypeFilter,
       setSearchQuery,
       setViewMode,
+      openCreateNotePicker,
       createNote,
       selectNote,
       updateNote,
@@ -611,7 +674,18 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  return <NotesContext.Provider value={value}>{children}</NotesContext.Provider>
+  return (
+    <NotesContext.Provider value={value}>
+      {children}
+      <CreateNoteDialog
+        open={createNotePickerOpen}
+        onOpenChange={setCreateNotePickerOpen}
+        onCreateNote={createNote}
+        projectFilter={projectFilter}
+        projects={projects}
+      />
+    </NotesContext.Provider>
+  )
 }
 
 export function useNotes() {

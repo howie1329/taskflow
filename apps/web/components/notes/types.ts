@@ -1,3 +1,5 @@
+import type { NoteType } from "./note-templates"
+
 export interface NotesProject {
   _id: string
   title: string
@@ -46,6 +48,8 @@ export interface Note {
   title: string
   content: string
   contentText: string
+  noteType?: NoteType
+  templateKey?: string | null
   pinned: boolean
   createdAt: number
   updatedAt: number

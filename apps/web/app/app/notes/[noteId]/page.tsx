@@ -30,7 +30,7 @@ export default function NotePage() {
     pinNote,
     moveNote,
     requestDeleteNote,
-    createNote,
+    openCreateNotePicker,
     closeEditor,
     projects,
     projectForNote,
@@ -137,7 +137,7 @@ export default function NotePage() {
           onPinNote={pinNote}
           onMoveNote={moveNote}
           onDeleteNote={requestDeleteNote}
-          onCreateNote={createNote}
+          onCreateNote={openCreateNotePicker}
           onCloseSheet={closeEditor}
         />
       </div>

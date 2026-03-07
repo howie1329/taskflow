@@ -261,6 +261,8 @@ const schema = defineSchema({
     title: v.string(),
     content: v.string(),
     contentText: v.string(),
+    noteType: v.optional(v.string()),
+    templateKey: v.optional(v.string()),
     reviewer: v.optional(
       v.object({
         schemaVersion: v.number(),

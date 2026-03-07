@@ -13,7 +13,7 @@ import { NoteIcon, Add01Icon } from "@hugeicons/core-free-icons";
 import { useNotes } from "@/components/notes";
 
 export default function NotesPage() {
-  const { createNote } = useNotes();
+  const { openCreateNotePicker } = useNotes()
 
   return (
     <div className="flex h-full w-full min-h-0 items-center justify-center px-4 py-3 md:px-6 md:py-4">
@@ -27,11 +27,11 @@ export default function NotesPage() {
             Choose a note from the sidebar or create a new one.
           </EmptyDescription>
         </EmptyHeader>
-        <Button size="sm" onClick={createNote}>
+        <Button size="sm" onClick={openCreateNotePicker}>
           <HugeiconsIcon icon={Add01Icon} className="size-4 mr-2" />
           Create note
         </Button>
       </Empty>
     </div>
-  );
+  )
 }

@@ -81,6 +81,8 @@ export const createNote = mutation({
     title: v.optional(v.string()),
     content: v.optional(v.string()),
     contentText: v.optional(v.string()),
+    noteType: v.optional(v.string()),
+    templateKey: v.optional(v.string()),
     projectId: v.optional(v.id("projects")),
   },
   handler: async (ctx, args) => {
@@ -103,6 +105,8 @@ export const createNote = mutation({
       title: args.title ?? "",
       content: args.content ?? "",
       contentText: args.contentText ?? "",
+      noteType: args.noteType ?? "blank",
+      templateKey: args.templateKey,
       pinned: false,
       projectId: args.projectId,
       createdAt: now,
@@ -119,6 +123,8 @@ export const updateNote = mutation({
     title: v.optional(v.string()),
     content: v.optional(v.string()),
     contentText: v.optional(v.string()),
+    noteType: v.optional(v.string()),
+    templateKey: v.optional(v.union(v.string(), v.null())),
     pinned: v.optional(v.boolean()),
     projectId: v.optional(v.union(v.id("projects"), v.null())),
   },
@@ -144,6 +150,13 @@ export const updateNote = mutation({
       title: args.title ?? note.title,
       content: args.content ?? note.content,
       contentText: args.contentText ?? note.contentText,
+      noteType: args.noteType ?? note.noteType,
+      templateKey:
+        args.templateKey === undefined
+          ? note.templateKey
+          : args.templateKey === null
+            ? undefined
+            : args.templateKey,
       pinned: args.pinned ?? note.pinned,
       projectId:
         args.projectId === undefined

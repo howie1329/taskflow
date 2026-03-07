@@ -44,17 +44,20 @@ interface NotesAppSidebarProps {
 }
 
 export function NotesAppSidebar({ onBackToWorkspace }: NotesAppSidebarProps) {
-  const { state, isMobile, setOpen, setOpenMobile } = useSidebar();
-  const isCollapsed = state === "collapsed" && !isMobile;
-  const searchInputRef = useRef<HTMLInputElement>(null);
-  const didAutoOpenRef = useRef(false);
+  const { state, isMobile, setOpen, setOpenMobile } = useSidebar()
+  const isCollapsed = state === "collapsed" && !isMobile
+  const searchInputRef = useRef<HTMLInputElement>(null)
+  const didAutoOpenRef = useRef(false)
 
   const {
     notes,
+    filteredNotes,
     selectedNoteId,
+    typeFilter,
     searchQuery,
+    setTypeFilter,
     setSearchQuery,
-    createNote,
+    openCreateNotePicker,
     selectNote,
     pinNote,
     moveNote,
@@ -63,53 +66,53 @@ export function NotesAppSidebar({ onBackToWorkspace }: NotesAppSidebarProps) {
     cancelDelete,
     deleteDialogOpen,
     projects,
-  } = useNotes();
+  } = useNotes()
 
-  const { setTheme, resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === "dark";
+  const { setTheme, resolvedTheme } = useTheme()
+  const isDark = resolvedTheme === "dark"
 
   useEffect(() => {
-    if (!isMobile) return;
-    if (didAutoOpenRef.current) return;
-    setOpenMobile(true);
-    didAutoOpenRef.current = true;
-  }, [isMobile, setOpenMobile]);
+    if (!isMobile) return
+    if (didAutoOpenRef.current) return
+    setOpenMobile(true)
+    didAutoOpenRef.current = true
+  }, [isMobile, setOpenMobile])
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "n") {
-        e.preventDefault();
-        createNote();
+        e.preventDefault()
+        openCreateNotePicker()
       }
       if (e.key === "/" && !e.metaKey && !e.ctrlKey) {
-        const target = e.target as HTMLElement;
+        const target = e.target as HTMLElement
         if (
           target.tagName !== "INPUT" &&
           target.tagName !== "TEXTAREA" &&
           !target.isContentEditable
         ) {
-          e.preventDefault();
-          searchInputRef.current?.focus();
+          e.preventDefault()
+          searchInputRef.current?.focus()
         }
       }
-    };
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [createNote]);
+    }
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [openCreateNotePicker])
 
   const handleSelectNote = (noteId: string) => {
-    selectNote(noteId);
+    selectNote(noteId)
     if (isMobile) {
-      setOpenMobile(false);
+      setOpenMobile(false)
     }
-  };
+  }
 
   const handleCreateNote = () => {
-    createNote();
+    openCreateNotePicker()
     if (isMobile) {
-      setOpenMobile(false);
+      setOpenMobile(false)
     }
-  };
+  }
 
   if (isCollapsed) {
     return (
@@ -224,7 +227,7 @@ export function NotesAppSidebar({ onBackToWorkspace }: NotesAppSidebarProps) {
           </AlertDialogContent>
         </AlertDialog>
       </>
-    );
+    )
   }
 
   return (
@@ -250,9 +253,12 @@ export function NotesAppSidebar({ onBackToWorkspace }: NotesAppSidebarProps) {
         <div className="flex h-full min-h-0 flex-col px-3 py-2">
           <NotesRail
             variant="sidebar"
-            notes={notes}
+            notes={filteredNotes}
+            totalNotesCount={notes.length}
             activeNoteId={selectedNoteId}
+            typeFilter={typeFilter}
             searchQuery={searchQuery}
+            onTypeFilterChange={setTypeFilter}
             onSearchQueryChange={setSearchQuery}
             onSelectNote={handleSelectNote}
             onCreateNote={handleCreateNote}
@@ -306,5 +312,5 @@ export function NotesAppSidebar({ onBackToWorkspace }: NotesAppSidebarProps) {
         </AlertDialogContent>
       </AlertDialog>
     </>
-  );
+  )
 }

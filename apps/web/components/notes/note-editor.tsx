@@ -10,6 +10,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuTrigger,
   DropdownMenuSub,
   DropdownMenuSubTrigger,
@@ -35,6 +37,7 @@ import {
 } from "@hugeicons/core-free-icons"
 import { cn } from "@/lib/utils"
 import { NoteRichEditor } from "./note-rich-editor"
+import { getAllTemplates, getTemplateByNoteType } from "./note-templates"
 import type { NotesProject, Note } from "./types"
 
 const TITLE_DEBOUNCE_MS = 400
@@ -226,7 +229,96 @@ export function NoteEditor({
   }
 
   const project = projectForNote(note.projectId)
+  const noteTemplate = getTemplateByNoteType(note.noteType)
+  const noteTypeOptions = getAllTemplates()
   const wordCount = note.contentText.split(/\s+/).filter(Boolean).length
+
+  const metadataBadges = (
+    <>
+      <Badge
+        variant="outline"
+        className="rounded-md border-border/40 bg-background/70 text-[10px]"
+      >
+        {project ? (
+          <>
+            {project.icon} {project.title}
+          </>
+        ) : (
+          "No project"
+        )}
+      </Badge>
+      <Badge
+        variant="outline"
+        className="rounded-md border-border/40 bg-background/70 text-[10px]"
+      >
+        {noteTemplate.label}
+      </Badge>
+    </>
+  )
+
+  const moreActionsMenu = (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon-sm" title="More actions">
+          <HugeiconsIcon icon={ArrowRight01Icon} className="size-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-48">
+        <DropdownMenuItem onClick={() => onPinNote(note._id)}>
+          <HugeiconsIcon icon={PinIcon} className="size-4 mr-2" />
+          {note.pinned ? "Unpin" : "Pin"}
+        </DropdownMenuItem>
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>
+            <HugeiconsIcon
+              icon={FolderManagementIcon}
+              className="size-4 mr-2"
+            />
+            Move to...
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent className="w-48">
+            <DropdownMenuItem onClick={() => onMoveNote(note._id, "__none__")}>
+              No project
+            </DropdownMenuItem>
+            {projects.map((p) => (
+              <DropdownMenuItem
+                key={p._id}
+                onClick={() => onMoveNote(note._id, p._id)}
+              >
+                {p.icon} {p.title}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>Change type</DropdownMenuSubTrigger>
+          <DropdownMenuSubContent className="w-44">
+            <DropdownMenuRadioGroup value={note.noteType ?? "blank"}>
+              {noteTypeOptions.map((template) => (
+                <DropdownMenuRadioItem
+                  key={template.key}
+                  value={template.noteType}
+                  onSelect={(event) => {
+                    event.preventDefault()
+                    onUpdateNote(note._id, { noteType: template.noteType })
+                  }}
+                >
+                  {template.label}
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+        <DropdownMenuItem
+          onClick={() => onDeleteNote(note._id)}
+          className="text-destructive"
+        >
+          <HugeiconsIcon icon={Delete01Icon} className="size-4 mr-2" />
+          Delete
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
 
   if (isInSheet) {
     return (
@@ -251,53 +343,7 @@ export function NoteEditor({
               >
                 <HugeiconsIcon icon={PinIcon} className="size-4" />
               </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon-sm">
-                    <HugeiconsIcon icon={ArrowRight01Icon} className="size-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem onClick={() => onPinNote(note._id)}>
-                    <HugeiconsIcon icon={PinIcon} className="size-4 mr-2" />
-                    {note.pinned ? "Unpin" : "Pin"}
-                  </DropdownMenuItem>
-                  <DropdownMenuSub>
-                    <DropdownMenuSubTrigger>
-                      <HugeiconsIcon
-                        icon={FolderManagementIcon}
-                        className="size-4 mr-2"
-                      />
-                      Move to...
-                    </DropdownMenuSubTrigger>
-                    <DropdownMenuSubContent className="w-48">
-                      <DropdownMenuItem
-                        onClick={() => onMoveNote(note._id, "__none__")}
-                      >
-                        No project
-                      </DropdownMenuItem>
-                      {projects.map((p) => (
-                        <DropdownMenuItem
-                          key={p._id}
-                          onClick={() => onMoveNote(note._id, p._id)}
-                        >
-                          {p.icon} {p.title}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuSubContent>
-                  </DropdownMenuSub>
-                  <DropdownMenuItem
-                    onClick={() => onDeleteNote(note._id)}
-                    className="text-destructive"
-                  >
-                    <HugeiconsIcon
-                      icon={Delete01Icon}
-                      className="size-4 mr-2"
-                    />
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+            {moreActionsMenu}
             </div>
           </div>
           <Input
@@ -312,18 +358,7 @@ export function NoteEditor({
             className="border-0 bg-transparent px-0 text-lg font-semibold tracking-tight shadow-none focus-visible:ring-0 placeholder:text-muted-foreground/50"
           />
           <div className="mt-2 flex items-center gap-2">
-            <Badge
-              variant="outline"
-              className="rounded-md border-border/40 bg-background/70 text-[10px]"
-            >
-              {project ? (
-                <>
-                  {project.icon} {project.title}
-                </>
-              ) : (
-                "No project"
-              )}
-            </Badge>
+            {metadataBadges}
             <span className="text-[11px] text-muted-foreground tabular-nums">
               {formatRelativeTime(note.updatedAt)}
             </span>
@@ -364,18 +399,7 @@ export function NoteEditor({
       <div className="sticky top-0 z-10 shrink-0 border-b border-border/40 bg-background/80 px-3 pb-2 pt-2 backdrop-blur supports-backdrop-filter:bg-background/70">
         <div className="mb-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Badge
-              variant="outline"
-              className="rounded-md border-border/40 bg-background/70 text-[10px]"
-            >
-              {project ? (
-                <>
-                  {project.icon} {project.title}
-                </>
-              ) : (
-                "No project"
-              )}
-            </Badge>
+            {metadataBadges}
             <span className="text-[11px] text-muted-foreground tabular-nums">
               {formatRelativeTime(note.updatedAt)}
             </span>
@@ -406,50 +430,7 @@ export function NoteEditor({
             >
               <HugeiconsIcon icon={PinIcon} className="size-4" />
             </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon-sm" title="More actions">
-                  <HugeiconsIcon icon={ArrowRight01Icon} className="size-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem onClick={() => onPinNote(note._id)}>
-                  <HugeiconsIcon icon={PinIcon} className="size-4 mr-2" />
-                  {note.pinned ? "Unpin" : "Pin"}
-                </DropdownMenuItem>
-                <DropdownMenuSub>
-                  <DropdownMenuSubTrigger>
-                    <HugeiconsIcon
-                      icon={FolderManagementIcon}
-                      className="size-4 mr-2"
-                    />
-                    Move to...
-                  </DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent className="w-48">
-                    <DropdownMenuItem
-                      onClick={() => onMoveNote(note._id, "__none__")}
-                    >
-                      No project
-                    </DropdownMenuItem>
-                    {projects.map((p) => (
-                      <DropdownMenuItem
-                        key={p._id}
-                        onClick={() => onMoveNote(note._id, p._id)}
-                      >
-                        {p.icon} {p.title}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuSubContent>
-                </DropdownMenuSub>
-                <DropdownMenuItem
-                  onClick={() => onDeleteNote(note._id)}
-                  className="text-destructive"
-                >
-                  <HugeiconsIcon icon={Delete01Icon} className="size-4 mr-2" />
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {moreActionsMenu}
           </div>
         </div>
         <Input
