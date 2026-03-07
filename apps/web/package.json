@@ -67,6 +67,7 @@
     "convex": "^1.31.7",
     "embla-carousel-react": "^8.6.0",
     "exa-js": "^2.3.0",
+    "jsdiff": "^1.1.1",
     "lexical": "^0.35.0",
     "lucide-react": "^0.562.0",
     "media-chrome": "^4.17.2",
