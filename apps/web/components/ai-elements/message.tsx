@@ -15,9 +15,9 @@ import { math } from "@streamdown/math";
 import { mermaid } from "@streamdown/mermaid";
 import type { UIMessage } from "ai";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
-import { motion, type HTMLMotionProps } from "framer-motion";
+import { motion, type HTMLMotionProps, useReducedMotion } from "framer-motion";
 import type { ComponentProps, HTMLAttributes, ReactElement } from "react";
-import { createContext, memo, useContext, useEffect, useState } from "react";
+import { createContext, memo, useContext, useEffect, useMemo, useState } from "react";
 import { Streamdown } from "streamdown";
 
 export type MessageProps = Omit<HTMLMotionProps<"div">, "from"> & {
@@ -35,20 +35,28 @@ const messageVariants = {
   },
 };
 
-export const Message = ({ className, from, ...props }: MessageProps) => (
-  <motion.div
-    className={cn(
-      "group flex w-full max-w-[96%] flex-col gap-2",
-      from === "user" ? "is-user ml-auto justify-end" : "is-assistant",
-      className,
-    )}
-    initial="initial"
-    animate="animate"
-    variants={messageVariants}
-    transition={{ duration: from === "user" ? 0.15 : 0.2, ease: "easeOut" }}
-    {...props}
-  />
-);
+export const Message = ({ className, from, ...props }: MessageProps) => {
+  const prefersReducedMotion = useReducedMotion();
+
+  return (
+    <motion.div
+      className={cn(
+        "group flex w-full max-w-[96%] flex-col gap-2",
+        from === "user" ? "is-user ml-auto justify-end" : "is-assistant",
+        className,
+      )}
+      initial={prefersReducedMotion ? false : "initial"}
+      animate="animate"
+      variants={prefersReducedMotion ? undefined : messageVariants}
+      transition={
+        prefersReducedMotion
+          ? undefined
+          : { duration: from === "user" ? 0.15 : 0.2, ease: "easeOut" }
+      }
+      {...props}
+    />
+  );
+};
 
 export type MessageContentProps = HTMLAttributes<HTMLDivElement>;
 
@@ -200,7 +208,10 @@ export const MessageBranchContent = ({
   ...props
 }: MessageBranchContentProps) => {
   const { currentBranch, setBranches, branches } = useMessageBranch();
-  const childrenArray = Array.isArray(children) ? children : [children];
+  const childrenArray = useMemo(
+    () => (Array.isArray(children) ? children : [children]),
+    [children],
+  );
 
   // Use useEffect to update branches when they change
   useEffect(() => {
@@ -228,8 +239,6 @@ export type MessageBranchSelectorProps = HTMLAttributes<HTMLDivElement> & {
 };
 
 export const MessageBranchSelector = ({
-  className,
-  from,
   ...props
 }: MessageBranchSelectorProps) => {
   const { totalBranches } = useMessageBranch();
@@ -324,6 +333,7 @@ export const StreamingText = memo(function StreamingText({
   text,
   isStreaming,
 }: StreamingTextProps) {
+  const prefersReducedMotion = useReducedMotion();
   const [displayed, setDisplayed] = useState("");
 
   useEffect(() => {
@@ -347,7 +357,10 @@ export const StreamingText = memo(function StreamingText({
       {displayed}
       {isStreaming && (
         <motion.span
-          className="inline-block ml-0.5 w-0.5 h-4 align-middle bg-foreground/40 animate-cursor"
+          className={cn(
+            "inline-block ml-0.5 h-4 w-0.5 align-middle bg-foreground/40",
+            !prefersReducedMotion && "animate-cursor",
+          )}
           aria-hidden="true"
         />
       )}

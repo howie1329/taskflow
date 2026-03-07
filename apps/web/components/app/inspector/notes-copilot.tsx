@@ -18,13 +18,26 @@ import {
   Wand2,
 } from "lucide-react"
 import { toast } from "sonner"
+import {
+  Conversation,
+  ConversationContent,
+  ConversationEmptyState,
+  ConversationScrollButton,
+} from "@/components/ai-elements/conversation"
+import { Message, MessageContent } from "@/components/ai-elements/message"
+import {
+  PromptInput,
+  PromptInputFooter,
+  PromptInputSubmit,
+  PromptInputTextarea,
+} from "@/components/ai-elements/prompt-input"
 import { useNotes } from "@/components/notes"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Textarea } from "@/components/ui/textarea"
 import { useSidebar } from "@/components/ui/sidebar"
+import { cn } from "@/lib/utils"
 import {
   createReviewerChatPrompt,
   createReviewerSignature,
@@ -175,27 +188,6 @@ function summarizeDiff(currentText: string, nextText: string) {
   return summaries.length > 0 ? summaries.slice(0, 3) : ["updated note"]
 }
 
-function MessageBubble({
-  role,
-  children,
-}: {
-  role: "user" | "assistant"
-  children: React.ReactNode
-}) {
-  return (
-    <div
-      className={[
-        "rounded-xl border px-3 py-2 text-sm",
-        role === "user"
-          ? "border-primary/20 bg-primary/5"
-          : "border-border/60 bg-background",
-      ].join(" ")}
-    >
-      {children}
-    </div>
-  )
-}
-
 function ReplaceNoteToolCard({
   note,
   part,
@@ -230,7 +222,7 @@ function ReplaceNoteToolCard({
             <p className="font-medium text-foreground">Change summary</p>
             <div className="mt-1 flex flex-wrap gap-1.5">
               {diffSummary.map((item) => (
-                <Badge key={item} variant="outline" className="h-5 text-[10px]">
+                <Badge key={item} variant="outline" className="h-5 text-xs">
                   {item}
                 </Badge>
               ))}
@@ -354,7 +346,7 @@ function WebSearchToolCard({
         <div className="flex items-center justify-between gap-2">
           <p className="font-medium">Web search results</p>
           {part.output?.provider ? (
-            <Badge variant="outline" className="h-5 text-[10px]">
+            <Badge variant="outline" className="h-5 text-xs">
               {part.output.provider}
             </Badge>
           ) : null}
@@ -376,7 +368,7 @@ function WebSearchToolCard({
                 <p className="mt-1 line-clamp-2 text-muted-foreground">
                   {result.snippet || "No snippet available."}
                 </p>
-                <p className="mt-1 truncate text-[10px] text-muted-foreground">{result.url}</p>
+                <p className="mt-1 truncate text-xs text-muted-foreground">{result.url}</p>
               </a>
             ))
           ) : (
@@ -421,6 +413,7 @@ function NotesMiniChat({ note }: { note: Note }) {
     sendMessage,
     setMessages,
     addToolApprovalResponse,
+    stop,
   } = useChat({
     id: `note_mini_chat_${note._id}`,
     transport: new DefaultChatTransport({
@@ -460,8 +453,8 @@ function NotesMiniChat({ note }: { note: Note }) {
     }
   }
 
-  const handleSubmit = async () => {
-    const trimmed = input.trim()
+  const handleSubmit = async (text = input) => {
+    const trimmed = text.trim()
     if (!trimmed || status === "streaming" || status === "submitted") return
     setInput("")
     await sendMessage(
@@ -495,8 +488,10 @@ function NotesMiniChat({ note }: { note: Note }) {
       <div className="space-y-2">
         <div className="flex items-center justify-between gap-2">
           <div>
-            <p className="text-sm font-medium">Notes mini chat</p>
-            <p className="truncate text-xs text-muted-foreground">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">
+              Notes mini chat
+            </p>
+            <p className="truncate text-sm font-medium">
               {note.title || "Untitled note"}
             </p>
           </div>
@@ -510,116 +505,126 @@ function NotesMiniChat({ note }: { note: Note }) {
           </Button>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="secondary" className="gap-1">
+          <Badge variant="secondary" className="h-6 gap-1 rounded-full text-xs">
             <FileText className="size-3" />
             Using current note only
           </Badge>
-          <Badge variant="outline">{messages.length} messages</Badge>
-          <Badge variant="outline">{status}</Badge>
+          <Badge variant="outline" className="h-6 rounded-full text-xs">
+            {messages.length} messages
+          </Badge>
         </div>
       </div>
 
       <Separator />
 
-      <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1">
-        {messages.length === 0 ? (
-          <div className="space-y-3 rounded-xl border border-dashed border-border/70 bg-muted/20 p-3">
-            <div className="flex items-start gap-2">
-              <Sparkles className="mt-0.5 size-4 text-muted-foreground" />
-              <div>
-                <p className="text-sm font-medium">Ask about this note</p>
-                <p className="text-xs text-muted-foreground">
-                  I can answer questions from the current note, rewrite it with approval, or search the web when you ask for outside information.
-                </p>
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {promptSuggestions.map((prompt) => (
-                <Button
-                  key={prompt}
-                  variant="outline"
-                  size="sm"
-                  className="h-7 text-xs"
-                  onClick={() => setInput(prompt)}
+      <Conversation className="min-h-0 flex-1">
+        <ConversationContent className="flex w-full flex-col gap-4 px-0 py-1 pr-1">
+          {messages.length === 0 ? (
+            <ConversationEmptyState
+              className="min-h-[260px] rounded-xl border border-dashed border-border/70 bg-muted/20 p-4 text-left"
+              icon={<Sparkles className="size-4" />}
+              title="Ask about this note"
+              description="I can answer questions from the current note, rewrite it with approval, or search the web when you ask for outside information."
+              suggestions={promptSuggestions.map((prompt) => ({
+                title: prompt,
+                value: prompt,
+              }))}
+              onSuggestionSelect={(value) => setInput(value)}
+            />
+          ) : (
+            messages.map((message) => {
+              const parts = message.parts as MessagePart[]
+              const text = getTextFromParts(parts)
+
+              return (
+                <Message
+                  key={message.id}
+                  from={message.role}
+                  className={cn("max-w-none gap-1.5", message.role === "user" && "justify-end")}
                 >
-                  {prompt}
-                </Button>
-              ))}
-            </div>
-          </div>
-        ) : (
-          messages.map((message) => {
-            const parts = message.parts as MessagePart[]
-            const text = getTextFromParts(parts)
+                  <MessageContent
+                    className={cn(
+                      "text-[15px] leading-7",
+                      message.role === "assistant" && "w-full",
+                      message.role === "user" && "max-w-xl",
+                    )}
+                  >
+                    {text ? <p className="whitespace-pre-wrap">{text}</p> : null}
+                    {parts.map((part) => {
+                      if (isReplaceCurrentNoteToolPart(part)) {
+                        return (
+                          <ReplaceNoteToolCard
+                            key={part.toolCallId}
+                            note={note}
+                            part={part}
+                            onApprove={(approvalId) => handleApproval(approvalId, true)}
+                            onDeny={(approvalId) => handleApproval(approvalId, false)}
+                          />
+                        )
+                      }
 
-            return (
-              <MessageBubble
-                key={message.id}
-                role={message.role === "user" ? "user" : "assistant"}
-              >
-                <p className="mb-1 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
-                  {message.role}
-                </p>
-                {text ? <p className="whitespace-pre-wrap">{text}</p> : null}
-                {parts.map((part) => {
-                  if (isReplaceCurrentNoteToolPart(part)) {
-                    return (
-                      <ReplaceNoteToolCard
-                        key={part.toolCallId}
-                        note={note}
-                        part={part}
-                        onApprove={(approvalId) => handleApproval(approvalId, true)}
-                        onDeny={(approvalId) => handleApproval(approvalId, false)}
-                      />
-                    )
-                  }
+                      if (isSearchWebToolPart(part)) {
+                        return (
+                          <WebSearchToolCard
+                            key={part.toolCallId}
+                            part={part}
+                          />
+                        )
+                      }
 
-                  if (isSearchWebToolPart(part)) {
-                    return (
-                      <WebSearchToolCard
-                        key={part.toolCallId}
-                        part={part}
-                      />
-                    )
-                  }
+                      return null
+                    })}
+                    {!text &&
+                    !parts.some(
+                      (part) =>
+                        part.type === "tool-replaceCurrentNote" ||
+                        part.type === "tool-searchWebForNoteContext",
+                    ) ? (
+                      <p className="text-xs text-muted-foreground">No renderable content.</p>
+                    ) : null}
+                  </MessageContent>
+                </Message>
+              )
+            })
+          )}
+          {error ? <p className="text-xs text-destructive">{error.message}</p> : null}
+        </ConversationContent>
+        <ConversationScrollButton />
+      </Conversation>
 
-                  return null
-                })}
-                {!text &&
-                !parts.some(
-                  (part) =>
-                    part.type === "tool-replaceCurrentNote" ||
-                    part.type === "tool-searchWebForNoteContext",
-                ) ? (
-                  <p className="text-xs text-muted-foreground">No renderable content.</p>
-                ) : null}
-              </MessageBubble>
-            )
-          })
-        )}
-        {error ? <p className="text-xs text-destructive">{error.message}</p> : null}
-      </div>
-
-      <div className="shrink-0 space-y-2 border-t border-border/40 pt-3">
-        <Textarea
-          value={input}
-          onChange={(event) => setInput(event.target.value)}
-          placeholder="Ask about this note..."
-          className="min-h-[100px] resize-none"
-          onKeyDown={(event) => {
-            if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
-              event.preventDefault()
-              void handleSubmit()
-            }
-          }}
-        />
-        <Button
-          className="w-full"
-          onClick={() => void handleSubmit()}
-          disabled={status === "streaming" || status === "submitted" || !input.trim()}
+      <div className="shrink-0 border-t border-border/40 pt-3">
+        <PromptInput
+          onSubmit={({ text }) => handleSubmit(text)}
+          className="**:data-[slot=input-group]:rounded-3xl **:data-[slot=input-group]:border-border/60 **:data-[slot=input-group]:bg-background **:data-[slot=input-group]:shadow-sm **:data-[slot=input-group]:transition-colors **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:border-ring/50 **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:ring-2 **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:ring-ring/20"
         >
-          Send
-        </Button>
+          <PromptInputTextarea
+            id="notes-mini-chat-message"
+            aria-label="Ask about this note"
+            value={input}
+            onChange={(event) => setInput(event.target.value)}
+            placeholder="Ask about this note..."
+            className="min-h-[72px] max-h-56 px-3 py-2.5 text-[15px] leading-7"
+          />
+          <PromptInputFooter className="border-t border-border/45 pb-2.5 pt-2 text-muted-foreground">
+            <div className="flex items-center gap-2 text-xs">
+              {status === "streaming" || status === "submitted" ? (
+                <span className="inline-flex items-center gap-1.5 text-muted-foreground">
+                  <Loader2 className="size-3.5 animate-spin" />
+                  Generating response
+                </span>
+              ) : (
+                <span>Enter to send</span>
+              )}
+            </div>
+            <PromptInputSubmit
+              status={status}
+              onStop={stop}
+              size="icon-sm"
+              className="size-8 rounded-full"
+              disabled={status !== "streaming" && status !== "submitted" && !input.trim()}
+            />
+          </PromptInputFooter>
+        </PromptInput>
       </div>
     </div>
   )
@@ -633,8 +638,8 @@ function ReviewerScoreCard({
   value: number
 }) {
   return (
-    <div className="rounded-md border border-border/60 bg-background px-2 py-2">
-      <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+    <div className="rounded-md border border-border/50 bg-background px-2.5 py-2.5">
+      <p className="text-xs uppercase tracking-wide text-muted-foreground">
         {label}
       </p>
       <p className="mt-1 text-sm font-medium text-foreground">{value}/5</p>
@@ -661,7 +666,7 @@ function ReviewerSuggestionCard({
   }
 
   return (
-    <div className="rounded-lg border border-border/60 bg-background p-3">
+    <div className="rounded-md border border-border/50 bg-background p-3 transition-colors duration-200 hover:bg-muted/30">
       <div className="flex items-start justify-between gap-2">
         <div>
           <p className="text-sm font-medium text-foreground">{suggestion.title}</p>
@@ -674,7 +679,7 @@ function ReviewerSuggestionCard({
       <div className="mt-3 flex items-center gap-2">
         <Button
           size="sm"
-          className="h-7 px-2 text-xs"
+          className="h-7 px-2 text-xs transition-colors duration-200"
           onClick={() => onAskChat(prompt)}
         >
           Ask chat
@@ -682,7 +687,7 @@ function ReviewerSuggestionCard({
         <Button
           variant="outline"
           size="sm"
-          className="h-7 px-2 text-xs"
+          className="h-7 px-2 text-xs transition-colors duration-200"
           onClick={() => void handleCopy()}
         >
           <Clipboard className="mr-1 size-3.5" />
@@ -716,7 +721,10 @@ function NotesInspectorReviewer({
       <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-sm font-medium">Reviewer</p>
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">
+              Reviewer
+            </p>
+            <p className="text-sm font-medium">Latest note review</p>
             <p className="mt-1 text-xs text-muted-foreground">
               Runs after meaningful note saves and keeps the latest review for this note.
             </p>
@@ -740,7 +748,9 @@ function NotesInspectorReviewer({
           {status === "ready" ? <CheckCircle2 className="size-3.5 text-emerald-600" /> : null}
           {status === "error" ? <AlertCircle className="size-3.5 text-destructive" /> : null}
           <span>
-            {reviewer
+            {status === "reviewing"
+              ? "Analyzing note..."
+              : reviewer
               ? `Last reviewed ${formatTimestamp(reviewer.updatedAt)}`
               : "No review has been generated yet."}
           </span>
@@ -759,10 +769,12 @@ function NotesInspectorReviewer({
         <>
           <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
             <div className="flex items-center justify-between gap-2">
-              <p className="font-medium">Summary</p>
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                Summary
+              </p>
               <Badge variant="outline">{reviewer.noteType}</Badge>
             </div>
-            <p className="mt-2 text-sm text-muted-foreground">{reviewer.summary}</p>
+            <p className="mt-2 text-sm font-medium text-foreground">{reviewer.summary}</p>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
@@ -779,14 +791,14 @@ function NotesInspectorReviewer({
           </div>
 
           <div className="space-y-2">
-            <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">
               Top Issues
             </p>
             {reviewer.topIssues.length > 0 ? (
               reviewer.topIssues.map((issue) => (
                 <div
                   key={`${issue.title}_${issue.detail}`}
-                  className="rounded-lg border border-border/60 bg-background p-3"
+                  className="rounded-md border border-border/50 bg-background p-3"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-sm font-medium text-foreground">{issue.title}</p>
@@ -803,7 +815,7 @@ function NotesInspectorReviewer({
           </div>
 
           <div className="space-y-2">
-            <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">
               Suggestions
             </p>
             {reviewer.suggestions.length > 0 ? (
@@ -821,7 +833,9 @@ function NotesInspectorReviewer({
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
-              <p className="font-medium">Action items</p>
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                Action items
+              </p>
               {reviewer.actionItems.length > 0 ? (
                 <ul className="mt-2 space-y-2 text-xs text-muted-foreground">
                   {reviewer.actionItems.map((item) => (
@@ -835,7 +849,9 @@ function NotesInspectorReviewer({
               )}
             </div>
             <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
-              <p className="font-medium">Open questions</p>
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                Open questions
+              </p>
               {reviewer.openQuestions.length > 0 ? (
                 <ul className="mt-2 space-y-2 text-xs text-muted-foreground">
                   {reviewer.openQuestions.map((item) => (
