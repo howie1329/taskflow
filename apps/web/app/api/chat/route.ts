@@ -32,11 +32,17 @@ import type { ModeName } from "@/lib/AITools/ModePrompts";
 import { getChatGenUISystemPrompt } from "@/lib/genui/chat-prompt";
 
 const CHAT_SUMMARIZATION_OPTIONS = {
-  trigger: { kind: "either", maxTokens: 6000, maxMessages: 20 } as const,
+  trigger: { kind: "either", maxTokens: 20000, maxMessages: 20 } as const,
   keepLastN: 8,
   includeToolText: false,
   maxCharsPerMessage: 8000,
 };
+
+const ROLLING_SUMMARY_OPTIONS = {
+  maxSummaryChars: 2800,
+  maxTranscriptChars: 12000,
+  minTranscriptChars: 180,
+} as const;
 
 const chatApiWithSummary = api as typeof api & {
   chat: typeof api.chat & {
@@ -99,6 +105,13 @@ const createRollingSummary = async ({
   previousSummary: string;
   transcript: string;
 }) => {
+  const boundedPreviousSummary = previousSummary
+    .trim()
+    .slice(0, ROLLING_SUMMARY_OPTIONS.maxSummaryChars);
+  const boundedTranscript = transcript
+    .trim()
+    .slice(-ROLLING_SUMMARY_OPTIONS.maxTranscriptChars);
+
   const { text } = await generateText({
     model: openRouter("arcee-ai/trinity-large-preview:free", {
       extraBody: {
@@ -109,13 +122,34 @@ const createRollingSummary = async ({
       },
     }),
     system:
-      "You maintain a rolling conversation summary used for context compression. Keep it concise, factual, and action-oriented.",
-    prompt: `Update the rolling summary.\n\nExisting summary:\n${previousSummary || "None"}\n\nNew transcript segment:\n${transcript}\n\nReturn only the updated summary text. Keep critical user preferences, decisions, open tasks, and unresolved questions.`,
+      "You maintain a rolling conversation summary used for context compression. Keep it concise, factual, action-oriented, and durable across long chats.",
+    prompt: `Update the rolling summary.
+
+Return plain markdown using this structure:
+- **User profile & preferences**
+- **Decisions & outcomes**
+- **Open tasks & unresolved questions**
+- **Active context for next reply**
+
+Rules:
+- Keep only information still useful for future turns.
+- Remove stale or resolved items.
+- Prefer short bullets over prose.
+- Never include tool JSON dumps or verbose logs.
+- Keep the full summary under ${ROLLING_SUMMARY_OPTIONS.maxSummaryChars} characters.
+
+Existing summary:
+${boundedPreviousSummary || "None"}
+
+New transcript segment:
+${boundedTranscript}
+
+Return only the updated markdown summary.`,
     temperature: 0.2,
     maxRetries: 3,
   });
 
-  return text.trim();
+  return text.trim().slice(0, ROLLING_SUMMARY_OPTIONS.maxSummaryChars);
 };
 
 export async function POST(req: Request) {
@@ -289,7 +323,7 @@ export async function POST(req: Request) {
       CHAT_SUMMARIZATION_OPTIONS,
     );
 
-    if (transcript) {
+    if (transcript.length >= ROLLING_SUMMARY_OPTIONS.minTranscriptChars) {
       try {
         const updatedSummary = await createRollingSummary({
           openRouter,
