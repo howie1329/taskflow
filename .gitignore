@@ -47,7 +47,6 @@ coverage/
 # skills
 .agents
 .cursor
-.codex-skills
 
 # Opencode
 .opencode
