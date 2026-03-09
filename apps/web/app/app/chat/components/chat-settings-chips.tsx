@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo, useState, type ReactNode } from "react"
 import type { Doc } from "@/convex/_generated/dataModel"
 import { ModelSelectorLogo } from "@/components/ai-elements/model-selector"
 import type { ModeName } from "@/lib/AITools/ModePrompts"
@@ -38,6 +38,45 @@ interface ChatSettingsChipsProps {
   showImageAction?: boolean
 }
 
+function SettingsPopoverChip({
+  panel,
+  openPanel,
+  setOpenPanel,
+  tooltip,
+  trigger,
+  children,
+}: {
+  panel: "model" | "mode" | "project"
+  openPanel: "model" | "mode" | "project" | null
+  setOpenPanel: (value: "model" | "mode" | "project" | null) => void
+  tooltip: string
+  trigger: ReactNode
+  children: ReactNode
+}) {
+  return (
+    <Tooltip>
+      <Popover
+        open={openPanel === panel}
+        onOpenChange={(open) => setOpenPanel(open ? panel : null)}
+      >
+        <PopoverTrigger asChild>
+          <TooltipTrigger asChild>{trigger}</TooltipTrigger>
+        </PopoverTrigger>
+        <TooltipContent sideOffset={6}>
+          <p>{tooltip}</p>
+        </TooltipContent>
+        <PopoverContent
+          align="start"
+          sideOffset={10}
+          className={cn("w-[min(92vw,28rem)]", CHAT_SETTINGS_POPOVER_CLASS_NAME)}
+        >
+          {children}
+        </PopoverContent>
+      </Popover>
+    </Tooltip>
+  )
+}
+
 export function ChatSettingsChips({
   availableModels,
   selectedModelId,
@@ -62,118 +101,94 @@ export function ChatSettingsChips({
 
   return (
     <>
-      <Tooltip>
-        <Popover open={openPanel === "model"} onOpenChange={(open) => setOpenPanel(open ? "model" : null)}>
-          <PopoverTrigger asChild>
-            <TooltipTrigger asChild>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                aria-label={`Model: ${selectedModel?.name ?? "Select model"}`}
-                className={cn(
-                  CHAT_SETTINGS_TRIGGER_CLASS_NAME,
-                  "h-7 max-w-44 justify-start gap-2 px-2.5 sm:max-w-52",
-                )}
-              >
-                {selectedModel?.provider ? (
-                  <ModelSelectorLogo provider={selectedModel.provider} className="size-3.5 shrink-0" />
-                ) : (
-                  <CpuIcon className="size-3.5 shrink-0" />
-                )}
-                <span className="truncate text-xs font-medium">
-                  {selectedModel?.name ?? "Select model"}
-                </span>
-              </Button>
-            </TooltipTrigger>
-          </PopoverTrigger>
-          <TooltipContent sideOffset={6}>
-            <p>{selectedModel?.name ?? "Select model"}</p>
-          </TooltipContent>
-          <PopoverContent
-            align="start"
-            sideOffset={10}
-            className={cn("w-[min(92vw,28rem)]", CHAT_SETTINGS_POPOVER_CLASS_NAME)}
+      <SettingsPopoverChip
+        panel="model"
+        openPanel={openPanel}
+        setOpenPanel={setOpenPanel}
+        tooltip={selectedModel?.name ?? "Select model"}
+        trigger={
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            aria-label={`Model: ${selectedModel?.name ?? "Select model"}`}
+            className={cn(
+              CHAT_SETTINGS_TRIGGER_CLASS_NAME,
+              "h-7 max-w-44 justify-start gap-2 px-2.5 sm:max-w-52",
+            )}
           >
-            <ModelSettingsList
-              availableModels={availableModels}
-              selectedModelId={selectedModelId}
-              onSelectModelId={onSelectModelId}
-              onClose={() => setOpenPanel(null)}
-            />
-          </PopoverContent>
-        </Popover>
-      </Tooltip>
+            {selectedModel?.provider ? (
+              <ModelSelectorLogo provider={selectedModel.provider} className="size-3.5 shrink-0" />
+            ) : (
+              <CpuIcon className="size-3.5 shrink-0" />
+            )}
+            <span className="truncate text-xs font-medium">
+              {selectedModel?.name ?? "Select model"}
+            </span>
+          </Button>
+        }
+      >
+        <ModelSettingsList
+          availableModels={availableModels}
+          selectedModelId={selectedModelId}
+          onSelectModelId={onSelectModelId}
+          onClose={() => setOpenPanel(null)}
+        />
+      </SettingsPopoverChip>
 
-      <Tooltip>
-        <Popover open={openPanel === "mode"} onOpenChange={(open) => setOpenPanel(open ? "mode" : null)}>
-          <PopoverTrigger asChild>
-            <TooltipTrigger asChild>
-              <Button
-                type="button"
-                variant="outline"
-                size="icon-sm"
-                aria-label={`Mode: ${selectedMode}`}
-                className={cn(CHAT_SETTINGS_TRIGGER_CLASS_NAME, "size-7")}
-              >
-                <WandSparklesIcon className="size-3.5" />
-              </Button>
-            </TooltipTrigger>
-          </PopoverTrigger>
-          <TooltipContent sideOffset={6}>
-            <p>{`Mode: ${selectedMode}`}</p>
-          </TooltipContent>
-          <PopoverContent
-            align="start"
-            sideOffset={10}
-            className={cn("w-[min(92vw,28rem)]", CHAT_SETTINGS_POPOVER_CLASS_NAME)}
+      <SettingsPopoverChip
+        panel="mode"
+        openPanel={openPanel}
+        setOpenPanel={setOpenPanel}
+        tooltip={`Mode: ${selectedMode}`}
+        trigger={
+          <Button
+            type="button"
+            variant="outline"
+            size="icon-sm"
+            aria-label={`Mode: ${selectedMode}`}
+            className={cn(CHAT_SETTINGS_TRIGGER_CLASS_NAME, "size-7")}
           >
-            <ModeSettingsList
-              selectedMode={selectedMode}
-              onSelectMode={onSelectMode}
-              onClose={() => setOpenPanel(null)}
-            />
-          </PopoverContent>
-        </Popover>
-      </Tooltip>
+            <WandSparklesIcon className="size-3.5" />
+          </Button>
+        }
+      >
+        <ModeSettingsList
+          selectedMode={selectedMode}
+          onSelectMode={onSelectMode}
+          onClose={() => setOpenPanel(null)}
+        />
+      </SettingsPopoverChip>
 
-      <Tooltip>
-        <Popover open={openPanel === "project"} onOpenChange={(open) => setOpenPanel(open ? "project" : null)}>
-          <PopoverTrigger asChild>
-            <TooltipTrigger asChild>
-              <Button
-                type="button"
-                variant="outline"
-                size="icon-sm"
-                aria-label={`Project: ${projectLabel}`}
-                className={cn(CHAT_SETTINGS_TRIGGER_CLASS_NAME, "size-7")}
-              >
-                {selectedProject ? (
-                  <FolderIcon className="size-3.5" />
-                ) : (
-                  <GlobeIcon className="size-3.5" />
-                )}
-              </Button>
-            </TooltipTrigger>
-          </PopoverTrigger>
-          <TooltipContent sideOffset={6}>
-            <p>{projectLabel}</p>
-          </TooltipContent>
-          <PopoverContent
-            align="start"
-            sideOffset={10}
-            className={cn("w-[min(92vw,28rem)]", CHAT_SETTINGS_POPOVER_CLASS_NAME)}
+      <SettingsPopoverChip
+        panel="project"
+        openPanel={openPanel}
+        setOpenPanel={setOpenPanel}
+        tooltip={projectLabel}
+        trigger={
+          <Button
+            type="button"
+            variant="outline"
+            size="icon-sm"
+            aria-label={`Project: ${projectLabel}`}
+            className={cn(CHAT_SETTINGS_TRIGGER_CLASS_NAME, "size-7")}
           >
-            <ProjectSettingsList
-              projects={projects}
-              selectedProjectId={selectedProjectId}
-              onSelectProjectId={onSelectProjectId}
-              showImageAction={showImageAction}
-              onClose={() => setOpenPanel(null)}
-            />
-          </PopoverContent>
-        </Popover>
-      </Tooltip>
+            {selectedProject ? (
+              <FolderIcon className="size-3.5" />
+            ) : (
+              <GlobeIcon className="size-3.5" />
+            )}
+          </Button>
+        }
+      >
+        <ProjectSettingsList
+          projects={projects}
+          selectedProjectId={selectedProjectId}
+          onSelectProjectId={onSelectProjectId}
+          showImageAction={showImageAction}
+          onClose={() => setOpenPanel(null)}
+        />
+      </SettingsPopoverChip>
     </>
   )
 }
