@@ -162,7 +162,7 @@ export function ModelSettingsList({
     if (!query) return availableModels
 
     return availableModels.filter((model) =>
-      `${model.name} ${model.provider ?? ""}`.toLowerCase().includes(query)
+      `${model.name} ${model.provider ?? ""} ${model.interface ?? ""} ${formatInterfaceDisplay(model.interface) ?? ""}`.toLowerCase().includes(query)
     )
   }, [availableModels, searchQuery])
 
@@ -353,8 +353,16 @@ export function ProjectSettingsList({
   )
 }
 
+export function formatInterfaceDisplay(interfaceType?: string): string | undefined {
+  if (!interfaceType) return undefined
+  if (interfaceType === "openrouter") return "OpenRouter"
+  if (interfaceType === "qroq") return "Groq"
+  return interfaceType
+}
+
 export function buildModelMeta(model: Doc<"availableModels">): string | undefined {
   const parts = [
+    formatInterfaceDisplay(model.interface),
     model.provider,
     model.contextLength ? `${formatTokenCount(model.contextLength)} context` : null,
     model.modality,
@@ -427,7 +435,11 @@ function ModelSettingsOptionButton({
           selected ? "bg-foreground/8 text-foreground" : null,
         )}
       >
-        {model.provider ? (
+        {model.interface === "qroq" ? (
+          <ModelSelectorLogo provider="groq" className="size-2.5" />
+        ) : model.interface === "openrouter" ? (
+          <ModelSelectorLogo provider="openrouter" className="size-2.5" />
+        ) : model.provider ? (
           <ModelSelectorLogo provider={model.provider} className="size-2.5" />
         ) : selected ? (
           <CheckIcon className="size-2.5" />
@@ -439,6 +451,11 @@ function ModelSettingsOptionButton({
       <span className="min-w-0 flex-1">
         <span className="flex min-w-0 items-center gap-2">
           <span className="truncate text-xs font-medium text-foreground">{model.name}</span>
+          {formatInterfaceDisplay(model.interface) ? (
+            <span className="shrink-0 rounded-full bg-muted/50 px-1.5 py-0.5 text-[9px] font-medium text-muted-foreground">
+              {formatInterfaceDisplay(model.interface)}
+            </span>
+          ) : null}
         </span>
         <span className="mt-0.5 flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1 text-[10px] text-muted-foreground tabular-nums">
           <span className="whitespace-nowrap">
@@ -459,6 +476,11 @@ function ModelSettingsOptionButton({
             </TooltipTrigger>
             <TooltipContent side="top" className="max-w-sm">
               <p className="font-medium">{model.name}</p>
+              {formatInterfaceDisplay(model.interface) ? (
+                <p className="mt-0.5 text-[11px] text-background/70">
+                  Interface: {formatInterfaceDisplay(model.interface)}
+                </p>
+              ) : null}
               <p className="mt-1 text-xs text-background/80">
                 {model.description || "No description available."}
               </p>

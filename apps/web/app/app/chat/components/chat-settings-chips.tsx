@@ -21,6 +21,7 @@ import {
 import {
   CHAT_SETTINGS_POPOVER_CLASS_NAME,
   CHAT_SETTINGS_TRIGGER_CLASS_NAME,
+  formatInterfaceDisplay,
   ModelSettingsList,
   ModeSettingsList,
   ProjectSettingsList,
@@ -105,25 +106,38 @@ export function ChatSettingsChips({
         panel="model"
         openPanel={openPanel}
         setOpenPanel={setOpenPanel}
-        tooltip={selectedModel?.name ?? "Select model"}
+        tooltip={
+          selectedModel
+            ? `${selectedModel.name}${formatInterfaceDisplay(selectedModel.interface) ? ` (${formatInterfaceDisplay(selectedModel.interface)})` : ""}`
+            : "Select model"
+        }
         trigger={
           <Button
             type="button"
             variant="outline"
             size="sm"
-            aria-label={`Model: ${selectedModel?.name ?? "Select model"}`}
+            aria-label={`Model: ${selectedModel?.name ?? "Select model"}${selectedModel?.interface ? ` via ${formatInterfaceDisplay(selectedModel.interface)}` : ""}`}
             className={cn(
               CHAT_SETTINGS_TRIGGER_CLASS_NAME,
               "h-7 max-w-44 justify-start gap-2 px-2.5 sm:max-w-52",
             )}
           >
-            {selectedModel?.provider ? (
+            {selectedModel?.interface === "qroq" ? (
+              <ModelSelectorLogo provider="groq" className="size-3.5 shrink-0" />
+            ) : selectedModel?.interface === "openrouter" ? (
+              <ModelSelectorLogo provider="openrouter" className="size-3.5 shrink-0" />
+            ) : selectedModel?.provider ? (
               <ModelSelectorLogo provider={selectedModel.provider} className="size-3.5 shrink-0" />
             ) : (
               <CpuIcon className="size-3.5 shrink-0" />
             )}
-            <span className="truncate text-xs font-medium">
+            <span className="min-w-0 flex-1 truncate text-xs font-medium">
               {selectedModel?.name ?? "Select model"}
+              {selectedModel?.interface && formatInterfaceDisplay(selectedModel.interface) ? (
+                <span className="ml-1 font-normal text-muted-foreground">
+                  · {formatInterfaceDisplay(selectedModel.interface)}
+                </span>
+              ) : null}
             </span>
           </Button>
         }
