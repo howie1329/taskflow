@@ -1,7 +1,6 @@
 import { v } from "convex/values";
 import { query, internalMutation, internalAction } from "./_generated/server";
 import { api, internal } from "./_generated/api";
-import { Mode } from "fs";
 
 // Type definitions for OpenRouter API response
 type OpenRouterPricing = {
@@ -79,6 +78,17 @@ type ModelInfo = {
 export const getAvailableModels = query({
   handler: async (ctx) => {
     return await ctx.db.query("availableModels").collect();
+  },
+});
+
+// Get model by ID (for provider routing)
+export const getModelById = query({
+  args: { modelId: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("availableModels")
+      .withIndex("by_modelId", (q) => q.eq("modelId", args.modelId))
+      .first();
   },
 });
 

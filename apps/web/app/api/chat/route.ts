@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
+import { createGroq } from "@ai-sdk/groq";
 import {
   stepCountIs,
   ToolLoopAgent as Agent,
@@ -205,22 +206,6 @@ export async function POST(req: Request) {
     );
   }
 
-  const modelWithMemory = withSupermemory(
-    openRouter(model, {
-      reasoning: { enabled: true, effort: "medium" },
-      parallelToolCalls: true,
-      usage: {
-        include: true,
-      },
-    }),
-    userId,
-    {
-      addMemory: "always",
-      mode: "profile",
-      apiKey: process.env.SUPERMEMORY_API_KEY!,
-    },
-  );
-
   if (
     !threadId ||
     !Array.isArray(rawMessages) ||
@@ -229,6 +214,40 @@ export async function POST(req: Request) {
   ) {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
+
+  const modelDoc = await fetchQuery(
+    api.models.getModelById,
+    { modelId: model },
+    { token },
+  );
+  const interfaceType = modelDoc?.interface ?? "openrouter";
+
+  let baseModel;
+  if (interfaceType === "qroq") {
+    const groq = createGroq({ apiKey: process.env.GROQ_API_KEY });
+    if (!groq) {
+      return NextResponse.json(
+        { error: "Groq not initialized" },
+        { status: 500 },
+      );
+    }
+    baseModel = groq(model, {
+      parallelToolCalls: true,
+      usage: { include: true },
+    });
+  } else {
+    baseModel = openRouter(model, {
+      reasoning: { enabled: true, effort: "medium" },
+      parallelToolCalls: true,
+      usage: { include: true },
+    });
+  }
+
+  const modelWithMemory = withSupermemory(baseModel, userId, {
+    addMemory: "always",
+    mode: "profile",
+    apiKey: process.env.SUPERMEMORY_API_KEY!,
+  });
 
   const parsedMessages = safeParseUIMessages(rawMessages);
   if (!parsedMessages.success) {
