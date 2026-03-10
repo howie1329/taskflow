@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { query, internalMutation, internalAction } from "./_generated/server";
 import { api, internal } from "./_generated/api";
+import { Mode } from "fs";
 
 // Type definitions for OpenRouter API response
 type OpenRouterPricing = {
@@ -34,14 +35,30 @@ type OpenRouterModel = {
   expiration_date: number | null;
 };
 
+type QroqModel = {
+  id: string;
+  object: string;
+  created: number;
+  owned_by: string;
+  active: boolean;
+  context_window: number;
+  public_apps?: string;
+  max_completion_tokens: number;
+};
+
 type OpenRouterModelsResponse = {
   data: OpenRouterModel[];
+};
+
+type QroqResponse = {
+  data: QroqModel[];
 };
 
 type ModelInfo = {
   id: string;
   canonicalSlug: string;
   provider: string;
+  interface: string;
   name: string;
   description: string;
   pricing: {
@@ -79,6 +96,7 @@ export const getBaseModels = query({
 export const addBaseModel = internalMutation({
   args: {
     modelId: v.string(),
+    interface: v.string(),
   },
   handler: async (ctx, args) => {
     // Check if already exists
@@ -93,6 +111,7 @@ export const addBaseModel = internalMutation({
 
     await ctx.db.insert("baseModels", {
       modelId: args.modelId,
+      interface: args.interface,
     });
 
     return { success: true, message: "Model added to allowlist" };
@@ -160,6 +179,7 @@ export const fetchOpenRouterModels = internalAction({
       id: model.id,
       canonicalSlug: model.canonical_slug ?? model.id,
       provider: model.id.split("/")[0] ?? "unknown",
+      interface: "openrouter",
       name: model.name,
       description: model.description ?? "",
       pricing: {
@@ -179,6 +199,53 @@ export const fetchOpenRouterModels = internalAction({
   },
 });
 
+// Fetch Models from qroq API (internal action)
+export const fetchQroqModels = internalAction({
+  handler: async (): Promise<{ models: ModelInfo[] }> => {
+    const key = process.env.GROQ_API_KEY!;
+
+    if (!key) {
+      throw new Error("GROQ_API_KEY environment variable not set");
+    }
+
+    let response: Response;
+
+    try {
+      response = await fetch("https://api.groq.com/openai/v1/models", {
+        headers: {
+          Authorization: `Bearer ${key}`,
+        },
+      });
+    } catch (error) {
+      throw new Error(`Failed to fetch models: ${error}`);
+    }
+
+    let data: QroqResponse;
+    try {
+      data = await response.json();
+    } catch (error) {
+      throw new Error(`Failed to parse response: ${error}`);
+    }
+
+    const models: ModelInfo[] = data.data.map((model) => ({
+      id: model.id,
+      canonicalSlug: model.id,
+      name: model.id,
+      interface: "qroq",
+      provider: model.owned_by,
+      description: model.id,
+      pricing: {
+        prompt: "0",
+        completion: "0",
+      },
+      contextLength: model.context_window,
+      maxCompletionTokens: model.max_completion_tokens,
+    }));
+
+    return { models };
+  },
+});
+
 // Replace all available models atomically (internal only)
 export const replaceAvailableModels = internalMutation({
   args: {
@@ -186,6 +253,7 @@ export const replaceAvailableModels = internalMutation({
       v.object({
         id: v.string(),
         canonicalSlug: v.string(),
+        interface: v.string(),
         provider: v.string(),
         name: v.string(),
         description: v.string(),
@@ -216,6 +284,7 @@ export const replaceAvailableModels = internalMutation({
         modelId: model.id,
         canonicalSlug: model.canonicalSlug,
         provider: model.provider,
+        interface: model.interface,
         name: model.name,
         description: model.description,
         pricing: model.pricing,
@@ -262,6 +331,20 @@ export const syncModels = internalAction({
       };
     }
 
+    // Fetch from QroqModel
+    let qroqModels: ModelInfo[];
+    try {
+      const result = await ctx.runAction(internal.models.fetchQroqModels);
+      qroqModels = result.models;
+    } catch (error) {
+      console.error("Failed to fetch from Qroq - keeping existing models");
+      return {
+        success: false,
+        message: "Failed to fetch from Qroq - keeping existing models",
+        keptExisting: true,
+      };
+    }
+
     // Get allowlist
     const baseModelIds: string[] = await ctx.runQuery(api.models.getBaseModels);
 
@@ -276,12 +359,21 @@ export const syncModels = internalAction({
     }
 
     // Filter to only allowlisted models
-    const allowlistedModels: ModelInfo[] = openRouterModels.filter(
-      (m: ModelInfo) => baseModelIds.includes(m.id),
-    );
+    // First filter by base model IDs, then by interface (OpenRouter only)
+    const allowedOpenRouterModels: ModelInfo[] = openRouterModels
+      .filter((m: ModelInfo) => baseModelIds.includes(m.id))
+      .filter((m: ModelInfo) => m.interface === "openrouter");
+
+    // Qroq models are filtered separately
+    const allowedQroqModels: ModelInfo[] = qroqModels
+      .filter((m: ModelInfo) => baseModelIds.includes(m.id))
+      .filter((m: ModelInfo) => m.interface === "qroq");
 
     // If no allowlisted matches found, keep existing (don't wipe on partial failure)
-    if (allowlistedModels.length === 0) {
+    if (
+      allowedOpenRouterModels.length === 0 &&
+      allowedQroqModels.length === 0
+    ) {
       console.warn("No allowlisted models found in OpenRouter response");
       return {
         success: false,
@@ -294,7 +386,7 @@ export const syncModels = internalAction({
     const syncedAt = Date.now();
     const result: { success: boolean; message: string; count: number } =
       await ctx.runMutation(internal.models.replaceAvailableModels, {
-        models: allowlistedModels,
+        models: [...allowedOpenRouterModels, ...allowedQroqModels],
         syncedAt,
       });
 
@@ -306,4 +398,3 @@ export const syncModels = internalAction({
     };
   },
 });
-

@@ -6,6 +6,7 @@ const schema = defineSchema({
   ...authTables,
   baseModels: defineTable({
     modelId: v.string(),
+    interface: v.optional(v.string()),
   }).index("by_modelId", ["modelId"]),
   thread: defineTable({
     userId: v.string(),
@@ -68,6 +69,7 @@ const schema = defineSchema({
     modelId: v.string(),
     canonicalSlug: v.optional(v.string()),
     provider: v.optional(v.string()),
+    interface: v.optional(v.string()),
     name: v.string(),
     description: v.string(),
     pricing: v.object({
