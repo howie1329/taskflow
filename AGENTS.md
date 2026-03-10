@@ -2,7 +2,7 @@
 
 ## Core Principles
 
-1. **Simple first.** Solve the actual problem. Don't over-engineer. Avoid speculative edge cases, extra abstractions, and defensive code for situations that don't exist yet.
+1. **Simple first.** Solve the actual problem. Don't over-engineer. Avoid speculative edge cases, extra abstractions, and defensive code for situations that don't exist yet. Keep the code simple and focused on the problem at hand and easy to understand and follow and maintain.
 2. **Use shadcn first.** Before writing custom UI, check `@/components/ui` in the app you're working in. Use existing components. Add new shadcn components via `npx shadcn@latest add <component>` if needed—don't hand-roll equivalents.
 3. **Match the codebase.** Search for how similar things are done before adding new patterns, utilities, or structure. Reuse existing conventions instead of inventing new ones.
 4. Build just enough to accompish the goal or plan.
