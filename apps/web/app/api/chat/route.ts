@@ -247,7 +247,7 @@ export async function POST(req: Request) {
       break;
     }
     case "cerebras": {
-      const cerebras = createCerebras({ apiKey: process.env.CEREBRAS });
+      const cerebras = createCerebras({ apiKey: process.env.CEREBRAS_API_KEY });
       if (!cerebras) {
         return NextResponse.json(
           { error: "Cerebras not initialized" },
