@@ -42,8 +42,9 @@ export function useThreadPageActions({
   }, [])
 
   const saveThreadTitle = useCallback(async (title: string) => {
-    if (!title.trim()) return false
-    await updateTitle(title)
+    const trimmed = title.trim()
+    if (!trimmed) return false
+    await updateTitle(trimmed)
     return true
   }, [updateTitle])
 

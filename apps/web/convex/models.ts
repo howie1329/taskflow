@@ -1,8 +1,6 @@
 import { v } from "convex/values";
 import { query, internalMutation, internalAction } from "./_generated/server";
 import { api, internal } from "./_generated/api";
-import { CipherKey } from "crypto";
-import { captureOwnerStack } from "react";
 
 // Type definitions for OpenRouter API response
 type OpenRouterPricing = {
@@ -47,7 +45,7 @@ type CerebrasModelsResponse = {
   data: CerebrasModel[];
 };
 
-type QroqModel = {
+type GroqModel = {
   id: string;
   object: string;
   created: number;
@@ -85,8 +83,8 @@ type OpenRouterModelsResponse = {
   data: OpenRouterModel[];
 };
 
-type QroqResponse = {
-  data: QroqModel[];
+type GroqResponse = {
+  data: GroqModel[];
 };
 
 type ModelInfo = {
@@ -253,8 +251,8 @@ export const fetchOpenRouterModels = internalAction({
   },
 });
 
-// Fetch Models from qroq API (internal action)
-export const fetchQroqModels = internalAction({
+// Fetch Models from groq API (internal action)
+export const fetchGroqModels = internalAction({
   handler: async (): Promise<{ models: ModelInfo[] }> => {
     const key = process.env.GROQ_API_KEY!;
 
@@ -274,7 +272,7 @@ export const fetchQroqModels = internalAction({
       throw new Error(`Failed to fetch models: ${error}`);
     }
 
-    let data: QroqResponse;
+    let data: GroqResponse;
     try {
       data = await response.json();
     } catch (error) {
@@ -285,7 +283,7 @@ export const fetchQroqModels = internalAction({
       id: model.id,
       canonicalSlug: model.id,
       name: model.id,
-      interface: "qroq",
+      interface: "groq",
       provider: model.owned_by,
       description: model.id,
       pricing: {
@@ -475,16 +473,16 @@ export const syncModels = internalAction({
       };
     }
 
-    // Fetch from QroqModel
-    let qroqModels: ModelInfo[];
+    // Fetch from GroqModel
+    let groqModels: ModelInfo[];
     try {
-      const result = await ctx.runAction(internal.models.fetchQroqModels);
-      qroqModels = result.models;
+      const result = await ctx.runAction(internal.models.fetchGroqModels);
+      groqModels = result.models;
     } catch (error) {
-      console.error("Failed to fetch from Qroq - keeping existing models");
+      console.error("Failed to fetch from Groq - keeping existing models");
       return {
         success: false,
-        message: "Failed to fetch from Qroq - keeping existing models",
+        message: "Failed to fetch from Groq - keeping existing models",
         keptExisting: true,
       };
     }
@@ -535,8 +533,8 @@ export const syncModels = internalAction({
     const allowedOpenRouterModels: ModelInfo[] = openRouterModels
       .filter((m: ModelInfo) => baseModels.some((bm: BaseModel) => bm.modelId === m.id && bm.interface === "openrouter"))
 
-    // Qroq models are filtered separately
-    const allowedQroqModels: ModelInfo[] = qroqModels
+    // Groq models are filtered separately
+    const allowedGroqModels: ModelInfo[] = groqModels
       .filter((m: ModelInfo) => baseModels.some((bm: BaseModel) => bm.modelId === m.id && bm.interface === "qroq"))
 
     // Cerebras models are filtered separately
@@ -550,7 +548,7 @@ export const syncModels = internalAction({
     // If no allowlisted matches found, keep existing (don't wipe on partial failure)
     if (
       allowedOpenRouterModels.length === 0 &&
-      allowedQroqModels.length === 0 &&
+      allowedGroqModels.length === 0 &&
       allowedCerebrasModels.length === 0 &&
       allowedVercelAIGatewayModels.length === 0
     ) {
@@ -568,7 +566,7 @@ export const syncModels = internalAction({
       await ctx.runMutation(internal.models.replaceAvailableModels, {
         models: [
           ...allowedOpenRouterModels,
-          ...allowedQroqModels,
+          ...allowedGroqModels,
           ...allowedCerebrasModels,
           ...allowedVercelAIGatewayModels,
         ],

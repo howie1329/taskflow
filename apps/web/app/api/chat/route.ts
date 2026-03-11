@@ -235,7 +235,7 @@ export async function POST(req: Request) {
 
   let baseModel;
   switch (interfaceType) {
-    case "qroq": {
+    case "groq": {
       const groq = createGroq({ apiKey: process.env.GROQ_API_KEY });
       if (!groq) {
         return NextResponse.json(

@@ -9,9 +9,10 @@ crons.interval(
   internal.models.syncModels,
 );
 
-crons.daily(
+
+crons.hourly(
   "delete old threads & messages",
-  { hourUTC: 1, minuteUTC: 0 },
+  { minuteUTC: 1 },
   internal.chat.deleteOldThreadsAndMessages,
 );
 
