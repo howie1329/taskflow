@@ -47,15 +47,15 @@ const ROLLING_SUMMARY_OPTIONS = {
 
 const chatApiWithSummary = api as typeof api & {
   chat: typeof api.chat & {
-    setThreadSummary: unknown
-  }
-}
+    setThreadSummary: unknown;
+  };
+};
 
 const fetchMutationUnsafe = fetchMutation as unknown as (
   mutationRef: unknown,
   args: unknown,
   options: { token: string },
-) => Promise<unknown>
+) => Promise<unknown>;
 
 type ActiveAgentStream = {
   totalUsage: Promise<{
@@ -223,24 +223,27 @@ export async function POST(req: Request) {
   const interfaceType = modelDoc?.interface ?? "openrouter";
 
   let baseModel;
-  if (interfaceType === "qroq") {
-    const groq = createGroq({ apiKey: process.env.GROQ_API_KEY });
-    if (!groq) {
-      return NextResponse.json(
-        { error: "Groq not initialized" },
-        { status: 500 },
-      );
+  switch (interfaceType) {
+    case "qroq": {
+      const groq = createGroq({ apiKey: process.env.GROQ_API_KEY });
+      if (!groq) {
+        return NextResponse.json(
+          { error: "Groq not initialized" },
+          { status: 500 },
+        );
+      }
+      baseModel = groq(model);
+      break;
     }
-    baseModel = groq(model, {
-      parallelToolCalls: true,
-      usage: { include: true },
-    });
-  } else {
-    baseModel = openRouter(model, {
-      reasoning: { enabled: true, effort: "medium" },
-      parallelToolCalls: true,
-      usage: { include: true },
-    });
+    case "openrouter":
+    default: {
+      baseModel = openRouter(model, {
+        reasoning: { enabled: true, effort: "medium" },
+        parallelToolCalls: true,
+        usage: { include: true },
+      });
+      break;
+    }
   }
 
   const modelWithMemory = withSupermemory(baseModel, userId, {
@@ -507,7 +510,7 @@ ${getChatGenUISystemPrompt()}`;
               containerTags: [userId],
             }) as unknown as typeof Tools),
           },
-          maxOutputTokens: 4500, // Balanced default to reduce runaway completions
+          maxOutputTokens: 6500, // Balanced default to reduce runaway completions
           activeTools: activeTools as Array<keyof typeof Tools>,
         });
 
