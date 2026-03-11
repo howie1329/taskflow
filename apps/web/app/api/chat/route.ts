@@ -1,10 +1,8 @@
 import { NextResponse } from "next/server";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { createGroq } from "@ai-sdk/groq";
-import {
-  createGoogleGenerativeAI,
-  type GoogleLanguageModelOptions,
-} from "@ai-sdk/google";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createCerebras } from "@ai-sdk/cerebras";
 import {
   stepCountIs,
   ToolLoopAgent as Agent,
@@ -246,6 +244,17 @@ export async function POST(req: Request) {
         );
       }
       baseModel = groq(model);
+      break;
+    }
+    case "cerebras": {
+      const cerebras = createCerebras({ apiKey: process.env.CEREBRAS });
+      if (!cerebras) {
+        return NextResponse.json(
+          { error: "Cerebras not initialized" },
+          { status: 500 },
+        );
+      }
+      baseModel = cerebras(model);
       break;
     }
     case "openrouter":

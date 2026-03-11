@@ -1,6 +1,8 @@
 import { v } from "convex/values";
 import { query, internalMutation, internalAction } from "./_generated/server";
 import { api, internal } from "./_generated/api";
+import { CipherKey } from "crypto";
+import { captureOwnerStack } from "react";
 
 // Type definitions for OpenRouter API response
 type OpenRouterPricing = {
@@ -32,6 +34,17 @@ type OpenRouterModel = {
   supported_parameters?: string[];
   description: string;
   expiration_date: number | null;
+};
+
+type CerebrasModel = {
+  id: string;
+  object: string;
+  created: number;
+  owned_by: string;
+};
+
+type CerebrasModelsResponse = {
+  data: CerebrasModel[];
 };
 
 type QroqModel = {
@@ -256,6 +269,52 @@ export const fetchQroqModels = internalAction({
   },
 });
 
+// Fetch all models from Cerebras
+export const fetchCerebrasModels = internalAction({
+  handler: async (): Promise<{ models: ModelInfo[] }> => {
+    const key = process.env.CEREBRAS_API_KEY;
+    if (!key) {
+      throw new Error("CEREBRAS_API_KEY not set");
+    }
+
+    const response = await fetch("https://api.cerebras.ai/v1/models", {
+      headers: {
+        Authorization: `Bearer ${key}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch models: ${response.status}`);
+    }
+
+    let data: CerebrasModelsResponse;
+    try {
+      data = await response.json();
+    } catch {
+      throw new Error("Failed to parse models response");
+    }
+    const models: ModelInfo[] = data.data.map((model) => ({
+      id: model.id,
+      canonicalSlug: model.id,
+      name: model.id,
+      interface: "cerebras",
+      provider: "cerebras",
+      description: model.owned_by,
+      pricing: {
+        prompt: "0",
+        completion: "0",
+      },
+      contextLength: 0,
+      maxCompletionTokens: 0,
+      modality: "",
+      inputModalities: [],
+      outputModalities: [],
+      supportedParameters: [],
+    }));
+
+    return { models };
+  },
+});
 // Replace all available models atomically (internal only)
 export const replaceAvailableModels = internalMutation({
   args: {
@@ -355,6 +414,20 @@ export const syncModels = internalAction({
       };
     }
 
+    // Fetch from CerebrasModel
+    let cerebrasModels: ModelInfo[];
+    try {
+      const result = await ctx.runAction(internal.models.fetchCerebrasModels);
+      cerebrasModels = result.models;
+    } catch (error) {
+      console.error("Failed to fetch from Cerebras - keeping existing models");
+      return {
+        success: false,
+        message: "Failed to fetch from Cerebras - keeping existing models",
+        keptExisting: true,
+      };
+    }
+
     // Get allowlist
     const baseModelIds: string[] = await ctx.runQuery(api.models.getBaseModels);
 
@@ -379,10 +452,16 @@ export const syncModels = internalAction({
       .filter((m: ModelInfo) => baseModelIds.includes(m.id))
       .filter((m: ModelInfo) => m.interface === "qroq");
 
+    // Cerebras models are filtered separately
+    const allowedCerebrasModels: ModelInfo[] = cerebrasModels
+      .filter((m: ModelInfo) => baseModelIds.includes(m.id))
+      .filter((m: ModelInfo) => m.interface === "cerebras");
+
     // If no allowlisted matches found, keep existing (don't wipe on partial failure)
     if (
       allowedOpenRouterModels.length === 0 &&
-      allowedQroqModels.length === 0
+      allowedQroqModels.length === 0 &&
+      allowedCerebrasModels.length === 0
     ) {
       console.warn("No allowlisted models found in OpenRouter response");
       return {
@@ -396,7 +475,11 @@ export const syncModels = internalAction({
     const syncedAt = Date.now();
     const result: { success: boolean; message: string; count: number } =
       await ctx.runMutation(internal.models.replaceAvailableModels, {
-        models: [...allowedOpenRouterModels, ...allowedQroqModels],
+        models: [
+          ...allowedOpenRouterModels,
+          ...allowedQroqModels,
+          ...allowedCerebrasModels,
+        ],
         syncedAt,
       });
 
