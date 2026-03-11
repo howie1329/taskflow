@@ -258,6 +258,16 @@ export async function POST(req: Request) {
       break;
     }
     case "openrouter":
+      baseModel = openRouter(model, {
+        reasoning: { enabled: true, effort: "medium" },
+        parallelToolCalls: true,
+        usage: { include: true },
+      });
+      break
+    case "vercel": {
+      baseModel = model;
+      break;
+    }
     default: {
       baseModel = openRouter(model, {
         reasoning: { enabled: true, effort: "medium" },
@@ -335,25 +345,25 @@ export async function POST(req: Request) {
   const existingSummary =
     thread && "summary" in thread
       ? (thread.summary as
-          | {
-              schemaVersion: number;
-              summaryText: string;
-              summarizedThroughMessageId: string;
-              updatedAt: number;
-            }
-          | undefined)
+        | {
+          schemaVersion: number;
+          summaryText: string;
+          summarizedThroughMessageId: string;
+          updatedAt: number;
+        }
+        | undefined)
       : undefined;
 
   const summaryPlan = planSummarization({
     messages,
     previousSummary: existingSummary
       ? {
-          schemaVersion: 1,
-          summaryText: existingSummary.summaryText,
-          summarizedThroughMessageId:
-            existingSummary.summarizedThroughMessageId,
-          updatedAt: existingSummary.updatedAt,
-        }
+        schemaVersion: 1,
+        summaryText: existingSummary.summaryText,
+        summarizedThroughMessageId:
+          existingSummary.summarizedThroughMessageId,
+        updatedAt: existingSummary.updatedAt,
+      }
       : null,
     options: CHAT_SUMMARIZATION_OPTIONS,
   });
@@ -477,10 +487,10 @@ ${getChatGenUISystemPrompt()}`;
 
         let usagePayload:
           | {
-              inputTokens: number;
-              outputTokens: number;
-              totalTokens?: number;
-            }
+            inputTokens: number;
+            outputTokens: number;
+            totalTokens?: number;
+          }
           | undefined;
 
         try {
@@ -517,7 +527,7 @@ ${getChatGenUISystemPrompt()}`;
       },
       execute: async ({ writer }) => {
         const agent = new Agent({
-          model: modelWithMemory,
+          model: interfaceType === "vercel" ? baseModel : modelWithMemory,
           instructions,
           stopWhen: stepCountIs(10),
           experimental_context: {

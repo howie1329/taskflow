@@ -58,6 +58,29 @@ type QroqModel = {
   max_completion_tokens: number;
 };
 
+type VercelAIGatewayModelsResponse = {
+  object: string
+  data: VercelAIGatewayModel[]
+}
+
+type VercelAIGatewayModel = {
+  id: string;
+  object: string;
+  name: string;
+  description: string;
+  created: number;
+  released: number;
+  owned_by: string;
+  type: string;
+  context_window: number;
+  max_tokens: number;
+  tags: string[];
+  pricing: {
+    input: string;
+    output: string;
+  };
+}
+
 type OpenRouterModelsResponse = {
   data: OpenRouterModel[];
 };
@@ -315,6 +338,50 @@ export const fetchCerebrasModels = internalAction({
     return { models };
   },
 });
+
+// Fetch all models from Vercel AI Gateway
+export const fetchVercelAIGatewayModels = internalAction({
+  handler: async (): Promise<{ models: ModelInfo[] }> => {
+    const key = process.env.AI_GATEWAY_API_KEY;
+    if (!key) {
+      throw new Error("AI_GATEWAY_API_KEY not set");
+    }
+
+    const response = await fetch("https://ai-gateway.vercel.sh/v1/models");
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch models: ${response.status}`);
+    }
+
+    let data: VercelAIGatewayModelsResponse;
+    try {
+      data = await response.json();
+    } catch {
+      throw new Error("Failed to parse models response");
+    }
+
+    const models: ModelInfo[] = data.data.map((model) => ({
+      id: model.id,
+      canonicalSlug: model.id,
+      name: model.name,
+      interface: "vercel",
+      provider: model.owned_by,
+      description: model.description,
+      pricing: {
+        prompt: model.pricing.input,
+        completion: model.pricing.output,
+      },
+      contextLength: model.context_window,
+      maxCompletionTokens: model.max_tokens,
+      modality: model.type,
+      inputModalities: model.tags,
+      outputModalities: model.tags,
+      supportedParameters: model.tags,
+    }));
+
+    return { models };
+  },
+});
 // Replace all available models atomically (internal only)
 export const replaceAvailableModels = internalMutation({
   args: {
@@ -428,6 +495,20 @@ export const syncModels = internalAction({
       };
     }
 
+    // Fetch from Vercel AI Gateway
+    let vercelAIGatewayModels: ModelInfo[];
+    try {
+      const result = await ctx.runAction(internal.models.fetchVercelAIGatewayModels);
+      vercelAIGatewayModels = result.models;
+    } catch (error) {
+      console.error("Failed to fetch from Vercel AI Gateway - keeping existing models");
+      return {
+        success: false,
+        message: "Failed to fetch from Vercel AI Gateway - keeping existing models",
+        keptExisting: true,
+      };
+    }
+
     // Get allowlist
     const baseModelIds: string[] = await ctx.runQuery(api.models.getBaseModels);
 
@@ -457,11 +538,17 @@ export const syncModels = internalAction({
       .filter((m: ModelInfo) => baseModelIds.includes(m.id))
       .filter((m: ModelInfo) => m.interface === "cerebras");
 
+    // Vercel AI Gateway models are filtered separately
+    const allowedVercelAIGatewayModels: ModelInfo[] = vercelAIGatewayModels
+      .filter((m: ModelInfo) => baseModelIds.includes(m.id))
+      .filter((m: ModelInfo) => m.interface === "vercel");
+
     // If no allowlisted matches found, keep existing (don't wipe on partial failure)
     if (
       allowedOpenRouterModels.length === 0 &&
       allowedQroqModels.length === 0 &&
-      allowedCerebrasModels.length === 0
+      allowedCerebrasModels.length === 0 &&
+      allowedVercelAIGatewayModels.length === 0
     ) {
       console.warn("No allowlisted models found in OpenRouter response");
       return {
@@ -479,6 +566,7 @@ export const syncModels = internalAction({
           ...allowedOpenRouterModels,
           ...allowedQroqModels,
           ...allowedCerebrasModels,
+          ...allowedVercelAIGatewayModels,
         ],
         syncedAt,
       });
