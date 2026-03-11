@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { createGroq } from "@ai-sdk/groq";
 import {
+  createGoogleGenerativeAI,
+  type GoogleLanguageModelOptions,
+} from "@ai-sdk/google";
+import {
   stepCountIs,
   ToolLoopAgent as Agent,
   createUIMessageStream,
@@ -98,14 +102,18 @@ const createTitle = async (messages: UIMessage[]) => {
 };
 
 const createRollingSummary = async ({
-  openRouter,
+  googleModel,
   previousSummary,
   transcript,
 }: {
-  openRouter: ReturnType<typeof createOpenRouter>;
+  googleModel: ReturnType<typeof createGoogleGenerativeAI>;
   previousSummary: string;
   transcript: string;
 }) => {
+  if (!googleModel) {
+    console.error("Google not initialized");
+    return "";
+  }
   const boundedPreviousSummary = previousSummary
     .trim()
     .slice(0, ROLLING_SUMMARY_OPTIONS.maxSummaryChars);
@@ -114,14 +122,7 @@ const createRollingSummary = async ({
     .slice(-ROLLING_SUMMARY_OPTIONS.maxTranscriptChars);
 
   const { text } = await generateText({
-    model: openRouter("arcee-ai/trinity-large-preview:free", {
-      extraBody: {
-        models: [
-          "arcee-ai/trinity-large-preview:free",
-          "openrouter/aurora-alpha",
-        ],
-      },
-    }),
+    model: googleModel("gemini-3.1-flash-lite-preview"),
     system:
       "You maintain a rolling conversation summary used for context compression. Keep it concise, factual, action-oriented, and durable across long chats.",
     prompt: `Update the rolling summary.
@@ -163,10 +164,22 @@ export async function POST(req: Request) {
     apiKey: process.env.OPENROUTER_AI_KEY,
   });
 
+  const googleModel = createGoogleGenerativeAI({
+    apiKey: process.env.GOOGLE_GENERATIVE_AI_KEY,
+  });
+
   if (!openRouter) {
     console.error("OpenRouter not initialized");
     return NextResponse.json(
       { error: "OpenRouter not initialized" },
+      { status: 500 },
+    );
+  }
+
+  if (!googleModel) {
+    console.error("Google not initialized");
+    return NextResponse.json(
+      { error: "Google not initialized" },
       { status: 500 },
     );
   }
@@ -348,7 +361,7 @@ export async function POST(req: Request) {
     if (transcript.length >= ROLLING_SUMMARY_OPTIONS.minTranscriptChars) {
       try {
         const updatedSummary = await createRollingSummary({
-          openRouter,
+          googleModel,
           previousSummary: summaryTextForContext,
           transcript,
         });
