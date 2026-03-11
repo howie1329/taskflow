@@ -157,17 +157,78 @@ export function ModelSettingsList({
   "availableModels" | "selectedModelId" | "onSelectModelId" | "onClose"
 >) {
   const [searchQuery, setSearchQuery] = useState("")
-  const filteredModels = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase()
-    if (!query) return availableModels
+  const [selectedInterface, setSelectedInterface] = useState<"all" | string>("all")
 
-    return availableModels.filter((model) =>
+  const interfaces = useMemo(() => {
+    const set = new Set(
+      availableModels
+        .map((m) => (typeof m.interface === "string" ? m.interface.trim().toLowerCase() : null))
+        .filter(Boolean),
+    )
+    return Array.from(set).sort()
+  }, [availableModels])
+
+  const showInterfaceFilter = interfaces.length > 1
+
+  const filteredModels = useMemo(() => {
+    let list = availableModels
+
+    if (selectedInterface !== "all") {
+      const normalizedSelected = selectedInterface.trim().toLowerCase()
+      list = list.filter((m) => {
+        const iface = typeof m.interface === "string" ? m.interface.trim().toLowerCase() : ""
+        return iface === normalizedSelected
+      })
+    }
+
+    const seen = new Set<string>()
+    list = list.filter((m) => {
+      const key = `${m.modelId}::${typeof m.interface === "string" ? m.interface : ""}`
+      if (seen.has(key)) return false
+      seen.add(key)
+      return true
+    })
+
+    const query = searchQuery.trim().toLowerCase()
+    if (!query) return list
+    return list.filter((model) =>
       `${model.name} ${model.provider ?? ""} ${model.interface ?? ""} ${formatInterfaceDisplay(model.interface) ?? ""}`.toLowerCase().includes(query)
     )
-  }, [availableModels, searchQuery])
+  }, [availableModels, selectedInterface, searchQuery])
 
   return (
     <div className="max-h-[min(48vh,24rem)] overflow-y-auto overscroll-contain px-1 py-1">
+      {showInterfaceFilter ? (
+        <div className="flex flex-wrap gap-1 px-1 pb-2 pt-0.5">
+          <button
+            type="button"
+            onClick={() => setSelectedInterface("all")}
+            className={cn(
+              "rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors",
+              selectedInterface === "all"
+                ? "bg-muted/55 text-foreground"
+                : "bg-muted/20 text-muted-foreground hover:bg-muted/40 hover:text-foreground",
+            )}
+          >
+            All
+          </button>
+          {interfaces.map((iface) => (
+            <button
+              key={iface}
+              type="button"
+              onClick={() => setSelectedInterface(iface)}
+              className={cn(
+                "rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors",
+                selectedInterface === iface
+                  ? "bg-muted/55 text-foreground"
+                  : "bg-muted/20 text-muted-foreground hover:bg-muted/40 hover:text-foreground",
+              )}
+            >
+              {formatInterfaceDisplay(iface) ?? iface}
+            </button>
+          ))}
+        </div>
+      ) : null}
       <div className="px-1 pb-1 pt-0.5">
         <div className="relative">
           <SearchIcon className="pointer-events-none absolute left-2.5 top-1/2 size-3 -translate-y-1/2 text-muted-foreground" />
@@ -191,7 +252,7 @@ export function ModelSettingsList({
         ) : filteredModels.length > 0 ? (
           filteredModels.map((model) => (
             <ModelSettingsOptionButton
-              key={model.modelId}
+              key={model._id}
               model={model}
               selected={model.modelId === selectedModelId}
               onClick={() => {
@@ -357,6 +418,8 @@ export function formatInterfaceDisplay(interfaceType?: string): string | undefin
   if (!interfaceType) return undefined
   if (interfaceType === "openrouter") return "OpenRouter"
   if (interfaceType === "qroq") return "Groq"
+  if (interfaceType === "cerebras") return "Cerebras"
+  if (interfaceType === "vercel") return "Vercel"
   return interfaceType
 }
 
