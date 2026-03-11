@@ -108,6 +108,11 @@ type ModelInfo = {
   supportedParameters?: string[];
 };
 
+type BaseModel = {
+  modelId: string;
+  interface: string;
+};
+
 // PUBLIC QUERIES
 
 // Get all available models (for UI display)
@@ -132,7 +137,10 @@ export const getModelById = query({
 export const getBaseModels = query({
   handler: async (ctx) => {
     const models = await ctx.db.query("baseModels").collect();
-    return models.map((model) => model.modelId);
+    return models.map((model) => ({
+      modelId: model.modelId,
+      interface: model.interface ?? "openrouter",
+    }));
   },
 });
 
@@ -510,10 +518,10 @@ export const syncModels = internalAction({
     }
 
     // Get allowlist
-    const baseModelIds: string[] = await ctx.runQuery(api.models.getBaseModels);
+    const baseModels: BaseModel[] = await ctx.runQuery(api.models.getBaseModels);
 
     // If allowlist is empty, don't clear anything (avoid wiping data accidentally)
-    if (baseModelIds.length === 0) {
+    if (baseModels.length === 0) {
       console.log("Allowlist is empty - keeping existing available models");
       return {
         success: true,
@@ -525,23 +533,19 @@ export const syncModels = internalAction({
     // Filter to only allowlisted models
     // First filter by base model IDs, then by interface (OpenRouter only)
     const allowedOpenRouterModels: ModelInfo[] = openRouterModels
-      .filter((m: ModelInfo) => baseModelIds.includes(m.id))
-      .filter((m: ModelInfo) => m.interface === "openrouter");
+      .filter((m: ModelInfo) => baseModels.some((bm: BaseModel) => bm.modelId === m.id && bm.interface === "openrouter"))
 
     // Qroq models are filtered separately
     const allowedQroqModels: ModelInfo[] = qroqModels
-      .filter((m: ModelInfo) => baseModelIds.includes(m.id))
-      .filter((m: ModelInfo) => m.interface === "qroq");
+      .filter((m: ModelInfo) => baseModels.some((bm: BaseModel) => bm.modelId === m.id && bm.interface === "qroq"))
 
     // Cerebras models are filtered separately
     const allowedCerebrasModels: ModelInfo[] = cerebrasModels
-      .filter((m: ModelInfo) => baseModelIds.includes(m.id))
-      .filter((m: ModelInfo) => m.interface === "cerebras");
+      .filter((m: ModelInfo) => baseModels.some((bm: BaseModel) => bm.modelId === m.id && bm.interface === "cerebras"))
 
     // Vercel AI Gateway models are filtered separately
     const allowedVercelAIGatewayModels: ModelInfo[] = vercelAIGatewayModels
-      .filter((m: ModelInfo) => baseModelIds.includes(m.id))
-      .filter((m: ModelInfo) => m.interface === "vercel");
+      .filter((m: ModelInfo) => baseModels.some((bm: BaseModel) => bm.modelId === m.id && bm.interface === "vercel"))
 
     // If no allowlisted matches found, keep existing (don't wipe on partial failure)
     if (
