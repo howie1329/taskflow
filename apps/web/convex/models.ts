@@ -535,7 +535,7 @@ export const syncModels = internalAction({
 
     // Groq models are filtered separately
     const allowedGroqModels: ModelInfo[] = groqModels
-      .filter((m: ModelInfo) => baseModels.some((bm: BaseModel) => bm.modelId === m.id && bm.interface === "qroq"))
+      .filter((m: ModelInfo) => baseModels.some((bm: BaseModel) => bm.modelId === m.id && bm.interface === "groq"))
 
     // Cerebras models are filtered separately
     const allowedCerebrasModels: ModelInfo[] = cerebrasModels
