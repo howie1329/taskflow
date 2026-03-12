@@ -122,7 +122,7 @@ export function ChatSettingsChips({
               "h-7 max-w-44 justify-start gap-2 px-2.5 sm:max-w-52",
             )}
           >
-            {selectedModel?.interface === "qroq" ? (
+            {selectedModel?.interface === "groq" ? (
               <ModelSelectorLogo provider="groq" className="size-3.5 shrink-0" />
             ) : selectedModel?.interface === "openrouter" ? (
               <ModelSelectorLogo provider="openrouter" className="size-3.5 shrink-0" />

@@ -417,7 +417,7 @@ export function ProjectSettingsList({
 export function formatInterfaceDisplay(interfaceType?: string): string | undefined {
   if (!interfaceType) return undefined
   if (interfaceType === "openrouter") return "OpenRouter"
-  if (interfaceType === "qroq") return "Groq"
+  if (interfaceType === "groq") return "Groq"
   if (interfaceType === "cerebras") return "Cerebras"
   if (interfaceType === "vercel") return "Vercel"
   return interfaceType
@@ -498,7 +498,7 @@ function ModelSettingsOptionButton({
           selected ? "bg-foreground/8 text-foreground" : null,
         )}
       >
-        {model.interface === "qroq" ? (
+        {model.interface === "groq" ? (
           <ModelSelectorLogo provider="groq" className="size-2.5" />
         ) : model.interface === "openrouter" ? (
           <ModelSelectorLogo provider="openrouter" className="size-2.5" />
