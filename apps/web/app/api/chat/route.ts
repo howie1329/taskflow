@@ -67,6 +67,33 @@ type ActiveAgentStream = {
   }>;
 };
 
+type ThreadSummary = {
+  schemaVersion: number;
+  summaryText: string;
+  summarizedThroughMessageId: string;
+  updatedAt: number;
+};
+
+type ChatRequestBody = {
+  model?: string;
+  id?: string;
+  messages?: unknown;
+  messageId?: string;
+  userId?: string;
+  projectId?: Id<"projects">;
+  mode?: string;
+  toolLock?: string;
+};
+
+const OPENROUTER_MODEL_OPTIONS = {
+  reasoning: { enabled: true, effort: "medium" as const },
+  parallelToolCalls: true,
+  usage: { include: true },
+};
+
+const jsonError = (error: string, status: number) =>
+  NextResponse.json({ error }, { status });
+
 const createTitle = async (messages: UIMessage[]) => {
   const openRouter = createOpenRouter({
     apiKey: process.env.OPENROUTER_AI_KEY,
@@ -155,7 +182,7 @@ Return only the updated markdown summary.`,
 export async function POST(req: Request) {
   const token = await convexAuthNextjsToken();
   if (!token) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return jsonError("Unauthorized", 401);
   }
 
   const openRouter = createOpenRouter({
@@ -168,53 +195,43 @@ export async function POST(req: Request) {
 
   if (!openRouter) {
     console.error("OpenRouter not initialized");
-    return NextResponse.json(
-      { error: "OpenRouter not initialized" },
-      { status: 500 },
-    );
+    return jsonError("OpenRouter not initialized", 500);
   }
 
   if (!googleModel) {
     console.error("Google not initialized");
-    return NextResponse.json(
-      { error: "Google not initialized" },
-      { status: 500 },
-    );
+    return jsonError("Google not initialized", 500);
   }
 
-  let model: string;
-  let threadId: string;
-  let rawMessages: unknown;
-  let messageId: string | undefined;
-  let userId: string | undefined;
-  let projectId: Id<"projects"> | undefined;
-  let mode: string;
-  let toolLock: string | undefined;
+  let body: ChatRequestBody;
   try {
-    const body = await req.json();
-    model = body.model;
-    threadId = body.id;
-    rawMessages = body.messages;
-    messageId = body.messageId;
-    userId = body.userId;
-    projectId = body.projectId || undefined;
-    mode = body.mode || "Basic";
-    toolLock = body.toolLock || undefined;
+    body = await req.json();
   } catch (error) {
     console.error("Error parsing request:", error);
-    return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+    return jsonError("Invalid request", 400);
   }
 
+  const {
+    model,
+    id: threadId,
+    messages: rawMessages,
+    messageId,
+    userId,
+    projectId: rawProjectId,
+    mode: rawMode,
+    toolLock: rawToolLock,
+  } = body;
+  const projectId = rawProjectId || undefined;
+  const mode = rawMode || "Basic";
+  const toolLock = rawToolLock || undefined;
+
   if (!userId) {
-    return NextResponse.json({ error: "User ID is required" }, { status: 400 });
+    return jsonError("User ID is required", 400);
   }
 
   // Creation of the supermemory tools
   if (!process.env.SUPERMEMORY_API_KEY) {
-    return NextResponse.json(
-      { error: "SuperMemory API key is required" },
-      { status: 400 },
-    );
+    return jsonError("SuperMemory API key is required", 400);
   }
 
   if (
@@ -223,7 +240,7 @@ export async function POST(req: Request) {
     !model ||
     typeof userId !== "string"
   ) {
-    return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+    return jsonError("Invalid request", 400);
   }
 
   const modelDoc = await fetchQuery(
@@ -233,49 +250,22 @@ export async function POST(req: Request) {
   );
   const interfaceType = modelDoc?.interface ?? "openrouter";
 
-  let baseModel;
-  switch (interfaceType) {
-    case "groq": {
-      const groq = createGroq({ apiKey: process.env.GROQ_API_KEY });
-      if (!groq) {
-        return NextResponse.json(
-          { error: "Groq not initialized" },
-          { status: 500 },
-        );
-      }
-      baseModel = groq(model);
-      break;
+  let baseModel = openRouter(model, OPENROUTER_MODEL_OPTIONS);
+
+  if (interfaceType === "groq") {
+    const groq = createGroq({ apiKey: process.env.GROQ_API_KEY });
+    if (!groq) {
+      return jsonError("Groq not initialized", 500);
     }
-    case "cerebras": {
-      const cerebras = createCerebras({ apiKey: process.env.CEREBRAS_API_KEY });
-      if (!cerebras) {
-        return NextResponse.json(
-          { error: "Cerebras not initialized" },
-          { status: 500 },
-        );
-      }
-      baseModel = cerebras(model);
-      break;
+    baseModel = groq(model);
+  } else if (interfaceType === "cerebras") {
+    const cerebras = createCerebras({ apiKey: process.env.CEREBRAS_API_KEY });
+    if (!cerebras) {
+      return jsonError("Cerebras not initialized", 500);
     }
-    case "openrouter":
-      baseModel = openRouter(model, {
-        reasoning: { enabled: true, effort: "medium" },
-        parallelToolCalls: true,
-        usage: { include: true },
-      });
-      break
-    case "vercel": {
-      baseModel = model;
-      break;
-    }
-    default: {
-      baseModel = openRouter(model, {
-        reasoning: { enabled: true, effort: "medium" },
-        parallelToolCalls: true,
-        usage: { include: true },
-      });
-      break;
-    }
+    baseModel = cerebras(model);
+  } else if (interfaceType === "vercel") {
+    baseModel = model;
   }
 
   const modelWithMemory = withSupermemory(baseModel, userId, {
@@ -344,27 +334,21 @@ export async function POST(req: Request) {
 
   const existingSummary =
     thread && "summary" in thread
-      ? (thread.summary as
-        | {
-          schemaVersion: number;
-          summaryText: string;
-          summarizedThroughMessageId: string;
-          updatedAt: number;
-        }
-        | undefined)
+      ? (thread.summary as ThreadSummary | undefined)
       : undefined;
-
-  const summaryPlan = planSummarization({
-    messages,
-    previousSummary: existingSummary
-      ? {
+  const previousSummary = existingSummary
+    ? {
         schemaVersion: 1,
         summaryText: existingSummary.summaryText,
         summarizedThroughMessageId:
           existingSummary.summarizedThroughMessageId,
         updatedAt: existingSummary.updatedAt,
       }
-      : null,
+    : null;
+
+  const summaryPlan = planSummarization({
+    messages,
+    previousSummary,
     options: CHAT_SUMMARIZATION_OPTIONS,
   });
 
@@ -439,41 +423,31 @@ export async function POST(req: Request) {
   }
 
   const selectedMode = ModeMapping[mode] ? mode : "Basic";
+  const modeConfig = ModeMapping[selectedMode];
+  const validatedToolLock =
+    typeof toolLock === "string" &&
+    toolLock.length > 0 &&
+    Object.prototype.hasOwnProperty.call(Tools, toolLock) &&
+    modeConfig.activeTools.includes(toolLock as keyof typeof Tools)
+      ? (toolLock as keyof typeof Tools)
+      : null;
+  const activeTools = validatedToolLock
+    ? [validatedToolLock]
+    : modeConfig.activeTools;
 
-  // Get the active tools for the model
-  let activeTools = ModeMapping[selectedMode].activeTools;
-  let validatedToolLock: keyof typeof Tools | null = null;
-
-  if (typeof toolLock === "string" && toolLock.length > 0) {
-    const isKnownTool = Object.prototype.hasOwnProperty.call(Tools, toolLock);
-    const isAllowedInMode = activeTools.includes(
-      toolLock as keyof typeof Tools,
-    );
-
-    if (isKnownTool && isAllowedInMode) {
-      validatedToolLock = toolLock as keyof typeof Tools;
-      activeTools = [validatedToolLock];
-    }
-  }
-
-  // Build system instructions with project context and mode
-  let instructions = buildSystemPrompt(
-    projectContext ?? undefined,
-    selectedMode as ModeName,
-  );
+  const instructionSections = [
+    buildSystemPrompt(projectContext ?? undefined, selectedMode as ModeName),
+  ];
 
   if (validatedToolLock) {
-    instructions = `${instructions}
-
-## Tool Lock (User Selected)
+    instructionSections.push(`## Tool Lock (User Selected)
 - Tool usage is locked to \`${validatedToolLock}\`
 - Only use this tool for tool calls in this response
-- If this tool cannot complete the request, explain the limitation and ask the user to clear the tool lock or choose another slash command`;
+- If this tool cannot complete the request, explain the limitation and ask the user to clear the tool lock or choose another slash command`);
   }
 
-  instructions = `${instructions}
-
-${getChatGenUISystemPrompt()}`;
+  instructionSections.push(getChatGenUISystemPrompt());
+  const instructions = instructionSections.join("\n\n");
 
   let activeAgentStream: ActiveAgentStream | null = null;
 
