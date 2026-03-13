@@ -748,6 +748,25 @@ export const updateThreadSnippetAndTimestamps = mutation({
   },
 });
 
+const threadStateValidator = v.object({
+  activeGoal: v.optional(v.string()),
+  currentTopic: v.optional(v.string()),
+  importantFacts: v.array(v.string()),
+  decisions: v.array(v.string()),
+  unresolvedItems: v.array(v.string()),
+  referencedEntities: v.array(v.string()),
+  userPreferences: v.array(v.string()),
+  recentToolFindings: v.array(v.string()),
+  warningsOrRisks: v.array(v.string()),
+})
+
+const compactionMetadataValidator = v.object({
+  lastCompactedAt: v.number(),
+  lastCompactedMessageId: v.string(),
+  messageCountAtCompaction: v.number(),
+  tokenEstimateAtCompaction: v.optional(v.number()),
+})
+
 export const setThreadSummary = mutation({
   args: {
     threadId: v.string(),
@@ -756,6 +775,8 @@ export const setThreadSummary = mutation({
       summaryText: v.string(),
       summarizedThroughMessageId: v.string(),
       updatedAt: v.number(),
+      threadState: v.optional(threadStateValidator),
+      compactionMetadata: v.optional(compactionMetadataValidator),
     }),
   },
   handler: async (ctx, args) => {

@@ -25,6 +25,28 @@ const schema = defineSchema({
         summaryText: v.string(),
         summarizedThroughMessageId: v.string(),
         updatedAt: v.number(),
+        // Context compaction v1: structured state + metadata
+        threadState: v.optional(
+          v.object({
+            activeGoal: v.optional(v.string()),
+            currentTopic: v.optional(v.string()),
+            importantFacts: v.array(v.string()),
+            decisions: v.array(v.string()),
+            unresolvedItems: v.array(v.string()),
+            referencedEntities: v.array(v.string()),
+            userPreferences: v.array(v.string()),
+            recentToolFindings: v.array(v.string()),
+            warningsOrRisks: v.array(v.string()),
+          }),
+        ),
+        compactionMetadata: v.optional(
+          v.object({
+            lastCompactedAt: v.number(),
+            lastCompactedMessageId: v.string(),
+            messageCountAtCompaction: v.number(),
+            tokenEstimateAtCompaction: v.optional(v.number()),
+          }),
+        ),
       }),
     ),
     usageTotals: v.optional(
