@@ -265,9 +265,11 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
               </div>
               {hasSummary ? (
                 <Badge variant="outline">
-                  {thread.summary?.updatedAt
-                    ? `Updated ${formatTimestamp(thread.summary.updatedAt)}`
-                    : "Available"}
+                  {thread.summary?.compactionMetadata?.lastCompactedAt
+                    ? `Compacted ${formatTimestamp(thread.summary.compactionMetadata.lastCompactedAt)}`
+                    : thread.summary?.updatedAt
+                      ? `Updated ${formatTimestamp(thread.summary.updatedAt)}`
+                      : "Available"}
                 </Badge>
               ) : null}
             </div>
@@ -292,8 +294,8 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
               </Collapsible>
             ) : (
               <p className="mt-3 text-sm text-muted-foreground">
-                No summary yet. A rolling summary appears after the conversation is
-                compacted for context.
+                No compaction yet. A rolling summary appears when the conversation
+                exceeds thresholds or when you use Compact chat.
               </p>
             )}
           </div>
@@ -447,8 +449,8 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
               Thread memory
             </p>
             <p className="mt-1 text-sm text-muted-foreground">
-              This edits the rolling summary used to compress older context for the
-              current thread.
+              This edits the rolling summary used to compact older context for the
+              current thread. Use Compact chat to compress when thresholds are exceeded.
             </p>
           </div>
 
@@ -511,8 +513,8 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
                 No rolling summary yet
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Summaries are created automatically as the conversation grows and
-                older messages are compressed.
+                Summaries are created when the conversation exceeds message/token
+                thresholds or when you use Compact chat.
               </p>
             </div>
           )}

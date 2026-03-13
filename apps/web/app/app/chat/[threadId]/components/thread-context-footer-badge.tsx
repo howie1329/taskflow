@@ -175,16 +175,25 @@ export function ThreadContextFooterBadge() {
 
           <DetailRow
             icon={<MemoryStickIcon className="size-3.5" />}
-            label="Memory"
-            value={hasSummary ? "Available" : "No summary yet"}
+            label="Compacted"
+            value={
+              thread.summary?.compactionMetadata
+                ? "Yes"
+                : hasSummary
+                  ? "Yes"
+                  : "No"
+            }
           />
 
           {hasSummary ? (
             <>
               <DetailRow
                 icon={<Clock3Icon className="size-3.5" />}
-                label="Summary updated"
-                value={formatTimestamp(thread.summary?.updatedAt)}
+                label="Last compacted"
+                value={formatTimestamp(
+                  thread.summary?.compactionMetadata?.lastCompactedAt ??
+                    thread.summary?.updatedAt
+                )}
               />
               <div className="rounded-xl border border-border/60 bg-muted/20 px-3 py-2.5">
                 <p className="mb-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
@@ -198,8 +207,8 @@ export function ThreadContextFooterBadge() {
           ) : (
             <div className="rounded-xl border border-dashed border-border/60 bg-muted/20 px-3 py-3">
               <p className="text-sm text-muted-foreground">
-                No summary yet. A rolling summary appears after the conversation is
-                compacted for context.
+                No compaction yet. A rolling summary appears when the conversation
+                exceeds thresholds or when you use Compact chat.
               </p>
             </div>
           )}

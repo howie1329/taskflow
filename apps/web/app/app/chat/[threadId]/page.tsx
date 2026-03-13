@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { ArrowLeft01Icon, MessageQuestionIcon } from "@hugeicons/core-free-icons"
 import type { UIMessage } from "ai"
@@ -117,6 +118,26 @@ function ThreadPageContent() {
     router.push("/app/chat")
   }
 
+  const handleCompactChat = async () => {
+    if (!thread) return
+    try {
+      const res = await fetch("/api/chat/compact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ threadId: thread.threadId }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? "Compaction failed")
+      if (data.compacted) {
+        toast.success("Chat compacted")
+      } else {
+        toast.info(data.message ?? "Nothing to compact")
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Compaction failed")
+    }
+  }
+
   const selectedMessage = uiMessages.find((message) => message.id === messageDetailsId)
 
   if (shouldShowNotFound) {
@@ -135,6 +156,7 @@ function ThreadPageContent() {
             setIsEditDialogOpen(true)
           }}
           onOpenDeleteThread={() => setIsDeleteDialogOpen(true)}
+          onCompactChat={handleCompactChat}
         />
 
         {error && error.message !== clearedErrorMessage && (
