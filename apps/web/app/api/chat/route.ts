@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
+import { createGroq } from "@ai-sdk/groq";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createCerebras } from "@ai-sdk/cerebras";
 import {
   stepCountIs,
   ToolLoopAgent as Agent,
@@ -32,23 +35,29 @@ import type { ModeName } from "@/lib/AITools/ModePrompts";
 import { getChatGenUISystemPrompt } from "@/lib/genui/chat-prompt";
 
 const CHAT_SUMMARIZATION_OPTIONS = {
-  trigger: { kind: "either", maxTokens: 6000, maxMessages: 20 } as const,
+  trigger: { kind: "either", maxTokens: 20000, maxMessages: 20 } as const,
   keepLastN: 8,
   includeToolText: false,
   maxCharsPerMessage: 8000,
 };
 
+const ROLLING_SUMMARY_OPTIONS = {
+  maxSummaryChars: 2800,
+  maxTranscriptChars: 12000,
+  minTranscriptChars: 180,
+} as const;
+
 const chatApiWithSummary = api as typeof api & {
   chat: typeof api.chat & {
-    setThreadSummary: unknown
-  }
-}
+    setThreadSummary: unknown;
+  };
+};
 
 const fetchMutationUnsafe = fetchMutation as unknown as (
   mutationRef: unknown,
   args: unknown,
   options: { token: string },
-) => Promise<unknown>
+) => Promise<unknown>;
 
 type ActiveAgentStream = {
   totalUsage: Promise<{
@@ -91,31 +100,56 @@ const createTitle = async (messages: UIMessage[]) => {
 };
 
 const createRollingSummary = async ({
-  openRouter,
+  googleModel,
   previousSummary,
   transcript,
 }: {
-  openRouter: ReturnType<typeof createOpenRouter>;
+  googleModel: ReturnType<typeof createGoogleGenerativeAI>;
   previousSummary: string;
   transcript: string;
 }) => {
+  if (!googleModel) {
+    console.error("Google not initialized");
+    return "";
+  }
+  const boundedPreviousSummary = previousSummary
+    .trim()
+    .slice(0, ROLLING_SUMMARY_OPTIONS.maxSummaryChars);
+  const boundedTranscript = transcript
+    .trim()
+    .slice(-ROLLING_SUMMARY_OPTIONS.maxTranscriptChars);
+
   const { text } = await generateText({
-    model: openRouter("arcee-ai/trinity-large-preview:free", {
-      extraBody: {
-        models: [
-          "arcee-ai/trinity-large-preview:free",
-          "openrouter/aurora-alpha",
-        ],
-      },
-    }),
+    model: googleModel("gemini-3.1-flash-lite-preview"),
     system:
-      "You maintain a rolling conversation summary used for context compression. Keep it concise, factual, and action-oriented.",
-    prompt: `Update the rolling summary.\n\nExisting summary:\n${previousSummary || "None"}\n\nNew transcript segment:\n${transcript}\n\nReturn only the updated summary text. Keep critical user preferences, decisions, open tasks, and unresolved questions.`,
+      "You maintain a rolling conversation summary used for context compression. Keep it concise, factual, action-oriented, and durable across long chats.",
+    prompt: `Update the rolling summary.
+
+Return plain markdown using this structure:
+- **User profile & preferences**
+- **Decisions & outcomes**
+- **Open tasks & unresolved questions**
+- **Active context for next reply**
+
+Rules:
+- Keep only information still useful for future turns.
+- Remove stale or resolved items.
+- Prefer short bullets over prose.
+- Never include tool JSON dumps or verbose logs.
+- Keep the full summary under ${ROLLING_SUMMARY_OPTIONS.maxSummaryChars} characters.
+
+Existing summary:
+${boundedPreviousSummary || "None"}
+
+New transcript segment:
+${boundedTranscript}
+
+Return only the updated markdown summary.`,
     temperature: 0.2,
     maxRetries: 3,
   });
 
-  return text.trim();
+  return text.trim().slice(0, ROLLING_SUMMARY_OPTIONS.maxSummaryChars);
 };
 
 export async function POST(req: Request) {
@@ -128,10 +162,22 @@ export async function POST(req: Request) {
     apiKey: process.env.OPENROUTER_AI_KEY,
   });
 
+  const googleModel = createGoogleGenerativeAI({
+    apiKey: process.env.GOOGLE_GENERATIVE_AI_KEY,
+  });
+
   if (!openRouter) {
     console.error("OpenRouter not initialized");
     return NextResponse.json(
       { error: "OpenRouter not initialized" },
+      { status: 500 },
+    );
+  }
+
+  if (!googleModel) {
+    console.error("Google not initialized");
+    return NextResponse.json(
+      { error: "Google not initialized" },
       { status: 500 },
     );
   }
@@ -171,22 +217,6 @@ export async function POST(req: Request) {
     );
   }
 
-  const modelWithMemory = withSupermemory(
-    openRouter(model, {
-      reasoning: { enabled: true, effort: "medium" },
-      parallelToolCalls: true,
-      usage: {
-        include: true,
-      },
-    }),
-    userId,
-    {
-      addMemory: "always",
-      mode: "profile",
-      apiKey: process.env.SUPERMEMORY_API_KEY!,
-    },
-  );
-
   if (
     !threadId ||
     !Array.isArray(rawMessages) ||
@@ -195,6 +225,64 @@ export async function POST(req: Request) {
   ) {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
+
+  const modelDoc = await fetchQuery(
+    api.models.getModelById,
+    { modelId: model },
+    { token },
+  );
+  const interfaceType = modelDoc?.interface ?? "openrouter";
+
+  let baseModel;
+  switch (interfaceType) {
+    case "groq": {
+      const groq = createGroq({ apiKey: process.env.GROQ_API_KEY });
+      if (!groq) {
+        return NextResponse.json(
+          { error: "Groq not initialized" },
+          { status: 500 },
+        );
+      }
+      baseModel = groq(model);
+      break;
+    }
+    case "cerebras": {
+      const cerebras = createCerebras({ apiKey: process.env.CEREBRAS_API_KEY });
+      if (!cerebras) {
+        return NextResponse.json(
+          { error: "Cerebras not initialized" },
+          { status: 500 },
+        );
+      }
+      baseModel = cerebras(model);
+      break;
+    }
+    case "openrouter":
+      baseModel = openRouter(model, {
+        reasoning: { enabled: true, effort: "medium" },
+        parallelToolCalls: true,
+        usage: { include: true },
+      });
+      break
+    case "vercel": {
+      baseModel = model;
+      break;
+    }
+    default: {
+      baseModel = openRouter(model, {
+        reasoning: { enabled: true, effort: "medium" },
+        parallelToolCalls: true,
+        usage: { include: true },
+      });
+      break;
+    }
+  }
+
+  const modelWithMemory = withSupermemory(baseModel, userId, {
+    addMemory: "always",
+    mode: "profile",
+    apiKey: process.env.SUPERMEMORY_API_KEY!,
+  });
 
   const parsedMessages = safeParseUIMessages(rawMessages);
   if (!parsedMessages.success) {
@@ -257,25 +345,25 @@ export async function POST(req: Request) {
   const existingSummary =
     thread && "summary" in thread
       ? (thread.summary as
-          | {
-              schemaVersion: number;
-              summaryText: string;
-              summarizedThroughMessageId: string;
-              updatedAt: number;
-            }
-          | undefined)
+        | {
+          schemaVersion: number;
+          summaryText: string;
+          summarizedThroughMessageId: string;
+          updatedAt: number;
+        }
+        | undefined)
       : undefined;
 
   const summaryPlan = planSummarization({
     messages,
     previousSummary: existingSummary
       ? {
-          schemaVersion: 1,
-          summaryText: existingSummary.summaryText,
-          summarizedThroughMessageId:
-            existingSummary.summarizedThroughMessageId,
-          updatedAt: existingSummary.updatedAt,
-        }
+        schemaVersion: 1,
+        summaryText: existingSummary.summaryText,
+        summarizedThroughMessageId:
+          existingSummary.summarizedThroughMessageId,
+        updatedAt: existingSummary.updatedAt,
+      }
       : null,
     options: CHAT_SUMMARIZATION_OPTIONS,
   });
@@ -289,10 +377,10 @@ export async function POST(req: Request) {
       CHAT_SUMMARIZATION_OPTIONS,
     );
 
-    if (transcript) {
+    if (transcript.length >= ROLLING_SUMMARY_OPTIONS.minTranscriptChars) {
       try {
         const updatedSummary = await createRollingSummary({
-          openRouter,
+          googleModel,
           previousSummary: summaryTextForContext,
           transcript,
         });
@@ -399,10 +487,10 @@ ${getChatGenUISystemPrompt()}`;
 
         let usagePayload:
           | {
-              inputTokens: number;
-              outputTokens: number;
-              totalTokens?: number;
-            }
+            inputTokens: number;
+            outputTokens: number;
+            totalTokens?: number;
+          }
           | undefined;
 
         try {
@@ -439,7 +527,7 @@ ${getChatGenUISystemPrompt()}`;
       },
       execute: async ({ writer }) => {
         const agent = new Agent({
-          model: modelWithMemory,
+          model: interfaceType === "vercel" ? baseModel : modelWithMemory,
           instructions,
           stopWhen: stepCountIs(10),
           experimental_context: {
@@ -454,7 +542,7 @@ ${getChatGenUISystemPrompt()}`;
               containerTags: [userId],
             }) as unknown as typeof Tools),
           },
-          maxOutputTokens: 4500, // Balanced default to reduce runaway completions
+          maxOutputTokens: 6500, // Balanced default to reduce runaway completions
           activeTools: activeTools as Array<keyof typeof Tools>,
         });
 

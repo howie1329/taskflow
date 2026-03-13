@@ -32,10 +32,14 @@ import {
   Attachments,
 } from "@/components/ai-elements/attachments"
 import { Skeleton } from "@/components/ui/skeleton"
-import { getMessageFiles, getMessageReasoning, getMessageText } from "./message-parts"
+import {
+  parseMessageParts,
+  type ToolProgressPart,
+} from "./message-parts"
 import { MessageGenUIPanel } from "./message-genui-panel"
-import { getToolCalls } from "./tool-calls"
 import { ToolPanels } from "./tool-panels"
+import { formatToolKeyLabel } from "./tool-meta"
+import type { ToolCall } from "./tool-types"
 
 const STREAMDOWN_PLUGINS = { code, mermaid, math, cjk }
 
@@ -104,16 +108,16 @@ const ThreadMessageRow = memo(function ThreadMessageRow({
   onCopy,
   onOpenDetails,
 }: ThreadMessageRowProps) {
-  const reasoningText = useMemo(() => getMessageReasoning(message), [message])
+  const parsedMessage = useMemo(() => parseMessageParts(message), [message])
+  const {
+    files,
+    reasoningText,
+    text: messageText,
+    toolCalls,
+    toolProgress,
+  } = parsedMessage
   const hasReasoning = !!reasoningText
-  const toolCalls = useMemo(
-    () => (message.role === "assistant" ? getToolCalls(message) : []),
-    [message],
-  )
-  const hasToolCalls = toolCalls.length > 0
-  const messageText = useMemo(() => getMessageText(message), [message])
-  const messageFiles = useMemo(() => getMessageFiles(message), [message])
-  const hasFiles = messageFiles.length > 0
+  const hasFiles = files.length > 0
   const isStreamingMessage =
     message.role === "assistant" &&
     status === "streaming" &&
@@ -134,15 +138,15 @@ const ThreadMessageRow = memo(function ThreadMessageRow({
         {message.role === "assistant" ? (
           <AssistantMessageBody
             message={message}
-            messageFiles={messageFiles}
+            messageFiles={files}
             toolCalls={toolCalls}
-            hasToolCalls={hasToolCalls}
             hasReasoning={hasReasoning}
             reasoningText={reasoningText}
             preferences={preferences}
             status={status}
             isStreamingMessage={isStreamingMessage}
             plainMessageText={messageText}
+            progressParts={toolProgress}
             onRegenerate={onRegenerate}
             onCopy={onCopy}
             onOpenDetails={onOpenDetails}
@@ -151,7 +155,7 @@ const ThreadMessageRow = memo(function ThreadMessageRow({
           <div className="whitespace-pre-wrap text-[15px] leading-7">
             {hasFiles && (
               <Attachments variant="inline" className="mb-2">
-                {messageFiles.map((file, fileIndex) => (
+                {files.map((file, fileIndex) => (
                   <Attachment
                     key={`${message.id}-${file.filename ?? "file"}-${fileIndex}`}
                     data={{ ...file, id: `${message.id}-${fileIndex}` }}
@@ -177,41 +181,18 @@ const ThreadMessageRow = memo(function ThreadMessageRow({
 
 interface AssistantMessageBodyProps {
   message: UIMessage
-  messageFiles: ReturnType<typeof getMessageFiles>
-  toolCalls: ReturnType<typeof getToolCalls>
-  hasToolCalls: boolean
+  messageFiles: ReturnType<typeof parseMessageParts>["files"]
+  toolCalls: ToolCall[]
   hasReasoning: boolean
   reasoningText: string | null
   preferences: PreferencesLike | undefined
   status: string
   isStreamingMessage: boolean
   plainMessageText: string
+  progressParts: ToolProgressPart[]
   onRegenerate: (assistantMessageId: string) => void
   onCopy: (messageText: string) => void
   onOpenDetails: (messageId: string) => void
-}
-
-type ToolProgressPart = {
-  type: "data-toolProgress"
-  id?: string
-  data: {
-    toolKey: string
-    toolCallId: string
-    status: "running" | "done" | "error"
-    text: string
-  }
-}
-
-function getMessageToolProgress(message: UIMessage): ToolProgressPart[] {
-  return message.parts.filter(
-    (part): part is ToolProgressPart => part.type === "data-toolProgress",
-  )
-}
-
-function formatToolProgressLabel(toolKey: string) {
-  return toolKey
-    .replace(/([A-Z])/g, " $1")
-    .replace(/^./, (value) => value.toUpperCase())
 }
 
 function ToolProgressList({ parts }: { parts: ToolProgressPart[] }) {
@@ -232,7 +213,7 @@ function ToolProgressList({ parts }: { parts: ToolProgressPart[] }) {
             <AlertCircleIcon className="size-3.5 text-destructive" />
           )}
           <span className="font-medium text-foreground/85">
-            {formatToolProgressLabel(part.data.toolKey)}
+            {formatToolKeyLabel(part.data.toolKey)}
           </span>
           <span className="min-w-0 truncate text-muted-foreground">
             {part.data.text}
@@ -247,13 +228,13 @@ function AssistantMessageBody({
   message,
   messageFiles,
   toolCalls,
-  hasToolCalls,
   hasReasoning,
   reasoningText,
   preferences,
   status,
   isStreamingMessage,
   plainMessageText,
+  progressParts,
   onRegenerate,
   onCopy,
   onOpenDetails,
@@ -261,7 +242,6 @@ function AssistantMessageBody({
   const { spec, text: renderedText, hasSpec } = useJsonRenderMessage(
     message.parts as Parameters<typeof useJsonRenderMessage>[0],
   )
-  const progressParts = useMemo(() => getMessageToolProgress(message), [message])
 
   return (
     <div className="flex flex-col gap-4">
@@ -280,7 +260,7 @@ function AssistantMessageBody({
 
       <ToolProgressList parts={progressParts} />
 
-      {hasToolCalls && (
+      {toolCalls.length > 0 && (
         <ToolPanels toolCalls={toolCalls} preferences={preferences} />
       )}
 

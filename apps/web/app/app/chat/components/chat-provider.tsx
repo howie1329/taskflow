@@ -44,6 +44,14 @@ type ChatSendPromptInput = {
   files: FileUIPart[]
 }
 
+type ChatRequestState = {
+  selectedModelId: string | null
+  selectedProjectId: string | null
+  selectedMode: ModeName
+  toolLock: ToolKey | null
+  userId: string | null | undefined
+}
+
 type ChatIdState = {
   activeThreadId: string
   isThreadRoute: boolean
@@ -98,6 +106,52 @@ const ChatThreadActionsContext = createContext<ChatThreadActions | null>(null)
 
 const createDraftThreadId = () => `thread_${nanoid(10)}`
 
+function getDefaultModelId({
+  threadModel,
+  preferredModelId,
+  availableModels,
+}: {
+  threadModel: string | null | undefined
+  preferredModelId: string | null | undefined
+  availableModels: Doc<"availableModels">[]
+}) {
+  return threadModel ?? preferredModelId ?? availableModels[0]?.modelId ?? null
+}
+
+function getEffectiveToolLock(selectedMode: ModeName, toolLock: ToolKey | null) {
+  if (!toolLock) return null
+
+  const availableInMode = new Set(
+    getToolLockCommandsForMode(selectedMode)
+      .map((commandDef) => commandDef.toolKey)
+      .filter((toolKey): toolKey is ToolKey => toolKey !== null),
+  )
+
+  return availableInMode.has(toolLock) ? toolLock : null
+}
+
+function toServerMessages(
+  threadMessages:
+    | Array<{
+        messageId: string
+        role: UIMessage["role"]
+        content: UIMessage["parts"]
+      } & PersistedMessageFields>
+    | undefined,
+): UIMessage<ChatMessageMetadata>[] {
+  if (!threadMessages) return []
+
+  return threadMessages.map((message) => ({
+    id: message.messageId,
+    role: message.role,
+    parts: message.content,
+    metadata: {
+      usage: (message as unknown as PersistedMessageFields).usage,
+      costUsdMicros: (message as unknown as PersistedMessageFields).costUsdMicros,
+    },
+  }))
+}
+
 function useRequiredContext<T>(
   context: React.Context<T | null>,
   name: string,
@@ -132,6 +186,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
 
   const { messages, setMessages, sendMessage, status, error, stop } = useChat({
     id: activeThreadId,
+    experimental_throttle: 100
   })
   const { userId } = useViewer()
 
@@ -152,12 +207,11 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   )
 
   const defaultModelId = useMemo(() => {
-    return (
-      thread?.model ??
-      bootstrap?.preferences?.defaultAIModel?.modelId ??
-      availableModels[0]?.modelId ??
-      null
-    )
+    return getDefaultModelId({
+      threadModel: thread?.model,
+      preferredModelId: bootstrap?.preferences?.defaultAIModel?.modelId,
+      availableModels,
+    })
   }, [
     thread?.model,
     bootstrap?.preferences?.defaultAIModel?.modelId,
@@ -179,13 +233,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   }, [activeThreadId])
 
   const effectiveToolLock = useMemo(() => {
-    if (!toolLock) return null
-    const availableInMode = new Set(
-      getToolLockCommandsForMode(selectedMode)
-        .map((commandDef) => commandDef.toolKey)
-        .filter((toolKey): toolKey is ToolKey => toolKey !== null),
-    )
-    return availableInMode.has(toolLock) ? toolLock : null
+    return getEffectiveToolLock(selectedMode, toolLock)
   }, [selectedMode, toolLock])
 
   useEffect(() => {
@@ -205,16 +253,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const serverMessages = useMemo<UIMessage<ChatMessageMetadata>[]>(() => {
-    if (!threadMessages) return []
-    return threadMessages.map((message) => ({
-      id: message.messageId,
-      role: message.role,
-      parts: message.content,
-      metadata: {
-        usage: (message as unknown as PersistedMessageFields).usage,
-        costUsdMicros: (message as unknown as PersistedMessageFields).costUsdMicros,
-      },
-    }))
+    return toServerMessages(threadMessages)
   }, [threadMessages])
 
   useEffect(() => {
@@ -224,38 +263,35 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     setMessages(serverMessages)
   }, [messages.length, serverMessages, setMessages, status])
 
-  const selectedModelIdRef = useRef(selectedModelId)
-  const selectedProjectIdRef = useRef(selectedProjectId)
-  const selectedModeRef = useRef(selectedMode)
-  const effectiveToolLockRef = useRef(effectiveToolLock)
-  const userIdRef = useRef(userId)
+  const requestStateRef = useRef<ChatRequestState>({
+    selectedModelId,
+    selectedProjectId,
+    selectedMode,
+    toolLock: effectiveToolLock,
+    userId,
+  })
 
   useEffect(() => {
-    selectedModelIdRef.current = selectedModelId
-  }, [selectedModelId])
-
-  useEffect(() => {
-    selectedProjectIdRef.current = selectedProjectId
-  }, [selectedProjectId])
-
-  useEffect(() => {
-    selectedModeRef.current = selectedMode
-  }, [selectedMode])
-
-  useEffect(() => {
-    effectiveToolLockRef.current = effectiveToolLock
-  }, [effectiveToolLock])
-
-  useEffect(() => {
-    userIdRef.current = userId
-  }, [userId])
+    requestStateRef.current = {
+      selectedModelId,
+      selectedProjectId,
+      selectedMode,
+      toolLock: effectiveToolLock,
+      userId,
+    }
+  }, [selectedModelId, selectedProjectId, selectedMode, effectiveToolLock, userId])
 
   const sendPrompt = useCallback(
     async ({ text, files }: ChatSendPromptInput) => {
       const trimmed = text.trim()
       const hasFiles = files.length > 0
-      const currentModel = selectedModelIdRef.current
-      const currentUserId = userIdRef.current
+      const {
+        selectedModelId: currentModel,
+        selectedProjectId: currentProjectId,
+        selectedMode: currentMode,
+        toolLock: currentToolLock,
+        userId: currentUserId,
+      } = requestStateRef.current
       if ((!trimmed && !hasFiles) || !currentModel || !currentUserId) return
 
       await sendMessage(
@@ -264,9 +300,9 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
           body: {
             model: currentModel,
             userId: currentUserId,
-            projectId: selectedProjectIdRef.current,
-            mode: selectedModeRef.current,
-            toolLock: effectiveToolLockRef.current,
+            projectId: currentProjectId,
+            mode: currentMode,
+            toolLock: currentToolLock,
           },
         },
       )

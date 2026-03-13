@@ -1,159 +1,75 @@
-# Agent Coding Guidelines for Taskflow
+# Taskflow — Codex Guidelines
 
-## Build/Test/Lint Commands
+## Guidelines
+
+Act like a high-performing senior engineer. Be concise, direct, decisive, and execution-focused.
+Solve problems with simple, maintainable, production-friendly solutions.
+Prefer low-complexity code that is easy to read, debug, and modify.
+Do not overengineer. Do not introduce heavy abstractions,
+extra layers,
+or large dependencies for small features. Choose the smallest solution that solves the problem well.
+Keep implementations clean, APIs small, behavior explicit, and naming clear. Avoid cleverness unless it clearly improves the outcome.
+Write code that another strong engineer can quickly understand, safely extend, and confidently ship.
+
+## Core Principles
+
+1. **Simple first.** Solve the actual problem. Don't over-engineer. Avoid speculative edge cases, extra abstractions, and defensive code for situations that don't exist yet. Keep the code simple and focused on the problem at hand and easy to understand and follow and maintain.
+2. **Use shadcn first.** Before writing custom UI, check `@/components/ui` in the app you're working in. Use existing components. Add new shadcn components via `npx shadcn@latest add <component>` if needed—don't hand-roll equivalents.
+3. **Match the codebase.** Search for how similar things are done before adding new patterns, utilities, or structure. Reuse existing conventions instead of inventing new ones.
+4. Build just enough to accomplish the goal or plan.
+
+## Do Not
+
+- Add edge-case logic for scenarios that aren't in the current requirements
+- Build custom UI when a shadcn component exists or can be added
+- Introduce new abstractions, helpers, or patterns without checking if something equivalent already exists
+- Add semicolons (codebase omits them)
+- Use TypeScript in `apps/frontend` (it's JavaScript)
+- Touch `apps/backend/db/schema.js` directly—use migrations (`npm run db:generate --workspace=@taskflow/backend`)
+
+## Do
+
+- Use `cn()` from `@/lib/utils` for class merging
+- Use `"use client"` on client components
+- Run `npm run lint` before committing
+- Rebuild RAG after changes: `npm run build --workspace=@taskflow/rag`
+
+## Apps
+
+| App      | Path            | Stack                                                                                 |
+| -------- | --------------- | ------------------------------------------------------------------------------------- |
+| Frontend | `apps/frontend` | Next.js 16, React 19, JS (not TS), Tailwind 4, shadcn, Clerk, Zustand, TanStack Query |
+| Web      | `apps/web`      | Next.js, Convex, TypeScript, shadcn, Hugeicons                                        |
+| Backend  | `apps/backend`  | Express 5, Drizzle, PostgreSQL, BullMQ, Socket.io                                     |
+
+Frontend uses Lucide/Hugeicons; Web uses Hugeicons. Both use shadcn from `@/components/ui`.
+
+## Commands
 
 ```bash
-# Root-level commands (run from /Users/howardthomas/Desktop/taskflow)
-npm run dev              # Start all apps in development mode
-npm run dev:frontend     # Start only frontend (Next.js + Turbopack)
-npm run dev:backend      # Start only backend (Express + nodemon)
-npm run dev:web          # Start web app (Next.js + Convex)
-npm run build            # Build all apps and packages
-npm run build:frontend   # Build only frontend
-npm run build:backend    # Build only backend
-npm run build:web        # Build only web
-npm run lint             # Run linting across all workspaces
-npm run test             # Run tests across all workspaces
-
-# Backend-specific commands
-npm run db:push --workspace=@taskflow/backend      # Push schema to database
-npm run db:generate --workspace=@taskflow/backend  # Generate migrations
-npm run db:studio --workspace=@taskflow/backend    # Open Drizzle Studio
-npm run start:backend    # Start backend in production mode
-
-# Package commands
-npm run build --workspace=@taskflow/rag            # Build RAG package
-
-# Running a single test (when tests are added)
-# Use workspace filter: npm test --workspace=@taskflow/backend -- --grep "test name"
+npm run dev              # All apps
+npm run dev:frontend      # Frontend only
+npm run dev:backend       # Backend only
+npm run dev:web           # Web only
+npm run build             # Build all
+npm run lint              # Lint all
+npm run db:push --workspace=@taskflow/backend     # Push schema
+npm run db:generate --workspace=@taskflow/backend # Generate migrations
+npm run db:studio --workspace=@taskflow/backend   # Drizzle Studio
 ```
 
-## Code Style Guidelines
+## Backend Pattern
 
-### General
+Use `BaseOperationHandler` for route handlers. See existing controllers in `apps/backend` for the pattern.
 
-- **Package manager**: npm (v10.8.2)
-- **Node.js**: >=25.0.0
-- **Monorepo**: Turbo + npm workspaces
-- **No semicolons**: Codebase omits semicolons
+## Database
 
-### Frontend (apps/frontend)
+- Schema: `apps/backend/db/schema.js`
+- Relations: `apps/backend/db/relations.js`
+- Operations: `apps/backend/db/operations/`
 
-- **Framework**: Next.js 16 with App Router, React 19
-- **Language**: JavaScript (JSX), NOT TypeScript
-- **Styling**: Tailwind CSS 4 with CSS variables
-- **UI Components**: shadcn/ui (Radix UI primitives)
-- **Icons**: Lucide React
-- **State**: Zustand + TanStack React Query
-- **Auth**: Clerk
-- **Font**: JetBrains Mono (primary), Geist Mono
+## Naming
 
-**Naming conventions:**
-
-- Components: PascalCase (e.g., `Button.jsx`, `TaskCard.jsx`)
-- Hooks: camelCase starting with "use" (e.g., `useCreateTask.js`)
-- Utilities: camelCase (e.g., `utils.js`, `axiosClient.js`)
-- Folders: lowercase with hyphens (e.g., `use-mobile.js`)
-
-**File structure:**
-
-```
-src/
-  app/              # Next.js App Router pages
-  components/       # UI components (shadcn/ui)
-  hooks/            # Custom React Query hooks
-  lib/              # Utilities and clients
-  presentation/     # Theme providers, styles
-```
-
-**Import order:**
-
-1. React/Next imports
-2. Third-party libraries
-3. Internal utilities (`@/lib/*`, `@/components/*`)
-4. Relative imports
-
-### Backend (apps/backend)
-
-- **Runtime**: Node.js with Express.js 5
-- **Language**: ES modules (type: "module"), JavaScript
-- **Database**: PostgreSQL with Drizzle ORM
-- **Auth**: Clerk Express middleware
-- **Real-time**: Socket.io
-- **Jobs**: BullMQ with Redis
-- **AI**: Vercel AI SDK
-
-**Naming conventions:**
-
-- Controllers: camelCase exports (e.g., `createTask`, `fetchTasks`)
-- Services: camelCase with "Service" suffix (e.g., `taskService`, `cacheService`)
-- Files: PascalCase for utilities, camelCase for routes
-
-**Error handling pattern:**
-
-```javascript
-export const fetchSingleTask = async (req, res) => {
-  return await BaseOperationHandler(req, res, async (req) => {
-    const task = await taskService.fetchSingleTask(taskId, userId);
-    if (!task) {
-      const error = new Error("Task not found");
-      error.statusCode = 404;
-      throw error;
-    }
-    return task;
-  });
-};
-```
-
-### Packages (packages/Taskflow-Rag)
-
-- **Language**: TypeScript (strict mode)
-- **Module**: ES modules with NodeNext resolution
-- **Target**: ES2022
-
-### Database (Drizzle ORM)
-
-- Schema defined in `apps/backend/db/schema.js`
-- Relations in `apps/backend/db/relations.js`
-- Operations in `apps/backend/db/operations/`
-
-## Key Patterns
-
-### React Components
-
-- Use shadcn/ui components with `class-variance-authority` (cva)
-- Use `cn()` utility from `@/lib/utils` for class merging
-- Components use `Slot` from Radix for composition
-- Always include `"use client"` directive for client components
-
-### React Query Hooks
-
-- Organize by feature in `src/hooks/{feature}/`
-- Use optimistic updates with `onMutate`, `onSuccess`, `onError`
-- Use `toast` from sonner for user feedback
-- Pattern: `use{Action}{Entity}` (e.g., `useCreateTask`)
-
-### API Calls
-
-- Use axios client from `@/lib/axios/axiosClient`
-- Get Clerk token with `useAuth().getToken()`
-- Always include `withCredentials: true`
-
-### Environment Variables
-
-- Frontend: `NEXT_PUBLIC_*` for client-side, regular for server
-- Backend: Standard `process.env.*`
-
-## Lint/Format
-
-- **ESLint**: Next.js core-web-vitals + typescript configs
-- **Prettier**: v3.x (installed, no custom config found)
-- Always run `npm run lint` before committing
-
-## Important Notes
-
-- Backend has NO test framework configured yet
-- Backend build step is a no-op ("echo 'Backend has no build step'")
-- RAG package must be rebuilt after changes: `npm run build --workspace=@taskflow/rag`
-- Frontend uses Tailwind CSS 4 (different config from v3)
-- Web app uses Convex for backend (different from Express backend)
+- Components: PascalCase (`TaskCard.jsx`)
+- Hooks: `use` + camelCase (`useCreateTask.js`)
+- Folders: lowercase-with-hyphens

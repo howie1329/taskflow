@@ -5,23 +5,12 @@ import { useRouter } from "next/navigation"
 import type { FileUIPart } from "ai"
 import { toast } from "sonner"
 import {
-  PromptInputActionAddAttachments,
-  PromptInputActionMenu,
-  PromptInputActionMenuContent,
-  PromptInputActionMenuTrigger,
   PromptInput,
   PromptInputTextarea,
-  PromptInputSubmit,
   PromptInputFooter,
   usePromptInputController,
   usePromptInputAttachments,
 } from "@/components/ai-elements/prompt-input"
-import {
-  Attachment,
-  AttachmentPreview,
-  AttachmentRemove,
-  Attachments,
-} from "@/components/ai-elements/attachments"
 import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion"
 import {
   useChatConfig,
@@ -30,21 +19,28 @@ import {
   useChatMessages,
   useChatMessagingActions,
 } from "./chat-provider"
-import { ModelSelectorMenu } from "./model-selector-menu"
-import { ModeSelectorMenu } from "./mode-selector-menu"
-import { ProjectSelectorMenu } from "./project-selector-menu"
-import { ToolLockCommandMenu } from "./tool-lock-command-menu"
+import { ChatSettingsChips } from "./chat-settings-chips"
 import { ComposerHints } from "./composer-hints"
 import { CHAT_SUGGESTIONS } from "../constants/suggestions"
-import { Button } from "@/components/ui/button"
+import { useIsMobile } from "@/hooks/use-mobile"
+import {
+  CHAT_COMPOSER_INPUT_CLASS_NAME,
+  ChatComposerToolHeader,
+  ComposerAttachmentsPreview,
+  ComposerImageButton,
+  ComposerSlashCommandButton,
+  ComposerSubmitButton,
+} from "./chat-composer-ui"
 
 export function NewChatComposer() {
   const router = useRouter()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const { textInput } = usePromptInputController()
+  const attachments = usePromptInputAttachments()
   const { activeThreadId } = useChatId()
   const { status } = useChatMessages()
   const { sendPrompt, stop } = useChatMessagingActions()
+  const isMobile = useIsMobile()
   const {
     selectedModelId,
     selectedProjectId,
@@ -107,18 +103,7 @@ export function NewChatComposer() {
           <label htmlFor="new-chat-message" className="sr-only">
             Message
           </label>
-          <div
-            className={`grid overflow-hidden transition-all duration-200 ease-out ${
-              showPromptHeader
-                ? "mb-2 grid-rows-[1fr] opacity-100"
-                : "pointer-events-none mb-0 grid-rows-[0fr] opacity-0"
-            }`}
-            aria-hidden={!showPromptHeader}
-          >
-            <div className="overflow-hidden rounded-2xl border border-border/60 bg-background px-3 py-2 shadow-sm">
-              <ToolLockCommandMenu textareaRef={textareaRef} />
-            </div>
-          </div>
+          <ChatComposerToolHeader show={showPromptHeader} textareaRef={textareaRef} />
           <PromptInput
             onSubmit={handleSubmit}
             accept="image/*"
@@ -126,7 +111,7 @@ export function NewChatComposer() {
             maxFiles={4}
             maxFileSize={1_000_000}
             onError={(error) => toast.error(error.message)}
-            className="**:data-[slot=input-group]:rounded-3xl **:data-[slot=input-group]:border-border/60 **:data-[slot=input-group]:bg-background **:data-[slot=input-group]:shadow-sm **:data-[slot=input-group]:transition-colors **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:border-ring/50 **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:ring-2 **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:ring-ring/20"
+            className={CHAT_COMPOSER_INPUT_CLASS_NAME}
           >
             <ComposerAttachmentsPreview />
             <PromptInputTextarea
@@ -138,81 +123,37 @@ export function NewChatComposer() {
 
             <PromptInputFooter className="border-t border-border/45 pb-2.5 pt-2 text-muted-foreground">
               <div className="flex flex-wrap items-center gap-1.5">
-                <ComposerHints
-                  show={!textInput.value.trim()}
-                  toolLock={toolLock}
+                {isMobile ? null : (
+                  <ComposerHints
+                    show={!textInput.value.trim()}
+                    toolLock={toolLock}
+                  />
+                )}
+                <ComposerSlashCommandButton
+                  value={textInput.value}
+                  setInput={textInput.setInput}
+                  onFocus={() => textareaRef.current?.focus()}
                 />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="h-7 rounded-full border-border/60 bg-muted/30 px-2.5 text-xs font-medium text-foreground hover:bg-muted/60"
-                  onClick={() => {
-                    const v = textInput.value
-                    textInput.setInput(v.trimStart().startsWith("/") ? v : `/${v}`)
-                    textareaRef.current?.focus()
-                  }}
-                >
-                  /
-                </Button>
-                <PromptInputActionMenu>
-                  <PromptInputActionMenuTrigger
-                    className="h-7 rounded-full border border-border/60 bg-muted/30 px-2.5 text-xs font-medium text-foreground hover:bg-muted/60"
-                    size="sm"
-                  >
-                    Add image
-                  </PromptInputActionMenuTrigger>
-                  <PromptInputActionMenuContent>
-                    <PromptInputActionAddAttachments label="Add image" />
-                  </PromptInputActionMenuContent>
-                </PromptInputActionMenu>
-                <ModelSelectorMenu
+                <ChatSettingsChips
                   availableModels={availableModels}
                   selectedModelId={selectedModelId}
                   onSelectModelId={setSelectedModelId}
-                />
-                <ModeSelectorMenu
                   selectedMode={selectedMode}
                   onSelectMode={setSelectedMode}
-                />
-                <ProjectSelectorMenu
                   projects={projects}
                   selectedProjectId={selectedProjectId}
                   onSelectProjectId={setSelectedProjectId}
+                  showImageAction={isMobile}
                 />
+                {isMobile ? null : (
+                  <ComposerImageButton onClick={() => attachments.openFileDialog()} />
+                )}
               </div>
-              <PromptInputSubmit
-                status={status}
-                onStop={stop}
-                size="icon-sm"
-                className="size-8 rounded-full"
-              />
+              <ComposerSubmitButton status={status} onStop={stop} />
             </PromptInputFooter>
           </PromptInput>
         </div>
       </div>
-    </div>
-  )
-}
-
-function ComposerAttachmentsPreview() {
-  const attachments = usePromptInputAttachments()
-  if (attachments.files.length === 0) return null
-
-  return (
-    <div className="px-3 pt-3">
-      <Attachments variant="inline" className="mr-auto">
-        {attachments.files.map((file) => (
-          <Attachment
-            key={file.id}
-            data={file}
-            onRemove={() => attachments.remove(file.id)}
-          >
-            <AttachmentPreview />
-            <AttachmentRemove />
-          </Attachment>
-        ))}
-      </Attachments>
     </div>
   )
 }

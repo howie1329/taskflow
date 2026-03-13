@@ -3,18 +3,16 @@ import {
   detectProvider,
   providerConfig,
 } from "@/components/ai-elements/provider-badge"
-import {
-  isTavilyWebSearchOutput,
-  normalizeTavilyOutput,
-} from "@/lib/AITools/Tavily/types"
-import { TASKFLOW_TOOL_KEYS } from "@/lib/AITools/taskflow-tool-keys"
 import type { ToolCall, ToolStateInfo } from "./tool-types"
+import { getToolDefinition } from "./tool-definitions"
 
-export function getToolDisplayNameFromKey(toolKey: string): string {
+export function formatToolKeyLabel(toolKey: string): string {
   return toolKey
     .replace(/([A-Z])/g, " $1")
     .replace(/^./, (value) => value.toUpperCase())
 }
+
+export const getToolDisplayNameFromKey = formatToolKeyLabel
 
 export function getToolStateInfo(state: ToolUIPart["state"]): ToolStateInfo {
   const stateMap: Record<ToolUIPart["state"], ToolStateInfo> = {
@@ -130,70 +128,9 @@ function describeValue(value: unknown): string {
   return String(value)
 }
 
-function getOutputArrayLength(output: unknown, key: string): number {
-  if (!output || typeof output !== "object") return 0
-  const value = (output as Record<string, unknown>)[key]
-  return Array.isArray(value) ? value.length : 0
-}
-
 export function getToolSummary(toolCall: ToolCall): string | null {
-  if (
-    toolCall.toolKey === "tavilyWebSearch" &&
-    isTavilyWebSearchOutput(toolCall.output)
-  ) {
-    const output = normalizeTavilyOutput(
-      toolCall.output as unknown as Record<string, unknown>,
-    )
-    return `Found ${output.results.length} sources`
-  }
-
-  if (toolCall.toolKey === "exaWebSearch") {
-    const resultCount = getOutputArrayLength(toolCall.output, "results")
-    return `Found ${resultCount} Exa results`
-  }
-
-  if (toolCall.toolKey === "exaAnswer") {
-    return "Generated answer with citations"
-  }
-
-  if (toolCall.toolKey === "firecrawlSearch") {
-    const resultCount = getOutputArrayLength(toolCall.output, "data")
-    return `Found ${resultCount} pages`
-  }
-
-  if (toolCall.toolKey === "firecrawlScrape") {
-    return "Scraped page content"
-  }
-
-  if (toolCall.toolKey === "parallelWebSearch") {
-    const resultCount = getOutputArrayLength(toolCall.output, "results")
-    return `Found ${resultCount} aggregated results`
-  }
-
-  if (toolCall.toolKey === "advancedResearch") {
-    const resultCount = getOutputArrayLength(toolCall.output, "sources")
-    return `Compiled ${resultCount} multi-source results`
-  }
-
-  if (
-    toolCall.toolKey === "valyuWebSearch" ||
-    toolCall.toolKey === "valyuFinanceSearch"
-  ) {
-    const resultCount = getOutputArrayLength(toolCall.output, "results")
-    return `Found ${resultCount} Valyu results`
-  }
-
-  if (
-    TASKFLOW_TOOL_KEYS.includes(
-      toolCall.toolKey as (typeof TASKFLOW_TOOL_KEYS)[number],
-    )
-  ) {
-    if (toolCall.toolKey.startsWith("create")) return "Created successfully"
-    if (toolCall.toolKey.startsWith("update")) return "Updated successfully"
-    if (toolCall.toolKey.startsWith("delete")) return "Deleted successfully"
-    if (toolCall.toolKey.startsWith("list")) return "Listed records"
-    if (toolCall.toolKey.startsWith("get")) return "Fetched record"
-  }
+  const definitionSummary = getToolDefinition(toolCall.toolKey)?.summarize?.(toolCall)
+  if (definitionSummary) return definitionSummary
 
   const outputSummary = summarizeToolOutput(toolCall.output)
   if (outputSummary) return outputSummary

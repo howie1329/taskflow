@@ -12,7 +12,10 @@ export type ConversationProps = ComponentProps<typeof StickToBottom>;
 
 export const Conversation = ({ className, ...props }: ConversationProps) => (
   <StickToBottom
-    className={cn("relative flex-1 overflow-y-hidden", className)}
+    className={cn(
+      "relative flex-1 overflow-y-hidden overscroll-contain bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.055),transparent_42%),linear-gradient(180deg,rgba(255,255,255,0.02),transparent_34%),linear-gradient(180deg,hsl(var(--background)),color-mix(in_oklab,hsl(var(--muted))_22%,hsl(var(--background)))_100%)] before:pointer-events-none before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.035)_0,transparent_22%),radial-gradient(circle_at_80%_0%,rgba(255,255,255,0.03)_0,transparent_18%),url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.08'/%3E%3C/svg%3E\")] before:opacity-40",
+      className,
+    )}
     initial="smooth"
     resize="smooth"
     role="log"
@@ -29,7 +32,7 @@ export const ConversationContent = ({
   ...props
 }: ConversationContentProps) => (
   <StickToBottom.Content
-    className={cn("flex flex-col gap-8 p-4", className)}
+    className={cn("relative z-10 flex flex-col gap-8 p-4", className)}
     {...props}
   />
 );
@@ -117,6 +120,7 @@ export const ConversationScrollButton = ({
         className="absolute bottom-4 left-[50%] -translate-x-1/2"
       >
         <Button
+          aria-label="Scroll to bottom"
           className={cn(
             "rounded-full dark:bg-background dark:hover:bg-muted",
             className,
