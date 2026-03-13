@@ -40,6 +40,7 @@ import {
   ComposerSlashCommandButton,
   ComposerSubmitButton,
 } from "../../components/chat-composer-ui"
+import { ThreadContextFooterBadge } from "./thread-context-footer-badge"
 
 export function ThreadComposerBar() {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -184,8 +185,12 @@ export function ThreadComposerBar() {
                 showImageAction={isMobile}
               />
               {isMobile ? null : (
-                <ComposerImageButton onClick={() => attachments.openFileDialog()} />
+                <>
+                  <ComposerImageButton onClick={() => attachments.openFileDialog()} />
+                  <ThreadContextFooterBadge />
+                </>
               )}
+              {isMobile ? <ThreadContextFooterBadge /> : null}
             </div>
             <ComposerSubmitButton status={status} onStop={stop} />
           </PromptInputFooter>

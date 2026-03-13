@@ -23,6 +23,12 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { extractSourcesFromMessages } from "@/lib/chat/extract-sources";
+import {
+  formatTimestamp,
+  formatTokenCount,
+  formatUsdMicros,
+  getContextUsageRatio,
+} from "@/lib/chat/thread-context";
 
 type ChatInspectorProps = {
   threadId?: string;
@@ -60,36 +66,6 @@ function getAssistantToolKeys(messages: MessageLike[]) {
   return Array.from(counts.entries())
     .map(([toolKey, count]) => ({ toolKey, count }))
     .sort((left, right) => right.count - left.count);
-}
-
-function formatTimestamp(value?: number) {
-  if (!value) return "—";
-  return new Date(value).toLocaleString();
-}
-
-function trimTrailingZeros(value: number): string {
-  return value.toFixed(1).replace(/\.0$/, "");
-}
-
-function formatTokenCount(value?: number): string {
-  if (!Number.isFinite(value) || !value || value <= 0) return "—";
-  if (value >= 1_000_000) {
-    return `${trimTrailingZeros(value / 1_000_000)}M`;
-  }
-  if (value >= 1_000) {
-    return `${trimTrailingZeros(value / 1_000)}k`;
-  }
-  return String(value);
-}
-
-function formatUsdMicros(value?: number): string {
-  if (!Number.isFinite(value) || value === undefined) return "—";
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 4,
-  }).format(value / 1_000_000);
 }
 
 async function copyText(value: string, successMessage: string) {
@@ -137,15 +113,10 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
   );
   const sources = useMemo(() => extractSourcesFromMessages(messages), [messages]);
   const usageTotals = thread?.usageTotals;
-  const contextUsageRatio =
-    activeModelDetails?.contextLength && usageTotals?.totalTokens
-      ? Math.min(
-          100,
-          Math.round(
-            (usageTotals.totalTokens / activeModelDetails.contextLength) * 100,
-          ),
-        )
-      : null;
+  const contextUsageRatio = getContextUsageRatio({
+    totalTokens: usageTotals?.totalTokens,
+    contextLength: activeModelDetails?.contextLength,
+  })
 
   useEffect(() => {
     setMemoryDraft(thread?.summary?.summaryText ?? "");
