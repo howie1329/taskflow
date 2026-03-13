@@ -76,6 +76,7 @@ type ThreadSummary = {
 
 type ChatRequestBody = {
   model?: string;
+  interface?: string;
   id?: string;
   messages?: unknown;
   messageId?: string;
@@ -213,6 +214,7 @@ export async function POST(req: Request) {
 
   const {
     model,
+    interface: rawInterface,
     id: threadId,
     messages: rawMessages,
     messageId,
@@ -221,6 +223,7 @@ export async function POST(req: Request) {
     mode: rawMode,
     toolLock: rawToolLock,
   } = body;
+  const modelInterface = rawInterface || undefined;
   const projectId = rawProjectId || undefined;
   const mode = rawMode || "Basic";
   const toolLock = rawToolLock || undefined;
@@ -244,8 +247,8 @@ export async function POST(req: Request) {
   }
 
   const modelDoc = await fetchQuery(
-    api.models.getModelById,
-    { modelId: model },
+    api.models.getModelByIdAndProvider,
+    { modelId: model, interface: modelInterface },
     { token },
   );
   const interfaceType = modelDoc?.interface ?? "openrouter";
@@ -324,6 +327,7 @@ export async function POST(req: Request) {
           threadId,
           title,
           model,
+          interface: modelInterface,
           projectId,
           scope: projectId ? "project" : "workspace",
         },
@@ -351,6 +355,11 @@ export async function POST(req: Request) {
           role: "user",
           parts: lastMessage.parts,
         },
+        { token },
+      );
+      await fetchMutation(
+        api.chat.setThreadModel,
+        { threadId, model, interface: modelInterface },
         { token },
       );
     } catch (error) {

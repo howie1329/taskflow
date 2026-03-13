@@ -57,7 +57,7 @@ export function ThreadComposerBar() {
     projects,
     availableModels,
   } = useChatConfig()
-  const { setSelectedModelId, setSelectedProjectId, setSelectedMode } =
+  const { setSelectedModel, setSelectedProjectId, setSelectedMode } =
     useChatConfigActions()
   const { setScope } = useChatThreadActions()
   const composerFocus = useChatComposerFocus()
@@ -160,7 +160,7 @@ export function ThreadComposerBar() {
               <ChatSettingsChips
                 availableModels={availableModels}
                 selectedModelId={selectedModelId}
-                onSelectModelId={setSelectedModelId}
+                onSelectModel={setSelectedModel}
                 selectedMode={selectedMode}
                 onSelectMode={setSelectedMode}
                 projects={projects}

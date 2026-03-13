@@ -46,6 +46,7 @@ type ChatSendPromptInput = {
 
 type ChatRequestState = {
   selectedModelId: string | null
+  selectedInterface: string | null
   selectedProjectId: string | null
   selectedMode: ModeName
   toolLock: ToolKey | null
@@ -71,6 +72,7 @@ type ChatMessagingActions = {
 
 type ChatConfigState = {
   selectedModelId: string | null
+  selectedInterface: string | null
   selectedProjectId: string | null
   selectedMode: ModeName
   toolLock: ToolKey | null
@@ -81,7 +83,7 @@ type ChatConfigState = {
 }
 
 type ChatConfigActions = {
-  setSelectedModelId: (value: string | null) => void
+  setSelectedModel: (model: Doc<"availableModels"> | null) => void
   setSelectedProjectId: (value: string | null) => void
   setSelectedMode: (value: ModeName) => void
   setToolLock: (value: ToolKey | null) => void
@@ -118,6 +120,21 @@ function getDefaultModelId({
   return threadModel ?? preferredModelId ?? availableModels[0]?.modelId ?? null
 }
 
+function getDefaultInterfaceId({
+  threadInterface,
+  modelId,
+  availableModels,
+}: {
+  threadInterface: string | null | undefined
+  modelId: string | null
+  availableModels: Doc<"availableModels">[]
+}) {
+  if (threadInterface) return threadInterface
+  if (!modelId) return null
+  const model = availableModels.find((m) => m.modelId === modelId)
+  return model?.interface ?? null
+}
+
 function getEffectiveToolLock(selectedMode: ModeName, toolLock: ToolKey | null) {
   if (!toolLock) return null
 
@@ -133,10 +150,10 @@ function getEffectiveToolLock(selectedMode: ModeName, toolLock: ToolKey | null) 
 function toServerMessages(
   threadMessages:
     | Array<{
-        messageId: string
-        role: UIMessage["role"]
-        content: UIMessage["parts"]
-      } & PersistedMessageFields>
+      messageId: string
+      role: UIMessage["role"]
+      content: UIMessage["parts"]
+    } & PersistedMessageFields>
     | undefined,
 ): UIMessage<ChatMessageMetadata>[] {
   if (!threadMessages) return []
@@ -218,7 +235,16 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     availableModels,
   ])
 
+  const defaultInterface = useMemo(() => {
+    return getDefaultInterfaceId({
+      threadInterface: thread?.interface ?? null,
+      modelId: defaultModelId ?? thread?.model ?? null,
+      availableModels,
+    })
+  }, [thread?.interface, thread?.model, defaultModelId, availableModels])
+
   const [selectedModelId, setSelectedModelIdState] = useState<string | null>(null)
+  const [selectedInterface, setSelectedInterfaceState] = useState<string | null>(null)
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null)
   const [selectedMode, setSelectedMode] = useState<ModeName>("Basic")
   const [toolLock, setToolLock] = useState<ToolKey | null>(null)
@@ -241,16 +267,32 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       if (thread?.model) {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setSelectedModelIdState(thread.model)
+        setSelectedInterfaceState(
+          thread.interface ??
+          availableModels.find((m) => m.modelId === thread.model)?.interface ??
+          null,
+        )
       } else if (defaultModelId) {
         setSelectedModelIdState(defaultModelId)
+        setSelectedInterfaceState(defaultInterface)
       }
     }
-  }, [thread?.model, defaultModelId])
+  }, [
+    thread?.model,
+    thread?.interface,
+    defaultModelId,
+    defaultInterface,
+    availableModels,
+  ])
 
-  const setSelectedModelId = useCallback((value: string | null) => {
-    hasUserSelectedModel.current = true
-    setSelectedModelIdState(value)
-  }, [])
+  const setSelectedModel = useCallback(
+    (model: Doc<"availableModels"> | null) => {
+      hasUserSelectedModel.current = true
+      setSelectedModelIdState(model?.modelId ?? null)
+      setSelectedInterfaceState(model?.interface ?? null)
+    },
+    [],
+  )
 
   const serverMessages = useMemo<UIMessage<ChatMessageMetadata>[]>(() => {
     return toServerMessages(threadMessages)
@@ -265,6 +307,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
 
   const requestStateRef = useRef<ChatRequestState>({
     selectedModelId,
+    selectedInterface,
     selectedProjectId,
     selectedMode,
     toolLock: effectiveToolLock,
@@ -274,12 +317,20 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     requestStateRef.current = {
       selectedModelId,
+      selectedInterface,
       selectedProjectId,
       selectedMode,
       toolLock: effectiveToolLock,
       userId,
     }
-  }, [selectedModelId, selectedProjectId, selectedMode, effectiveToolLock, userId])
+  }, [
+    selectedModelId,
+    selectedInterface,
+    selectedProjectId,
+    selectedMode,
+    effectiveToolLock,
+    userId,
+  ])
 
   const sendPrompt = useCallback(
     async ({ text, files }: ChatSendPromptInput) => {
@@ -287,6 +338,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       const hasFiles = files.length > 0
       const {
         selectedModelId: currentModel,
+        selectedInterface: currentInterface,
         selectedProjectId: currentProjectId,
         selectedMode: currentMode,
         toolLock: currentToolLock,
@@ -299,6 +351,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         {
           body: {
             model: currentModel,
+            interface: currentInterface ?? undefined,
             userId: currentUserId,
             projectId: currentProjectId,
             mode: currentMode,
@@ -380,6 +433,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   const configState = useMemo<ChatConfigState>(
     () => ({
       selectedModelId,
+      selectedInterface,
       selectedProjectId,
       selectedMode,
       toolLock: effectiveToolLock,
@@ -390,6 +444,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     }),
     [
       selectedModelId,
+      selectedInterface,
       selectedProjectId,
       selectedMode,
       effectiveToolLock,
@@ -402,12 +457,12 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
 
   const configActions = useMemo<ChatConfigActions>(
     () => ({
-      setSelectedModelId,
+      setSelectedModel,
       setSelectedProjectId,
       setSelectedMode,
       setToolLock,
     }),
-    [setSelectedModelId, setSelectedProjectId, setSelectedMode, setToolLock],
+    [setSelectedModel, setSelectedProjectId, setSelectedMode, setToolLock],
   )
 
   const threadActions = useMemo<ChatThreadActions>(

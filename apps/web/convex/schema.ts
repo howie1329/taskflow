@@ -16,6 +16,7 @@ const schema = defineSchema({
     pinned: v.optional(v.boolean()),
     projectId: v.optional(v.id("projects")),
     model: v.optional(v.string()),
+    interface: v.optional(v.string()),
     scope: v.optional(v.union(v.literal("workspace"), v.literal("project"))),
     deletedAt: v.optional(v.number()),
     summary: v.optional(

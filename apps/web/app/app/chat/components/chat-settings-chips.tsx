@@ -30,7 +30,7 @@ import {
 interface ChatSettingsChipsProps {
   availableModels: Doc<"availableModels">[]
   selectedModelId: string | null
-  onSelectModelId: (modelId: string | null) => void
+  onSelectModel: (model: Doc<"availableModels"> | null) => void
   selectedMode: ModeName
   onSelectMode: (mode: ModeName) => void
   projects: Doc<"projects">[]
@@ -81,7 +81,7 @@ function SettingsPopoverChip({
 export function ChatSettingsChips({
   availableModels,
   selectedModelId,
-  onSelectModelId,
+  onSelectModel,
   selectedMode,
   onSelectMode,
   projects,
@@ -145,7 +145,7 @@ export function ChatSettingsChips({
         <ModelSettingsList
           availableModels={availableModels}
           selectedModelId={selectedModelId}
-          onSelectModelId={onSelectModelId}
+          onSelectModel={onSelectModel}
           onClose={() => setOpenPanel(null)}
         />
       </SettingsPopoverChip>

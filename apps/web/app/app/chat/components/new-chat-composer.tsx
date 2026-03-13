@@ -49,7 +49,7 @@ export function NewChatComposer() {
     projects,
     availableModels,
   } = useChatConfig()
-  const { setSelectedModelId, setSelectedProjectId, setSelectedMode } =
+  const { setSelectedModel, setSelectedProjectId, setSelectedMode } =
     useChatConfigActions()
 
   const handleSubmit = ({
@@ -137,7 +137,7 @@ export function NewChatComposer() {
                 <ChatSettingsChips
                   availableModels={availableModels}
                   selectedModelId={selectedModelId}
-                  onSelectModelId={setSelectedModelId}
+                  onSelectModel={setSelectedModel}
                   selectedMode={selectedMode}
                   onSelectMode={setSelectedMode}
                   projects={projects}

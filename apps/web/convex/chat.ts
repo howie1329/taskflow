@@ -81,7 +81,7 @@ const computeAssistantUsageAndCost = async (
   const totalMicros = Math.round(
     (normalizedUsage.inputTokens * promptMicrosPerMillion +
       normalizedUsage.outputTokens * completionMicrosPerMillion) /
-      USAGE_MICROS_MULTIPLIER,
+    USAGE_MICROS_MULTIPLIER,
   );
 
   return {
@@ -326,6 +326,7 @@ export const createThread = mutation({
     title: v.optional(v.string()),
     projectId: v.optional(v.id("projects")),
     model: v.optional(v.string()),
+    interface: v.optional(v.string()),
     scope: v.optional(v.union(v.literal("workspace"), v.literal("project"))),
   },
   handler: async (ctx, args) => {
@@ -367,6 +368,7 @@ export const createThread = mutation({
       pinned: false,
       projectId: args.projectId,
       model: args.model,
+      interface: args.interface,
       scope: args.scope ?? (args.projectId ? "project" : "workspace"),
       deletedAt: undefined,
       createdAt: now,
@@ -613,12 +615,13 @@ export const softDeleteThread = mutation({
 });
 
 /**
- * Set the AI model for a thread
+ * Set the AI model and interface for a thread
  */
 export const setThreadModel = mutation({
   args: {
     threadId: v.string(),
     model: v.string(),
+    interface: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -636,10 +639,15 @@ export const setThreadModel = mutation({
       throw new Error("Thread not found or access denied");
     }
 
-    await ctx.db.patch(thread._id, {
+    const patch: { model: string; interface?: string; updatedAt: number } = {
       model: args.model,
       updatedAt: Date.now(),
-    });
+    }
+    if (args.interface !== undefined) {
+      patch.interface = args.interface
+    }
+
+    await ctx.db.patch(thread._id, patch);
 
     return await ctx.db.get(thread._id);
   },

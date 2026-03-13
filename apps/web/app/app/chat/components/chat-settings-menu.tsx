@@ -25,7 +25,7 @@ import {
 export interface ChatSettingsContentProps {
   availableModels: Doc<"availableModels">[]
   selectedModelId: string | null
-  onSelectModelId: (modelId: string | null) => void
+  onSelectModel: (model: Doc<"availableModels"> | null) => void
   selectedMode: ModeName
   onSelectMode: (mode: ModeName) => void
   projects: Doc<"projects">[]
@@ -150,11 +150,11 @@ export function SettingsOptionButton({
 export function ModelSettingsList({
   availableModels,
   selectedModelId,
-  onSelectModelId,
+  onSelectModel,
   onClose,
 }: Pick<
   ChatSettingsContentProps,
-  "availableModels" | "selectedModelId" | "onSelectModelId" | "onClose"
+  "availableModels" | "selectedModelId" | "onSelectModel" | "onClose"
 >) {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedInterface, setSelectedInterface] = useState<"all" | string>("all")
@@ -256,7 +256,7 @@ export function ModelSettingsList({
               model={model}
               selected={model.modelId === selectedModelId}
               onClick={() => {
-                onSelectModelId(model.modelId)
+                onSelectModel(model)
                 onClose?.()
               }}
             />

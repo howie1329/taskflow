@@ -131,6 +131,22 @@ export const getModelById = query({
   },
 });
 
+// Get model by ID and optional interface (disambiguates when duplicate model names exist)
+export const getModelByIdAndProvider = query({
+  args: {
+    modelId: v.string(),
+    interface: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const matches = await ctx.db
+      .query("availableModels")
+      .withIndex("by_modelId", (q) => q.eq("modelId", args.modelId))
+      .collect();
+    if (!args.interface || matches.length <= 1) return matches[0] ?? null;
+    return matches.find((m) => m.interface === args.interface) ?? matches[0] ?? null;
+  },
+});
+
 // Get all base models (allowlist)
 export const getBaseModels = query({
   handler: async (ctx) => {
