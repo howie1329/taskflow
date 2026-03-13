@@ -6,8 +6,8 @@
 2. **API route:** `POST /api/chat` receives `messages`, `id` (threadId), `messageId`. It:
    - Parses/normalizes messages via `@taskflow/chat-content`
    - Fetches thread from Convex
-   - Runs `planSummarization` → if triggered, `formatMessagesForSummarizer` → `createRollingSummary` (Gemini) → `setThreadSummary` (Convex)
-   - Uses `injectRollingSummary` to prepend system message with summary
+   - Runs `planCompaction` → if triggered, `formatMessagesForSummarizer` → `generateThreadSummary` + `generateStructuredThreadState` (Gemini) → `setThreadSummary` (Convex)
+   - Uses `assemblePromptContext` to prepend system message with summary + thread state
    - Converts to model messages, prunes, then streams via `createUIMessageStream`
 3. **Storage:** Convex `thread` table has `summary`, `threadMessages` table has messages.
 4. **UI:** `ThreadContextFooterBadge` and `ChatInspector` show/edit the rolling summary.
@@ -39,7 +39,7 @@
 - `config.ts` — `DEFAULT_COMPACTION_CONFIG` (recentMessageCount: 8, messageThreshold: 20, tokenThreshold: 10000, minTranscriptChars: 180, maxSummaryChars: 2800)
 - `thresholds.ts` — `estimateMessageTokens(messages)`, `shouldCompactByMessageCount(...)`, `shouldCompactByTokenCount(...)`
 - `planning.ts` — `planCompaction(messages, previousSummary, config)` — returns `shouldCompact`, `messagesToSummarize`, `messagesToKeep`, `nextCursorMessageId`
-- `formatting.ts` — `formatMessagesForSummarizer(messages, options)` — reuse from `@taskflow/chat-content` or inline
+- `formatting.ts` — `formatMessagesForSummarizer(messages, options)` — in planning.ts
 - `generation.ts` — `generateThreadSummary(...)`, `generateStructuredThreadState(...)` — both call Gemini with structured prompts
 - `assembly.ts` — `assemblePromptContext(summary, threadState, messagesToKeep)` — builds final prompt structure
 
@@ -58,7 +58,7 @@
 
 **2.1 Replace summarization in `/api/chat/route.ts`**
 
-- Remove `planSummarization`, `formatMessagesForSummarizer`, `injectRollingSummary` from `@taskflow/chat-content`
+- ~~Remove summarization from `@taskflow/chat-content`~~ (done)
 - Use new `planCompaction`, `generateThreadSummary`, `generateStructuredThreadState`, `assemblePromptContext`
 - Add `compactManually` body param — when true, force compaction before model call
 - Add debounce: only compact if `lastCompactedAt` was > N minutes ago (e.g. 2 min) or manual

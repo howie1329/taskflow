@@ -1,6 +1,6 @@
 import { encode } from "gpt-tokenizer"
 import type { UIMessage } from "ai"
-import type { SummarizationOptions } from "./types.js"
+import type { TextExtractionOptions } from "./types.js"
 import { getTextFromUIMessage } from "./text.js"
 
 export const estimateTokensFromText = (text: string): number => {
@@ -9,10 +9,7 @@ export const estimateTokensFromText = (text: string): number => {
 
 export const estimateTokensFromUIMessages = (
   messages: UIMessage[],
-  options?: Pick<
-    SummarizationOptions,
-    "includeToolText" | "maxCharsPerMessage"
-  >
+  options?: TextExtractionOptions
 ): number => {
   const transcript = messages
     .map((message) => getTextFromUIMessage(message, options))
