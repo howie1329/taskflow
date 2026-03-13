@@ -250,22 +250,52 @@ export async function POST(req: Request) {
   );
   const interfaceType = modelDoc?.interface ?? "openrouter";
 
-  let baseModel = openRouter(model, OPENROUTER_MODEL_OPTIONS);
-
-  if (interfaceType === "groq") {
-    const groq = createGroq({ apiKey: process.env.GROQ_API_KEY });
-    if (!groq) {
-      return jsonError("Groq not initialized", 500);
+  let baseModel;
+  console.log("modelDoc", modelDoc);
+  console.log("model", model);
+  console.log("interfaceType", interfaceType);
+  switch (interfaceType) {
+    case "groq": {
+      const groq = createGroq({ apiKey: process.env.GROQ_API_KEY });
+      if (!groq) {
+        return NextResponse.json(
+          { error: "Groq not initialized" },
+          { status: 500 },
+        );
+      }
+      baseModel = groq(model);
+      break;
     }
-    baseModel = groq(model);
-  } else if (interfaceType === "cerebras") {
-    const cerebras = createCerebras({ apiKey: process.env.CEREBRAS_API_KEY });
-    if (!cerebras) {
-      return jsonError("Cerebras not initialized", 500);
+    case "cerebras": {
+      const cerebras = createCerebras({ apiKey: process.env.CEREBRAS_API_KEY });
+      if (!cerebras) {
+        return NextResponse.json(
+          { error: "Cerebras not initialized" },
+          { status: 500 },
+        );
+      }
+      baseModel = cerebras(model);
+      break;
     }
-    baseModel = cerebras(model);
-  } else if (interfaceType === "vercel") {
-    baseModel = model;
+    case "openrouter":
+      baseModel = openRouter(model, {
+        reasoning: { enabled: true, effort: "medium" },
+        parallelToolCalls: true,
+        usage: { include: true },
+      });
+      break
+    case "vercel": {
+      baseModel = model;
+      break;
+    }
+    default: {
+      baseModel = openRouter(model, {
+        reasoning: { enabled: true, effort: "medium" },
+        parallelToolCalls: true,
+        usage: { include: true },
+      });
+      break;
+    }
   }
 
   const modelWithMemory = withSupermemory(baseModel, userId, {
@@ -338,12 +368,12 @@ export async function POST(req: Request) {
       : undefined;
   const previousSummary = existingSummary
     ? {
-        schemaVersion: 1,
-        summaryText: existingSummary.summaryText,
-        summarizedThroughMessageId:
-          existingSummary.summarizedThroughMessageId,
-        updatedAt: existingSummary.updatedAt,
-      }
+      schemaVersion: 1,
+      summaryText: existingSummary.summaryText,
+      summarizedThroughMessageId:
+        existingSummary.summarizedThroughMessageId,
+      updatedAt: existingSummary.updatedAt,
+    }
     : null;
 
   const summaryPlan = planSummarization({
@@ -426,9 +456,9 @@ export async function POST(req: Request) {
   const modeConfig = ModeMapping[selectedMode];
   const validatedToolLock =
     typeof toolLock === "string" &&
-    toolLock.length > 0 &&
-    Object.prototype.hasOwnProperty.call(Tools, toolLock) &&
-    modeConfig.activeTools.includes(toolLock as keyof typeof Tools)
+      toolLock.length > 0 &&
+      Object.prototype.hasOwnProperty.call(Tools, toolLock) &&
+      modeConfig.activeTools.includes(toolLock as keyof typeof Tools)
       ? (toolLock as keyof typeof Tools)
       : null;
   const activeTools = validatedToolLock
