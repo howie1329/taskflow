@@ -117,7 +117,7 @@ export const ConversationScrollButton = ({
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 10, scale: 0.95 }}
         transition={{ duration: 0.2, ease: "easeOut" }}
-        className="absolute bottom-4 left-[50%] -translate-x-1/2"
+        className="pointer-events-auto absolute bottom-4 left-[50%] z-30 -translate-x-1/2"
       >
         <Button
           aria-label="Scroll to bottom"
