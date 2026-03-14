@@ -1,51 +1,57 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { toast } from "sonner"
-import { HugeiconsIcon } from "@hugeicons/react"
-import { ArrowLeft01Icon, MessageQuestionIcon } from "@hugeicons/core-free-icons"
-import type { UIMessage } from "ai"
+import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  ArrowLeft01Icon,
+  MessageQuestionIcon,
+} from "@hugeicons/core-free-icons";
+import type { UIMessage } from "ai";
 import {
   useChatConfig,
   useChatMessages,
   useChatMessagingActions,
   useChatThreadActions,
-} from "../components/chat-provider"
-import { useViewer } from "@/components/settings/hooks/use-viewer"
-import { Button } from "@/components/ui/button"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+} from "../components/chat-provider";
+import { useViewer } from "@/components/settings/hooks/use-viewer";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Conversation,
   ConversationContent,
   ConversationScrollButton,
-} from "@/components/ai-elements/conversation"
-import { PromptInputProvider } from "@/components/ai-elements/prompt-input"
+} from "@/components/ai-elements/conversation";
+import { PromptInputProvider } from "@/components/ai-elements/prompt-input";
 import {
   Empty,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/components/ui/empty"
-import { ChatComposerProvider } from "../components/chat-composer-context"
-import { ChatEmptyStateWithSuggestions } from "./components/chat-empty-state-suggestions"
-import { MessageDetailsSheet } from "./components/message-details-sheet"
-import { ThreadComposerBar } from "./components/thread-composer-bar"
-import { ThreadDialogs } from "./components/thread-dialogs"
-import { ThreadHeader } from "./components/thread-header"
-import { ThreadMessageList } from "./components/thread-message-list"
-import { useThreadPageActions } from "./components/use-thread-page-actions"
+} from "@/components/ui/empty";
+import { ChatEmptyStateWithSuggestions } from "./components/chat-empty-state-suggestions";
+import { MessageDetailsSheet } from "./components/message-details-sheet";
+import { ThreadComposerBar } from "./components/thread-composer-bar";
+import { ThreadDialogs } from "./components/thread-dialogs";
+import { ThreadHeader } from "./components/thread-header";
+import { ThreadMessageList } from "./components/thread-message-list";
+import { useThreadPageActions } from "./components/use-thread-page-actions";
 
-import "streamdown/styles.css"
-import "katex/dist/katex.min.css"
+import "streamdown/styles.css";
+import "katex/dist/katex.min.css";
 
 function ThreadNotFoundState({ onBack }: { onBack: () => void }) {
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-2 border-b p-4 md:hidden">
         <Button variant="ghost" size="icon-sm" onClick={onBack}>
-          <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" strokeWidth={2} />
+          <HugeiconsIcon
+            icon={ArrowLeft01Icon}
+            className="size-4"
+            strokeWidth={2}
+          />
         </Button>
         <span className="text-sm font-medium">Back to chats</span>
       </div>
@@ -54,7 +60,11 @@ function ThreadNotFoundState({ onBack }: { onBack: () => void }) {
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon">
-              <HugeiconsIcon icon={MessageQuestionIcon} className="size-8" strokeWidth={2} />
+              <HugeiconsIcon
+                icon={MessageQuestionIcon}
+                className="size-8"
+                strokeWidth={2}
+              />
             </EmptyMedia>
             <EmptyTitle>Conversation not found</EmptyTitle>
             <EmptyDescription>
@@ -72,96 +82,102 @@ function ThreadNotFoundState({ onBack }: { onBack: () => void }) {
         </Empty>
       </div>
     </div>
-  )
+  );
 }
 
 function ThreadPageContent() {
-  const router = useRouter()
-  const { messages, status, error } = useChatMessages()
-  const { sendText } = useChatMessagingActions()
-  const { thread, project } = useChatConfig()
-  const { updateTitle, softDelete } = useChatThreadActions()
-  const { preferences } = useViewer()
+  const router = useRouter();
+  const composerRef = useRef<HTMLTextAreaElement>(null);
+  const { messages, status, error } = useChatMessages();
+  const { sendText } = useChatMessagingActions();
+  const { thread, project } = useChatConfig();
+  const { updateTitle, softDelete } = useChatThreadActions();
+  const { preferences } = useViewer();
 
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-  const [editTitle, setEditTitle] = useState(thread?.title || "")
-  const [messageDetailsId, setMessageDetailsId] = useState<string | null>(null)
-  const [clearedErrorMessage, setClearedErrorMessage] = useState<string | null>(null)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [editTitle, setEditTitle] = useState(thread?.title || "");
+  const [messageDetailsId, setMessageDetailsId] = useState<string | null>(null);
+  const [clearedErrorMessage, setClearedErrorMessage] = useState<string | null>(
+    null,
+  );
 
-  const uiMessages = messages
   const shouldShowNotFound =
-    thread === null && messages.length === 0 && status === "ready"
+    thread === null && messages.length === 0 && status === "ready";
+
   const {
     copyAssistantMessage,
     regenerateAssistantResponse,
     saveThreadTitle,
     deleteThread,
   } = useThreadPageActions({
-    messages: uiMessages as UIMessage[],
+    messages: messages as UIMessage[],
     sendText,
     updateTitle,
     softDelete,
-  })
+  });
 
   const handleEditTitle = async () => {
-    if (!thread) return
-    const didSave = await saveThreadTitle(editTitle)
-    if (!didSave) return
-    setIsEditDialogOpen(false)
-  }
+    if (!thread) return;
+    const didSave = await saveThreadTitle(editTitle);
+    if (!didSave) return;
+    setIsEditDialogOpen(false);
+  };
 
   const handleDeleteThread = async () => {
-    if (!thread) return
-    await deleteThread()
-    setIsDeleteDialogOpen(false)
-    router.push("/app/chat")
-  }
+    if (!thread) return;
+    await deleteThread();
+    setIsDeleteDialogOpen(false);
+    router.push("/app/chat");
+  };
 
   const handleCompactChat = async () => {
-    if (!thread) return
+    if (!thread) return;
     try {
       const res = await fetch("/api/chat/compact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ threadId: thread.threadId }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? "Compaction failed")
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Compaction failed");
       if (data.compacted) {
-        toast.success("Chat compacted")
+        toast.success("Chat compacted");
       } else {
-        toast.info(data.message ?? "Nothing to compact")
+        toast.info(data.message ?? "Nothing to compact");
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Compaction failed")
+      toast.error(err instanceof Error ? err.message : "Compaction failed");
     }
-  }
+  };
 
-  const selectedMessage = uiMessages.find((message) => message.id === messageDetailsId)
+  const selectedMessage =
+    messages.find((m) => m.id === messageDetailsId) ?? null;
 
   if (shouldShowNotFound) {
-    return <ThreadNotFoundState onBack={() => router.push("/app/chat")} />
+    return <ThreadNotFoundState onBack={() => router.push("/app/chat")} />;
   }
 
   return (
-    <ChatComposerProvider>
-      <div className="flex h-full min-h-0 w-full flex-col overflow-hidden">
-        <ThreadHeader
-          thread={thread}
-          project={project}
-          onBackToChats={() => router.push("/app/chat")}
-          onOpenEditTitle={() => {
-            setEditTitle(thread?.title || "")
-            setIsEditDialogOpen(true)
-          }}
-          onOpenDeleteThread={() => setIsDeleteDialogOpen(true)}
-          onCompactChat={handleCompactChat}
-        />
+    <div className="flex h-full min-h-0 w-full flex-col overflow-hidden">
+      <ThreadHeader
+        thread={thread}
+        project={project}
+        onBackToChats={() => router.push("/app/chat")}
+        onOpenEditTitle={() => {
+          setEditTitle(thread?.title || "");
+          setIsEditDialogOpen(true);
+        }}
+        onOpenDeleteThread={() => setIsDeleteDialogOpen(true)}
+        onCompactChat={handleCompactChat}
+      />
 
-        {error && error.message !== clearedErrorMessage && (
+      {error && error.message !== clearedErrorMessage && (
         <div className="px-4 py-3">
-          <Alert variant="destructive" className="flex items-start justify-between gap-3">
+          <Alert
+            variant="destructive"
+            className="flex items-start justify-between gap-3"
+          >
             <div>
               <AlertTitle>Chat request failed</AlertTitle>
               <AlertDescription>{error.message}</AlertDescription>
@@ -175,9 +191,9 @@ function ThreadPageContent() {
             </Button>
           </Alert>
         </div>
-        )}
+      )}
 
-        <ThreadDialogs
+      <ThreadDialogs
         isEditDialogOpen={isEditDialogOpen}
         setIsEditDialogOpen={setIsEditDialogOpen}
         isDeleteDialogOpen={isDeleteDialogOpen}
@@ -186,39 +202,36 @@ function ThreadPageContent() {
         setEditTitle={setEditTitle}
         onSaveTitle={() => void handleEditTitle()}
         onDeleteThread={() => void handleDeleteThread()}
-        />
+      />
 
-        <Conversation className="flex-1">
-          <ConversationContent className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-6 md:py-7">
-          {uiMessages.length === 0 ? (
-            <ChatEmptyStateWithSuggestions />
+      <Conversation className="flex-1">
+        <ConversationContent className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-6 md:py-7">
+          {messages.length === 0 ? (
+            <ChatEmptyStateWithSuggestions textareaRef={composerRef} />
           ) : (
             <ThreadMessageList
-              uiMessages={uiMessages as UIMessage[]}
+              uiMessages={messages as UIMessage[]}
               status={status}
               preferences={preferences ?? undefined}
-              onRegenerate={(assistantMessageId) =>
-                void regenerateAssistantResponse(assistantMessageId)
-              }
-              onCopy={(messageText) => void copyAssistantMessage(messageText)}
+              onRegenerate={(id) => void regenerateAssistantResponse(id)}
+              onCopy={(text) => void copyAssistantMessage(text)}
               onOpenDetails={setMessageDetailsId}
             />
           )}
-          </ConversationContent>
-          <ConversationScrollButton />
-        </Conversation>
+        </ConversationContent>
+        <ConversationScrollButton />
+      </Conversation>
 
-        <MessageDetailsSheet
-          open={!!messageDetailsId}
-          onOpenChange={(open) => !open && setMessageDetailsId(null)}
-          message={selectedMessage ?? null}
-          onCopy={copyAssistantMessage}
-        />
+      <MessageDetailsSheet
+        open={!!messageDetailsId}
+        onOpenChange={(open) => !open && setMessageDetailsId(null)}
+        message={selectedMessage}
+        onCopy={copyAssistantMessage}
+      />
 
-        <ThreadComposerBar />
-      </div>
-    </ChatComposerProvider>
-  )
+      <ThreadComposerBar textareaRef={composerRef} />
+    </div>
+  );
 }
 
 export default function ThreadPage() {
@@ -226,5 +239,5 @@ export default function ThreadPage() {
     <PromptInputProvider>
       <ThreadPageContent />
     </PromptInputProvider>
-  )
+  );
 }

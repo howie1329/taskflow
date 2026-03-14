@@ -1,6 +1,6 @@
 import type { UIMessage } from "ai"
-import { estimateTokensFromUIMessages, getTextFromUIMessage } from "@taskflow/chat-content"
-import type { CompactionConfig, CompactionPlan, ThreadCompaction } from "./types"
+import { estimateTokensFromUIMessages, getTextFromUIMessage } from "./utils/index.js"
+import type { CompactionConfig, CompactionPlan, ThreadCompaction } from "./types.js"
 
 function splitProtectedTail(
   messages: UIMessage[],

@@ -1,4 +1,4 @@
-import type { CompactionConfig } from "./types"
+import type { CompactionConfig } from "./types.js"
 
 export const DEFAULT_COMPACTION_CONFIG: CompactionConfig = {
   // Always keep the last N UI messages verbatim in the model context.

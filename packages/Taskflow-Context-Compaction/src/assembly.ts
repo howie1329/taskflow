@@ -1,5 +1,5 @@
 import type { UIMessage } from "ai"
-import type { ThreadState } from "./types"
+import type { ThreadState } from "./types.js"
 
 const SUMMARY_MESSAGE_ID = "compaction_summary_v1"
 

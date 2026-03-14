@@ -1,23 +1,23 @@
-import { memo, useMemo } from "react"
-import type { UIMessage } from "ai"
-import { useJsonRenderMessage } from "@json-render/react"
+import { memo, useMemo } from "react";
+import type { UIMessage } from "ai";
+import { useJsonRenderMessage } from "@json-render/react";
 import {
   Message,
   MessageAction,
   MessageActions,
   MessageContent,
-} from "@/components/ai-elements/message"
+} from "@/components/ai-elements/message";
 import {
   Reasoning,
   ReasoningContent,
   ReasoningTrigger,
-} from "@/components/ai-elements/reasoning"
-import { cn } from "@/lib/utils"
-import { Streamdown } from "streamdown"
-import { code } from "@streamdown/code"
-import { mermaid } from "@streamdown/mermaid"
-import { math } from "@streamdown/math"
-import { cjk } from "@streamdown/cjk"
+} from "@/components/ai-elements/reasoning";
+import { cn } from "@/lib/utils";
+import { Streamdown } from "streamdown";
+import { code } from "@streamdown/code";
+import { mermaid } from "@streamdown/mermaid";
+import { math } from "@streamdown/math";
+import { cjk } from "@streamdown/cjk";
 import {
   ActivityIcon,
   AlertCircleIcon,
@@ -25,37 +25,34 @@ import {
   CopyIcon,
   EllipsisIcon,
   RefreshCwIcon,
-} from "lucide-react"
+} from "lucide-react";
 import {
   Attachment,
   AttachmentPreview,
   Attachments,
-} from "@/components/ai-elements/attachments"
-import { Skeleton } from "@/components/ui/skeleton"
-import {
-  parseMessageParts,
-  type ToolProgressPart,
-} from "./message-parts"
-import { MessageGenUIPanel } from "./message-genui-panel"
-import { ToolPanels } from "./tool-panels"
-import { formatToolKeyLabel } from "./tool-meta"
-import type { ToolCall } from "./tool-types"
+} from "@/components/ai-elements/attachments";
+import { Skeleton } from "@/components/ui/skeleton";
+import { parseMessageParts, type ToolProgressPart } from "./message-parts";
+import { MessageGenUIPanel } from "./message-genui-panel";
+import { ToolPanels } from "./tool-panels";
+import { formatToolKeyLabel } from "./tool-meta";
+import type { ToolCall } from "./tool-calls";
 
-const STREAMDOWN_PLUGINS = { code, mermaid, math, cjk }
+const STREAMDOWN_PLUGINS = { code, mermaid, math, cjk };
 
 interface PreferencesLike {
-  aiChatShowReasoning?: boolean
-  aiChatShowActions?: boolean
-  aiChatShowToolDetails?: boolean
+  aiChatShowReasoning?: boolean;
+  aiChatShowActions?: boolean;
+  aiChatShowToolDetails?: boolean;
 }
 
 interface ThreadMessageListProps {
-  uiMessages: UIMessage[]
-  status: string
-  preferences: PreferencesLike | undefined
-  onRegenerate: (assistantMessageId: string) => void
-  onCopy: (messageText: string) => void
-  onOpenDetails: (messageId: string) => void
+  uiMessages: UIMessage[];
+  status: string;
+  preferences: PreferencesLike | undefined;
+  onRegenerate: (assistantMessageId: string) => void;
+  onCopy: (messageText: string) => void;
+  onOpenDetails: (messageId: string) => void;
 }
 
 export function ThreadMessageList({
@@ -81,21 +78,21 @@ export function ThreadMessageList({
             onCopy={onCopy}
             onOpenDetails={onOpenDetails}
           />
-        )
+        );
       })}
     </>
-  )
+  );
 }
 
 interface ThreadMessageRowProps {
-  message: UIMessage
-  index: number
-  totalMessages: number
-  status: string
-  preferences: PreferencesLike | undefined
-  onRegenerate: (assistantMessageId: string) => void
-  onCopy: (messageText: string) => void
-  onOpenDetails: (messageId: string) => void
+  message: UIMessage;
+  index: number;
+  totalMessages: number;
+  status: string;
+  preferences: PreferencesLike | undefined;
+  onRegenerate: (assistantMessageId: string) => void;
+  onCopy: (messageText: string) => void;
+  onOpenDetails: (messageId: string) => void;
 }
 
 const ThreadMessageRow = memo(function ThreadMessageRow({
@@ -108,25 +105,28 @@ const ThreadMessageRow = memo(function ThreadMessageRow({
   onCopy,
   onOpenDetails,
 }: ThreadMessageRowProps) {
-  const parsedMessage = useMemo(() => parseMessageParts(message), [message])
+  const parsedMessage = useMemo(() => parseMessageParts(message), [message]);
   const {
     files,
     reasoningText,
     text: messageText,
     toolCalls,
     toolProgress,
-  } = parsedMessage
-  const hasReasoning = !!reasoningText
-  const hasFiles = files.length > 0
+  } = parsedMessage;
+  const hasReasoning = !!reasoningText;
+  const hasFiles = files.length > 0;
   const isStreamingMessage =
     message.role === "assistant" &&
     status === "streaming" &&
-    index === totalMessages - 1
+    index === totalMessages - 1;
 
   return (
     <Message
       from={message.role}
-      className={cn("max-w-none gap-1.5", message.role === "user" && "justify-end")}
+      className={cn(
+        "max-w-none gap-1.5",
+        message.role === "user" && "justify-end",
+      )}
     >
       <MessageContent
         className={cn(
@@ -176,27 +176,27 @@ const ThreadMessageRow = memo(function ThreadMessageRow({
         )}
       </MessageContent>
     </Message>
-  )
-})
+  );
+});
 
 interface AssistantMessageBodyProps {
-  message: UIMessage
-  messageFiles: ReturnType<typeof parseMessageParts>["files"]
-  toolCalls: ToolCall[]
-  hasReasoning: boolean
-  reasoningText: string | null
-  preferences: PreferencesLike | undefined
-  status: string
-  isStreamingMessage: boolean
-  plainMessageText: string
-  progressParts: ToolProgressPart[]
-  onRegenerate: (assistantMessageId: string) => void
-  onCopy: (messageText: string) => void
-  onOpenDetails: (messageId: string) => void
+  message: UIMessage;
+  messageFiles: ReturnType<typeof parseMessageParts>["files"];
+  toolCalls: ToolCall[];
+  hasReasoning: boolean;
+  reasoningText: string | null;
+  preferences: PreferencesLike | undefined;
+  status: string;
+  isStreamingMessage: boolean;
+  plainMessageText: string;
+  progressParts: ToolProgressPart[];
+  onRegenerate: (assistantMessageId: string) => void;
+  onCopy: (messageText: string) => void;
+  onOpenDetails: (messageId: string) => void;
 }
 
 function ToolProgressList({ parts }: { parts: ToolProgressPart[] }) {
-  if (parts.length === 0) return null
+  if (parts.length === 0) return null;
 
   return (
     <div className="space-y-2">
@@ -221,7 +221,7 @@ function ToolProgressList({ parts }: { parts: ToolProgressPart[] }) {
         </div>
       ))}
     </div>
-  )
+  );
 }
 
 function AssistantMessageBody({
@@ -239,9 +239,13 @@ function AssistantMessageBody({
   onCopy,
   onOpenDetails,
 }: AssistantMessageBodyProps) {
-  const { spec, text: renderedText, hasSpec } = useJsonRenderMessage(
+  const {
+    spec,
+    text: renderedText,
+    hasSpec,
+  } = useJsonRenderMessage(
     message.parts as Parameters<typeof useJsonRenderMessage>[0],
-  )
+  );
 
   return (
     <div className="flex flex-col gap-4">
@@ -264,12 +268,14 @@ function AssistantMessageBody({
         <ToolPanels toolCalls={toolCalls} preferences={preferences} />
       )}
 
-      {hasReasoning && preferences?.aiChatShowReasoning !== false && reasoningText && (
-        <Reasoning isStreaming={status === "streaming"} defaultOpen={false}>
-          <ReasoningTrigger />
-          <ReasoningContent>{reasoningText}</ReasoningContent>
-        </Reasoning>
-      )}
+      {hasReasoning &&
+        preferences?.aiChatShowReasoning !== false &&
+        reasoningText && (
+          <Reasoning isStreaming={status === "streaming"} defaultOpen={false}>
+            <ReasoningTrigger />
+            <ReasoningContent>{reasoningText}</ReasoningContent>
+          </Reasoning>
+        )}
 
       {hasSpec && spec && <MessageGenUIPanel spec={spec} />}
 
@@ -333,5 +339,5 @@ function AssistantMessageBody({
         </MessageAction>
       </MessageActions>
     </div>
-  )
+  );
 }

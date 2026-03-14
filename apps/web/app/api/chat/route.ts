@@ -19,8 +19,6 @@ import {
   getInitialUserText,
   getLatestUserMessage,
   fromStoredThreadMessage,
-} from "@taskflow/chat-content";
-import {
   planCompaction,
   selectContextMessages,
   formatMessagesForSummarizer,
@@ -29,7 +27,7 @@ import {
   assemblePromptContext,
   DEFAULT_COMPACTION_CONFIG,
   isPastCompactionCooldown,
-} from "@/lib/chat/context-compaction";
+} from "@taskflow/context-compaction";
 import { pipeJsonRender } from "@json-render/core";
 import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server";
 import { fetchMutation, fetchQuery } from "convex/nextjs";
@@ -372,13 +370,13 @@ export async function POST(req: Request) {
     try {
       const [updatedSummary, updatedState] = await Promise.all([
         generateThreadSummary({
-          googleModel,
+          model: googleModel("gemini-3.1-flash-lite-preview"),
           previousSummary: summaryTextForContext,
           transcript,
           maxSummaryChars: COMPACTION_CONFIG.maxSummaryChars,
         }),
         generateStructuredThreadState({
-          googleModel,
+          model: googleModel("gemini-3.1-flash-lite-preview"),
           previousState: threadStateForContext ?? null,
           transcript,
         }),

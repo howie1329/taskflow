@@ -1,7 +1,7 @@
 import { generateText, Output } from "ai"
-import { createGoogleGenerativeAI } from "@ai-sdk/google"
+import type { LanguageModel } from "ai"
 import { z } from "zod"
-import type { ThreadState } from "./types"
+import type { ThreadState } from "./types.js"
 
 const THREAD_STATE_SCHEMA = z.object({
   activeGoal: z.string().optional(),
@@ -29,24 +29,24 @@ function emptyThreadState(): ThreadState {
 
 /** Generate rolling summary from transcript. Returns empty string on failure. */
 export async function generateThreadSummary({
-  googleModel,
+  model,
   previousSummary,
   transcript,
   maxSummaryChars,
 }: {
-  googleModel: ReturnType<typeof createGoogleGenerativeAI>
+  model: LanguageModel
   previousSummary: string
   transcript: string
   maxSummaryChars: number
 }): Promise<string> {
-  if (!googleModel) return ""
+  if (!model) return ""
 
   const boundedPrevious = previousSummary.trim().slice(0, maxSummaryChars)
   const boundedTranscript = transcript.trim().slice(-12000)
 
   try {
     const { text } = await generateText({
-      model: googleModel("gemini-3.1-flash-lite-preview"),
+      model,
       system:
         "You maintain a rolling conversation summary for context compression. Keep it concise, factual, action-oriented. Preserve: user goals, decisions, unresolved items, important tool outputs, preferences.",
       prompt: `Update the rolling summary.
@@ -79,21 +79,21 @@ Return only the updated markdown summary.`,
 
 /** Generate structured thread state from transcript. Returns empty state on failure. */
 export async function generateStructuredThreadState({
-  googleModel,
+  model,
   previousState,
   transcript,
 }: {
-  googleModel: ReturnType<typeof createGoogleGenerativeAI>
+  model: LanguageModel
   previousState: ThreadState | null
   transcript: string
 }): Promise<ThreadState> {
-  if (!googleModel) return emptyThreadState()
+  if (!model) return emptyThreadState()
 
   const boundedTranscript = transcript.trim().slice(-8000)
 
   try {
     const { output } = await generateText({
-      model: googleModel("gemini-3.1-flash-lite-preview"),
+      model,
       output: Output.object({ schema: THREAD_STATE_SCHEMA }),
       system: `Extract structured thread memory from conversation. Be concise. Each array item should be a short string (1-2 sentences max). Merge with previous state when provided.`,
       prompt: `Previous state (merge/update): ${JSON.stringify(previousState ?? emptyThreadState())}
