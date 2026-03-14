@@ -1,15 +1,19 @@
-"use client"
+"use client";
 
-import { useMemo, useState, type ReactNode } from "react"
-import type { Doc } from "@/convex/_generated/dataModel"
-import { ModelSelectorLogo } from "@/components/ai-elements/model-selector"
-import type { ModeName } from "@/lib/AITools/ModePrompts"
-import { AVAILABLE_MODES, getModeDescription } from "@/lib/AITools/ModePrompts"
-import { formatModelPrice } from "./format-model-price"
-import { Input } from "@/components/ui/input"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { usePromptInputAttachments } from "@/components/ai-elements/prompt-input"
-import { cn } from "@/lib/utils"
+import { useMemo, useState, type ReactNode } from "react";
+import type { Doc } from "@/convex/_generated/dataModel";
+import { ModelSelectorLogo } from "@/components/ai-elements/model-selector";
+import type { ModeName } from "@/lib/AITools/ModePrompts";
+import { AVAILABLE_MODES, getModeDescription } from "@/lib/AITools/ModePrompts";
+
+import { Input } from "@/components/ui/input";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { usePromptInputAttachments } from "@/components/ai-elements/prompt-input";
+import { cn } from "@/lib/utils";
 import {
   CircleHelpIcon,
   CheckIcon,
@@ -20,38 +24,41 @@ import {
   SearchIcon,
   SparklesIcon,
   WandSparklesIcon,
-} from "lucide-react"
+} from "lucide-react";
 
 export interface ChatSettingsContentProps {
-  availableModels: Doc<"availableModels">[]
-  selectedModelId: string | null
-  onSelectModel: (model: Doc<"availableModels"> | null) => void
-  selectedMode: ModeName
-  onSelectMode: (mode: ModeName) => void
-  projects: Doc<"projects">[]
-  selectedProjectId: string | null
-  onSelectProjectId: (projectId: string | null) => void
-  showImageAction?: boolean
-  onClose?: () => void
+  availableModels: Doc<"availableModels">[];
+  selectedModelId: string | null;
+  onSelectModel: (model: Doc<"availableModels"> | null) => void;
+  selectedMode: ModeName;
+  onSelectMode: (mode: ModeName) => void;
+  projects: Doc<"projects">[];
+  selectedProjectId: string | null;
+  onSelectProjectId: (projectId: string | null) => void;
+  showImageAction?: boolean;
+  onClose?: () => void;
 }
 
 export const CHAT_SETTINGS_TRIGGER_CLASS_NAME =
-  "rounded-full border border-border/60 bg-background/70 text-foreground shadow-sm hover:bg-muted/70"
+  "rounded-full border border-border/60 bg-background/70 text-foreground shadow-sm hover:bg-muted/70";
 
 export const CHAT_SETTINGS_POPOVER_CLASS_NAME =
-  "overflow-hidden rounded-[28px] bg-background/96 p-0 ring-1 ring-border/35 shadow-[0_18px_48px_-36px_rgba(15,23,42,0.45)] backdrop-blur-xl"
+  "overflow-hidden rounded-[28px] bg-background/96 p-0 ring-1 ring-border/35 shadow-[0_18px_48px_-36px_rgba(15,23,42,0.45)] backdrop-blur-xl";
 
 export function SettingsSection({
   icon,
   title,
   children,
 }: {
-  icon: ReactNode
-  title: string
-  children: ReactNode
+  icon: ReactNode;
+  title: string;
+  children: ReactNode;
 }) {
   return (
-    <section className="border-b border-border/20 px-1 py-1.5 last:border-b-0" aria-label={title}>
+    <section
+      className="border-b border-border/20 px-1 py-1.5 last:border-b-0"
+      aria-label={title}
+    >
       <div className="px-1.5 pb-1 pt-0.5">
         <div className="flex items-center gap-1.5 text-[10px] font-medium uppercase text-muted-foreground">
           <span className="text-foreground/70">{icon}</span>
@@ -60,7 +67,7 @@ export function SettingsSection({
       </div>
       <div className="grid gap-1">{children}</div>
     </section>
-  )
+  );
 }
 
 export function SettingsEmptyState({ children }: { children: ReactNode }) {
@@ -68,7 +75,7 @@ export function SettingsEmptyState({ children }: { children: ReactNode }) {
     <div className="rounded-xl bg-muted/20 px-3 py-4 text-center text-[11px] text-muted-foreground">
       {children}
     </div>
-  )
+  );
 }
 
 export function SettingsOptionButton({
@@ -81,14 +88,14 @@ export function SettingsOptionButton({
   tags,
   onClick,
 }: {
-  selected?: boolean
-  leadingIcon?: ReactNode
-  title: string
-  description?: string
-  meta?: string
-  detail?: string
-  tags?: string[]
-  onClick: () => void
+  selected?: boolean;
+  leadingIcon?: ReactNode;
+  title: string;
+  description?: string;
+  meta?: string;
+  detail?: string;
+  tags?: string[];
+  onClick: () => void;
 }) {
   return (
     <button
@@ -96,9 +103,7 @@ export function SettingsOptionButton({
       onClick={onClick}
       className={cn(
         "flex w-full min-w-0 items-start gap-3 rounded-2xl px-3 py-3 text-left transition-[background-color,transform] duration-150 ease-out hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
-        selected
-          ? "bg-muted/55"
-          : "bg-transparent",
+        selected ? "bg-muted/55" : "bg-transparent",
       )}
     >
       <span
@@ -112,7 +117,9 @@ export function SettingsOptionButton({
       <span className="min-w-0 flex-1">
         <span className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
           <span className="min-w-0 flex-1">
-            <span className="block truncate text-sm font-medium text-foreground">{title}</span>
+            <span className="block truncate text-sm font-medium text-foreground">
+              {title}
+            </span>
             {meta ? (
               <span className="mt-0.5 block truncate text-[11px] text-muted-foreground">
                 {meta}
@@ -144,7 +151,7 @@ export function SettingsOptionButton({
         ) : null}
       </span>
     </button>
-  )
+  );
 }
 
 export function ModelSettingsList({
@@ -156,45 +163,56 @@ export function ModelSettingsList({
   ChatSettingsContentProps,
   "availableModels" | "selectedModelId" | "onSelectModel" | "onClose"
 >) {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [selectedInterface, setSelectedInterface] = useState<"all" | string>("all")
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedInterface, setSelectedInterface] = useState<"all" | string>(
+    "all",
+  );
 
   const interfaces = useMemo(() => {
     const set = new Set(
       availableModels
-        .map((m) => (typeof m.interface === "string" ? m.interface.trim().toLowerCase() : null))
-        .filter(Boolean),
-    )
-    return Array.from(set).sort()
-  }, [availableModels])
+        .map((m) =>
+          typeof m.interface === "string"
+            ? m.interface.trim().toLowerCase()
+            : null,
+        )
+        .filter((v): v is string => v !== null),
+    );
+    return Array.from(set).sort();
+  }, [availableModels]);
 
-  const showInterfaceFilter = interfaces.length > 1
+  const showInterfaceFilter = interfaces.length > 1;
 
   const filteredModels = useMemo(() => {
-    let list = availableModels
+    let list = availableModels;
 
     if (selectedInterface !== "all") {
-      const normalizedSelected = selectedInterface.trim().toLowerCase()
+      const normalizedSelected = selectedInterface.trim().toLowerCase();
       list = list.filter((m) => {
-        const iface = typeof m.interface === "string" ? m.interface.trim().toLowerCase() : ""
-        return iface === normalizedSelected
-      })
+        const iface =
+          typeof m.interface === "string"
+            ? m.interface.trim().toLowerCase()
+            : "";
+        return iface === normalizedSelected;
+      });
     }
 
-    const seen = new Set<string>()
+    const seen = new Set<string>();
     list = list.filter((m) => {
-      const key = `${m.modelId}::${typeof m.interface === "string" ? m.interface : ""}`
-      if (seen.has(key)) return false
-      seen.add(key)
-      return true
-    })
+      const key = `${m.modelId}::${typeof m.interface === "string" ? m.interface : ""}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
 
-    const query = searchQuery.trim().toLowerCase()
-    if (!query) return list
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return list;
     return list.filter((model) =>
-      `${model.name} ${model.provider ?? ""} ${model.interface ?? ""} ${formatInterfaceDisplay(model.interface) ?? ""}`.toLowerCase().includes(query)
-    )
-  }, [availableModels, selectedInterface, searchQuery])
+      `${model.name} ${model.provider ?? ""} ${model.interface ?? ""} ${formatInterfaceDisplay(model.interface) ?? ""}`
+        .toLowerCase()
+        .includes(query),
+    );
+  }, [availableModels, selectedInterface, searchQuery]);
 
   return (
     <div className="max-h-[min(48vh,24rem)] overflow-y-auto overscroll-contain px-1 py-1">
@@ -256,33 +274,34 @@ export function ModelSettingsList({
               model={model}
               selected={model.modelId === selectedModelId}
               onClick={() => {
-                onSelectModel(model)
-                onClose?.()
+                onSelectModel(model);
+                onClose?.();
               }}
             />
           ))
         ) : (
-          <SettingsEmptyState>
-            No models found
-          </SettingsEmptyState>
+          <SettingsEmptyState>No models found</SettingsEmptyState>
         )}
       </SettingsSection>
     </div>
-  )
+  );
 }
 
 export function ModeSettingsList({
   selectedMode,
   onSelectMode,
   onClose,
-}: Pick<ChatSettingsContentProps, "selectedMode" | "onSelectMode" | "onClose">) {
-  const [searchQuery, setSearchQuery] = useState("")
+}: Pick<
+  ChatSettingsContentProps,
+  "selectedMode" | "onSelectMode" | "onClose"
+>) {
+  const [searchQuery, setSearchQuery] = useState("");
   const filteredModes = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase()
-    if (!query) return AVAILABLE_MODES
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return AVAILABLE_MODES;
 
-    return AVAILABLE_MODES.filter((mode) => mode.toLowerCase().includes(query))
-  }, [searchQuery])
+    return AVAILABLE_MODES.filter((mode) => mode.toLowerCase().includes(query));
+  }, [searchQuery]);
 
   return (
     <div className="max-h-[min(48vh,24rem)] overflow-y-auto overscroll-contain px-1 py-1">
@@ -309,8 +328,8 @@ export function ModeSettingsList({
               mode={mode}
               selected={mode === selectedMode}
               onClick={() => {
-                onSelectMode(mode)
-                onClose?.()
+                onSelectMode(mode);
+                onClose?.();
               }}
             />
           ))
@@ -319,7 +338,7 @@ export function ModeSettingsList({
         )}
       </SettingsSection>
     </div>
-  )
+  );
 }
 
 export function ProjectSettingsList({
@@ -330,18 +349,24 @@ export function ProjectSettingsList({
   onClose,
 }: Pick<
   ChatSettingsContentProps,
-  "projects" | "selectedProjectId" | "onSelectProjectId" | "showImageAction" | "onClose"
+  | "projects"
+  | "selectedProjectId"
+  | "onSelectProjectId"
+  | "showImageAction"
+  | "onClose"
 >) {
-  const attachments = usePromptInputAttachments()
+  const attachments = usePromptInputAttachments();
   const selectedProject =
-    projects.find((project) => project._id === selectedProjectId) ?? null
-  const [searchQuery, setSearchQuery] = useState("")
+    projects.find((project) => project._id === selectedProjectId) ?? null;
+  const [searchQuery, setSearchQuery] = useState("");
   const filteredProjects = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase()
-    if (!query) return projects
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return projects;
 
-    return projects.filter((project) => project.title.toLowerCase().includes(query))
-  }, [projects, searchQuery])
+    return projects.filter((project) =>
+      project.title.toLowerCase().includes(query),
+    );
+  }, [projects, searchQuery]);
 
   return (
     <div className="max-h-[min(48vh,24rem)] overflow-y-auto overscroll-contain px-1 py-1">
@@ -374,8 +399,8 @@ export function ProjectSettingsList({
           meta="Full workspace"
           tooltipContent="Use the full workspace as context."
           onClick={() => {
-            onSelectProjectId(null)
-            onClose?.()
+            onSelectProjectId(null);
+            onClose?.();
           }}
         />
         {filteredProjects.length > 0 ? (
@@ -388,8 +413,8 @@ export function ProjectSettingsList({
               meta="Project scope"
               tooltipContent="Scope the chat to this project."
               onClick={() => {
-                onSelectProjectId(project._id)
-                onClose?.()
+                onSelectProjectId(project._id);
+                onClose?.();
               }}
             />
           ))
@@ -403,72 +428,84 @@ export function ProjectSettingsList({
               title="Add image"
               meta="Upload"
               onClick={() => {
-                attachments.openFileDialog()
-                onClose?.()
+                attachments.openFileDialog();
+                onClose?.();
               }}
             />
           </div>
         ) : null}
       </SettingsSection>
     </div>
-  )
+  );
 }
 
-export function formatInterfaceDisplay(interfaceType?: string): string | undefined {
-  if (!interfaceType) return undefined
-  if (interfaceType === "openrouter") return "OpenRouter"
-  if (interfaceType === "groq") return "Groq"
-  if (interfaceType === "cerebras") return "Cerebras"
-  if (interfaceType === "vercel") return "Vercel"
-  return interfaceType
+function formatModelPrice(pricePerTokenUsd: string, decimals = 2): string {
+  const parsed = Number(pricePerTokenUsd);
+  if (!Number.isFinite(parsed)) return "-";
+  return `$${(parsed * 1_000_000).toFixed(decimals)}`;
 }
 
-export function buildModelMeta(model: Doc<"availableModels">): string | undefined {
+export function formatInterfaceDisplay(
+  interfaceType?: string,
+): string | undefined {
+  if (!interfaceType) return undefined;
+  if (interfaceType === "openrouter") return "OpenRouter";
+  if (interfaceType === "groq") return "Groq";
+  if (interfaceType === "cerebras") return "Cerebras";
+  if (interfaceType === "vercel") return "Vercel";
+  return interfaceType;
+}
+
+export function buildModelMeta(
+  model: Doc<"availableModels">,
+): string | undefined {
   const parts = [
     formatInterfaceDisplay(model.interface),
     model.provider,
-    model.contextLength ? `${formatTokenCount(model.contextLength)} context` : null,
+    model.contextLength
+      ? `${formatTokenCount(model.contextLength)} context`
+      : null,
     model.modality,
-  ].filter(Boolean)
+  ].filter(Boolean);
 
-  return parts.length ? parts.join(" • ") : undefined
+  return parts.length ? parts.join(" • ") : undefined;
 }
 
 function formatTokenCount(value: number): string {
-  if (!Number.isFinite(value) || value <= 0) return "-"
+  if (!Number.isFinite(value) || value <= 0) return "-";
   if (value >= 1_000_000) {
-    const millions = value / 1_000_000
-    return `${trimTrailingZeros(millions)}M`
+    const millions = value / 1_000_000;
+    return `${trimTrailingZeros(millions)}M`;
   }
   if (value >= 1_000) {
-    const thousands = value / 1_000
-    return `${trimTrailingZeros(thousands)}k`
+    const thousands = value / 1_000;
+    return `${trimTrailingZeros(thousands)}k`;
   }
-  return String(value)
+  return String(value);
 }
 
 function trimTrailingZeros(value: number): string {
-  return value.toFixed(1).replace(/\.0$/, "")
+  return value.toFixed(1).replace(/\.0$/, "");
 }
 
 export function getCapabilityLabels(supportedParameters?: string[]): string[] {
-  if (!supportedParameters?.length) return []
+  if (!supportedParameters?.length) return [];
 
-  const params = new Set(supportedParameters)
-  const labels: string[] = []
+  const params = new Set(supportedParameters);
+  const labels: string[] = [];
 
-  if (params.has("tools") || params.has("tool_choice")) labels.push("Tools")
+  if (params.has("tools") || params.has("tool_choice")) labels.push("Tools");
   if (params.has("structured_outputs") || params.has("response_format")) {
-    labels.push("Structured")
+    labels.push("Structured");
   }
   if (params.has("reasoning") || params.has("include_reasoning")) {
-    labels.push("Reasoning")
+    labels.push("Reasoning");
   }
-  if (params.has("seed")) labels.push("Seed")
-  if (params.has("temperature") || params.has("top_p")) labels.push("Sampling")
-  if (params.has("stop")) labels.push("Stops")
+  if (params.has("seed")) labels.push("Seed");
+  if (params.has("temperature") || params.has("top_p")) labels.push("Sampling");
+  if (params.has("stop")) labels.push("Stops");
 
-  return labels
+  return labels;
 }
 
 function ModelSettingsOptionButton({
@@ -476,12 +513,12 @@ function ModelSettingsOptionButton({
   selected,
   onClick,
 }: {
-  model: Doc<"availableModels">
-  selected: boolean
-  onClick: () => void
+  model: Doc<"availableModels">;
+  selected: boolean;
+  onClick: () => void;
 }) {
-  const compactInputOutput = formatCompactInputOutput(model)
-  const capabilityLabels = getCapabilityLabels(model.supportedParameters)
+  const compactInputOutput = formatCompactInputOutput(model);
+  const capabilityLabels = getCapabilityLabels(model.supportedParameters);
 
   return (
     <button
@@ -513,7 +550,9 @@ function ModelSettingsOptionButton({
 
       <span className="min-w-0 flex-1">
         <span className="flex min-w-0 items-center gap-2">
-          <span className="truncate text-xs font-medium text-foreground">{model.name}</span>
+          <span className="truncate text-xs font-medium text-foreground">
+            {model.name}
+          </span>
           {formatInterfaceDisplay(model.interface) ? (
             <span className="shrink-0 rounded-full bg-muted/50 px-1.5 py-0.5 text-[9px] font-medium text-muted-foreground">
               {formatInterfaceDisplay(model.interface)}
@@ -522,7 +561,8 @@ function ModelSettingsOptionButton({
         </span>
         <span className="mt-0.5 flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1 text-[10px] text-muted-foreground tabular-nums">
           <span className="whitespace-nowrap">
-            {formatModelPrice(model.pricing.prompt)} / {formatModelPrice(model.pricing.completion)}
+            {formatModelPrice(model.pricing.prompt)} /{" "}
+            {formatModelPrice(model.pricing.completion)}
           </span>
           <span className="max-w-24 truncate">{compactInputOutput}</span>
           <Tooltip>
@@ -549,7 +589,8 @@ function ModelSettingsOptionButton({
               </p>
               <div className="mt-2 space-y-1 text-[11px] text-background/75">
                 <p>
-                  Pricing (per 1M tokens): {formatModelPrice(model.pricing.prompt)} in,{" "}
+                  Pricing (per 1M tokens):{" "}
+                  {formatModelPrice(model.pricing.prompt)} in,{" "}
                   {formatModelPrice(model.pricing.completion)} out
                 </p>
                 {model.modality ? <p>Modality: {model.modality}</p> : null}
@@ -580,15 +621,19 @@ function ModelSettingsOptionButton({
                   </div>
                 ) : null}
               </div>
-              <p className="mt-2 text-[10px] text-background/70">{model.modelId}</p>
+              <p className="mt-2 text-[10px] text-background/70">
+                {model.modelId}
+              </p>
             </TooltipContent>
           </Tooltip>
         </span>
       </span>
 
-      {selected ? <CheckIcon className="size-2.5 shrink-0 text-foreground" /> : null}
+      {selected ? (
+        <CheckIcon className="size-2.5 shrink-0 text-foreground" />
+      ) : null}
     </button>
-  )
+  );
 }
 
 function ModeSettingsOptionButton({
@@ -596,9 +641,9 @@ function ModeSettingsOptionButton({
   selected,
   onClick,
 }: {
-  mode: ModeName
-  selected: boolean
-  onClick: () => void
+  mode: ModeName;
+  selected: boolean;
+  onClick: () => void;
 }) {
   return (
     <button
@@ -615,11 +660,17 @@ function ModeSettingsOptionButton({
           selected ? "bg-foreground/8 text-foreground" : null,
         )}
       >
-        {selected ? <CheckIcon className="size-2.5" /> : <WandSparklesIcon className="size-2.5" />}
+        {selected ? (
+          <CheckIcon className="size-2.5" />
+        ) : (
+          <WandSparklesIcon className="size-2.5" />
+        )}
       </span>
 
       <span className="min-w-0 flex-1">
-        <span className="truncate text-xs font-medium text-foreground">{mode}</span>
+        <span className="truncate text-xs font-medium text-foreground">
+          {mode}
+        </span>
         <span className="mt-0.5 flex min-w-0 items-center gap-1.5 text-[10px] text-muted-foreground">
           <span className="truncate">Prompt behavior</span>
           <Tooltip>
@@ -636,15 +687,19 @@ function ModeSettingsOptionButton({
             </TooltipTrigger>
             <TooltipContent side="top" className="max-w-sm">
               <p className="font-medium">{mode}</p>
-              <p className="mt-1 text-xs text-background/80">{getModeDescription(mode)}</p>
+              <p className="mt-1 text-xs text-background/80">
+                {getModeDescription(mode)}
+              </p>
             </TooltipContent>
           </Tooltip>
         </span>
       </span>
 
-      {selected ? <CheckIcon className="size-2.5 shrink-0 text-foreground" /> : null}
+      {selected ? (
+        <CheckIcon className="size-2.5 shrink-0 text-foreground" />
+      ) : null}
     </button>
-  )
+  );
 }
 
 function ProjectSettingsOptionButton({
@@ -655,12 +710,12 @@ function ProjectSettingsOptionButton({
   selected = false,
   onClick,
 }: {
-  icon: ReactNode
-  title: string
-  meta?: string
-  tooltipContent?: string
-  selected?: boolean
-  onClick: () => void
+  icon: ReactNode;
+  title: string;
+  meta?: string;
+  tooltipContent?: string;
+  selected?: boolean;
+  onClick: () => void;
 }) {
   return (
     <button
@@ -681,7 +736,9 @@ function ProjectSettingsOptionButton({
       </span>
 
       <span className="min-w-0 flex-1">
-        <span className="truncate text-xs font-medium text-foreground">{title}</span>
+        <span className="truncate text-xs font-medium text-foreground">
+          {title}
+        </span>
         {meta ? (
           <span className="mt-0.5 flex min-w-0 items-center gap-1.5 text-[10px] text-muted-foreground">
             <span className="truncate">{meta}</span>
@@ -700,7 +757,9 @@ function ProjectSettingsOptionButton({
                 </TooltipTrigger>
                 <TooltipContent side="top" className="max-w-sm">
                   <p className="font-medium">{title}</p>
-                  <p className="mt-1 text-xs text-background/80">{tooltipContent}</p>
+                  <p className="mt-1 text-xs text-background/80">
+                    {tooltipContent}
+                  </p>
                 </TooltipContent>
               </Tooltip>
             ) : null}
@@ -708,24 +767,28 @@ function ProjectSettingsOptionButton({
         ) : null}
       </span>
 
-      {selected ? <CheckIcon className="size-2.5 shrink-0 text-foreground" /> : null}
+      {selected ? (
+        <CheckIcon className="size-2.5 shrink-0 text-foreground" />
+      ) : null}
     </button>
-  )
+  );
 }
 
 function formatCompactInputOutput(model: Doc<"availableModels">): string {
-  const context = model.contextLength ? formatTokenCount(model.contextLength) : ""
+  const context = model.contextLength
+    ? formatTokenCount(model.contextLength)
+    : "";
   const inputModalities = model.inputModalities?.length
     ? model.inputModalities.join(", ")
-    : ""
+    : "";
   const outputModalities = model.outputModalities?.length
     ? model.outputModalities.join(", ")
-    : ""
+    : "";
   const modalities =
     inputModalities && outputModalities
       ? `${inputModalities}->${outputModalities}`
-      : inputModalities || outputModalities || ""
+      : inputModalities || outputModalities || "";
 
-  const parts = [context, modalities].filter(Boolean)
-  return parts.join(" · ") || "-"
+  const parts = [context, modalities].filter(Boolean);
+  return parts.join(" · ") || "-";
 }

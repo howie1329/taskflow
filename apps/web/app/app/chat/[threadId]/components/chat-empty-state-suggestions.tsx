@@ -1,18 +1,23 @@
-"use client"
+"use client";
 
-import { ConversationEmptyState } from "@/components/ai-elements/conversation"
-import { usePromptInputController } from "@/components/ai-elements/prompt-input"
-import { useChatComposerFocus } from "../../components/chat-composer-context"
-import { EMPTY_STATE_SUGGESTIONS } from "../../constants/suggestions"
+import type { RefObject } from "react";
+import { ConversationEmptyState } from "@/components/ai-elements/conversation";
+import { usePromptInputController } from "@/components/ai-elements/prompt-input";
+import { EMPTY_STATE_SUGGESTIONS } from "../../constants/suggestions";
 
-export function ChatEmptyStateWithSuggestions() {
-  const { textInput } = usePromptInputController()
-  const composerFocus = useChatComposerFocus()
+interface ChatEmptyStateWithSuggestionsProps {
+  textareaRef: RefObject<HTMLTextAreaElement | null>;
+}
+
+export function ChatEmptyStateWithSuggestions({
+  textareaRef,
+}: ChatEmptyStateWithSuggestionsProps) {
+  const { textInput } = usePromptInputController();
 
   const handleSuggestionSelect = (value: string) => {
-    textInput.setInput(value)
-    composerFocus?.focusComposer()
-  }
+    textInput.setInput(value);
+    textareaRef.current?.focus();
+  };
 
   return (
     <ConversationEmptyState
@@ -21,5 +26,5 @@ export function ChatEmptyStateWithSuggestions() {
       suggestions={[...EMPTY_STATE_SUGGESTIONS]}
       onSuggestionSelect={handleSuggestionSelect}
     />
-  )
+  );
 }

@@ -1,14 +1,17 @@
-import { ChatShell } from "./components/chat-shell"
-import { ChatProvider } from "./components/chat-provider"
+import { ChatProvider } from "./components/chat-provider";
 
 export default function ChatLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <ChatProvider>
-      <ChatShell>{children}</ChatShell>
+      <div className="flex h-full flex-1 overflow-hidden bg-background">
+        <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden bg-background">
+          {children}
+        </div>
+      </div>
     </ChatProvider>
-  )
+  );
 }

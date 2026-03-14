@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import type { ChatThread } from "./mock-data";
+import type { ChatThread } from "./thread-types";
 
 interface ThreadRowProps {
   thread: ChatThread;
