@@ -1,8 +1,8 @@
-import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { LandingContainer } from "./index";
-import { landingFooterLinks } from "./landing-links";
+import Link from "next/link"
+import { Separator } from "@/components/ui/separator"
+import { LandingContainer } from "./landing-container"
+import { LandingBrand } from "./landing-brand"
+import { landingFooterLinks } from "./landing-links"
 
 export function LandingFooter() {
   return (
@@ -10,12 +10,11 @@ export function LandingFooter() {
       <LandingContainer className="py-8">
         <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
           <div className="flex items-center gap-2">
-            <Badge
-              variant="secondary"
-              className="rounded-full px-2.5 font-mono text-[11px]"
-            >
-              Taskflow
-            </Badge>
+            <LandingBrand
+              className="gap-2"
+              iconClassName="size-7 rounded-md"
+              labelClassName="text-sm"
+            />
             <span className="text-xs text-muted-foreground">v1 rewrite</span>
           </div>
 
@@ -54,5 +53,5 @@ export function LandingFooter() {
         </div>
       </LandingContainer>
     </footer>
-  );
+  )
 }

@@ -1,14 +1,14 @@
 "use client";
 
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { useConvexAuth } from "convex/react";
-import { landingNavLinks } from "./landing-links";
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { ThemeToggle } from "@/components/theme-toggle"
+import { useConvexAuth } from "convex/react"
+import { LandingBrand } from "./landing-brand"
+import { landingNavLinks } from "./landing-links"
 
 export function LandingNavbar() {
-  const { isAuthenticated } = useConvexAuth();
+  const { isAuthenticated } = useConvexAuth()
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-sm">
@@ -20,14 +20,7 @@ export function LandingNavbar() {
       </a>
       <div className="w-full px-4 lg:px-6">
         <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 font-medium">
-            <Badge
-              variant="secondary"
-              className="rounded-full px-2.5 font-mono text-[11px]"
-            >
-              Taskflow
-            </Badge>
-          </Link>
+          <LandingBrand />
 
           <nav className="hidden items-center gap-6 text-xs font-medium md:flex">
             {landingNavLinks.map((link) => (
@@ -62,5 +55,5 @@ export function LandingNavbar() {
         </div>
       </div>
     </header>
-  );
+  )
 }

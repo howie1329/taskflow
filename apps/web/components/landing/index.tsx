@@ -10,3 +10,4 @@ export { Workflow } from "./workflow";
 export { FeatureGrid } from "./feature-grid";
 export { AiOperatorPanel } from "./ai-operator-panel";
 export { LandingFooter } from "./landing-footer";
+export { LandingBrand } from "./landing-brand";
