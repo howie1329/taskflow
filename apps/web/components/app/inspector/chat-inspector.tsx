@@ -193,6 +193,8 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
           summaryText: nextSummary,
           summarizedThroughMessageId: thread.summary.summarizedThroughMessageId,
           updatedAt: Date.now(),
+          threadState: thread.summary.threadState,
+          compactionMetadata: thread.summary.compactionMetadata,
         },
       });
       toast.success("Thread memory updated");

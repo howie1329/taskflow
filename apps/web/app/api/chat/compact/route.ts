@@ -42,7 +42,7 @@ export async function POST(req: Request) {
   }
 
   const googleModel = createGoogleGenerativeAI({
-    apiKey: process.env.GOOGLE_GENERATIVE_AI_KEY,
+    apiKey: process.env.GOOGLE_AI_KEY,
   })
   if (!googleModel) {
     return NextResponse.json(

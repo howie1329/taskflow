@@ -1,4 +1,4 @@
-import { generateObject, generateText } from "ai"
+import { generateText, Output } from "ai"
 import { createGoogleGenerativeAI } from "@ai-sdk/google"
 import { z } from "zod"
 import type { ThreadState } from "./types"
@@ -46,7 +46,7 @@ export async function generateThreadSummary({
 
   try {
     const { text } = await generateText({
-      model: googleModel("gemini-2.0-flash"),
+      model: googleModel("gemini-3.1-flash-lite-preview"),
       system:
         "You maintain a rolling conversation summary for context compression. Keep it concise, factual, action-oriented. Preserve: user goals, decisions, unresolved items, important tool outputs, preferences.",
       prompt: `Update the rolling summary.
@@ -92,9 +92,9 @@ export async function generateStructuredThreadState({
   const boundedTranscript = transcript.trim().slice(-8000)
 
   try {
-    const { object } = await generateObject({
-      model: googleModel("gemini-2.0-flash"),
-      schema: THREAD_STATE_SCHEMA,
+    const { output } = await generateText({
+      model: googleModel("gemini-3.1-flash-lite-preview"),
+      output: Output.object({ schema: THREAD_STATE_SCHEMA }),
       system: `Extract structured thread memory from conversation. Be concise. Each array item should be a short string (1-2 sentences max). Merge with previous state when provided.`,
       prompt: `Previous state (merge/update): ${JSON.stringify(previousState ?? emptyThreadState())}
 
@@ -107,15 +107,15 @@ Extract and return the updated structured state.`,
     })
 
     return {
-      activeGoal: object.activeGoal,
-      currentTopic: object.currentTopic,
-      importantFacts: object.importantFacts ?? [],
-      decisions: object.decisions ?? [],
-      unresolvedItems: object.unresolvedItems ?? [],
-      referencedEntities: object.referencedEntities ?? [],
-      userPreferences: object.userPreferences ?? [],
-      recentToolFindings: object.recentToolFindings ?? [],
-      warningsOrRisks: object.warningsOrRisks ?? [],
+      activeGoal: output.activeGoal,
+      currentTopic: output.currentTopic,
+      importantFacts: output.importantFacts ?? [],
+      decisions: output.decisions ?? [],
+      unresolvedItems: output.unresolvedItems ?? [],
+      referencedEntities: output.referencedEntities ?? [],
+      userPreferences: output.userPreferences ?? [],
+      recentToolFindings: output.recentToolFindings ?? [],
+      warningsOrRisks: output.warningsOrRisks ?? [],
     }
   } catch (error) {
     console.error("Context compaction: generateStructuredThreadState failed", error)
