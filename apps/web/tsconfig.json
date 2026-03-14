@@ -20,8 +20,8 @@
     ],
     "paths": {
       "@/*": ["./*"],
-      "@taskflow/chat-content": [
-        "../../packages/Taskflow-Chat-Content/dist/index.js"
+      "@taskflow/context-compaction": [
+        "../../packages/Taskflow-Context-Compaction/dist/index.js"
       ]
     }
   },

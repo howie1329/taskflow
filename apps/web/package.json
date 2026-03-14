@@ -58,7 +58,7 @@
     "@streamdown/mermaid": "^1.0.2",
     "@supermemory/tools": "^1.4.0",
     "@takoviz/ai-sdk": "^1.0.1",
-    "@taskflow/chat-content": "1.0.0",
+    "@taskflow/context-compaction": "1.0.0",
     "@tavily/core": "^0.7.2",
     "@xyflow/react": "^12.10.1",
     "ai": "^6.0.116",

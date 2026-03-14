@@ -3,15 +3,15 @@ import { createGoogleGenerativeAI } from "@ai-sdk/google"
 import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server"
 import { fetchMutation, fetchQuery } from "convex/nextjs"
 import { api } from "@/convex/_generated/api"
-import { fromStoredThreadMessage } from "@taskflow/chat-content"
 import type { UIMessage } from "ai"
 import {
+  fromStoredThreadMessage,
   planCompaction,
   formatMessagesForSummarizer,
   generateThreadSummary,
   generateStructuredThreadState,
   DEFAULT_COMPACTION_CONFIG,
-} from "@/lib/chat/context-compaction"
+} from "@taskflow/context-compaction"
 
 const chatApiWithSummary = api as typeof api & {
   chat: typeof api.chat & { setThreadSummary: unknown }
@@ -113,13 +113,13 @@ export async function POST(req: Request) {
   try {
     const [updatedSummary, updatedState] = await Promise.all([
       generateThreadSummary({
-        googleModel,
+        model: googleModel("gemini-3.1-flash-lite-preview"),
         previousSummary: existingSummary?.summaryText ?? "",
         transcript,
         maxSummaryChars: DEFAULT_COMPACTION_CONFIG.maxSummaryChars,
       }),
       generateStructuredThreadState({
-        googleModel,
+        model: googleModel("gemini-3.1-flash-lite-preview"),
         previousState: existingSummary?.threadState ?? null,
         transcript,
       }),
