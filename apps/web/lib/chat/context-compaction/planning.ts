@@ -161,3 +161,13 @@ export function formatMessagesForSummarizer(
     .filter(Boolean)
     .join("\n")
 }
+
+/** Check if we're past the cooldown since last compaction */
+export function isPastCompactionCooldown(
+  lastCompactedAt: number | undefined,
+  config: Pick<CompactionConfig, "minCompactionIntervalMinutes">
+): boolean {
+  if (!lastCompactedAt) return true
+  const cooldownMs = config.minCompactionIntervalMinutes * 60 * 1000
+  return Date.now() - lastCompactedAt >= cooldownMs
+}

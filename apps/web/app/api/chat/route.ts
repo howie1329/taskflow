@@ -77,12 +77,6 @@ type ChatRequestBody = {
   compactManually?: boolean;
 };
 
-const OPENROUTER_MODEL_OPTIONS = {
-  reasoning: { enabled: true, effort: "medium" as const },
-  parallelToolCalls: true,
-  usage: { include: true },
-};
-
 const jsonError = (error: string, status: number) =>
   NextResponse.json({ error }, { status });
 
@@ -253,12 +247,12 @@ export async function POST(req: Request) {
       { status: 400 },
     );
   }
-  const requestMessages = normalizeUIMessages(parsedMessages.data);
+  const clientMessages = normalizeUIMessages(parsedMessages.data);
 
   let thread = await fetchQuery(api.chat.getThread, { threadId }, { token });
 
   if (!thread) {
-    const title = await createTitle(requestMessages);
+    const title = await createTitle(clientMessages);
     try {
       thread = await fetchMutation(
         api.chat.createThread,
@@ -281,7 +275,7 @@ export async function POST(req: Request) {
     }
   }
 
-  const lastMessage = getLatestUserMessage(requestMessages, messageId);
+  const lastMessage = getLatestUserMessage(clientMessages, messageId);
 
   if (lastMessage) {
     try {
@@ -315,7 +309,7 @@ export async function POST(req: Request) {
     { threadId },
     { token },
   )
-  const messages: UIMessage[] = storedMessages.map((message) =>
+  const threadMessages: UIMessage[] = storedMessages.map((message) =>
     fromStoredThreadMessage({
       messageId: message.messageId,
       role: message.role,
@@ -337,7 +331,7 @@ export async function POST(req: Request) {
     : null
 
   const compactionPlan = planCompaction({
-    messages,
+    messages: threadMessages,
     previousCompaction: previousCompaction ?? undefined,
     config: COMPACTION_CONFIG,
     forceManual: compactManually,
@@ -346,7 +340,7 @@ export async function POST(req: Request) {
   let summaryTextForContext = existingSummary?.summaryText ?? ""
   let threadStateForContext = existingSummary?.threadState ?? null
   let messagesForModelContext = selectContextMessages({
-    messages,
+    messages: threadMessages,
     summarizedThroughMessageId: existingSummary?.summarizedThroughMessageId ?? null,
     recentMessageCount: COMPACTION_CONFIG.recentMessageCount,
   })

@@ -28,7 +28,6 @@ export type CompactionConfig = {
   tokenThreshold: number
   minTranscriptChars: number
   maxSummaryChars: number
-  maxTranscriptChars: number
   /** Minimum minutes between auto-compactions */
   minCompactionIntervalMinutes: number
 }

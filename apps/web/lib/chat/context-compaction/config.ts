@@ -20,10 +20,6 @@ export const DEFAULT_COMPACTION_CONFIG: CompactionConfig = {
   // Hard cap on rolling summary length (characters). This summary is prepended as a system message.
   maxSummaryChars: 2800,
 
-  // Maximum transcript size (characters) sent to the summarizer model (most-recent portion).
-  // Keeps summarization calls bounded in cost/latency.
-  maxTranscriptChars: 12000,
-
   // Minimum minutes between automatic compactions (manual compaction bypasses this).
   minCompactionIntervalMinutes: 5,
 }
