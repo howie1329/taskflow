@@ -1,7 +1,7 @@
 "use client";
 
-import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   ArrowLeft01Icon,
@@ -28,13 +28,10 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarTrigger,
+  useSidebar,
 } from "@/components/ui/sidebar";
-import { useSidebar } from "@/components/ui/sidebar";
 import { ThreadsRail } from "@/app/app/chat/components/threads-rail";
-import {
-  convertToChatThread,
-  type ChatThread,
-} from "@/app/app/chat/components/mock-data";
+import { convertToChatThread } from "@/app/app/chat/components/thread-types";
 import { useThreads } from "@/hooks/use-threads";
 import { useTheme } from "next-themes";
 import Link from "next/link";
@@ -49,22 +46,16 @@ interface ChatSidebarProps {
 
 export function ChatSidebar({ onBackToWorkspace }: ChatSidebarProps) {
   const pathname = usePathname();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [editingThreadId, setEditingThreadId] = useState<string | null>(null);
-  const [editingTitle, setEditingTitle] = useState("");
   const [deleteThreadId, setDeleteThreadId] = useState<string | null>(null);
   const { setTheme, resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
 
-  // Fetch threads from Convex
   const {
     threads: convexThreads,
     updateTitle,
     togglePin,
     softDelete,
   } = useThreads();
-
-  // Convert Convex threads to ChatThread format
   const threads = convexThreads.map(convertToChatThread);
 
   const { state, isMobile, setOpen } = useSidebar();
@@ -73,100 +64,53 @@ export function ChatSidebar({ onBackToWorkspace }: ChatSidebarProps) {
   const isNewChat = pathname === "/app/chat";
   const activeThreadId = isNewChat ? null : pathname.split("/").pop() || null;
 
-  // Fetch real projects from Convex
-  const projects = useQuery(api.projects.listMyProjects, { status: "active" });
+  const rawProjects = useQuery(api.projects.listMyProjects, {
+    status: "active",
+  });
+  const projects = (rawProjects ?? []).map((p: Doc<"projects">) => ({
+    id: p._id,
+    title: p.title,
+    icon: p.icon,
+  }));
 
-  const filteredThreads = threads.filter(
-    (thread) =>
-      thread.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      thread.snippet.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
-
-  // Pinned section: ALL pinned threads (with or without projects)
-  const pinnedThreads = filteredThreads.filter((thread) => thread.pinned);
-
-  // Recent section: Non-pinned threads WITHOUT projects
-  const recentThreads = filteredThreads.filter(
-    (thread) => !thread.pinned && !thread.projectId,
-  );
-
-  // Convert Convex projects to ChatProject format
-  const chatProjects =
-    projects?.map((project: Doc<"projects">) => ({
-      id: project._id,
-      title: project.title,
-      icon: project.icon,
-    })) ?? [];
-
-  // Project groups: Non-pinned threads grouped by their projects
-  const groupedByProject =
-    projects
-      ?.map((project: Doc<"projects">) => ({
-        project: {
-          id: project._id,
-          title: project.title,
-          icon: project.icon,
-        },
-        threads: filteredThreads.filter(
-          (thread) => thread.projectId === project._id && !thread.pinned,
-        ),
-      }))
-      .filter((group: { threads: ChatThread[] }) => group.threads.length > 0) ??
-    [];
-
-  const handleStartEdit = (thread: ChatThread) => {
-    setEditingThreadId(thread.id);
-    setEditingTitle(thread.title);
+  const handleRename = async (threadId: string, title: string) => {
+    await updateTitle({ threadId, title });
   };
 
-  const handleCommitEdit = async () => {
-    if (!editingThreadId) return;
-
-    const trimmedTitle = editingTitle.trim() || "Untitled chat";
-
-    try {
-      await updateTitle({
-        threadId: editingThreadId,
-        title: trimmedTitle,
-      });
-    } catch (error) {
-      console.error("Failed to update thread title:", error);
-    }
-
-    setEditingThreadId(null);
-  };
-
-  const handleCancelEdit = () => {
-    setEditingThreadId(null);
-  };
-
-  const handleTogglePin = async (threadId: string) => {
-    const thread = threads.find((t) => t.id === threadId);
-    if (!thread) return;
-
-    try {
-      await togglePin({
-        threadId,
-        pinned: !thread.pinned,
-      });
-    } catch (error) {
-      console.error("Failed to toggle pin:", error);
-    }
+  const handleTogglePin = async (threadId: string, pinned: boolean) => {
+    await togglePin({ threadId, pinned });
   };
 
   const handleDeleteThread = async () => {
     if (!deleteThreadId) return;
-
-    try {
-      await softDelete({
-        threadId: deleteThreadId,
-      });
-    } catch (error) {
-      console.error("Failed to delete thread:", error);
-    }
-
+    await softDelete({ threadId: deleteThreadId });
     setDeleteThreadId(null);
   };
+
+  const deleteDialog = (
+    <AlertDialog
+      open={!!deleteThreadId}
+      onOpenChange={(open) => !open && setDeleteThreadId(null)}
+    >
+      <AlertDialogContent size="sm">
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete conversation?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This action cannot be undone. The conversation will be removed from
+            your history.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={() => setDeleteThreadId(null)}>
+            Cancel
+          </AlertDialogCancel>
+          <AlertDialogAction variant="destructive" onClick={handleDeleteThread}>
+            Delete
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
 
   if (isCollapsed) {
     return (
@@ -189,7 +133,11 @@ export function ChatSidebar({ onBackToWorkspace }: ChatSidebarProps) {
                 onClick={() => setOpen(true)}
                 className="justify-center"
               >
-                <HugeiconsIcon icon={SearchIcon} className="size-4" strokeWidth={2} />
+                <HugeiconsIcon
+                  icon={SearchIcon}
+                  className="size-4"
+                  strokeWidth={2}
+                />
                 <span>Search threads</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -200,11 +148,16 @@ export function ChatSidebar({ onBackToWorkspace }: ChatSidebarProps) {
                 isActive={isNewChat}
                 className={cn(
                   "justify-center",
-                  isNewChat && "bg-sidebar-accent text-sidebar-accent-foreground",
+                  isNewChat &&
+                    "bg-sidebar-accent text-sidebar-accent-foreground",
                 )}
               >
                 <Link href="/app/chat" aria-label="New chat">
-                  <HugeiconsIcon icon={PlusSignIcon} className="size-4" strokeWidth={2} />
+                  <HugeiconsIcon
+                    icon={PlusSignIcon}
+                    className="size-4"
+                    strokeWidth={2}
+                  />
                   <span>New chat</span>
                 </Link>
               </SidebarMenuButton>
@@ -232,31 +185,7 @@ export function ChatSidebar({ onBackToWorkspace }: ChatSidebarProps) {
           </SidebarMenu>
         </SidebarFooter>
 
-        <AlertDialog
-          open={!!deleteThreadId}
-          onOpenChange={(open) => !open && setDeleteThreadId(null)}
-        >
-          <AlertDialogContent size="sm">
-            <AlertDialogHeader>
-              <AlertDialogTitle>Delete conversation?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This action cannot be undone. The conversation will be removed
-                from your history.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => setDeleteThreadId(null)}>
-                Cancel
-              </AlertDialogCancel>
-              <AlertDialogAction
-                variant="destructive"
-                onClick={handleDeleteThread}
-              >
-                Delete
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        {deleteDialog}
       </>
     );
   }
@@ -280,55 +209,22 @@ export function ChatSidebar({ onBackToWorkspace }: ChatSidebarProps) {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
+
       <SidebarContent className="min-w-0 px-0 overflow-hidden">
         <ThreadsRail
           className="w-full"
           variant="sidebar"
           isNewChat={isNewChat}
-          searchQuery={searchQuery}
-          onSearchQueryChange={setSearchQuery}
           threads={threads}
-          filteredThreads={filteredThreads}
-          pinnedThreads={pinnedThreads}
-          recentThreads={recentThreads}
-          groupedByProject={groupedByProject}
-          projects={chatProjects}
+          projects={projects}
           activeThreadId={activeThreadId}
-          editingThreadId={editingThreadId}
-          editingTitle={editingTitle}
-          onEditTitleChange={setEditingTitle}
-          onStartEdit={handleStartEdit}
-          onCancelEdit={handleCancelEdit}
-          onCommitEdit={handleCommitEdit}
+          onRename={handleRename}
           onTogglePin={handleTogglePin}
           onDeleteRequest={setDeleteThreadId}
         />
       </SidebarContent>
-      <AlertDialog
-        open={!!deleteThreadId}
-        onOpenChange={(open) => !open && setDeleteThreadId(null)}
-      >
-        <AlertDialogContent size="sm">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete conversation?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. The conversation will be removed
-              from your history.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setDeleteThreadId(null)}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              onClick={handleDeleteThread}
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+
+      {deleteDialog}
     </>
   );
 }

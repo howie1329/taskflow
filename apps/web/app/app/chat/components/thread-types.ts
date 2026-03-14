@@ -42,9 +42,3 @@ export interface ChatProject {
   title: string;
   icon: string;
 }
-
-export interface ChatMessage {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-}

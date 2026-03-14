@@ -1,53 +1,81 @@
+import type { ReactNode } from "react";
 import {
   ChainOfThought,
   EnhancedChainOfThoughtHeader,
   ChainOfThoughtContent,
   ChainOfThoughtStep,
-} from "@/components/ai-elements/chain-of-thought"
+} from "@/components/ai-elements/chain-of-thought";
 import {
   Tool,
   EnhancedToolHeader,
   ToolContent,
   ToolSummaryBar,
   ToolRawPayload,
-} from "@/components/ai-elements/tool"
-import {
-  detectProvider,
-} from "@/components/ai-elements/provider-badge"
+} from "@/components/ai-elements/tool";
+import { detectProvider } from "@/components/ai-elements/provider-badge";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible"
-import { ChevronDownIcon } from "lucide-react"
-import type { ToolCall } from "./tool-types"
+} from "@/components/ui/collapsible";
+import { ChevronDownIcon } from "lucide-react";
+import type { ToolCall } from "./tool-calls";
 import {
   getToolDisplayNameFromKey,
   getToolInputSummary,
   getToolStateInfo,
   getToolSummary,
-} from "./tool-meta"
-import { renderToolContent } from "./tool-render-content"
+  summarizeToolOutput,
+} from "./tool-meta";
+import { getToolDefinition } from "./tool-definitions";
 
 interface PreferencesLike {
-  aiChatShowActions?: boolean
-  aiChatShowToolDetails?: boolean
+  aiChatShowActions?: boolean;
+  aiChatShowToolDetails?: boolean;
 }
 
 interface ToolPanelsProps {
-  toolCalls: ToolCall[]
-  preferences: PreferencesLike | undefined
+  toolCalls: ToolCall[];
+  preferences: PreferencesLike | undefined;
+}
+
+function renderToolContent(toolCall: ToolCall): ReactNode {
+  if (
+    toolCall.state !== "output-available" &&
+    toolCall.state !== "output-error"
+  ) {
+    return (
+      <p className="text-sm text-muted-foreground">
+        {getToolStateInfo(toolCall.state).badgeLabel}
+      </p>
+    );
+  }
+
+  if (toolCall.errorText) {
+    return <p className="text-sm text-destructive">{toolCall.errorText}</p>;
+  }
+
+  const renderedContent = getToolDefinition(toolCall.toolKey)?.render?.(
+    toolCall,
+  );
+  if (renderedContent) {
+    return renderedContent;
+  }
+
+  const summary = summarizeToolOutput(toolCall.output);
+  if (summary) {
+    return <p className="text-sm">{summary}</p>;
+  }
+
+  return <p className="text-sm text-muted-foreground">Completed</p>;
 }
 
 export function ToolPanels({ toolCalls, preferences }: ToolPanelsProps) {
-  if (toolCalls.length === 0) return null
+  if (toolCalls.length === 0) return null;
 
   const renderToolCard = (toolCall: ToolCall) => (
     <Tool key={toolCall.id}>
-      <EnhancedToolHeader
-        toolName={toolCall.toolKey}
-        state={toolCall.state}
-      />
+      <EnhancedToolHeader toolName={toolCall.toolKey} state={toolCall.state} />
       <ToolContent>
         <div className="space-y-3 pt-2">
           <ToolSummaryBar summary={getToolSummary(toolCall)} />
@@ -58,7 +86,7 @@ export function ToolPanels({ toolCalls, preferences }: ToolPanelsProps) {
         </div>
       </ToolContent>
     </Tool>
-  )
+  );
 
   return (
     <>
@@ -78,9 +106,9 @@ export function ToolPanels({ toolCalls, preferences }: ToolPanelsProps) {
           </EnhancedChainOfThoughtHeader>
           <ChainOfThoughtContent className="mt-2 space-y-2">
             {toolCalls.map((toolCall) => {
-              const stateInfo = getToolStateInfo(toolCall.state)
-              const summary = getToolInputSummary(toolCall.input)
-              const displayName = getToolDisplayNameFromKey(toolCall.toolKey)
+              const stateInfo = getToolStateInfo(toolCall.state);
+              const summary = getToolInputSummary(toolCall.input);
+              const displayName = getToolDisplayNameFromKey(toolCall.toolKey);
               return (
                 <ChainOfThoughtStep
                   key={toolCall.id}
@@ -89,7 +117,7 @@ export function ToolPanels({ toolCalls, preferences }: ToolPanelsProps) {
                   status={stateInfo.stepStatus}
                   toolName={toolCall.toolKey}
                 />
-              )
+              );
             })}
 
             {preferences?.aiChatShowToolDetails !== false && (
@@ -107,5 +135,5 @@ export function ToolPanels({ toolCalls, preferences }: ToolPanelsProps) {
         </ChainOfThought>
       )}
     </>
-  )
+  );
 }

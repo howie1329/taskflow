@@ -18,10 +18,16 @@ import {
   normalizeUIMessages,
   getInitialUserText,
   getLatestUserMessage,
-  planSummarization,
+  fromStoredThreadMessage,
+  planCompaction,
+  selectContextMessages,
   formatMessagesForSummarizer,
-  injectRollingSummary,
-} from "@taskflow/chat-content";
+  generateThreadSummary,
+  generateStructuredThreadState,
+  assemblePromptContext,
+  DEFAULT_COMPACTION_CONFIG,
+  isPastCompactionCooldown,
+} from "@taskflow/context-compaction";
 import { pipeJsonRender } from "@json-render/core";
 import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server";
 import { fetchMutation, fetchQuery } from "convex/nextjs";
@@ -34,18 +40,7 @@ import { ModeMapping } from "@/lib/AITools/ModeMapping";
 import type { ModeName } from "@/lib/AITools/ModePrompts";
 import { getChatGenUISystemPrompt } from "@/lib/genui/chat-prompt";
 
-const CHAT_SUMMARIZATION_OPTIONS = {
-  trigger: { kind: "either", maxTokens: 20000, maxMessages: 20 } as const,
-  keepLastN: 8,
-  includeToolText: false,
-  maxCharsPerMessage: 8000,
-};
-
-const ROLLING_SUMMARY_OPTIONS = {
-  maxSummaryChars: 2800,
-  maxTranscriptChars: 12000,
-  minTranscriptChars: 180,
-} as const;
+const COMPACTION_CONFIG = DEFAULT_COMPACTION_CONFIG;
 
 const chatApiWithSummary = api as typeof api & {
   chat: typeof api.chat & {
@@ -67,13 +62,6 @@ type ActiveAgentStream = {
   }>;
 };
 
-type ThreadSummary = {
-  schemaVersion: number;
-  summaryText: string;
-  summarizedThroughMessageId: string;
-  updatedAt: number;
-};
-
 type ChatRequestBody = {
   model?: string;
   interface?: string;
@@ -84,12 +72,7 @@ type ChatRequestBody = {
   projectId?: Id<"projects">;
   mode?: string;
   toolLock?: string;
-};
-
-const OPENROUTER_MODEL_OPTIONS = {
-  reasoning: { enabled: true, effort: "medium" as const },
-  parallelToolCalls: true,
-  usage: { include: true },
+  compactManually?: boolean;
 };
 
 const jsonError = (error: string, status: number) =>
@@ -127,59 +110,6 @@ const createTitle = async (messages: UIMessage[]) => {
   return text;
 };
 
-const createRollingSummary = async ({
-  googleModel,
-  previousSummary,
-  transcript,
-}: {
-  googleModel: ReturnType<typeof createGoogleGenerativeAI>;
-  previousSummary: string;
-  transcript: string;
-}) => {
-  if (!googleModel) {
-    console.error("Google not initialized");
-    return "";
-  }
-  const boundedPreviousSummary = previousSummary
-    .trim()
-    .slice(0, ROLLING_SUMMARY_OPTIONS.maxSummaryChars);
-  const boundedTranscript = transcript
-    .trim()
-    .slice(-ROLLING_SUMMARY_OPTIONS.maxTranscriptChars);
-
-  const { text } = await generateText({
-    model: googleModel("gemini-3.1-flash-lite-preview"),
-    system:
-      "You maintain a rolling conversation summary used for context compression. Keep it concise, factual, action-oriented, and durable across long chats.",
-    prompt: `Update the rolling summary.
-
-Return plain markdown using this structure:
-- **User profile & preferences**
-- **Decisions & outcomes**
-- **Open tasks & unresolved questions**
-- **Active context for next reply**
-
-Rules:
-- Keep only information still useful for future turns.
-- Remove stale or resolved items.
-- Prefer short bullets over prose.
-- Never include tool JSON dumps or verbose logs.
-- Keep the full summary under ${ROLLING_SUMMARY_OPTIONS.maxSummaryChars} characters.
-
-Existing summary:
-${boundedPreviousSummary || "None"}
-
-New transcript segment:
-${boundedTranscript}
-
-Return only the updated markdown summary.`,
-    temperature: 0.2,
-    maxRetries: 3,
-  });
-
-  return text.trim().slice(0, ROLLING_SUMMARY_OPTIONS.maxSummaryChars);
-};
-
 export async function POST(req: Request) {
   const token = await convexAuthNextjsToken();
   if (!token) {
@@ -191,7 +121,7 @@ export async function POST(req: Request) {
   });
 
   const googleModel = createGoogleGenerativeAI({
-    apiKey: process.env.GOOGLE_GENERATIVE_AI_KEY,
+    apiKey: process.env.GOOGLE_AI_KEY,
   });
 
   if (!openRouter) {
@@ -222,6 +152,7 @@ export async function POST(req: Request) {
     projectId: rawProjectId,
     mode: rawMode,
     toolLock: rawToolLock,
+    compactManually = false,
   } = body;
   const modelInterface = rawInterface || undefined;
   const projectId = rawProjectId || undefined;
@@ -254,9 +185,6 @@ export async function POST(req: Request) {
   const interfaceType = modelDoc?.interface ?? "openrouter";
 
   let baseModel;
-  console.log("modelDoc", modelDoc);
-  console.log("model", model);
-  console.log("interfaceType", interfaceType);
   switch (interfaceType) {
     case "groq": {
       const groq = createGroq({ apiKey: process.env.GROQ_API_KEY });
@@ -314,12 +242,12 @@ export async function POST(req: Request) {
       { status: 400 },
     );
   }
-  const messages = normalizeUIMessages(parsedMessages.data);
+  const clientMessages = normalizeUIMessages(parsedMessages.data);
 
   let thread = await fetchQuery(api.chat.getThread, { threadId }, { token });
 
   if (!thread) {
-    const title = await createTitle(messages);
+    const title = await createTitle(clientMessages);
     try {
       thread = await fetchMutation(
         api.chat.createThread,
@@ -342,7 +270,7 @@ export async function POST(req: Request) {
     }
   }
 
-  const lastMessage = getLatestUserMessage(messages, messageId);
+  const lastMessage = getLatestUserMessage(clientMessages, messageId);
 
   if (lastMessage) {
     try {
@@ -371,73 +299,124 @@ export async function POST(req: Request) {
     }
   }
 
-  const existingSummary =
-    thread && "summary" in thread
-      ? (thread.summary as ThreadSummary | undefined)
-      : undefined;
-  const previousSummary = existingSummary
+  const storedMessages = await fetchQuery(
+    api.chat.listMessages,
+    { threadId },
+    { token },
+  )
+  const threadMessages: UIMessage[] = storedMessages.map((message) =>
+    fromStoredThreadMessage({
+      messageId: message.messageId,
+      role: message.role,
+      model: message.model,
+      content: message.content,
+    })
+  )
+
+  const existingSummary = thread && "summary" in thread ? thread.summary : undefined
+  const previousCompaction = existingSummary
     ? {
-      schemaVersion: 1,
+      schemaVersion: 1 as const,
       summaryText: existingSummary.summaryText,
-      summarizedThroughMessageId:
-        existingSummary.summarizedThroughMessageId,
+      summarizedThroughMessageId: existingSummary.summarizedThroughMessageId,
       updatedAt: existingSummary.updatedAt,
+      threadState: existingSummary.threadState ?? undefined,
+      compactionMetadata: existingSummary.compactionMetadata ?? undefined,
     }
-    : null;
+    : null
 
-  const summaryPlan = planSummarization({
-    messages,
-    previousSummary,
-    options: CHAT_SUMMARIZATION_OPTIONS,
-  });
+  const compactionPlan = planCompaction({
+    messages: threadMessages,
+    previousCompaction: previousCompaction ?? undefined,
+    config: COMPACTION_CONFIG,
+    forceManual: compactManually,
+  })
 
-  let summaryTextForContext = existingSummary?.summaryText ?? "";
-  let messagesForModelContext = messages;
+  let summaryTextForContext = existingSummary?.summaryText ?? ""
+  let threadStateForContext = existingSummary?.threadState ?? null
+  let messagesForModelContext = selectContextMessages({
+    messages: threadMessages,
+    summarizedThroughMessageId: existingSummary?.summarizedThroughMessageId ?? null,
+    recentMessageCount: COMPACTION_CONFIG.recentMessageCount,
+  })
 
-  if (summaryPlan.shouldSummarize && summaryPlan.nextCursorMessageId) {
-    const transcript = formatMessagesForSummarizer(
-      summaryPlan.messagesToSummarize,
-      CHAT_SUMMARIZATION_OPTIONS,
-    );
+  const shouldRunCompaction =
+    compactionPlan.shouldCompact &&
+    compactionPlan.nextCursorMessageId &&
+    compactionPlan.messagesToSummarize.length > 0
 
-    if (transcript.length >= ROLLING_SUMMARY_OPTIONS.minTranscriptChars) {
-      try {
-        const updatedSummary = await createRollingSummary({
-          googleModel,
+  const transcript =
+    shouldRunCompaction &&
+    formatMessagesForSummarizer(compactionPlan.messagesToSummarize, {
+      includeToolText: false,
+      maxCharsPerMessage: 8000,
+    })
+
+  const transcriptLongEnough =
+    typeof transcript === "string" &&
+    transcript.length >= COMPACTION_CONFIG.minTranscriptChars
+
+  const pastCooldown = isPastCompactionCooldown(
+    existingSummary?.compactionMetadata?.lastCompactedAt,
+    COMPACTION_CONFIG
+  )
+
+  const runCompaction =
+    shouldRunCompaction &&
+    transcriptLongEnough &&
+    (compactManually || pastCooldown)
+
+  if (runCompaction && typeof transcript === "string") {
+    try {
+      const [updatedSummary, updatedState] = await Promise.all([
+        generateThreadSummary({
+          model: googleModel("gemini-3.1-flash-lite-preview"),
           previousSummary: summaryTextForContext,
           transcript,
-        });
+          maxSummaryChars: COMPACTION_CONFIG.maxSummaryChars,
+        }),
+        generateStructuredThreadState({
+          model: googleModel("gemini-3.1-flash-lite-preview"),
+          previousState: threadStateForContext ?? null,
+          transcript,
+        }),
+      ])
 
-        if (updatedSummary) {
-          await fetchMutationUnsafe(
-            // Convex generated types may lag behind schema changes in CI/local restricted environments.
-            chatApiWithSummary.chat.setThreadSummary,
-            {
-              threadId,
-              summary: {
-                schemaVersion: 1,
-                summaryText: updatedSummary,
-                summarizedThroughMessageId: summaryPlan.nextCursorMessageId,
-                updatedAt: Date.now(),
+      if (updatedSummary) {
+        await fetchMutationUnsafe(
+          chatApiWithSummary.chat.setThreadSummary,
+          {
+            threadId,
+            summary: {
+              schemaVersion: 1,
+              summaryText: updatedSummary,
+              summarizedThroughMessageId: compactionPlan.nextCursorMessageId!,
+              updatedAt: Date.now(),
+              threadState: updatedState,
+              compactionMetadata: {
+                lastCompactedAt: Date.now(),
+                lastCompactedMessageId: compactionPlan.nextCursorMessageId!,
+                messageCountAtCompaction: compactionPlan.currentMessageCount,
+                tokenEstimateAtCompaction: compactionPlan.currentTokenEstimate,
               },
             },
-            { token },
-          );
-          summaryTextForContext = updatedSummary;
-          messagesForModelContext = summaryPlan.messagesToKeep;
-        }
-      } catch (error) {
-        console.error("Error creating rolling summary:", error);
+          },
+          { token },
+        )
+        summaryTextForContext = updatedSummary
+        threadStateForContext = updatedState
+        messagesForModelContext = compactionPlan.messagesToKeep
       }
+    } catch (error) {
+      console.error("Context compaction failed:", error)
     }
   }
 
-  if (summaryTextForContext) {
-    messagesForModelContext = injectRollingSummary({
-      summaryText: summaryTextForContext,
-      messagesToKeep: messagesForModelContext,
-    });
-  }
+  messagesForModelContext = assemblePromptContext({
+    summaryText: summaryTextForContext,
+    threadState: threadStateForContext,
+    messagesToKeep: messagesForModelContext,
+  })
 
   const modelMessages = await convertToModelMessages(messagesForModelContext);
   const cleanedMessages = pruneMessages({
@@ -555,7 +534,7 @@ export async function POST(req: Request) {
               containerTags: [userId],
             }) as unknown as typeof Tools),
           },
-          maxOutputTokens: 6500, // Balanced default to reduce runaway completions
+          maxOutputTokens: 8000, // Balanced default to reduce runaway completions
           activeTools: activeTools as Array<keyof typeof Tools>,
         });
 

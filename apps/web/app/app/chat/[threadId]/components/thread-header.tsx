@@ -12,6 +12,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
   ArrowLeft01Icon,
+  Layers01Icon,
   Delete02Icon,
   FolderManagementIcon,
   GlobalIcon,
@@ -25,6 +26,7 @@ interface ThreadHeaderProps {
   onBackToChats: () => void
   onOpenEditTitle: () => void
   onOpenDeleteThread: () => void
+  onCompactChat?: () => void | Promise<void>
 }
 
 export function ThreadHeader({
@@ -33,6 +35,7 @@ export function ThreadHeader({
   onBackToChats,
   onOpenEditTitle,
   onOpenDeleteThread,
+  onCompactChat,
 }: ThreadHeaderProps) {
   return (
     <div className="shrink-0 border-b border-border/50 bg-background/90 px-2 py-2 backdrop-blur supports-backdrop-filter:bg-background/80">
@@ -117,6 +120,16 @@ export function ThreadHeader({
                   />
                   Edit title
                 </DropdownMenuItem>
+                {onCompactChat ? (
+                  <DropdownMenuItem onClick={() => void onCompactChat()}>
+                    <HugeiconsIcon
+                      icon={Layers01Icon}
+                      className="mr-2 size-4"
+                      strokeWidth={2}
+                    />
+                    Compact chat
+                  </DropdownMenuItem>
+                ) : null}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={onOpenDeleteThread}

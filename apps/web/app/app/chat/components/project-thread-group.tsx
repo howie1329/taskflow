@@ -1,21 +1,21 @@
-"use client"
+"use client";
 
-import type { ReactNode } from "react"
-import { ChevronDownIcon } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
+import type { ReactNode } from "react";
+import { ChevronDownIcon } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible"
-import { cn } from "@/lib/utils"
-import type { ChatProject, ChatThread } from "./mock-data"
+} from "@/components/ui/collapsible";
+import { cn } from "@/lib/utils";
+import type { ChatProject, ChatThread } from "./thread-types";
 
 interface ProjectThreadGroupProps {
-  project: ChatProject
-  threads: ChatThread[]
-  children: ReactNode
-  className?: string
+  project: ChatProject;
+  threads: ChatThread[];
+  children: ReactNode;
+  className?: string;
 }
 
 export function ProjectThreadGroup({
@@ -43,5 +43,5 @@ export function ProjectThreadGroup({
         {children}
       </CollapsibleContent>
     </Collapsible>
-  )
+  );
 }

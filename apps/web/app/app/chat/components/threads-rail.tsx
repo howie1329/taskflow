@@ -4,8 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
-  Cancel01Icon,
   ArrowDown01Icon,
+  Cancel01Icon,
   MessageQuestionIcon,
   PinIcon,
   PlusSignIcon,
@@ -30,31 +30,21 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
-import type { ChatProject, ChatThread } from "./mock-data";
+import type { ChatProject, ChatThread } from "./thread-types";
 import { ProjectThreadGroup } from "./project-thread-group";
 import { ThreadRow } from "./thread-row";
 import { ThreadSection } from "./thread-section";
+import { useThreadRailState } from "./use-thread-rail-state";
 
 interface ThreadsRailProps {
   className?: string;
   variant?: "rail" | "sidebar";
   isNewChat: boolean;
-  searchQuery: string;
-  onSearchQueryChange: (value: string) => void;
   threads: ChatThread[];
-  filteredThreads: ChatThread[];
-  pinnedThreads: ChatThread[];
-  recentThreads: ChatThread[];
-  groupedByProject: { project: ChatProject; threads: ChatThread[] }[];
   projects?: ChatProject[];
   activeThreadId: string | null;
-  editingThreadId: string | null;
-  editingTitle: string;
-  onEditTitleChange: (value: string) => void;
-  onStartEdit: (thread: ChatThread) => void;
-  onCancelEdit: () => void;
-  onCommitEdit: () => void;
-  onTogglePin: (threadId: string) => void;
+  onRename: (threadId: string, title: string) => Promise<void>;
+  onTogglePin: (threadId: string, pinned: boolean) => Promise<void>;
   onDeleteRequest: (threadId: string | null) => void;
 }
 
@@ -62,48 +52,87 @@ export function ThreadsRail({
   className,
   variant = "rail",
   isNewChat,
-  searchQuery,
-  onSearchQueryChange,
   threads,
-  filteredThreads,
-  pinnedThreads,
-  recentThreads,
-  groupedByProject,
   projects = [],
   activeThreadId,
-  editingThreadId,
-  editingTitle,
-  onEditTitleChange,
-  onStartEdit,
-  onCancelEdit,
-  onCommitEdit,
+  onRename,
   onTogglePin,
   onDeleteRequest,
 }: ThreadsRailProps) {
+  const [editingThreadId, setEditingThreadId] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState("");
   const [isPinnedOpen, setIsPinnedOpen] = useState(true);
   const [isProjectsOpen, setIsProjectsOpen] = useState(true);
 
-  // Helper to get project info for a thread
-  const getThreadProject = (thread: ChatThread) => {
-    if (!thread.projectId) return null;
-    return projects.find((p) => p.id === thread.projectId) || null;
-  };
-  const projectThreadCount = groupedByProject.reduce(
-    (total, group) => total + group.threads.length,
-    0,
-  );
-
   const isSidebar = variant === "sidebar";
+  const {
+    searchQuery,
+    setSearchQuery,
+    filteredThreads,
+    pinnedThreads,
+    recentThreads,
+    groupedByProject,
+    projectThreadCount,
+  } = useThreadRailState({
+    threads,
+    projects,
+  });
+
+  // Editing handlers
+  const handleStartEdit = (thread: ChatThread) => {
+    setEditingThreadId(thread.id);
+    setEditingTitle(thread.title);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingThreadId(null);
+  };
+
+  const handleCommitEdit = async () => {
+    if (!editingThreadId) return;
+    const trimmed = editingTitle.trim() || "Untitled chat";
+    await onRename(editingThreadId, trimmed);
+    setEditingThreadId(null);
+  };
+
+  const handleTogglePin = (thread: ChatThread) => {
+    void onTogglePin(thread.id, !thread.pinned);
+  };
+
+  const getThreadProject = (thread: ChatThread) =>
+    thread.projectId
+      ? (projects.find((p) => p.id === thread.projectId) ?? null)
+      : null;
+
+  const renderThreadRow = (thread: ChatThread) => (
+    <ThreadRow
+      key={thread.id}
+      thread={thread}
+      isActive={thread.id === activeThreadId}
+      isEditing={editingThreadId === thread.id}
+      editingTitle={editingTitle}
+      projectIcon={getThreadProject(thread)?.icon}
+      onEditTitleChange={setEditingTitle}
+      onStartEdit={() => handleStartEdit(thread)}
+      onCancelEdit={handleCancelEdit}
+      onCommitEdit={() => void handleCommitEdit()}
+      onTogglePin={() => handleTogglePin(thread)}
+      onDeleteRequest={() => onDeleteRequest(thread.id)}
+    />
+  );
 
   return (
     <nav
       aria-label="Threads"
       className={cn(
         "flex min-h-0 min-w-0 flex-col overflow-hidden text-foreground",
-        isSidebar ? "w-full flex-1 bg-transparent" : "w-full shrink-0 bg-background",
+        isSidebar
+          ? "w-full flex-1 bg-transparent"
+          : "w-full shrink-0 bg-background",
         className,
       )}
     >
+      {/* Header: label + new button + search */}
       <div
         className={cn(
           "sticky top-0 z-10 bg-transparent space-y-2",
@@ -133,7 +162,7 @@ export function ThreadsRail({
                 className={cn("mr-1", isSidebar ? "size-3" : "size-3.5 mr-2")}
                 strokeWidth={2}
               />
-              {isSidebar ? "New" : "New"}
+              New
             </Button>
           </Link>
         </div>
@@ -148,7 +177,7 @@ export function ThreadsRail({
           <InputGroupInput
             placeholder="Search threads..."
             value={searchQuery}
-            onChange={(e) => onSearchQueryChange(e.target.value)}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className={cn("text-xs", isSidebar ? "h-7" : "h-8")}
           />
           {searchQuery && (
@@ -156,7 +185,7 @@ export function ThreadsRail({
               <Button
                 variant="ghost"
                 size="icon-xs"
-                onClick={() => onSearchQueryChange("")}
+                onClick={() => setSearchQuery("")}
                 className="h-5 w-5"
               >
                 <HugeiconsIcon
@@ -170,6 +199,7 @@ export function ThreadsRail({
         </InputGroup>
       </div>
 
+      {/* Thread list */}
       <div className="no-scrollbar flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden">
         <div
           className={cn(
@@ -202,7 +232,7 @@ export function ThreadsRail({
               <Button
                 variant="link"
                 size="sm"
-                onClick={() => onSearchQueryChange("")}
+                onClick={() => setSearchQuery("")}
                 className="mt-2"
               >
                 Clear search
@@ -237,25 +267,7 @@ export function ThreadsRail({
                     </div>
                   </CollapsibleTrigger>
                   <CollapsibleContent className="space-y-0.5 w-full max-w-full">
-                    {pinnedThreads.map((thread) => {
-                      const threadProject = getThreadProject(thread);
-                      return (
-                        <ThreadRow
-                          key={thread.id}
-                          thread={thread}
-                          isActive={thread.id === activeThreadId}
-                          isEditing={editingThreadId === thread.id}
-                          editingTitle={editingTitle}
-                          projectIcon={threadProject?.icon}
-                          onEditTitleChange={onEditTitleChange}
-                          onStartEdit={() => onStartEdit(thread)}
-                          onCancelEdit={onCancelEdit}
-                          onCommitEdit={onCommitEdit}
-                          onTogglePin={() => onTogglePin(thread.id)}
-                          onDeleteRequest={() => onDeleteRequest(thread.id)}
-                        />
-                      );
-                    })}
+                    {pinnedThreads.map(renderThreadRow)}
                   </CollapsibleContent>
                 </Collapsible>
               )}
@@ -266,9 +278,7 @@ export function ThreadsRail({
                   onOpenChange={setIsProjectsOpen}
                   className={cn(
                     "w-full max-w-full",
-                    pinnedThreads.length > 0
-                      ? "mt-3 pt-2"
-                      : "",
+                    pinnedThreads.length > 0 ? "mt-3 pt-2" : "",
                     isSidebar ? "space-y-2" : "space-y-2.5",
                   )}
                 >
@@ -292,21 +302,7 @@ export function ThreadsRail({
                         project={group.project}
                         threads={group.threads}
                       >
-                        {group.threads.map((thread) => (
-                          <ThreadRow
-                            key={thread.id}
-                            thread={thread}
-                            isActive={thread.id === activeThreadId}
-                            isEditing={editingThreadId === thread.id}
-                            editingTitle={editingTitle}
-                            onEditTitleChange={onEditTitleChange}
-                            onStartEdit={() => onStartEdit(thread)}
-                            onCancelEdit={onCancelEdit}
-                            onCommitEdit={onCommitEdit}
-                            onTogglePin={() => onTogglePin(thread.id)}
-                            onDeleteRequest={() => onDeleteRequest(thread.id)}
-                          />
-                        ))}
+                        {group.threads.map(renderThreadRow)}
                       </ProjectThreadGroup>
                     ))}
                   </CollapsibleContent>
@@ -317,21 +313,7 @@ export function ThreadsRail({
                 <div className="space-y-1.5 w-full max-w-full">
                   <ThreadSection label="Latest" count={recentThreads.length} />
                   <div className="space-y-0.5 w-full max-w-full">
-                    {recentThreads.map((thread) => (
-                      <ThreadRow
-                        key={thread.id}
-                        thread={thread}
-                        isActive={thread.id === activeThreadId}
-                        isEditing={editingThreadId === thread.id}
-                        editingTitle={editingTitle}
-                        onEditTitleChange={onEditTitleChange}
-                        onStartEdit={() => onStartEdit(thread)}
-                        onCancelEdit={onCancelEdit}
-                        onCommitEdit={onCommitEdit}
-                        onTogglePin={() => onTogglePin(thread.id)}
-                        onDeleteRequest={() => onDeleteRequest(thread.id)}
-                      />
-                    ))}
+                    {recentThreads.map(renderThreadRow)}
                   </div>
                 </div>
               )}

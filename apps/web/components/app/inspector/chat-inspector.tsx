@@ -6,19 +6,14 @@ import { useMutation, useQuery } from "convex/react";
 import { toast } from "sonner";
 import {
   CheckCircle2Icon,
-  ChevronDownIcon,
   CopyIcon,
   ExternalLinkIcon,
   SaveIcon,
 } from "lucide-react";
+import { ThreadContext } from "@/app/app/chat/components/thread-context";
 import { api } from "@/convex/_generated/api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
@@ -26,7 +21,8 @@ import { extractSourcesFromMessages } from "@/lib/chat/extract-sources";
 import {
   formatTimestamp,
   formatTokenCount,
-  formatUsdMicros,
+  getContextHealthState,
+  getLastAssistantInputTokens,
   getContextUsageRatio,
 } from "@/lib/chat/thread-context";
 
@@ -113,10 +109,12 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
   );
   const sources = useMemo(() => extractSourcesFromMessages(messages), [messages]);
   const usageTotals = thread?.usageTotals;
+  const lastPromptTokens = getLastAssistantInputTokens(messages);
   const contextUsageRatio = getContextUsageRatio({
-    totalTokens: usageTotals?.totalTokens,
+    totalTokens: lastPromptTokens,
     contextLength: activeModelDetails?.contextLength,
-  })
+  });
+  const contextHealthState = getContextHealthState(contextUsageRatio);
 
   useEffect(() => {
     setMemoryDraft(thread?.summary?.summaryText ?? "");
@@ -162,6 +160,33 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
   const summaryText = thread.summary?.summaryText ?? "";
   const hasSummary = Boolean(summaryText);
   const hasUnsavedMemoryChanges = memoryDraft !== summaryText;
+  const contextLabel = activeModelDetails?.contextLength
+    ? `${formatTokenCount(lastPromptTokens)} / ${formatTokenCount(activeModelDetails.contextLength)}`
+    : formatTokenCount(lastPromptTokens);
+  const scopeLabel =
+    thread.scope === "project" && project
+      ? project.title
+      : "Workspace";
+  const lastCompactedAt =
+    thread.summary?.compactionMetadata?.lastCompactedAt ?? thread.summary?.updatedAt;
+  const threadContextValue = {
+    state: {
+      thread,
+      project,
+      activeModel: activeModelDetails,
+      usageTotals,
+      lastPromptTokens,
+      summaryText: summaryText.trim(),
+      hasSummary,
+      lastCompactedAt,
+      contextUsageRatio,
+      contextHealthState,
+      contextLabel,
+      scopeLabel,
+    },
+    actions: {},
+    meta: {},
+  };
 
   const handleCopySources = async () => {
     await copyText(
@@ -193,6 +218,8 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
           summaryText: nextSummary,
           summarizedThroughMessageId: thread.summary.summarizedThroughMessageId,
           updatedAt: Date.now(),
+          threadState: thread.summary.threadState,
+          compactionMetadata: thread.summary.compactionMetadata,
         },
       });
       toast.success("Thread memory updated");
@@ -253,106 +280,10 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
 
           <Separator />
 
-          <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
-            <div className="flex items-center justify-between gap-2">
-              <div>
-                <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                  Rolling summary
-                </p>
-                <p className="mt-1 text-sm font-medium text-foreground">
-                  What the thread remembers right now
-                </p>
-              </div>
-              {hasSummary ? (
-                <Badge variant="outline">
-                  {thread.summary?.updatedAt
-                    ? `Updated ${formatTimestamp(thread.summary.updatedAt)}`
-                    : "Available"}
-                </Badge>
-              ) : null}
-            </div>
-            {hasSummary ? (
-              <Collapsible className="mt-3">
-                <CollapsibleTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="w-full justify-between"
-                  >
-                    <span>View summary</span>
-                    <ChevronDownIcon className="size-4" />
-                  </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="pt-3">
-                  <p className="whitespace-pre-wrap rounded-md border border-border/50 bg-background px-3 py-2 text-sm text-foreground">
-                    {summaryText}
-                  </p>
-                </CollapsibleContent>
-              </Collapsible>
-            ) : (
-              <p className="mt-3 text-sm text-muted-foreground">
-                No summary yet. A rolling summary appears after the conversation is
-                compacted for context.
-              </p>
-            )}
-          </div>
-
-          <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
-            <div className="flex items-center justify-between gap-2">
-              <div>
-                <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                  Usage snapshot
-                </p>
-                <p className="mt-1 text-sm font-medium text-foreground">
-                  Tokens and context pressure
-                </p>
-              </div>
-              {activeModelDetails?.contextLength ? (
-                <Badge variant="secondary">
-                  {formatTokenCount(activeModelDetails.contextLength)} context
-                </Badge>
-              ) : null}
-            </div>
-            <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-              <div className="rounded-md border border-border/60 bg-background px-2 py-2">
-                <p className="text-muted-foreground">Input tokens</p>
-                <p className="mt-1 text-sm font-medium text-foreground">
-                  {formatTokenCount(usageTotals?.inputTokens)}
-                </p>
-              </div>
-              <div className="rounded-md border border-border/60 bg-background px-2 py-2">
-                <p className="text-muted-foreground">Output tokens</p>
-                <p className="mt-1 text-sm font-medium text-foreground">
-                  {formatTokenCount(usageTotals?.outputTokens)}
-                </p>
-              </div>
-              <div className="rounded-md border border-border/60 bg-background px-2 py-2">
-                <p className="text-muted-foreground">Total tokens</p>
-                <p className="mt-1 text-sm font-medium text-foreground">
-                  {formatTokenCount(usageTotals?.totalTokens)}
-                </p>
-              </div>
-              <div className="rounded-md border border-border/60 bg-background px-2 py-2">
-                <p className="text-muted-foreground">Estimated cost</p>
-                <p className="mt-1 text-sm font-medium text-foreground">
-                  {formatUsdMicros(usageTotals?.totalCostUsdMicros)}
-                </p>
-              </div>
-            </div>
-            {activeModelDetails?.contextLength ? (
-              <div className="mt-3 rounded-md border border-border/60 bg-background px-3 py-2">
-                <div className="flex items-center justify-between gap-3 text-xs">
-                  <span className="text-muted-foreground">Context window</span>
-                  <span className="font-medium text-foreground">
-                    {formatTokenCount(usageTotals?.totalTokens)} /{" "}
-                    {formatTokenCount(activeModelDetails.contextLength)}
-                    {contextUsageRatio !== null ? ` (${contextUsageRatio}%)` : ""}
-                  </span>
-                </div>
-              </div>
-            ) : null}
-          </div>
+          <ThreadContext.Provider value={threadContextValue}>
+            <ThreadContext.RollingSummaryCard />
+            <ThreadContext.UsageSnapshotCard />
+          </ThreadContext.Provider>
 
           <Separator />
 
@@ -447,8 +378,8 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
               Thread memory
             </p>
             <p className="mt-1 text-sm text-muted-foreground">
-              This edits the rolling summary used to compress older context for the
-              current thread.
+              This edits the rolling summary used to compact older context for the
+              current thread. Use Compact chat to compress when thresholds are exceeded.
             </p>
           </div>
 
@@ -511,8 +442,8 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
                 No rolling summary yet
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Summaries are created automatically as the conversation grows and
-                older messages are compressed.
+                Summaries are created when the conversation exceeds message/token
+                thresholds or when you use Compact chat.
               </p>
             </div>
           )}
