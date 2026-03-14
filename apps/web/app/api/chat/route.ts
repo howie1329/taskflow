@@ -187,9 +187,6 @@ export async function POST(req: Request) {
   const interfaceType = modelDoc?.interface ?? "openrouter";
 
   let baseModel;
-  console.log("modelDoc", modelDoc);
-  console.log("model", model);
-  console.log("interfaceType", interfaceType);
   switch (interfaceType) {
     case "groq": {
       const groq = createGroq({ apiKey: process.env.GROQ_API_KEY });
@@ -321,13 +318,13 @@ export async function POST(req: Request) {
   const existingSummary = thread && "summary" in thread ? thread.summary : undefined
   const previousCompaction = existingSummary
     ? {
-        schemaVersion: 1 as const,
-        summaryText: existingSummary.summaryText,
-        summarizedThroughMessageId: existingSummary.summarizedThroughMessageId,
-        updatedAt: existingSummary.updatedAt,
-        threadState: existingSummary.threadState ?? undefined,
-        compactionMetadata: existingSummary.compactionMetadata ?? undefined,
-      }
+      schemaVersion: 1 as const,
+      summaryText: existingSummary.summaryText,
+      summarizedThroughMessageId: existingSummary.summarizedThroughMessageId,
+      updatedAt: existingSummary.updatedAt,
+      threadState: existingSummary.threadState ?? undefined,
+      compactionMetadata: existingSummary.compactionMetadata ?? undefined,
+    }
     : null
 
   const compactionPlan = planCompaction({
@@ -539,7 +536,7 @@ export async function POST(req: Request) {
               containerTags: [userId],
             }) as unknown as typeof Tools),
           },
-          maxOutputTokens: 6500, // Balanced default to reduce runaway completions
+          maxOutputTokens: 8000, // Balanced default to reduce runaway completions
           activeTools: activeTools as Array<keyof typeof Tools>,
         });
 
