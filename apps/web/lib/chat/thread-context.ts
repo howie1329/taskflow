@@ -3,6 +3,13 @@ export function formatTimestamp(value?: number) {
   return new Date(value).toLocaleString()
 }
 
+type MessageWithUsage = {
+  role?: string
+  usage?: {
+    inputTokens?: number
+  }
+}
+
 function trimTrailingZeros(value: number): string {
   return value.toFixed(1).replace(/\.0$/, "")
 }
@@ -69,4 +76,20 @@ export function getContextHealthLabel(state: ContextHealthState) {
     default:
       return "Unknown"
   }
+}
+
+export function getLastAssistantInputTokens(
+  messages: MessageWithUsage[] | undefined
+) {
+  if (!messages) return undefined
+
+  for (let i = messages.length - 1; i >= 0; i -= 1) {
+    const message = messages[i]
+    if (message.role !== "assistant") continue
+    if (typeof message.usage?.inputTokens === "number") {
+      return message.usage.inputTokens
+    }
+  }
+
+  return undefined
 }

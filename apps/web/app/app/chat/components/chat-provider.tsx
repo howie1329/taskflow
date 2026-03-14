@@ -99,12 +99,24 @@ type ChatThreadActions = {
   setScope: (input: SetThreadScopeInput) => Promise<void>
 }
 
+type ChatThreadDataState = {
+  threadMessages:
+    | Array<{
+      role?: string
+      usage?: {
+        inputTokens?: number
+      }
+    }>
+    | undefined
+}
+
 const ChatIdContext = createContext<ChatIdState | null>(null)
 const ChatMessagesContext = createContext<ChatMessagesState | null>(null)
 const ChatMessagingActionsContext = createContext<ChatMessagingActions | null>(null)
 const ChatConfigContext = createContext<ChatConfigState | null>(null)
 const ChatConfigActionsContext = createContext<ChatConfigActions | null>(null)
 const ChatThreadActionsContext = createContext<ChatThreadActions | null>(null)
+const ChatThreadDataContext = createContext<ChatThreadDataState | null>(null)
 
 const createDraftThreadId = () => `thread_${nanoid(10)}`
 
@@ -470,17 +482,24 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     [updateTitle, softDelete, setScope],
   )
 
+  const threadDataState = useMemo<ChatThreadDataState>(
+    () => ({ threadMessages }),
+    [threadMessages],
+  )
+
   return (
     <ChatIdContext.Provider value={idState}>
       <ChatMessagesContext.Provider value={messagesState}>
         <ChatMessagingActionsContext.Provider value={messagingActions}>
-          <ChatConfigContext.Provider value={configState}>
-            <ChatConfigActionsContext.Provider value={configActions}>
-              <ChatThreadActionsContext.Provider value={threadActions}>
-                {children}
-              </ChatThreadActionsContext.Provider>
-            </ChatConfigActionsContext.Provider>
-          </ChatConfigContext.Provider>
+          <ChatThreadDataContext.Provider value={threadDataState}>
+            <ChatConfigContext.Provider value={configState}>
+              <ChatConfigActionsContext.Provider value={configActions}>
+                <ChatThreadActionsContext.Provider value={threadActions}>
+                  {children}
+                </ChatThreadActionsContext.Provider>
+              </ChatConfigActionsContext.Provider>
+            </ChatConfigContext.Provider>
+          </ChatThreadDataContext.Provider>
         </ChatMessagingActionsContext.Provider>
       </ChatMessagesContext.Provider>
     </ChatIdContext.Provider>
@@ -509,4 +528,12 @@ export function useChatConfigActions() {
 
 export function useChatThreadActions() {
   return useRequiredContext(ChatThreadActionsContext, "useChatThreadActions")
+}
+
+export function useChatThreadMessages() {
+  const { threadMessages } = useRequiredContext(
+    ChatThreadDataContext,
+    "useChatThreadMessages",
+  )
+  return threadMessages
 }
