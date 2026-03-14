@@ -142,10 +142,11 @@ function BadgePopover() {
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        align="start"
+        align="center"
         side="top"
         sideOffset={10}
-        className="w-[min(28rem,calc(100vw-2rem))] rounded-2xl p-3"
+        collisionPadding={12}
+        className="w-[min(28rem,calc(100vw-1rem))] max-h-[min(70vh,32rem)] overflow-y-auto rounded-2xl p-3"
       >
         <PopoverHeader>
           <PopoverTitle>Thread context</PopoverTitle>
