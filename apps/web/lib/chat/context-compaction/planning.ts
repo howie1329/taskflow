@@ -27,6 +27,38 @@ function findCursorIndex(
   return messages.findIndex((m) => m.id === cursorMessageId)
 }
 
+/** Select model context with cursor-aware trimming of already summarized history. */
+export function selectContextMessages({
+  messages,
+  summarizedThroughMessageId,
+  recentMessageCount,
+}: {
+  messages: UIMessage[]
+  summarizedThroughMessageId?: string | null
+  recentMessageCount: number
+}): UIMessage[] {
+  if (!summarizedThroughMessageId) return messages
+
+  const keepLastN = Math.max(0, recentMessageCount)
+  const { candidateMessages, protectedMessages } = splitProtectedTail(messages, keepLastN)
+  const cursorInCandidates = findCursorIndex(candidateMessages, summarizedThroughMessageId)
+
+  if (cursorInCandidates >= 0) {
+    const unsummarizedCandidates = candidateMessages.slice(cursorInCandidates + 1)
+    return [...unsummarizedCandidates, ...protectedMessages]
+  }
+
+  const cursorInProtected = findCursorIndex(protectedMessages, summarizedThroughMessageId)
+  if (cursorInProtected >= 0) {
+    // Cursor should typically live in candidateMessages, but if it ends up in the protected tail
+    // we keep the full tail to avoid accidentally dropping all recent context.
+    return protectedMessages
+  }
+
+  // If the cursor can't be found, keep full history to avoid dropping unsummarized context.
+  return messages
+}
+
 /** Plan a compaction run. Returns what to summarize and what to keep. */
 export function planCompaction({
   messages,

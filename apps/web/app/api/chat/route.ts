@@ -18,9 +18,11 @@ import {
   normalizeUIMessages,
   getInitialUserText,
   getLatestUserMessage,
+  fromStoredThreadMessage,
 } from "@taskflow/chat-content";
 import {
   planCompaction,
+  selectContextMessages,
   formatMessagesForSummarizer,
   generateThreadSummary,
   generateStructuredThreadState,
@@ -251,12 +253,12 @@ export async function POST(req: Request) {
       { status: 400 },
     );
   }
-  const messages = normalizeUIMessages(parsedMessages.data);
+  const requestMessages = normalizeUIMessages(parsedMessages.data);
 
   let thread = await fetchQuery(api.chat.getThread, { threadId }, { token });
 
   if (!thread) {
-    const title = await createTitle(messages);
+    const title = await createTitle(requestMessages);
     try {
       thread = await fetchMutation(
         api.chat.createThread,
@@ -279,7 +281,7 @@ export async function POST(req: Request) {
     }
   }
 
-  const lastMessage = getLatestUserMessage(messages, messageId);
+  const lastMessage = getLatestUserMessage(requestMessages, messageId);
 
   if (lastMessage) {
     try {
@@ -308,6 +310,20 @@ export async function POST(req: Request) {
     }
   }
 
+  const storedMessages = await fetchQuery(
+    api.chat.listMessages,
+    { threadId },
+    { token },
+  )
+  const messages: UIMessage[] = storedMessages.map((message) =>
+    fromStoredThreadMessage({
+      messageId: message.messageId,
+      role: message.role,
+      model: message.model,
+      content: message.content,
+    })
+  )
+
   const existingSummary = thread && "summary" in thread ? thread.summary : undefined
   const previousCompaction = existingSummary
     ? {
@@ -329,7 +345,11 @@ export async function POST(req: Request) {
 
   let summaryTextForContext = existingSummary?.summaryText ?? ""
   let threadStateForContext = existingSummary?.threadState ?? null
-  let messagesForModelContext = messages
+  let messagesForModelContext = selectContextMessages({
+    messages,
+    summarizedThroughMessageId: existingSummary?.summarizedThroughMessageId ?? null,
+    recentMessageCount: COMPACTION_CONFIG.recentMessageCount,
+  })
 
   const shouldRunCompaction =
     compactionPlan.shouldCompact &&

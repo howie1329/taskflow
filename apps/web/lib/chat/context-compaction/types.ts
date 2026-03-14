@@ -49,9 +49,9 @@ export type CompactionPlan = {
 export type ThreadCompaction = {
   schemaVersion: 1
   summaryText: string
-  threadState: ThreadState
+  threadState?: ThreadState | null
   summarizedThroughMessageId: string
-  compactionMetadata: CompactionMetadata
+  compactionMetadata?: CompactionMetadata
   updatedAt: number
 }
 

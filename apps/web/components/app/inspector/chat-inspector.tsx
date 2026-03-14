@@ -113,8 +113,18 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
   );
   const sources = useMemo(() => extractSourcesFromMessages(messages), [messages]);
   const usageTotals = thread?.usageTotals;
+  const lastPromptTokens = useMemo(() => {
+    for (let i = messages.length - 1; i >= 0; i -= 1) {
+      const message = messages[i];
+      if (message.role !== "assistant") continue;
+      if (typeof message.usage?.inputTokens === "number") {
+        return message.usage.inputTokens;
+      }
+    }
+    return undefined;
+  }, [messages]);
   const contextUsageRatio = getContextUsageRatio({
-    totalTokens: usageTotals?.totalTokens,
+    totalTokens: lastPromptTokens,
     contextLength: activeModelDetails?.contextLength,
   })
 
@@ -320,19 +330,25 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
             </div>
             <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
               <div className="rounded-md border border-border/60 bg-background px-2 py-2">
-                <p className="text-muted-foreground">Input tokens</p>
+                <p className="text-muted-foreground">Last prompt tokens</p>
+                <p className="mt-1 text-sm font-medium text-foreground">
+                  {formatTokenCount(lastPromptTokens)}
+                </p>
+              </div>
+              <div className="rounded-md border border-border/60 bg-background px-2 py-2">
+                <p className="text-muted-foreground">Lifetime input</p>
                 <p className="mt-1 text-sm font-medium text-foreground">
                   {formatTokenCount(usageTotals?.inputTokens)}
                 </p>
               </div>
               <div className="rounded-md border border-border/60 bg-background px-2 py-2">
-                <p className="text-muted-foreground">Output tokens</p>
+                <p className="text-muted-foreground">Lifetime output</p>
                 <p className="mt-1 text-sm font-medium text-foreground">
                   {formatTokenCount(usageTotals?.outputTokens)}
                 </p>
               </div>
               <div className="rounded-md border border-border/60 bg-background px-2 py-2">
-                <p className="text-muted-foreground">Total tokens</p>
+                <p className="text-muted-foreground">Lifetime total</p>
                 <p className="mt-1 text-sm font-medium text-foreground">
                   {formatTokenCount(usageTotals?.totalTokens)}
                 </p>
@@ -347,9 +363,9 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
             {activeModelDetails?.contextLength ? (
               <div className="mt-3 rounded-md border border-border/60 bg-background px-3 py-2">
                 <div className="flex items-center justify-between gap-3 text-xs">
-                  <span className="text-muted-foreground">Context window</span>
+                  <span className="text-muted-foreground">Last prompt vs context</span>
                   <span className="font-medium text-foreground">
-                    {formatTokenCount(usageTotals?.totalTokens)} /{" "}
+                    {formatTokenCount(lastPromptTokens)} /{" "}
                     {formatTokenCount(activeModelDetails.contextLength)}
                     {contextUsageRatio !== null ? ` (${contextUsageRatio}%)` : ""}
                   </span>

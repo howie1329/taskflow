@@ -1,7 +1,7 @@
 import type { CompactionConfig } from "./types"
 
 export const DEFAULT_COMPACTION_CONFIG: CompactionConfig = {
-  recentMessageCount: 8,
+  recentMessageCount: 4,
   messageThreshold: 2,
   tokenThreshold: 10000,
   minTranscriptChars: 180,

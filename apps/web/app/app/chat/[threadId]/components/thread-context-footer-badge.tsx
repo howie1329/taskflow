@@ -1,6 +1,9 @@
 "use client"
 
 import type { ReactNode } from "react"
+import { useMemo } from "react"
+import { useQuery } from "convex/react"
+import { api } from "@/convex/_generated/api"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -66,6 +69,21 @@ function DetailRow({
 
 export function ThreadContextFooterBadge() {
   const { thread, project, selectedModelId, availableModels } = useChatConfig()
+  const threadMessages = useQuery(
+    api.chat.listMessages,
+    thread ? { threadId: thread.threadId } : "skip"
+  )
+  const lastPromptTokens = useMemo(() => {
+    if (!threadMessages) return undefined
+    for (let i = threadMessages.length - 1; i >= 0; i -= 1) {
+      const message = threadMessages[i]
+      if (message.role !== "assistant") continue
+      if (typeof message.usage?.inputTokens === "number") {
+        return message.usage.inputTokens
+      }
+    }
+    return undefined
+  }, [threadMessages])
 
   if (!thread) return null
 
@@ -78,13 +96,13 @@ export function ThreadContextFooterBadge() {
   const summaryText = thread.summary?.summaryText?.trim() ?? ""
   const hasSummary = Boolean(summaryText)
   const contextUsageRatio = getContextUsageRatio({
-    totalTokens: usageTotals?.totalTokens,
+    totalTokens: lastPromptTokens,
     contextLength: activeModel?.contextLength,
   })
   const contextHealthState = getContextHealthState(contextUsageRatio)
   const contextLabel = activeModel?.contextLength
-    ? `${formatTokenCount(usageTotals?.totalTokens)} / ${formatTokenCount(activeModel.contextLength)}`
-    : formatTokenCount(usageTotals?.totalTokens)
+    ? `${formatTokenCount(lastPromptTokens)} / ${formatTokenCount(activeModel.contextLength)}`
+    : formatTokenCount(lastPromptTokens)
   const scopeLabel =
     thread.scope === "project" && project
       ? project.title
@@ -123,7 +141,13 @@ export function ThreadContextFooterBadge() {
         <div className="space-y-2">
           <DetailRow
             icon={<Layers3Icon className="size-3.5" />}
-            label="Tokens used"
+            label="Last prompt tokens"
+            value={formatTokenCount(lastPromptTokens)}
+          />
+
+          <DetailRow
+            icon={<Layers3Icon className="size-3.5" />}
+            label="Lifetime tokens"
             value={formatTokenCount(usageTotals?.totalTokens)}
           />
 
