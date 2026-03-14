@@ -58,3 +58,31 @@ export function getTextFromUIMessage(
 
   return clampText(segments.join("\n").trim(), maxChars)
 }
+
+export function getInitialUserText(messages: UIMessage[]): string {
+  for (const message of messages) {
+    if (message.role !== "user") continue
+    const text = getTextFromUIMessage(message)
+    if (text) return text
+  }
+  return ""
+}
+
+export function getLatestUserMessage(
+  messages: UIMessage[],
+  preferredMessageId?: string
+): UIMessage | null {
+  if (preferredMessageId) {
+    const preferred = messages.find(
+      (message) => message.id === preferredMessageId && message.role === "user"
+    )
+    if (preferred) return preferred
+  }
+
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    if (messages[index].role === "user") {
+      return messages[index]
+    }
+  }
+  return null
+}

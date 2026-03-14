@@ -13,7 +13,20 @@ export {
 } from "./generation.js"
 export {
   getTextFromUIMessage,
+  getInitialUserText,
+  getLatestUserMessage,
   estimateTokensFromText,
   estimateTokensFromUIMessages,
+  safeParseUIMessages,
+  normalizeUIMessages,
+  fromStoredThreadMessage,
+  toStoredThreadMessage,
+  makeJsonSerializable,
+  ChatContentError,
+  assertJsonSerializable,
+  uiMessageSchema,
+  uiPartSchema,
+  storedThreadMessageSchema,
   type TextExtractionOptions,
+  type StoredThreadMessage,
 } from "./utils/index.js"
