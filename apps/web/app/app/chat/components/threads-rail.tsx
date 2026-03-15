@@ -136,7 +136,7 @@ export function ThreadsRail({
       <div
         className={cn(
           "sticky top-0 z-10 bg-transparent space-y-2",
-          isSidebar ? "p-2.5" : "p-3",
+          isSidebar ? "p-2" : "p-2.5 md:p-3",
         )}
       >
         <div className="flex items-center justify-between gap-2">
@@ -204,7 +204,7 @@ export function ThreadsRail({
         <div
           className={cn(
             "w-full max-w-full min-w-0",
-            isSidebar ? "space-y-2 p-2" : "space-y-3 p-3",
+            isSidebar ? "space-y-1.5 p-2" : "space-y-2 p-2 md:space-y-3 md:p-3",
           )}
         >
           {threads.length === 0 ? (

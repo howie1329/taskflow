@@ -97,8 +97,12 @@ interface WorkspaceSidebarContentProps {
   pathname: string;
   isChatRoute: boolean;
   isNotesRoute: boolean;
-  setChatSidebarMode: React.Dispatch<React.SetStateAction<"threads" | "workspace">>;
-  setNotesSidebarMode: React.Dispatch<React.SetStateAction<"notes" | "workspace">>;
+  setChatSidebarMode: React.Dispatch<
+    React.SetStateAction<"threads" | "workspace">
+  >;
+  setNotesSidebarMode: React.Dispatch<
+    React.SetStateAction<"notes" | "workspace">
+  >;
 }
 
 function WorkspaceSidebarContent({
@@ -165,26 +169,34 @@ function WorkspaceSidebarContent({
                 const isChatItem = item.href === "/app/chat";
                 const isNotesItem = item.href === "/app/notes";
                 const isActive =
-                  pathname === item.href || pathname.startsWith(`${item.href}/`);
+                  pathname === item.href ||
+                  pathname.startsWith(`${item.href}/`);
                 const handleChatClick =
                   isChatRoute && isChatItem
                     ? (event: React.MouseEvent<HTMLAnchorElement>) => {
-                      event.preventDefault();
-                      setChatSidebarMode("threads");
-                    }
+                        event.preventDefault();
+                        setChatSidebarMode("threads");
+                      }
                     : undefined;
                 const handleNotesClick =
                   isNotesRoute && isNotesItem
                     ? (event: React.MouseEvent<HTMLAnchorElement>) => {
-                      event.preventDefault();
-                      setNotesSidebarMode("notes");
-                    }
+                        event.preventDefault();
+                        setNotesSidebarMode("notes");
+                      }
                     : undefined;
 
                 return (
                   <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton asChild isActive={isActive} tooltip={item.title}>
-                      <Link href={item.href} onClick={handleChatClick ?? handleNotesClick}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive}
+                      tooltip={item.title}
+                    >
+                      <Link
+                        href={item.href}
+                        onClick={handleChatClick ?? handleNotesClick}
+                      >
                         <HugeiconsIcon icon={item.icon} className="size-4" />
                         <span>{item.title}</span>
                       </Link>
@@ -225,7 +237,8 @@ export function AppShell({ children, right }: AppShellProps) {
   const isNotesRoute = pathname.startsWith("/app/notes");
   const isTasksRoute = pathname.startsWith("/app/tasks");
   const isSettingsRoute = pathname.startsWith("/app/settings");
-  const showInspector = !isOnboardingRoute && !isSettingsRoute && (isChatRoute || isNotesRoute);
+  const showInspector =
+    !isOnboardingRoute && !isSettingsRoute && (isChatRoute || isNotesRoute);
 
   useEffect(() => {
     if (isLoading) return;
@@ -263,14 +276,14 @@ export function AppShell({ children, right }: AppShellProps) {
       style={
         isChatRoute
           ? ({
-            "--sidebar-width": "16rem",
-            "--sidebar-width-mobile": "18rem",
-          } as React.CSSProperties)
-          : isNotesRoute
-            ? ({
               "--sidebar-width": "16rem",
               "--sidebar-width-mobile": "18rem",
             } as React.CSSProperties)
+          : isNotesRoute
+            ? ({
+                "--sidebar-width": "16rem",
+                "--sidebar-width-mobile": "18rem",
+              } as React.CSSProperties)
             : undefined
       }
     >
@@ -299,8 +312,10 @@ export function AppShell({ children, right }: AppShellProps) {
         )}
         <SidebarRail scope="primary" />
       </Sidebar>
-      <SidebarInset className={cn("min-w-0 overflow-hidden", isChatRoute && "min-h-0")}>
-        {!isOnboardingRoute && (
+      <SidebarInset
+        className={cn("min-w-0 overflow-hidden", isChatRoute && "min-h-0")}
+      >
+        {!isOnboardingRoute && !isChatRoute && (
           <div className="md:hidden sticky top-0 z-20 flex h-10 items-center gap-2 px-2 bg-background/70 backdrop-blur supports-backdrop-filter:bg-background/50">
             <SidebarTrigger className="-ml-1" />
             <div className="min-w-0 flex-1">

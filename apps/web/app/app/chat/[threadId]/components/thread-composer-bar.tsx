@@ -20,6 +20,7 @@ import { ChatComposerInput } from "../../components/chat-composer-input";
 import { useChatComposer } from "../../components/use-chat-composer";
 import { THREAD_COMPOSER_SUGGESTIONS } from "../../constants/suggestions";
 import { ThreadContextFooterBadge } from "./thread-context-footer-badge";
+import { useKeyboardScroll } from "@/hooks/use-keyboard-scroll";
 
 interface ThreadComposerBarProps {
   textareaRef: RefObject<HTMLTextAreaElement | null>;
@@ -34,6 +35,10 @@ export function ThreadComposerBar({ textareaRef }: ThreadComposerBarProps) {
     setScope,
     thread,
   } = useChatComposer();
+
+  useKeyboardScroll(textareaRef as React.RefObject<HTMLElement | null>, {
+    enabled: isMobile,
+  });
 
   const handleSubmit = ({
     text,

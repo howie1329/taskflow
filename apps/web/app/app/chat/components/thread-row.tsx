@@ -79,7 +79,7 @@ export function ThreadRow({
     <Link
       href={`/app/chat/${thread.id}`}
       className={cn(
-        "group relative flex items-center gap-2 rounded-md px-2.5 py-2 text-sm transition-colors w-full max-w-full overflow-hidden",
+        "group relative flex items-center gap-2 rounded-md px-2.5 py-2.5 text-sm transition-colors w-full max-w-full overflow-hidden",
         "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/60",
         isActive
           ? "bg-muted text-foreground"
