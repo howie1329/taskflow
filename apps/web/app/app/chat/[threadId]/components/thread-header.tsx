@@ -1,6 +1,7 @@
 "use client"
 
 import type { Doc } from "@/convex/_generated/dataModel"
+import { AnimatePresence, motion } from "motion/react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar"
@@ -39,18 +40,34 @@ export function ThreadHeader({
   onOpenDeleteThread,
   onCompactChat,
 }: ThreadHeaderProps) {
-  const { isMobile } = useSidebar()
+  const { state: primarySidebarState, isMobile } = useSidebar()
   const {
     open: inspectorOpenDesktop,
     openMobile: inspectorOpenMobile,
   } = useSidebar("inspector")
 
+  const showPrimarySidebarTrigger = !isMobile && primarySidebarState === "collapsed"
   const inspectorOpen = isMobile ? inspectorOpenMobile : inspectorOpenDesktop
 
   return (
     <div className="shrink-0 border-b border-border/50 bg-background/90 px-3 py-1.5 backdrop-blur supports-backdrop-filter:bg-background/80">
       <div className="flex min-h-10 items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2.5">
+          <AnimatePresence initial={false}>
+            {showPrimarySidebarTrigger ? (
+              <motion.div
+                key="primary-sidebar-trigger"
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -8 }}
+                transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                className="hidden md:block"
+              >
+                <SidebarTrigger aria-label="Open sidebar" />
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
+
           <Button
             variant="ghost"
             size="icon-sm"
@@ -101,13 +118,23 @@ export function ThreadHeader({
 
         {thread && (
           <div className="flex items-center gap-1">
-            {!inspectorOpen ? (
-              <SidebarTrigger
-                scope="inspector"
-                className="[&_svg]:rotate-180"
-                aria-label="Open inspector"
-              />
-            ) : null}
+            <AnimatePresence initial={false}>
+              {!inspectorOpen ? (
+                <motion.div
+                  key="inspector-trigger"
+                  initial={{ opacity: 0, x: 8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 8 }}
+                  transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <SidebarTrigger
+                    scope="inspector"
+                    className="[&_svg]:rotate-180"
+                    aria-label="Open inspector"
+                  />
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon-sm">

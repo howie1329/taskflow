@@ -1,21 +1,21 @@
 import type { Metadata, Viewport } from "next";
-import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 import ConvexClientProvider from "@/components/convex/ConvexClientProvider";
 import { Toaster } from "@/components/ui/sonner";
 
-const ibmPlexSans = IBM_Plex_Sans({
+const GeistSans = Geist({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
-  variable: "--font-sans",
+  variable: "--font-geist-sans",
 });
 
-const ibmPlexMono = IBM_Plex_Mono({
+const GeistMono = Geist_Mono({
   subsets: ["latin"],
   weight: ["400", "500"],
-  variable: "--font-mono",
+  variable: "--font-geist-mono",
 });
 
 export const viewport: Viewport = {
@@ -48,7 +48,7 @@ export default function RootLayout({
     <ConvexAuthNextjsServerProvider>
       <html
         lang="en"
-        className={`${ibmPlexSans.variable} ${ibmPlexMono.variable}`}
+        className={`${GeistSans.variable} ${GeistMono.variable}`}
         suppressHydrationWarning
       >
         <head>
