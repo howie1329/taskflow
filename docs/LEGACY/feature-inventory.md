@@ -1,31 +1,29 @@
-# Legacy Feature Inventory (Reference)
+# Legacy Feature Inventory
 
-This file lists what existed in the legacy implementation so we can reuse ideas and avoid re-learning lessons.
+This file is a short reference for what existed before the `apps/web` rewrite became the active product direction.
 
-Important: the rewrite treats all features as not yet implemented.
+## Legacy App Status
 
-## Legacy Apps
+- `apps/frontend`: deprecated legacy Next.js app
+- `apps/backend`: deprecated legacy Express backend
 
-- Frontend: `apps/frontend`
-- Backend: `apps/backend`
+The legacy app-local docs were intentionally removed during the docs rewrite. This file keeps only the high-signal history that still helps current work.
 
 ## Major Legacy Feature Areas
 
-- Tasks: UI + Express routes (`apps/backend/routes/v1/tasks.js`)
-- Subtasks: Express routes (`apps/backend/routes/v1/subtasks.js`)
-- Notes: Block editor + Express routes (`apps/backend/routes/v1/notes.js`)
-- Projects: UI exists; backend missing update/delete (`apps/backend/routes/v1/projects.js`)
-- Inbox: UI prototype only (`apps/frontend/src/app/mainview/inbox/page.js`)
-- Schedule: UI prototype only (`apps/frontend/src/app/mainview/schedule/page.js`)
-- AI Chat: streaming chat UI + persisted conversations/messages (`apps/backend/routes/v1/conversations.js`)
-- Global search modal: UI existed (`apps/frontend/src/presentation/components/Layout/GlobalSearch.js`)
-- Notifications: UI + Express routes (`apps/backend/routes/v1/notifications.js`)
+- Tasks: CRUD, board workflows, subtasks, priorities, project assignment
+- Notes: editor flows, note-task linking, search, project grouping
+- Projects: list/detail flows and project-scoped work organization
+- Inbox: capture-first workflow prototype
+- Schedule: early day-planning UI concepts
+- AI chat: persisted threads/messages, tool execution, streaming responses
+- Notifications: early feed and event concepts
+- Search and context retrieval: semantic search, summarization, and RAG experimentation
 
-## Legacy Docs Worth Mining
+## Legacy Lessons Still Worth Keeping
 
-- Feature priorities: `apps/backend/docs/FEATURE_RECOMMENDATIONS_SUMMARY.md`
-- Feature analysis: `apps/backend/docs/FEATURE_ANALYSIS_AND_RECOMMENDATIONS.md`
-- Gaps list: `apps/frontend/docs/FEATURE_GAPS_AND_IDEAS.md`
-- Mentions guide: `apps/frontend/docs/MENTION_SYSTEM_GUIDE.md`
-- AI artifacts: `apps/backend/docs/ARTIFACT_SYSTEM.md`
-- Chat context: `apps/backend/docs/CHAT_HISTORY_ANALYSIS.md`
+- Keep current docs aligned with real code, not aspirational architecture.
+- Preserve tool execution state in chat UIs with clear loading, complete, and error states.
+- Treat context-window management as an explicit product/system concern, not a hidden implementation detail.
+- Keep package boundaries clear: pure shared utilities belong in packages, app-specific orchestration belongs with the active app.
+- Avoid preserving outdated planning docs once their useful decisions have been absorbed into canonical docs.

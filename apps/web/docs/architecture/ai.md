@@ -1,47 +1,69 @@
 # AI Architecture
 
-This document describes AI behavior in `apps/web`, centered on `/app/chat`.
+This document describes the current AI system in `apps/web`, centered on `/app/chat`.
 
 ## Runtime Model
 
-- Chat UI is rendered in App Router routes:
+- Chat UI lives at:
   - `/app/chat`
   - `/app/chat/[threadId]`
-- Conversation state is managed via chat provider context.
-- Message history and thread metadata are fetched from Convex.
-- Assistant generation is sent through `/api/chat` using selected model/mode/tool lock.
+- Thread metadata and message history are stored in Convex.
+- Generation is sent through `/api/chat`.
+- Client state is coordinated by the chat provider and route-level chat shell.
 
 ## Core Pieces
 
 - `app/app/chat/components/chat-provider.tsx`
-  - owns active thread ID, model/mode/project selection, and send behavior
+  - owns active thread, selected model, mode, project scope, and send behavior
 - `app/app/chat/[threadId]/components/thread-message-list.tsx`
-  - renders messages, reasoning, and tool panel stubs
+  - renders messages, reasoning, and tool output sections
 - `app/app/chat/[threadId]/components/tool-panels.tsx`
-  - renders action summaries and expandable tool details
+  - renders compact action summaries and expandable detail cards
 - `components/ai-elements/*`
-  - shared primitives for conversation, prompt input, tool cards, chain-of-thought
+  - shared UI primitives for messages, composer, reasoning, and tool rendering
+- `lib/AITools/*`
+  - tool registry, provider-specific tool modules, mode mappings, and prompt logic
 
-## Tool Call Rendering
+## Tool Execution Model
 
-- Tool parts are extracted from assistant message parts.
-- UI renders:
-  - compact actions summary (default collapsed)
-  - optional expanded tool detail cards
-- Provider badges/status metadata are mapped from tool keys.
+The current app treats tool activity as a first-class UI concern.
 
-See:
+- Assistant messages can include action summaries and expanded tool detail cards.
+- Tool output should preserve enough structure to show:
+  - current state
+  - human-readable status
+  - key inputs
+  - useful outputs or errors
+- The stable status model is:
+  - `pending`
+  - `loading`
+  - `complete`
+  - `error`
 
-- `features/ai-chat-tools-ui.md`
-- `features/ai-tools-ui-implementation-plan.md`
+This keeps long-running or multi-step AI actions traceable without forcing raw payloads into the default reading flow.
 
-## Modes and Tool Locking
+## Tool Organization
 
-- Mode prompts and routing logic live in `lib/AITools/ModePrompts.ts`.
-- Tool lock command behavior is constrained by selected mode/tool availability.
-- Viewer preferences can control reasoning/actions/tool detail visibility.
+Tools are organized under `lib/AITools` by provider and exported through shared index files.
 
-## Known Constraints
+- provider folders own provider-specific implementations
+- `index.ts` aggregates tool exports
+- mode mapping selects which tool keys are available in each chat mode
+- custom tools can compose provider tools when Taskflow needs a single higher-level action
 
-- UI rendering is richer than some backend validation conventions today; keep output handling defensive.
-- Keep fallback summaries for unknown tool payload shapes.
+## Context and History Guidance
+
+Current architecture should keep context handling explicit and conservative.
+
+- Prefer model-aware token budgets over fixed message-count slicing.
+- Preserve important tool-call context instead of pruning it blindly.
+- Keep recent conversation fidelity while summarizing older history when needed.
+- Treat context-window management as a system concern that should be visible in docs and code, not hidden behind ad hoc limits.
+
+These are guiding constraints from legacy chat work, not a promise that every optimization is already implemented in `apps/web`.
+
+## Related Docs
+
+- [`../features/ai-chat.md`](../features/ai-chat.md)
+- [`./overview.md`](./overview.md)
+- [`../archive/2026-legacy-plans/README.md`](../archive/2026-legacy-plans/README.md)
