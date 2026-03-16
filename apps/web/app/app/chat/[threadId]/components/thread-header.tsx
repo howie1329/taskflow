@@ -1,7 +1,9 @@
+"use client"
+
 import type { Doc } from "@/convex/_generated/dataModel"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { SidebarTrigger } from "@/components/ui/sidebar"
+import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,14 +39,18 @@ export function ThreadHeader({
   onOpenDeleteThread,
   onCompactChat,
 }: ThreadHeaderProps) {
-  return (
-    <div className="shrink-0 border-b border-border/50 bg-background/90 px-2 py-2 backdrop-blur supports-backdrop-filter:bg-background/80">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-2.5">
-          <div className="hidden md:block">
-            <SidebarTrigger />
-          </div>
+  const { isMobile } = useSidebar()
+  const {
+    open: inspectorOpenDesktop,
+    openMobile: inspectorOpenMobile,
+  } = useSidebar("inspector")
 
+  const inspectorOpen = isMobile ? inspectorOpenMobile : inspectorOpenDesktop
+
+  return (
+    <div className="shrink-0 border-b border-border/50 bg-background/90 px-3 py-1.5 backdrop-blur supports-backdrop-filter:bg-background/80">
+      <div className="flex min-h-10 items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2.5">
           <Button
             variant="ghost"
             size="icon-sm"
@@ -95,11 +101,13 @@ export function ThreadHeader({
 
         {thread && (
           <div className="flex items-center gap-1">
-            <SidebarTrigger
-              scope="inspector"
-              className="[&_svg]:rotate-180"
-              aria-label="Toggle inspector"
-            />
+            {!inspectorOpen ? (
+              <SidebarTrigger
+                scope="inspector"
+                className="[&_svg]:rotate-180"
+                aria-label="Open inspector"
+              />
+            ) : null}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon-sm">

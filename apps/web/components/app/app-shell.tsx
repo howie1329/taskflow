@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { motion, useReducedMotion } from "motion/react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Task01Icon,
@@ -219,6 +220,32 @@ function WorkspaceSidebarContent({
   );
 }
 
+function InspectorPanelContent({ children }: { children: React.ReactNode }) {
+  const reduceMotion = useReducedMotion();
+  const { isMobile, open, openMobile } = useSidebar("inspector");
+  const inspectorOpen = isMobile ? openMobile : open;
+
+  return (
+    <motion.div
+      initial={false}
+      animate={
+        reduceMotion
+          ? { opacity: 1, x: 0 }
+          : inspectorOpen
+            ? { opacity: 1, x: 0 }
+            : { opacity: 0.72, x: 24 }
+      }
+      transition={{
+        duration: reduceMotion ? 0 : inspectorOpen ? 0.24 : 0.18,
+        ease: [0.16, 1, 0.3, 1],
+      }}
+      className="min-h-0 flex-1 will-change-transform"
+    >
+      {children}
+    </motion.div>
+  );
+}
+
 export function AppShell({ children, right }: AppShellProps) {
   const pathname = usePathname();
   const pageTitle = getPageTitle(pathname);
@@ -234,6 +261,7 @@ export function AppShell({ children, right }: AppShellProps) {
   const isOnboardingRoute = pathname === "/app/onboarding";
   const isOnboarded = !!preferences?.onboardingCompletedAt;
   const isChatRoute = pathname.startsWith("/app/chat");
+  const isChatThreadRoute = isChatRoute && pathname !== "/app/chat";
   const isNotesRoute = pathname.startsWith("/app/notes");
   const isTasksRoute = pathname.startsWith("/app/tasks");
   const isSettingsRoute = pathname.startsWith("/app/settings");
@@ -340,6 +368,8 @@ export function AppShell({ children, right }: AppShellProps) {
               ? "relative flex flex-1 flex-col overflow-hidden"
               : isSettingsRoute
                 ? "relative flex flex-1 flex-col overflow-hidden"
+                : isChatThreadRoute
+                  ? "relative flex min-h-0 flex-1 flex-col overflow-hidden px-2 pb-2"
                 : "relative flex min-h-0 flex-1 flex-col gap-2 overflow-hidden p-2 md:gap-2 md:p-2"
           }
         >
@@ -367,7 +397,9 @@ export function AppShell({ children, right }: AppShellProps) {
             </div>
           </SidebarHeader>
           <SidebarContent className="p-4">
-            <div className="min-h-0 flex-1 overflow-y-auto">{right}</div>
+            <InspectorPanelContent>
+              <div className="min-h-0 flex-1 overflow-y-auto">{right}</div>
+            </InspectorPanelContent>
           </SidebarContent>
           <SidebarRail scope="inspector" />
         </Sidebar>
