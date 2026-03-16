@@ -29,6 +29,9 @@ import {
 } from "./tool-meta";
 import { getToolDefinition } from "./tool-definitions";
 
+const INLINE_ACTIONS_MAX = 4;
+const TOOL_DETAILS_ENABLED = false;
+
 interface PreferencesLike {
   aiChatShowActions?: boolean;
   aiChatShowToolDetails?: boolean;
@@ -73,6 +76,22 @@ function renderToolContent(toolCall: ToolCall): ReactNode {
 export function ToolPanels({ toolCalls, preferences }: ToolPanelsProps) {
   if (toolCalls.length === 0) return null;
 
+  const actionSteps = toolCalls.map((toolCall) => {
+    const stateInfo = getToolStateInfo(toolCall.state);
+    const summary = getToolInputSummary(toolCall.input);
+    const displayName = getToolDisplayNameFromKey(toolCall.toolKey);
+
+    return (
+      <ChainOfThoughtStep
+        key={toolCall.id}
+        label={displayName}
+        description={summary ?? stateInfo.badgeLabel}
+        status={stateInfo.stepStatus}
+        toolName={toolCall.toolKey}
+      />
+    );
+  });
+
   const renderToolCard = (toolCall: ToolCall) => (
     <Tool key={toolCall.id}>
       <EnhancedToolHeader toolName={toolCall.toolKey} state={toolCall.state} />
@@ -90,50 +109,43 @@ export function ToolPanels({ toolCalls, preferences }: ToolPanelsProps) {
 
   return (
     <>
-      {preferences?.aiChatShowActions !== false && (
-        <ChainOfThought defaultOpen={false}>
-          <EnhancedChainOfThoughtHeader
-            totalSteps={toolCalls.length}
-            providers={toolCalls
-              .filter(
-                (toolCall) =>
-                  toolCall.state === "output-available" ||
-                  toolCall.state === "output-error",
-              )
-              .map((toolCall) => detectProvider(toolCall.toolKey))}
-          >
-            Actions
-          </EnhancedChainOfThoughtHeader>
-          <ChainOfThoughtContent className="mt-2 space-y-2">
-            {toolCalls.map((toolCall) => {
-              const stateInfo = getToolStateInfo(toolCall.state);
-              const summary = getToolInputSummary(toolCall.input);
-              const displayName = getToolDisplayNameFromKey(toolCall.toolKey);
-              return (
-                <ChainOfThoughtStep
-                  key={toolCall.id}
-                  label={displayName}
-                  description={summary ?? stateInfo.badgeLabel}
-                  status={stateInfo.stepStatus}
-                  toolName={toolCall.toolKey}
-                />
-              );
-            })}
+      {preferences?.aiChatShowActions !== false &&
+        (toolCalls.length <= INLINE_ACTIONS_MAX ? (
+          <div className="space-y-2">
+            {actionSteps}
+          </div>
+        ) : (
+          <ChainOfThought defaultOpen={false}>
+            <EnhancedChainOfThoughtHeader
+              totalSteps={toolCalls.length}
+              providers={toolCalls
+                .filter(
+                  (toolCall) =>
+                    toolCall.state === "output-available" ||
+                    toolCall.state === "output-error",
+                )
+                .map((toolCall) => detectProvider(toolCall.toolKey))}
+            >
+              Actions
+            </EnhancedChainOfThoughtHeader>
+            <ChainOfThoughtContent className="mt-2 space-y-2">
+              {actionSteps}
 
-            {preferences?.aiChatShowToolDetails !== false && (
-              <Collapsible defaultOpen={false}>
-                <CollapsibleTrigger className="group flex w-full items-center gap-2 rounded-md py-1 text-xs text-muted-foreground hover:text-foreground">
-                  <ChevronDownIcon className="size-3.5 transition-transform group-data-[state=open]:rotate-180" />
-                  <span>View tool details</span>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="space-y-2 pt-2">
-                  {toolCalls.map((toolCall) => renderToolCard(toolCall))}
-                </CollapsibleContent>
-              </Collapsible>
-            )}
-          </ChainOfThoughtContent>
-        </ChainOfThought>
-      )}
+              {TOOL_DETAILS_ENABLED &&
+                preferences?.aiChatShowToolDetails !== false && (
+                  <Collapsible defaultOpen={false}>
+                    <CollapsibleTrigger className="group flex w-full items-center gap-2 rounded-md py-1 text-xs text-muted-foreground hover:text-foreground">
+                      <ChevronDownIcon className="size-3.5 transition-transform group-data-[state=open]:rotate-180" />
+                      <span>View tool details</span>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="space-y-2 pt-2">
+                      {toolCalls.map((toolCall) => renderToolCard(toolCall))}
+                    </CollapsibleContent>
+                  </Collapsible>
+                )}
+            </ChainOfThoughtContent>
+          </ChainOfThought>
+        ))}
     </>
   );
 }

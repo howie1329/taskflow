@@ -18,24 +18,16 @@ import { code } from "@streamdown/code";
 import { mermaid } from "@streamdown/mermaid";
 import { math } from "@streamdown/math";
 import { cjk } from "@streamdown/cjk";
-import {
-  ActivityIcon,
-  AlertCircleIcon,
-  CheckCircle2Icon,
-  CopyIcon,
-  EllipsisIcon,
-  RefreshCwIcon,
-} from "lucide-react";
+import { ActivityIcon, CopyIcon, EllipsisIcon, RefreshCwIcon } from "lucide-react";
 import {
   Attachment,
   AttachmentPreview,
   Attachments,
 } from "@/components/ai-elements/attachments";
 import { Skeleton } from "@/components/ui/skeleton";
-import { parseMessageParts, type ToolProgressPart } from "./message-parts";
+import { parseMessageParts } from "./message-parts";
 import { MessageGenUIPanel } from "./message-genui-panel";
 import { ToolPanels } from "./tool-panels";
-import { formatToolKeyLabel } from "./tool-meta";
 import type { ToolCall } from "./tool-calls";
 
 const STREAMDOWN_PLUGINS = { code, mermaid, math, cjk };
@@ -111,7 +103,6 @@ const ThreadMessageRow = memo(function ThreadMessageRow({
     reasoningText,
     text: messageText,
     toolCalls,
-    toolProgress,
   } = parsedMessage;
   const hasReasoning = !!reasoningText;
   const hasFiles = files.length > 0;
@@ -146,7 +137,6 @@ const ThreadMessageRow = memo(function ThreadMessageRow({
             status={status}
             isStreamingMessage={isStreamingMessage}
             plainMessageText={messageText}
-            progressParts={toolProgress}
             onRegenerate={onRegenerate}
             onCopy={onCopy}
             onOpenDetails={onOpenDetails}
@@ -189,39 +179,9 @@ interface AssistantMessageBodyProps {
   status: string;
   isStreamingMessage: boolean;
   plainMessageText: string;
-  progressParts: ToolProgressPart[];
   onRegenerate: (assistantMessageId: string) => void;
   onCopy: (messageText: string) => void;
   onOpenDetails: (messageId: string) => void;
-}
-
-function ToolProgressList({ parts }: { parts: ToolProgressPart[] }) {
-  if (parts.length === 0) return null;
-
-  return (
-    <div className="space-y-2">
-      {parts.map((part) => (
-        <div
-          key={part.id ?? part.data.toolCallId}
-          className="flex items-center gap-2 rounded-full border border-border/60 bg-muted/20 px-3 py-1.5 text-sm"
-        >
-          {part.data.status === "running" ? (
-            <ActivityIcon className="size-3.5 animate-pulse text-muted-foreground" />
-          ) : part.data.status === "done" ? (
-            <CheckCircle2Icon className="size-3.5 text-muted-foreground" />
-          ) : (
-            <AlertCircleIcon className="size-3.5 text-destructive" />
-          )}
-          <span className="font-medium text-foreground/85">
-            {formatToolKeyLabel(part.data.toolKey)}
-          </span>
-          <span className="min-w-0 truncate text-muted-foreground">
-            {part.data.text}
-          </span>
-        </div>
-      ))}
-    </div>
-  );
 }
 
 function AssistantMessageBody({
@@ -234,7 +194,6 @@ function AssistantMessageBody({
   status,
   isStreamingMessage,
   plainMessageText,
-  progressParts,
   onRegenerate,
   onCopy,
   onOpenDetails,
@@ -261,8 +220,6 @@ function AssistantMessageBody({
           ))}
         </Attachments>
       )}
-
-      <ToolProgressList parts={progressParts} />
 
       {toolCalls.length > 0 && (
         <ToolPanels toolCalls={toolCalls} preferences={preferences} />
