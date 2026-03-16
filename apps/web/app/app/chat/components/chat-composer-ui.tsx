@@ -80,7 +80,7 @@ export function ComposerAttachmentsPreview() {
 }
 
 const COMPOSER_ICON_BUTTON_CLASS_NAME =
-  "size-7 rounded-full border-border/60 bg-background/70 text-foreground shadow-sm hover:bg-muted/70";
+  "size-7 rounded-full border-transparent bg-transparent text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground";
 
 export function ComposerSlashCommandButton({
   value,
@@ -154,7 +154,7 @@ export function ComposerSubmitButton({
             status={status}
             onStop={onStop}
             size="icon-sm"
-            className="size-8 rounded-full"
+            className="size-8 rounded-full shadow-none"
           />
         </div>
       </TooltipTrigger>

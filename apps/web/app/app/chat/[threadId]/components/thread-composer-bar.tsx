@@ -75,7 +75,7 @@ export function ThreadComposerBar({ textareaRef }: ThreadComposerBarProps) {
               variant="outline"
               size="icon-sm"
               aria-label="Examples"
-              className="size-7 rounded-full border-border/60 bg-background/70 text-foreground shadow-sm hover:bg-muted/70"
+              className="size-7 rounded-full border-transparent bg-transparent text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground"
             >
               <LightbulbIcon className="size-3.5" />
             </Button>
