@@ -30,7 +30,6 @@ import {
 import { getToolDefinition } from "./tool-definitions";
 
 const INLINE_ACTIONS_MAX = 4;
-const TOOL_DETAILS_ENABLED = false;
 
 interface PreferencesLike {
   aiChatShowActions?: boolean;
@@ -104,8 +103,21 @@ export function ToolPanels({ toolCalls, preferences }: ToolPanelsProps) {
           )}
         </div>
       </ToolContent>
-    </Tool>
+      </Tool>
   );
+
+  const detailsSection =
+    preferences?.aiChatShowToolDetails !== false ? (
+      <Collapsible defaultOpen={false}>
+        <CollapsibleTrigger className="group flex w-full items-center gap-2 rounded-md py-1 text-xs text-muted-foreground hover:text-foreground">
+          <ChevronDownIcon className="size-3.5 transition-transform group-data-[state=open]:rotate-180" />
+          <span>View tool details</span>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-2 pt-2">
+          {toolCalls.map((toolCall) => renderToolCard(toolCall))}
+        </CollapsibleContent>
+      </Collapsible>
+    ) : null;
 
   return (
     <>
@@ -113,6 +125,7 @@ export function ToolPanels({ toolCalls, preferences }: ToolPanelsProps) {
         (toolCalls.length <= INLINE_ACTIONS_MAX ? (
           <div className="space-y-2">
             {actionSteps}
+            {detailsSection}
           </div>
         ) : (
           <ChainOfThought defaultOpen={false}>
@@ -130,19 +143,7 @@ export function ToolPanels({ toolCalls, preferences }: ToolPanelsProps) {
             </EnhancedChainOfThoughtHeader>
             <ChainOfThoughtContent className="mt-2 space-y-2">
               {actionSteps}
-
-              {TOOL_DETAILS_ENABLED &&
-                preferences?.aiChatShowToolDetails !== false && (
-                  <Collapsible defaultOpen={false}>
-                    <CollapsibleTrigger className="group flex w-full items-center gap-2 rounded-md py-1 text-xs text-muted-foreground hover:text-foreground">
-                      <ChevronDownIcon className="size-3.5 transition-transform group-data-[state=open]:rotate-180" />
-                      <span>View tool details</span>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="space-y-2 pt-2">
-                      {toolCalls.map((toolCall) => renderToolCard(toolCall))}
-                    </CollapsibleContent>
-                  </Collapsible>
-                )}
+              {detailsSection}
             </ChainOfThoughtContent>
           </ChainOfThought>
         ))}
