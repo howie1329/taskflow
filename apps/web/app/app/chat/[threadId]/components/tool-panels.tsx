@@ -6,9 +6,6 @@ import {
   ChainOfThoughtStep,
 } from "@/components/ai-elements/chain-of-thought";
 import {
-  Tool,
-  EnhancedToolHeader,
-  ToolContent,
   ToolSummaryBar,
   ToolRawPayload,
 } from "@/components/ai-elements/tool";
@@ -75,7 +72,35 @@ function renderToolContent(toolCall: ToolCall): ReactNode {
 export function ToolPanels({ toolCalls, preferences }: ToolPanelsProps) {
   if (toolCalls.length === 0) return null;
 
-  const actionSteps = toolCalls.map((toolCall) => {
+  const showToolDetails = preferences?.aiChatShowToolDetails !== false;
+
+  const renderToolDetails = (toolCall: ToolCall) => (
+    <Collapsible className="pt-1">
+      <CollapsibleTrigger className="group flex items-center gap-1.5 rounded-md py-1 text-[11px] text-muted-foreground transition-colors hover:text-foreground">
+        <ChevronDownIcon className="size-3.5 transition-transform group-data-[state=open]:rotate-180" />
+        <span>Details</span>
+      </CollapsibleTrigger>
+      <CollapsibleContent className="pt-2">
+        <div className="space-y-3 rounded-md border border-border/35 bg-muted/15 p-3">
+          <ToolSummaryBar
+            label="Query"
+            summary={getToolInputQuery(toolCall.input)}
+          />
+          <div className="border-t border-border/35 pt-3">
+            {renderToolContent(toolCall)}
+          </div>
+          {toolCall.output !== undefined && (
+            <ToolRawPayload output={toolCall.output} />
+          )}
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
+  )
+
+  const renderActionStep = (
+    toolCall: ToolCall,
+    includeDescription: boolean,
+  ) => {
     const stateInfo = getToolStateInfo(toolCall.state);
     const summary = getToolInputSummary(toolCall.input);
     const displayName = getToolDisplayNameFromKey(toolCall.toolKey);
@@ -84,53 +109,21 @@ export function ToolPanels({ toolCalls, preferences }: ToolPanelsProps) {
       <ChainOfThoughtStep
         key={toolCall.id}
         label={displayName}
-        description={summary ?? stateInfo.badgeLabel}
+        description={includeDescription ? summary ?? stateInfo.badgeLabel : undefined}
         status={stateInfo.stepStatus}
         toolName={toolCall.toolKey}
-      />
+      >
+        {showToolDetails ? renderToolDetails(toolCall) : null}
+      </ChainOfThoughtStep>
     );
-  });
-
-  const renderToolCard = (toolCall: ToolCall) => (
-    <Tool key={toolCall.id}>
-      <EnhancedToolHeader toolName={toolCall.toolKey} state={toolCall.state} />
-      <ToolContent>
-        <div className="space-y-3 pt-2">
-          <ToolSummaryBar
-            label="Query"
-            summary={getToolInputQuery(toolCall.input)}
-          />
-          <div className="border-t border-border/35 pt-3">
-            {renderToolContent(toolCall)}
-          </div>
-          {(toolCall.input !== undefined || toolCall.output !== undefined) && (
-            <ToolRawPayload input={toolCall.input} output={toolCall.output} />
-          )}
-        </div>
-      </ToolContent>
-      </Tool>
-  );
-
-  const detailsSection =
-    preferences?.aiChatShowToolDetails !== false ? (
-      <Collapsible defaultOpen={false}>
-        <CollapsibleTrigger className="group flex w-full items-center gap-2 rounded-md py-1 text-xs text-muted-foreground hover:text-foreground">
-          <ChevronDownIcon className="size-3.5 transition-transform group-data-[state=open]:rotate-180" />
-          <span>View tool details</span>
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-2 pt-2">
-          {toolCalls.map((toolCall) => renderToolCard(toolCall))}
-        </CollapsibleContent>
-      </Collapsible>
-    ) : null;
+  }
 
   return (
     <>
       {preferences?.aiChatShowActions !== false &&
         (toolCalls.length <= INLINE_ACTIONS_MAX ? (
           <div className="space-y-2">
-            {actionSteps}
-            {detailsSection}
+            {toolCalls.map((toolCall) => renderActionStep(toolCall, false))}
           </div>
         ) : (
           <ChainOfThought defaultOpen={false}>
@@ -147,8 +140,7 @@ export function ToolPanels({ toolCalls, preferences }: ToolPanelsProps) {
               Actions
             </EnhancedChainOfThoughtHeader>
             <ChainOfThoughtContent className="mt-2 space-y-2">
-              {actionSteps}
-              {detailsSection}
+              {toolCalls.map((toolCall) => renderActionStep(toolCall, true))}
             </ChainOfThoughtContent>
           </ChainOfThought>
         ))}
