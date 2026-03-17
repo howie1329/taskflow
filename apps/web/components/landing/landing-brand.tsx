@@ -30,11 +30,11 @@ export function LandingBrand({
         )}
       >
         <Image
-          src="/favicon-32x32.png"
+          src="/brand/taskflow-mark-dark.svg"
           alt="Taskflow"
-          width={18}
-          height={18}
-          className="size-[18px]"
+          width={28}
+          height={28}
+          className="size-7"
         />
       </span>
       <span className={cn("font-medium tracking-tight", labelClassName)}>
