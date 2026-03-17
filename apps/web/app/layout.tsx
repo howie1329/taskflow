@@ -6,16 +6,15 @@ import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 import ConvexClientProvider from "@/components/convex/ConvexClientProvider";
 import { Toaster } from "@/components/ui/sonner";
 
-const GeistSans = Geist({
+const fontSans = Geist({
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-geist-sans",
+  variable: "--font-sans",
 });
 
-const GeistMono = Geist_Mono({
+
+const fontMono = Geist_Mono({
   subsets: ["latin"],
-  weight: ["400", "500"],
-  variable: "--font-geist-mono",
+  variable: "--font-mono",
 });
 
 export const viewport: Viewport = {
@@ -50,7 +49,7 @@ export default function RootLayout({
     <ConvexAuthNextjsServerProvider>
       <html
         lang="en"
-        className={`${GeistSans.variable} ${GeistMono.variable}`}
+        className={`${fontSans.variable} ${fontMono.variable} antialiased mobile-safe`}
         suppressHydrationWarning
       >
         <head>
