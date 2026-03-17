@@ -19,8 +19,8 @@ import { ChevronDownIcon } from "lucide-react";
 import type { ToolCall } from "./tool-calls";
 import {
   getToolDisplayNameFromKey,
-  getToolInputSummary,
   getToolInputQuery,
+  getToolSummary,
   getToolStepMeta,
   getToolStateInfo,
   summarizeToolOutput,
@@ -80,8 +80,8 @@ export function ToolPanels({ toolCalls, preferences }: ToolPanelsProps) {
     includeDescription: boolean,
   ) => {
     const stateInfo = getToolStateInfo(toolCall.state);
-    const summary = getToolInputSummary(toolCall.input);
-    const query = getToolInputQuery(toolCall.input);
+    const summary = getToolSummary(toolCall);
+    const query = getToolInputQuery(toolCall.input, toolCall.toolKey);
     const displayName = getToolDisplayNameFromKey(toolCall.toolKey);
     const stepMeta = getToolStepMeta(toolCall);
 
@@ -122,8 +122,8 @@ export function ToolPanels({ toolCalls, preferences }: ToolPanelsProps) {
             <CollapsibleContent className="pt-2">
               <div className="space-y-3 rounded-md border border-border/35 bg-muted/15 p-3 [&_h4]:hidden">
                 <ToolSummaryBar
-                  label="Query"
-                  summary={getToolInputQuery(toolCall.input)}
+                  label="Summary"
+                  summary={getToolSummary(toolCall)}
                 />
                 <div className="border-t border-border/35 pt-3">
                   {renderToolContent(toolCall)}

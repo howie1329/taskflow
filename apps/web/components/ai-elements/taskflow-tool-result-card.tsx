@@ -13,6 +13,40 @@ type TaskflowToolResultCardProps = {
   output?: unknown;
 };
 
+function getEntityLabel(toolKey: TaskflowToolKey) {
+  if (toolKey.endsWith("Task")) return "Task";
+  if (toolKey.endsWith("Project")) return "Project";
+  if (toolKey.endsWith("Note")) return "Note";
+  if (toolKey.endsWith("InboxItem")) return "Inbox item";
+  return "Record";
+}
+
+function getInputLabel(toolKey: TaskflowToolKey) {
+  if (toolKey.startsWith("list")) return "Filters";
+  if (toolKey.startsWith("get") || toolKey.startsWith("delete")) return "Lookup";
+  return "Input";
+}
+
+function getHeaderPills(toolKey: TaskflowToolKey, output: unknown) {
+  const entityLabel = getEntityLabel(toolKey);
+
+  if (Array.isArray(output)) {
+    return [`${output.length} ${output.length === 1 ? "item" : "items"}`];
+  }
+
+  if (output === null) {
+    return [entityLabel];
+  }
+
+  if (isRecord(output)) {
+    const identifier =
+      typeof output._id === "string" ? `id:${output._id.slice(0, 8)}` : null;
+    return [entityLabel, identifier].filter((value): value is string => Boolean(value));
+  }
+
+  return [entityLabel];
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
@@ -54,11 +88,33 @@ export function TaskflowToolResultCard({
   const [showAll, setShowAll] = useState(false);
 
   if (!TASKFLOW_TOOL_KEYS.includes(toolKey as TaskflowToolKey)) {
-    return <ToolEmptyState message="This tool key is not a Taskflow tool." />;
+    return (
+      <ToolResultShell>
+        <ToolResultHeader title="Taskflow" pills={["unsupported tool"]} />
+        <ToolResultSection title="Status">
+          <ToolEmptyState message="This tool key is not a Taskflow tool." />
+        </ToolResultSection>
+      </ToolResultShell>
+    );
   }
 
   if (output === null) {
-    return <ToolEmptyState message="No matching item was found." />;
+    return (
+      <ToolResultShell>
+        <ToolResultHeader
+          title={`Taskflow ${getActionLabel(toolKey as TaskflowToolKey)}`}
+          pills={getHeaderPills(toolKey as TaskflowToolKey, output)}
+        />
+        {isRecord(input) ? (
+          <ToolResultSection title={getInputLabel(toolKey as TaskflowToolKey)}>
+            {renderObjectRows(input)}
+          </ToolResultSection>
+        ) : null}
+        <ToolResultSection title="Result">
+          <ToolEmptyState message="No matching item was found." />
+        </ToolResultSection>
+      </ToolResultShell>
+    );
   }
 
   const actionLabel = getActionLabel(toolKey as TaskflowToolKey);
@@ -70,9 +126,14 @@ export function TaskflowToolResultCard({
 
   return (
     <ToolResultShell>
-      <ToolResultHeader title={`Taskflow ${actionLabel}`} pills={[toolKey]} />
+      <ToolResultHeader
+        title={`Taskflow ${actionLabel} ${getEntityLabel(toolKey as TaskflowToolKey)}`}
+        pills={getHeaderPills(toolKey as TaskflowToolKey, output)}
+      />
       {isRecord(input) ? (
-        <ToolResultSection title="Input">{renderObjectRows(input)}</ToolResultSection>
+        <ToolResultSection title={getInputLabel(toolKey as TaskflowToolKey)}>
+          {renderObjectRows(input)}
+        </ToolResultSection>
       ) : null}
       {Array.isArray(output) ? (
         <ToolResultSection title="Results">

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { AdvancedResearchCard } from "@/components/ai-elements/advanced-research-card";
 import { ExaAnswerCard } from "@/components/ai-elements/exa-answer-card";
 import { ExaWebSearchCard } from "@/components/ai-elements/exa-web-search-card";
 import { FirecrawlScrapeCard } from "@/components/ai-elements/firecrawl-scrape-card";
@@ -80,35 +81,40 @@ const TOOL_DEFINITIONS: Record<string, ToolDefinition> = {
     },
   },
   exaWebSearch: {
-    render: (toolCall) => <ExaWebSearchCard output={toolCall.output} />,
+    render: (toolCall) => (
+      <ExaWebSearchCard input={toolCall.input} output={toolCall.output} />
+    ),
     summarize: (toolCall) =>
       `Found ${getOutputArrayLength(toolCall.output, "results")} Exa results`,
   },
   exaAnswer: {
-    render: (toolCall) => <ExaAnswerCard output={toolCall.output} />,
+    render: (toolCall) => (
+      <ExaAnswerCard input={toolCall.input} output={toolCall.output} />
+    ),
     summarize: () => "Generated answer with citations",
   },
   firecrawlSearch: {
-    render: (toolCall) => <FirecrawlSearchCard output={toolCall.output} />,
+    render: (toolCall) => (
+      <FirecrawlSearchCard input={toolCall.input} output={toolCall.output} />
+    ),
     summarize: (toolCall) =>
       `Found ${getOutputArrayLength(toolCall.output, "data")} pages`,
   },
   firecrawlScrape: {
-    render: (toolCall) => <FirecrawlScrapeCard output={toolCall.output} />,
+    render: (toolCall) => (
+      <FirecrawlScrapeCard input={toolCall.input} output={toolCall.output} />
+    ),
     summarize: () => "Scraped page content",
   },
   parallelWebSearch: {
-    render: (toolCall) => <ParallelWebSearchCard output={toolCall.output} />,
+    render: (toolCall) => (
+      <ParallelWebSearchCard input={toolCall.input} output={toolCall.output} />
+    ),
     summarize: (toolCall) =>
       `Found ${getOutputArrayLength(toolCall.output, "results")} aggregated results`,
   },
   advancedResearch: {
-    render: () => (
-      <p className="text-sm text-muted-foreground">
-        Advanced research completed. Open raw payload for full sources and
-        scrape details.
-      </p>
-    ),
+    render: (toolCall) => <AdvancedResearchCard output={toolCall.output} />,
     summarize: (toolCall) =>
       `Compiled ${getOutputArrayLength(toolCall.output, "sources")} multi-source results`,
   },
@@ -129,5 +135,15 @@ const TOOL_DEFINITIONS: Record<string, ToolDefinition> = {
 };
 
 export function getToolDefinition(toolKey: string): ToolDefinition | null {
-  return TOOL_DEFINITIONS[toolKey] ?? TOOL_DEFINITIONS.taskflow;
+  if (TOOL_DEFINITIONS[toolKey]) {
+    return TOOL_DEFINITIONS[toolKey];
+  }
+
+  if (
+    TASKFLOW_TOOL_KEYS.includes(toolKey as (typeof TASKFLOW_TOOL_KEYS)[number])
+  ) {
+    return TOOL_DEFINITIONS.taskflow;
+  }
+
+  return null;
 }
