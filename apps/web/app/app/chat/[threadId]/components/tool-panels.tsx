@@ -81,6 +81,7 @@ export function ToolPanels({ toolCalls, preferences }: ToolPanelsProps) {
   ) => {
     const stateInfo = getToolStateInfo(toolCall.state);
     const summary = getToolInputSummary(toolCall.input);
+    const query = getToolInputQuery(toolCall.input);
     const displayName = getToolDisplayNameFromKey(toolCall.toolKey);
     const stepMeta = getToolStepMeta(toolCall);
 
@@ -88,6 +89,7 @@ export function ToolPanels({ toolCalls, preferences }: ToolPanelsProps) {
       <Collapsible key={toolCall.id} className="group">
         <ChainOfThoughtStep
           label={displayName}
+          inlineDescription={query}
           description={includeDescription ? summary ?? stateInfo.badgeLabel : undefined}
           status={stateInfo.stepStatus}
           toolName={toolCall.toolKey}

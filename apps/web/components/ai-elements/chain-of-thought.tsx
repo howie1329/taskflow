@@ -171,6 +171,7 @@ export const ChainOfThoughtHeader = memo(
 export type ChainOfThoughtStepProps = ComponentProps<"div"> & {
   icon?: LucideIcon;
   label: ReactNode;
+  inlineDescription?: ReactNode;
   description?: ReactNode;
   status?: "complete" | "active" | "pending";
   duration?: number;
@@ -200,6 +201,7 @@ export const ChainOfThoughtStep = memo(
     className,
     icon: Icon,
     label,
+    inlineDescription,
     description,
     status = "complete",
     duration,
@@ -232,7 +234,12 @@ export const ChainOfThoughtStep = memo(
         </div>
         <div className="flex-1 space-y-1 overflow-hidden min-w-0">
           <div className="flex items-center gap-2">
-            <span className="font-medium truncate">{label}</span>
+            <span className="shrink-0 font-medium truncate">{label}</span>
+            {inlineDescription ? (
+              <span className="min-w-0 flex-1 truncate text-muted-foreground/80">
+                {inlineDescription}
+              </span>
+            ) : null}
             {duration !== undefined && status === "complete" && (
               <TimingBadge duration={duration} size="sm" />
             )}
