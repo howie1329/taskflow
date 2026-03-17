@@ -77,6 +77,23 @@ export function getToolInputSummary(input: unknown): string | null {
   return null;
 }
 
+export function getToolInputQuery(input: unknown): string | null {
+  if (!input || typeof input !== "object") return null;
+  const inputObj = input as Record<string, unknown>;
+
+  if ("query" in inputObj && typeof inputObj.query === "string") {
+    return inputObj.query;
+  }
+  if ("title" in inputObj && typeof inputObj.title === "string") {
+    return inputObj.title;
+  }
+  if ("name" in inputObj && typeof inputObj.name === "string") {
+    return inputObj.name;
+  }
+
+  return null;
+}
+
 export function summarizeToolOutput(output: unknown): string | null {
   if (output === null || output === undefined) return null;
 

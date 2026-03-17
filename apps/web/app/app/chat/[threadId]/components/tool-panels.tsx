@@ -23,8 +23,8 @@ import type { ToolCall } from "./tool-calls";
 import {
   getToolDisplayNameFromKey,
   getToolInputSummary,
+  getToolInputQuery,
   getToolStateInfo,
-  getToolSummary,
   summarizeToolOutput,
 } from "./tool-meta";
 import { getToolDefinition } from "./tool-definitions";
@@ -96,8 +96,13 @@ export function ToolPanels({ toolCalls, preferences }: ToolPanelsProps) {
       <EnhancedToolHeader toolName={toolCall.toolKey} state={toolCall.state} />
       <ToolContent>
         <div className="space-y-3 pt-2">
-          <ToolSummaryBar summary={getToolSummary(toolCall)} />
-          {renderToolContent(toolCall)}
+          <ToolSummaryBar
+            label="Query"
+            summary={getToolInputQuery(toolCall.input)}
+          />
+          <div className="border-t border-border/35 pt-3">
+            {renderToolContent(toolCall)}
+          </div>
           {(toolCall.input !== undefined || toolCall.output !== undefined) && (
             <ToolRawPayload input={toolCall.input} output={toolCall.output} />
           )}
