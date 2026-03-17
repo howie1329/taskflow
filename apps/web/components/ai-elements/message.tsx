@@ -68,7 +68,7 @@ export const MessageContent = ({
   <div
     className={cn(
       "is-user:dark flex w-fit min-w-0 max-w-full flex-col gap-2 overflow-hidden text-sm",
-      "group-[.is-user]:ml-auto group-[.is-user]:rounded-2xl group-[.is-user]:border group-[.is-user]:border-border/65 group-[.is-user]:bg-muted/45 group-[.is-user]:px-3.5 group-[.is-user]:py-2.5 group-[.is-user]:text-foreground group-[.is-user]:shadow-[0_10px_30px_-18px_rgba(15,23,42,0.4)] group-[.is-user]:dark:shadow-[0_10px_30px_-18px_rgba(0,0,0,0.65)]",
+      "group-[.is-user]:ml-auto group-[.is-user]:rounded-2xl group-[.is-user]:border group-[.is-user]:border-border/65 group-[.is-user]:bg-muted/45 group-[.is-user]:px-3.5 group-[.is-user]:py-2.5 group-[.is-user]:text-foreground group-[.is-user]:shadow-[0_6px_18px_-16px_rgba(15,23,42,0.2)] group-[.is-user]:dark:shadow-[0_6px_18px_-16px_rgba(0,0,0,0.35)]",
       "group-[.is-assistant]:rounded-2xl group-[.is-assistant]:bg-transparent group-[.is-assistant]:px-4 group-[.is-assistant]:py-3 group-[.is-assistant]:text-foreground",
       className,
     )}
