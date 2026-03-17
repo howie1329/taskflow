@@ -1,32 +1,33 @@
 import type { UIMessage } from "ai"
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible"
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { ChevronDownIcon, CopyIcon } from "lucide-react"
-import {
   Attachment,
   AttachmentInfo,
   AttachmentPreview,
   Attachments,
 } from "@/components/ai-elements/attachments"
-import { getMessageFiles, getMessageReasoning, getMessageText } from "./message-parts"
-import { getToolCalls } from "./tool-calls"
+import { Button } from "@/components/ui/button"
+import {
+  Sheet,
+  SheetContent,
+} from "@/components/ui/sheet"
+import { CopyIcon } from "lucide-react"
+import { cn } from "@/lib/utils"
+import { buildMessageDetailsViewModel } from "@/lib/chat/right-panel-view-model"
+import {
+  RightPanelChipRow,
+  RightPanelCollapsibleSection,
+  RightPanelEmptyState,
+  RightPanelList,
+  RightPanelListRow,
+  RightPanelScrollBody,
+  RightPanelSection,
+  RightPanelShell,
+  RightPanelSummaryBar,
+} from "@/components/app/right-panel-primitives"
 import {
   getToolDisplayNameFromKey,
   getToolStateInfo,
 } from "./tool-meta"
-import { cn } from "@/lib/utils"
 
 interface MessageDetailsSheetProps {
   open: boolean
@@ -35,233 +36,179 @@ interface MessageDetailsSheetProps {
   onCopy?: (text: string) => void
 }
 
-type PersistedMessageMetadata = {
-  usage?: {
-    inputTokens: number
-    outputTokens: number
-    totalTokens?: number
-  }
-  costUsdMicros?: number
-}
-
-function estimateTokens(text: string) {
-  return Math.max(1, Math.ceil(text.length / 4))
-}
-
-function getMessageLengthLabel(text: string) {
-  const wordCount = text.trim().length ? text.trim().split(/\s+/).length : 0
-  return `${wordCount} words · ${text.length} chars`
-}
-
-const blockClassName =
-  "rounded-lg border border-border/40 bg-muted/30 p-4"
-const labelClassName = "text-sm text-muted-foreground"
-const valueClassName = "text-[15px] leading-6"
-
 export function MessageDetailsSheet({
   open,
   onOpenChange,
   message,
   onCopy,
 }: MessageDetailsSheetProps) {
-  const messageText = message ? getMessageText(message) : ""
-  const metadata = message?.metadata as PersistedMessageMetadata | undefined
-  const persistedUsage = metadata?.usage
-  const persistedCostUsdMicros = metadata?.costUsdMicros
-  const reasoningText =
-    message?.role === "assistant" ? getMessageReasoning(message) : null
-  const messageFiles = message ? getMessageFiles(message) : []
-  const toolCalls =
-    message?.role === "assistant" ? getToolCalls(message) : []
-  const hasReasoning = !!reasoningText?.trim()
-  const hasAttachments = messageFiles.length > 0
-  const hasToolCalls = toolCalls.length > 0
-  const canCopy = !!message && !!onCopy
-  const totalTokens =
-    persistedUsage?.totalTokens ??
-    (persistedUsage
-      ? persistedUsage.inputTokens + persistedUsage.outputTokens
-      : undefined)
-  const formattedCost =
-    persistedCostUsdMicros === undefined
-      ? null
-      : new Intl.NumberFormat("en-US", {
-          style: "currency",
-          currency: "USD",
-        }).format(persistedCostUsdMicros / 1_000_000)
+  const viewModel = buildMessageDetailsViewModel(message)
+  const canCopy = !!viewModel && !!onCopy
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:max-w-md">
-        <SheetHeader className="pb-5">
-          <SheetTitle className="text-base font-medium">
-            Assistant message details
-          </SheetTitle>
-          <SheetDescription className="text-sm mb-1">
-            Token and size metrics for this response.
-          </SheetDescription>
-        </SheetHeader>
-        <div className="space-y-5 py-5">
-          {!message ? (
-            <p className={cn(labelClassName, "py-4")}>
-              No message selected.
-            </p>
-          ) : (
-            <>
-              {canCopy && (
-                <div className="flex justify-end">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onCopy(messageText)}
-                  >
-                    <CopyIcon className="size-3.5 mr-2" />
-                    Copy message
-                  </Button>
-                </div>
-              )}
-
-              {persistedUsage ? (
-                <>
-                  <div className={blockClassName}>
-                    <p className={labelClassName}>Input tokens</p>
-                    <p className={cn(valueClassName, "font-semibold mt-0.5")}>
-                      {persistedUsage.inputTokens}
-                    </p>
-                  </div>
-                  <div className={blockClassName}>
-                    <p className={labelClassName}>Output tokens</p>
-                    <p className={cn(valueClassName, "font-semibold mt-0.5")}>
-                      {persistedUsage.outputTokens}
-                    </p>
-                  </div>
-                  {totalTokens !== undefined && (
-                    <div className={blockClassName}>
-                      <p className={labelClassName}>Total tokens</p>
-                      <p className={cn(valueClassName, "font-semibold mt-0.5")}>
-                        {totalTokens}
-                      </p>
-                    </div>
-                  )}
-                  {formattedCost && (
-                    <div className={blockClassName}>
-                      <p className={labelClassName}>Estimated cost</p>
-                      <p className={cn(valueClassName, "font-semibold mt-0.5")}>
-                        {formattedCost}
-                      </p>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <div className={blockClassName}>
-                  <p className={labelClassName}>Estimated tokens</p>
-                  <p className={cn(valueClassName, "font-semibold mt-0.5")}>
-                    {estimateTokens(messageText)}
-                  </p>
-                </div>
-              )}
-
-              <div className={blockClassName}>
-                <p className={labelClassName}>Length</p>
-                <p className={cn(valueClassName, "mt-0.5 font-medium")}>
-                  {getMessageLengthLabel(messageText)}
-                </p>
-              </div>
-
-              {hasAttachments && (
-                <div className={blockClassName}>
-                  <p className={labelClassName}>Attachments</p>
-                  <Attachments variant="list" className="mt-3">
-                    {messageFiles.map((file, fileIndex) => (
-                      <Attachment
-                        key={`${message!.id}-${file.filename ?? "file"}-${fileIndex}`}
-                        data={{ ...file, id: `${message!.id}-${fileIndex}` }}
+      <SheetContent side="right" className="w-full border-l border-border/60 px-4 sm:max-w-md">
+        <RightPanelShell className="pt-5">
+          <RightPanelScrollBody>
+            {!viewModel ? (
+              <RightPanelSection title="Message details">
+                <RightPanelEmptyState
+                  title="No message selected"
+                  description="Pick an assistant message to inspect tokens, reasoning, tools, and preview content."
+                />
+              </RightPanelSection>
+            ) : (
+              <>
+                <RightPanelSummaryBar
+                  eyebrow="Summary"
+                  title={viewModel.summaryTitle}
+                  description={
+                    <span className="line-clamp-4">{viewModel.summaryDescription}</span>
+                  }
+                  actions={
+                    canCopy ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onCopy?.(viewModel.text)}
                       >
-                        <AttachmentPreview />
-                        <AttachmentInfo showMediaType />
-                        {file.url ? (
-                          <Button asChild size="sm" variant="outline">
-                            <a
-                              href={file.url}
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              Open
-                            </a>
-                          </Button>
-                        ) : null}
-                      </Attachment>
-                    ))}
-                  </Attachments>
-                </div>
-              )}
+                        <CopyIcon className="size-3.5" />
+                        Copy
+                      </Button>
+                    ) : null
+                  }
+                />
 
-              {message.role === "assistant" && hasReasoning && (
-                <div className={blockClassName}>
-                  <p className={labelClassName}>Reasoning</p>
-                  <p className={cn(valueClassName, "mt-0.5 text-muted-foreground")}>
-                    {reasoningText!.trim().split(/\s+/).length} words
-                  </p>
-                  <Collapsible defaultOpen={false} className="group mt-3">
-                    <CollapsibleTrigger className="flex w-full items-center gap-2 rounded-md py-1.5 text-sm text-muted-foreground hover:text-foreground">
-                      <ChevronDownIcon className="size-4 transition-transform group-data-[state=open]:rotate-180" />
-                      Show full reasoning
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <p className={cn(valueClassName, "mt-2 whitespace-pre-wrap text-muted-foreground")}>
-                        {reasoningText}
-                      </p>
-                    </CollapsibleContent>
-                  </Collapsible>
-                </div>
-              )}
+                <RightPanelChipRow chips={viewModel.chips} />
 
-              {message.role === "assistant" && hasToolCalls && (
-                <div className={blockClassName}>
-                  <p className={labelClassName}>Tools used</p>
-                  <ul className={cn("mt-2 space-y-2", valueClassName)}>
-                    {toolCalls.map((tool) => {
-                      const stateInfo = getToolStateInfo(tool.state)
-                      return (
-                        <li
-                          key={tool.id}
-                          className="flex items-center justify-between gap-2"
-                        >
-                          <span className="font-medium">
-                            {getToolDisplayNameFromKey(tool.toolKey)}
+                <RightPanelSection
+                  title="Metrics"
+                  description="Usage and size information for this message."
+                >
+                  <RightPanelList>
+                    {viewModel.metrics.map((metric) => (
+                      <RightPanelListRow key={metric.label}>
+                        <div className="flex items-center justify-between gap-3 text-sm">
+                          <span className="text-muted-foreground">
+                            {metric.label}
                           </span>
-                          <Badge
-                            variant={stateInfo.isError ? "destructive" : "secondary"}
-                            className="text-xs font-normal"
-                          >
-                            {stateInfo.badgeLabel}
-                          </Badge>
-                        </li>
-                      )
-                    })}
-                  </ul>
-                </div>
-              )}
+                          <span className="font-medium text-foreground">
+                            {metric.value}
+                          </span>
+                        </div>
+                      </RightPanelListRow>
+                    ))}
+                  </RightPanelList>
+                </RightPanelSection>
 
-              <div className={blockClassName}>
-                <Collapsible defaultOpen={false} className="group">
-                  <CollapsibleTrigger className="flex w-full items-center justify-between gap-2 rounded-md py-1.5 text-left">
-                    <span className={labelClassName}>Preview</span>
-                    <span className="text-sm text-muted-foreground">
-                      {messageText.length} characters
-                    </span>
-                    <ChevronDownIcon className="size-4 shrink-0 transition-transform group-data-[state=open]:rotate-180" />
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <p className={cn(valueClassName, "mt-3 whitespace-pre-wrap")}>
-                      {messageText || "No text in this message."}
+                <RightPanelCollapsibleSection
+                  title="Attachments"
+                  description="Files attached to this message."
+                  defaultOpen={viewModel.attachments.length > 0}
+                >
+                  {viewModel.attachments.length === 0 ? (
+                    <RightPanelEmptyState
+                      title="No attachments"
+                      description="This message does not include files."
+                    />
+                  ) : (
+                    <div className="rounded-xl border border-border/45 bg-background px-3 py-3">
+                      <Attachments variant="list">
+                        {viewModel.attachments.map((file, fileIndex) => (
+                          <Attachment
+                            key={`${message!.id}-${file.filename ?? "file"}-${fileIndex}`}
+                            data={{ ...file, id: `${message!.id}-${fileIndex}` }}
+                          >
+                            <AttachmentPreview />
+                            <AttachmentInfo showMediaType />
+                            {file.url ? (
+                              <Button asChild size="sm" variant="outline">
+                                <a href={file.url} target="_blank" rel="noreferrer">
+                                  Open
+                                </a>
+                              </Button>
+                            ) : null}
+                          </Attachment>
+                        ))}
+                      </Attachments>
+                    </div>
+                  )}
+                </RightPanelCollapsibleSection>
+
+                <RightPanelCollapsibleSection
+                  title="Reasoning"
+                  description="Expanded reasoning trace when available."
+                  defaultOpen={false}
+                >
+                  {viewModel.reasoningText?.trim() ? (
+                    <div className="rounded-xl border border-border/45 bg-background px-4 py-3">
+                      <p
+                        className={cn(
+                          "whitespace-pre-wrap text-sm leading-6 text-muted-foreground",
+                        )}
+                      >
+                        {viewModel.reasoningText}
+                      </p>
+                    </div>
+                  ) : (
+                    <RightPanelEmptyState
+                      title="No reasoning captured"
+                      description="This message does not have persisted reasoning text."
+                    />
+                  )}
+                </RightPanelCollapsibleSection>
+
+                <RightPanelCollapsibleSection
+                  title="Tool Activity"
+                  description="Assistant tools invoked while producing this message."
+                  defaultOpen={viewModel.toolCalls.length > 0}
+                >
+                  {viewModel.toolCalls.length === 0 ? (
+                    <RightPanelEmptyState
+                      title="No tools used"
+                      description="The assistant responded without calling tools."
+                    />
+                  ) : (
+                    <RightPanelList>
+                      {viewModel.toolCalls.map((tool) => {
+                        const stateInfo = getToolStateInfo(tool.state)
+                        return (
+                          <RightPanelListRow key={tool.id}>
+                            <div className="space-y-2">
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="text-sm font-medium leading-6 text-foreground">
+                                  {getToolDisplayNameFromKey(tool.toolKey)}
+                                </div>
+                                <RightPanelChipRow
+                                  chips={[
+                                    stateInfo.badgeLabel.toLowerCase(),
+                                    tool.toolKey,
+                                  ]}
+                                />
+                              </div>
+                            </div>
+                          </RightPanelListRow>
+                        )
+                      })}
+                    </RightPanelList>
+                  )}
+                </RightPanelCollapsibleSection>
+
+                <RightPanelCollapsibleSection
+                  title="Preview"
+                  description="Rendered text content for this message."
+                  defaultOpen={false}
+                >
+                  <div className="rounded-xl border border-border/45 bg-background px-4 py-3">
+                    <p className="whitespace-pre-wrap text-sm leading-6 text-foreground">
+                      {viewModel.text || "No text in this message."}
                     </p>
-                  </CollapsibleContent>
-                </Collapsible>
-              </div>
-            </>
-          )}
-        </div>
+                  </div>
+                </RightPanelCollapsibleSection>
+              </>
+            )}
+          </RightPanelScrollBody>
+        </RightPanelShell>
       </SheetContent>
     </Sheet>
   )

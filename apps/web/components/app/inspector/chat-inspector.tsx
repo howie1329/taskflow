@@ -1,215 +1,249 @@
-"use client";
+"use client"
 
-import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
-import { useMutation, useQuery } from "convex/react";
-import { toast } from "sonner";
+import { useEffect, useMemo, useState } from "react"
+import Link from "next/link"
+import { useMutation, useQuery } from "convex/react"
+import { toast } from "sonner"
 import {
   CheckCircle2Icon,
   CopyIcon,
   ExternalLinkIcon,
   SaveIcon,
-} from "lucide-react";
-import { ThreadContext } from "@/app/app/chat/components/thread-context";
-import { api } from "@/convex/_generated/api";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
-import { extractSourcesFromMessages } from "@/lib/chat/extract-sources";
+} from "lucide-react"
+import { api } from "@/convex/_generated/api"
+import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
+import { extractSourcesFromMessages } from "@/lib/chat/extract-sources"
 import {
   formatTimestamp,
-  formatTokenCount,
+  getContextHealthLabel,
   getContextHealthState,
-  getLastAssistantInputTokens,
   getContextUsageRatio,
-} from "@/lib/chat/thread-context";
+  getLastAssistantInputTokens,
+} from "@/lib/chat/thread-context"
+import {
+  buildThreadContextChips,
+  buildThreadInspectorSummary,
+} from "@/lib/chat/right-panel-view-model"
+import {
+  RightPanelChipRow,
+  RightPanelCollapsibleSection,
+  RightPanelEmptyState,
+  RightPanelList,
+  RightPanelListRow,
+  RightPanelScrollBody,
+  RightPanelSection,
+  RightPanelShell,
+  RightPanelSummaryBar,
+} from "@/components/app/right-panel-primitives"
 
 type ChatInspectorProps = {
-  threadId?: string;
-};
+  threadId?: string
+}
 
 type ToolCallSummary = {
-  toolKey: string;
-  count: number;
-};
+  toolKey: string
+  count: number
+}
 
 type MessageLike = {
-  role: string;
-  content: unknown;
-  messageId?: string;
-};
+  role: string
+  content: unknown
+  messageId?: string
+}
 
 function getAssistantToolKeys(messages: MessageLike[]) {
-  const counts = new Map<string, number>();
+  const counts = new Map<string, number>()
   for (const message of messages) {
-    const content = message.content;
-    if (!Array.isArray(content)) continue;
+    const content = message.content
+    if (!Array.isArray(content)) continue
     for (const part of content) {
-      if (!part || typeof part !== "object") continue;
-      const type = (part as { type?: unknown }).type;
-      if (typeof type !== "string") continue;
-      if (!type.startsWith("tool-") && type !== "dynamic-tool") continue;
+      if (!part || typeof part !== "object") continue
+      const type = (part as { type?: unknown }).type
+      if (typeof type !== "string") continue
+      if (!type.startsWith("tool-") && type !== "dynamic-tool") continue
       const key =
         type === "dynamic-tool"
           ? String((part as { toolName?: unknown }).toolName ?? "dynamic-tool")
-          : type.replace(/^tool-/, "");
-      counts.set(key, (counts.get(key) ?? 0) + 1);
+          : type.replace(/^tool-/, "")
+      counts.set(key, (counts.get(key) ?? 0) + 1)
     }
   }
 
   return Array.from(counts.entries())
     .map(([toolKey, count]) => ({ toolKey, count }))
-    .sort((left, right) => right.count - left.count);
+    .sort((left, right) => right.count - left.count)
 }
 
 async function copyText(value: string, successMessage: string) {
   try {
-    await navigator.clipboard.writeText(value);
-    toast.success(successMessage);
+    await navigator.clipboard.writeText(value)
+    toast.success(successMessage)
   } catch {
-    toast.error("Failed to copy");
+    toast.error("Failed to copy")
   }
 }
 
 export function ChatInspector({ threadId }: ChatInspectorProps) {
-  const [activeTab, setActiveTab] = useState("context");
-  const [memoryDraft, setMemoryDraft] = useState("");
-  const [isSavingMemory, setIsSavingMemory] = useState(false);
-  const threads = useQuery(api.chat.listThreads, {}) ?? [];
-  const bootstrap = useQuery(api.chat.getChatBootstrap);
-  const saveThreadSummary = useMutation(api.chat.setThreadSummary);
-  const thread = useQuery(api.chat.getThread, threadId ? { threadId } : "skip");
+  const [memoryDraft, setMemoryDraft] = useState("")
+  const [isSavingMemory, setIsSavingMemory] = useState(false)
+  const threads = useQuery(api.chat.listThreads, {}) ?? []
+  const bootstrap = useQuery(api.chat.getChatBootstrap)
+  const saveThreadSummary = useMutation(api.chat.setThreadSummary)
+  const thread = useQuery(api.chat.getThread, threadId ? { threadId } : "skip")
   const messagesQuery = useQuery(
     api.chat.listMessages,
     threadId ? { threadId } : "skip",
-  );
+  )
   const project = useQuery(
     api.projects.getMyProject,
     thread?.projectId ? { projectId: thread.projectId } : "skip",
-  );
+  )
 
-  const messages = useMemo(() => messagesQuery ?? [], [messagesQuery]);
+  const messages = useMemo(() => messagesQuery ?? [], [messagesQuery])
   const toolSummary = useMemo<ToolCallSummary[]>(
     () => getAssistantToolKeys(messages),
     [messages],
-  );
+  )
   const assistantCount = useMemo(
     () => messages.filter((message) => message.role === "assistant").length,
     [messages],
-  );
-  const defaultModel = bootstrap?.preferences?.defaultAIModel?.modelId ?? null;
-  const activeModel = thread?.model ?? defaultModel;
+  )
+  const defaultModel = bootstrap?.preferences?.defaultAIModel?.modelId ?? null
+  const activeModel = thread?.model ?? defaultModel
   const activeModelDetails = useMemo(
     () =>
       bootstrap?.availableModels?.find((model) => model.modelId === activeModel) ??
       null,
     [bootstrap?.availableModels, activeModel],
-  );
-  const sources = useMemo(() => extractSourcesFromMessages(messages), [messages]);
-  const usageTotals = thread?.usageTotals;
-  const lastPromptTokens = getLastAssistantInputTokens(messages);
+  )
+  const sources = useMemo(() => extractSourcesFromMessages(messages), [messages])
+  const usageTotals = thread?.usageTotals
+  const lastPromptTokens = getLastAssistantInputTokens(messages)
   const contextUsageRatio = getContextUsageRatio({
     totalTokens: lastPromptTokens,
     contextLength: activeModelDetails?.contextLength,
-  });
-  const contextHealthState = getContextHealthState(contextUsageRatio);
+  })
+  const contextHealthState = getContextHealthState(contextUsageRatio)
+  const contextHealthLabel = getContextHealthLabel(contextHealthState)
 
   useEffect(() => {
-    setMemoryDraft(thread?.summary?.summaryText ?? "");
-  }, [thread?.threadId, thread?.summary?.summaryText]);
+    setMemoryDraft(thread?.summary?.summaryText ?? "")
+  }, [thread?.threadId, thread?.summary?.summaryText])
 
   if (!threadId) {
     return (
-      <div className="space-y-4">
-        <p className="text-sm text-muted-foreground">
-          Select a chat thread to see context, model, and tool activity.
-        </p>
-        {threads.length > 0 && (
-          <>
-            <Separator />
-            <div className="space-y-2">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                Recent Threads
-              </p>
-              {threads.slice(0, 6).map((item) => (
-                <Link
-                  key={item.threadId}
-                  href={`/app/chat/${item.threadId}`}
-                  className="block rounded-md border border-border/50 px-3 py-2 text-sm hover:bg-muted/30"
-                >
-                  {item.title || "Untitled chat"}
-                </Link>
-              ))}
-            </div>
-          </>
-        )}
-      </div>
-    );
+      <RightPanelShell>
+        <RightPanelScrollBody className="pt-1">
+          <RightPanelSummaryBar
+            eyebrow="Inspector"
+            title="Choose a thread"
+            description="Thread-level context, evidence, tool activity, and memory will appear here."
+          />
+
+          <RightPanelSection
+            title="Recent threads"
+            description="Jump back into a conversation to inspect its context and evidence."
+          >
+            {threads.length === 0 ? (
+              <RightPanelEmptyState
+                title="No threads yet"
+                description="Start a conversation to populate the inspector."
+              />
+            ) : (
+              <RightPanelList>
+                {threads.slice(0, 6).map((item) => (
+                  <RightPanelListRow key={item.threadId} className="px-0 py-0">
+                    <Link
+                      href={`/app/chat/${item.threadId}`}
+                      className="block px-4 py-3 text-sm transition-colors hover:bg-muted/20"
+                    >
+                      <div className="font-medium text-foreground">
+                        {item.title || "Untitled chat"}
+                      </div>
+                    </Link>
+                  </RightPanelListRow>
+                ))}
+              </RightPanelList>
+            )}
+          </RightPanelSection>
+        </RightPanelScrollBody>
+      </RightPanelShell>
+    )
   }
 
   if (thread === undefined) {
-    return <p className="text-sm text-muted-foreground">Loading inspector…</p>;
+    return (
+      <RightPanelShell>
+        <RightPanelScrollBody className="pt-1">
+          <RightPanelSummaryBar
+            eyebrow="Inspector"
+            title="Loading thread"
+            description="Gathering context, sources, and memory."
+          />
+        </RightPanelScrollBody>
+      </RightPanelShell>
+    )
   }
 
   if (!thread) {
-    return <p className="text-sm text-muted-foreground">Thread not found.</p>;
+    return (
+      <RightPanelShell>
+        <RightPanelScrollBody className="pt-1">
+          <RightPanelSummaryBar
+            eyebrow="Inspector"
+            title="Thread not found"
+            description="This conversation may have been removed."
+          />
+        </RightPanelScrollBody>
+      </RightPanelShell>
+    )
   }
 
-  const summaryText = thread.summary?.summaryText ?? "";
-  const hasSummary = Boolean(summaryText);
-  const hasUnsavedMemoryChanges = memoryDraft !== summaryText;
-  const contextLabel = activeModelDetails?.contextLength
-    ? `${formatTokenCount(lastPromptTokens)} / ${formatTokenCount(activeModelDetails.contextLength)}`
-    : formatTokenCount(lastPromptTokens);
+  const summaryText = thread.summary?.summaryText ?? ""
+  const hasSummary = Boolean(summaryText)
+  const hasUnsavedMemoryChanges = memoryDraft !== summaryText
   const scopeLabel =
-    thread.scope === "project" && project
-      ? project.title
-      : "Workspace";
-  const lastCompactedAt =
-    thread.summary?.compactionMetadata?.lastCompactedAt ?? thread.summary?.updatedAt;
-  const threadContextValue = {
-    state: {
-      thread,
-      project,
-      activeModel: activeModelDetails,
-      usageTotals,
-      lastPromptTokens,
-      summaryText: summaryText.trim(),
-      hasSummary,
-      lastCompactedAt,
-      contextUsageRatio,
-      contextHealthState,
-      contextLabel,
-      scopeLabel,
-    },
-    actions: {},
-    meta: {},
-  };
+    thread.scope === "project" && project ? project.title : "Workspace"
+  const inspectorSummary = buildThreadInspectorSummary({
+    scopeLabel,
+    assistantCount,
+    messageCount: messages.length,
+    updatedAt: thread.updatedAt,
+    sourceCount: sources.length,
+    hasSummary,
+  })
+  const contextChips = buildThreadContextChips({
+    activeModel,
+    contextLabel: activeModelDetails?.contextLength
+      ? `${lastPromptTokens ?? "—"} / ${activeModelDetails.contextLength}`
+      : String(lastPromptTokens ?? "—"),
+    contextHealthLabel,
+    costUsdMicros: usageTotals?.costUsdMicros,
+  })
 
   const handleCopySources = async () => {
     await copyText(
       sources.map((source) => source.url).join("\n"),
       "Sources copied",
-    );
-  };
+    )
+  }
 
   const handleCopyMemory = async () => {
-    if (!summaryText) return;
-    await copyText(summaryText, "Thread memory copied");
-  };
+    if (!summaryText) return
+    await copyText(summaryText, "Thread memory copied")
+  }
 
   const handleSaveMemory = async () => {
-    if (!thread.summary?.summarizedThroughMessageId) return;
+    if (!thread.summary?.summarizedThroughMessageId) return
 
-    const nextSummary = memoryDraft.trim();
+    const nextSummary = memoryDraft.trim()
     if (!nextSummary) {
-      toast.error("Summary cannot be empty");
-      return;
+      toast.error("Summary cannot be empty")
+      return
     }
 
-    setIsSavingMemory(true);
+    setIsSavingMemory(true)
     try {
       await saveThreadSummary({
         threadId: thread.threadId,
@@ -221,105 +255,33 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
           threadState: thread.summary.threadState,
           compactionMetadata: thread.summary.compactionMetadata,
         },
-      });
-      toast.success("Thread memory updated");
+      })
+      toast.success("Thread memory updated")
     } catch (error) {
-      toast.error("Failed to update thread memory");
-      console.error("Failed to save thread memory:", error);
+      toast.error("Failed to update thread memory")
+      console.error("Failed to save thread memory:", error)
     } finally {
-      setIsSavingMemory(false);
+      setIsSavingMemory(false)
     }
-  };
+  }
 
   return (
-    <Tabs
-      value={activeTab}
-      onValueChange={setActiveTab}
-      className="flex h-full min-h-0 flex-col gap-3"
-    >
-      <div className="space-y-1">
-        <p className="text-xs uppercase tracking-wide text-muted-foreground">
-          Thread
-        </p>
-        <p className="text-sm font-medium">{thread.title || "Untitled chat"}</p>
-        <div className="flex flex-wrap gap-2">
-          <Badge variant="secondary">{thread.scope ?? "workspace"}</Badge>
-          {project ? <Badge variant="outline">{project.title}</Badge> : null}
-        </div>
-      </div>
+    <RightPanelShell>
+      <RightPanelScrollBody className="pt-1">
+        <RightPanelSummaryBar
+          eyebrow="Summary"
+          title={inspectorSummary.status}
+          description={thread.title || "Untitled chat"}
+        />
 
-      <TabsList variant="line" className="w-full justify-start bg-transparent p-0">
-        <TabsTrigger value="context" className="max-w-[120px] px-0 py-1 text-xs">
-          Context
-        </TabsTrigger>
-        <TabsTrigger value="sources" className="max-w-[120px] px-0 py-1 text-xs">
-          Sources
-        </TabsTrigger>
-        <TabsTrigger value="memory" className="max-w-[120px] px-0 py-1 text-xs">
-          Memory
-        </TabsTrigger>
-      </TabsList>
+        <RightPanelChipRow chips={inspectorSummary.chips.map((chip) => chip.label)} />
 
-      <TabsContent value="context" className="mt-0 min-h-0 flex-1 overflow-y-auto">
-        <div className="space-y-4 pb-1">
-          <div className="space-y-1 text-sm">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">
-              Context
-            </p>
-            <p>Model: {activeModel ?? "Not set"}</p>
-            <p>
-              Scope:{" "}
-              {thread.scope === "project" && project
-                ? `Project - ${project.title}`
-                : "Workspace"}
-            </p>
-            <p>Total messages: {messages.length}</p>
-            <p>Assistant replies: {assistantCount}</p>
-            <p>Updated: {formatTimestamp(thread.updatedAt)}</p>
-          </div>
-
-          <Separator />
-
-          <ThreadContext.Provider value={threadContextValue}>
-            <ThreadContext.RollingSummaryCard />
-            <ThreadContext.UsageSnapshotCard />
-          </ThreadContext.Provider>
-
-          <Separator />
-
-          <div className="space-y-2">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">
-              Tool Activity
-            </p>
-            {toolSummary.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No tool calls yet.</p>
-            ) : (
-              toolSummary.map((tool) => (
-                <div
-                  key={tool.toolKey}
-                  className="flex items-center justify-between rounded-md border border-border/50 px-3 py-2 text-sm"
-                >
-                  <span>{tool.toolKey}</span>
-                  <Badge variant="secondary">{tool.count}</Badge>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      </TabsContent>
-
-      <TabsContent value="sources" className="mt-0 min-h-0 flex-1 overflow-y-auto">
-        <div className="space-y-4 pb-1">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                Sources used in this thread
-              </p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Links gathered from web search and evidence tool calls.
-              </p>
-            </div>
-            {sources.length > 0 ? (
+        <RightPanelCollapsibleSection
+          title="Sources"
+          description="Evidence gathered from search and tool execution."
+          defaultOpen
+          actions={
+            sources.length > 0 ? (
               <Button
                 type="button"
                 variant="outline"
@@ -329,126 +291,192 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
                 <CopyIcon className="size-3.5" />
                 Copy all
               </Button>
-            ) : null}
-          </div>
-
+            ) : null
+          }
+        >
           {sources.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-border/60 bg-muted/20 p-4">
-              <p className="text-sm font-medium text-foreground">No evidence yet</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                No web search sources have been captured in this thread.
-              </p>
-            </div>
+            <RightPanelEmptyState
+              title="No evidence yet"
+              description="No web or evidence sources have been captured in this thread."
+            />
           ) : (
-            <div className="space-y-2">
+            <RightPanelList>
               {sources.map((source) => (
-                <a
-                  key={source.url}
-                  href={source.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="block rounded-xl border border-border/60 bg-background p-3 transition-colors hover:bg-muted/20"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-foreground">
-                        {source.title ?? source.domain}
-                      </p>
-                      <p className="mt-1 truncate text-xs text-muted-foreground">
-                        {source.domain}
-                      </p>
+                <RightPanelListRow key={source.url}>
+                  <a
+                    href={source.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="block space-y-2"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium leading-6 text-foreground">
+                          {source.title ?? source.domain}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {source.domain}
+                        </p>
+                      </div>
+                      <ExternalLinkIcon className="mt-1 size-4 shrink-0 text-muted-foreground" />
                     </div>
-                    <ExternalLinkIcon className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-                  </div>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    <Badge variant="outline">{source.toolKey}</Badge>
-                    <Badge variant="secondary">{source.messageId.slice(0, 8)}</Badge>
-                  </div>
-                </a>
+                    <RightPanelChipRow
+                      chips={[
+                        source.toolKey,
+                        source.messageId ? `msg ${source.messageId.slice(0, 8)}` : null,
+                      ]}
+                    />
+                  </a>
+                </RightPanelListRow>
               ))}
-            </div>
+            </RightPanelList>
           )}
-        </div>
-      </TabsContent>
+        </RightPanelCollapsibleSection>
 
-      <TabsContent value="memory" className="mt-0 min-h-0 flex-1 overflow-y-auto">
-        <div className="space-y-4 pb-1">
-          <div>
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">
-              Thread memory
-            </p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              This edits the rolling summary used to compact older context for the
-              current thread. Use Compact chat to compress when thresholds are exceeded.
-            </p>
+        <RightPanelCollapsibleSection
+          title="Context"
+          description="Model, scope, usage, and compaction health for this thread."
+          defaultOpen
+        >
+          <div className="space-y-3">
+            <RightPanelChipRow chips={contextChips} />
+            <RightPanelList>
+              <RightPanelListRow>
+                <div className="flex items-center justify-between gap-3 text-sm">
+                  <span className="text-muted-foreground">Scope</span>
+                  <span className="font-medium text-foreground">{scopeLabel}</span>
+                </div>
+              </RightPanelListRow>
+              <RightPanelListRow>
+                <div className="flex items-center justify-between gap-3 text-sm">
+                  <span className="text-muted-foreground">Updated</span>
+                  <span className="font-medium text-foreground">
+                    {formatTimestamp(thread.updatedAt)}
+                  </span>
+                </div>
+              </RightPanelListRow>
+              <RightPanelListRow>
+                <div className="flex items-center justify-between gap-3 text-sm">
+                  <span className="text-muted-foreground">Context health</span>
+                  <span className="font-medium text-foreground">
+                    {contextHealthLabel}
+                  </span>
+                </div>
+              </RightPanelListRow>
+              {project ? (
+                <RightPanelListRow>
+                  <div className="flex items-center justify-between gap-3 text-sm">
+                    <span className="text-muted-foreground">Project</span>
+                    <span className="font-medium text-foreground">
+                      {project.title}
+                    </span>
+                  </div>
+                </RightPanelListRow>
+              ) : null}
+            </RightPanelList>
           </div>
+        </RightPanelCollapsibleSection>
 
+        <RightPanelCollapsibleSection
+          title="Tool Activity"
+          description="Every tool used by assistant messages in this thread."
+          defaultOpen={toolSummary.length > 0}
+        >
+          {toolSummary.length === 0 ? (
+            <RightPanelEmptyState
+              title="No tool calls yet"
+              description="Tool usage will appear here once the assistant invokes actions."
+            />
+          ) : (
+            <RightPanelList>
+              {toolSummary.map((tool) => (
+                <RightPanelListRow key={tool.toolKey}>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-sm font-medium text-foreground">
+                      {tool.toolKey}
+                    </span>
+                    <RightPanelChipRow chips={[`${tool.count} calls`]} />
+                  </div>
+                </RightPanelListRow>
+              ))}
+            </RightPanelList>
+          )}
+        </RightPanelCollapsibleSection>
+
+        <RightPanelCollapsibleSection
+          title="Memory"
+          description="Rolling summary used to compact older context for the current thread."
+          defaultOpen={hasSummary}
+          actions={
+            hasSummary ? (
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCopyMemory}
+                >
+                  <CopyIcon className="size-3.5" />
+                  Copy
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={handleSaveMemory}
+                  disabled={
+                    isSavingMemory ||
+                    !hasUnsavedMemoryChanges ||
+                    memoryDraft.trim().length === 0
+                  }
+                >
+                  {isSavingMemory ? (
+                    <>Saving…</>
+                  ) : (
+                    <>
+                      <SaveIcon className="size-3.5" />
+                      Save
+                    </>
+                  )}
+                </Button>
+              </div>
+            ) : null
+          }
+        >
           {hasSummary ? (
             <div className="space-y-3">
               <Textarea
                 value={memoryDraft}
                 onChange={(event) => setMemoryDraft(event.target.value)}
                 maxLength={2000}
-                className="min-h-48 resize-y"
+                className="min-h-40 resize-y rounded-xl border-border/50 bg-background"
                 placeholder="Thread memory summary"
               />
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-xs text-muted-foreground">
-                  {memoryDraft.length}/2000 characters
-                </p>
-                <div className="flex items-center gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={handleCopyMemory}
-                  >
-                    <CopyIcon className="size-3.5" />
-                    Copy
-                  </Button>
-                  <Button
-                    type="button"
-                    size="sm"
-                    onClick={handleSaveMemory}
-                    disabled={
-                      isSavingMemory ||
-                      !hasUnsavedMemoryChanges ||
-                      memoryDraft.trim().length === 0
-                    }
-                  >
-                    {isSavingMemory ? (
-                      <>Saving…</>
-                    ) : (
-                      <>
-                        <SaveIcon className="size-3.5" />
-                        Save
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </div>
-              <div className="rounded-md border border-border/50 bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
+              <RightPanelChipRow
+                chips={[
+                  `${memoryDraft.length}/2000 chars`,
+                  thread.summary?.updatedAt
+                    ? `updated ${formatTimestamp(thread.summary.updatedAt)}`
+                    : null,
+                ]}
+              />
+              <div className="rounded-xl border border-border/45 bg-muted/15 px-3 py-2 text-xs text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <CheckCircle2Icon className="size-3.5" />
                   <span>
-                    Last updated: {formatTimestamp(thread.summary?.updatedAt)}
+                    Edit the stored summary directly when you need tighter memory
+                    for later turns.
                   </span>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="rounded-xl border border-dashed border-border/60 bg-muted/20 p-4">
-              <p className="text-sm font-medium text-foreground">
-                No rolling summary yet
-              </p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Summaries are created when the conversation exceeds message/token
-                thresholds or when you use Compact chat.
-              </p>
-            </div>
+            <RightPanelEmptyState
+              title="No rolling summary yet"
+              description="Summaries are created when the conversation exceeds compaction thresholds or when you use Compact chat."
+            />
           )}
-        </div>
-      </TabsContent>
-    </Tabs>
-  );
+        </RightPanelCollapsibleSection>
+      </RightPanelScrollBody>
+    </RightPanelShell>
+  )
 }
