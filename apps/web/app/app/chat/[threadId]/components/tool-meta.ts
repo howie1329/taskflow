@@ -160,6 +160,69 @@ export function getToolSummary(toolCall: ToolCall): string | null {
   return null;
 }
 
+export function getToolStepMeta(toolCall: ToolCall): string[] {
+  const output =
+    toolCall.output && typeof toolCall.output === "object"
+      ? (toolCall.output as Record<string, unknown>)
+      : null;
+
+  if (!output) return [];
+
+  if (toolCall.toolKey === "tavilyWebSearch") {
+    const results = Array.isArray(output.results) ? output.results.length : 0;
+    const responseTime =
+      typeof output.responseTime === "number"
+        ? `${output.responseTime.toFixed(2)}s`
+        : null;
+    return [
+      results > 0 ? `${results} sources` : null,
+      responseTime,
+    ].filter((value): value is string => !!value);
+  }
+
+  if (toolCall.toolKey === "exaWebSearch") {
+    const results = Array.isArray(output.results) ? output.results.length : 0;
+    return results > 0 ? [`${results} results`] : [];
+  }
+
+  if (toolCall.toolKey === "firecrawlSearch") {
+    const pages = Array.isArray(output.data) ? output.data.length : 0;
+    const credits =
+      typeof output.creditsUsed === "number" ? `${output.creditsUsed} credits` : null;
+    return [
+      pages > 0 ? `${pages} pages` : null,
+      credits,
+    ].filter((value): value is string => !!value);
+  }
+
+  if (toolCall.toolKey === "parallelWebSearch") {
+    const results = Array.isArray(output.results) ? output.results.length : 0;
+    return results > 0 ? [`${results} results`] : [];
+  }
+
+  if (
+    toolCall.toolKey === "valyuWebSearch" ||
+    toolCall.toolKey === "valyuFinanceSearch"
+  ) {
+    const results = Array.isArray(output.results) ? output.results.length : 0;
+    const cost =
+      typeof output.total_deduction_dollars === "number"
+        ? `$${output.total_deduction_dollars.toFixed(4)}`
+        : null;
+    return [
+      results > 0 ? `${results} results` : null,
+      cost,
+    ].filter((value): value is string => !!value);
+  }
+
+  if (toolCall.toolKey === "advancedResearch") {
+    const sources = Array.isArray(output.sources) ? output.sources.length : 0;
+    return sources > 0 ? [`${sources} sources`] : [];
+  }
+
+  return [];
+}
+
 export function getToolMetaItems(toolCall: ToolCall) {
   const providerType = detectProvider(toolCall.toolKey);
   const providerName = providerConfig[providerType]?.name ?? "Unknown";

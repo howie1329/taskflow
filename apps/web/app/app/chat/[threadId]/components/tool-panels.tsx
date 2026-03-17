@@ -21,6 +21,7 @@ import {
   getToolDisplayNameFromKey,
   getToolInputSummary,
   getToolInputQuery,
+  getToolStepMeta,
   getToolStateInfo,
   summarizeToolOutput,
 } from "./tool-meta";
@@ -81,6 +82,7 @@ export function ToolPanels({ toolCalls, preferences }: ToolPanelsProps) {
     const stateInfo = getToolStateInfo(toolCall.state);
     const summary = getToolInputSummary(toolCall.input);
     const displayName = getToolDisplayNameFromKey(toolCall.toolKey);
+    const stepMeta = getToolStepMeta(toolCall);
 
     return (
       <Collapsible key={toolCall.id} className="group">
@@ -91,18 +93,32 @@ export function ToolPanels({ toolCalls, preferences }: ToolPanelsProps) {
           toolName={toolCall.toolKey}
           trailing={
             showToolDetails ? (
-              <CollapsibleTrigger
-                className="rounded-sm p-0.5 text-muted-foreground transition-colors hover:text-foreground"
-                aria-label="Toggle tool details"
-              >
-                <ChevronDownIcon className="size-3.5 transition-transform group-data-[state=open]:rotate-180" />
-              </CollapsibleTrigger>
+              <div className="flex items-center gap-2">
+                {stepMeta.length > 0 ? (
+                  <div className="flex items-center gap-1.5">
+                    {stepMeta.map((item) => (
+                      <span
+                        key={`${toolCall.id}-${item}`}
+                        className="rounded-sm bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground"
+                      >
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
+                <CollapsibleTrigger
+                  className="rounded-sm p-0.5 text-muted-foreground transition-colors hover:text-foreground"
+                  aria-label="Toggle tool details"
+                >
+                  <ChevronDownIcon className="size-3.5 transition-transform group-data-[state=open]:rotate-180" />
+                </CollapsibleTrigger>
+              </div>
             ) : null
           }
         >
           {showToolDetails ? (
             <CollapsibleContent className="pt-2">
-              <div className="space-y-3 rounded-md border border-border/35 bg-muted/15 p-3">
+              <div className="space-y-3 rounded-md border border-border/35 bg-muted/15 p-3 [&_h4]:hidden">
                 <ToolSummaryBar
                   label="Query"
                   summary={getToolInputQuery(toolCall.input)}
