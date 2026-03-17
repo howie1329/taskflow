@@ -12,6 +12,7 @@ import {
 } from "lucide-react"
 import { api } from "@/convex/_generated/api"
 import { Button } from "@/components/ui/button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { extractSourcesFromMessages } from "@/lib/chat/extract-sources"
 import {
@@ -85,6 +86,7 @@ async function copyText(value: string, successMessage: string) {
 }
 
 export function ChatInspector({ threadId }: ChatInspectorProps) {
+  const [activeTab, setActiveTab] = useState("overview")
   const [memoryDraft, setMemoryDraft] = useState("")
   const [isSavingMemory, setIsSavingMemory] = useState(false)
   const threads = useQuery(api.chat.listThreads, {}) ?? []
@@ -275,207 +277,234 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
         />
 
         <RightPanelChipRow chips={inspectorSummary.chips.map((chip) => chip.label)} />
-
-        <RightPanelCollapsibleSection
-          title="Sources"
-          description="Evidence gathered from search and tool execution."
-          defaultOpen
-          actions={
-            sources.length > 0 ? (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleCopySources}
-              >
-                <CopyIcon className="size-3.5" />
-                Copy all
-              </Button>
-            ) : null
-          }
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="space-y-3"
         >
-          {sources.length === 0 ? (
-            <RightPanelEmptyState
-              title="No evidence yet"
-              description="No web or evidence sources have been captured in this thread."
-            />
-          ) : (
-            <RightPanelList>
-              {sources.map((source) => (
-                <RightPanelListRow key={source.url}>
-                  <a
-                    href={source.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="block space-y-2"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium leading-6 text-foreground">
-                          {source.title ?? source.domain}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {source.domain}
-                        </p>
-                      </div>
-                      <ExternalLinkIcon className="mt-1 size-4 shrink-0 text-muted-foreground" />
+          <TabsList
+            variant="line"
+            className="w-full justify-start gap-4 overflow-x-auto bg-transparent p-0"
+          >
+            <TabsTrigger value="overview" className="px-0 py-1 text-xs">
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="sources" className="px-0 py-1 text-xs">
+              Sources
+            </TabsTrigger>
+            <TabsTrigger value="memory" className="px-0 py-1 text-xs">
+              Memory
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="mt-0 space-y-3">
+            <RightPanelSection
+              title="Context"
+              description="Model, scope, usage, and compaction health for this thread."
+            >
+              <div className="space-y-3">
+                <RightPanelChipRow chips={contextChips} />
+                <RightPanelList>
+                  <RightPanelListRow>
+                    <div className="flex items-center justify-between gap-3 text-sm">
+                      <span className="text-muted-foreground">Scope</span>
+                      <span className="font-medium text-foreground">{scopeLabel}</span>
                     </div>
-                    <RightPanelChipRow
-                      chips={[
-                        source.toolKey,
-                        source.messageId ? `msg ${source.messageId.slice(0, 8)}` : null,
-                      ]}
-                    />
-                  </a>
-                </RightPanelListRow>
-              ))}
-            </RightPanelList>
-          )}
-        </RightPanelCollapsibleSection>
-
-        <RightPanelCollapsibleSection
-          title="Context"
-          description="Model, scope, usage, and compaction health for this thread."
-          defaultOpen
-        >
-          <div className="space-y-3">
-            <RightPanelChipRow chips={contextChips} />
-            <RightPanelList>
-              <RightPanelListRow>
-                <div className="flex items-center justify-between gap-3 text-sm">
-                  <span className="text-muted-foreground">Scope</span>
-                  <span className="font-medium text-foreground">{scopeLabel}</span>
-                </div>
-              </RightPanelListRow>
-              <RightPanelListRow>
-                <div className="flex items-center justify-between gap-3 text-sm">
-                  <span className="text-muted-foreground">Updated</span>
-                  <span className="font-medium text-foreground">
-                    {formatTimestamp(thread.updatedAt)}
-                  </span>
-                </div>
-              </RightPanelListRow>
-              <RightPanelListRow>
-                <div className="flex items-center justify-between gap-3 text-sm">
-                  <span className="text-muted-foreground">Context health</span>
-                  <span className="font-medium text-foreground">
-                    {contextHealthLabel}
-                  </span>
-                </div>
-              </RightPanelListRow>
-              {project ? (
-                <RightPanelListRow>
-                  <div className="flex items-center justify-between gap-3 text-sm">
-                    <span className="text-muted-foreground">Project</span>
-                    <span className="font-medium text-foreground">
-                      {project.title}
-                    </span>
-                  </div>
-                </RightPanelListRow>
-              ) : null}
-            </RightPanelList>
-          </div>
-        </RightPanelCollapsibleSection>
-
-        <RightPanelCollapsibleSection
-          title="Tool Activity"
-          description="Every tool used by assistant messages in this thread."
-          defaultOpen={toolSummary.length > 0}
-        >
-          {toolSummary.length === 0 ? (
-            <RightPanelEmptyState
-              title="No tool calls yet"
-              description="Tool usage will appear here once the assistant invokes actions."
-            />
-          ) : (
-            <RightPanelList>
-              {toolSummary.map((tool) => (
-                <RightPanelListRow key={tool.toolKey}>
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-sm font-medium text-foreground">
-                      {tool.toolKey}
-                    </span>
-                    <RightPanelChipRow chips={[`${tool.count} calls`]} />
-                  </div>
-                </RightPanelListRow>
-              ))}
-            </RightPanelList>
-          )}
-        </RightPanelCollapsibleSection>
-
-        <RightPanelCollapsibleSection
-          title="Memory"
-          description="Rolling summary used to compact older context for the current thread."
-          defaultOpen={hasSummary}
-          actions={
-            hasSummary ? (
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleCopyMemory}
-                >
-                  <CopyIcon className="size-3.5" />
-                  Copy
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={handleSaveMemory}
-                  disabled={
-                    isSavingMemory ||
-                    !hasUnsavedMemoryChanges ||
-                    memoryDraft.trim().length === 0
-                  }
-                >
-                  {isSavingMemory ? (
-                    <>Saving…</>
-                  ) : (
-                    <>
-                      <SaveIcon className="size-3.5" />
-                      Save
-                    </>
-                  )}
-                </Button>
+                  </RightPanelListRow>
+                  <RightPanelListRow>
+                    <div className="flex items-center justify-between gap-3 text-sm">
+                      <span className="text-muted-foreground">Updated</span>
+                      <span className="font-medium text-foreground">
+                        {formatTimestamp(thread.updatedAt)}
+                      </span>
+                    </div>
+                  </RightPanelListRow>
+                  <RightPanelListRow>
+                    <div className="flex items-center justify-between gap-3 text-sm">
+                      <span className="text-muted-foreground">Context health</span>
+                      <span className="font-medium text-foreground">
+                        {contextHealthLabel}
+                      </span>
+                    </div>
+                  </RightPanelListRow>
+                  {project ? (
+                    <RightPanelListRow>
+                      <div className="flex items-center justify-between gap-3 text-sm">
+                        <span className="text-muted-foreground">Project</span>
+                        <span className="font-medium text-foreground">
+                          {project.title}
+                        </span>
+                      </div>
+                    </RightPanelListRow>
+                  ) : null}
+                </RightPanelList>
               </div>
-            ) : null
-          }
-        >
-          {hasSummary ? (
-            <div className="space-y-3">
-              <Textarea
-                value={memoryDraft}
-                onChange={(event) => setMemoryDraft(event.target.value)}
-                maxLength={2000}
-                className="min-h-40 resize-y rounded-xl border-border/50 bg-background"
-                placeholder="Thread memory summary"
-              />
-              <RightPanelChipRow
-                chips={[
-                  `${memoryDraft.length}/2000 chars`,
-                  thread.summary?.updatedAt
-                    ? `updated ${formatTimestamp(thread.summary.updatedAt)}`
-                    : null,
-                ]}
-              />
-              <div className="rounded-xl border border-border/45 bg-muted/15 px-3 py-2 text-xs text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2Icon className="size-3.5" />
-                  <span>
-                    Edit the stored summary directly when you need tighter memory
-                    for later turns.
-                  </span>
+            </RightPanelSection>
+
+            <RightPanelCollapsibleSection
+              title="Tool Activity"
+              description="Every tool used by assistant messages in this thread."
+              defaultOpen={toolSummary.length > 0}
+            >
+              {toolSummary.length === 0 ? (
+                <RightPanelEmptyState
+                  title="No tool calls yet"
+                  description="Tool usage will appear here once the assistant invokes actions."
+                />
+              ) : (
+                <RightPanelList>
+                  {toolSummary.map((tool) => (
+                    <RightPanelListRow key={tool.toolKey}>
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-sm font-medium text-foreground">
+                          {tool.toolKey}
+                        </span>
+                        <RightPanelChipRow chips={[`${tool.count} calls`]} />
+                      </div>
+                    </RightPanelListRow>
+                  ))}
+                </RightPanelList>
+              )}
+            </RightPanelCollapsibleSection>
+          </TabsContent>
+
+          <TabsContent value="sources" className="mt-0">
+            <RightPanelCollapsibleSection
+              title="Sources"
+              description="Evidence gathered from search and tool execution."
+              defaultOpen
+              actions={
+                sources.length > 0 ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCopySources}
+                  >
+                    <CopyIcon className="size-3.5" />
+                    Copy all
+                  </Button>
+                ) : null
+              }
+            >
+              {sources.length === 0 ? (
+                <RightPanelEmptyState
+                  title="No evidence yet"
+                  description="No web or evidence sources have been captured in this thread."
+                />
+              ) : (
+                <RightPanelList>
+                  {sources.map((source) => (
+                    <RightPanelListRow key={source.url}>
+                      <a
+                        href={source.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="block space-y-2"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium leading-6 text-foreground">
+                              {source.title ?? source.domain}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {source.domain}
+                            </p>
+                          </div>
+                          <ExternalLinkIcon className="mt-1 size-4 shrink-0 text-muted-foreground" />
+                        </div>
+                        <RightPanelChipRow
+                          chips={[
+                            source.toolKey,
+                            source.messageId
+                              ? `msg ${source.messageId.slice(0, 8)}`
+                              : null,
+                          ]}
+                        />
+                      </a>
+                    </RightPanelListRow>
+                  ))}
+                </RightPanelList>
+              )}
+            </RightPanelCollapsibleSection>
+          </TabsContent>
+
+          <TabsContent value="memory" className="mt-0">
+            <RightPanelCollapsibleSection
+              title="Memory"
+              description="Rolling summary used to compact older context for the current thread."
+              defaultOpen={hasSummary}
+              actions={
+                hasSummary ? (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleCopyMemory}
+                    >
+                      <CopyIcon className="size-3.5" />
+                      Copy
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={handleSaveMemory}
+                      disabled={
+                        isSavingMemory ||
+                        !hasUnsavedMemoryChanges ||
+                        memoryDraft.trim().length === 0
+                      }
+                    >
+                      {isSavingMemory ? (
+                        <>Saving…</>
+                      ) : (
+                        <>
+                          <SaveIcon className="size-3.5" />
+                          Save
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                ) : null
+              }
+            >
+              {hasSummary ? (
+                <div className="space-y-3">
+                  <Textarea
+                    value={memoryDraft}
+                    onChange={(event) => setMemoryDraft(event.target.value)}
+                    maxLength={2000}
+                    className="min-h-40 resize-y rounded-xl border-border/50 bg-background"
+                    placeholder="Thread memory summary"
+                  />
+                  <RightPanelChipRow
+                    chips={[
+                      `${memoryDraft.length}/2000 chars`,
+                      thread.summary?.updatedAt
+                        ? `updated ${formatTimestamp(thread.summary.updatedAt)}`
+                        : null,
+                    ]}
+                  />
+                  <div className="rounded-xl border border-border/45 bg-muted/15 px-3 py-2 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2Icon className="size-3.5" />
+                      <span>
+                        Edit the stored summary directly when you need tighter memory
+                        for later turns.
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          ) : (
-            <RightPanelEmptyState
-              title="No rolling summary yet"
-              description="Summaries are created when the conversation exceeds compaction thresholds or when you use Compact chat."
-            />
-          )}
-        </RightPanelCollapsibleSection>
+              ) : (
+                <RightPanelEmptyState
+                  title="No rolling summary yet"
+                  description="Summaries are created when the conversation exceeds compaction thresholds or when you use Compact chat."
+                />
+              )}
+            </RightPanelCollapsibleSection>
+          </TabsContent>
+        </Tabs>
       </RightPanelScrollBody>
     </RightPanelShell>
   )
