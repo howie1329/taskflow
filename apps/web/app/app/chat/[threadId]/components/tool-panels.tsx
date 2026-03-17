@@ -74,29 +74,6 @@ export function ToolPanels({ toolCalls, preferences }: ToolPanelsProps) {
 
   const showToolDetails = preferences?.aiChatShowToolDetails !== false;
 
-  const renderToolDetails = (toolCall: ToolCall) => (
-    <Collapsible className="pt-1">
-      <CollapsibleTrigger className="group flex items-center gap-1.5 rounded-md py-1 text-[11px] text-muted-foreground transition-colors hover:text-foreground">
-        <ChevronDownIcon className="size-3.5 transition-transform group-data-[state=open]:rotate-180" />
-        <span>Details</span>
-      </CollapsibleTrigger>
-      <CollapsibleContent className="pt-2">
-        <div className="space-y-3 rounded-md border border-border/35 bg-muted/15 p-3">
-          <ToolSummaryBar
-            label="Query"
-            summary={getToolInputQuery(toolCall.input)}
-          />
-          <div className="border-t border-border/35 pt-3">
-            {renderToolContent(toolCall)}
-          </div>
-          {toolCall.output !== undefined && (
-            <ToolRawPayload output={toolCall.output} />
-          )}
-        </div>
-      </CollapsibleContent>
-    </Collapsible>
-  )
-
   const renderActionStep = (
     toolCall: ToolCall,
     includeDescription: boolean,
@@ -106,15 +83,41 @@ export function ToolPanels({ toolCalls, preferences }: ToolPanelsProps) {
     const displayName = getToolDisplayNameFromKey(toolCall.toolKey);
 
     return (
-      <ChainOfThoughtStep
-        key={toolCall.id}
-        label={displayName}
-        description={includeDescription ? summary ?? stateInfo.badgeLabel : undefined}
-        status={stateInfo.stepStatus}
-        toolName={toolCall.toolKey}
-      >
-        {showToolDetails ? renderToolDetails(toolCall) : null}
-      </ChainOfThoughtStep>
+      <Collapsible key={toolCall.id} className="group">
+        <ChainOfThoughtStep
+          label={displayName}
+          description={includeDescription ? summary ?? stateInfo.badgeLabel : undefined}
+          status={stateInfo.stepStatus}
+          toolName={toolCall.toolKey}
+          trailing={
+            showToolDetails ? (
+              <CollapsibleTrigger
+                className="rounded-sm p-0.5 text-muted-foreground transition-colors hover:text-foreground"
+                aria-label="Toggle tool details"
+              >
+                <ChevronDownIcon className="size-3.5 transition-transform group-data-[state=open]:rotate-180" />
+              </CollapsibleTrigger>
+            ) : null
+          }
+        >
+          {showToolDetails ? (
+            <CollapsibleContent className="pt-2">
+              <div className="space-y-3 rounded-md border border-border/35 bg-muted/15 p-3">
+                <ToolSummaryBar
+                  label="Query"
+                  summary={getToolInputQuery(toolCall.input)}
+                />
+                <div className="border-t border-border/35 pt-3">
+                  {renderToolContent(toolCall)}
+                </div>
+                {toolCall.output !== undefined && (
+                  <ToolRawPayload output={toolCall.output} />
+                )}
+              </div>
+            </CollapsibleContent>
+          ) : null}
+        </ChainOfThoughtStep>
+      </Collapsible>
     );
   }
 

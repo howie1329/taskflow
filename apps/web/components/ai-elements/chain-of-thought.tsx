@@ -175,6 +175,7 @@ export type ChainOfThoughtStepProps = ComponentProps<"div"> & {
   status?: "complete" | "active" | "pending";
   duration?: number;
   toolName?: string;
+  trailing?: ReactNode;
 };
 
 const StatusIcon = ({
@@ -203,6 +204,7 @@ export const ChainOfThoughtStep = memo(
     status = "complete",
     duration,
     toolName,
+    trailing,
     children,
     ...props
   }: ChainOfThoughtStepProps) => {
@@ -237,6 +239,9 @@ export const ChainOfThoughtStep = memo(
             {toolName && (
               <ProviderBadge toolName={toolName} showName={false} size="sm" />
             )}
+            {trailing ? (
+              <div className="ml-auto shrink-0">{trailing}</div>
+            ) : null}
           </div>
           {description && (
             <div className="truncate text-muted-foreground/80">{description}</div>
