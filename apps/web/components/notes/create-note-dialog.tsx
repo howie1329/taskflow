@@ -65,25 +65,27 @@ export function CreateNoteDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="grid max-h-[min(88vh,820px)] max-w-[calc(100%-1.5rem)] grid-rows-[auto_auto_minmax(0,1fr)] overflow-hidden p-0 sm:max-w-3xl">
-        <DialogHeader className="border-b border-border/50 px-5 pb-4 pt-5 pr-12 sm:px-6 sm:pb-5 sm:pt-6">
-          <DialogTitle>Create note</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="grid max-h-[min(88vh,820px)] max-w-[calc(100%-1.5rem)] grid-rows-[auto_auto_minmax(0,1fr)] gap-0 overflow-hidden rounded-xl border-border p-0 shadow-lg sm:max-w-3xl">
+        <DialogHeader className="border-b border-border px-5 pb-4 pt-5 pr-12 sm:px-6 sm:pb-4 sm:pt-6">
+          <DialogTitle className="text-lg font-semibold tracking-tight">
+            Create note
+          </DialogTitle>
+          <DialogDescription className="text-sm text-muted-foreground">
             Pick a starting point. You can change the note type later without
             rewriting any content.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-wrap items-center gap-2 px-5 pt-4 sm:px-6">
+        <div className="flex flex-wrap items-center gap-2 border-b border-border/60 px-5 py-3 sm:px-6">
           <Badge
             variant="outline"
-            className="rounded-md border-border/40 bg-background/70 text-[10px]"
+            className="rounded-md border-border bg-muted/40 text-xs font-normal"
           >
             {templates.length} templates
           </Badge>
           <Badge
             variant="outline"
-            className="rounded-md border-border/40 bg-background/70 text-[10px]"
+            className="rounded-md border-border bg-muted/40 text-xs font-normal"
           >
             {scopedProject
               ? `${scopedProject.icon} ${scopedProject.title}`
@@ -95,17 +97,19 @@ export function CreateNoteDialog({
 
         <div className="min-h-0 overflow-y-auto px-5 pb-5 pt-4 sm:px-6 sm:pb-6">
           <div className="space-y-4">
-            <div className="rounded-2xl border border-border/50 bg-linear-to-br from-background to-muted/30 p-4">
+            <div className="rounded-lg border border-border bg-card p-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                  <div className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
                     Quick create
                   </div>
-                  <div className="mt-1 text-sm font-medium">Start a blank note instantly</div>
+                  <div className="mt-1 text-sm font-medium text-foreground">
+                    Start a blank note instantly
+                  </div>
                 </div>
                 <Button
-                  size="lg"
-                  className="rounded-full px-5"
+                  size="default"
+                  className="h-8 px-3 text-sm font-medium active:scale-[0.98] motion-safe:transition-transform motion-safe:duration-100"
                   disabled={pendingTemplateKey !== null}
                   onClick={() =>
                     void handleCreate({
@@ -115,7 +119,11 @@ export function CreateNoteDialog({
                     })
                   }
                 >
-                  <HugeiconsIcon icon={quickStartTemplates[0]?.icon} className="mr-2 size-4" />
+                  <HugeiconsIcon
+                    icon={quickStartTemplates[0]?.icon}
+                    className="mr-2 size-4"
+                    strokeWidth={2}
+                  />
                   Blank note
                 </Button>
               </div>
@@ -126,7 +134,7 @@ export function CreateNoteDialog({
               { title: "Structured", templates: structuredTemplates },
             ].map((group) => (
               <div key={group.title} className="space-y-3">
-                <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                <div className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
                   {group.title}
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -146,19 +154,22 @@ export function CreateNoteDialog({
                           })
                         }}
                         className={cn(
-                          "group rounded-2xl border border-border/50 bg-background/70 px-4 py-3.5 text-left transition-all duration-200",
-                          "hover:-translate-y-0.5 hover:border-border hover:bg-muted/40 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60",
-                          isPending && "pointer-events-none border-border bg-muted/40",
+                          "group rounded-lg border border-border bg-card p-4 text-left",
+                          "motion-safe:transition-[border-color,background-color,transform] motion-safe:duration-150 motion-safe:ease-[cubic-bezier(0.16,1,0.3,1)]",
+                          "hover:border-border hover:bg-muted/40",
+                          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                          "active:scale-[0.99]",
+                          isPending && "pointer-events-none border-border bg-muted/50",
                         )}
                       >
-                        <div className="mb-2.5 flex items-start justify-between gap-3">
+                        <div className="mb-2 flex items-start justify-between gap-3">
                           <div className="flex items-center gap-2">
-                            <span className="flex size-8 shrink-0 items-center justify-center rounded-xl border border-border/40 bg-muted/60 text-muted-foreground">
-                              <HugeiconsIcon icon={template.icon} className="size-4" />
+                            <span className="flex size-8 shrink-0 items-center justify-center rounded-md border border-border bg-muted/50 text-muted-foreground">
+                              <HugeiconsIcon icon={template.icon} className="size-4" strokeWidth={2} />
                             </span>
                             <div>
                               <div className="text-sm font-medium">{template.label}</div>
-                              <div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+                              <div className="text-[10px] font-medium uppercase tracking-[0.1em] text-muted-foreground">
                                 {template.noteType.replace("_", " ")}
                               </div>
                             </div>
@@ -166,7 +177,7 @@ export function CreateNoteDialog({
                           {template.key === "blank" ? (
                             <Badge
                               variant="outline"
-                              className="rounded-md border-border/40 bg-background/70 text-[10px]"
+                              className="rounded-md border-border bg-muted/30 text-[10px] font-normal"
                             >
                               Default
                             </Badge>
@@ -190,7 +201,7 @@ export function CreateNoteDialog({
               </div>
             ))}
 
-            <div className="rounded-xl border border-dashed border-border/50 bg-muted/15 px-4 py-3 text-xs text-muted-foreground">
+            <div className="rounded-lg border border-dashed border-border bg-muted/20 px-4 py-3 text-xs leading-relaxed text-muted-foreground">
               Templates only shape the starting structure. You can switch note type later without losing content.
             </div>
           </div>

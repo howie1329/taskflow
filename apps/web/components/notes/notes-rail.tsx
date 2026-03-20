@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, type RefObject } from "react"
-import { motion, useReducedMotion } from "motion/react"
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
   ArrowDown01Icon,
@@ -87,7 +86,6 @@ export function NotesRail({
 }: NotesRailProps) {
   const [isPinnedOpen, setIsPinnedOpen] = useState(true)
   const [isProjectsOpen, setIsProjectsOpen] = useState(true)
-  const prefersReducedMotion = useReducedMotion()
   const typeOptions = getAllTemplates()
   const primaryTypeKeys = ["all", "blank", "meeting", "research", "idea"]
   const primaryTypeOptions = [
@@ -141,26 +139,18 @@ export function NotesRail({
   const isSidebar = variant === "sidebar"
 
   const renderNoteRow = (note: Note, projectIcon?: string) => (
-    <motion.div
+    <NoteRow
       key={note._id}
-      initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
-      animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
-      transition={
-        prefersReducedMotion ? undefined : { duration: 0.2, ease: "easeOut" }
-      }
-    >
-      <NoteRow
-        note={note}
-        isActive={note._id === activeNoteId}
-        projectIcon={projectIcon}
-        showPreview={isSidebar}
-        onSelect={() => onSelectNote(note._id)}
-        onTogglePin={() => onTogglePin(note._id)}
-        onMove={(newProjectId) => onMoveNote(note._id, newProjectId)}
-        onDelete={() => onDeleteNote(note._id)}
-        projects={projects}
-      />
-    </motion.div>
+      note={note}
+      isActive={note._id === activeNoteId}
+      projectIcon={projectIcon}
+      showPreview={isSidebar}
+      onSelect={() => onSelectNote(note._id)}
+      onTogglePin={() => onTogglePin(note._id)}
+      onMove={(newProjectId) => onMoveNote(note._id, newProjectId)}
+      onDelete={() => onDeleteNote(note._id)}
+      projects={projects}
+    />
   )
 
   return (
@@ -174,7 +164,7 @@ export function NotesRail({
     >
       <div
         className={cn(
-          "sticky top-0 z-10 bg-transparent space-y-2",
+          "sticky top-0 z-10 space-y-2 bg-transparent",
           isSidebar ? "p-2" : "p-3",
         )}
       >
@@ -182,9 +172,7 @@ export function NotesRail({
           <span
             className={cn(
               "font-medium text-muted-foreground",
-              isSidebar
-                ? "text-[9px] uppercase tracking-wide"
-                : "text-sm",
+              isSidebar ? "text-[10px] uppercase tracking-[0.12em]" : "text-sm",
             )}
           >
             Notes
@@ -226,7 +214,7 @@ export function NotesRail({
             placeholder="Search notes..."
             value={searchQuery}
             onChange={(e) => onSearchQueryChange(e.target.value)}
-            className="h-8 text-xs"
+            className="h-8 text-sm"
           />
           {searchQuery && (
             <InputGroupAddon>
@@ -303,7 +291,7 @@ export function NotesRail({
               {Array.from({ length: 5 }).map((_, index) => (
                 <div
                   key={index}
-                  className="rounded-xl border border-border/50 bg-background/60 px-3 py-3"
+                  className="rounded-lg border border-border bg-muted/30 px-3 py-3"
                 >
                   <Skeleton className="mb-2 h-3.5 w-2/3" />
                   <Skeleton className="mb-2 h-3 w-full" />
@@ -314,7 +302,10 @@ export function NotesRail({
           ) : (totalNotesCount ?? notes.length) === 0 ? (
             <Empty className="min-h-[260px]">
               <EmptyHeader>
-                <EmptyMedia variant="icon">
+                <EmptyMedia
+                  variant="icon"
+                  className="size-8 rounded-lg border border-border text-muted-foreground [&_svg]:size-5"
+                >
                   <HugeiconsIcon icon={NoteIcon} className="size-5" strokeWidth={2} />
                 </EmptyMedia>
                 <EmptyTitle>No notes yet</EmptyTitle>

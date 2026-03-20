@@ -57,17 +57,17 @@ export default function NotePage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-full w-full min-h-0 flex-col overflow-hidden p-3">
-        <div className="rounded-2xl border border-border/50 bg-background/80 p-3">
-          <Skeleton className="mb-4 h-10 w-3/5" />
+      <div className="flex h-full min-h-0 w-full flex-col overflow-hidden px-4 py-3 md:px-8 md:py-4">
+        <div className="mx-auto w-full max-w-[42rem] rounded-lg border border-border bg-card p-4">
+          <Skeleton className="mb-4 h-9 w-3/5" />
           <div className="flex flex-wrap items-center gap-2">
-            <Skeleton className="h-5 w-24 rounded-full" />
-            <Skeleton className="h-5 w-20 rounded-full" />
+            <Skeleton className="h-6 w-24 rounded-md" />
+            <Skeleton className="h-6 w-20 rounded-md" />
             <Skeleton className="h-4 w-16" />
           </div>
         </div>
-        <div className="flex-1 space-y-3 rounded-2xl border border-border/40 bg-background/60 p-3 mt-3">
-          <Skeleton className="h-9 w-72" />
+        <div className="mx-auto mt-3 flex w-full max-w-[42rem] flex-1 flex-col space-y-3 rounded-lg border border-border bg-muted/20 p-4">
+          <Skeleton className="h-8 w-72 max-w-full" />
           <Skeleton className="h-24 w-full" />
           <Skeleton className="h-24 w-full" />
           <Skeleton className="h-24 w-4/5" />
@@ -78,9 +78,9 @@ export default function NotePage() {
 
   if (!selectedNote || selectedNote._id !== noteId) {
     return (
-      <div className="flex flex-col h-full">
+      <div className="flex h-full flex-col">
         {isMobile && (
-          <div className="flex items-center gap-2 p-4 border-b md:hidden">
+          <div className="flex items-center gap-2 border-b border-border px-4 py-2.5 md:hidden">
             <Button
               variant="ghost"
               size="icon-sm"
@@ -96,21 +96,24 @@ export default function NotePage() {
           </div>
         )}
 
-        <div className="flex-1 flex items-center justify-center p-8">
-          <Empty>
+        <div className="flex flex-1 items-center justify-center p-8">
+          <Empty className="max-w-md border-0">
             <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <HugeiconsIcon icon={NoteIcon} className="size-6" />
+              <EmptyMedia
+                variant="icon"
+                className="size-8 rounded-lg border border-border bg-background text-muted-foreground [&_svg]:size-5"
+              >
+                <HugeiconsIcon icon={NoteIcon} className="size-5" strokeWidth={2} />
               </EmptyMedia>
-              <EmptyTitle>Note not found</EmptyTitle>
-              <EmptyDescription>
+              <EmptyTitle className="text-sm font-medium">Note not found</EmptyTitle>
+              <EmptyDescription className="max-w-[20rem] text-sm text-muted-foreground">
                 This note may have been deleted or the link is invalid.
               </EmptyDescription>
             </EmptyHeader>
-            <Button onClick={() => router.push("/app/notes")}>
+            <Button className="h-8" onClick={() => router.push("/app/notes")}>
               <HugeiconsIcon
                 icon={ArrowLeft01Icon}
-                className="size-4 mr-2"
+                className="mr-2 size-4"
                 strokeWidth={2}
               />
               Back to notes
@@ -122,9 +125,9 @@ export default function NotePage() {
   }
 
   return (
-    <div className="flex h-full w-full min-h-0 flex-col overflow-hidden">
+    <div className="flex h-full min-h-0 w-full flex-col overflow-hidden">
       {isMobile && (
-        <div className="flex items-center gap-2 border-b border-border/40 px-3 py-2 md:hidden">
+        <div className="flex items-center gap-2 border-b border-border px-4 py-2.5 md:hidden">
           <Button
             variant="ghost"
             size="icon-sm"
@@ -140,7 +143,7 @@ export default function NotePage() {
         </div>
       )}
 
-      <div className="flex-1 min-h-0">
+      <div className="min-h-0 flex-1">
         <NoteEditor
           note={selectedNote}
           isSaved={isSaved}

@@ -27,6 +27,8 @@ Store longer-form context and working documents linked to projects.
 - Desktop uses a two-pane notes workspace: list on the left, editor on the right.
 - Mobile keeps list browsing primary and opens editing in a sheet/panel flow.
 - The default list mode groups notes by project, with recent and pinned views available as alternate slices.
+- `/app/notes` (no note selected) is a dense two-column landing: primary actions and tips on the left, recent notes on the right—token-based cards, short CSS transitions, no list stagger.
+- Editor body uses a max reading width (~42rem) centered in the main pane; inspector hosts Notes mini chat, reviewer, and info tabs (Hugeicons + aligned spacing).
 
 ## Data
 

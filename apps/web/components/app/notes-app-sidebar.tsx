@@ -251,7 +251,7 @@ export function NotesAppSidebar({ onBackToWorkspace }: NotesAppSidebarProps) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent className="overflow-hidden px-0">
-        <div className="flex h-full min-h-0 flex-col px-3 py-2">
+        <div className="flex h-full min-h-0 flex-col px-2 py-2 md:px-3">
           <NotesRail
             variant="sidebar"
             notes={filteredNotes}
