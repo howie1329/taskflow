@@ -55,7 +55,7 @@ export function ThreadRow({
         )}
       >
         <Input
-          className="h-7 min-w-0 flex-1 w-full max-w-full px-2 py-0 text-sm"
+          className="h-7 min-w-0 flex-1 w-full max-w-full px-2 py-0 text-xs"
           value={editingTitle}
           onChange={(e) => onEditTitleChange(e.target.value)}
           onKeyDown={(e) => {
@@ -79,7 +79,7 @@ export function ThreadRow({
     <Link
       href={`/app/chat/${thread.id}`}
       className={cn(
-        "group relative flex h-8 min-h-8 items-center gap-1.5 rounded-md px-3 text-sm transition-colors duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] w-full max-w-full overflow-hidden",
+        "group relative flex h-8 min-h-8 items-center gap-1.5 rounded-md px-3 text-xs transition-colors duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] w-full max-w-full overflow-hidden",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
         isActive
           ? "bg-muted font-medium text-foreground"
@@ -100,7 +100,7 @@ export function ThreadRow({
             {projectIcon}
           </span>
         )}
-        <span className="block min-w-0 flex-1 truncate text-sm font-normal">
+        <span className="block min-w-0 flex-1 truncate text-xs font-normal">
           {thread.title || "Untitled chat"}
         </span>
       </div>

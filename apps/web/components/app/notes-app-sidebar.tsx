@@ -135,13 +135,13 @@ export function NotesAppSidebar({ onBackToWorkspace }: NotesAppSidebarProps) {
         <SidebarContent className="px-2">
           <div className="space-y-2">
             <Button
-              className="h-8 w-full gap-1.5 rounded-md px-3 text-sm font-medium"
+              className="h-8 w-full gap-1.5 rounded-md px-3 text-xs font-medium"
               variant="default"
               onClick={handleCreateNote}
             >
               <HugeiconsIcon
                 icon={PlusSignIcon}
-                className="size-[1.125rem] shrink-0"
+                className="size-3 shrink-0"
                 strokeWidth={2}
               />
               New
@@ -151,7 +151,7 @@ export function NotesAppSidebar({ onBackToWorkspace }: NotesAppSidebarProps) {
               <InputGroupAddon>
                 <HugeiconsIcon
                   icon={SearchIcon}
-                  className="size-[1.125rem] shrink-0"
+                  className="size-3 shrink-0"
                   strokeWidth={2}
                 />
               </InputGroupAddon>
@@ -162,7 +162,7 @@ export function NotesAppSidebar({ onBackToWorkspace }: NotesAppSidebarProps) {
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setSearchQuery(e.target.value)
                 }
-                className="h-8 border-border/50 text-sm"
+                className="h-8 border-border/50 text-xs"
               />
               {searchQuery && (
                 <InputGroupAddon>

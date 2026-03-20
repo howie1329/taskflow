@@ -144,7 +144,7 @@ export function ThreadsRail({
             className={cn(
               "font-medium text-muted-foreground",
               isSidebar
-                ? "text-[10px] uppercase tracking-wider"
+                ? "text-[9px] uppercase tracking-wide"
                 : "text-sm",
             )}
           >
@@ -185,7 +185,7 @@ export function ThreadsRail({
               icon={SearchIcon}
               className={cn(
                 "stroke-2 shrink-0",
-                isSidebar ? "size-[1.125rem]" : "size-4",
+                isSidebar ? "size-3" : "size-4",
               )}
             />
           </InputGroupAddon>
@@ -193,9 +193,7 @@ export function ThreadsRail({
             placeholder="Search threads..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className={cn(
-              isSidebar ? "h-8 text-sm" : "h-8 text-xs",
-            )}
+            className="h-8 text-xs"
           />
           {searchQuery && (
             <InputGroupAddon>
@@ -271,14 +269,14 @@ export function ThreadsRail({
                         icon={
                           <HugeiconsIcon
                             icon={PinIcon}
-                            className="size-[1.125rem] shrink-0 text-muted-foreground"
+                            className="size-3 shrink-0 text-muted-foreground"
                             strokeWidth={2}
                           />
                         }
                       />
                       <HugeiconsIcon
                         icon={ArrowDown01Icon}
-                        className="size-[1.125rem] shrink-0 text-muted-foreground transition-transform duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-[state=open]:rotate-180"
+                        className="size-3 shrink-0 text-muted-foreground transition-transform duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-[state=open]:rotate-180"
                         strokeWidth={2}
                       />
                     </div>
@@ -307,7 +305,7 @@ export function ThreadsRail({
                       />
                       <HugeiconsIcon
                         icon={ArrowDown01Icon}
-                        className="size-[1.125rem] shrink-0 text-muted-foreground transition-transform duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-[state=open]:rotate-180"
+                        className="size-3 shrink-0 text-muted-foreground transition-transform duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-[state=open]:rotate-180"
                         strokeWidth={2}
                       />
                     </div>

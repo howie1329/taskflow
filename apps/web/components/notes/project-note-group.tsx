@@ -37,7 +37,7 @@ export function ProjectNoteGroup({
             {notes.length}
           </Badge>
         </span>
-        <ChevronDownIcon className="size-[1.125rem] shrink-0 transition-transform duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-[state=open]:rotate-180" />
+        <ChevronDownIcon className="size-3 shrink-0 transition-transform duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-[state=open]:rotate-180" />
       </CollapsibleTrigger>
       <CollapsibleContent className="space-y-0.5 pl-2">
         {children}

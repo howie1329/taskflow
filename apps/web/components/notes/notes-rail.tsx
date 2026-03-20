@@ -183,7 +183,7 @@ export function NotesRail({
             className={cn(
               "font-medium text-muted-foreground",
               isSidebar
-                ? "text-[10px] uppercase tracking-wider"
+                ? "text-[9px] uppercase tracking-wide"
                 : "text-sm",
             )}
           >
@@ -203,7 +203,7 @@ export function NotesRail({
               icon={PlusSignIcon}
               className={cn(
                 "shrink-0",
-                isSidebar ? "size-[1.125rem]" : "mr-2 size-3.5",
+                isSidebar ? "size-3" : "mr-2 size-3.5",
               )}
               strokeWidth={2}
             />
@@ -217,7 +217,7 @@ export function NotesRail({
               icon={SearchIcon}
               className={cn(
                 "stroke-2 shrink-0",
-                isSidebar ? "size-[1.125rem]" : "size-4",
+                isSidebar ? "size-3" : "size-4",
               )}
             />
           </InputGroupAddon>
@@ -226,7 +226,7 @@ export function NotesRail({
             placeholder="Search notes..."
             value={searchQuery}
             onChange={(e) => onSearchQueryChange(e.target.value)}
-            className={cn(isSidebar ? "h-8 text-sm" : "h-8 text-xs")}
+            className="h-8 text-xs"
           />
           {searchQuery && (
             <InputGroupAddon>
@@ -363,20 +363,14 @@ export function NotesRail({
                         icon={
                           <HugeiconsIcon
                             icon={PinIcon}
-                            className={cn(
-                              "shrink-0 text-muted-foreground",
-                              isSidebar ? "size-[1.125rem]" : "size-3",
-                            )}
+                            className="size-3 shrink-0 text-muted-foreground"
                             strokeWidth={2}
                           />
                         }
                       />
                       <HugeiconsIcon
                         icon={ArrowDown01Icon}
-                        className={cn(
-                          "shrink-0 text-muted-foreground transition-transform duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-[state=open]:rotate-180",
-                          isSidebar ? "size-[1.125rem]" : "size-3",
-                        )}
+                        className="size-3 shrink-0 text-muted-foreground transition-transform duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-[state=open]:rotate-180"
                         strokeWidth={2}
                       />
                     </div>
@@ -414,10 +408,7 @@ export function NotesRail({
                       <NoteSection label="Projects" />
                       <HugeiconsIcon
                         icon={ArrowDown01Icon}
-                        className={cn(
-                          "shrink-0 text-muted-foreground transition-transform duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-[state=open]:rotate-180",
-                          isSidebar ? "size-[1.125rem]" : "size-3",
-                        )}
+                        className="size-3 shrink-0 text-muted-foreground transition-transform duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-[state=open]:rotate-180"
                         strokeWidth={2}
                       />
                     </div>

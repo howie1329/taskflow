@@ -52,7 +52,8 @@ export function NoteRow({
       type="button"
       onClick={onSelect}
       className={cn(
-        "group relative flex w-full max-w-full items-center gap-2 overflow-hidden rounded-lg px-2 py-1.5 text-left text-sm transition-colors duration-150",
+        "group relative flex w-full max-w-full items-center gap-2 overflow-hidden rounded-lg px-2 py-1.5 text-left transition-colors duration-150",
+        showPreview ? "text-xs" : "text-sm",
         "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/60",
         isActive
           ? "bg-muted/80 text-foreground"
@@ -82,7 +83,12 @@ export function NoteRow({
                 strokeWidth={2}
               />
             )}
-            <span className="min-w-0 truncate text-[12.5px] font-medium">
+            <span
+              className={cn(
+                "min-w-0 truncate font-medium",
+                showPreview ? "text-xs" : "text-[12.5px]",
+              )}
+            >
               {note.title || "Untitled note"}
             </span>
           </div>

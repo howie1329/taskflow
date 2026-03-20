@@ -76,9 +76,9 @@ export function SignOutButton() {
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0 flex-1 text-left">
-            <p className="truncate text-sm font-medium">{displayName}</p>
+            <p className="truncate text-xs font-medium">{displayName}</p>
             {email ? (
-              <p className="truncate text-xs text-sidebar-foreground/65">
+              <p className="truncate text-[10px] text-sidebar-foreground/65">
                 {email}
               </p>
             ) : null}
