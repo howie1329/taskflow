@@ -9,6 +9,9 @@ import { useAuthActions } from "@convex-dev/auth/react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
+const inputClassName =
+  "h-8 px-3 text-sm transition-[color,box-shadow,background-color] duration-(--duration-ui) ease-(--ease-snap)";
+
 export function SignInForm() {
   const { signIn } = useAuthActions();
   const [isLoading, setIsLoading] = useState(false);
@@ -45,7 +48,7 @@ export function SignInForm() {
           inputMode="email"
           autoComplete="email"
           placeholder="Email address"
-          className="h-11 px-3 text-sm"
+          className={inputClassName}
           required
           disabled={isLoading}
         />
@@ -60,25 +63,24 @@ export function SignInForm() {
           type="password"
           autoComplete="current-password"
           placeholder="Password"
-          className="h-11 px-3 text-sm"
+          className={inputClassName}
           required
           disabled={isLoading}
         />
       </div>
       <Button
         type="submit"
-        size="lg"
-        className="h-11 w-full rounded-full text-sm"
+        className="marketing-press w-full"
         disabled={isLoading}
       >
         {isLoading ? "Signing in..." : "Continue"}
       </Button>
 
-      <div className="text-center text-xs text-muted-foreground pt-2">
+      <div className="pt-2 text-center text-xs text-muted-foreground">
         <span>Don&apos;t have an account? </span>
         <Link
           href="/sign-up"
-          className="underline underline-offset-2 hover:text-foreground"
+          className="font-medium text-foreground underline-offset-4 transition-[color,opacity] duration-(--duration-ui) ease-(--ease-snap) hover:underline"
         >
           Sign up
         </Link>
@@ -116,42 +118,54 @@ export function SignUpForm() {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="firstName">First name</Label>
+          <Label htmlFor="firstName" className="text-sm font-medium">
+            First name
+          </Label>
           <Input
             id="firstName"
             name="firstName"
             placeholder="Jane"
+            className={inputClassName}
             disabled={isLoading}
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="lastName">Last name</Label>
+          <Label htmlFor="lastName" className="text-sm font-medium">
+            Last name
+          </Label>
           <Input
             id="lastName"
             name="lastName"
             placeholder="Doe"
+            className={inputClassName}
             disabled={isLoading}
           />
         </div>
       </div>
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="email" className="text-sm font-medium">
+          Email
+        </Label>
         <Input
           id="email"
           name="email"
           type="email"
           placeholder="you@example.com"
+          className={inputClassName}
           required
           disabled={isLoading}
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
+        <Label htmlFor="password" className="text-sm font-medium">
+          Password
+        </Label>
         <Input
           id="password"
           name="password"
           type="password"
           placeholder="Create a password"
+          className={inputClassName}
           required
           disabled={isLoading}
           minLength={8}
@@ -160,15 +174,19 @@ export function SignUpForm() {
           Password must be at least 8 characters
         </p>
       </div>
-      <Button type="submit" className="w-full" disabled={isLoading}>
+      <Button
+        type="submit"
+        className="marketing-press w-full"
+        disabled={isLoading}
+      >
         {isLoading ? "Creating account..." : "Create account"}
       </Button>
 
-      <div className="text-center text-xs text-muted-foreground pt-2">
+      <div className="pt-2 text-center text-xs text-muted-foreground">
         <span>Already have an account? </span>
         <Link
           href="/sign-in"
-          className="underline underline-offset-2 hover:text-foreground"
+          className="font-medium text-foreground underline-offset-4 transition-[color,opacity] duration-(--duration-ui) ease-(--ease-snap) hover:underline"
         >
           Sign in
         </Link>

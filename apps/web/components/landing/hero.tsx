@@ -10,53 +10,54 @@ export function Hero() {
   const { isAuthenticated } = useConvexAuth();
 
   return (
-    <section id="main" className="relative w-full px-4 py-24 lg:px-6 lg:py-32">
+    <section id="main" className="relative w-full px-4 py-16 lg:px-8 lg:py-24">
       <div className="pointer-events-none absolute inset-0 landing-radial-wash" />
-      <div className="relative mx-auto w-full max-w-7xl">
-        <div className="grid gap-12 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.1fr)] lg:items-center">
-          <div className="flex max-w-2xl flex-col items-center gap-8 text-center lg:items-start lg:text-left">
-            <div className="flex items-center gap-3 text-xs">
+      <div className="relative mx-auto w-full max-w-6xl">
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-center lg:gap-12">
+          <div className="flex max-w-2xl flex-col items-center gap-6 text-center lg:items-start lg:text-left">
+            <div className="flex items-center gap-3 text-xs font-medium">
               <Badge
                 variant="outline"
-                className="rounded-full border-border/50 px-3 font-mono text-[11px]"
+                className="rounded-full border-border/50 px-2.5 font-mono text-[10px] uppercase tracking-[0.12em]"
               >
-                v1 Rewrite
+                v1
               </Badge>
               <span className="text-muted-foreground">Convex-powered</span>
             </div>
 
-            <div className="space-y-5">
-              <h1 className="text-balance text-4xl font-medium tracking-tight sm:text-5xl xl:text-[3.4rem]">
+            <div className="space-y-4">
+              <h1 className="text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl lg:text-[2.375rem] lg:leading-[1.15]">
                 Your AI-assisted workplace, rebuilt for focused solo work
               </h1>
-              <p className="max-w-[62ch] text-pretty text-base leading-7 text-muted-foreground">
+              <p className="max-w-[62ch] text-pretty text-sm leading-relaxed text-muted-foreground">
                 Capture ideas, organize projects and tasks, manage notes, plan
                 your day, and let AI execute the busywork. Everything stays in
                 one calm workspace.
               </p>
             </div>
 
-            <div className="flex w-full flex-col gap-3 pt-1 sm:w-auto sm:flex-row">
+            <div className="flex w-full flex-col gap-2 pt-1 sm:w-auto sm:flex-row sm:gap-3">
               {isAuthenticated ? (
                 <Link href="/app" className="w-full sm:w-auto">
-                  <Button size="lg" className="h-11 w-full px-6 sm:w-auto">
+                  <Button
+                    className="marketing-press w-full px-5 sm:w-auto"
+                  >
                     Open Taskflow
                   </Button>
                 </Link>
               ) : (
                 <>
                   <Link href="/sign-up" className="w-full sm:w-auto">
-                    <Button size="lg" className="h-11 w-full px-6 sm:w-auto">
-                      Get Started Free
+                    <Button className="marketing-press w-full px-5 sm:w-auto">
+                      Get started
                     </Button>
                   </Link>
                   <Link href="/sign-in" className="w-full sm:w-auto">
                     <Button
                       variant="outline"
-                      size="lg"
-                      className="h-11 w-full border-border/50 bg-transparent px-6 sm:w-auto"
+                      className="marketing-press w-full border-border/50 bg-transparent px-5 sm:w-auto"
                     >
-                      Sign In
+                      Sign in
                     </Button>
                   </Link>
                 </>
@@ -69,8 +70,8 @@ export function Hero() {
           </div>
 
           <div className="relative w-full">
-            <div className="pointer-events-none absolute -inset-4 rounded-[1.35rem] border border-border/30" />
-            <Card className="relative overflow-hidden rounded-2xl border-border/40 bg-card/70 shadow-sm dark:bg-card/40">
+            <div className="pointer-events-none absolute -inset-3 rounded-xl border border-border/35" />
+            <Card className="relative overflow-hidden rounded-xl border border-border/40 bg-card/70 dark:bg-card/40">
               <CardHeader className="gap-4 border-b border-border/40 pb-4">
                 <div className="flex items-center justify-between">
                   <CardTitle className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">

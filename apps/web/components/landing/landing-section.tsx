@@ -11,9 +11,9 @@ interface LandingSectionProps {
 }
 
 const variantClasses = {
-  default: "py-16 lg:py-24",
-  hero: "pt-20 pb-24 lg:pt-24 lg:pb-32",
-  compact: "py-12 lg:py-20",
+  default: "py-12 lg:py-20",
+  hero: "pt-16 pb-20 lg:pt-20 lg:pb-28",
+  compact: "py-10 lg:py-16",
 };
 
 export function LandingSection({

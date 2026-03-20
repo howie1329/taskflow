@@ -25,7 +25,7 @@ export function FeatureGrid() {
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {features.map((feature) => (
-            <Card key={feature.title} className="landing-surface">
+            <Card key={feature.title} className="rounded-xl landing-surface">
               <CardHeader className="pb-3">
                 <HugeiconsIcon
                   icon={feature.icon}

@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   CheckListIcon,
@@ -21,6 +19,9 @@ import {
   Flag03Icon,
   RocketIcon,
 } from "@hugeicons/core-free-icons";
+import { LandingNavbar } from "@/components/landing/landing-navbar";
+import { LandingFooter } from "@/components/landing/landing-footer";
+import { LandingContainer } from "@/components/landing/landing-container";
 
 export const metadata: Metadata = {
   title: "Roadmap | Taskflow",
@@ -128,46 +129,18 @@ const nonGoals = [
 
 export default function RoadmapPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-sm">
-        <a
-          href="#main"
-          className="sr-only focus:not-sr-only focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 absolute left-4 top-2 z-50 rounded-md bg-background px-3 py-2 text-xs text-foreground"
-        >
-          Skip to content
-        </a>
-        <div className="w-full px-4 lg:px-6">
-          <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between">
-            <Link href="/" className="flex items-center gap-2 font-medium">
-              <Badge
-                variant="secondary"
-                className="rounded-full px-2.5 font-mono text-[11px]"
-              >
-                Taskflow
-              </Badge>
-            </Link>
-            <Link
-              href="/"
-              className="text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-            >
-              ← Back to Home
-            </Link>
-          </div>
-        </div>
-      </header>
+    <div className="flex min-h-dvh flex-col bg-background">
+      <LandingNavbar />
 
-      <main className="flex-1">
-        {/* Hero */}
+      <main className="flex flex-1 flex-col">
         <section
           id="main"
-          className="relative w-full px-4 py-20 lg:px-6 lg:py-28"
+          className="relative w-full border-b border-border/40 py-12 lg:py-16"
         >
           <div className="pointer-events-none absolute inset-0 landing-radial-wash" />
-
-          <div className="relative mx-auto w-full max-w-6xl">
-            <div className="mx-auto flex max-w-3xl flex-col items-center gap-7 text-center">
-              <div className="flex items-center gap-3">
+          <LandingContainer className="relative">
+            <div className="mx-auto flex max-w-3xl flex-col items-center gap-6 text-center">
+              <div className="flex items-center gap-3 text-xs font-medium">
                 <Badge
                   variant="outline"
                   className="rounded-full border-border/50 px-2.5 font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground"
@@ -179,27 +152,24 @@ export default function RoadmapPage() {
                   />
                   v1
                 </Badge>
-                <span className="text-xs text-muted-foreground">
-                  In development
-                </span>
+                <span className="text-muted-foreground">In development</span>
               </div>
 
-              <h1 className="text-balance text-4xl font-medium tracking-tight lg:text-5xl">
-                MVP Roadmap
+              <h1 className="text-balance text-3xl font-semibold tracking-tight text-foreground lg:text-4xl">
+                MVP roadmap
               </h1>
 
-              <p className="max-w-[62ch] text-pretty text-base leading-7 text-muted-foreground">
+              <p className="max-w-[62ch] text-pretty text-sm leading-relaxed text-muted-foreground">
                 A focused path to Taskflow v1: capture, organize, execute, and
                 operate with AI in one calm workspace.
               </p>
             </div>
-          </div>
+          </LandingContainer>
         </section>
 
-        {/* MVP Scope */}
-        <section className="w-full border-t border-border/40 px-4 py-12 lg:px-6">
-          <div className="mx-auto w-full max-w-6xl">
-            <div className="mx-auto mb-9 max-w-3xl text-center">
+        <section className="w-full border-b border-border/40 py-10 lg:py-12">
+          <LandingContainer>
+            <div className="mx-auto mb-10 max-w-3xl text-center">
               <Badge
                 variant="outline"
                 className="mb-4 rounded-full border-border/50 px-2.5 font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground"
@@ -209,9 +179,9 @@ export default function RoadmapPage() {
                   aria-hidden="true"
                   className="mr-1 h-3 w-3"
                 />
-                MVP Scope
+                MVP scope
               </Badge>
-              <h2 className="mb-3 text-balance text-[1.8rem] font-medium leading-tight tracking-tight lg:text-[2.1rem]">
+              <h2 className="mb-3 text-balance text-2xl font-semibold leading-tight tracking-tight text-foreground lg:text-3xl">
                 Core entities
               </h2>
               <p className="text-pretty text-sm leading-relaxed text-muted-foreground">
@@ -221,10 +191,7 @@ export default function RoadmapPage() {
 
             <div className="mx-auto grid max-w-5xl gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {mvpScope.map((item) => (
-                <Card
-                  key={item.title}
-                  className="rounded-xl border-border/40 bg-card/55 dark:bg-card/35"
-                >
+                <Card key={item.title} className="rounded-xl landing-surface">
                   <CardHeader className="pb-3">
                     <HugeiconsIcon
                       icon={item.icon}
@@ -233,21 +200,22 @@ export default function RoadmapPage() {
                     />
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    <CardTitle className="text-sm">{item.title}</CardTitle>
-                    <p className="text-xs text-muted-foreground">
+                    <CardTitle className="text-sm font-medium">
+                      {item.title}
+                    </CardTitle>
+                    <p className="text-xs leading-relaxed text-muted-foreground">
                       {item.description}
                     </p>
                   </CardContent>
                 </Card>
               ))}
             </div>
-          </div>
+          </LandingContainer>
         </section>
 
-        {/* Phases */}
-        <section className="w-full border-t border-border/40 px-4 py-12 lg:px-6">
-          <div className="mx-auto w-full max-w-6xl">
-            <div className="mx-auto mb-9 max-w-3xl text-center">
+        <section className="w-full border-b border-border/40 py-10 lg:py-12">
+          <LandingContainer>
+            <div className="mx-auto mb-10 max-w-3xl text-center">
               <Badge
                 variant="outline"
                 className="mb-4 rounded-full border-border/50 px-2.5 font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground"
@@ -259,7 +227,7 @@ export default function RoadmapPage() {
                 />
                 Development phases
               </Badge>
-              <h2 className="mb-3 text-balance text-[1.8rem] font-medium leading-tight tracking-tight lg:text-[2.1rem]">
+              <h2 className="mb-3 text-balance text-2xl font-semibold leading-tight tracking-tight text-foreground lg:text-3xl">
                 From foundation to AI operator
               </h2>
               <p className="text-pretty text-sm leading-relaxed text-muted-foreground">
@@ -271,10 +239,10 @@ export default function RoadmapPage() {
               {phases.map((phase, index) => (
                 <Card
                   key={phase.phase}
-                  className="relative rounded-xl border-border/40 bg-card/55 dark:bg-card/35"
+                  className="relative rounded-xl landing-surface"
                 >
                   <CardHeader className="border-b border-border/35 pb-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
                       <div className="flex items-center gap-3">
                         <Badge
                           variant="secondary"
@@ -282,41 +250,42 @@ export default function RoadmapPage() {
                         >
                           {phase.phase}
                         </Badge>
-                        <CardTitle className="text-sm">{phase.title}</CardTitle>
+                        <CardTitle className="text-sm font-medium">
+                          {phase.title}
+                        </CardTitle>
                       </div>
                       <span className="font-mono text-xs text-muted-foreground">
                         {phase.timeline}
                       </span>
                     </div>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="pt-4">
                     <ul className="space-y-2">
                       {phase.items.map((item) => (
                         <li
                           key={item}
                           className="flex items-start gap-2 text-sm text-muted-foreground"
                         >
-                          <span className="text-primary">—</span>
-                          {item}
+                          <span className="shrink-0 text-primary">—</span>
+                          <span>{item}</span>
                         </li>
                       ))}
                     </ul>
                   </CardContent>
                   {index < phases.length - 1 && (
-                    <div className="absolute -bottom-3 left-1/2 -translate-x-1/2">
+                    <div className="pointer-events-none absolute -bottom-3 left-1/2 -translate-x-1/2">
                       <div className="h-3 w-px bg-border" />
                     </div>
                   )}
                 </Card>
               ))}
             </div>
-          </div>
+          </LandingContainer>
         </section>
 
-        {/* Backlog */}
-        <section className="w-full border-t border-border/40 px-4 py-12 lg:px-6">
-          <div className="mx-auto w-full max-w-6xl">
-            <div className="mx-auto mb-9 max-w-3xl text-center">
+        <section className="w-full border-b border-border/40 py-10 lg:py-12">
+          <LandingContainer>
+            <div className="mx-auto mb-10 max-w-3xl text-center">
               <Badge
                 variant="outline"
                 className="mb-4 rounded-full border-border/50 px-2.5 font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground"
@@ -328,7 +297,7 @@ export default function RoadmapPage() {
                 />
                 v1.1+
               </Badge>
-              <h2 className="mb-3 text-balance text-[1.8rem] font-medium leading-tight tracking-tight lg:text-[2.1rem]">
+              <h2 className="mb-3 text-balance text-2xl font-semibold leading-tight tracking-tight text-foreground lg:text-3xl">
                 Backlog
               </h2>
               <p className="text-pretty text-sm leading-relaxed text-muted-foreground">
@@ -340,23 +309,22 @@ export default function RoadmapPage() {
               {backlog.map((item) => (
                 <div
                   key={item.text}
-                  className="flex items-center gap-3 rounded-xl border border-border/40 bg-card/55 p-3 text-sm text-muted-foreground dark:bg-card/35"
+                  className="flex items-center gap-3 rounded-xl landing-surface p-3 text-sm text-muted-foreground"
                 >
                   <HugeiconsIcon
                     icon={item.icon}
                     aria-hidden="true"
-                    className="h-4 w-4 text-muted-foreground"
+                    className="h-4 w-4 shrink-0 text-muted-foreground"
                   />
                   <span>{item.text}</span>
                 </div>
               ))}
             </div>
-          </div>
+          </LandingContainer>
         </section>
 
-        {/* Non-goals */}
-        <section className="w-full border-t border-border/40 px-4 py-12 lg:px-6">
-          <div className="mx-auto w-full max-w-6xl">
+        <section className="w-full py-10 lg:py-12">
+          <LandingContainer>
             <div className="mx-auto max-w-3xl">
               <div className="mb-4 flex items-center gap-2">
                 <Badge
@@ -379,36 +347,18 @@ export default function RoadmapPage() {
                   <Badge
                     key={goal}
                     variant="secondary"
-                    className="rounded-full px-2.5 text-[10px]"
+                    className="rounded-full px-2.5 text-[10px] font-medium"
                   >
                     {goal}
                   </Badge>
                 ))}
               </div>
             </div>
-          </div>
+          </LandingContainer>
         </section>
-
-        <Separator className="mx-auto w-full max-w-6xl" />
       </main>
 
-      {/* Footer */}
-      <footer className="w-full border-t border-border/40 px-4 py-8 lg:px-6">
-        <div className="mx-auto w-full max-w-6xl">
-          <div className="mx-auto flex max-w-3xl flex-col items-center gap-4 text-center">
-            <p className="text-xs text-muted-foreground">
-              Taskflow v1 — Solo AI-assisted workplace. Built with Next.js,
-              Convex, and shadcn/ui.
-            </p>
-            <Link
-              href="/"
-              className="text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-            >
-              ← Back to Home
-            </Link>
-          </div>
-        </div>
-      </footer>
+      <LandingFooter />
     </div>
   );
 }

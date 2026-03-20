@@ -61,6 +61,8 @@
   --shadow-2xl: 0px 1px 2px 0px hsl(0 0% 0% / 0.45);
   --tracking-normal: 0em;
   --spacing: 0.25rem;
+  --ease-snap: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-ui: 150ms;
 }
 
 .dark {
@@ -188,6 +190,28 @@
 
   .landing-hairline {
     @apply border-t border-border/40;
+  }
+
+  /* Marketing CTAs: crisp press feedback on fine pointers only */
+  .marketing-press {
+    transition:
+      transform var(--duration-ui) var(--ease-snap),
+      color var(--duration-ui) var(--ease-snap),
+      background-color var(--duration-ui) var(--ease-snap),
+      border-color var(--duration-ui) var(--ease-snap),
+      opacity var(--duration-ui) var(--ease-snap);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .marketing-press:active {
+      transform: scale(0.98);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .marketing-press:active {
+      transform: none;
+    }
   }
 }
 

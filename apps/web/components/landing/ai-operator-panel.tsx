@@ -19,7 +19,7 @@ export function AiOperatorPanel() {
           description="Use plain English to run day-to-day operations: create tasks, link context, and move work forward."
         />
 
-        <Card className="mx-auto w-full max-w-4xl overflow-hidden rounded-2xl landing-surface">
+        <Card className="mx-auto w-full max-w-4xl overflow-hidden rounded-xl landing-surface">
           <CardHeader className="border-b border-border/40 pb-4">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm">Operator in action</CardTitle>

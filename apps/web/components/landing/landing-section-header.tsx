@@ -29,7 +29,7 @@ export function LandingSectionHeader({
     align === "center" ? "mx-auto max-w-[62ch]" : "max-w-[62ch]";
 
   return (
-    <div className={cn(textAlignment, containerClasses, "mb-12", className)}>
+    <div className={cn(textAlignment, containerClasses, "mb-10", className)}>
       {(eyebrow || icon) && (
         <div className={cn("mb-4 flex items-center gap-2", badgeAlignment)}>
           <Badge
@@ -41,7 +41,7 @@ export function LandingSectionHeader({
           </Badge>
         </div>
       )}
-      <h2 className="mb-4 text-balance text-[1.8rem] font-medium leading-tight tracking-tight lg:text-[2.1rem]">
+      <h2 className="mb-3 text-balance text-2xl font-semibold leading-tight tracking-tight text-foreground lg:text-3xl">
         {title}
       </h2>
       {description && (
