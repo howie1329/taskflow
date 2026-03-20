@@ -284,15 +284,24 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
         >
           <TabsList
             variant="line"
-            className="w-full justify-start gap-4 overflow-x-auto bg-transparent p-0"
+            className="h-8 w-full justify-start gap-4 overflow-x-auto bg-transparent p-0"
           >
-            <TabsTrigger value="overview" className="px-0 py-1 text-xs">
+            <TabsTrigger
+              value="overview"
+              className="h-8 rounded-none px-0 py-0 text-sm font-medium"
+            >
               Overview
             </TabsTrigger>
-            <TabsTrigger value="sources" className="px-0 py-1 text-xs">
+            <TabsTrigger
+              value="sources"
+              className="h-8 rounded-none px-0 py-0 text-sm font-medium"
+            >
               Sources
             </TabsTrigger>
-            <TabsTrigger value="memory" className="px-0 py-1 text-xs">
+            <TabsTrigger
+              value="memory"
+              className="h-8 rounded-none px-0 py-0 text-sm font-medium"
+            >
               Memory
             </TabsTrigger>
           </TabsList>
@@ -475,7 +484,7 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
                     value={memoryDraft}
                     onChange={(event) => setMemoryDraft(event.target.value)}
                     maxLength={2000}
-                    className="min-h-40 resize-y rounded-xl border-border/50 bg-background"
+                    className="min-h-40 resize-y rounded-md border-border bg-background text-sm"
                     placeholder="Thread memory summary"
                   />
                   <RightPanelChipRow
@@ -486,7 +495,7 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
                         : null,
                     ]}
                   />
-                  <div className="rounded-xl border border-border/45 bg-muted/15 px-3 py-2 text-xs text-muted-foreground">
+                  <div className="rounded-lg border border-border bg-muted/15 px-3 py-2 text-xs text-muted-foreground">
                     <div className="flex items-center gap-2">
                       <CheckCircle2Icon className="size-3.5" />
                       <span>

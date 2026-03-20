@@ -382,7 +382,7 @@ export function AppShell({ children, right }: AppShellProps) {
           side="right"
           variant="sidebar"
           collapsible="offcanvas"
-          className="border-l border-border/40"
+          className="border-l border-border"
           style={
             {
               "--sidebar-width": "22rem",
@@ -390,9 +390,9 @@ export function AppShell({ children, right }: AppShellProps) {
             } as React.CSSProperties
           }
         >
-          <SidebarHeader className="border-b border-border/40">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Inspector</span>
+          <SidebarHeader className="border-b border-border">
+            <div className="flex h-8 items-center justify-between">
+              <span className="text-sm font-semibold tracking-tight">Inspector</span>
               <SidebarTrigger scope="inspector" aria-label="Close inspector" />
             </div>
           </SidebarHeader>

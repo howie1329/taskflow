@@ -45,19 +45,19 @@ export function RightPanelSummaryBar({
   actions?: ReactNode
 }) {
   return (
-    <div className="rounded-2xl border border-border/50 bg-background/90 px-4 py-3 shadow-[0_1px_0_rgba(0,0,0,0.02)]">
+    <div className="rounded-lg border border-border bg-card px-4 py-3">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 space-y-1">
-          <div className="flex items-center gap-3">
-            <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
               {eyebrow}
             </span>
-            <div className="min-w-0 text-[15px] font-medium leading-6 text-foreground">
+            <div className="min-w-0 text-base font-semibold leading-snug text-foreground">
               {title}
             </div>
           </div>
           {description ? (
-            <div className="text-sm leading-6 text-muted-foreground">
+            <div className="text-sm leading-relaxed text-muted-foreground">
               {description}
             </div>
           ) : null}
@@ -83,7 +83,7 @@ export function RightPanelChipRow({
       {visibleChips.map((chip, index) => (
         <div
           key={index}
-          className="rounded-md border border-border/55 bg-background px-2.5 py-1.5 font-mono text-[11px] font-medium text-foreground shadow-[0_1px_0_rgba(0,0,0,0.02)]"
+          className="rounded-md border border-border bg-muted/30 px-2 py-1 font-mono text-xs font-medium text-foreground"
         >
           {chip}
         </div>
@@ -108,7 +108,7 @@ export function RightPanelSection({
   return (
     <section
       className={cn(
-        "rounded-2xl border border-border/45 bg-background/80 px-4 py-4 shadow-[0_1px_0_rgba(0,0,0,0.02)]",
+        "rounded-lg border border-border bg-card px-4 py-4",
         className,
       )}
     >
@@ -143,10 +143,10 @@ export function RightPanelCollapsibleSection({
 }) {
   return (
     <Collapsible defaultOpen={defaultOpen} className="group">
-      <div className="rounded-2xl border border-border/45 bg-background/80 px-4 py-4 shadow-[0_1px_0_rgba(0,0,0,0.02)]">
+      <div className="rounded-lg border border-border bg-card px-4 py-4">
         <div className="flex items-start justify-between gap-3">
           <CollapsibleTrigger className="flex min-w-0 flex-1 items-start gap-3 text-left">
-            <ChevronDownIcon className="mt-0.5 size-4 shrink-0 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+            <ChevronDownIcon className="mt-0.5 size-4 shrink-0 text-muted-foreground transition-transform duration-150 group-data-[state=open]:rotate-180" />
             <div className="min-w-0 space-y-1">
               <div className="text-sm font-medium tracking-[-0.01em] text-foreground">
                 {title}
@@ -176,7 +176,7 @@ export function RightPanelList({
   className?: string
 }) {
   return (
-    <div className={cn("overflow-hidden rounded-xl border border-border/45", className)}>
+    <div className={cn("overflow-hidden rounded-lg border border-border", className)}>
       {children}
     </div>
   )
@@ -192,7 +192,7 @@ export function RightPanelListRow({
   return (
     <div
       className={cn(
-        "border-b border-border/45 bg-background px-4 py-3 last:border-b-0",
+        "border-b border-border bg-background px-4 py-3 last:border-b-0",
         className,
       )}
     >
@@ -209,7 +209,7 @@ export function RightPanelEmptyState({
   description: ReactNode
 }) {
   return (
-    <div className="rounded-xl border border-dashed border-border/55 bg-muted/15 px-4 py-4">
+    <div className="rounded-lg border border-dashed border-border bg-muted/15 px-4 py-4">
       <p className="text-sm font-medium text-foreground">{title}</p>
       <p className="mt-1 text-sm leading-6 text-muted-foreground">{description}</p>
     </div>
