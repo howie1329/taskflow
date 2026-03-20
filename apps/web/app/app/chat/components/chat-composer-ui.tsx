@@ -80,7 +80,7 @@ export function ComposerAttachmentsPreview() {
 }
 
 const COMPOSER_ICON_BUTTON_CLASS_NAME =
-  "size-8 rounded-md border-transparent bg-transparent text-muted-foreground shadow-none transition-colors duration-150 hover:bg-muted hover:text-foreground";
+  "size-8 rounded-md border-transparent bg-transparent text-muted-foreground shadow-none transition-[color,background-color,border-color,transform] duration-150 ease-out hover:bg-muted hover:text-foreground motion-safe:active:scale-[0.97]";
 
 export function ComposerSlashCommandButton({
   value,

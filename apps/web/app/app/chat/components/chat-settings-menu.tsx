@@ -40,10 +40,18 @@ export interface ChatSettingsContentProps {
 }
 
 export const CHAT_SETTINGS_TRIGGER_CLASS_NAME =
-  "rounded-md border-border bg-background text-foreground shadow-none transition-colors duration-150 hover:bg-muted/50";
+  "rounded-md border-border bg-background text-foreground shadow-none transition-[color,background-color,border-color,transform] duration-150 ease-out hover:bg-muted/50 motion-safe:active:scale-[0.97]";
 
 export const CHAT_SETTINGS_POPOVER_CLASS_NAME =
   "gap-0 overflow-hidden rounded-xl border border-border bg-popover p-0 shadow-md ring-0";
+
+/** List row / menu option: explicit properties, ease-out, light press (popover rows are wide) */
+const SETTINGS_MENU_ROW_INTERACTION =
+  "transition-[background-color,color,border-color,transform] duration-150 ease-out motion-safe:active:scale-[0.985]";
+
+/** Compact filter chips in model picker */
+const SETTINGS_FILTER_CHIP_INTERACTION =
+  "transition-[background-color,color,transform] duration-150 ease-out motion-safe:active:scale-[0.97]";
 
 export function SettingsSection({
   icon,
@@ -104,7 +112,8 @@ export function SettingsOptionButton({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex w-full min-w-0 items-start gap-3 rounded-md px-3 py-2.5 text-left transition-colors duration-150 ease-out hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
+        "flex w-full min-w-0 origin-left items-start gap-3 rounded-md px-3 py-2.5 text-left hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
+        SETTINGS_MENU_ROW_INTERACTION,
         selected ? "bg-muted/55" : "bg-transparent",
       )}
     >
@@ -224,7 +233,8 @@ export function ModelSettingsList({
             type="button"
             onClick={() => setSelectedInterface("all")}
             className={cn(
-              "rounded-md px-2.5 py-1 text-xs font-medium transition-colors duration-150",
+              "rounded-md px-2.5 py-1 text-xs font-medium",
+              SETTINGS_FILTER_CHIP_INTERACTION,
               selectedInterface === "all"
                 ? "bg-muted/55 text-foreground"
                 : "bg-muted/20 text-muted-foreground hover:bg-muted/40 hover:text-foreground",
@@ -238,7 +248,8 @@ export function ModelSettingsList({
               type="button"
               onClick={() => setSelectedInterface(iface)}
               className={cn(
-                "rounded-md px-2.5 py-1 text-xs font-medium transition-colors duration-150",
+                "rounded-md px-2.5 py-1 text-xs font-medium",
+                SETTINGS_FILTER_CHIP_INTERACTION,
                 selectedInterface === iface
                   ? "bg-muted/55 text-foreground"
                   : "bg-muted/20 text-muted-foreground hover:bg-muted/40 hover:text-foreground",
@@ -527,7 +538,8 @@ function ModelSettingsOptionButton({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex w-full min-w-0 items-center gap-2 rounded-md px-2 py-2 text-left transition-colors duration-150 ease-out hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
+        "flex w-full min-w-0 origin-left items-center gap-2 rounded-md px-2 py-2 text-left hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
+        SETTINGS_MENU_ROW_INTERACTION,
         selected ? "bg-muted/55" : "bg-transparent",
       )}
     >
@@ -652,7 +664,8 @@ function ModeSettingsOptionButton({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex w-full min-w-0 items-center gap-2 rounded-md px-2 py-2 text-left transition-colors duration-150 ease-out hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
+        "flex w-full min-w-0 origin-left items-center gap-2 rounded-md px-2 py-2 text-left hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
+        SETTINGS_MENU_ROW_INTERACTION,
         selected ? "bg-muted/55" : "bg-transparent",
       )}
     >
@@ -724,7 +737,8 @@ function ProjectSettingsOptionButton({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex w-full min-w-0 items-center gap-2 rounded-md px-2 py-2 text-left transition-colors duration-150 ease-out hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
+        "flex w-full min-w-0 origin-left items-center gap-2 rounded-md px-2 py-2 text-left hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
+        SETTINGS_MENU_ROW_INTERACTION,
         selected ? "bg-muted/55" : "bg-transparent",
       )}
     >
