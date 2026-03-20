@@ -31,6 +31,7 @@ import {
   PromptInputSubmit,
   PromptInputTextarea,
 } from "@/components/ai-elements/prompt-input"
+import { CHAT_COMPOSER_INPUT_CLASS_NAME } from "@/app/app/chat/components/chat-composer-ui"
 import { useNotes } from "@/components/notes"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -505,11 +506,11 @@ function NotesMiniChat({ note }: { note: Note }) {
           </Button>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="secondary" className="h-6 gap-1 rounded-full text-xs">
+          <Badge variant="secondary" className="h-6 gap-1 rounded-md text-xs">
             <FileText className="size-3" />
             Using current note only
           </Badge>
-          <Badge variant="outline" className="h-6 rounded-full text-xs">
+          <Badge variant="outline" className="h-6 rounded-md text-xs">
             {messages.length} messages
           </Badge>
         </div>
@@ -518,10 +519,10 @@ function NotesMiniChat({ note }: { note: Note }) {
       <Separator />
 
       <Conversation className="min-h-0 flex-1">
-        <ConversationContent className="flex w-full flex-col gap-4 px-0 py-1 pr-1">
+        <ConversationContent className="flex w-full flex-col gap-6 px-0 py-2 pr-1">
           {messages.length === 0 ? (
             <ConversationEmptyState
-              className="min-h-[260px] rounded-xl border border-dashed border-border/70 bg-muted/20 p-4 text-left"
+              className="min-h-[260px] rounded-lg border border-dashed border-border bg-muted/20 p-4 text-left"
               icon={<Sparkles className="size-4" />}
               title="Ask about this note"
               description="I can answer questions from the current note, rewrite it with approval, or search the web when you ask for outside information."
@@ -540,11 +541,11 @@ function NotesMiniChat({ note }: { note: Note }) {
                 <Message
                   key={message.id}
                   from={message.role}
-                  className={cn("max-w-none gap-1.5", message.role === "user" && "justify-end")}
+                  className={cn("max-w-none gap-2", message.role === "user" && "justify-end")}
                 >
                   <MessageContent
                     className={cn(
-                      "text-[15px] leading-7",
+                      "text-sm leading-relaxed",
                       message.role === "assistant" && "w-full",
                       message.role === "user" && "max-w-xl",
                     )}
@@ -592,10 +593,10 @@ function NotesMiniChat({ note }: { note: Note }) {
         <ConversationScrollButton />
       </Conversation>
 
-      <div className="shrink-0 border-t border-border/40 pt-3">
+      <div className="shrink-0 border-t border-border pt-3">
         <PromptInput
           onSubmit={({ text }) => handleSubmit(text)}
-          className="**:data-[slot=input-group]:rounded-3xl **:data-[slot=input-group]:border-border/60 **:data-[slot=input-group]:bg-background **:data-[slot=input-group]:shadow-sm **:data-[slot=input-group]:transition-colors **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:border-ring/50 **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:ring-2 **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:ring-ring/20"
+          className={CHAT_COMPOSER_INPUT_CLASS_NAME}
         >
           <PromptInputTextarea
             id="notes-mini-chat-message"
@@ -603,9 +604,9 @@ function NotesMiniChat({ note }: { note: Note }) {
             value={input}
             onChange={(event) => setInput(event.target.value)}
             placeholder="Ask about this note..."
-            className="min-h-[72px] max-h-56 px-3 py-2.5 text-[15px] leading-7"
+            className="min-h-16 max-h-56 px-3 py-2 text-sm leading-relaxed placeholder:text-muted-foreground"
           />
-          <PromptInputFooter className="border-t border-border/45 pb-2.5 pt-2 text-muted-foreground">
+          <PromptInputFooter className="border-t border-border px-3 py-2 text-muted-foreground">
             <div className="flex items-center gap-2 text-xs">
               {status === "streaming" || status === "submitted" ? (
                 <span className="inline-flex items-center gap-1.5 text-muted-foreground">
@@ -620,7 +621,7 @@ function NotesMiniChat({ note }: { note: Note }) {
               status={status}
               onStop={stop}
               size="icon-sm"
-              className="size-8 rounded-full"
+              className="size-8 rounded-md shadow-none"
               disabled={status !== "streaming" && status !== "submitted" && !input.trim()}
             />
           </PromptInputFooter>

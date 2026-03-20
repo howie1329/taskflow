@@ -24,8 +24,8 @@ function ChatMobileHeader() {
   if (!isMobile) return null;
 
   return (
-    <div className="sticky top-0 z-30 flex h-12 items-center justify-between border-b border-border/50 bg-background/90 px-2 backdrop-blur supports-backdrop-filter:bg-background/80">
-      <div className="flex items-center gap-1">
+    <div className="sticky top-0 z-30 flex h-11 min-h-11 items-center justify-between border-b border-border bg-background/90 px-2 backdrop-blur supports-backdrop-filter:bg-background/80">
+      <div className="flex min-w-0 items-center gap-2">
         {isThreadRoute ? (
           <Button
             variant="ghost"
@@ -35,7 +35,7 @@ function ChatMobileHeader() {
           >
             <HugeiconsIcon
               icon={ArrowLeft01Icon}
-              className="size-5"
+              className="size-4"
               strokeWidth={2}
             />
             <span className="sr-only">Back to chats</span>
@@ -43,7 +43,7 @@ function ChatMobileHeader() {
         ) : (
           <SidebarTrigger className="size-8" />
         )}
-        <h1 className="truncate text-[15px] font-medium">
+        <h1 className="truncate text-sm font-medium">
           {isThreadRoute ? thread?.title || "Chat" : "Chat"}
         </h1>
       </div>
@@ -55,7 +55,7 @@ function ChatMobileHeader() {
       >
         <HugeiconsIcon
           icon={MessageQuestionIcon}
-          className="size-5"
+          className="size-4"
           strokeWidth={2}
         />
         <span className="sr-only">New chat</span>

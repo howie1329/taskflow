@@ -106,7 +106,7 @@ export const EnhancedChainOfThoughtHeader = memo(
       <Collapsible onOpenChange={setIsOpen} open={isOpen}>
         <CollapsibleTrigger
           className={cn(
-            "flex w-full items-center gap-2 rounded-md py-0.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground",
+            "flex w-full items-center gap-2 rounded-md py-1 text-xs font-medium text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground",
             className,
           )}
           {...props}
@@ -117,7 +117,7 @@ export const EnhancedChainOfThoughtHeader = memo(
               isOpen ? "rotate-180" : "rotate-0",
             )}
           />
-          <span className="flex-1 text-left text-xs flex items-center gap-2">
+          <span className="flex flex-1 items-center gap-2 text-left text-xs">
             {children ?? "Actions"}
             <span className="text-[10px] text-muted-foreground/80">
               {totalSteps} steps
@@ -148,7 +148,7 @@ export const ChainOfThoughtHeader = memo(
       <Collapsible onOpenChange={setIsOpen} open={isOpen}>
         <CollapsibleTrigger
           className={cn(
-            "flex w-full items-center gap-2 rounded-md py-0.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground",
+            "flex w-full items-center gap-2 rounded-md py-1 text-xs font-medium text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground",
             className,
           )}
           {...props}

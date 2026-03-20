@@ -120,12 +120,12 @@ export function ToolPanels({ toolCalls, preferences }: ToolPanelsProps) {
         >
           {showToolDetails ? (
             <CollapsibleContent className="pt-2">
-              <div className="space-y-3 rounded-md border border-border/35 bg-muted/15 p-3 [&_h4]:hidden">
+              <div className="space-y-4 rounded-lg bg-muted/10 p-3 [&_h4]:hidden">
                 <ToolSummaryBar
                   label="Summary"
                   summary={getToolSummary(toolCall)}
                 />
-                <div className="border-t border-border/35 pt-3">
+                <div className="border-t border-border pt-4">
                   {renderToolContent(toolCall)}
                 </div>
                 {toolCall.output !== undefined && (

@@ -27,7 +27,7 @@ export type ToolProps = ComponentProps<typeof Collapsible>;
 export const Tool = ({ className, ...props }: ToolProps) => (
   <Collapsible
     className={cn(
-      "group not-prose w-full rounded-lg border border-border/45 bg-muted/15",
+      "group not-prose w-full rounded-lg border border-border bg-card text-card-foreground",
       className,
     )}
     {...props}
@@ -70,7 +70,7 @@ export const getStatusBadge = (status: ToolPart["state"]) => {
   return (
     <Badge
       className={cn(
-        "gap-1 rounded-full text-[10px] px-2 h-5 border font-medium",
+        "h-5 gap-1 rounded-md border px-2 text-[10px] font-medium",
         variantMap[status],
       )}
       variant="outline"
@@ -105,7 +105,7 @@ export const EnhancedToolHeader = ({
   return (
     <CollapsibleTrigger
       className={cn(
-          "flex w-full items-center justify-between gap-3 px-3 py-1.5 text-xs transition-colors hover:bg-muted/35",
+        "flex w-full items-center justify-between gap-3 px-4 py-2 text-xs transition-colors duration-150 hover:bg-muted",
         className,
       )}
       {...props}
@@ -152,7 +152,7 @@ export const ToolHeader = ({
   return (
     <CollapsibleTrigger
       className={cn(
-        "flex w-full items-center justify-between gap-3 px-3 py-2 text-xs transition-colors hover:bg-muted/50",
+        "flex w-full items-center justify-between gap-3 px-4 py-2 text-xs transition-colors duration-150 hover:bg-muted",
         className,
       )}
       {...props}
@@ -173,7 +173,7 @@ export type ToolContentProps = ComponentProps<typeof CollapsibleContent>;
 export const ToolContent = ({ className, ...props }: ToolContentProps) => (
   <CollapsibleContent
     className={cn(
-      "px-3 pb-2",
+      "px-4 pb-4",
       "data-[state=closed]:animate-out data-[state=open]:animate-in",
       className,
     )}
@@ -197,7 +197,7 @@ export const ToolSummaryBar = ({
   return (
     <div
       className={cn(
-        "rounded-md border border-border/35 bg-muted/20 px-2.5 py-1.5",
+        "rounded-md border border-border bg-muted/30 px-3 py-2",
         "text-xs text-foreground",
         className,
       )}
@@ -234,8 +234,8 @@ export const ToolMetaPanel = ({
   return (
     <div
       className={cn(
-        "rounded-md border border-border/40 bg-muted/10",
-        "px-3 py-2 text-xs",
+        "rounded-md border border-border bg-muted/20",
+        "p-3 text-xs",
         className,
       )}
       {...props}
@@ -291,12 +291,17 @@ export const ToolRawPayload = ({
   );
 
   return (
-    <Collapsible className={cn("group rounded-md border border-border/35", className)}>
-      <CollapsibleTrigger className="flex w-full items-center justify-between px-2.5 py-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground">
+    <Collapsible
+      className={cn(
+        "group rounded-lg border border-border bg-muted/10",
+        className,
+      )}
+    >
+      <CollapsibleTrigger className="flex w-full items-center justify-between px-3 py-2 text-xs text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground">
         <span className="font-medium">Advanced: raw payload</span>
         <ChevronDownIcon className="size-3.5 transition-transform group-data-[state=open]:rotate-180" />
       </CollapsibleTrigger>
-      <CollapsibleContent className="space-y-2 px-2.5 pb-2.5">
+      <CollapsibleContent className="space-y-2 px-3 pb-3">
         <div className="flex items-center gap-1">
           {hasOutput ? (
             <Button
@@ -321,7 +326,7 @@ export const ToolRawPayload = ({
             </Button>
           ) : null}
         </div>
-        <div className="overflow-hidden rounded-sm border border-border/50 bg-muted/20">
+        <div className="overflow-hidden rounded-md border border-border bg-muted/20">
           <CodeBlock code={code} language="json" />
         </div>
       </CollapsibleContent>

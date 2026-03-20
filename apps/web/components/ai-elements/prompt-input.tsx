@@ -43,7 +43,7 @@ import {
   SquareIcon,
   XIcon,
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { nanoid } from "nanoid";
 import {
   type ChangeEvent,
@@ -899,7 +899,10 @@ export const PromptInputTextarea = ({
 
   return (
     <InputGroupTextarea
-      className={cn("field-sizing-content max-h-48 min-h-16", className)}
+      className={cn(
+        "field-sizing-content max-h-48 min-h-16 text-sm leading-relaxed placeholder:text-muted-foreground",
+        className,
+      )}
       name="message"
       onCompositionEnd={() => setIsComposing(false)}
       onCompositionStart={() => setIsComposing(true)}
@@ -1032,6 +1035,7 @@ export const PromptInputSubmit = ({
   children,
   ...props
 }: PromptInputSubmitProps) => {
+  const prefersReducedMotion = useReducedMotion();
   const isGenerating = status === "submitted" || status === "streaming";
 
   let Icon = <CornerDownLeftIcon className="size-4" />;
@@ -1055,8 +1059,8 @@ export const PromptInputSubmit = ({
 
   return (
     <motion.div
-      whileTap={{ scale: 0.92 }}
-      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+      whileTap={prefersReducedMotion ? undefined : { scale: 0.96 }}
+      transition={{ duration: 0.1, ease: "easeOut" }}
     >
       <InputGroupButton
         aria-label={isGenerating ? "Stop generating" : "Send message"}
@@ -1089,8 +1093,8 @@ export const PromptInputSelectTrigger = ({
 }: PromptInputSelectTriggerProps) => (
   <SelectTrigger
     className={cn(
-      "border-none bg-transparent font-medium text-muted-foreground shadow-none transition-colors",
-      "hover:bg-accent hover:text-foreground aria-expanded:bg-accent aria-expanded:text-foreground",
+      "h-8 border-none bg-transparent text-sm font-medium text-muted-foreground shadow-none transition-colors duration-150",
+      "hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground",
       className,
     )}
     {...props}

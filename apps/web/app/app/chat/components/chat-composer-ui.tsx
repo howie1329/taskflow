@@ -22,7 +22,7 @@ import {
 import { ToolLockCommandMenu } from "./tool-lock-command-menu";
 
 export const CHAT_COMPOSER_INPUT_CLASS_NAME =
-  "**:data-[slot=input-group]:rounded-2xl **:data-[slot=input-group]:border-border/60 **:data-[slot=input-group]:bg-background **:data-[slot=input-group]:shadow-sm **:data-[slot=input-group]:transition-colors **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:border-ring/50 **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:ring-2 **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:ring-ring/20";
+  "**:data-[slot=input-group]:rounded-md **:data-[slot=input-group]:border-border **:data-[slot=input-group]:bg-background **:data-[slot=input-group]:shadow-none **:data-[slot=input-group]:transition-colors **:data-[slot=input-group]:duration-150 **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:border-ring **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:ring-2 **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:ring-ring/30";
 
 export function getComposerHeaderClassName(showPromptHeader: boolean) {
   return `grid overflow-hidden transition-[grid-template-rows,opacity,margin-bottom] duration-200 ease-out ${
@@ -50,7 +50,7 @@ export function ChatComposerToolHeader({
 }) {
   return (
     <div className={getComposerHeaderClassName(show)} aria-hidden={!show}>
-      <div className="overflow-hidden rounded-2xl border border-border/60 bg-background px-3 py-2 shadow-sm">
+      <div className="overflow-hidden rounded-md border border-border bg-background px-3 py-2 transition-colors duration-150">
         <ToolLockCommandMenu textareaRef={textareaRef} />
       </div>
     </div>
@@ -80,7 +80,7 @@ export function ComposerAttachmentsPreview() {
 }
 
 const COMPOSER_ICON_BUTTON_CLASS_NAME =
-  "size-7 rounded-full border-transparent bg-transparent text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground";
+  "size-8 rounded-md border-transparent bg-transparent text-muted-foreground shadow-none transition-colors duration-150 hover:bg-muted hover:text-foreground";
 
 export function ComposerSlashCommandButton({
   value,
@@ -154,7 +154,7 @@ export function ComposerSubmitButton({
             status={status}
             onStop={onStop}
             size="icon-sm"
-            className="size-8 rounded-full shadow-none"
+            className="size-8 rounded-md shadow-none"
           />
         </div>
       </TooltipTrigger>
