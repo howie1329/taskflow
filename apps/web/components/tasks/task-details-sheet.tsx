@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import { priorityDotClassName } from "@/lib/task-priority-styles";
 import { useState, useEffect } from "react";
 import {
   CheckSquareIcon,
@@ -282,7 +283,7 @@ export function TaskDetailsSheet({
   const panelContent = (
     <div className="flex h-full flex-col">
           {/* Header Block */}
-          <SheetHeader className="pt-8 pb-4">
+          <SheetHeader className="pb-4 pt-6">
             {/* Top row: Project + Status + Actions */}
             <div className="flex items-center justify-between mb-3">
               <Badge variant="outline" className="text-xs px-2 py-0.5 h-6">
@@ -380,10 +381,8 @@ export function TaskDetailsSheet({
                   )}
                   <div
                     className={cn(
-                      "w-1.5 h-1.5 rounded-full",
-                      task.priority === "high" && "bg-red-500",
-                      task.priority === "medium" && "bg-amber-500",
-                      task.priority === "low" && "bg-blue-500",
+                      "size-1.5 rounded-full opacity-80",
+                      priorityDotClassName(task.priority),
                     )}
                     title={`Priority: ${task.priority}`}
                   />
@@ -401,31 +400,31 @@ export function TaskDetailsSheet({
           <Separator />
 
           {/* Scrollable Content */}
-          <div className="flex-1 overflow-y-auto px-5 py-5 space-y-7">
+          <div className="flex-1 space-y-6 overflow-y-auto px-4 py-4">
             {isEditing && (
               <div className="space-y-6">
                 <div className="space-y-3">
                   <Input
                     value={editedTitle}
                     onChange={(e) => setEditedTitle(e.target.value)}
-                    className="h-11 rounded-xl px-4 text-base font-medium"
+                    className="h-8 rounded-md px-3 text-sm font-medium"
                     placeholder="Task title"
                   />
                   <Textarea
                     value={editedDescription}
                     onChange={(e) => setEditedDescription(e.target.value)}
-                    className="min-h-28 rounded-xl px-4 py-3 text-sm leading-relaxed"
+                    className="min-h-28 rounded-md px-3 py-2 text-sm leading-relaxed"
                     placeholder="Description (optional)"
                   />
                   <Textarea
                     value={editedNotes}
                     onChange={(e) => setEditedNotes(e.target.value)}
-                    className="min-h-24 rounded-xl px-4 py-3 text-sm leading-relaxed"
+                    className="min-h-24 rounded-md px-3 py-2 text-sm leading-relaxed"
                     placeholder="Notes (optional)"
                   />
                 </div>
 
-                <div className="space-y-4 rounded-xl border border-border/60 p-4">
+                <div className="space-y-4 rounded-lg border border-border p-4">
                   <h4 className="text-sm font-medium text-muted-foreground">
                     Options
                   </h4>
@@ -438,7 +437,7 @@ export function TaskDetailsSheet({
                         value={editedStatus}
                         onValueChange={(v) => setEditedStatus(v as Task["status"])}
                       >
-                        <SelectTrigger className="h-9 text-sm">
+                        <SelectTrigger className="h-8 text-sm">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -459,13 +458,33 @@ export function TaskDetailsSheet({
                           setEditedPriority(v as Task["priority"])
                         }
                       >
-                        <SelectTrigger className="h-9 text-sm">
-                          <SelectValue />
+                        <SelectTrigger className="h-8 text-sm">
+                          <SelectValue>
+                            <div className="flex items-center gap-2">
+                              <div
+                                className={cn(
+                                  "size-1.5 rounded-full",
+                                  priorityDotClassName(editedPriority),
+                                )}
+                              />
+                              <span className="capitalize">{editedPriority}</span>
+                            </div>
+                          </SelectValue>
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="low">Low</SelectItem>
-                          <SelectItem value="medium">Medium</SelectItem>
-                          <SelectItem value="high">High</SelectItem>
+                          {(["low", "medium", "high"] as const).map((p) => (
+                            <SelectItem key={p} value={p} className="text-sm">
+                              <div className="flex items-center gap-2">
+                                <div
+                                  className={cn(
+                                    "size-1.5 rounded-full",
+                                    priorityDotClassName(p),
+                                  )}
+                                />
+                                <span className="capitalize">{p}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
@@ -475,7 +494,7 @@ export function TaskDetailsSheet({
                       Project
                     </label>
                     <Select value={editedProjectId} onValueChange={setEditedProjectId}>
-                      <SelectTrigger className="h-9 text-sm">
+                      <SelectTrigger className="h-8 text-sm">
                         <SelectValue placeholder="No project" />
                       </SelectTrigger>
                       <SelectContent>
@@ -528,7 +547,7 @@ export function TaskDetailsSheet({
                                     : [...prev, tag._id as string],
                                 );
                               }}
-                              className="h-8 px-3 text-sm rounded-lg"
+                              className="h-8 rounded-md px-3 text-sm"
                             >
                               <span
                                 className="inline-block w-1.5 h-1.5 rounded-full mr-1.5"
@@ -543,7 +562,7 @@ export function TaskDetailsSheet({
                           variant="outline"
                           size="sm"
                           onClick={() => setIsCreateTagDialogOpen(true)}
-                          className="h-8 px-3 text-sm rounded-lg border-dashed"
+                          className="h-8 rounded-md border-dashed px-3 text-sm"
                         >
                           + Create tag
                         </Button>
@@ -559,7 +578,7 @@ export function TaskDetailsSheet({
                         type="date"
                         value={editedScheduledDate}
                         onChange={(e) => setEditedScheduledDate(e.target.value)}
-                        className="h-9 text-sm"
+                        className="h-8 text-sm"
                       />
                     </div>
                     <div>
@@ -570,7 +589,7 @@ export function TaskDetailsSheet({
                         type="date"
                         value={editedDueDate}
                         onChange={(e) => setEditedDueDate(e.target.value)}
-                        className="h-9 text-sm"
+                        className="h-8 text-sm"
                       />
                     </div>
                   </div>
@@ -581,7 +600,7 @@ export function TaskDetailsSheet({
                     size="sm"
                     onClick={handleSave}
                     disabled={!editedTitle.trim()}
-                    className="h-9 text-sm"
+                    className="h-8 text-sm"
                   >
                     Save
                   </Button>
@@ -589,7 +608,7 @@ export function TaskDetailsSheet({
                     variant="outline"
                     size="sm"
                     onClick={handleCancelEdit}
-                    className="h-9 text-sm"
+                    className="h-8 text-sm"
                   >
                     Cancel
                   </Button>
@@ -625,7 +644,7 @@ export function TaskDetailsSheet({
                       value={newSubtaskTitle}
                       onChange={(e) => setNewSubtaskTitle(e.target.value)}
                       placeholder="Add a checklist item..."
-                      className="h-9 text-sm flex-1"
+                      className="h-8 flex-1 text-sm"
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
                           handleAddSubtask();
@@ -636,7 +655,7 @@ export function TaskDetailsSheet({
                       size="icon-sm"
                       onClick={handleAddSubtask}
                       disabled={!newSubtaskTitle.trim()}
-                      className="h-9 w-9"
+                      className="h-8 w-8"
                     >
                       <PlusIcon className="h-4 w-4" />
                     </Button>
@@ -802,7 +821,7 @@ export function TaskDetailsSheet({
 
             {/* Scheduling Section */}
             {!isEditing && (
-              <div className="pt-1 border-t border-border/60">
+              <div className="border-t border-border pt-4">
                 <h4 className="text-sm font-medium text-muted-foreground mb-3">
                   Scheduling
                 </h4>
@@ -893,7 +912,7 @@ export function TaskDetailsSheet({
 
           {/* Footer with Delete */}
           {onDelete && (
-            <SheetFooter className="border-t gap-2 sm:flex-row sm:justify-between shrink-0 py-3">
+            <SheetFooter className="shrink-0 gap-2 border-t border-border py-3 sm:flex-row sm:justify-between">
               {showDeleteConfirm ? (
                 <>
                   <span className="text-sm text-muted-foreground">
@@ -904,7 +923,7 @@ export function TaskDetailsSheet({
                       variant="outline"
                       size="sm"
                       onClick={() => setShowDeleteConfirm(false)}
-                      className="h-9 text-sm"
+                      className="h-8 text-sm"
                     >
                       Cancel
                     </Button>
@@ -912,7 +931,7 @@ export function TaskDetailsSheet({
                       variant="destructive"
                       size="sm"
                       onClick={handleDelete}
-                      className="h-9 text-sm"
+                      className="h-8 text-sm"
                     >
                       Delete
                     </Button>
@@ -923,7 +942,7 @@ export function TaskDetailsSheet({
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowDeleteConfirm(true)}
-                  className="h-9 text-sm text-destructive hover:text-destructive"
+                  className="h-8 text-sm text-destructive hover:text-destructive"
                 >
                   Delete task
                 </Button>

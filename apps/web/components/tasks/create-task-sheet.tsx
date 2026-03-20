@@ -29,6 +29,7 @@ import { Kbd } from "@/components/ui/kbd";
 import { Separator } from "@/components/ui/separator";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import { priorityDotClassName } from "@/lib/task-priority-styles";
 
 type Task = Doc<"tasks">;
 type Project = Doc<"projects">;
@@ -224,7 +225,7 @@ export function CreateTaskSheet({
 
   const content = (
     <div className="flex h-full flex-col">
-      <SheetHeader className="shrink-0 pt-7 pb-3">
+      <SheetHeader className="shrink-0 pb-4 pt-6">
         {renderInSidebar ? (
           <h2 className="text-sm font-medium text-muted-foreground">New task</h2>
         ) : (
@@ -243,7 +244,7 @@ export function CreateTaskSheet({
 
       <form
         onSubmit={handleSubmit}
-        className="flex-1 overflow-y-auto px-5 py-5 space-y-6"
+        className="flex-1 space-y-4 overflow-y-auto px-4 py-4"
       >
             {/* Title - Required */}
             <Field>
@@ -256,7 +257,7 @@ export function CreateTaskSheet({
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="What needs to be done?"
-                  className="h-11 rounded-xl px-4 text-base font-medium"
+                  className="h-8 rounded-md px-3 text-sm font-medium"
                   aria-invalid={showTitleError}
                   aria-describedby={showTitleError ? ids.titleError : undefined}
                 />
@@ -278,14 +279,14 @@ export function CreateTaskSheet({
                   onChange={(e) => setDescription(e.target.value)}
                   onKeyDown={handleDescriptionKeyDown}
                   placeholder="Add details (optional)"
-                  className="min-h-32 rounded-xl px-4 py-3 text-sm leading-relaxed"
+                  className="min-h-28 rounded-md px-3 py-2 text-sm leading-relaxed"
                 />
               </FieldContent>
             </Field>
 
             <Separator />
 
-            <div className="space-y-4 rounded-xl border border-border/60 p-4">
+            <div className="space-y-4 rounded-lg border border-border p-4">
               <h3 className="text-sm font-medium text-muted-foreground">Options</h3>
 
               {/* Core metadata */}
@@ -305,7 +306,7 @@ export function CreateTaskSheet({
                     >
                       <SelectTrigger
                         id={ids.project}
-                        className="w-full h-9 text-sm"
+                        className="h-8 w-full text-sm"
                       >
                         <SelectValue placeholder="No project" />
                       </SelectTrigger>
@@ -349,7 +350,7 @@ export function CreateTaskSheet({
                     >
                       <SelectTrigger
                         id={ids.status}
-                        className="w-full h-9 text-sm"
+                        className="h-8 w-full text-sm"
                       >
                         <SelectValue />
                       </SelectTrigger>
@@ -379,16 +380,14 @@ export function CreateTaskSheet({
                     >
                       <SelectTrigger
                         id={ids.priority}
-                        className="w-full h-9 text-sm"
+                        className="h-8 w-full text-sm"
                       >
                         <SelectValue>
                           <div className="flex items-center gap-2">
                             <div
                               className={cn(
-                                "w-1.5 h-1.5 rounded-full",
-                                priority === "high" && "bg-red-500",
-                                priority === "medium" && "bg-amber-500",
-                                priority === "low" && "bg-blue-500",
+                                "size-1.5 rounded-full",
+                                priorityDotClassName(priority),
                               )}
                             />
                             <span className="capitalize">{priority}</span>
@@ -401,10 +400,8 @@ export function CreateTaskSheet({
                             <div className="flex items-center gap-2">
                               <div
                                 className={cn(
-                                  "w-1.5 h-1.5 rounded-full",
-                                  p === "high" && "bg-red-500",
-                                  p === "medium" && "bg-amber-500",
-                                  p === "low" && "bg-blue-500",
+                                  "size-1.5 rounded-full",
+                                  priorityDotClassName(p),
                                 )}
                               />
                               <span className="capitalize">{p}</span>
@@ -433,7 +430,7 @@ export function CreateTaskSheet({
                       type="date"
                       value={scheduledDate}
                       onChange={(e) => setScheduledDate(e.target.value)}
-                      className="h-9 text-sm"
+                      className="h-8 text-sm"
                     />
                   </FieldContent>
                 </Field>
@@ -449,7 +446,7 @@ export function CreateTaskSheet({
                       type="date"
                       value={dueDate}
                       onChange={(e) => setDueDate(e.target.value)}
-                      className="h-9 text-sm"
+                      className="h-8 text-sm"
                     />
                   </FieldContent>
                 </Field>
@@ -475,7 +472,7 @@ export function CreateTaskSheet({
                             size="xs"
                             onClick={() => toggleTag(tag._id as string)}
                             aria-pressed={isSelected}
-                            className="h-8 px-3 text-sm rounded-lg"
+                            className="h-8 rounded-md px-3 text-sm"
                           >
                             <span
                               className="inline-block w-1.5 h-1.5 rounded-full mr-1.5"
@@ -492,19 +489,19 @@ export function CreateTaskSheet({
             </div>
 
             {/* Footer */}
-            <SheetFooter className="gap-2 sm:flex-row sm:justify-end pt-4 border-t">
+            <SheetFooter className="gap-2 border-t border-border pt-4 sm:flex-row sm:justify-end">
               <Button
                 type="button"
                 variant="outline"
                 onClick={handleCancel}
-                className="h-9 text-sm"
+                className="h-8 text-sm"
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 disabled={!canSubmit}
-                className="h-9 text-sm"
+                className="h-8 text-sm"
               >
                 Create
               </Button>
