@@ -11,7 +11,7 @@ interface NoteSectionProps {
 
 export function NoteSection({ label, icon, className }: NoteSectionProps) {
   return (
-    <div className={cn("flex items-center gap-2 px-0.5", className)}>
+    <div className={cn("flex items-center gap-1.5 px-0.5", className)}>
       {icon}
       <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/80">
         {label}

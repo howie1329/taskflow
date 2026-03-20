@@ -143,7 +143,9 @@ export function ThreadsRail({
           <span
             className={cn(
               "font-medium text-muted-foreground",
-              isSidebar ? "text-xs" : "text-sm",
+              isSidebar
+                ? "text-[10px] uppercase tracking-wider"
+                : "text-sm",
             )}
           >
             Threads
@@ -151,15 +153,20 @@ export function ThreadsRail({
           <Link href="/app/chat">
             <Button
               className={cn(
-                "rounded-md transition-colors duration-150",
-                isSidebar ? "h-7 px-2 text-xs" : "h-8 px-3 text-xs font-medium",
+                "rounded-md transition-colors duration-150 ease-[cubic-bezier(0.16,1,0.3,1)]",
+                isSidebar
+                  ? "h-8 gap-1.5 px-3 text-sm font-medium"
+                  : "h-8 px-3 text-xs font-medium",
                 isNewChat && "bg-muted text-foreground",
               )}
               variant={isNewChat ? "secondary" : "outline"}
             >
               <HugeiconsIcon
                 icon={PlusSignIcon}
-                className={cn("mr-1", isSidebar ? "size-3" : "size-3.5 mr-2")}
+                className={cn(
+                  "shrink-0",
+                  isSidebar ? "size-[1.125rem]" : "mr-2 size-3.5",
+                )}
                 strokeWidth={2}
               />
               New
@@ -171,14 +178,19 @@ export function ThreadsRail({
           <InputGroupAddon>
             <HugeiconsIcon
               icon={SearchIcon}
-              className={cn("stroke-2", isSidebar ? "size-3.5" : "size-4")}
+              className={cn(
+                "stroke-2 shrink-0",
+                isSidebar ? "size-[1.125rem]" : "size-4",
+              )}
             />
           </InputGroupAddon>
           <InputGroupInput
             placeholder="Search threads..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className={cn("text-xs", isSidebar ? "h-7" : "h-8")}
+            className={cn(
+              isSidebar ? "h-8 text-sm" : "h-8 text-xs",
+            )}
           />
           {searchQuery && (
             <InputGroupAddon>
@@ -246,22 +258,22 @@ export function ThreadsRail({
                   onOpenChange={setIsPinnedOpen}
                   className="space-y-1.5 w-full max-w-full"
                 >
-                  <CollapsibleTrigger className="group flex h-8 w-full items-center rounded-md px-2 text-left transition-colors duration-150 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40">
-                    <div className="flex w-full items-center justify-between">
+                  <CollapsibleTrigger className="group flex h-8 w-full items-center rounded-md px-3 text-left transition-colors duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40">
+                    <div className="flex w-full items-center justify-between gap-1.5">
                       <ThreadSection
                         label="Pinned"
                         count={pinnedThreads.length}
                         icon={
                           <HugeiconsIcon
                             icon={PinIcon}
-                            className="size-3 text-muted-foreground"
+                            className="size-[1.125rem] shrink-0 text-muted-foreground"
                             strokeWidth={2}
                           />
                         }
                       />
                       <HugeiconsIcon
                         icon={ArrowDown01Icon}
-                        className="size-3 text-muted-foreground transition-transform group-data-[state=open]:rotate-180"
+                        className="size-[1.125rem] shrink-0 text-muted-foreground transition-transform duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-[state=open]:rotate-180"
                         strokeWidth={2}
                       />
                     </div>
@@ -282,15 +294,15 @@ export function ThreadsRail({
                     isSidebar ? "space-y-2" : "space-y-2.5",
                   )}
                 >
-                  <CollapsibleTrigger className="group flex h-8 w-full items-center rounded-md px-2 text-left transition-colors duration-150 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40">
-                    <div className="flex w-full items-center justify-between">
+                  <CollapsibleTrigger className="group flex h-8 w-full items-center rounded-md px-3 text-left transition-colors duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40">
+                    <div className="flex w-full items-center justify-between gap-1.5">
                       <ThreadSection
                         label="Projects"
                         count={projectThreadCount}
                       />
                       <HugeiconsIcon
                         icon={ArrowDown01Icon}
-                        className="size-3 text-muted-foreground transition-transform group-data-[state=open]:rotate-180"
+                        className="size-[1.125rem] shrink-0 text-muted-foreground transition-transform duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-[state=open]:rotate-180"
                         strokeWidth={2}
                       />
                     </div>

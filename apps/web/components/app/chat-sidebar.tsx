@@ -35,7 +35,6 @@ import { convertToChatThread } from "@/app/app/chat/components/thread-types";
 import { useThreads } from "@/hooks/use-threads";
 import { useTheme } from "next-themes";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Doc } from "@/convex/_generated/dataModel";
@@ -123,7 +122,7 @@ export function ChatSidebar({ onBackToWorkspace }: ChatSidebarProps) {
                 onClick={() => setOpen(true)}
                 className="justify-center"
               >
-                <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
+                <HugeiconsIcon icon={ArrowLeft01Icon} className="shrink-0" />
                 <span>Open sidebar</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -133,11 +132,7 @@ export function ChatSidebar({ onBackToWorkspace }: ChatSidebarProps) {
                 onClick={() => setOpen(true)}
                 className="justify-center"
               >
-                <HugeiconsIcon
-                  icon={SearchIcon}
-                  className="size-4"
-                  strokeWidth={2}
-                />
+                <HugeiconsIcon icon={SearchIcon} className="shrink-0" strokeWidth={2} />
                 <span>Search threads</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -146,16 +141,12 @@ export function ChatSidebar({ onBackToWorkspace }: ChatSidebarProps) {
                 asChild
                 tooltip="New chat"
                 isActive={isNewChat}
-                className={cn(
-                  "justify-center",
-                  isNewChat &&
-                    "bg-sidebar-accent text-sidebar-accent-foreground",
-                )}
+                className="justify-center"
               >
                 <Link href="/app/chat" aria-label="New chat">
                   <HugeiconsIcon
                     icon={PlusSignIcon}
-                    className="size-4"
+                    className="shrink-0"
                     strokeWidth={2}
                   />
                   <span>New chat</span>
@@ -178,7 +169,7 @@ export function ChatSidebar({ onBackToWorkspace }: ChatSidebarProps) {
               >
                 <HugeiconsIcon
                   icon={isDark ? Sun02Icon : Moon02Icon}
-                  className="size-4"
+                  className="shrink-0"
                 />
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -195,13 +186,13 @@ export function ChatSidebar({ onBackToWorkspace }: ChatSidebarProps) {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1.5">
               <SidebarMenuButton
                 tooltip="Back to workspace"
                 onClick={onBackToWorkspace}
                 className="flex-1"
               >
-                <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
+                <HugeiconsIcon icon={ArrowLeft01Icon} className="shrink-0" />
                 <span>Back to workspace</span>
               </SidebarMenuButton>
               <SidebarTrigger className="size-8 shrink-0" />

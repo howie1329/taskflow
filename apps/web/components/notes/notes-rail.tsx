@@ -175,26 +175,36 @@ export function NotesRail({
       <div
         className={cn(
           "sticky top-0 z-10 bg-transparent space-y-2",
-          isSidebar ? "p-2.5" : "p-3",
+          isSidebar ? "p-2" : "p-3",
         )}
       >
         <div className="flex items-center justify-between gap-2">
           <span
             className={cn(
               "font-medium text-muted-foreground",
-              isSidebar ? "text-xs" : "text-sm",
+              isSidebar
+                ? "text-[10px] uppercase tracking-wider"
+                : "text-sm",
             )}
           >
             Notes
           </span>
           <Button
-            className={cn("rounded-lg", isSidebar ? "h-7 px-2 text-xs" : "h-8 px-3 text-xs")}
+            className={cn(
+              "transition-colors duration-150 ease-[cubic-bezier(0.16,1,0.3,1)]",
+              isSidebar
+                ? "h-8 gap-1.5 rounded-md px-3 text-sm font-medium"
+                : "h-8 rounded-lg px-3 text-xs",
+            )}
             variant="outline"
             onClick={onCreateNote}
           >
             <HugeiconsIcon
               icon={PlusSignIcon}
-              className={cn("mr-1", isSidebar ? "size-3" : "mr-2 size-3.5")}
+              className={cn(
+                "shrink-0",
+                isSidebar ? "size-[1.125rem]" : "mr-2 size-3.5",
+              )}
               strokeWidth={2}
             />
             New
@@ -205,7 +215,10 @@ export function NotesRail({
           <InputGroupAddon>
             <HugeiconsIcon
               icon={SearchIcon}
-              className={cn("stroke-2", isSidebar ? "size-3.5" : "size-4")}
+              className={cn(
+                "stroke-2 shrink-0",
+                isSidebar ? "size-[1.125rem]" : "size-4",
+              )}
             />
           </InputGroupAddon>
           <InputGroupInput
@@ -213,7 +226,7 @@ export function NotesRail({
             placeholder="Search notes..."
             value={searchQuery}
             onChange={(e) => onSearchQueryChange(e.target.value)}
-            className={cn("text-xs", isSidebar ? "h-7" : "h-8")}
+            className={cn(isSidebar ? "h-8 text-sm" : "h-8 text-xs")}
           />
           {searchQuery && (
             <InputGroupAddon>
@@ -239,7 +252,12 @@ export function NotesRail({
                 <TabsTrigger
                   key={option.key}
                   value={option.key}
-                  className="h-7 flex-none rounded-full border border-border/50 bg-background px-2.5 text-[11px] data-active:border-border data-active:bg-muted"
+                  className={cn(
+                    "flex-none rounded-full border border-border/50 bg-background data-active:border-border data-active:bg-muted",
+                    isSidebar
+                      ? "h-8 px-3 text-xs"
+                      : "h-7 px-2.5 text-[11px]",
+                  )}
                 >
                   {option.label}
                 </TabsTrigger>
@@ -247,7 +265,12 @@ export function NotesRail({
               {activeSecondaryType ? (
                 <TabsTrigger
                   value={activeSecondaryType.noteType}
-                  className="h-7 flex-none rounded-full border border-border/50 bg-background px-2.5 text-[11px] data-active:border-border data-active:bg-muted"
+                  className={cn(
+                    "flex-none rounded-full border border-border/50 bg-background data-active:border-border data-active:bg-muted",
+                    isSidebar
+                      ? "h-8 px-3 text-xs"
+                      : "h-7 px-2.5 text-[11px]",
+                  )}
                 >
                   {activeSecondaryType.label}
                 </TabsTrigger>
@@ -321,21 +344,39 @@ export function NotesRail({
                   onOpenChange={setIsPinnedOpen}
                   className="w-full max-w-full space-y-2"
                 >
-                  <CollapsibleTrigger className="group w-full rounded-lg border border-border/40 bg-muted/20 px-2 py-2 text-left hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background">
-                    <div className="flex items-center justify-between">
+                  <CollapsibleTrigger
+                    className={cn(
+                      "group w-full text-left transition-colors duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
+                      isSidebar
+                        ? "flex h-8 items-center rounded-md px-3 hover:bg-muted"
+                        : "rounded-lg border border-border/40 bg-muted/20 px-2 py-2 hover:bg-muted/40 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        "flex items-center justify-between",
+                        isSidebar && "w-full gap-1.5",
+                      )}
+                    >
                       <NoteSection
                         label="Pinned"
                         icon={
                           <HugeiconsIcon
                             icon={PinIcon}
-                            className="size-3 text-muted-foreground"
+                            className={cn(
+                              "shrink-0 text-muted-foreground",
+                              isSidebar ? "size-[1.125rem]" : "size-3",
+                            )}
                             strokeWidth={2}
                           />
                         }
                       />
                       <HugeiconsIcon
                         icon={ArrowDown01Icon}
-                        className="size-3 text-muted-foreground transition-transform group-data-[state=open]:rotate-180"
+                        className={cn(
+                          "shrink-0 text-muted-foreground transition-transform duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-[state=open]:rotate-180",
+                          isSidebar ? "size-[1.125rem]" : "size-3",
+                        )}
                         strokeWidth={2}
                       />
                     </div>
@@ -356,12 +397,27 @@ export function NotesRail({
                     isSidebar ? "space-y-2" : "space-y-2.5",
                   )}
                 >
-                  <CollapsibleTrigger className="group w-full rounded-lg px-2 py-2 text-left hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background">
-                    <div className="flex items-center justify-between">
+                  <CollapsibleTrigger
+                    className={cn(
+                      "group w-full text-left transition-colors duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
+                      isSidebar
+                        ? "flex h-8 items-center rounded-md px-3 hover:bg-muted"
+                        : "rounded-lg px-2 py-2 hover:bg-muted/40 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        "flex items-center justify-between",
+                        isSidebar && "w-full gap-1.5",
+                      )}
+                    >
                       <NoteSection label="Projects" />
                       <HugeiconsIcon
                         icon={ArrowDown01Icon}
-                        className="size-3 text-muted-foreground transition-transform group-data-[state=open]:rotate-180"
+                        className={cn(
+                          "shrink-0 text-muted-foreground transition-transform duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-[state=open]:rotate-180",
+                          isSidebar ? "size-[1.125rem]" : "size-3",
+                        )}
                         strokeWidth={2}
                       />
                     </div>

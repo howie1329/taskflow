@@ -50,7 +50,7 @@ export function ThreadRow({
     return (
       <div
         className={cn(
-          "flex h-8 items-center gap-2 rounded-md px-3 w-full max-w-full overflow-hidden",
+          "flex h-8 items-center gap-1.5 rounded-md px-3 w-full max-w-full overflow-hidden",
           isActive ? "bg-muted" : "bg-muted/50",
         )}
       >
@@ -79,7 +79,7 @@ export function ThreadRow({
     <Link
       href={`/app/chat/${thread.id}`}
       className={cn(
-        "group relative flex h-8 min-h-8 items-center gap-2 rounded-md px-3 text-sm transition-colors duration-150 w-full max-w-full overflow-hidden",
+        "group relative flex h-8 min-h-8 items-center gap-1.5 rounded-md px-3 text-sm transition-colors duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] w-full max-w-full overflow-hidden",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
         isActive
           ? "bg-muted font-medium text-foreground"
@@ -87,7 +87,7 @@ export function ThreadRow({
       )}
       aria-current={isActive ? "page" : undefined}
     >
-      <div className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
+      <div className="flex min-w-0 flex-1 items-center gap-1.5 overflow-hidden">
         {thread.pinned && (
           <HugeiconsIcon
             icon={PinIcon}

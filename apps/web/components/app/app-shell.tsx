@@ -125,29 +125,36 @@ function WorkspaceSidebarContent({
               <SidebarMenuButton
                 size="lg"
                 tooltip="Open sidebar"
-                className="group/sidebar-toggle"
+                className="group/sidebar-toggle text-sidebar-foreground"
                 onClick={toggleSidebar}
               >
                 <div className="relative flex aspect-square size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
                   <HugeiconsIcon
                     icon={CommandIcon}
-                    className="size-4 transition-opacity group-hover/sidebar-toggle:opacity-0"
+                    className="size-[1.125rem] transition-opacity duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/sidebar-toggle:opacity-0"
                   />
                   <HugeiconsIcon
                     icon={SidebarLeftIcon}
-                    className="absolute size-4 opacity-0 transition-opacity group-hover/sidebar-toggle:opacity-100"
+                    className="absolute size-[1.125rem] opacity-0 transition-opacity duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/sidebar-toggle:opacity-100"
                   />
                 </div>
                 <span className="sr-only">Open sidebar</span>
               </SidebarMenuButton>
             ) : (
-              <div className="flex items-center gap-1">
-                <SidebarMenuButton size="lg" asChild className="flex-1">
+              <div className="flex items-center gap-1.5">
+                <SidebarMenuButton
+                  size="lg"
+                  asChild
+                  className="flex-1 text-sidebar-foreground"
+                >
                   <Link href="/app">
-                    <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-                      <HugeiconsIcon icon={CommandIcon} className="size-4" />
+                    <div className="flex aspect-square size-8 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                      <HugeiconsIcon
+                        icon={CommandIcon}
+                        className="size-[1.125rem]"
+                      />
                     </div>
-                    <div className="grid flex-1 text-left text-sm leading-tight">
+                    <div className="grid min-w-0 flex-1 text-left text-sm leading-tight">
                       <span className="truncate font-semibold">Taskflow</span>
                       <span className="truncate text-xs text-muted-foreground">
                         Workspace
@@ -198,7 +205,7 @@ function WorkspaceSidebarContent({
                         href={item.href}
                         onClick={handleChatClick ?? handleNotesClick}
                       >
-                        <HugeiconsIcon icon={item.icon} className="size-4" />
+                        <HugeiconsIcon icon={item.icon} className="shrink-0" />
                         <span>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
@@ -301,26 +308,8 @@ export function AppShell({ children, right }: AppShellProps) {
     <SidebarProvider
       defaultOpenInspector={false}
       className={cn(isChatRoute && "h-svh overflow-hidden")}
-      style={
-        isChatRoute
-          ? ({
-              "--sidebar-width": "16rem",
-              "--sidebar-width-mobile": "18rem",
-            } as React.CSSProperties)
-          : isNotesRoute
-            ? ({
-                "--sidebar-width": "16rem",
-                "--sidebar-width-mobile": "18rem",
-              } as React.CSSProperties)
-            : undefined
-      }
     >
-      <Sidebar
-        scope="primary"
-        variant="sidebar"
-        collapsible="icon"
-        className={isNotesRoute ? "border-r border-border/40" : undefined}
-      >
+      <Sidebar scope="primary" variant="sidebar" collapsible="icon">
         {isChatRoute && chatSidebarMode === "threads" ? (
           <ChatSidebar
             onBackToWorkspace={() => setChatSidebarMode("workspace")}

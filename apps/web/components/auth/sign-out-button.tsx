@@ -68,7 +68,7 @@ export function SignOutButton() {
         <SidebarMenuButton
           size="lg"
           tooltip="Account"
-          className="h-10 rounded-xl border border-sidebar-border/60 bg-sidebar-accent/20"
+          className="h-10 min-h-10 gap-1.5 rounded-md border border-sidebar-border/60 bg-sidebar-accent/20 text-sidebar-foreground"
         >
           <Avatar size="sm" className="ring-0 after:hidden">
             <AvatarFallback className="bg-sidebar-accent text-sidebar-foreground text-[10px] font-semibold">
@@ -76,9 +76,9 @@ export function SignOutButton() {
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0 flex-1 text-left">
-            <p className="truncate text-xs font-medium">{displayName}</p>
+            <p className="truncate text-sm font-medium">{displayName}</p>
             {email ? (
-              <p className="truncate text-[11px] text-sidebar-foreground/65">
+              <p className="truncate text-xs text-sidebar-foreground/65">
                 {email}
               </p>
             ) : null}
@@ -89,14 +89,14 @@ export function SignOutButton() {
       <DropdownMenuContent
         align="end"
         side="top"
-        className="w-64 rounded-xl border border-border/70 p-1.5"
+        className="w-64 rounded-lg border border-border/70 p-1.5"
       >
         <DropdownMenuLabel className="px-2 py-1.5">
-          <p className="truncate text-xs font-medium text-foreground">
+          <p className="truncate text-sm font-medium text-foreground">
             {displayName}
           </p>
           {email ? (
-            <p className="truncate text-[11px] text-muted-foreground">{email}</p>
+            <p className="truncate text-xs text-muted-foreground">{email}</p>
           ) : null}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
