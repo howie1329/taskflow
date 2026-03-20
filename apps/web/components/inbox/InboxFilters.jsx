@@ -40,16 +40,19 @@ export const InboxFilters = memo(function InboxFilters({
           placeholder="Search inbox..."
           value={searchQuery}
           onChange={handleChange}
-          className="pl-9 h-9 text-xs border-border/50 focus-visible:ring-ring/50"
+          className="h-8 border-border pl-9 text-sm focus-visible:ring-ring/50"
           aria-label="Search inbox items"
         />
         <AnimatePresence>
           {searchQuery && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.92 }}
+              initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.92 }}
-              transition={{ duration: 0.14, ease: "easeOut" }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              transition={{
+                duration: 0.14,
+                ease: [0.16, 1, 0.3, 1],
+              }}
               className="absolute right-2 top-1/2 -translate-y-1/2"
             >
               <Button
