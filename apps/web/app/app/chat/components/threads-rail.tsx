@@ -155,21 +155,26 @@ export function ThreadsRail({
               className={cn(
                 "rounded-md transition-colors duration-150 ease-[cubic-bezier(0.16,1,0.3,1)]",
                 isSidebar
-                  ? "h-8 gap-1.5 px-3 text-sm font-medium"
+                  ? "size-7 shrink-0 p-0"
                   : "h-8 px-3 text-xs font-medium",
                 isNewChat && "bg-muted text-foreground",
               )}
               variant={isNewChat ? "secondary" : "outline"}
+              aria-label="New chat"
             >
               <HugeiconsIcon
                 icon={PlusSignIcon}
                 className={cn(
                   "shrink-0",
-                  isSidebar ? "size-[1.125rem]" : "mr-2 size-3.5",
+                  isSidebar ? "size-3" : "mr-2 size-3.5",
                 )}
                 strokeWidth={2}
               />
-              New
+              {isSidebar ? (
+                <span className="sr-only">New chat</span>
+              ) : (
+                "New"
+              )}
             </Button>
           </Link>
         </div>

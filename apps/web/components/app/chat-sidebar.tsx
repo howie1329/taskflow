@@ -146,10 +146,10 @@ export function ChatSidebar({ onBackToWorkspace }: ChatSidebarProps) {
                 <Link href="/app/chat" aria-label="New chat">
                   <HugeiconsIcon
                     icon={PlusSignIcon}
-                    className="shrink-0"
+                    className="size-3 shrink-0"
                     strokeWidth={2}
                   />
-                  <span>New chat</span>
+                  <span className="sr-only">New chat</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
