@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
@@ -286,16 +287,18 @@ export function PreferencesTab() {
   };
 
   return (
-    <div className="space-y-8">
-      <div className="space-y-2">
-        <h2 className="text-base font-medium">General Preferences</h2>
+    <div className="space-y-6">
+      <div className="space-y-1">
+        <h2 className="text-lg font-semibold tracking-tight">
+          General Preferences
+        </h2>
         <p className="text-sm text-muted-foreground">
           Customize your workspace experience
         </p>
       </div>
 
-      <div className="divide-y divide-border/60">
-        <section className="space-y-6 pb-8">
+      <div className="space-y-0">
+        <section className="space-y-6 pb-6">
           <Field>
             <FieldLabel>Default AI Model</FieldLabel>
             {isLoadingViewer || isLoadingModels ? (
@@ -326,7 +329,7 @@ export function PreferencesTab() {
                       <SelectItem key={model.modelId} value={model.modelId}>
                         <div className="flex flex-col">
                           <span>{model.name}</span>
-                          <span className="text-xs text-muted-foreground">
+                          <span className="font-mono text-xs text-muted-foreground">
                             {model.modelId}
                           </span>
                         </div>
@@ -341,13 +344,16 @@ export function PreferencesTab() {
                       Current default:{" "}
                     </span>
                     <span className="font-medium">{currentDefaultModel.name}</span>
-                    <span className="ml-2 text-xs text-muted-foreground">
+                    <span className="ml-2 font-mono text-xs text-muted-foreground">
                       ({currentDefaultModel.modelId})
                     </span>
                     {!isModelInList && (
-                      <span className="ml-2 text-xs text-amber-600">
-                        (not in current available models)
-                      </span>
+                      <Badge
+                        variant="outline"
+                        className="ml-2 align-middle font-normal text-muted-foreground"
+                      >
+                        Not in current catalog
+                      </Badge>
                     )}
                   </div>
                 )}
@@ -370,6 +376,7 @@ export function PreferencesTab() {
                   (currentDefaultModel?.modelId === selectedModelId &&
                     models.some((m) => m.modelId === selectedModelId))
                 }
+                className="motion-safe:active:scale-[0.97]"
               >
                 {isSaving ? "Saving..." : "Save Default Model"}
               </Button>
@@ -377,8 +384,8 @@ export function PreferencesTab() {
           )}
         </section>
 
-        <section className="space-y-6 py-8">
-          <h3 className="text-sm font-medium">Tasks</h3>
+        <section className="space-y-6 border-t border-border py-6">
+          <h3 className="text-sm font-semibold tracking-tight">Tasks</h3>
           <Field>
             <FieldLabel>Default Task View</FieldLabel>
             {isLoadingViewer ? (
@@ -422,6 +429,7 @@ export function PreferencesTab() {
                     disabled={
                       isSaving || preferences?.taskDefaultView === taskDefaultView
                     }
+                    className="motion-safe:active:scale-[0.97]"
                   >
                     {isSaving ? "Saving..." : "Save Default View"}
                   </Button>
@@ -452,8 +460,10 @@ export function PreferencesTab() {
           </Field>
         </section>
 
-        <section className="space-y-6 py-8">
-          <h3 className="text-sm font-medium">Notifications</h3>
+        <section className="space-y-6 border-t border-border py-6">
+          <h3 className="text-sm font-semibold tracking-tight">
+            Notifications
+          </h3>
           <Field>
             <div className="flex items-center justify-between gap-4">
               <div className="space-y-1">
@@ -476,8 +486,8 @@ export function PreferencesTab() {
           </Field>
         </section>
 
-        <section className="space-y-6 py-8">
-          <h3 className="text-sm font-medium">Tags</h3>
+        <section className="space-y-6 border-t border-border py-6">
+          <h3 className="text-sm font-semibold tracking-tight">Tags</h3>
           <Field>
             <FieldLabel>New tag</FieldLabel>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -499,7 +509,7 @@ export function PreferencesTab() {
                 <Button
                   onClick={handleCreateTag}
                   disabled={isCreatingTag || !newTagName.trim()}
-                  className="h-10"
+                  className="h-10 motion-safe:active:scale-[0.97]"
                 >
                   {isCreatingTag ? "Creating..." : "Create"}
                 </Button>
@@ -525,27 +535,30 @@ export function PreferencesTab() {
               tags.map((tag) => (
                 <div
                   key={tag._id}
-                  className="flex items-center justify-between rounded-md border border-border px-3 py-2"
+                  className="flex min-h-10 items-center justify-between gap-3 rounded-lg border border-border bg-card px-3 py-2 transition-colors duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none hover:bg-muted/80"
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex min-w-0 items-center gap-2">
                     <span
-                      className="inline-block h-2.5 w-2.5 rounded-full"
+                      className="inline-block size-2.5 shrink-0 rounded-full"
                       style={{ backgroundColor: tag.color }}
                     />
-                    <span className="text-sm font-medium">{tag.name}</span>
+                    <span className="truncate text-sm font-medium">
+                      {tag.name}
+                    </span>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex shrink-0 items-center gap-2">
                     <Button
                       variant="outline"
                       size="sm"
+                      className="motion-safe:active:scale-[0.97]"
                       onClick={() => setEditingTag(tag)}
                     >
                       Edit
                     </Button>
                     <Button
-                      variant="ghost"
+                      variant="destructive"
                       size="sm"
-                      className="text-destructive hover:text-destructive"
+                      className="motion-safe:active:scale-[0.97]"
                       onClick={() => setTagToDelete(tag)}
                     >
                       Delete
@@ -557,8 +570,8 @@ export function PreferencesTab() {
           </div>
         </section>
 
-        <section className="space-y-6 pt-8">
-          <h3 className="text-sm font-medium">Appearance</h3>
+        <section className="space-y-6 border-t border-border pt-6">
+          <h3 className="text-sm font-semibold tracking-tight">Appearance</h3>
           <Field>
             <FieldLabel>Theme</FieldLabel>
             {!theme ? (
