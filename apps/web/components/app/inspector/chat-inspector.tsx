@@ -9,8 +9,12 @@ import {
   CopyIcon,
   ExternalLinkIcon,
   LoaderCircleIcon,
+  PlayIcon,
+  RefreshCcwIcon,
   SaveIcon,
   ServerCogIcon,
+  SquareIcon,
+  Trash2Icon,
   TriangleAlertIcon,
 } from "lucide-react"
 import { api } from "@/convex/_generated/api"
@@ -42,6 +46,11 @@ import {
   RightPanelShell,
   RightPanelSummaryBar,
 } from "@/components/app/right-panel-primitives"
+import {
+  EMPTY_DAYTONA_STATUS,
+  type DaytonaStatus,
+  type DaytonaStatusPayload,
+} from "@/lib/daytona/state"
 
 type ChatInspectorProps = {
   threadId?: string
@@ -56,38 +65,6 @@ type MessageLike = {
   role: string
   content: unknown
   messageId?: string
-}
-
-type DaytonaStatus =
-  | "idle"
-  | "provisioning"
-  | "ready"
-  | "failed"
-
-type DaytonaCloneStatus =
-  | "not_started"
-  | "running"
-  | "succeeded"
-  | "failed"
-
-type DaytonaStatusValue = {
-  exists: boolean
-  repoUrl: string | null
-  sandboxId: string | null
-  status: DaytonaStatus
-  cloneStatus: DaytonaCloneStatus
-  updatedAt: number | null
-  errorMessage: string | null
-}
-
-const DEFAULT_DAYTONA_STATUS: DaytonaStatusValue = {
-  exists: false,
-  repoUrl: null,
-  sandboxId: null,
-  status: "idle",
-  cloneStatus: "not_started",
-  updatedAt: null,
-  errorMessage: null,
 }
 
 function getAssistantToolKeys(messages: MessageLike[]) {
@@ -128,6 +105,8 @@ function getDaytonaStatusLabel(status: DaytonaStatus) {
       return "Provisioning"
     case "ready":
       return "Ready"
+    case "stopped":
+      return "Stopped"
     case "failed":
       return "Failed"
     default:
@@ -135,9 +114,13 @@ function getDaytonaStatusLabel(status: DaytonaStatus) {
   }
 }
 
-function getDaytonaAcknowledgeText(daytona: DaytonaStatusValue) {
+function getDaytonaAcknowledgeText(daytona: DaytonaStatusPayload) {
   if (daytona.status === "ready") {
     return "Daytona instance created and repository clone completed."
+  }
+
+  if (daytona.status === "stopped") {
+    return "Daytona instance is stopped and still attached to this thread."
   }
 
   if (daytona.status === "failed") {
@@ -156,7 +139,9 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
   const [memoryDraft, setMemoryDraft] = useState("")
   const [isSavingMemory, setIsSavingMemory] = useState(false)
   const [repoDraft, setRepoDraft] = useState("")
-  const [isSpinningUpDaytona, setIsSpinningUpDaytona] = useState(false)
+  const [daytonaAction, setDaytonaAction] = useState<
+    null | "spin-up" | "status" | "start" | "stop" | "delete"
+  >(null)
   const threads = useQuery(api.chat.listThreads, {}) ?? []
   const bootstrap = useQuery(api.chat.getChatBootstrap)
   const saveThreadSummary = useMutation(api.chat.setThreadSummary)
@@ -165,7 +150,7 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
     useQuery(
       api.chat.getThreadDaytonaStatus,
       threadId ? { threadId } : "skip",
-    ) ?? DEFAULT_DAYTONA_STATUS
+    ) ?? EMPTY_DAYTONA_STATUS
   const messagesQuery = useQuery(
     api.chat.listMessages,
     threadId ? { threadId } : "skip",
@@ -282,9 +267,9 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
   const summaryText = thread.summary?.summaryText ?? ""
   const hasSummary = Boolean(summaryText)
   const hasUnsavedMemoryChanges = memoryDraft !== summaryText
-  const hasDaytonaInstance =
-    daytonaStatus.exists && daytonaStatus.status !== "idle"
-  const daytonaSpinUpBlocked = hasDaytonaInstance || isSpinningUpDaytona
+  const hasDaytonaInstance = daytonaStatus.exists
+  const isDaytonaBusy = daytonaAction !== null
+  const daytonaSpinUpBlocked = hasDaytonaInstance || isDaytonaBusy
   const scopeLabel =
     thread.scope === "project" && project ? project.title : "Workspace"
   const inspectorSummary = buildThreadInspectorSummary({
@@ -347,41 +332,116 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
     }
   }
 
+  const runDaytonaAction = async ({
+    action,
+    endpoint,
+    body,
+    successMessage,
+  }: {
+    action: NonNullable<typeof daytonaAction>
+    endpoint: string
+    body: Record<string, string>
+    successMessage: string
+  }) => {
+    setDaytonaAction(action)
+    try {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      })
+
+      const payload = (await response.json()) as { error?: string }
+      if (!response.ok) {
+        throw new Error(payload.error ?? "Daytona request failed")
+      }
+
+      toast.success(successMessage)
+      setActiveTab("daytona")
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Daytona request failed",
+      )
+    } finally {
+      setDaytonaAction(null)
+    }
+  }
+
   const handleSpinUpDaytona = async () => {
     const repoUrl = repoDraft.trim()
     if (!threadId || !repoUrl || daytonaSpinUpBlocked) {
       return
     }
 
-    setIsSpinningUpDaytona(true)
-    try {
-      const response = await fetch("/api/daytona/spin-up", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          threadId,
-          repoUrl,
-        }),
-      })
+    await runDaytonaAction({
+      action: "spin-up",
+      endpoint: "/api/daytona/spin-up",
+      body: { threadId, repoUrl },
+      successMessage: "Daytona instance created successfully",
+    })
+  }
 
-      const payload = (await response.json()) as { error?: string }
-      if (!response.ok) {
-        throw new Error(payload.error ?? "Failed to spin up Daytona instance")
-      }
+  const handleRefreshDaytonaStatus = async () => {
+    if (!threadId || !daytonaStatus.sandboxId || isDaytonaBusy) return
 
-      toast.success("Daytona instance created successfully")
-      setActiveTab("daytona")
-    } catch (error) {
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : "Failed to spin up Daytona instance",
-      )
-    } finally {
-      setIsSpinningUpDaytona(false)
+    await runDaytonaAction({
+      action: "status",
+      endpoint: "/api/daytona/status",
+      body: { threadId },
+      successMessage: "Daytona status refreshed",
+    })
+  }
+
+  const handleStopDaytona = async () => {
+    if (
+      !threadId ||
+      !daytonaStatus.sandboxId ||
+      daytonaStatus.status === "stopped" ||
+      isDaytonaBusy
+    ) {
+      return
     }
+
+    await runDaytonaAction({
+      action: "stop",
+      endpoint: "/api/daytona/stop",
+      body: { threadId },
+      successMessage: "Daytona instance stopped",
+    })
+  }
+
+  const handleStartDaytona = async () => {
+    if (
+      !threadId ||
+      !daytonaStatus.sandboxId ||
+      daytonaStatus.status !== "stopped" ||
+      isDaytonaBusy
+    ) {
+      return
+    }
+
+    await runDaytonaAction({
+      action: "start",
+      endpoint: "/api/daytona/start",
+      body: { threadId },
+      successMessage: "Daytona instance started",
+    })
+  }
+
+  const handleDeleteDaytona = async () => {
+    if (!threadId || !daytonaStatus.sandboxId || isDaytonaBusy) return
+    if (!window.confirm("Delete this Daytona instance from the thread?")) {
+      return
+    }
+
+    await runDaytonaAction({
+      action: "delete",
+      endpoint: "/api/daytona/delete",
+      body: { threadId },
+      successMessage: "Daytona instance deleted",
+    })
   }
 
   return (
@@ -656,32 +716,85 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
                     placeholder="https://github.com/owner/repo"
                     value={repoDraft}
                     onChange={(event) => setRepoDraft(event.target.value)}
-                    disabled={daytonaSpinUpBlocked}
+                    disabled={hasDaytonaInstance || isDaytonaBusy}
                   />
                 </div>
 
-                <Button
-                  type="button"
-                  onClick={handleSpinUpDaytona}
-                  disabled={!repoDraft.trim() || daytonaSpinUpBlocked}
-                  className="w-full"
-                >
-                  {isSpinningUpDaytona ? (
-                    <>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    type="button"
+                    onClick={handleSpinUpDaytona}
+                    disabled={!repoDraft.trim() || daytonaSpinUpBlocked}
+                    className="col-span-2"
+                  >
+                    {daytonaAction === "spin-up" ? (
+                      <>
+                        <LoaderCircleIcon className="size-4 animate-spin" />
+                        Spinning up instance
+                      </>
+                    ) : (
+                      <>
+                        <ServerCogIcon className="size-4" />
+                        Spin up instance
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleRefreshDaytonaStatus}
+                    disabled={!daytonaStatus.sandboxId || isDaytonaBusy}
+                  >
+                    {daytonaAction === "status" ? (
                       <LoaderCircleIcon className="size-4 animate-spin" />
-                      Spinning up instance
-                    </>
-                  ) : (
-                    <>
-                      <ServerCogIcon className="size-4" />
-                      Spin up instance
-                    </>
-                  )}
-                </Button>
+                    ) : (
+                      <RefreshCcwIcon className="size-4" />
+                    )}
+                    Get status
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={
+                      daytonaStatus.status === "stopped"
+                        ? handleStartDaytona
+                        : handleStopDaytona
+                    }
+                    disabled={
+                      !daytonaStatus.sandboxId ||
+                      isDaytonaBusy
+                    }
+                  >
+                    {daytonaAction === "stop" || daytonaAction === "start" ? (
+                      <LoaderCircleIcon className="size-4 animate-spin" />
+                    ) : daytonaStatus.status === "stopped" ? (
+                      <PlayIcon className="size-4" />
+                    ) : (
+                      <SquareIcon className="size-4" />
+                    )}
+                    {daytonaStatus.status === "stopped"
+                      ? "Start instance"
+                      : "Stop instance"}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleDeleteDaytona}
+                    disabled={!daytonaStatus.sandboxId || isDaytonaBusy}
+                    className="col-span-2"
+                  >
+                    {daytonaAction === "delete" ? (
+                      <LoaderCircleIcon className="size-4 animate-spin" />
+                    ) : (
+                      <Trash2Icon className="size-4" />
+                    )}
+                    Delete instance
+                  </Button>
+                </div>
 
                 {hasDaytonaInstance ? (
                   <div className="rounded-lg border border-border bg-muted/15 px-3 py-2 text-xs text-muted-foreground">
-                    This thread already has a Daytona instance. Replacement is out of scope for v1.
+                    This thread already has a Daytona instance attached. Delete it to spin up a fresh one.
                   </div>
                 ) : null}
               </div>

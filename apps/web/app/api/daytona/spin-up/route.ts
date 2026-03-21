@@ -1,23 +1,13 @@
 import { NextResponse } from "next/server"
-import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server"
-import { fetchMutation, fetchQuery } from "convex/nextjs"
-import { api } from "@/convex/_generated/api"
 import { createSandboxAndCloneRepo, parseGitHubRepoUrl } from "@/lib/daytona/server"
+import { getAuthedThread, jsonError, saveThreadDaytonaState } from "../_shared"
 
 type SpinUpRequestBody = {
   threadId?: string
   repoUrl?: string
 }
 
-const jsonError = (error: string, status: number) =>
-  NextResponse.json({ error }, { status })
-
 export async function POST(req: Request) {
-  const token = await convexAuthNextjsToken()
-  if (!token) {
-    return jsonError("Unauthorized", 401)
-  }
-
   let body: SpinUpRequestBody
   try {
     body = await req.json()
@@ -42,9 +32,9 @@ export async function POST(req: Request) {
     )
   }
 
-  const thread = await fetchQuery(api.chat.getThread, { threadId }, { token })
-  if (!thread) {
-    return jsonError("Thread not found", 404)
+  const { token, thread, error } = await getAuthedThread(threadId)
+  if (!token || !thread) {
+    return error ?? jsonError("Thread not found", 404)
   }
 
   if (thread.daytona && thread.daytona.status !== "idle") {
@@ -52,53 +42,31 @@ export async function POST(req: Request) {
   }
 
   const createdAt = thread.daytona?.createdAt ?? Date.now()
-  const provisioningState = {
+  await saveThreadDaytonaState({
+    token,
+    threadId,
     repoUrl: parsedRepo.repoUrl,
     sandboxId: thread.daytona?.sandboxId,
-    status: "provisioning" as const,
-    cloneStatus: "running" as const,
+    status: "provisioning",
+    cloneStatus: "running",
     createdAt,
-    updatedAt: Date.now(),
-    errorMessage: undefined,
-  }
-
-  await fetchMutation(
-    api.chat.setThreadDaytonaState,
-    {
-      threadId,
-      daytona: provisioningState,
-    },
-    { token },
-  )
-
-  let sandboxId: string | undefined = thread.daytona?.sandboxId
+  })
 
   try {
     const result = await createSandboxAndCloneRepo(parsedRepo.repoUrl)
-    sandboxId = result.sandboxId
-
-    const readyState = {
+    const daytona = await saveThreadDaytonaState({
+      token,
+      threadId,
       repoUrl: result.repoUrl,
       sandboxId: result.sandboxId,
-      status: "ready" as const,
-      cloneStatus: "succeeded" as const,
+      status: "ready",
+      cloneStatus: "succeeded",
       createdAt,
-      updatedAt: Date.now(),
-      errorMessage: undefined,
-    }
-
-    await fetchMutation(
-      api.chat.setThreadDaytonaState,
-      {
-        threadId,
-        daytona: readyState,
-      },
-      { token },
-    )
+    })
 
     return NextResponse.json({
       success: true,
-      daytona: readyState,
+      daytona: daytona?.daytona ?? null,
     })
   } catch (error) {
     const message =
@@ -106,24 +74,16 @@ export async function POST(req: Request) {
         ? error.message
         : "Failed to spin up the Daytona instance."
 
-    const failedState = {
+    await saveThreadDaytonaState({
+      token,
+      threadId,
       repoUrl: parsedRepo.repoUrl,
-      sandboxId,
-      status: "failed" as const,
-      cloneStatus: "failed" as const,
+      sandboxId: thread.daytona?.sandboxId,
+      status: "failed",
+      cloneStatus: "failed",
       createdAt,
-      updatedAt: Date.now(),
       errorMessage: message,
-    }
-
-    await fetchMutation(
-      api.chat.setThreadDaytonaState,
-      {
-        threadId,
-        daytona: failedState,
-      },
-      { token },
-    )
+    })
 
     return jsonError(message, 500)
   }

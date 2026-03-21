@@ -3,8 +3,6 @@ import { Daytona } from "@daytonaio/sdk"
 
 type ParsedGitHubRepo = {
   repoUrl: string
-  owner: string
-  repo: string
   clonePath: string
 }
 
@@ -51,8 +49,6 @@ export const parseGitHubRepoUrl = (value: string): ParsedGitHubRepo => {
 
   return {
     repoUrl: `https://github.com/${owner}/${repo}`,
-    owner,
-    repo,
     clonePath: `/home/daytona/${owner}-${repo}`,
   }
 }
@@ -84,4 +80,28 @@ export const createSandboxAndCloneRepo = async (repoUrl: string) => {
     repoUrl: parsedRepo.repoUrl,
     clonePath: parsedRepo.clonePath,
   }
+}
+
+export const getSandboxStatus = async (sandboxId: string) => {
+  const daytona = createDaytonaClient()
+  const sandbox = await daytona.get(sandboxId)
+  return sandbox.state ?? null
+}
+
+export const stopSandbox = async (sandboxId: string) => {
+  const daytona = createDaytonaClient()
+  const sandbox = await daytona.get(sandboxId)
+  await sandbox.stop()
+}
+
+export const startSandbox = async (sandboxId: string) => {
+  const daytona = createDaytonaClient()
+  const sandbox = await daytona.get(sandboxId)
+  await sandbox.start()
+}
+
+export const deleteSandbox = async (sandboxId: string) => {
+  const daytona = createDaytonaClient()
+  const sandbox = await daytona.get(sandboxId)
+  await sandbox.delete(60)
 }

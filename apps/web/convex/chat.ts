@@ -36,6 +36,7 @@ const daytonaStatusValidator = v.union(
   v.literal("idle"),
   v.literal("provisioning"),
   v.literal("ready"),
+  v.literal("stopped"),
   v.literal("failed"),
 )
 
@@ -55,6 +56,41 @@ const daytonaStateValidator = v.object({
   updatedAt: v.number(),
   errorMessage: v.optional(v.string()),
 })
+
+const EMPTY_DAYTONA_STATUS = {
+  exists: false,
+  repoUrl: null,
+  sandboxId: null,
+  status: "idle" as const,
+  cloneStatus: "not_started" as const,
+  updatedAt: null,
+  errorMessage: null,
+}
+
+const toDaytonaStatusPayload = (
+  daytona: {
+    repoUrl: string
+    sandboxId?: string
+    status: "idle" | "provisioning" | "ready" | "stopped" | "failed"
+    cloneStatus: "not_started" | "running" | "succeeded" | "failed"
+    updatedAt: number
+    errorMessage?: string
+  } | null | undefined,
+) => {
+  if (!daytona) {
+    return EMPTY_DAYTONA_STATUS
+  }
+
+  return {
+    exists: true,
+    repoUrl: daytona.repoUrl,
+    sandboxId: daytona.sandboxId ?? null,
+    status: daytona.status,
+    cloneStatus: daytona.cloneStatus,
+    updatedAt: daytona.updatedAt,
+    errorMessage: daytona.errorMessage ?? null,
+  }
+}
 
 const getUtcDayKey = (timestamp: number) =>
   new Date(timestamp).toISOString().slice(0, 10);
@@ -283,15 +319,7 @@ export const getThreadDaytonaStatus = query({
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx)
     if (!userId) {
-      return {
-        exists: false,
-        repoUrl: null,
-        sandboxId: null,
-        status: "idle" as const,
-        cloneStatus: "not_started" as const,
-        updatedAt: null,
-        errorMessage: null,
-      }
+      return EMPTY_DAYTONA_STATUS
     }
 
     const thread = await ctx.db
@@ -301,26 +329,10 @@ export const getThreadDaytonaStatus = query({
       .first()
 
     if (!thread || thread.deletedAt !== undefined || !thread.daytona) {
-      return {
-        exists: false,
-        repoUrl: null,
-        sandboxId: null,
-        status: "idle" as const,
-        cloneStatus: "not_started" as const,
-        updatedAt: null,
-        errorMessage: null,
-      }
+      return EMPTY_DAYTONA_STATUS
     }
 
-    return {
-      exists: true,
-      repoUrl: thread.daytona.repoUrl,
-      sandboxId: thread.daytona.sandboxId ?? null,
-      status: thread.daytona.status,
-      cloneStatus: thread.daytona.cloneStatus,
-      updatedAt: thread.daytona.updatedAt,
-      errorMessage: thread.daytona.errorMessage ?? null,
-    }
+    return toDaytonaStatusPayload(thread.daytona)
   },
 })
 
@@ -905,6 +917,35 @@ export const setThreadDaytonaState = mutation({
 
     await ctx.db.patch(thread._id, {
       daytona: args.daytona,
+      updatedAt: Date.now(),
+    })
+
+    return await ctx.db.get(thread._id)
+  },
+})
+
+export const clearThreadDaytonaState = mutation({
+  args: {
+    threadId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx)
+    if (!userId) {
+      throw new Error("Not authenticated")
+    }
+
+    const thread = await ctx.db
+      .query("thread")
+      .withIndex("by_threadId", (q) => q.eq("threadId", args.threadId))
+      .filter((q) => q.eq(q.field("userId"), userId))
+      .first()
+
+    if (!thread || thread.deletedAt !== undefined) {
+      throw new Error("Thread not found or access denied")
+    }
+
+    await ctx.db.patch(thread._id, {
+      daytona: undefined,
       updatedAt: Date.now(),
     })
 

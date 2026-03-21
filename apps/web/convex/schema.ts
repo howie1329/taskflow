@@ -27,6 +27,7 @@ const schema = defineSchema({
           v.literal("idle"),
           v.literal("provisioning"),
           v.literal("ready"),
+          v.literal("stopped"),
           v.literal("failed"),
         ),
         cloneStatus: v.union(

@@ -8,7 +8,7 @@ const daytonaStatusResponseSchema = z.object({
   exists: z.boolean(),
   repoUrl: z.string().nullable(),
   sandboxId: z.string().nullable(),
-  status: z.enum(["idle", "provisioning", "ready", "failed"]),
+  status: z.enum(["idle", "provisioning", "ready", "stopped", "failed"]),
   cloneStatus: z.enum(["not_started", "running", "succeeded", "failed"]),
   updatedAt: z.number().nullable(),
   errorMessage: z.string().nullable(),
