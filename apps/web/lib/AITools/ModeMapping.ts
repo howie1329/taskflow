@@ -18,7 +18,7 @@ type Mode = {
 export const ModeMapping: Record<string, Mode> = {
     "Basic": {
         name: "Basic",
-        activeTools: [...taskflowToolsKeys, ...TavilyToolsKeys, "firecrawlScrape", "getDaytonaStatus"] as ToolKey[]
+        activeTools: [...taskflowToolsKeys, ...TavilyToolsKeys, "firecrawlScrape"] as ToolKey[]
     },
     "Advanced": {
         name: "Advanced",
@@ -26,14 +26,14 @@ export const ModeMapping: Record<string, Mode> = {
     },
     "Finance": {
         name: "Finance",
-        activeTools: [...taskflowToolsKeys, ...ValyuToolsKeys, ...ParallelToolsKeys, "firecrawlScrape", "getDaytonaStatus"] as ToolKey[]
+        activeTools: [...taskflowToolsKeys, ...ValyuToolsKeys, ...ParallelToolsKeys, "firecrawlScrape"] as ToolKey[]
     },
     "Research": {
         name: "Research",
-        activeTools: [...taskflowToolsKeys, ...ValyuToolsKeys, ...ParallelToolsKeys, ...ExaToolsKeys, "firecrawlScrape", "getDaytonaStatus"] as ToolKey[]
+        activeTools: [...taskflowToolsKeys, ...ValyuToolsKeys, ...ParallelToolsKeys, ...ExaToolsKeys, "firecrawlScrape"] as ToolKey[]
     },
     "Social": {
         name: "Social",
-        activeTools: [...taskflowToolsKeys, ...ValyuToolsKeys, ...ParallelToolsKeys, "firecrawlScrape", "getDaytonaStatus"] as ToolKey[]
+        activeTools: [...taskflowToolsKeys, ...ValyuToolsKeys, ...ParallelToolsKeys, "firecrawlScrape"] as ToolKey[]
     }
 }

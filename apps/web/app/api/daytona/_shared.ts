@@ -25,6 +25,7 @@ export const saveThreadDaytonaState = async ({
   token,
   threadId,
   repoUrl,
+  clonePath,
   createdAt,
   status,
   cloneStatus,
@@ -34,6 +35,7 @@ export const saveThreadDaytonaState = async ({
   token: string
   threadId: string
   repoUrl: string
+  clonePath?: string
   createdAt: number
   status: DaytonaStatus
   cloneStatus: DaytonaCloneStatus
@@ -46,6 +48,7 @@ export const saveThreadDaytonaState = async ({
       threadId,
       daytona: buildDaytonaState({
         repoUrl,
+        clonePath,
         status,
         cloneStatus,
         createdAt,

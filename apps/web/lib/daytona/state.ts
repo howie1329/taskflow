@@ -13,6 +13,7 @@ export type DaytonaCloneStatus =
 
 export type DaytonaThreadState = {
   repoUrl: string
+  clonePath?: string
   sandboxId?: string
   status: DaytonaStatus
   cloneStatus: DaytonaCloneStatus
@@ -46,10 +47,12 @@ export const buildDaytonaState = ({
   status,
   cloneStatus,
   createdAt,
+  clonePath,
   sandboxId,
   errorMessage,
 }: {
   repoUrl: string
+  clonePath?: string
   status: DaytonaStatus
   cloneStatus: DaytonaCloneStatus
   createdAt: number
@@ -57,6 +60,7 @@ export const buildDaytonaState = ({
   errorMessage?: string
 }): DaytonaThreadState => ({
   repoUrl,
+  clonePath,
   sandboxId,
   status,
   cloneStatus,

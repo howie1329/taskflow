@@ -22,6 +22,7 @@ const schema = defineSchema({
     daytona: v.optional(
       v.object({
         repoUrl: v.string(),
+        clonePath: v.optional(v.string()),
         sandboxId: v.optional(v.string()),
         status: v.union(
           v.literal("idle"),

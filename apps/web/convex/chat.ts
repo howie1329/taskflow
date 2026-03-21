@@ -49,6 +49,7 @@ const daytonaCloneStatusValidator = v.union(
 
 const daytonaStateValidator = v.object({
   repoUrl: v.string(),
+  clonePath: v.optional(v.string()),
   sandboxId: v.optional(v.string()),
   status: daytonaStatusValidator,
   cloneStatus: daytonaCloneStatusValidator,
@@ -70,6 +71,7 @@ const EMPTY_DAYTONA_STATUS = {
 const toDaytonaStatusPayload = (
   daytona: {
     repoUrl: string
+    clonePath?: string
     sandboxId?: string
     status: "idle" | "provisioning" | "ready" | "stopped" | "failed"
     cloneStatus: "not_started" | "running" | "succeeded" | "failed"

@@ -137,6 +137,83 @@ const TOOL_DEFINITIONS: Record<string, ToolDefinition> = {
       return `Daytona is ${output.status ?? "unknown"}${output.repoUrl ? ` for ${output.repoUrl}` : ""}`
     },
   },
+  startDaytonaInstance: {
+    summarize: () => "Started Daytona sandbox",
+  },
+  stopDaytonaInstance: {
+    summarize: () => "Stopped Daytona sandbox",
+  },
+  listDaytonaRepoFiles: {
+    summarize: (toolCall) => {
+      if (!toolCall.output || typeof toolCall.output !== "object") {
+        return "Listed Daytona repo files"
+      }
+
+      const output = toolCall.output as {
+        files?: unknown[]
+        message?: string
+      }
+
+      if (!Array.isArray(output.files)) {
+        return output.message ?? "Listed Daytona repo files"
+      }
+
+      return `Listed ${output.files.length} Daytona repo entries`
+    },
+  },
+  searchDaytonaRepo: {
+    summarize: (toolCall) => {
+      if (!toolCall.output || typeof toolCall.output !== "object") {
+        return "Searched Daytona repo"
+      }
+
+      const output = toolCall.output as {
+        matches?: unknown[]
+        message?: string
+      }
+
+      if (!Array.isArray(output.matches)) {
+        return output.message ?? "Searched Daytona repo"
+      }
+
+      return `Found ${output.matches.length} Daytona repo matches`
+    },
+  },
+  readDaytonaRepoFile: {
+    summarize: (toolCall) => {
+      if (!toolCall.output || typeof toolCall.output !== "object") {
+        return "Read Daytona repo file"
+      }
+
+      const output = toolCall.output as {
+        path?: string | null
+        message?: string
+      }
+
+      return output.path
+        ? `Read ${output.path}`
+        : output.message ?? "Read Daytona repo file"
+    },
+  },
+  runDaytonaReadCommand: {
+    summarize: (toolCall) => {
+      if (!toolCall.output || typeof toolCall.output !== "object") {
+        return "Ran Daytona read command"
+      }
+
+      const output = toolCall.output as {
+        command?: string
+        exitCode?: number | null
+        message?: string
+      }
+
+      if (!output.command) {
+        return output.message ?? "Ran Daytona read command"
+      }
+
+      return `Ran ${output.command} (exit ${output.exitCode ?? "?"})`
+    },
+  },
   valyuWebSearch: {
     render: (toolCall) => <ValyuWebSearchCard output={toolCall.output} />,
     summarize: (toolCall) =>

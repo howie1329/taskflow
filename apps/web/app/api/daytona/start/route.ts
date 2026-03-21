@@ -38,6 +38,7 @@ export async function POST(req: Request) {
       token,
       threadId,
       repoUrl: thread.daytona.repoUrl,
+      clonePath: thread.daytona.clonePath,
       sandboxId: thread.daytona.sandboxId,
       status: "ready",
       cloneStatus: thread.daytona.cloneStatus,
