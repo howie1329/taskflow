@@ -8,10 +8,15 @@ import {
   CheckCircle2Icon,
   CopyIcon,
   ExternalLinkIcon,
+  LoaderCircleIcon,
   SaveIcon,
+  ServerCogIcon,
+  TriangleAlertIcon,
 } from "lucide-react"
 import { api } from "@/convex/_generated/api"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { extractSourcesFromMessages } from "@/lib/chat/extract-sources"
@@ -53,6 +58,38 @@ type MessageLike = {
   messageId?: string
 }
 
+type DaytonaStatus =
+  | "idle"
+  | "provisioning"
+  | "ready"
+  | "failed"
+
+type DaytonaCloneStatus =
+  | "not_started"
+  | "running"
+  | "succeeded"
+  | "failed"
+
+type DaytonaStatusValue = {
+  exists: boolean
+  repoUrl: string | null
+  sandboxId: string | null
+  status: DaytonaStatus
+  cloneStatus: DaytonaCloneStatus
+  updatedAt: number | null
+  errorMessage: string | null
+}
+
+const DEFAULT_DAYTONA_STATUS: DaytonaStatusValue = {
+  exists: false,
+  repoUrl: null,
+  sandboxId: null,
+  status: "idle",
+  cloneStatus: "not_started",
+  updatedAt: null,
+  errorMessage: null,
+}
+
 function getAssistantToolKeys(messages: MessageLike[]) {
   const counts = new Map<string, number>()
   for (const message of messages) {
@@ -85,14 +122,50 @@ async function copyText(value: string, successMessage: string) {
   }
 }
 
+function getDaytonaStatusLabel(status: DaytonaStatus) {
+  switch (status) {
+    case "provisioning":
+      return "Provisioning"
+    case "ready":
+      return "Ready"
+    case "failed":
+      return "Failed"
+    default:
+      return "Not started"
+  }
+}
+
+function getDaytonaAcknowledgeText(daytona: DaytonaStatusValue) {
+  if (daytona.status === "ready") {
+    return "Daytona instance created and repository clone completed."
+  }
+
+  if (daytona.status === "failed") {
+    return daytona.errorMessage ?? "Daytona setup failed."
+  }
+
+  if (daytona.status === "provisioning") {
+    return "Daytona is provisioning this thread's sandbox."
+  }
+
+  return "No Daytona instance has been created for this thread yet."
+}
+
 export function ChatInspector({ threadId }: ChatInspectorProps) {
   const [activeTab, setActiveTab] = useState("overview")
   const [memoryDraft, setMemoryDraft] = useState("")
   const [isSavingMemory, setIsSavingMemory] = useState(false)
+  const [repoDraft, setRepoDraft] = useState("")
+  const [isSpinningUpDaytona, setIsSpinningUpDaytona] = useState(false)
   const threads = useQuery(api.chat.listThreads, {}) ?? []
   const bootstrap = useQuery(api.chat.getChatBootstrap)
   const saveThreadSummary = useMutation(api.chat.setThreadSummary)
   const thread = useQuery(api.chat.getThread, threadId ? { threadId } : "skip")
+  const daytonaStatus =
+    useQuery(
+      api.chat.getThreadDaytonaStatus,
+      threadId ? { threadId } : "skip",
+    ) ?? DEFAULT_DAYTONA_STATUS
   const messagesQuery = useQuery(
     api.chat.listMessages,
     threadId ? { threadId } : "skip",
@@ -132,6 +205,10 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
   useEffect(() => {
     setMemoryDraft(thread?.summary?.summaryText ?? "")
   }, [thread?.threadId, thread?.summary?.summaryText])
+
+  useEffect(() => {
+    setRepoDraft(daytonaStatus.repoUrl ?? "")
+  }, [thread?.threadId, daytonaStatus.repoUrl])
 
   if (!threadId) {
     return (
@@ -205,6 +282,9 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
   const summaryText = thread.summary?.summaryText ?? ""
   const hasSummary = Boolean(summaryText)
   const hasUnsavedMemoryChanges = memoryDraft !== summaryText
+  const hasDaytonaInstance =
+    daytonaStatus.exists && daytonaStatus.status !== "idle"
+  const daytonaSpinUpBlocked = hasDaytonaInstance || isSpinningUpDaytona
   const scopeLabel =
     thread.scope === "project" && project ? project.title : "Workspace"
   const inspectorSummary = buildThreadInspectorSummary({
@@ -221,7 +301,7 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
       ? `${lastPromptTokens ?? "—"} / ${activeModelDetails.contextLength}`
       : String(lastPromptTokens ?? "—"),
     contextHealthLabel,
-    costUsdMicros: usageTotals?.costUsdMicros,
+    costUsdMicros: usageTotals?.totalCostUsdMicros,
   })
 
   const handleCopySources = async () => {
@@ -267,6 +347,43 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
     }
   }
 
+  const handleSpinUpDaytona = async () => {
+    const repoUrl = repoDraft.trim()
+    if (!threadId || !repoUrl || daytonaSpinUpBlocked) {
+      return
+    }
+
+    setIsSpinningUpDaytona(true)
+    try {
+      const response = await fetch("/api/daytona/spin-up", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          threadId,
+          repoUrl,
+        }),
+      })
+
+      const payload = (await response.json()) as { error?: string }
+      if (!response.ok) {
+        throw new Error(payload.error ?? "Failed to spin up Daytona instance")
+      }
+
+      toast.success("Daytona instance created successfully")
+      setActiveTab("daytona")
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to spin up Daytona instance",
+      )
+    } finally {
+      setIsSpinningUpDaytona(false)
+    }
+  }
+
   return (
     <RightPanelShell>
       <RightPanelScrollBody className="pt-1">
@@ -303,6 +420,12 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
               className="h-8 rounded-none px-0 py-0 text-sm font-medium"
             >
               Memory
+            </TabsTrigger>
+            <TabsTrigger
+              value="daytona"
+              className="h-8 rounded-none px-0 py-0 text-sm font-medium"
+            >
+              Daytona
             </TabsTrigger>
           </TabsList>
 
@@ -512,6 +635,112 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
                 />
               )}
             </RightPanelCollapsibleSection>
+          </TabsContent>
+
+          <TabsContent value="daytona" className="mt-0 space-y-3">
+            <RightPanelSection
+              title="Daytona"
+              description="Create one Daytona sandbox for this thread by cloning a public GitHub repository."
+            >
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <label
+                    htmlFor="daytona-repo-url"
+                    className="text-sm font-medium text-foreground"
+                  >
+                    Repository URL
+                  </label>
+                  <Input
+                    id="daytona-repo-url"
+                    type="url"
+                    placeholder="https://github.com/owner/repo"
+                    value={repoDraft}
+                    onChange={(event) => setRepoDraft(event.target.value)}
+                    disabled={daytonaSpinUpBlocked}
+                  />
+                </div>
+
+                <Button
+                  type="button"
+                  onClick={handleSpinUpDaytona}
+                  disabled={!repoDraft.trim() || daytonaSpinUpBlocked}
+                  className="w-full"
+                >
+                  {isSpinningUpDaytona ? (
+                    <>
+                      <LoaderCircleIcon className="size-4 animate-spin" />
+                      Spinning up instance
+                    </>
+                  ) : (
+                    <>
+                      <ServerCogIcon className="size-4" />
+                      Spin up instance
+                    </>
+                  )}
+                </Button>
+
+                {hasDaytonaInstance ? (
+                  <div className="rounded-lg border border-border bg-muted/15 px-3 py-2 text-xs text-muted-foreground">
+                    This thread already has a Daytona instance. Replacement is out of scope for v1.
+                  </div>
+                ) : null}
+              </div>
+            </RightPanelSection>
+
+            <RightPanelSection
+              title="Status"
+              description="Basic Daytona status for the current thread."
+            >
+              <div className="space-y-3">
+                <RightPanelChipRow
+                  chips={[
+                    getDaytonaStatusLabel(daytonaStatus.status),
+                    daytonaStatus.cloneStatus.replace(/_/g, " "),
+                  ]}
+                />
+
+                <RightPanelList>
+                  <RightPanelListRow>
+                    <div className="flex items-center justify-between gap-3 text-sm">
+                      <span className="text-muted-foreground">Repository</span>
+                      <span className="max-w-[14rem] truncate font-medium text-foreground">
+                        {daytonaStatus.repoUrl ?? "—"}
+                      </span>
+                    </div>
+                  </RightPanelListRow>
+                  <RightPanelListRow>
+                    <div className="flex items-center justify-between gap-3 text-sm">
+                      <span className="text-muted-foreground">Sandbox</span>
+                      <span className="font-medium text-foreground">
+                        {daytonaStatus.sandboxId ?? "—"}
+                      </span>
+                    </div>
+                  </RightPanelListRow>
+                  <RightPanelListRow>
+                    <div className="flex items-center justify-between gap-3 text-sm">
+                      <span className="text-muted-foreground">Last updated</span>
+                      <span className="font-medium text-foreground">
+                        {daytonaStatus.updatedAt
+                          ? formatTimestamp(daytonaStatus.updatedAt)
+                          : "—"}
+                      </span>
+                    </div>
+                  </RightPanelListRow>
+                </RightPanelList>
+
+                <Alert variant={daytonaStatus.status === "failed" ? "destructive" : "default"}>
+                  {daytonaStatus.status === "failed" ? (
+                    <TriangleAlertIcon className="size-4" />
+                  ) : (
+                    <CheckCircle2Icon className="size-4" />
+                  )}
+                  <AlertTitle>Acknowledgment</AlertTitle>
+                  <AlertDescription>
+                    {getDaytonaAcknowledgeText(daytonaStatus)}
+                  </AlertDescription>
+                </Alert>
+              </div>
+            </RightPanelSection>
           </TabsContent>
         </Tabs>
       </RightPanelScrollBody>

@@ -19,6 +19,27 @@ const schema = defineSchema({
     interface: v.optional(v.string()),
     scope: v.optional(v.union(v.literal("workspace"), v.literal("project"))),
     deletedAt: v.optional(v.number()),
+    daytona: v.optional(
+      v.object({
+        repoUrl: v.string(),
+        sandboxId: v.optional(v.string()),
+        status: v.union(
+          v.literal("idle"),
+          v.literal("provisioning"),
+          v.literal("ready"),
+          v.literal("failed"),
+        ),
+        cloneStatus: v.union(
+          v.literal("not_started"),
+          v.literal("running"),
+          v.literal("succeeded"),
+          v.literal("failed"),
+        ),
+        createdAt: v.number(),
+        updatedAt: v.number(),
+        errorMessage: v.optional(v.string()),
+      }),
+    ),
     summary: v.optional(
       v.object({
         schemaVersion: v.number(),

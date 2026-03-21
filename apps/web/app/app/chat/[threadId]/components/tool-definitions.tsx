@@ -118,6 +118,25 @@ const TOOL_DEFINITIONS: Record<string, ToolDefinition> = {
     summarize: (toolCall) =>
       `Compiled ${getOutputArrayLength(toolCall.output, "sources")} multi-source results`,
   },
+  getDaytonaStatus: {
+    summarize: (toolCall) => {
+      if (!toolCall.output || typeof toolCall.output !== "object") {
+        return "Checked Daytona status"
+      }
+
+      const output = toolCall.output as {
+        exists?: boolean
+        status?: string
+        repoUrl?: string | null
+      }
+
+      if (!output.exists) {
+        return "No Daytona instance for this thread"
+      }
+
+      return `Daytona is ${output.status ?? "unknown"}${output.repoUrl ? ` for ${output.repoUrl}` : ""}`
+    },
+  },
   valyuWebSearch: {
     render: (toolCall) => <ValyuWebSearchCard output={toolCall.output} />,
     summarize: (toolCall) =>
