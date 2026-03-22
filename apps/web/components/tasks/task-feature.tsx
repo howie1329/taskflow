@@ -856,12 +856,12 @@ function TaskFilterControls() {
   const { state, actions } = useTaskFeature();
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap items-center gap-2">
       <Select
         value={state.statusFilter}
         onValueChange={(value) => actions.setStatusFilter(value as StatusFilter)}
       >
-        <SelectTrigger size="sm" className="min-w-[120px]">
+        <SelectTrigger size="sm" className="min-w-[124px]">
           <SelectValue placeholder="Status" />
         </SelectTrigger>
         <SelectContent>
@@ -879,7 +879,7 @@ function TaskFilterControls() {
           actions.setPriorityFilter(value as PriorityFilter)
         }
       >
-        <SelectTrigger size="sm" className="min-w-[110px]">
+        <SelectTrigger size="sm" className="min-w-[116px]">
           <SelectValue placeholder="Priority" />
         </SelectTrigger>
         <SelectContent>
@@ -891,7 +891,7 @@ function TaskFilterControls() {
       </Select>
 
       <Select value={state.projectFilter} onValueChange={actions.setProjectFilter}>
-        <SelectTrigger size="sm" className="min-w-[140px]">
+        <SelectTrigger size="sm" className="min-w-[144px]">
           <SelectValue placeholder="Project" />
         </SelectTrigger>
         <SelectContent>
@@ -924,7 +924,7 @@ function TaskFilterControls() {
           actions.setTagFilter(value);
         }}
       >
-        <SelectTrigger size="sm" className="min-w-[120px]">
+        <SelectTrigger size="sm" className="min-w-[124px]">
           <SelectValue placeholder="Tag" />
         </SelectTrigger>
         <SelectContent>
@@ -950,7 +950,7 @@ function TaskFilterControls() {
           actions.setScheduleFilter(value as ScheduleFilter)
         }
       >
-        <SelectTrigger size="sm" className="min-w-[140px]">
+        <SelectTrigger size="sm" className="min-w-[144px]">
           <SelectValue placeholder="Schedule" />
         </SelectTrigger>
         <SelectContent>
@@ -971,7 +971,11 @@ function TaskFilterControls() {
 }
 
 function TaskFeatureFrame({ children }: { children: ReactNode }) {
-  return <div className="flex h-full w-full min-h-0 flex-col overflow-hidden">{children}</div>;
+  return (
+    <div className="flex h-full w-full min-h-0 flex-col overflow-hidden bg-background">
+      {children}
+    </div>
+  );
 }
 
 function TaskFeatureToolbar() {
@@ -979,12 +983,19 @@ function TaskFeatureToolbar() {
 
   return (
     <div className="flex shrink-0 flex-col gap-2">
-      <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:gap-3">
-        <p className="text-sm text-muted-foreground">Organize and track your work</p>
+      <div className="flex flex-col gap-2.5 lg:flex-row lg:items-center lg:gap-3">
+        <div className="hidden shrink-0 lg:block">
+          <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground/80">
+            Tasks
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Organize and track your work
+          </p>
+        </div>
 
-        <div className="w-full flex-1 min-w-0">
+        <div className="min-w-0 flex-1">
           {state.isSearchOpen || state.searchInput.length > 0 ? (
-            <InputGroup className="h-8">
+            <InputGroup className="h-9 rounded-lg border-border/70 bg-card/70 shadow-none">
               <InputGroupAddon>
                 <SearchIcon className="size-4" />
               </InputGroupAddon>
@@ -1005,6 +1016,7 @@ function TaskFeatureToolbar() {
                 }}
                 placeholder="Search tasks"
                 aria-label="Search tasks"
+                className="text-sm"
               />
               <InputGroupButton
                 size="icon-xs"
@@ -1019,14 +1031,14 @@ function TaskFeatureToolbar() {
               // eslint-disable-next-line react-hooks/refs -- forwarded ref object for focus restore outside render
               ref={meta.searchButtonRef}
               variant="outline"
-              size="sm"
-              className="h-8 w-full justify-between text-sm"
+              size="default"
+              className="h-9 w-full justify-between rounded-lg border-border/70 bg-card/70 px-3 text-sm"
               onClick={actions.openSearch}
               aria-expanded={state.isSearchOpen}
               aria-controls="task-search-input"
             >
               <span className="flex items-center gap-2">
-                <SearchIcon className="size-4" />
+                <SearchIcon data-icon="inline-start" />
                 Search tasks
               </span>
               <Kbd>/</Kbd>
@@ -1034,30 +1046,34 @@ function TaskFeatureToolbar() {
           )}
         </div>
 
-        <div className="flex items-center gap-2 lg:justify-end">
-          <label className="inline-flex h-8 items-center gap-2 rounded-md border border-border px-3 text-sm">
+        <div className="flex flex-wrap items-center gap-2 lg:flex-nowrap lg:justify-end">
+          <label className="inline-flex h-9 items-center gap-2 rounded-lg border border-border/70 bg-card/70 px-3 text-sm text-foreground">
             <Switch
               size="sm"
               checked={state.hideCompleted}
               onCheckedChange={actions.toggleHideCompleted}
             />
-            <span className="font-medium">Hide completed</span>
+            <span className="font-medium leading-none">Hide completed</span>
           </label>
 
           <Tabs
             value={state.currentView}
             onValueChange={(value) => actions.setView(value as TaskView)}
+            className="shrink-0"
           >
-            <TabsList variant="line" className="h-8 gap-1 bg-transparent p-0">
+            <TabsList
+              variant="line"
+              className="h-9 rounded-lg border border-border/70 bg-card/70 p-1"
+            >
               <TabsTrigger
                 value="board"
-                className="px-3 py-1.5 text-sm data-[state=active]:font-medium"
+                className="h-7 rounded-md px-3 text-sm text-muted-foreground data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:after:hidden"
               >
                 Board
               </TabsTrigger>
               <TabsTrigger
                 value="todayPlusBoard"
-                className="px-3 py-1.5 text-sm data-[state=active]:font-medium"
+                className="h-7 rounded-md px-3 text-sm text-muted-foreground data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:after:hidden"
               >
                 Today + Board
               </TabsTrigger>
@@ -1084,21 +1100,24 @@ function TaskFeatureFilters() {
         <Button
           variant="outline"
           size="sm"
-          className="w-fit"
+          className="h-8 w-fit rounded-lg border-border/70 bg-card/70"
           onClick={() => setIsMobileFiltersOpen(true)}
         >
-          <SlidersHorizontalIcon className="size-4 mr-2" />
+          <SlidersHorizontalIcon data-icon="inline-start" />
           Filters
         </Button>
         <Sheet open={isMobileFiltersOpen} onOpenChange={setIsMobileFiltersOpen}>
-          <SheetContent side="bottom" className="h-[70vh]">
+          <SheetContent
+            side="bottom"
+            className="h-[70vh] rounded-t-[20px] border-border/70 bg-background"
+          >
             <SheetHeader>
               <SheetTitle>Filter tasks</SheetTitle>
               <SheetDescription>
                 Narrow tasks by status, priority, project, tag, and schedule.
               </SheetDescription>
             </SheetHeader>
-            <div className="p-4 overflow-y-auto">
+            <div className="overflow-y-auto p-4">
               <TaskFilterControls />
             </div>
           </SheetContent>
@@ -1108,7 +1127,7 @@ function TaskFeatureFilters() {
   }
 
   return (
-    <div className="rounded-lg border border-border bg-card p-4">
+    <div className="rounded-[18px] border border-border/70 bg-card/45 p-2.5">
       <TaskFilterControls />
     </div>
   );
@@ -1119,10 +1138,7 @@ function TaskFeatureContent() {
 
   if (meta.isLoading) {
     return (
-      <div className="flex h-full min-h-0 flex-col gap-3 overflow-hidden px-6 py-4 md:px-8">
-        <div className="flex shrink-0 items-center justify-between">
-          <p className="text-sm text-muted-foreground">Organize and track your work</p>
-        </div>
+      <div className="flex h-full min-h-0 flex-col gap-3 overflow-hidden px-6 py-3 md:px-8">
         <div className="flex min-h-0 flex-1 items-center justify-center">
           <p className="text-sm text-muted-foreground">Loading...</p>
         </div>
@@ -1131,7 +1147,7 @@ function TaskFeatureContent() {
   }
 
   return (
-    <div className="flex h-full w-full min-h-0 flex-1 flex-col overflow-hidden px-6 py-4 md:px-8">
+    <div className="flex h-full w-full min-h-0 flex-1 flex-col overflow-hidden px-6 py-3 md:px-8">
       {state.isEmptyState ? (
         <div className="flex min-h-0 flex-1 items-center justify-center py-16">
           <div className="flex max-w-xs flex-col items-center justify-center gap-3 text-center">
@@ -1145,7 +1161,7 @@ function TaskFeatureContent() {
             </p>
             <Button
               size="sm"
-              className="mt-2 h-8"
+              className="mt-2 h-8 rounded-lg"
               onClick={() => actions.openCreate({ status: "Not Started" })}
             >
               Add your first task
@@ -1153,7 +1169,7 @@ function TaskFeatureContent() {
             <Button
               size="sm"
               variant="outline"
-              className="h-8"
+              className="h-8 rounded-lg"
               onClick={() => actions.setCreateTagDialogOpen(true)}
             >
               Create a tag
@@ -1175,7 +1191,7 @@ function TaskFeatureContent() {
               <Button
                 variant="outline"
                 size="sm"
-                className="mt-2 h-8"
+                className="mt-2 h-8 rounded-lg"
                 onClick={actions.clearFilters}
               >
                 Clear filters

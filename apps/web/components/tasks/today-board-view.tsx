@@ -50,32 +50,37 @@ export function TodayBoardView({
   );
 
   return (
-    <div className="flex h-full w-full min-h-0 flex-col gap-4 overflow-y-auto lg:flex-row lg:overflow-hidden">
-      {/* Today Lane - Left side */}
-      <div className="flex min-h-[200px] min-w-[260px] flex-col overflow-hidden rounded-lg border border-border bg-card lg:min-h-0 lg:w-[32%] xl:w-[28%]">
-        {/* Today header */}
-        <div className="sticky top-0 z-10 flex min-h-8 shrink-0 items-center justify-between border-b border-border bg-card px-3 py-1">
+    <div className="flex h-full w-full min-h-0 flex-col gap-3 overflow-y-auto lg:flex-row lg:overflow-hidden">
+      <div className="flex min-h-[220px] min-w-[260px] flex-col overflow-hidden rounded-[18px] border border-border/70 bg-card/50 lg:min-h-0 lg:w-[31%] xl:w-[27%]">
+        <div className="sticky top-0 z-10 flex min-h-10 shrink-0 items-center justify-between gap-2 border-b border-border/60 bg-background/92 px-3 py-2 backdrop-blur supports-backdrop-filter:bg-background/80">
           <div className="flex min-w-0 items-center gap-2">
-            <h3 className="shrink-0 text-sm font-medium tracking-tight">Today</h3>
-            <span className="shrink-0 rounded-md bg-muted px-2 py-0.5 text-xs font-medium tabular-nums text-muted-foreground">
+            <h3 className="shrink-0 text-sm font-medium tracking-tight text-foreground">
+              Today
+            </h3>
+            <span className="shrink-0 rounded-md bg-muted px-2 py-0.5 text-[11px] font-medium tabular-nums text-muted-foreground">
               {todayTasks.length}
             </span>
-            <span className="truncate text-xs text-muted-foreground">{today}</span>
+            <span className="truncate text-[11px] tabular-nums text-muted-foreground">
+              {today}
+            </span>
           </div>
           <Button
             variant="ghost"
             size="icon-sm"
-            className={cn("shrink-0", isMobile ? "size-8" : "size-7")}
+            className={cn(
+              "shrink-0 rounded-md text-muted-foreground",
+              isMobile ? "size-8" : "size-7",
+            )}
             onClick={() =>
               onCreateTask({ status: "To Do", scheduledDate: today })
             }
+            aria-label="Add task for today"
           >
-            <HugeiconsIcon icon={Add01Icon} className="size-4" />
+            <HugeiconsIcon icon={Add01Icon} />
           </Button>
         </div>
 
-        {/* Today task list with Add card */}
-        <div className="min-h-0 flex-1 divide-y divide-border overflow-y-auto">
+        <div className="min-h-0 flex-1 divide-y divide-border/40 overflow-y-auto">
           {todayTasks.map((task) => (
             <TaskCard
               key={task._id}
@@ -94,8 +99,7 @@ export function TodayBoardView({
         </div>
       </div>
 
-      {/* Board View - Right side */}
-      <div className="flex-1 h-full min-h-[300px] min-w-0">
+      <div className="h-full min-h-[300px] min-w-0 flex-1">
         <div className="h-full min-h-0">
           <BoardView
             tasks={boardTasks}

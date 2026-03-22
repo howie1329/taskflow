@@ -23,6 +23,7 @@ import {
   Field,
   FieldLabel,
   FieldContent,
+  FieldGroup,
   FieldError,
 } from "@/components/ui/field";
 import { Kbd } from "@/components/ui/kbd";
@@ -225,15 +226,17 @@ export function CreateTaskSheet({
 
   const content = (
     <div className="flex h-full flex-col">
-      <SheetHeader className="shrink-0 pb-4 pt-6">
+      <SheetHeader className="shrink-0 gap-2 px-4 pb-3 pt-5 sm:px-5">
         {renderInSidebar ? (
-          <h2 className="text-sm font-medium text-muted-foreground">New task</h2>
+          <h2 className="text-lg font-medium tracking-tight text-foreground">
+            New task
+          </h2>
         ) : (
-          <SheetTitle className="text-sm text-muted-foreground font-medium">
+          <SheetTitle className="text-lg font-medium tracking-tight text-foreground">
             New task
           </SheetTitle>
         )}
-        <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
           <Kbd>Enter</Kbd>
           <span>to create</span>
           <span className="mx-1">·</span>
@@ -242,11 +245,11 @@ export function CreateTaskSheet({
         </div>
       </SheetHeader>
 
-      <form
-        onSubmit={handleSubmit}
-        className="flex-1 space-y-4 overflow-y-auto px-4 py-4"
-      >
-            {/* Title - Required */}
+      <Separator />
+
+      <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
+        <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-4 py-4 sm:px-5">
+          <div className="flex flex-col gap-3.5">
             <Field>
               <FieldLabel htmlFor={ids.title} className="sr-only">
                 Title
@@ -257,7 +260,7 @@ export function CreateTaskSheet({
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="What needs to be done?"
-                  className="h-8 rounded-md px-3 text-sm font-medium"
+                  className="h-auto rounded-none border-0 border-b border-border/60 px-0 py-2 text-[24px] font-medium tracking-[-0.02em] shadow-none focus-visible:ring-0"
                   aria-invalid={showTitleError}
                   aria-describedby={showTitleError ? ids.titleError : undefined}
                 />
@@ -279,23 +282,32 @@ export function CreateTaskSheet({
                   onChange={(e) => setDescription(e.target.value)}
                   onKeyDown={handleDescriptionKeyDown}
                   placeholder="Add details (optional)"
-                  className="min-h-28 rounded-md px-3 py-2 text-sm leading-relaxed"
+                  className="min-h-32 rounded-xl border-border/60 bg-card/40 px-3 py-3 text-sm leading-relaxed"
                 />
               </FieldContent>
             </Field>
+          </div>
 
-            <Separator />
+          <Separator />
 
-            <div className="space-y-4 rounded-lg border border-border p-4">
-              <h3 className="text-sm font-medium text-muted-foreground">Options</h3>
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex flex-col gap-0.5">
+                <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground/80">
+                  Properties
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Set context without interrupting capture.
+                </p>
+              </div>
+            </div>
 
-              {/* Core metadata */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Project */}
+            <FieldGroup className="gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <Field>
                   <FieldLabel
                     htmlFor={ids.project}
-                    className="text-sm font-medium"
+                    className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground"
                   >
                     Project
                   </FieldLabel>
@@ -306,7 +318,7 @@ export function CreateTaskSheet({
                     >
                       <SelectTrigger
                         id={ids.project}
-                        className="h-8 w-full text-sm"
+                        className="h-9 w-full rounded-lg border-border/60 bg-card/40 text-sm"
                       >
                         <SelectValue placeholder="No project" />
                       </SelectTrigger>
@@ -318,11 +330,10 @@ export function CreateTaskSheet({
                           <SelectItem
                             key={project._id as string}
                             value={project._id as string}
-                            className="text-sm"
                           >
                             <div className="flex items-center gap-2">
                               <div
-                                className="w-2 h-2 rounded-full"
+                                className="size-2 rounded-full"
                                 style={{ backgroundColor: project.color }}
                               />
                               <span className="mr-1">{project.icon}</span>
@@ -339,7 +350,7 @@ export function CreateTaskSheet({
                 <Field>
                   <FieldLabel
                     htmlFor={ids.status}
-                    className="text-sm font-medium"
+                    className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground"
                   >
                     Status
                   </FieldLabel>
@@ -350,13 +361,13 @@ export function CreateTaskSheet({
                     >
                       <SelectTrigger
                         id={ids.status}
-                        className="h-8 w-full text-sm"
+                        className="h-9 w-full rounded-lg border-border/60 bg-card/40 text-sm"
                       >
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         {statusOptions.map((s) => (
-                          <SelectItem key={s} value={s} className="text-sm">
+                          <SelectItem key={s} value={s}>
                             {s}
                           </SelectItem>
                         ))}
@@ -369,7 +380,7 @@ export function CreateTaskSheet({
                 <Field>
                   <FieldLabel
                     htmlFor={ids.priority}
-                    className="text-sm font-medium"
+                    className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground"
                   >
                     Priority
                   </FieldLabel>
@@ -380,7 +391,7 @@ export function CreateTaskSheet({
                     >
                       <SelectTrigger
                         id={ids.priority}
-                        className="h-8 w-full text-sm"
+                        className="h-9 w-full rounded-lg border-border/60 bg-card/40 text-sm"
                       >
                         <SelectValue>
                           <div className="flex items-center gap-2">
@@ -396,7 +407,7 @@ export function CreateTaskSheet({
                       </SelectTrigger>
                       <SelectContent>
                         {priorityOptions.map((p) => (
-                          <SelectItem key={p} value={p} className="text-sm">
+                          <SelectItem key={p} value={p}>
                             <div className="flex items-center gap-2">
                               <div
                                 className={cn(
@@ -412,15 +423,11 @@ export function CreateTaskSheet({
                     </Select>
                   </FieldContent>
                 </Field>
-              </div>
 
-              {/* Dates */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Scheduled Date */}
                 <Field>
                   <FieldLabel
                     htmlFor={ids.scheduled}
-                    className="text-sm font-medium"
+                    className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground"
                   >
                     Scheduled
                   </FieldLabel>
@@ -430,14 +437,16 @@ export function CreateTaskSheet({
                       type="date"
                       value={scheduledDate}
                       onChange={(e) => setScheduledDate(e.target.value)}
-                      className="h-8 text-sm"
+                      className="h-9 rounded-lg border-border/60 bg-card/40 text-sm"
                     />
                   </FieldContent>
                 </Field>
 
-                {/* Due Date */}
                 <Field>
-                  <FieldLabel htmlFor={ids.due} className="text-sm font-medium">
+                  <FieldLabel
+                    htmlFor={ids.due}
+                    className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground"
+                  >
                     Due Date
                   </FieldLabel>
                   <FieldContent>
@@ -446,15 +455,16 @@ export function CreateTaskSheet({
                       type="date"
                       value={dueDate}
                       onChange={(e) => setDueDate(e.target.value)}
-                      className="h-8 text-sm"
+                      className="h-9 rounded-lg border-border/60 bg-card/40 text-sm"
                     />
                   </FieldContent>
                 </Field>
               </div>
 
-              {/* Tags */}
               <Field>
-                <FieldLabel className="text-sm font-medium">Tags</FieldLabel>
+                <FieldLabel className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">
+                  Tags
+                </FieldLabel>
                 <FieldContent>
                   {tags.length === 0 ? (
                     <span className="text-sm text-muted-foreground">
@@ -472,10 +482,10 @@ export function CreateTaskSheet({
                             size="xs"
                             onClick={() => toggleTag(tag._id as string)}
                             aria-pressed={isSelected}
-                            className="h-8 rounded-md px-3 text-sm"
+                            className="h-7 rounded-full border-border/60 px-2.5"
                           >
                             <span
-                              className="inline-block w-1.5 h-1.5 rounded-full mr-1.5"
+                              className="mr-1.5 inline-block size-1.5 rounded-full"
                               style={{ backgroundColor: tag.color }}
                             />
                             {tag.name}
@@ -486,26 +496,29 @@ export function CreateTaskSheet({
                   )}
                 </FieldContent>
               </Field>
-            </div>
+            </FieldGroup>
+          </div>
+        </div>
 
-            {/* Footer */}
-            <SheetFooter className="gap-2 border-t border-border pt-4 sm:flex-row sm:justify-end">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleCancel}
-                className="h-8 text-sm"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={!canSubmit}
-                className="h-8 text-sm"
-              >
-                Create
-              </Button>
-            </SheetFooter>
+        <Separator />
+
+        <SheetFooter className="shrink-0 gap-2 px-4 py-3 sm:flex-row sm:justify-end sm:px-5">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleCancel}
+            className="h-8 rounded-lg"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            disabled={!canSubmit}
+            className="h-8 rounded-lg"
+          >
+            Create
+          </Button>
+        </SheetFooter>
       </form>
     </div>
   );
@@ -518,7 +531,10 @@ export function CreateTaskSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side={isMobile ? "bottom" : "right"}
-        className={cn("sm:max-w-md", isMobile && "h-[85vh]")}
+        className={cn(
+          "bg-background sm:max-w-lg",
+          isMobile ? "h-[85vh] rounded-t-[22px]" : "sm:max-w-[36rem]",
+        )}
       >
         {content}
       </SheetContent>

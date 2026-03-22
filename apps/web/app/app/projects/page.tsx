@@ -209,81 +209,91 @@ export default function ProjectsPage() {
   }, [deleteProject, isSheetOpen])
 
   return (
-    <div className="flex flex-col gap-4 h-full w-full">
-      {/* Header Row */}
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between shrink-0">
-        <div className="flex items-center gap-2">
-          <p className="text-sm text-muted-foreground">
-            Group related work together
-          </p>
-        </div>
-        <Button size="sm" onClick={handleCreateClick} className="h-8">
-          <HugeiconsIcon
-            icon={PlusSignIcon}
-            strokeWidth={2}
-            data-icon="inline-start"
-          />
-          New project
-        </Button>
-      </div>
+    <div className="flex h-full w-full flex-col gap-4">
+      <div className="flex shrink-0 flex-col gap-2.5 rounded-[20px] border border-border/70 bg-card/45 p-3 sm:p-3.5">
+        <div className="flex flex-col gap-2.5 lg:flex-row lg:items-center lg:gap-3">
+          <div className="hidden shrink-0 lg:block">
+            <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground/80">
+              Projects
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Group related work together
+            </p>
+          </div>
 
-      {/* Controls Row */}
-      <div className="rounded-lg border border-border/60 bg-muted/30 p-2 shrink-0">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
           <Tabs
             value={activeTab}
             onValueChange={(v) => setActiveTab(v as "active" | "archived")}
-            className="w-full sm:w-auto"
+            className="w-full shrink-0 sm:w-auto"
           >
-            <TabsList className="w-full sm:w-auto">
-              <TabsTrigger value="active" className="flex-1 sm:flex-none">
+            <TabsList
+              variant="line"
+              className="h-9 w-full rounded-lg border border-border/70 bg-card/70 p-1 sm:w-auto"
+            >
+              <TabsTrigger
+                value="active"
+                className="h-7 flex-1 rounded-md px-3 text-sm text-muted-foreground data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:after:hidden sm:flex-none"
+              >
                 Active
               </TabsTrigger>
-              <TabsTrigger value="archived" className="flex-1 sm:flex-none">
+              <TabsTrigger
+                value="archived"
+                className="h-7 flex-1 rounded-md px-3 text-sm text-muted-foreground data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:after:hidden sm:flex-none"
+              >
                 Archived
               </TabsTrigger>
             </TabsList>
           </Tabs>
 
-          <InputGroup className="w-full flex-1 min-w-0">
+          <InputGroup className="h-9 min-w-0 flex-1 rounded-lg border-border/70 bg-card/70 shadow-none">
             <InputGroupAddon>
               <HugeiconsIcon icon={SearchIcon} strokeWidth={2} />
             </InputGroupAddon>
             <InputGroupInput
               ref={searchInputRef}
-              placeholder="Search projects..."
+              placeholder="Search projects"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               aria-label="Search projects"
               aria-describedby="search-shortcut"
+              className="text-sm"
             />
-            {searchQuery && (
-              <InputGroupAddon>
+            {searchQuery ? (
+              <InputGroupAddon align="inline-end">
                 <Button
                   variant="ghost"
                   size="icon-xs"
                   onClick={() => setSearchQuery("")}
-                  className="h-6 w-6"
                   aria-label="Clear search"
                 >
                   ×
                 </Button>
               </InputGroupAddon>
-            )}
+            ) : null}
           </InputGroup>
+
+          <Button
+            size="default"
+            onClick={handleCreateClick}
+            className="h-9 shrink-0 rounded-lg"
+          >
+            <HugeiconsIcon
+              icon={PlusSignIcon}
+              strokeWidth={2}
+              data-icon="inline-start"
+            />
+            New project
+          </Button>
           <span id="search-shortcut" className="sr-only">
             Press Command K or Control K to focus search
           </span>
         </div>
       </div>
 
-      {/* Content Area */}
       <div className="flex-1 min-h-0">
         {isLoading ? (
-          // Loading State
           <ProjectGridSkeleton count={6} />
         ) : displayProjects.length === 0 ? (
-          // Empty State
           <Empty className="h-full min-h-[400px]">
             <EmptyHeader>
               {searchQuery ? (
@@ -325,7 +335,7 @@ export default function ProjectsPage() {
               </EmptyDescription>
             </EmptyHeader>
             {activeTab === "active" && !searchQuery && (
-              <Button onClick={handleCreateClick}>
+              <Button onClick={handleCreateClick} className="rounded-lg">
                 <HugeiconsIcon
                   icon={PlusSignIcon}
                   strokeWidth={2}
@@ -336,7 +346,6 @@ export default function ProjectsPage() {
             )}
           </Empty>
         ) : (
-          // Project Grid
           <>
             <div
               className="sr-only"
@@ -350,7 +359,7 @@ export default function ProjectsPage() {
               {searchQuery && ` matching "${searchQuery}"`}
             </div>
             <div
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 pb-4"
+              className="grid grid-cols-1 gap-3 pb-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
               role="list"
               aria-label={`${activeTab === "active" ? "Active" : "Archived"} projects`}
             >
@@ -372,7 +381,6 @@ export default function ProjectsPage() {
         )}
       </div>
 
-      {/* Create/Edit Project Sheet */}
       <ProjectSheet
         open={isSheetOpen}
         onOpenChange={setIsSheetOpen}
@@ -381,7 +389,6 @@ export default function ProjectsPage() {
         isSubmitting={isSubmitting}
       />
 
-      {/* Delete Confirmation Dialog */}
       <AlertDialog
         open={!!deleteProject}
         onOpenChange={(open) => !open && setDeleteProject(null)}

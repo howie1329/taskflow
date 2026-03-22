@@ -6,8 +6,8 @@ export default function TasksPage() {
   return (
     <TaskFeature.Provider>
       <TaskFeature.Frame>
-        <div className="sticky top-0 z-10 border-b border-border bg-background/95 px-6 py-3 backdrop-blur-sm supports-backdrop-filter:bg-background/90 md:px-8">
-          <div className="space-y-2">
+        <div className="sticky top-0 z-20 border-b border-border/70 bg-background/94 px-6 py-3 backdrop-blur supports-backdrop-filter:bg-background/88 md:px-8">
+          <div className="flex flex-col gap-2.5">
             <TaskFeature.Toolbar />
             <TaskFeature.Filters />
           </div>

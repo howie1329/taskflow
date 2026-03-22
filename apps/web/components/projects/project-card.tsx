@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -48,16 +48,14 @@ export function ProjectCard({
   onDelete,
   showArchiveAction = true,
 }: ProjectCardProps) {
-  const cardRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null)
 
-  const formatRelativeTime = (timestamp: number) => {
-    const diff = Date.now() - timestamp;
-    const days = Math.floor(diff / 86400000);
-    if (days === 0) return "Today";
-    if (days === 1) return "Yesterday";
-    if (days < 7) return `${days} days ago`;
-    if (days < 30) return `${Math.floor(days / 7)} weeks ago`;
-    return `${Math.floor(days / 30)} months ago`;
+  const formatUpdatedAt = (timestamp: number) => {
+    return new Date(timestamp).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
   };
 
   const handleCardClick = () => {
@@ -83,24 +81,23 @@ export function ProjectCard({
       role="button"
       tabIndex={0}
       aria-label={`${project.title} project. Press Enter to open.`}
-      className="group rounded-xl border border-border/60 bg-card/40 dark:bg-card/20 p-4 hover:bg-accent/30 hover:border-border shadow-sm shadow-black/5 hover:-translate-y-[1px] transition-[transform,box-shadow,background-color,border-color] duration-200 ease-out cursor-pointer relative h-full flex flex-col outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-offset-2"
+      className="group relative flex h-full cursor-pointer flex-col rounded-[18px] border border-border/70 bg-card/50 p-4 outline-none transition-[background-color,border-color,transform] duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] hover:border-border hover:bg-accent/20 motion-safe:active:scale-[0.99] focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-offset-2"
     >
-      {/* Card Header */}
-      <div className="flex items-start justify-between gap-2 mb-2">
-        <div className="flex items-center gap-2.5 min-w-0">
+      <div className="mb-3 flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2.5">
           <div
-            className="w-2.5 h-2.5 rounded-full shrink-0 ring-1 ring-border/50"
+            className="size-2.5 shrink-0 rounded-full ring-1 ring-border/50"
             style={{ backgroundColor: project.color }}
             aria-hidden="true"
           />
           <span
-            className="text-xl shrink-0 leading-none select-none"
+            className="shrink-0 text-lg leading-none select-none"
             aria-hidden="true"
             role="img"
           >
             {project.icon}
           </span>
-          <h3 className="text-sm font-semibold tracking-tight truncate">
+          <h3 className="truncate text-[15px] font-medium tracking-[-0.01em] text-foreground">
             {project.title}
           </h3>
         </div>
@@ -110,15 +107,11 @@ export function ProjectCard({
             <Button
               variant="ghost"
               size="icon-xs"
-              className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100 transition-all duration-200 focus-visible:opacity-100"
+              className="shrink-0 rounded-md opacity-0 transition-opacity duration-150 group-hover:opacity-100 focus-visible:opacity-100"
               onClick={handleActionClick}
               aria-label={`Actions for ${project.title}`}
             >
-              <HugeiconsIcon
-                icon={MoreVerticalCircle01Icon}
-                strokeWidth={2}
-                className="w-4 h-4"
-              />
+              <HugeiconsIcon icon={MoreVerticalCircle01Icon} strokeWidth={2} />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -168,26 +161,24 @@ export function ProjectCard({
         </DropdownMenu>
       </div>
 
-      {/* Description */}
       <p
         className={cn(
-          "text-xs line-clamp-2 mb-4 flex-1 leading-relaxed",
+          "mb-5 flex-1 text-sm leading-relaxed",
           project.description
-            ? "text-muted-foreground"
+            ? "line-clamp-2 text-muted-foreground"
             : "text-muted-foreground/60 italic",
         )}
       >
         {project.description || "No description"}
       </p>
 
-      {/* Footer */}
-      <div className="flex items-center justify-between text-[11px] text-muted-foreground/80 mt-auto pt-2 border-t border-border/30 tabular-nums">
-        <span className="flex items-center gap-1">
+      <div className="mt-auto flex items-center justify-between border-t border-border/40 pt-2.5 text-[11px] tabular-nums text-muted-foreground/80">
+        <span className="flex items-center gap-1.5">
           <span className="text-muted-foreground/50">Updated</span>
-          {formatRelativeTime(project.updatedAt)}
+          {formatUpdatedAt(project.updatedAt)}
         </span>
         {project.status === "archived" && (
-          <Badge variant="secondary" className="text-[10px] h-4 px-1.5">
+          <Badge variant="secondary" className="h-5 rounded-full px-2 text-[10px]">
             Archived
           </Badge>
         )}
