@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/collapsible";
 import { ChevronDownIcon } from "lucide-react";
 import type { ToolCall } from "./tool-calls";
+import type { ToolProgressPart } from "./message-parts";
 import {
   getToolDisplayNameFromKey,
   getToolInputQuery,
@@ -37,11 +38,22 @@ interface PreferencesLike {
 
 interface ToolPanelsProps {
   toolCalls: ToolCall[];
+  toolProgress: ToolProgressPart[];
   preferences: PreferencesLike | undefined;
   onInspectTool?: (toolCallId: string) => void;
 }
 
-function renderToolContent(toolCall: ToolCall): ReactNode {
+function renderToolContent(
+  toolCall: ToolCall,
+  progress: ToolProgressPart[],
+): ReactNode {
+  const renderedContent = getToolDefinition(toolCall.toolKey)?.render?.(toolCall, {
+    progress,
+  });
+  if (renderedContent) {
+    return renderedContent;
+  }
+
   if (
     toolCall.state !== "output-available" &&
     toolCall.state !== "output-error"
@@ -57,13 +69,6 @@ function renderToolContent(toolCall: ToolCall): ReactNode {
     return <p className="text-sm text-destructive">{toolCall.errorText}</p>;
   }
 
-  const renderedContent = getToolDefinition(toolCall.toolKey)?.render?.(
-    toolCall,
-  );
-  if (renderedContent) {
-    return renderedContent;
-  }
-
   const summary = summarizeToolOutput(toolCall.output);
   if (summary) {
     return <p className="text-sm">{summary}</p>;
@@ -74,6 +79,7 @@ function renderToolContent(toolCall: ToolCall): ReactNode {
 
 export function ToolPanels({
   toolCalls,
+  toolProgress,
   preferences,
   onInspectTool,
 }: ToolPanelsProps) {
@@ -90,6 +96,11 @@ export function ToolPanels({
     const query = getToolInputQuery(toolCall.input, toolCall.toolKey);
     const displayName = getToolDisplayNameFromKey(toolCall.toolKey);
     const stepMeta = getToolStepMeta(toolCall);
+    const progressForTool = toolProgress.filter(
+      (part) => part.data.toolCallId === toolCall.id,
+    );
+    const shouldHideRawPayload =
+      getToolDefinition(toolCall.toolKey)?.hideRawPayload === true;
 
     return (
       <Collapsible key={toolCall.id} className="group">
@@ -147,9 +158,9 @@ export function ToolPanels({
                   summary={getToolSummary(toolCall)}
                 />
                 <div className="border-t border-border pt-4">
-                  {renderToolContent(toolCall)}
+                  {renderToolContent(toolCall, progressForTool)}
                 </div>
-                {toolCall.output !== undefined && (
+                {!shouldHideRawPayload && toolCall.output !== undefined && (
                   <ToolRawPayload output={toolCall.output} />
                 )}
               </div>

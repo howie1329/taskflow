@@ -227,14 +227,14 @@ const MODE_SPECIFIC_COMMANDS: ToolLockCommand[] = [
     label: "Firecrawl Search",
     description: "Discover URLs with Firecrawl search",
     toolKey: "firecrawlSearch",
-    allowedModes: ["Advanced"],
+    allowedModes: ["Advanced", "Research"],
   },
   {
     command: "/research.advanced",
     label: "Advanced Research",
     description: "Run the combined advanced research workflow",
     toolKey: "advancedResearch",
-    allowedModes: ["Advanced"],
+    allowedModes: ["Advanced", "Research"],
   },
   {
     command: "/valyu.search",

@@ -146,15 +146,26 @@ export function buildEvidenceSummary({
 }: {
   sources: ExtractedChatSource[]
 }) {
-  const topDomains = Array.from(new Set(sources.map((source) => source.domain))).slice(0, 3)
+  const topDomains = Array.from(
+    new Set(
+      sources
+        .map((source) => source.domain)
+        .filter((domain): domain is string => Boolean(domain)),
+    ),
+  ).slice(0, 3)
   const recentSources = sources.slice(-3).reverse()
+  const hasRepoEvidence = sources.some((source) => source.kind === "file")
 
   return {
     title:
       sources.length > 0 ? `${sources.length} source${sources.length === 1 ? "" : "s"} captured` : "No evidence yet",
     description:
       sources.length > 0
-        ? `Grounded in ${topDomains.join(", ")}`
+        ? hasRepoEvidence && topDomains.length > 0
+          ? `Grounded in repo citations and ${topDomains.join(", ")}`
+          : hasRepoEvidence
+            ? "Grounded in repo citations and tool evidence."
+            : `Grounded in ${topDomains.join(", ")}`
         : "Searches, citations, and tool evidence will collect here as the thread develops.",
     domains: topDomains,
     recentSources,

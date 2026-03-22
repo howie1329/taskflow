@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { AdvancedResearchCard } from "@/components/ai-elements/advanced-research-card";
+import { DaytonaResearchCard } from "./daytona-research-card";
 import { ExaAnswerCard } from "@/components/ai-elements/exa-answer-card";
 import { ExaWebSearchCard } from "@/components/ai-elements/exa-web-search-card";
 import { FirecrawlScrapeCard } from "@/components/ai-elements/firecrawl-scrape-card";
@@ -17,8 +18,12 @@ import { TASKFLOW_TOOL_KEYS } from "@/lib/AITools/taskflow-tool-keys";
 import type { ToolCall } from "./tool-calls";
 
 type ToolDefinition = {
-  render?: (toolCall: ToolCall) => ReactNode | null;
+  render?: (
+    toolCall: ToolCall,
+    context: { progress: Array<{ data: { toolKey: string; toolCallId: string; status: "running" | "done" | "error"; text: string } }> },
+  ) => ReactNode | null;
   summarize?: (toolCall: ToolCall) => string | null;
+  hideRawPayload?: boolean;
 };
 
 function getOutputArrayLength(output: unknown, key: string): number {
@@ -147,6 +152,12 @@ const TOOL_DEFINITIONS: Record<string, ToolDefinition> = {
     summarize: () => "Deleted Daytona sandbox",
   },
   researchDaytonaRepo: {
+    render: (toolCall, context) => (
+      <DaytonaResearchCard
+        output={toolCall.output}
+        progress={context.progress.map((item) => item.data)}
+      />
+    ),
     summarize: (toolCall) => {
       if (!toolCall.output || typeof toolCall.output !== "object") {
         return "Researched the attached repo"
@@ -167,6 +178,7 @@ const TOOL_DEFINITIONS: Record<string, ToolDefinition> = {
 
       return output.summary ?? "Researched the attached repo"
     },
+    hideRawPayload: true,
   },
   listDaytonaRepoFiles: {
     summarize: (toolCall) => {

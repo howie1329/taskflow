@@ -45,7 +45,7 @@ import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
-import { extractSourcesFromMessages } from "@/lib/chat/extract-sources"
+import { extractSourcesFromMessages, formatExtractedSourceLabel } from "@/lib/chat/extract-sources"
 import {
   formatTimestamp,
   getContextHealthLabel,
@@ -416,7 +416,7 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
 
   const handleCopySources = async () => {
     await copyText(
-      sources.map((source) => source.url).join("\n"),
+      sources.map((source) => formatExtractedSourceLabel(source)).join("\n"),
       "Sources copied",
     )
   }
@@ -693,7 +693,16 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
 
                   <Separator className="bg-border/35" />
                   <RightPanelMetaList>
-                    {selectedMessageView.metrics.map((metric) => (
+                    {selectedMessageView.metrics
+                      .filter(
+                        (
+                          metric,
+                        ): metric is {
+                          label: string
+                          value: string
+                        } => Boolean(metric),
+                      )
+                      .map((metric) => (
                       <RightPanelMetaRow
                         key={metric.label}
                         label={metric.label}
@@ -782,7 +791,8 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
                   />
                 ) : (
                   <div className="space-y-3">
-                    {evidenceModel.recentSources.map((source) => (
+                    {evidenceModel.recentSources.map((source) =>
+                      source.kind === "url" && source.url ? (
                       <a
                         key={source.url}
                         href={source.url}
@@ -793,11 +803,11 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0 space-y-1">
                             <p className="text-sm font-medium leading-6 text-foreground">
-                              {source.title ?? source.domain}
+                              {source.title ?? source.domain ?? source.url}
                             </p>
                             <RightPanelInlineMeta
                               items={[
-                                source.domain.toUpperCase(),
+                                source.domain ? source.domain.toUpperCase() : "WEB",
                                 source.toolKey,
                                 source.messageId ? `Msg ${source.messageId.slice(0, 8)}` : null,
                               ]}
@@ -806,7 +816,29 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
                           <ExternalLinkIcon className="mt-1 size-4 shrink-0 text-muted-foreground" />
                         </div>
                       </a>
-                    ))}
+                      ) : (
+                      <div
+                        key={formatExtractedSourceLabel(source)}
+                        className="block border-b border-border/40 pb-3 last:border-b-0 last:pb-0"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0 space-y-1">
+                            <p className="text-sm font-medium leading-6 text-foreground">
+                              {source.title ?? source.path}
+                            </p>
+                            <RightPanelInlineMeta
+                              items={[
+                                "REPO",
+                                formatExtractedSourceLabel(source),
+                                source.toolKey,
+                                source.messageId ? `Msg ${source.messageId.slice(0, 8)}` : null,
+                              ]}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      ),
+                    )}
                   </div>
                 )}
               </div>

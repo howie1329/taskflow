@@ -290,6 +290,18 @@ export function getToolStepMeta(toolCall: ToolCall): string[] {
     ].filter((value): value is string => !!value);
   }
 
+  if (toolCall.toolKey === "researchDaytonaRepo") {
+    const findings = Array.isArray(output.keyFindings) ? output.keyFindings.length : 0
+    const activity = Array.isArray(output.activity) ? output.activity.length : 0
+    const citations = Array.isArray(output.citations) ? output.citations.length : 0
+
+    return [
+      findings > 0 ? `${findings} findings` : null,
+      activity > 0 ? `${activity} steps` : null,
+      citations > 0 ? `${citations} citations` : null,
+    ].filter((value): value is string => !!value)
+  }
+
   if (toolCall.toolKey === "exaAnswer") {
     const citations = Array.isArray(output.citations) ? output.citations.length : 0;
     const requestId =

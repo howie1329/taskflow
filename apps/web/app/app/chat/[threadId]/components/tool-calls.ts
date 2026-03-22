@@ -4,6 +4,7 @@ export type ToolCall = {
   id: string;
   toolKey: string;
   state: ToolUIPart["state"];
+  preliminary?: boolean;
   input?: unknown;
   output?: unknown;
   errorText?: string;
@@ -32,6 +33,7 @@ export function getToolCalls(message: UIMessage): ToolCall[] {
         id: part.toolCallId ?? `${message.id}:${toolKey}:${index}`,
         toolKey,
         state: part.state,
+        preliminary: "preliminary" in part ? part.preliminary : undefined,
         input: "input" in part ? part.input : undefined,
         output: "output" in part ? part.output : undefined,
         errorText: "errorText" in part ? part.errorText : undefined,

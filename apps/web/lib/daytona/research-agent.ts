@@ -95,9 +95,24 @@ export const daytonaResearchFindingSchema = z.object({
   citations: z.array(daytonaResearchCitationSchema),
 })
 
+export const daytonaResearchActivityStepSchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  detail: z.string().nullable(),
+  phase: z.enum(["discover", "inspect", "synthesize"]),
+  status: z.enum(["running", "complete", "error"]),
+  toolName: z.string().nullable(),
+  path: z.string().nullable(),
+  startLine: z.number().int().min(1).nullable(),
+  endLine: z.number().int().min(1).nullable(),
+  query: z.string().nullable(),
+  count: z.number().int().nullable(),
+})
+
 export const daytonaResearchOutputSchema = z.object({
   task: z.string(),
   summary: z.string(),
+  activity: z.array(daytonaResearchActivityStepSchema),
   keyFindings: z.array(daytonaResearchFindingSchema),
   citations: z.array(daytonaResearchCitationSchema),
   limitations: z.array(z.string()),
@@ -106,6 +121,7 @@ export const daytonaResearchOutputSchema = z.object({
 })
 
 type DaytonaResearchCitation = z.infer<typeof daytonaResearchCitationSchema>
+type DaytonaResearchActivityStep = z.infer<typeof daytonaResearchActivityStepSchema>
 type DaytonaResearchFinding = z.infer<typeof daytonaResearchFindingSchema>
 type DaytonaResearchResult = z.infer<typeof daytonaResearchOutputSchema>
 
@@ -204,16 +220,19 @@ const dedupeCitations = (citations: DaytonaResearchCitation[]) => {
 const normalizeStructuredResearch = ({
   task,
   structuredOutput,
+  activity,
   transcript,
 }: {
   task: string
   structuredOutput: z.infer<typeof subagentResearchOutputSchema> | undefined
+  activity: DaytonaResearchActivityStep[]
   transcript: unknown
 }): DaytonaResearchResult => {
   if (!structuredOutput) {
     return {
       task,
       summary: DEFAULT_SUMMARY,
+      activity,
       keyFindings: [],
       citations: [],
       limitations: ["The research subagent did not return a structured output object."],
@@ -239,6 +258,7 @@ const normalizeStructuredResearch = ({
       structuredOutput.summary.trim().length > 0
         ? structuredOutput.summary.trim()
         : DEFAULT_SUMMARY,
+    activity,
     keyFindings: findings,
     citations,
     limitations: structuredOutput.limitations
@@ -284,6 +304,218 @@ const describeToolProgress = (toolName: string, input: unknown) => {
 
   return "Researching the attached repo..."
 }
+
+const getRecordString = (value: Record<string, unknown>, key: string) =>
+  typeof value[key] === "string" && value[key]!.toString().trim().length > 0
+    ? value[key]!.toString().trim()
+    : null
+
+const getRecordNumber = (value: Record<string, unknown>, key: string) =>
+  typeof value[key] === "number" && Number.isFinite(value[key])
+    ? Math.floor(value[key] as number)
+    : null
+
+const buildActivityStepFromToolResult = (
+  toolResult: unknown,
+  index: number,
+): DaytonaResearchActivityStep | null => {
+  if (!toolResult || typeof toolResult !== "object") {
+    return null
+  }
+
+  const input = toolResult as Record<string, unknown>
+  const toolName = getRecordString(input, "toolName")
+  const output =
+    input.output && typeof input.output === "object"
+      ? (input.output as Record<string, unknown>)
+      : null
+  const toolInput =
+    input.input && typeof input.input === "object"
+      ? (input.input as Record<string, unknown>)
+      : null
+
+  if (!toolName) {
+    return null
+  }
+
+  if (toolName === "listRepoFiles") {
+    const path = getRecordString(toolInput ?? {}, "path")
+    const count = Array.isArray(output?.files) ? output.files.length : 0
+    return {
+      id: `activity-${index}`,
+      label: "Listed repo files",
+      detail: count > 0 ? `Found ${count} entries${path ? ` in ${path}` : ""}.` : output ? getRecordString(output, "message") : null,
+      phase: "discover",
+      status: "complete",
+      toolName,
+      path,
+      startLine: null,
+      endLine: null,
+      query: null,
+      count,
+    }
+  }
+
+  if (toolName === "searchRepo") {
+    const path = getRecordString(toolInput ?? {}, "path")
+    const query = getRecordString(toolInput ?? {}, "query")
+    const count = Array.isArray(output?.matches) ? output.matches.length : 0
+    return {
+      id: `activity-${index}`,
+      label: "Searched the repo",
+      detail: query
+        ? `Searched for "${query}"${path ? ` in ${path}` : ""} and found ${count} matches.`
+        : `Found ${count} matches.`,
+      phase: "discover",
+      status: "complete",
+      toolName,
+      path,
+      startLine: null,
+      endLine: null,
+      query,
+      count,
+    }
+  }
+
+  if (toolName === "readRepoFile") {
+    const path = getRecordString(output ?? {}, "path") ?? getRecordString(toolInput ?? {}, "path")
+    const startLine = getRecordNumber(output ?? {}, "startLine")
+    const endLine = getRecordNumber(output ?? {}, "endLine")
+    return {
+      id: `activity-${index}`,
+      label: "Read a file",
+      detail: path
+        ? `Inspected ${path}${startLine ? `:${startLine}${endLine && endLine !== startLine ? `-${endLine}` : ""}` : ""}.`
+        : "Read a repo file.",
+      phase: "inspect",
+      status: "complete",
+      toolName,
+      path,
+      startLine,
+      endLine,
+      query: null,
+      count: null,
+    }
+  }
+
+  if (toolName === "runReadCommand") {
+    const command = getRecordString(output ?? {}, "command") ?? getRecordString(toolInput ?? {}, "command")
+    const path = getRecordString(output ?? {}, "path")
+    const startLine = getRecordNumber(output ?? {}, "startLine")
+    const endLine = getRecordNumber(output ?? {}, "endLine")
+    return {
+      id: `activity-${index}`,
+      label: "Ran bounded inspection",
+      detail: command
+        ? `${command}${path ? ` on ${path}` : ""}${startLine ? `:${startLine}${endLine && endLine !== startLine ? `-${endLine}` : ""}` : ""}.`
+        : "Ran a bounded inspection command.",
+      phase: "inspect",
+      status: "complete",
+      toolName,
+      path,
+      startLine,
+      endLine,
+      query: getRecordString(toolInput ?? {}, "query"),
+      count: null,
+    }
+  }
+
+  return null
+}
+
+const buildResearchActivity = (steps: unknown[]): DaytonaResearchActivityStep[] => {
+  const activity = steps.flatMap((step, stepIndex) => {
+    if (!step || typeof step !== "object") {
+      return []
+    }
+
+    const input = step as Record<string, unknown>
+    const toolResults = Array.isArray(input.toolResults) ? input.toolResults : []
+    return toolResults
+      .map((toolResult, toolIndex) =>
+        buildActivityStepFromToolResult(toolResult, stepIndex * 10 + toolIndex),
+      )
+      .filter((item): item is DaytonaResearchActivityStep => Boolean(item))
+  })
+
+  activity.push({
+    id: `activity-${activity.length + 1}`,
+    label: "Synthesized findings",
+    detail: "Condensed the repo investigation into grounded findings and citations.",
+    phase: "synthesize",
+    status: "complete",
+    toolName: null,
+    path: null,
+    startLine: null,
+    endLine: null,
+    query: null,
+    count: null,
+  })
+
+  return activity
+}
+
+const toDebugStepSummary = (step: unknown) => {
+  if (!step || typeof step !== "object") {
+    return null
+  }
+
+  const input = step as Record<string, unknown>
+  const text = typeof input.text === "string" ? input.text : null
+  const finishReason =
+    typeof input.finishReason === "string" ? input.finishReason : null
+
+  const toolCalls = Array.isArray(input.toolCalls)
+    ? input.toolCalls
+      .map((toolCall) => {
+        if (!toolCall || typeof toolCall !== "object") {
+          return null
+        }
+
+        const record = toolCall as Record<string, unknown>
+        return {
+          toolName:
+            typeof record.toolName === "string" ? record.toolName : "unknown",
+          input: record.input ?? null,
+        }
+      })
+      .filter(Boolean)
+    : []
+
+  const toolResults = Array.isArray(input.toolResults)
+    ? input.toolResults
+      .map((toolResult) => {
+        if (!toolResult || typeof toolResult !== "object") {
+          return null
+        }
+
+        const record = toolResult as Record<string, unknown>
+        return {
+          toolName:
+            typeof record.toolName === "string" ? record.toolName : "unknown",
+          output: record.output ?? null,
+        }
+      })
+      .filter(Boolean)
+    : []
+
+  return {
+    text,
+    finishReason,
+    toolCalls,
+    toolResults,
+  }
+}
+
+const buildConvexSafeTranscript = (result: {
+  text: string
+  steps: unknown[]
+}) => ({
+  text: result.text,
+  steps: result.steps
+    .map(toDebugStepSummary)
+    .filter(Boolean),
+})
 
 export async function runDaytonaResearchAgent({
   task,
@@ -450,15 +682,16 @@ Task: ${task}`,
     abortSignal,
   })
 
-  const transcript = {
+  const transcript = buildConvexSafeTranscript({
     text: result.text,
-    messages: result.response.messages,
     steps: result.steps,
-  }
+  })
+  const activity = buildResearchActivity(result.steps)
 
   const structuredResult = normalizeStructuredResearch({
     task,
     structuredOutput: result.output,
+    activity,
     transcript,
   })
 

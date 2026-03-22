@@ -30,7 +30,7 @@ export const ModeMapping: Record<string, Mode> = {
     },
     "Research": {
         name: "Research",
-        activeTools: [...taskflowToolsKeys, ...ValyuToolsKeys, ...ParallelToolsKeys, ...ExaToolsKeys, "firecrawlScrape"] as ToolKey[]
+        activeTools: [...taskflowToolsKeys, ...ValyuToolsKeys, ...ParallelToolsKeys, ...ExaToolsKeys, "advancedResearch", "firecrawlSearch", "firecrawlScrape"] as ToolKey[]
     },
     "Social": {
         name: "Social",

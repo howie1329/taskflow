@@ -108,6 +108,7 @@ const ThreadMessageRow = memo(function ThreadMessageRow({
     reasoningText,
     text: messageText,
     toolCalls,
+    toolProgress,
   } = parsedMessage;
   const hasReasoning = !!reasoningText;
   const hasFiles = files.length > 0;
@@ -136,6 +137,7 @@ const ThreadMessageRow = memo(function ThreadMessageRow({
             message={message}
             messageFiles={files}
             toolCalls={toolCalls}
+            toolProgress={toolProgress}
             hasReasoning={hasReasoning}
             reasoningText={reasoningText}
             preferences={preferences}
@@ -179,6 +181,7 @@ interface AssistantMessageBodyProps {
   message: UIMessage;
   messageFiles: ReturnType<typeof parseMessageParts>["files"];
   toolCalls: ToolCall[];
+  toolProgress: ReturnType<typeof parseMessageParts>["toolProgress"];
   hasReasoning: boolean;
   reasoningText: string | null;
   preferences: PreferencesLike | undefined;
@@ -195,6 +198,7 @@ function AssistantMessageBody({
   message,
   messageFiles,
   toolCalls,
+  toolProgress,
   hasReasoning,
   reasoningText,
   preferences,
@@ -232,6 +236,7 @@ function AssistantMessageBody({
       {toolCalls.length > 0 && (
         <ToolPanels
           toolCalls={toolCalls}
+          toolProgress={toolProgress}
           preferences={preferences}
           onInspectTool={(toolCallId) => onInspectTool(message.id, toolCallId)}
         />
