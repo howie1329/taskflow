@@ -1,15 +1,11 @@
-"use client";
+"use client"
 
-import { useEffect, useRef } from "react";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { useEffect, useRef } from "react"
+import { HugeiconsIcon } from "@hugeicons/react"
 import {
   ArrowLeft01Icon,
-  SearchIcon,
-  Cancel01Icon,
   PlusSignIcon,
-  Sun02Icon,
-  Moon02Icon,
-} from "@hugeicons/core-free-icons";
+} from "@hugeicons/core-free-icons"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,25 +15,18 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group";
+} from "@/components/ui/alert-dialog"
+import { Button } from "@/components/ui/button"
 import {
   SidebarContent,
-  SidebarFooter,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarTrigger,
-} from "@/components/ui/sidebar";
-import { useSidebar } from "@/components/ui/sidebar";
-import { NotesRail, useNotes } from "@/components/notes";
-import { useTheme } from "next-themes";
+} from "@/components/ui/sidebar"
+import { useSidebar } from "@/components/ui/sidebar"
+import { NotesRail, useNotes } from "@/components/notes"
 
 interface NotesAppSidebarProps {
   onBackToWorkspace?: () => void;
@@ -68,9 +57,6 @@ export function NotesAppSidebar({ onBackToWorkspace }: NotesAppSidebarProps) {
     deleteDialogOpen,
     projects,
   } = useNotes()
-
-  const { setTheme, resolvedTheme } = useTheme()
-  const isDark = resolvedTheme === "dark"
 
   useEffect(() => {
     if (!isMobile) return
@@ -121,86 +107,28 @@ export function NotesAppSidebar({ onBackToWorkspace }: NotesAppSidebarProps) {
         <SidebarHeader>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton
-                tooltip="Open sidebar"
-                onClick={() => setOpen(true)}
-              >
-                <HugeiconsIcon icon={ArrowLeft01Icon} className="shrink-0" />
-                <span>Open sidebar</span>
-              </SidebarMenuButton>
+              <div className="flex flex-col gap-2 px-2 py-2">
+                <SidebarMenuButton
+                  tooltip="Open notes"
+                  onClick={() => setOpen(true)}
+                  className="justify-center"
+                >
+                  <HugeiconsIcon icon={ArrowLeft01Icon} className="shrink-0" />
+                  <span>Open notes</span>
+                </SidebarMenuButton>
+                <Button
+                  variant="outline"
+                  size="icon-sm"
+                  className="size-8 rounded-lg"
+                  onClick={handleCreateNote}
+                  aria-label="New note"
+                >
+                  <HugeiconsIcon icon={PlusSignIcon} strokeWidth={2} />
+                </Button>
+              </div>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarHeader>
-
-        <SidebarContent className="px-2">
-          <div className="space-y-2">
-            <Button
-              className="h-8 w-full gap-1.5 rounded-md px-3 text-xs font-medium"
-              variant="default"
-              onClick={handleCreateNote}
-            >
-              <HugeiconsIcon
-                icon={PlusSignIcon}
-                className="size-3 shrink-0"
-                strokeWidth={2}
-              />
-              New
-            </Button>
-
-            <InputGroup className="w-full">
-              <InputGroupAddon>
-                <HugeiconsIcon
-                  icon={SearchIcon}
-                  className="size-3 shrink-0"
-                  strokeWidth={2}
-                />
-              </InputGroupAddon>
-              <InputGroupInput
-                ref={searchInputRef}
-                placeholder="Search notes..."
-                value={searchQuery}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setSearchQuery(e.target.value)
-                }
-                className="h-8 border-border/50 text-xs"
-              />
-              {searchQuery && (
-                <InputGroupAddon>
-                  <Button
-                    variant="ghost"
-                    size="icon-xs"
-                    onClick={() => setSearchQuery("")}
-                    className="h-5 w-5"
-                  >
-                    <HugeiconsIcon
-                      icon={Cancel01Icon}
-                      className="size-3"
-                      strokeWidth={2}
-                    />
-                  </Button>
-                </InputGroupAddon>
-              )}
-            </InputGroup>
-          </div>
-        </SidebarContent>
-
-        <SidebarFooter>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                onClick={() => setTheme(isDark ? "light" : "dark")}
-                tooltip={
-                  isDark ? "Switch to light mode" : "Switch to dark mode"
-                }
-              >
-                <HugeiconsIcon
-                  icon={isDark ? Sun02Icon : Moon02Icon}
-                  className="shrink-0"
-                />
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarFooter>
 
         <AlertDialog
           open={deleteDialogOpen}
@@ -236,7 +164,7 @@ export function NotesAppSidebar({ onBackToWorkspace }: NotesAppSidebarProps) {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-2 px-2 py-2">
               <SidebarMenuButton
                 tooltip="Back to workspace"
                 onClick={onBackToWorkspace}
@@ -251,7 +179,7 @@ export function NotesAppSidebar({ onBackToWorkspace }: NotesAppSidebarProps) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent className="overflow-hidden px-0">
-        <div className="flex h-full min-h-0 flex-col px-2 py-2 md:px-3">
+        <div className="flex h-full min-h-0 flex-col px-2 pb-2 md:px-3 md:pb-3">
           <NotesRail
             variant="sidebar"
             notes={filteredNotes}
@@ -272,24 +200,6 @@ export function NotesAppSidebar({ onBackToWorkspace }: NotesAppSidebarProps) {
           />
         </div>
       </SidebarContent>
-      <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              onClick={() => setTheme(isDark ? "light" : "dark")}
-              tooltip={
-                isDark ? "Switch to light mode" : "Switch to dark mode"
-              }
-            >
-              <HugeiconsIcon
-                icon={isDark ? Sun02Icon : Moon02Icon}
-                className="shrink-0"
-              />
-              <span>{isDark ? "Light mode" : "Dark mode"}</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
 
       <AlertDialog
         open={deleteDialogOpen}

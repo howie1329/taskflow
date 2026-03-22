@@ -5,16 +5,20 @@ import { cn } from "@/lib/utils"
 
 interface NoteSectionProps {
   label: string
+  count?: number
   icon?: ReactNode
   className?: string
 }
 
-export function NoteSection({ label, icon, className }: NoteSectionProps) {
+export function NoteSection({ label, count, icon, className }: NoteSectionProps) {
   return (
     <div className={cn("flex items-center gap-1.5 px-0.5", className)}>
       {icon}
-      <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/80">
+      <span className="text-xs font-medium text-muted-foreground">
         {label}
+        {typeof count === "number" ? (
+          <span className="ml-1 tabular-nums text-muted-foreground/80">({count})</span>
+        ) : null}
       </span>
     </div>
   )
