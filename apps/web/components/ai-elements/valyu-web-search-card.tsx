@@ -37,8 +37,8 @@ export function ValyuWebSearchCard({ output }: { output: unknown }) {
           `${data.results.length} results`,
           data.total_deduction_dollars !== undefined
             ? `$${data.total_deduction_dollars.toFixed(4)}`
-            : "cost n/a",
-        ]}
+            : null,
+        ].filter((value): value is string => Boolean(value))}
       />
       <ToolResultSection title="Query">
         <p className="rounded-sm bg-muted/20 px-2 py-1 font-mono text-xs">

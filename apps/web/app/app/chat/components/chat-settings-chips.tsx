@@ -115,23 +115,23 @@ export function ChatSettingsChips({
           <Button
             type="button"
             variant="outline"
-            size="sm"
+            size="default"
             aria-label={`Model: ${selectedModel?.name ?? "Select model"}${selectedModel?.interface ? ` via ${formatInterfaceDisplay(selectedModel.interface)}` : ""}`}
             className={cn(
               CHAT_SETTINGS_TRIGGER_CLASS_NAME,
-              "h-7 max-w-44 justify-start gap-2 px-2.5 sm:max-w-52",
+              "h-8 max-w-44 justify-start gap-1.5 px-3 text-sm sm:max-w-52",
             )}
           >
             {selectedModel?.interface === "groq" ? (
-              <ModelSelectorLogo provider="groq" className="size-3.5 shrink-0" />
+              <ModelSelectorLogo provider="groq" className="size-4 shrink-0" />
             ) : selectedModel?.interface === "openrouter" ? (
-              <ModelSelectorLogo provider="openrouter" className="size-3.5 shrink-0" />
+              <ModelSelectorLogo provider="openrouter" className="size-4 shrink-0" />
             ) : selectedModel?.provider ? (
-              <ModelSelectorLogo provider={selectedModel.provider} className="size-3.5 shrink-0" />
+              <ModelSelectorLogo provider={selectedModel.provider} className="size-4 shrink-0" />
             ) : (
-              <CpuIcon className="size-3.5 shrink-0" />
+              <CpuIcon className="size-4 shrink-0" />
             )}
-            <span className="min-w-0 flex-1 truncate text-xs font-medium">
+            <span className="min-w-0 flex-1 truncate text-sm font-medium">
               {selectedModel?.name ?? "Select model"}
               {selectedModel?.interface && formatInterfaceDisplay(selectedModel.interface) ? (
                 <span className="ml-1 font-normal text-muted-foreground">
@@ -159,11 +159,11 @@ export function ChatSettingsChips({
           <Button
             type="button"
             variant="outline"
-            size="icon-sm"
+            size="icon"
             aria-label={`Mode: ${selectedMode}`}
-            className={cn(CHAT_SETTINGS_TRIGGER_CLASS_NAME, "size-7")}
+            className={cn(CHAT_SETTINGS_TRIGGER_CLASS_NAME, "shrink-0")}
           >
-            <WandSparklesIcon className="size-3.5" />
+            <WandSparklesIcon className="size-4" />
           </Button>
         }
       >
@@ -183,14 +183,14 @@ export function ChatSettingsChips({
           <Button
             type="button"
             variant="outline"
-            size="icon-sm"
+            size="icon"
             aria-label={`Project: ${projectLabel}`}
-            className={cn(CHAT_SETTINGS_TRIGGER_CLASS_NAME, "size-7")}
+            className={cn(CHAT_SETTINGS_TRIGGER_CLASS_NAME, "shrink-0")}
           >
             {selectedProject ? (
-              <FolderIcon className="size-3.5" />
+              <FolderIcon className="size-4" />
             ) : (
-              <GlobeIcon className="size-3.5" />
+              <GlobeIcon className="size-4" />
             )}
           </Button>
         }

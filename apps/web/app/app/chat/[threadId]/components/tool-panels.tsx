@@ -6,9 +6,6 @@ import {
   ChainOfThoughtStep,
 } from "@/components/ai-elements/chain-of-thought";
 import {
-  Tool,
-  EnhancedToolHeader,
-  ToolContent,
   ToolSummaryBar,
   ToolRawPayload,
 } from "@/components/ai-elements/tool";
@@ -22,12 +19,15 @@ import { ChevronDownIcon } from "lucide-react";
 import type { ToolCall } from "./tool-calls";
 import {
   getToolDisplayNameFromKey,
-  getToolInputSummary,
-  getToolStateInfo,
+  getToolInputQuery,
   getToolSummary,
+  getToolStepMeta,
+  getToolStateInfo,
   summarizeToolOutput,
 } from "./tool-meta";
 import { getToolDefinition } from "./tool-definitions";
+
+const INLINE_ACTIONS_MAX = 4;
 
 interface PreferencesLike {
   aiChatShowActions?: boolean;
@@ -73,67 +73,98 @@ function renderToolContent(toolCall: ToolCall): ReactNode {
 export function ToolPanels({ toolCalls, preferences }: ToolPanelsProps) {
   if (toolCalls.length === 0) return null;
 
-  const renderToolCard = (toolCall: ToolCall) => (
-    <Tool key={toolCall.id}>
-      <EnhancedToolHeader toolName={toolCall.toolKey} state={toolCall.state} />
-      <ToolContent>
-        <div className="space-y-3 pt-2">
-          <ToolSummaryBar summary={getToolSummary(toolCall)} />
-          {renderToolContent(toolCall)}
-          {(toolCall.input !== undefined || toolCall.output !== undefined) && (
-            <ToolRawPayload input={toolCall.input} output={toolCall.output} />
-          )}
-        </div>
-      </ToolContent>
-    </Tool>
-  );
+  const showToolDetails = preferences?.aiChatShowToolDetails !== false;
+
+  const renderActionStep = (
+    toolCall: ToolCall,
+    includeDescription: boolean,
+  ) => {
+    const stateInfo = getToolStateInfo(toolCall.state);
+    const summary = getToolSummary(toolCall);
+    const query = getToolInputQuery(toolCall.input, toolCall.toolKey);
+    const displayName = getToolDisplayNameFromKey(toolCall.toolKey);
+    const stepMeta = getToolStepMeta(toolCall);
+
+    return (
+      <Collapsible key={toolCall.id} className="group">
+        <ChainOfThoughtStep
+          label={displayName}
+          inlineDescription={query}
+          description={includeDescription ? summary ?? stateInfo.badgeLabel : undefined}
+          status={stateInfo.stepStatus}
+          toolName={toolCall.toolKey}
+          trailing={
+            showToolDetails ? (
+              <div className="flex items-center gap-2">
+                {stepMeta.length > 0 ? (
+                  <div className="flex items-center gap-1.5">
+                    {stepMeta.map((item) => (
+                      <span
+                        key={`${toolCall.id}-${item}`}
+                        className="rounded-sm bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground"
+                      >
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
+                <CollapsibleTrigger
+                  className="rounded-sm p-0.5 text-muted-foreground transition-colors hover:text-foreground"
+                  aria-label="Toggle tool details"
+                >
+                  <ChevronDownIcon className="size-3.5 transition-transform group-data-[state=open]:rotate-180" />
+                </CollapsibleTrigger>
+              </div>
+            ) : null
+          }
+        >
+          {showToolDetails ? (
+            <CollapsibleContent className="pt-2">
+              <div className="space-y-4 rounded-lg bg-muted/10 p-3 [&_h4]:hidden">
+                <ToolSummaryBar
+                  label="Summary"
+                  summary={getToolSummary(toolCall)}
+                />
+                <div className="border-t border-border pt-4">
+                  {renderToolContent(toolCall)}
+                </div>
+                {toolCall.output !== undefined && (
+                  <ToolRawPayload output={toolCall.output} />
+                )}
+              </div>
+            </CollapsibleContent>
+          ) : null}
+        </ChainOfThoughtStep>
+      </Collapsible>
+    );
+  }
 
   return (
     <>
-      {preferences?.aiChatShowActions !== false && (
-        <ChainOfThought defaultOpen={false}>
-          <EnhancedChainOfThoughtHeader
-            totalSteps={toolCalls.length}
-            providers={toolCalls
-              .filter(
-                (toolCall) =>
-                  toolCall.state === "output-available" ||
-                  toolCall.state === "output-error",
-              )
-              .map((toolCall) => detectProvider(toolCall.toolKey))}
-          >
-            Actions
-          </EnhancedChainOfThoughtHeader>
-          <ChainOfThoughtContent className="mt-2 space-y-2">
-            {toolCalls.map((toolCall) => {
-              const stateInfo = getToolStateInfo(toolCall.state);
-              const summary = getToolInputSummary(toolCall.input);
-              const displayName = getToolDisplayNameFromKey(toolCall.toolKey);
-              return (
-                <ChainOfThoughtStep
-                  key={toolCall.id}
-                  label={displayName}
-                  description={summary ?? stateInfo.badgeLabel}
-                  status={stateInfo.stepStatus}
-                  toolName={toolCall.toolKey}
-                />
-              );
-            })}
-
-            {preferences?.aiChatShowToolDetails !== false && (
-              <Collapsible defaultOpen={false}>
-                <CollapsibleTrigger className="group flex w-full items-center gap-2 rounded-md py-1 text-xs text-muted-foreground hover:text-foreground">
-                  <ChevronDownIcon className="size-3.5 transition-transform group-data-[state=open]:rotate-180" />
-                  <span>View tool details</span>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="space-y-2 pt-2">
-                  {toolCalls.map((toolCall) => renderToolCard(toolCall))}
-                </CollapsibleContent>
-              </Collapsible>
-            )}
-          </ChainOfThoughtContent>
-        </ChainOfThought>
-      )}
+      {preferences?.aiChatShowActions !== false &&
+        (toolCalls.length <= INLINE_ACTIONS_MAX ? (
+          <div className="space-y-2">
+            {toolCalls.map((toolCall) => renderActionStep(toolCall, false))}
+          </div>
+        ) : (
+          <ChainOfThought defaultOpen={false}>
+            <EnhancedChainOfThoughtHeader
+              totalSteps={toolCalls.length}
+              providers={toolCalls
+                .filter(
+                  (toolCall) =>
+                    toolCall.state === "output-available" ||
+                    toolCall.state === "output-error",
+                )
+                .map((toolCall) => detectProvider(toolCall.toolKey))}
+            >
+              Actions
+            </EnhancedChainOfThoughtHeader>
+            <ChainOfThoughtContent className="mt-2 space-y-2">
+              {toolCalls.map((toolCall) => renderActionStep(toolCall, true))}
+            </ChainOfThoughtContent>
+          </ChainOfThought>
+        ))}
     </>
   );
 }

@@ -20,6 +20,7 @@ import { ChatComposerInput } from "../../components/chat-composer-input";
 import { useChatComposer } from "../../components/use-chat-composer";
 import { THREAD_COMPOSER_SUGGESTIONS } from "../../constants/suggestions";
 import { ThreadContextFooterBadge } from "./thread-context-footer-badge";
+import { useKeyboardScroll } from "@/hooks/use-keyboard-scroll";
 
 interface ThreadComposerBarProps {
   textareaRef: RefObject<HTMLTextAreaElement | null>;
@@ -34,6 +35,10 @@ export function ThreadComposerBar({ textareaRef }: ThreadComposerBarProps) {
     setScope,
     thread,
   } = useChatComposer();
+
+  useKeyboardScroll(textareaRef as React.RefObject<HTMLElement | null>, {
+    enabled: isMobile,
+  });
 
   const handleSubmit = ({
     text,
@@ -70,7 +75,7 @@ export function ThreadComposerBar({ textareaRef }: ThreadComposerBarProps) {
               variant="outline"
               size="icon-sm"
               aria-label="Examples"
-              className="size-7 rounded-full border-border/60 bg-background/70 text-foreground shadow-sm hover:bg-muted/70"
+              className="size-8 rounded-md border-transparent bg-transparent text-muted-foreground shadow-none transition-colors duration-150 hover:bg-muted hover:text-foreground"
             >
               <LightbulbIcon className="size-3.5" />
             </Button>
@@ -95,7 +100,7 @@ export function ThreadComposerBar({ textareaRef }: ThreadComposerBarProps) {
 
   return (
     <div className="shrink-0 bg-background/90 pb-[calc(env(safe-area-inset-bottom)+8px)] pt-3 backdrop-blur supports-backdrop-filter:bg-background/80">
-      <div className="mx-auto w-full max-w-4xl px-4">
+      <div className="mx-auto w-full max-w-2xl px-4 md:px-8">
         <ChatComposerInput
           id="thread-message"
           placeholder="Continue the conversation..."

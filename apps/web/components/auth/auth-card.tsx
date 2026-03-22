@@ -17,18 +17,18 @@ interface AuthCardProps {
 
 export function AuthCard({ title, description, children }: AuthCardProps) {
   return (
-    <Card className="w-full max-w-sm">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-semibold tracking-tight">
+    <Card className="w-full max-w-sm rounded-xl border-border/40 shadow-none">
+      <CardHeader className="space-y-1.5 pb-2">
+        <CardTitle className="text-xl font-semibold tracking-tight text-foreground">
           {title}
         </CardTitle>
         {description && (
-          <CardDescription className="text-sm text-muted-foreground">
+          <CardDescription className="text-sm leading-relaxed text-muted-foreground">
             {description}
           </CardDescription>
         )}
       </CardHeader>
-      <CardContent className="pb-6">{children}</CardContent>
+      <CardContent className="pb-6 pt-2">{children}</CardContent>
     </Card>
   );
 }

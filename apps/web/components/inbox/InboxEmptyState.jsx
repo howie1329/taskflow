@@ -24,7 +24,7 @@ export const InboxEmptyState = memo(function InboxEmptyState({
 }) {
   if (searchQuery) {
     return (
-      <Empty className="min-h-[200px]">
+      <Empty className="min-h-[200px] py-16 md:py-24">
         <EmptyHeader>
           <EmptyMedia variant="icon">
             <HugeiconsIcon icon={Search01Icon} className="size-4" />
@@ -53,7 +53,7 @@ export const InboxEmptyState = memo(function InboxEmptyState({
   }
 
   return (
-    <Empty className="min-h-[200px]">
+    <Empty className="min-h-[200px] py-16 md:py-24">
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <HugeiconsIcon icon={InboxDownloadIcon} className="size-4" />

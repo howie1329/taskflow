@@ -1,26 +1,27 @@
-# Taskflow Docs (Root Index)
+# Taskflow Docs
 
-Root docs are now intentionally minimal.
+Root docs are intentionally small.
 
-The canonical product and implementation docs for the main app live in:
+## Canonical Current Docs
 
-- `apps/web/docs`
+The current product and implementation docs live in [`apps/web/docs`](../apps/web/docs/README.md).
 
-## Start Here (Main App)
+Start there:
 
-- `apps/web/docs/README.md`
-- `apps/web/docs/ui-guidelines.md`
-- `apps/web/docs/architecture/README.md`
-- `apps/web/docs/features/README.md`
-- `apps/web/docs/features/status.md`
-- `apps/web/docs/roadmap.md`
+- [`apps/web/README.md`](../apps/web/README.md)
+- [`apps/web/docs/README.md`](../apps/web/docs/README.md)
+- [`apps/web/docs/architecture/README.md`](../apps/web/docs/architecture/README.md)
+- [`apps/web/docs/features/README.md`](../apps/web/docs/features/README.md)
+- [`apps/web/docs/roadmap.md`](../apps/web/docs/roadmap.md)
+- [`apps/web/docs/ui-guidelines.md`](../apps/web/docs/ui-guidelines.md)
 
-## What Remains in Root Docs
+## What Root Docs Keep
 
-- `docs/SOURCES.md`: map of docs across generations
-- `docs/LEGACY/feature-inventory.md`: legacy feature reference only
+- [`SOURCES.md`](./SOURCES.md): current docs map
+- [`LEGACY/feature-inventory.md`](./LEGACY/feature-inventory.md): short legacy feature history and lessons
 
-## Legacy Code Areas
+## Repo Status
 
-- `apps/frontend` (legacy Next.js app)
-- `apps/backend` (legacy Express app)
+- `apps/web` is active
+- `apps/mobile` is a planned/placeholder workspace
+- `apps/frontend` and `apps/backend` are deprecated

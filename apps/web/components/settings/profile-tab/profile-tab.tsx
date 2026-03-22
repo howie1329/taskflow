@@ -9,9 +9,9 @@ export function ProfileTab() {
 
   if (isLoading) {
     return (
-      <div className="space-y-8">
+      <div className="space-y-6">
         <div className="space-y-2">
-          <Skeleton className="h-5 w-32" />
+          <Skeleton className="h-6 w-40" />
           <Skeleton className="h-4 w-64" />
         </div>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -35,9 +35,5 @@ export function ProfileTab() {
     );
   }
 
-  return (
-    <div className="space-y-6">
-      <ProfileForm initialData={displayValues} />
-    </div>
-  );
+  return <ProfileForm initialData={displayValues} />;
 }

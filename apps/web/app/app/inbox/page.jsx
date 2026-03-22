@@ -17,19 +17,22 @@ import {
   useMobileActions,
 } from "@/hooks/inbox";
 
+const inboxColumnClass =
+  "mx-auto flex h-full w-full max-w-2xl min-h-0 flex-col overflow-hidden px-6 py-4 md:px-8 md:py-6";
+
 // Container component with loading state
 function InboxContainer({ children, isInitialLoading }) {
   if (isInitialLoading) {
     return (
       <div className="flex h-full w-full min-h-0 flex-col overflow-hidden">
-        <div className="flex w-full flex-1 min-h-0 flex-col gap-3 px-3 py-3 md:px-4 md:py-4">
+        <div className={`${inboxColumnClass} flex flex-1 flex-col gap-4`}>
           <InboxHeaderSkeleton />
-          <Skeleton className="h-24 w-full" />
-          <Skeleton className="h-9 w-full" />
-          <div className="space-y-3">
-            <Skeleton className="h-14 w-full" />
-            <Skeleton className="h-14 w-full" />
-            <Skeleton className="h-14 w-full" />
+          <Skeleton className="h-24 w-full rounded-lg" />
+          <Skeleton className="h-8 w-full rounded-md" />
+          <div className="flex flex-col gap-2">
+            <Skeleton className="h-12 w-full rounded-lg" />
+            <Skeleton className="h-12 w-full rounded-lg" />
+            <Skeleton className="h-12 w-full rounded-lg" />
           </div>
         </div>
       </div>
@@ -38,7 +41,7 @@ function InboxContainer({ children, isInitialLoading }) {
 
   return (
     <div className="flex h-full w-full min-h-0 flex-col overflow-hidden">
-      <div className="flex w-full flex-1 min-h-0 flex-col gap-3 px-3 py-3 md:px-4 md:py-4">
+      <div className={`${inboxColumnClass} flex flex-1 flex-col gap-4`}>
         {children}
       </div>
     </div>
@@ -104,6 +107,7 @@ function useClientSideFiltering(
 }
 
 export default function InboxPage() {
+  /* eslint-disable react-hooks/refs -- stale-while-revalidate: lastItemsRef/lastCountsRef read during render */
   const [captureText, setCaptureText] = useState("");
   const { searchQuery, setSearchQuery, debouncedSearchQuery } =
     useSearchState();
@@ -253,3 +257,4 @@ export default function InboxPage() {
     </InboxContainer>
   );
 }
+/* eslint-enable react-hooks/refs */

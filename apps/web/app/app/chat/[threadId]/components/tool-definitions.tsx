@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { AdvancedResearchCard } from "@/components/ai-elements/advanced-research-card";
 import { ExaAnswerCard } from "@/components/ai-elements/exa-answer-card";
 import { ExaWebSearchCard } from "@/components/ai-elements/exa-web-search-card";
 import { FirecrawlScrapeCard } from "@/components/ai-elements/firecrawl-scrape-card";
@@ -80,37 +81,138 @@ const TOOL_DEFINITIONS: Record<string, ToolDefinition> = {
     },
   },
   exaWebSearch: {
-    render: (toolCall) => <ExaWebSearchCard output={toolCall.output} />,
+    render: (toolCall) => (
+      <ExaWebSearchCard input={toolCall.input} output={toolCall.output} />
+    ),
     summarize: (toolCall) =>
       `Found ${getOutputArrayLength(toolCall.output, "results")} Exa results`,
   },
   exaAnswer: {
-    render: (toolCall) => <ExaAnswerCard output={toolCall.output} />,
+    render: (toolCall) => (
+      <ExaAnswerCard input={toolCall.input} output={toolCall.output} />
+    ),
     summarize: () => "Generated answer with citations",
   },
   firecrawlSearch: {
-    render: (toolCall) => <FirecrawlSearchCard output={toolCall.output} />,
+    render: (toolCall) => (
+      <FirecrawlSearchCard input={toolCall.input} output={toolCall.output} />
+    ),
     summarize: (toolCall) =>
       `Found ${getOutputArrayLength(toolCall.output, "data")} pages`,
   },
   firecrawlScrape: {
-    render: (toolCall) => <FirecrawlScrapeCard output={toolCall.output} />,
+    render: (toolCall) => (
+      <FirecrawlScrapeCard input={toolCall.input} output={toolCall.output} />
+    ),
     summarize: () => "Scraped page content",
   },
   parallelWebSearch: {
-    render: (toolCall) => <ParallelWebSearchCard output={toolCall.output} />,
+    render: (toolCall) => (
+      <ParallelWebSearchCard input={toolCall.input} output={toolCall.output} />
+    ),
     summarize: (toolCall) =>
       `Found ${getOutputArrayLength(toolCall.output, "results")} aggregated results`,
   },
   advancedResearch: {
-    render: () => (
-      <p className="text-sm text-muted-foreground">
-        Advanced research completed. Open raw payload for full sources and
-        scrape details.
-      </p>
-    ),
+    render: (toolCall) => <AdvancedResearchCard output={toolCall.output} />,
     summarize: (toolCall) =>
       `Compiled ${getOutputArrayLength(toolCall.output, "sources")} multi-source results`,
+  },
+  getDaytonaStatus: {
+    summarize: (toolCall) => {
+      if (!toolCall.output || typeof toolCall.output !== "object") {
+        return "Checked Daytona status"
+      }
+
+      const output = toolCall.output as {
+        exists?: boolean
+        status?: string
+        repoUrl?: string | null
+      }
+
+      if (!output.exists) {
+        return "No Daytona instance for this thread"
+      }
+
+      return `Daytona is ${output.status ?? "unknown"}${output.repoUrl ? ` for ${output.repoUrl}` : ""}`
+    },
+  },
+  startDaytonaInstance: {
+    summarize: () => "Started Daytona sandbox",
+  },
+  stopDaytonaInstance: {
+    summarize: () => "Stopped Daytona sandbox",
+  },
+  listDaytonaRepoFiles: {
+    summarize: (toolCall) => {
+      if (!toolCall.output || typeof toolCall.output !== "object") {
+        return "Listed Daytona repo files"
+      }
+
+      const output = toolCall.output as {
+        files?: unknown[]
+        message?: string
+      }
+
+      if (!Array.isArray(output.files)) {
+        return output.message ?? "Listed Daytona repo files"
+      }
+
+      return `Listed ${output.files.length} Daytona repo entries`
+    },
+  },
+  searchDaytonaRepo: {
+    summarize: (toolCall) => {
+      if (!toolCall.output || typeof toolCall.output !== "object") {
+        return "Searched Daytona repo"
+      }
+
+      const output = toolCall.output as {
+        matches?: unknown[]
+        message?: string
+      }
+
+      if (!Array.isArray(output.matches)) {
+        return output.message ?? "Searched Daytona repo"
+      }
+
+      return `Found ${output.matches.length} Daytona repo matches`
+    },
+  },
+  readDaytonaRepoFile: {
+    summarize: (toolCall) => {
+      if (!toolCall.output || typeof toolCall.output !== "object") {
+        return "Read Daytona repo file"
+      }
+
+      const output = toolCall.output as {
+        path?: string | null
+        message?: string
+      }
+
+      return output.path
+        ? `Read ${output.path}`
+        : output.message ?? "Read Daytona repo file"
+    },
+  },
+  runDaytonaReadCommand: {
+    summarize: (toolCall) => {
+      if (!toolCall.output || typeof toolCall.output !== "object") {
+        return "Ran Daytona read command"
+      }
+
+      const output = toolCall.output as {
+        command?: string
+        exitCode?: number | null
+        message?: string
+      }
+
+      if (!output.command) {
+        return output.message ?? "Ran Daytona read command"
+      }
+
+      return `Ran ${output.command} (exit ${output.exitCode ?? "?"})`
+    },
   },
   valyuWebSearch: {
     render: (toolCall) => <ValyuWebSearchCard output={toolCall.output} />,
@@ -129,5 +231,15 @@ const TOOL_DEFINITIONS: Record<string, ToolDefinition> = {
 };
 
 export function getToolDefinition(toolKey: string): ToolDefinition | null {
-  return TOOL_DEFINITIONS[toolKey] ?? TOOL_DEFINITIONS.taskflow;
+  if (TOOL_DEFINITIONS[toolKey]) {
+    return TOOL_DEFINITIONS[toolKey];
+  }
+
+  if (
+    TASKFLOW_TOOL_KEYS.includes(toolKey as (typeof TASKFLOW_TOOL_KEYS)[number])
+  ) {
+    return TOOL_DEFINITIONS.taskflow;
+  }
+
+  return null;
 }

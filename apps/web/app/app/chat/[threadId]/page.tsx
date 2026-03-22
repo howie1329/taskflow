@@ -173,7 +173,7 @@ function ThreadPageContent() {
       />
 
       {error && error.message !== clearedErrorMessage && (
-        <div className="px-4 py-3">
+        <div className="px-4 py-3 md:px-8">
           <Alert
             variant="destructive"
             className="flex items-start justify-between gap-3"
@@ -205,7 +205,7 @@ function ThreadPageContent() {
       />
 
       <Conversation className="flex-1">
-        <ConversationContent className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-6 md:py-7">
+        <ConversationContent className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-4 py-6 md:px-8">
           {messages.length === 0 ? (
             <ChatEmptyStateWithSuggestions textareaRef={composerRef} />
           ) : (

@@ -106,7 +106,7 @@ export const EnhancedChainOfThoughtHeader = memo(
       <Collapsible onOpenChange={setIsOpen} open={isOpen}>
         <CollapsibleTrigger
           className={cn(
-            "flex w-full items-center gap-2 rounded-md py-0.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground",
+            "flex w-full items-center gap-2 rounded-md py-1 text-xs font-medium text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground",
             className,
           )}
           {...props}
@@ -117,7 +117,7 @@ export const EnhancedChainOfThoughtHeader = memo(
               isOpen ? "rotate-180" : "rotate-0",
             )}
           />
-          <span className="flex-1 text-left text-xs flex items-center gap-2">
+          <span className="flex flex-1 items-center gap-2 text-left text-xs">
             {children ?? "Actions"}
             <span className="text-[10px] text-muted-foreground/80">
               {totalSteps} steps
@@ -148,7 +148,7 @@ export const ChainOfThoughtHeader = memo(
       <Collapsible onOpenChange={setIsOpen} open={isOpen}>
         <CollapsibleTrigger
           className={cn(
-            "flex w-full items-center gap-2 rounded-md py-0.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground",
+            "flex w-full items-center gap-2 rounded-md py-1 text-xs font-medium text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground",
             className,
           )}
           {...props}
@@ -171,10 +171,12 @@ export const ChainOfThoughtHeader = memo(
 export type ChainOfThoughtStepProps = ComponentProps<"div"> & {
   icon?: LucideIcon;
   label: ReactNode;
+  inlineDescription?: ReactNode;
   description?: ReactNode;
   status?: "complete" | "active" | "pending";
   duration?: number;
   toolName?: string;
+  trailing?: ReactNode;
 };
 
 const StatusIcon = ({
@@ -199,10 +201,12 @@ export const ChainOfThoughtStep = memo(
     className,
     icon: Icon,
     label,
+    inlineDescription,
     description,
     status = "complete",
     duration,
     toolName,
+    trailing,
     children,
     ...props
   }: ChainOfThoughtStepProps) => {
@@ -230,13 +234,21 @@ export const ChainOfThoughtStep = memo(
         </div>
         <div className="flex-1 space-y-1 overflow-hidden min-w-0">
           <div className="flex items-center gap-2">
-            <span className="font-medium truncate">{label}</span>
+            <span className="shrink-0 font-medium truncate">{label}</span>
+            {inlineDescription ? (
+              <span className="min-w-0 flex-1 truncate text-muted-foreground/80">
+                {inlineDescription}
+              </span>
+            ) : null}
             {duration !== undefined && status === "complete" && (
               <TimingBadge duration={duration} size="sm" />
             )}
             {toolName && (
               <ProviderBadge toolName={toolName} showName={false} size="sm" />
             )}
+            {trailing ? (
+              <div className="ml-auto shrink-0">{trailing}</div>
+            ) : null}
           </div>
           {description && (
             <div className="truncate text-muted-foreground/80">{description}</div>

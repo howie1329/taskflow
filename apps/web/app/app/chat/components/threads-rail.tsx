@@ -136,14 +136,16 @@ export function ThreadsRail({
       <div
         className={cn(
           "sticky top-0 z-10 bg-transparent space-y-2",
-          isSidebar ? "p-2.5" : "p-3",
+          isSidebar ? "p-2" : "p-2.5 md:p-3",
         )}
       >
         <div className="flex items-center justify-between gap-2">
           <span
             className={cn(
               "font-medium text-muted-foreground",
-              isSidebar ? "text-xs" : "text-sm",
+              isSidebar
+                ? "text-[9px] uppercase tracking-wide"
+                : "text-sm",
             )}
           >
             Threads
@@ -151,18 +153,28 @@ export function ThreadsRail({
           <Link href="/app/chat">
             <Button
               className={cn(
-                "rounded-lg",
-                isSidebar ? "h-7 px-2 text-xs" : "h-8 px-3 text-xs",
+                "rounded-md transition-colors duration-150 ease-[cubic-bezier(0.16,1,0.3,1)]",
+                isSidebar
+                  ? "size-7 shrink-0 p-0"
+                  : "h-8 px-3 text-xs font-medium",
                 isNewChat && "bg-muted text-foreground",
               )}
               variant={isNewChat ? "secondary" : "outline"}
+              aria-label="New chat"
             >
               <HugeiconsIcon
                 icon={PlusSignIcon}
-                className={cn("mr-1", isSidebar ? "size-3" : "size-3.5 mr-2")}
+                className={cn(
+                  "shrink-0",
+                  isSidebar ? "size-3" : "mr-2 size-3.5",
+                )}
                 strokeWidth={2}
               />
-              New
+              {isSidebar ? (
+                <span className="sr-only">New chat</span>
+              ) : (
+                "New"
+              )}
             </Button>
           </Link>
         </div>
@@ -171,14 +183,17 @@ export function ThreadsRail({
           <InputGroupAddon>
             <HugeiconsIcon
               icon={SearchIcon}
-              className={cn("stroke-2", isSidebar ? "size-3.5" : "size-4")}
+              className={cn(
+                "stroke-2 shrink-0",
+                isSidebar ? "size-3" : "size-4",
+              )}
             />
           </InputGroupAddon>
           <InputGroupInput
             placeholder="Search threads..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className={cn("text-xs", isSidebar ? "h-7" : "h-8")}
+            className="h-8 text-xs"
           />
           {searchQuery && (
             <InputGroupAddon>
@@ -204,7 +219,7 @@ export function ThreadsRail({
         <div
           className={cn(
             "w-full max-w-full min-w-0",
-            isSidebar ? "space-y-2 p-2" : "space-y-3 p-3",
+            isSidebar ? "space-y-1.5 p-2" : "space-y-2 p-2 md:space-y-3 md:p-3",
           )}
         >
           {threads.length === 0 ? (
@@ -246,22 +261,22 @@ export function ThreadsRail({
                   onOpenChange={setIsPinnedOpen}
                   className="space-y-1.5 w-full max-w-full"
                 >
-                  <CollapsibleTrigger className="group w-full rounded-sm px-1 py-1 text-left hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background">
-                    <div className="flex items-center justify-between">
+                  <CollapsibleTrigger className="group flex h-8 w-full items-center rounded-md px-3 text-left transition-colors duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40">
+                    <div className="flex w-full items-center justify-between gap-1.5">
                       <ThreadSection
                         label="Pinned"
                         count={pinnedThreads.length}
                         icon={
                           <HugeiconsIcon
                             icon={PinIcon}
-                            className="size-3 text-muted-foreground"
+                            className="size-3 shrink-0 text-muted-foreground"
                             strokeWidth={2}
                           />
                         }
                       />
                       <HugeiconsIcon
                         icon={ArrowDown01Icon}
-                        className="size-3 text-muted-foreground transition-transform group-data-[state=open]:rotate-180"
+                        className="size-3 shrink-0 text-muted-foreground transition-transform duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-[state=open]:rotate-180"
                         strokeWidth={2}
                       />
                     </div>
@@ -282,15 +297,15 @@ export function ThreadsRail({
                     isSidebar ? "space-y-2" : "space-y-2.5",
                   )}
                 >
-                  <CollapsibleTrigger className="group w-full rounded-sm px-1 py-1 text-left hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background">
-                    <div className="flex items-center justify-between">
+                  <CollapsibleTrigger className="group flex h-8 w-full items-center rounded-md px-3 text-left transition-colors duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40">
+                    <div className="flex w-full items-center justify-between gap-1.5">
                       <ThreadSection
                         label="Projects"
                         count={projectThreadCount}
                       />
                       <HugeiconsIcon
                         icon={ArrowDown01Icon}
-                        className="size-3 text-muted-foreground transition-transform group-data-[state=open]:rotate-180"
+                        className="size-3 shrink-0 text-muted-foreground transition-transform duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-[state=open]:rotate-180"
                         strokeWidth={2}
                       />
                     </div>

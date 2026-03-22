@@ -9,7 +9,7 @@ import {
   Loading03Icon,
   CheckmarkCircle02Icon,
 } from "@hugeicons/core-free-icons";
-import { motion, useReducedMotion } from "motion/react";
+import { useReducedMotion } from "motion/react";
 
 import { cn } from "@/lib/utils";
 
@@ -141,7 +141,7 @@ export const InboxCapture = memo(function InboxCapture({
   return (
     <div
       className={cn(
-        "rounded-xl border border-border/60 bg-background/60 p-3 space-y-2.5",
+        "space-y-2 rounded-lg border border-border bg-card p-4 text-card-foreground",
         className,
       )}
       role="form"
@@ -155,9 +155,9 @@ export const InboxCapture = memo(function InboxCapture({
           onKeyDown={handleKeyDown}
           placeholder="What's on your mind?"
           className={cn(
-            "min-h-[88px] resize-none pr-12 border-border/60 bg-transparent focus-visible:ring-[3px] focus-visible:ring-ring/50",
-            isNearLimit && "border-yellow-500/50",
-            isAtLimit && "border-red-500/50",
+            "min-h-[88px] resize-none border-border bg-transparent pr-12 text-sm focus-visible:ring-[3px] focus-visible:ring-ring/50",
+            isNearLimit && !isAtLimit && "border-muted-foreground/35",
+            isAtLimit && "border-destructive",
           )}
           disabled={isDisabled}
           aria-label="Capture inbox item"
@@ -169,9 +169,8 @@ export const InboxCapture = memo(function InboxCapture({
           <div
             id="capture-count"
             className={cn(
-              "absolute bottom-2 right-2 text-xs tabular-nums",
-              isNearLimit ? "text-yellow-600" : "text-muted-foreground",
-              isAtLimit && "text-red-600 font-medium",
+              "absolute bottom-2 right-2 text-xs tabular-nums text-muted-foreground",
+              isAtLimit && "font-medium text-destructive",
             )}
             aria-live="polite"
             aria-atomic="true"
@@ -182,9 +181,9 @@ export const InboxCapture = memo(function InboxCapture({
       </div>
       <div
         id="capture-help"
-        className="flex items-center justify-between text-[11px] text-muted-foreground"
+        className="flex items-center justify-between gap-2 text-xs text-muted-foreground"
       >
-        <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex flex-wrap items-center gap-3">
           <span className="flex items-center gap-1">
             <Kbd>Enter</Kbd> to capture
           </span>
@@ -198,24 +197,16 @@ export const InboxCapture = memo(function InboxCapture({
             <Kbd>C</Kbd> to focus
           </span>
         </div>
-        <motion.div
-          whileHover={
-            prefersReducedMotion || isDisabled || !value.trim() || isAtLimit
-              ? undefined
-              : { scale: 1.01 }
-          }
-          whileTap={
-            prefersReducedMotion || isDisabled || !value.trim() || isAtLimit
-              ? undefined
-              : { scale: 0.98 }
-          }
-          transition={{ duration: 0.14, ease: "easeOut" }}
-        >
+        <div className="shrink-0">
           <Button
             size="sm"
             onClick={handleCaptureClick}
             disabled={isDisabled || !value.trim() || isAtLimit}
             aria-busy={isCapturing}
+            className={cn(
+              "transition-transform duration-100 ease-[cubic-bezier(0.16,1,0.3,1)]",
+              !prefersReducedMotion && "active:scale-[0.97]",
+            )}
           >
             {isCapturing ? (
               <>
@@ -234,7 +225,7 @@ export const InboxCapture = memo(function InboxCapture({
               "Capture"
             )}
           </Button>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

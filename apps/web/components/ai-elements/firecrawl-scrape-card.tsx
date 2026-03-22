@@ -8,16 +8,36 @@ import { ToolEmptyState, ToolResultHeader, ToolResultSection, ToolResultShell } 
 
 type FormatKey = "markdown" | "text" | "html";
 
-export function FirecrawlScrapeCard({ output }: { output: unknown }) {
+function getInputUrl(input: unknown) {
+  if (!input || typeof input !== "object") return null;
+  const url = (input as Record<string, unknown>).url;
+  return typeof url === "string" ? url : null;
+}
+
+export function FirecrawlScrapeCard({
+  input,
+  output,
+}: {
+  input?: unknown;
+  output: unknown;
+}) {
   const parsed = firecrawlScrapeResponseSchema.safeParse(output);
   const [selectedFormat, setSelectedFormat] = useState<FormatKey>("markdown");
 
   if (!parsed.success) {
-    return <ToolEmptyState message="Firecrawl scrape returned an unexpected response." />;
+    return (
+      <ToolResultShell>
+        <ToolResultHeader title="Firecrawl Scrape" pills={["unparsed response"]} />
+        <ToolResultSection title="Raw output">
+          <CodeBlock code={JSON.stringify(output, null, 2)} language="json" />
+        </ToolResultSection>
+      </ToolResultShell>
+    );
   }
 
   const data = parsed.data;
   const scrapeData = data.data;
+  const inputUrl = getInputUrl(input);
 
   const formats = !scrapeData
     ? ([] as FormatKey[])
@@ -33,19 +53,19 @@ export function FirecrawlScrapeCard({ output }: { output: unknown }) {
       <ToolResultHeader
         title="Firecrawl Scrape"
         pills={[
-          scrapeData?.url ? "url loaded" : "url n/a",
-          data.creditsUsed !== undefined ? `${data.creditsUsed} credits` : "credits n/a",
-        ]}
+          scrapeData?.url ? "url loaded" : null,
+          data.creditsUsed !== undefined ? `${data.creditsUsed} credits` : null,
+        ].filter((value): value is string => Boolean(value))}
       />
-      {scrapeData?.url ? (
+      {scrapeData?.url || inputUrl ? (
         <ToolResultSection title="URL">
           <a
-            href={scrapeData.url}
+            href={scrapeData?.url ?? inputUrl ?? ""}
             target="_blank"
             rel="noreferrer"
             className="text-xs text-muted-foreground underline underline-offset-4"
           >
-            {scrapeData.url}
+            {scrapeData?.url ?? inputUrl}
           </a>
         </ToolResultSection>
       ) : null}

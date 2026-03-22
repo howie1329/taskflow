@@ -50,12 +50,12 @@ export function ThreadRow({
     return (
       <div
         className={cn(
-          "flex items-center gap-2 rounded-md px-2.5 py-2 w-full max-w-full overflow-hidden",
-          isActive ? "bg-accent" : "bg-accent/40",
+          "flex h-8 items-center gap-1.5 rounded-md px-3 w-full max-w-full overflow-hidden",
+          isActive ? "bg-muted" : "bg-muted/50",
         )}
       >
         <Input
-          className="h-7 px-2 py-0 text-[13px] min-w-0 flex-1 w-full max-w-full"
+          className="h-7 min-w-0 flex-1 w-full max-w-full px-2 py-0 text-xs"
           value={editingTitle}
           onChange={(e) => onEditTitleChange(e.target.value)}
           onKeyDown={(e) => {
@@ -79,15 +79,15 @@ export function ThreadRow({
     <Link
       href={`/app/chat/${thread.id}`}
       className={cn(
-        "group relative flex items-center gap-2 rounded-md px-2.5 py-2 text-sm transition-colors w-full max-w-full overflow-hidden",
-        "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/60",
+        "group relative flex h-8 min-h-8 items-center gap-1.5 rounded-md px-3 text-xs transition-colors duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] w-full max-w-full overflow-hidden",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
         isActive
-          ? "bg-muted text-foreground"
-          : "text-foreground hover:bg-muted/50",
+          ? "bg-muted font-medium text-foreground"
+          : "font-normal text-muted-foreground hover:bg-muted hover:text-foreground",
       )}
       aria-current={isActive ? "page" : undefined}
     >
-      <div className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
+      <div className="flex min-w-0 flex-1 items-center gap-1.5 overflow-hidden">
         {thread.pinned && (
           <HugeiconsIcon
             icon={PinIcon}
@@ -100,7 +100,7 @@ export function ThreadRow({
             {projectIcon}
           </span>
         )}
-        <span className="block min-w-0 flex-1 truncate text-[13px] font-normal">
+        <span className="block min-w-0 flex-1 truncate text-xs font-normal">
           {thread.title || "Untitled chat"}
         </span>
       </div>

@@ -68,9 +68,11 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
-      <div className="space-y-2">
-        <h2 className="text-base font-medium">Profile Information</h2>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-1">
+        <h2 className="text-lg font-semibold tracking-tight">
+          Profile Information
+        </h2>
         <p className="text-sm text-muted-foreground">
           Manage your personal information
         </p>
@@ -118,7 +120,11 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
       </Field>
 
       <div className="flex justify-end">
-        <Button type="submit" disabled={isSubmitting} className="min-w-24">
+        <Button
+          type="submit"
+          disabled={isSubmitting}
+          className="min-w-24 motion-safe:active:scale-[0.97]"
+        >
           {isSubmitting ? "Saving..." : "Save Changes"}
         </Button>
       </div>

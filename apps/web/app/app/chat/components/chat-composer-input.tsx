@@ -9,7 +9,6 @@ import {
   PromptInputTextarea,
 } from "@/components/ai-elements/prompt-input"
 import { ChatSettingsChips } from "./chat-settings-chips"
-import { ComposerHints } from "./composer-hints"
 import {
   CHAT_COMPOSER_INPUT_CLASS_NAME,
   ChatComposerToolHeader,
@@ -61,7 +60,6 @@ export function ChatComposerInput({
     selectedModelId,
     selectedProjectId,
     selectedMode,
-    toolLock,
     projects,
     availableModels,
     setSelectedModel,
@@ -100,33 +98,34 @@ export function ChatComposerInput({
           id={id}
           ref={textareaRef}
           placeholder={placeholder}
-          className="min-h-[72px] max-h-56 px-3 py-2.5 text-[15px] leading-7"
+          className="min-h-16 max-h-56 px-3 py-2 text-sm leading-relaxed placeholder:text-muted-foreground"
         />
-        <PromptInputFooter className="border-t border-border/45 pb-2.5 pt-2 text-muted-foreground">
-          <div className="flex flex-wrap items-center gap-1.5">
-            {!isMobile && (
-              <ComposerHints show={!textInput.value.trim()} toolLock={toolLock} />
-            )}
+        <PromptInputFooter className="border-t border-border px-3 py-2 text-muted-foreground">
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2 sm:gap-3">
             <ComposerSlashCommandButton
               value={textInput.value}
               setInput={textInput.setInput}
               onFocus={() => textareaRef.current?.focus()}
             />
-            {footerExtra}
-            <ChatSettingsChips
-              availableModels={availableModels}
-              selectedModelId={selectedModelId}
-              onSelectModel={setSelectedModel}
-              selectedMode={selectedMode}
-              onSelectMode={setSelectedMode}
-              projects={projects}
-              selectedProjectId={selectedProjectId}
-              onSelectProjectId={onSelectProjectId}
-              showImageAction={isMobile}
-            />
             {!isMobile && (
               <ComposerImageButton onClick={() => attachments.openFileDialog()} />
             )}
+            {footerExtra}
+            <div className="min-w-0">
+              <ChatSettingsChips
+                availableModels={availableModels}
+                selectedModelId={selectedModelId}
+                onSelectModel={setSelectedModel}
+                selectedMode={selectedMode}
+                onSelectMode={setSelectedMode}
+                projects={projects}
+                selectedProjectId={selectedProjectId}
+                onSelectProjectId={onSelectProjectId}
+                showImageAction={isMobile}
+              />
+            </div>
+          </div>
+          <div className="flex items-center gap-2 pl-3">
             {footerTrailing}
           </div>
           <ComposerSubmitButton status={status} onStop={stop} />

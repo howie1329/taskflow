@@ -11,7 +11,7 @@ export function ToolResultShell({
   return (
     <section
       className={cn(
-        "space-y-3",
+        "space-y-4 rounded-lg border border-border bg-card p-4 text-card-foreground",
         className,
       )}
       {...props}
@@ -66,7 +66,7 @@ export function ToolResultSection({
 
 export function ToolEmptyState({ message }: { message: string }) {
   return (
-    <div className="rounded-sm bg-muted/20 px-2.5 py-2 text-sm text-muted-foreground">
+    <div className="rounded-md border border-border bg-muted/30 px-3 py-2 text-sm text-muted-foreground">
       {message}
     </div>
   );

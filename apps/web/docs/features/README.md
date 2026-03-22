@@ -1,8 +1,8 @@
 # Features
 
-This section documents product behavior by feature area in `apps/web`.
+This section documents current product behavior in `apps/web`.
 
-## Core
+## Core Workspace
 
 - [Feature Status](./status.md)
 - [Inbox](./inbox.md)
@@ -14,7 +14,6 @@ This section documents product behavior by feature area in `apps/web`.
 - [Onboarding](./onboarding.md)
 - [Notifications](./notifications.md)
 
-## AI Implementation Details
+## Archive
 
-- [AI Chat Tools UI](./ai-chat-tools-ui.md)
-- [AI Tools UI Implementation Plan](./ai-tools-ui-implementation-plan.md)
+Historical UI planning docs live under [`../archive/2026-legacy-plans/`](../archive/2026-legacy-plans/README.md).

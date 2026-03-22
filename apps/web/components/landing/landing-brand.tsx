@@ -19,7 +19,7 @@ export function LandingBrand({
     <Link
       href={href}
       className={cn(
-        "flex items-center gap-1.5 text-sm font-medium text-foreground transition-colors hover:text-foreground/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
+        "flex items-center gap-1.5 text-sm font-medium text-foreground transition-[color,opacity] duration-(--duration-ui) ease-(--ease-snap) hover:text-foreground/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
         className
       )}
     >
@@ -30,11 +30,11 @@ export function LandingBrand({
         )}
       >
         <Image
-          src="/favicon-32x32.png"
+          src="/brand/taskflow-mark-dark.svg"
           alt="Taskflow"
-          width={18}
-          height={18}
-          className="size-[18px]"
+          width={28}
+          height={28}
+          className="size-7"
         />
       </span>
       <span className={cn("font-medium tracking-tight", labelClassName)}>

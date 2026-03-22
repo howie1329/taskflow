@@ -15,7 +15,7 @@ export function LandingFooter() {
               iconClassName="size-7 rounded-md"
               labelClassName="text-sm"
             />
-            <span className="text-xs text-muted-foreground">v1 rewrite</span>
+            <span className="text-xs text-muted-foreground">v1</span>
           </div>
 
           <nav className="flex items-center gap-6 text-xs">
@@ -23,7 +23,7 @@ export function LandingFooter() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                className="text-sm font-medium text-muted-foreground transition-[color,opacity] duration-(--duration-ui) ease-(--ease-snap) hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               >
                 {link.label}
               </Link>
@@ -33,9 +33,9 @@ export function LandingFooter() {
           <div className="flex items-center gap-2">
             <Link
               href="/app"
-              className="text-xs text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              className="text-sm font-medium text-muted-foreground transition-[color,opacity] duration-(--duration-ui) ease-(--ease-snap) hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
             >
-              Open App
+              Open app
             </Link>
           </div>
         </div>

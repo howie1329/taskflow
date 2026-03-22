@@ -6,17 +6,17 @@ import {
   DefaultChatTransport,
   lastAssistantMessageIsCompleteWithApprovalResponses,
 } from "ai"
+import { HugeiconsIcon } from "@hugeicons/react"
 import {
-  AlertCircle,
-  CheckCircle2,
-  Clipboard,
-  FileText,
-  Globe,
-  Loader2,
-  Search,
-  Sparkles,
-  Wand2,
-} from "lucide-react"
+  Alert02Icon,
+  CheckmarkCircle02Icon,
+  Copy01Icon,
+  File01Icon,
+  GlobalIcon,
+  Loading03Icon,
+  SearchIcon,
+  SparklesIcon,
+} from "@hugeicons/core-free-icons"
 import { toast } from "sonner"
 import {
   Conversation,
@@ -31,6 +31,7 @@ import {
   PromptInputSubmit,
   PromptInputTextarea,
 } from "@/components/ai-elements/prompt-input"
+import { CHAT_COMPOSER_INPUT_CLASS_NAME } from "@/app/app/chat/components/chat-composer-ui"
 import { useNotes } from "@/components/notes"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -205,9 +206,9 @@ function ReplaceNoteToolCard({
 
   if (part.state === "approval-requested") {
     return (
-      <div className="mt-2 rounded-lg border border-border/60 bg-muted/30 p-3 text-xs">
+      <div className="mt-2 rounded-lg border border-border bg-muted/30 p-3 text-xs">
         <div className="flex items-center gap-2 font-medium text-foreground">
-          <Wand2 className="size-3.5" />
+          <HugeiconsIcon icon={SparklesIcon} className="size-3.5" strokeWidth={2} />
           Apply note rewrite?
         </div>
         <p className="mt-2 text-muted-foreground">
@@ -260,7 +261,7 @@ function ReplaceNoteToolCard({
 
   if (part.state === "approval-responded") {
     return (
-      <div className="mt-2 rounded-lg border border-border/60 bg-muted/30 p-3 text-xs text-muted-foreground">
+      <div className="mt-2 rounded-lg border border-border bg-muted/30 p-3 text-xs text-muted-foreground">
         Saving approved note changes...
       </div>
     )
@@ -269,7 +270,7 @@ function ReplaceNoteToolCard({
   if (part.state === "output-available") {
     const success = part.output?.ok === true
     return (
-      <div className="mt-2 rounded-lg border border-border/60 bg-muted/30 p-3 text-xs">
+      <div className="mt-2 rounded-lg border border-border bg-muted/30 p-3 text-xs">
         <p className={success ? "font-medium" : "font-medium text-destructive"}>
           {success ? "Note updated" : "Note update failed"}
         </p>
@@ -297,7 +298,7 @@ function ReplaceNoteToolCard({
   }
 
   return (
-    <div className="mt-2 rounded-lg border border-border/60 bg-muted/30 p-3 text-xs text-muted-foreground">
+    <div className="mt-2 rounded-lg border border-border bg-muted/30 p-3 text-xs text-muted-foreground">
       Preparing note changes...
     </div>
   )
@@ -310,9 +311,9 @@ function WebSearchToolCard({
 }) {
   if (part.state === "input-available" || part.state === "input-streaming") {
     return (
-      <div className="mt-2 rounded-lg border border-border/60 bg-muted/30 p-3 text-xs">
+      <div className="mt-2 rounded-lg border border-border bg-muted/30 p-3 text-xs">
         <div className="flex items-center gap-2 font-medium text-foreground">
-          <Search className="size-3.5" />
+          <HugeiconsIcon icon={SearchIcon} className="size-3.5" strokeWidth={2} />
           Searching the web
         </div>
         <div className="mt-3 space-y-2">
@@ -333,7 +334,7 @@ function WebSearchToolCard({
 
   if (part.state === "approval-requested" || part.state === "approval-responded") {
     return (
-      <div className="mt-2 rounded-lg border border-border/60 bg-muted/30 p-3 text-xs text-muted-foreground">
+      <div className="mt-2 rounded-lg border border-border bg-muted/30 p-3 text-xs text-muted-foreground">
         Running web search...
       </div>
     )
@@ -342,9 +343,9 @@ function WebSearchToolCard({
   if (part.state === "output-available") {
     const results = Array.isArray(part.output?.results) ? part.output.results : []
     return (
-      <div className="mt-2 rounded-lg border border-border/60 bg-muted/30 p-3 text-xs">
+      <div className="mt-2 rounded-lg border border-border bg-muted/30 p-3 text-xs">
         <div className="flex items-center justify-between gap-2">
-          <p className="font-medium">Web search results</p>
+          <p className="font-medium text-foreground">Web search results</p>
           {part.output?.provider ? (
             <Badge variant="outline" className="h-5 text-xs">
               {part.output.provider}
@@ -362,7 +363,7 @@ function WebSearchToolCard({
                 href={result.url}
                 target="_blank"
                 rel="noreferrer"
-                className="block rounded-md border border-border/60 bg-background px-2 py-2 transition-colors hover:bg-accent/40"
+                className="block rounded-md border border-border bg-card px-2 py-2 motion-safe:transition-colors motion-safe:duration-150 motion-safe:ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-muted/50"
               >
                 <p className="font-medium text-foreground">{result.title || result.url}</p>
                 <p className="mt-1 line-clamp-2 text-muted-foreground">
@@ -388,7 +389,7 @@ function WebSearchToolCard({
   }
 
   return (
-    <div className="mt-2 rounded-lg border border-border/60 bg-muted/30 p-3 text-xs text-muted-foreground">
+    <div className="mt-2 rounded-lg border border-border bg-muted/30 p-3 text-xs text-muted-foreground">
       Preparing web search...
     </div>
   )
@@ -488,7 +489,7 @@ function NotesMiniChat({ note }: { note: Note }) {
       <div className="space-y-2">
         <div className="flex items-center justify-between gap-2">
           <div>
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">
+            <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
               Notes mini chat
             </p>
             <p className="truncate text-sm font-medium">
@@ -505,11 +506,11 @@ function NotesMiniChat({ note }: { note: Note }) {
           </Button>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="secondary" className="h-6 gap-1 rounded-full text-xs">
-            <FileText className="size-3" />
+          <Badge variant="secondary" className="h-6 gap-1 rounded-md text-xs">
+            <HugeiconsIcon icon={File01Icon} className="size-3" strokeWidth={2} />
             Using current note only
           </Badge>
-          <Badge variant="outline" className="h-6 rounded-full text-xs">
+          <Badge variant="outline" className="h-6 rounded-md text-xs">
             {messages.length} messages
           </Badge>
         </div>
@@ -518,11 +519,13 @@ function NotesMiniChat({ note }: { note: Note }) {
       <Separator />
 
       <Conversation className="min-h-0 flex-1">
-        <ConversationContent className="flex w-full flex-col gap-4 px-0 py-1 pr-1">
+        <ConversationContent className="flex w-full flex-col gap-6 px-0 py-2 pr-1">
           {messages.length === 0 ? (
             <ConversationEmptyState
-              className="min-h-[260px] rounded-xl border border-dashed border-border/70 bg-muted/20 p-4 text-left"
-              icon={<Sparkles className="size-4" />}
+              className="min-h-[260px] rounded-lg border border-dashed border-border bg-muted/20 p-4 text-left"
+              icon={
+                <HugeiconsIcon icon={SparklesIcon} className="size-4" strokeWidth={2} />
+              }
               title="Ask about this note"
               description="I can answer questions from the current note, rewrite it with approval, or search the web when you ask for outside information."
               suggestions={promptSuggestions.map((prompt) => ({
@@ -540,11 +543,11 @@ function NotesMiniChat({ note }: { note: Note }) {
                 <Message
                   key={message.id}
                   from={message.role}
-                  className={cn("max-w-none gap-1.5", message.role === "user" && "justify-end")}
+                  className={cn("max-w-none gap-2", message.role === "user" && "justify-end")}
                 >
                   <MessageContent
                     className={cn(
-                      "text-[15px] leading-7",
+                      "text-sm leading-relaxed",
                       message.role === "assistant" && "w-full",
                       message.role === "user" && "max-w-xl",
                     )}
@@ -592,10 +595,10 @@ function NotesMiniChat({ note }: { note: Note }) {
         <ConversationScrollButton />
       </Conversation>
 
-      <div className="shrink-0 border-t border-border/40 pt-3">
+      <div className="shrink-0 border-t border-border pt-3">
         <PromptInput
           onSubmit={({ text }) => handleSubmit(text)}
-          className="**:data-[slot=input-group]:rounded-3xl **:data-[slot=input-group]:border-border/60 **:data-[slot=input-group]:bg-background **:data-[slot=input-group]:shadow-sm **:data-[slot=input-group]:transition-colors **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:border-ring/50 **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:ring-2 **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:ring-ring/20"
+          className={CHAT_COMPOSER_INPUT_CLASS_NAME}
         >
           <PromptInputTextarea
             id="notes-mini-chat-message"
@@ -603,13 +606,17 @@ function NotesMiniChat({ note }: { note: Note }) {
             value={input}
             onChange={(event) => setInput(event.target.value)}
             placeholder="Ask about this note..."
-            className="min-h-[72px] max-h-56 px-3 py-2.5 text-[15px] leading-7"
+            className="min-h-16 max-h-56 px-3 py-2 text-sm leading-relaxed placeholder:text-muted-foreground"
           />
-          <PromptInputFooter className="border-t border-border/45 pb-2.5 pt-2 text-muted-foreground">
+          <PromptInputFooter className="border-t border-border px-3 py-2 text-muted-foreground">
             <div className="flex items-center gap-2 text-xs">
               {status === "streaming" || status === "submitted" ? (
                 <span className="inline-flex items-center gap-1.5 text-muted-foreground">
-                  <Loader2 className="size-3.5 animate-spin" />
+                  <HugeiconsIcon
+                    icon={Loading03Icon}
+                    className="size-3.5 animate-spin"
+                    strokeWidth={2}
+                  />
                   Generating response
                 </span>
               ) : (
@@ -620,7 +627,7 @@ function NotesMiniChat({ note }: { note: Note }) {
               status={status}
               onStop={stop}
               size="icon-sm"
-              className="size-8 rounded-full"
+              className="size-8 rounded-md shadow-none"
               disabled={status !== "streaming" && status !== "submitted" && !input.trim()}
             />
           </PromptInputFooter>
@@ -638,8 +645,8 @@ function ReviewerScoreCard({
   value: number
 }) {
   return (
-    <div className="rounded-md border border-border/50 bg-background px-2.5 py-2.5">
-      <p className="text-xs uppercase tracking-wide text-muted-foreground">
+    <div className="rounded-md border border-border bg-card px-2.5 py-2.5">
+      <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-muted-foreground">
         {label}
       </p>
       <p className="mt-1 text-sm font-medium text-foreground">{value}/5</p>
@@ -666,7 +673,7 @@ function ReviewerSuggestionCard({
   }
 
   return (
-    <div className="rounded-md border border-border/50 bg-background p-3 transition-colors duration-200 hover:bg-muted/30">
+    <div className="rounded-md border border-border bg-card p-3 motion-safe:transition-colors motion-safe:duration-150 motion-safe:ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-muted/40">
       <div className="flex items-start justify-between gap-2">
         <div>
           <p className="text-sm font-medium text-foreground">{suggestion.title}</p>
@@ -679,7 +686,7 @@ function ReviewerSuggestionCard({
       <div className="mt-3 flex items-center gap-2">
         <Button
           size="sm"
-          className="h-7 px-2 text-xs transition-colors duration-200"
+          className="h-7 px-2 text-xs"
           onClick={() => onAskChat(prompt)}
         >
           Ask chat
@@ -687,10 +694,10 @@ function ReviewerSuggestionCard({
         <Button
           variant="outline"
           size="sm"
-          className="h-7 px-2 text-xs transition-colors duration-200"
+          className="h-7 px-2 text-xs"
           onClick={() => void handleCopy()}
         >
-          <Clipboard className="mr-1 size-3.5" />
+          <HugeiconsIcon icon={Copy01Icon} className="mr-1 size-3.5" strokeWidth={2} />
           Copy
         </Button>
       </div>
@@ -718,7 +725,7 @@ function NotesInspectorReviewer({
 
   return (
     <div className="space-y-4 text-sm">
-      <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+      <div className="rounded-lg border border-border bg-muted/20 p-3">
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-xs uppercase tracking-wide text-muted-foreground">
@@ -739,14 +746,38 @@ function NotesInspectorReviewer({
             }
             className="capitalize"
           >
-            {status === "reviewing" ? <Loader2 className="mr-1 size-3 animate-spin" /> : null}
+            {status === "reviewing" ? (
+              <HugeiconsIcon
+                icon={Loading03Icon}
+                className="mr-1 size-3 animate-spin"
+                strokeWidth={2}
+              />
+            ) : null}
             {status}
           </Badge>
         </div>
         <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
-          {status === "reviewing" ? <Loader2 className="size-3.5 animate-spin" /> : null}
-          {status === "ready" ? <CheckCircle2 className="size-3.5 text-emerald-600" /> : null}
-          {status === "error" ? <AlertCircle className="size-3.5 text-destructive" /> : null}
+          {status === "reviewing" ? (
+            <HugeiconsIcon
+              icon={Loading03Icon}
+              className="size-3.5 animate-spin"
+              strokeWidth={2}
+            />
+          ) : null}
+          {status === "ready" ? (
+            <HugeiconsIcon
+              icon={CheckmarkCircle02Icon}
+              className="size-3.5 text-primary"
+              strokeWidth={2}
+            />
+          ) : null}
+          {status === "error" ? (
+            <HugeiconsIcon
+              icon={Alert02Icon}
+              className="size-3.5 text-destructive"
+              strokeWidth={2}
+            />
+          ) : null}
           <span>
             {status === "reviewing"
               ? "Analyzing note..."
@@ -759,7 +790,7 @@ function NotesInspectorReviewer({
       </div>
 
       {!reviewer ? (
-        <div className="rounded-xl border border-dashed border-border/70 bg-muted/20 p-4">
+        <div className="rounded-lg border border-dashed border-border bg-muted/20 p-4">
           <p className="text-sm font-medium">Waiting for a meaningful save</p>
           <p className="mt-1 text-xs text-muted-foreground">
             The reviewer runs automatically after note content changes and saves.
@@ -767,7 +798,7 @@ function NotesInspectorReviewer({
         </div>
       ) : (
         <>
-          <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+          <div className="rounded-lg border border-border bg-muted/20 p-3">
             <div className="flex items-center justify-between gap-2">
               <p className="text-xs uppercase tracking-wide text-muted-foreground">
                 Summary
@@ -798,7 +829,7 @@ function NotesInspectorReviewer({
               reviewer.topIssues.map((issue) => (
                 <div
                   key={`${issue.title}_${issue.detail}`}
-                  className="rounded-md border border-border/50 bg-background p-3"
+                  className="rounded-md border border-border bg-card p-3"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-sm font-medium text-foreground">{issue.title}</p>
@@ -832,7 +863,7 @@ function NotesInspectorReviewer({
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
-            <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+            <div className="rounded-lg border border-border bg-muted/20 p-3">
               <p className="text-xs uppercase tracking-wide text-muted-foreground">
                 Action items
               </p>
@@ -848,7 +879,7 @@ function NotesInspectorReviewer({
                 </p>
               )}
             </div>
-            <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+            <div className="rounded-lg border border-border bg-muted/20 p-3">
               <p className="text-xs uppercase tracking-wide text-muted-foreground">
                 Open questions
               </p>
@@ -877,9 +908,9 @@ function NotesInspectorInfo({ note }: { note: Note }) {
 
   return (
     <div className="space-y-4 text-sm">
-      <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
-        <div className="flex items-center gap-2 font-medium">
-          <Globe className="size-4" />
+      <div className="rounded-lg border border-border bg-muted/20 p-3">
+        <div className="flex items-center gap-2 font-medium text-foreground">
+          <HugeiconsIcon icon={GlobalIcon} className="size-4" strokeWidth={2} />
           Scope
         </div>
         <p className="mt-2 text-sm text-muted-foreground">
@@ -887,24 +918,24 @@ function NotesInspectorInfo({ note }: { note: Note }) {
         </p>
       </div>
 
-      <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+      <div className="rounded-lg border border-border bg-muted/20 p-3">
         <p className="font-medium">Current note</p>
         <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-          <div className="rounded-md border border-border/60 bg-background px-2 py-2">
+          <div className="rounded-md border border-border bg-background px-2 py-2">
             <p className="text-muted-foreground">Words</p>
             <p className="mt-1 text-sm font-medium text-foreground">{wordCount}</p>
           </div>
-          <div className="rounded-md border border-border/60 bg-background px-2 py-2">
+          <div className="rounded-md border border-border bg-background px-2 py-2">
             <p className="text-muted-foreground">Lines</p>
             <p className="mt-1 text-sm font-medium text-foreground">{lineCount}</p>
           </div>
-          <div className="rounded-md border border-border/60 bg-background px-2 py-2">
+          <div className="rounded-md border border-border bg-background px-2 py-2">
             <p className="text-muted-foreground">Pinned</p>
             <p className="mt-1 text-sm font-medium text-foreground">
               {note.pinned ? "Yes" : "No"}
             </p>
           </div>
-          <div className="rounded-md border border-border/60 bg-background px-2 py-2">
+          <div className="rounded-md border border-border bg-background px-2 py-2">
             <p className="text-muted-foreground">Updated</p>
             <p className="mt-1 text-sm font-medium text-foreground">
               {formatTimestamp(note.updatedAt)}
@@ -924,7 +955,7 @@ export function NotesCopilot() {
 
   if (!selectedNote) {
     return (
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm leading-relaxed text-muted-foreground">
         Open a note to use the mini chat.
       </p>
     )
@@ -936,14 +967,17 @@ export function NotesCopilot() {
       onValueChange={setActiveTab}
       className="flex h-full min-h-0 flex-col gap-3"
     >
-      <TabsList variant="line" className="w-full justify-start bg-transparent p-0">
-        <TabsTrigger value="chat" className="max-w-[120px] px-0 py-1 text-xs">
+      <TabsList
+        variant="line"
+        className="h-auto w-full justify-start gap-1 rounded-none bg-transparent p-0"
+      >
+        <TabsTrigger value="chat" className="px-2 py-1.5 text-sm font-medium">
           Chat
         </TabsTrigger>
-        <TabsTrigger value="reviewer" className="max-w-[120px] px-0 py-1 text-xs">
+        <TabsTrigger value="reviewer" className="px-2 py-1.5 text-sm font-medium">
           Reviewer
         </TabsTrigger>
-        <TabsTrigger value="info" className="max-w-[120px] px-0 py-1 text-xs">
+        <TabsTrigger value="info" className="px-2 py-1.5 text-sm font-medium">
           Info
         </TabsTrigger>
       </TabsList>

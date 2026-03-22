@@ -3,21 +3,49 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { parallelSearchResponseSchema } from "@/lib/AITools/ParallelAi/types";
+import { CodeBlock } from "./code-block";
 import { ToolEmptyState, ToolResultHeader, ToolResultSection, ToolResultShell } from "./tool-result-shell";
 
-export function ParallelWebSearchCard({ output }: { output: unknown }) {
+function getInputQuery(input: unknown) {
+  if (!input || typeof input !== "object") return null;
+  const query = (input as Record<string, unknown>).query;
+  return typeof query === "string" ? query : null;
+}
+
+export function ParallelWebSearchCard({
+  input,
+  output,
+}: {
+  input?: unknown;
+  output: unknown;
+}) {
   const [showAll, setShowAll] = useState(false);
   const parsed = parallelSearchResponseSchema.safeParse(output);
   if (!parsed.success) {
-    return <ToolEmptyState message="Parallel search output could not be parsed." />;
+    return (
+      <ToolResultShell>
+        <ToolResultHeader title="Parallel Web Search" pills={["unparsed response"]} />
+        <ToolResultSection title="Raw output">
+          <CodeBlock code={JSON.stringify(output, null, 2)} language="json" />
+        </ToolResultSection>
+      </ToolResultShell>
+    );
   }
 
   const results = parsed.data.results ?? [];
   const visibleResults = showAll ? results : results.slice(0, 5);
+  const query = getInputQuery(input);
 
   return (
     <ToolResultShell>
       <ToolResultHeader title="Parallel Web Search" pills={[`${results.length} results`]} />
+      {query ? (
+        <ToolResultSection title="Query">
+          <p className="rounded-sm bg-muted/20 px-2 py-1 font-mono text-xs">
+            {query}
+          </p>
+        </ToolResultSection>
+      ) : null}
       <ToolResultSection title="Sources">
         {results.length === 0 ? (
           <ToolEmptyState message="No search results were returned." />

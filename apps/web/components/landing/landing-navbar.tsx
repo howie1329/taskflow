@@ -22,12 +22,12 @@ export function LandingNavbar() {
         <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between">
           <LandingBrand />
 
-          <nav className="hidden items-center gap-6 text-xs font-medium md:flex">
+          <nav className="hidden items-center gap-6 text-sm font-medium md:flex">
             {landingNavLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                className="text-muted-foreground transition-[color,opacity] duration-(--duration-ui) ease-(--ease-snap) hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               >
                 {link.label}
               </Link>
@@ -38,17 +38,21 @@ export function LandingNavbar() {
             <ThemeToggle />
             <Link
               href="/roadmap"
-              className="hidden text-xs text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:block"
+              className="hidden text-sm font-medium text-muted-foreground transition-[color,opacity] duration-(--duration-ui) ease-(--ease-snap) hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:block"
             >
-              The Plan
+              The plan
             </Link>
             {isAuthenticated ? (
               <Link href="/app">
-                <Button size="sm">To App</Button>
+                <Button size="sm" className="marketing-press">
+                  To app
+                </Button>
               </Link>
             ) : (
               <Link href="/sign-in">
-                <Button size="sm">Get Started</Button>
+                <Button size="sm" className="marketing-press">
+                  Get started
+                </Button>
               </Link>
             )}
           </div>

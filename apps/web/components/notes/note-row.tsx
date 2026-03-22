@@ -52,11 +52,13 @@ export function NoteRow({
       type="button"
       onClick={onSelect}
       className={cn(
-        "group relative flex w-full max-w-full items-center gap-2 overflow-hidden rounded-lg px-2 py-1.5 text-left text-sm transition-colors duration-150",
-        "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/60",
+        "group relative flex w-full max-w-full items-center gap-2 overflow-hidden rounded-md px-2 py-1.5 text-left",
+        "motion-safe:transition-[background-color,color] motion-safe:duration-150 motion-safe:ease-[cubic-bezier(0.16,1,0.3,1)]",
+        showPreview ? "text-xs" : "text-sm",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-offset-1 focus-visible:ring-offset-background",
         isActive
-          ? "bg-muted/80 text-foreground"
-          : "text-foreground hover:bg-muted/45",
+          ? "bg-muted/80 font-medium text-foreground"
+          : "text-foreground hover:bg-muted/50 active:bg-muted/65",
       )}
       aria-current={isActive ? "page" : undefined}
     >
@@ -82,17 +84,22 @@ export function NoteRow({
                 strokeWidth={2}
               />
             )}
-            <span className="min-w-0 truncate text-[12.5px] font-medium">
+            <span
+              className={cn(
+                "min-w-0 truncate font-medium",
+                showPreview ? "text-xs" : "text-sm",
+              )}
+            >
               {note.title || "Untitled note"}
             </span>
           </div>
           {showPreview ? (
-            <span className="mt-0.5 line-clamp-1 min-w-0 pr-2 text-[10.5px] leading-4 text-muted-foreground">
+            <span className="mt-0.5 line-clamp-1 min-w-0 pr-2 text-xs leading-relaxed text-muted-foreground">
               {preview || "No content yet"}
             </span>
           ) : null}
         </div>
-        <span className="shrink-0 text-[10px] text-muted-foreground/75">{timeLabel}</span>
+        <span className="shrink-0 text-xs tabular-nums text-muted-foreground">{timeLabel}</span>
       </div>
 
       <DropdownMenu>

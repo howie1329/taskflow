@@ -52,7 +52,7 @@ export function BoardView({
 
   return (
     <div className="h-full w-full min-h-0 overflow-y-auto lg:overflow-y-hidden">
-      <div className="grid gap-3 lg:h-full lg:grid-cols-4">
+      <div className="grid gap-4 lg:h-full lg:grid-cols-4">
         {visibleColumns.map((column) => {
           const columnTasks = getTasksByStatus(column.id);
           const isCompleted = column.id === "Completed";
@@ -60,15 +60,15 @@ export function BoardView({
           return (
             <div
               key={column.id}
-              className="flex min-w-0 flex-col overflow-hidden rounded-xl border border-border/40 bg-background/50 lg:min-h-0"
+              className="flex min-w-0 flex-col overflow-hidden rounded-lg border border-border bg-card lg:min-h-0"
             >
               {/* Column header */}
-              <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border/40 bg-background/80 px-3 py-2 backdrop-blur supports-backdrop-filter:bg-background/70">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-medium tracking-tight">
+              <div className="sticky top-0 z-10 flex min-h-8 shrink-0 items-center justify-between border-b border-border bg-card px-3 py-1">
+                <div className="flex min-w-0 items-center gap-2">
+                  <h3 className="truncate text-sm font-medium tracking-tight">
                     {column.label}
                   </h3>
-                  <span className="rounded-md bg-muted/55 px-2 py-0.5 text-[11px] tabular-nums text-muted-foreground">
+                  <span className="shrink-0 rounded-md bg-muted px-2 py-0.5 text-xs font-medium tabular-nums text-muted-foreground">
                     {columnTasks.length}
                   </span>
                 </div>
@@ -85,9 +85,8 @@ export function BoardView({
               {/* Task list with Add card */}
               <div
                 className={cn(
-                  "flex-1 min-h-0 divide-y divide-border/50",
-                  "overflow-y-auto",
-                  isCompleted && "opacity-80",
+                  "min-h-0 flex-1 divide-y divide-border overflow-y-auto",
+                  isCompleted && "text-muted-foreground",
                 )}
               >
                 {columnTasks.map((task) => {

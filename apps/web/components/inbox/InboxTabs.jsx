@@ -38,7 +38,7 @@ export const InboxTabs = memo(function InboxTabs({
     >
       <TabsList
         variant="line"
-        className="mb-0 w-full justify-start gap-1 border-b border-border/50 bg-background/90 px-1 backdrop-blur supports-backdrop-filter:bg-background/80"
+        className="mb-0 w-full justify-start gap-1 border-b border-border bg-transparent px-0"
         role="tablist"
       >
         <TabsTrigger
@@ -51,7 +51,7 @@ export const InboxTabs = memo(function InboxTabs({
           Open
           <Badge
             variant="secondary"
-            className="rounded-md tabular-nums bg-muted/70"
+            className="rounded-md px-1.5 py-0 text-xs font-medium tabular-nums"
             aria-hidden="true"
           >
             {displayOpenCount}
@@ -67,7 +67,7 @@ export const InboxTabs = memo(function InboxTabs({
           Archived
           <Badge
             variant="secondary"
-            className="rounded-md tabular-nums bg-muted/70"
+            className="rounded-md px-1.5 py-0 text-xs font-medium tabular-nums"
             aria-hidden="true"
           >
             {displayArchivedCount}
@@ -81,9 +81,9 @@ export const InboxTabs = memo(function InboxTabs({
         role="tabpanel"
         aria-label="Open items"
       >
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border/50 bg-background/60">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-border bg-card text-card-foreground">
           {filteredOpenItems.length === 0 ? (
-            <div className="flex min-h-0 flex-1 items-center justify-center p-2">
+            <div className="flex min-h-0 flex-1 items-center justify-center p-4">
               <InboxEmptyState
                 status="open"
                 onCaptureFocus={onCaptureFocus}
@@ -92,7 +92,7 @@ export const InboxTabs = memo(function InboxTabs({
             </div>
           ) : (
             <div
-              className="min-h-0 flex-1 overflow-y-auto divide-y divide-border/50"
+              className="min-h-0 flex-1 divide-y divide-border overflow-y-auto"
               role="list"
               aria-label={`${filteredOpenItems.length} open inbox items`}
             >
@@ -122,14 +122,14 @@ export const InboxTabs = memo(function InboxTabs({
         role="tabpanel"
         aria-label="Archived items"
       >
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border/50 bg-background/60">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-border bg-card text-card-foreground">
           {filteredArchivedItems.length === 0 ? (
-            <div className="flex min-h-0 flex-1 items-center justify-center p-2">
+            <div className="flex min-h-0 flex-1 items-center justify-center p-4">
               <InboxEmptyState status="archived" searchQuery={searchQuery} />
             </div>
           ) : (
             <div
-              className="min-h-0 flex-1 overflow-y-auto divide-y divide-border/50"
+              className="min-h-0 flex-1 divide-y divide-border overflow-y-auto"
               role="list"
               aria-label={`${filteredArchivedItems.length} archived inbox items`}
             >

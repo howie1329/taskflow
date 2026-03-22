@@ -1,34 +1,34 @@
 # Source Docs Map
 
-This repo contains multiple generations of documentation. Use this map to find what you need.
+Use this file to find the current source of truth quickly.
 
-## Canonical (Current App)
+## Current Product Docs
 
-- `apps/web/docs/README.md`
-- `apps/web/docs/ui-guidelines.md`
-- `apps/web/docs/roadmap.md`
-- `apps/web/docs/architecture/`
-- `apps/web/docs/features/`
+- [`apps/web/README.md`](../apps/web/README.md): active app overview, setup, commands
+- [`apps/web/docs/README.md`](../apps/web/docs/README.md): canonical docs index
+- [`apps/web/docs/architecture/README.md`](../apps/web/docs/architecture/README.md): technical reference
+- [`apps/web/docs/features/README.md`](../apps/web/docs/features/README.md): current product behavior by feature
+- [`apps/web/docs/roadmap.md`](../apps/web/docs/roadmap.md): current product priorities
+- [`apps/web/docs/ui-guidelines.md`](../apps/web/docs/ui-guidelines.md): UI rules for the active app
 
-## Root Docs (Index + Legacy Reference)
+## Repo-Level Docs
 
-- `docs/README.md`
-- `docs/LEGACY/feature-inventory.md`
+- [`README.md`](../README.md): monorepo entrypoint
+- [`docs/README.md`](./README.md): root docs index
 
-## Legacy App Docs (Reference)
+## Shared Package Docs
 
-Frontend legacy docs:
+- [`packages/Taskflow-Rag/README.md`](../packages/Taskflow-Rag/README.md)
+- [`packages/Taskflow-Context-Compaction/README.md`](../packages/Taskflow-Context-Compaction/README.md)
+- [`packages/Taskflow-Chat-Content/README.md`](../packages/Taskflow-Chat-Content/README.md)
 
-- `apps/frontend/docs/FEATURE_GAPS_AND_IDEAS.md`
-- `apps/frontend/docs/MVP.md`
-- `apps/frontend/docs/PostMVP.md`
-- `apps/frontend/docs/MENTION_SYSTEM_GUIDE.md`
-- `apps/frontend/docs/AI_Chat_Enhancement_Roadmap.md`
+## Legacy Reference
 
-Backend legacy docs:
+Legacy app-local docs have been removed. The repo keeps only a brief reference here:
 
-- `apps/backend/docs/FEATURE_RECOMMENDATIONS_SUMMARY.md`
-- `apps/backend/docs/FEATURE_ANALYSIS_AND_RECOMMENDATIONS.md`
-- `apps/backend/docs/ARTIFACT_SYSTEM.md`
-- `apps/backend/docs/CHAT_HISTORY_ANALYSIS.md`
-- `apps/backend/docs/CHAT_HISTORY_RECOMMENDATIONS.md`
+- [`LEGACY/feature-inventory.md`](./LEGACY/feature-inventory.md)
+
+Deprecated app code still exists in:
+
+- `apps/frontend`
+- `apps/backend`

@@ -55,7 +55,13 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { SearchIcon, SlidersHorizontalIcon, XIcon } from "lucide-react";
+import {
+  InboxIcon,
+  SearchIcon,
+  SearchXIcon,
+  SlidersHorizontalIcon,
+  XIcon,
+} from "lucide-react";
 import { toast } from "sonner";
 
 type Task = Doc<"tasks">;
@@ -1014,7 +1020,7 @@ function TaskFeatureToolbar() {
               ref={meta.searchButtonRef}
               variant="outline"
               size="sm"
-              className="h-8 w-full justify-between text-xs"
+              className="h-8 w-full justify-between text-sm"
               onClick={actions.openSearch}
               aria-expanded={state.isSearchOpen}
               aria-controls="task-search-input"
@@ -1029,24 +1035,30 @@ function TaskFeatureToolbar() {
         </div>
 
         <div className="flex items-center gap-2 lg:justify-end">
-          <label className="inline-flex items-center gap-2 rounded-md border border-border px-2.5 py-1.5 text-xs">
+          <label className="inline-flex h-8 items-center gap-2 rounded-md border border-border px-3 text-sm">
             <Switch
               size="sm"
               checked={state.hideCompleted}
               onCheckedChange={actions.toggleHideCompleted}
             />
-            <span>Hide completed</span>
+            <span className="font-medium">Hide completed</span>
           </label>
 
           <Tabs
             value={state.currentView}
             onValueChange={(value) => actions.setView(value as TaskView)}
           >
-            <TabsList variant="line" className="gap-1 bg-transparent p-0">
-              <TabsTrigger value="board" className="px-2 py-1 text-xs">
+            <TabsList variant="line" className="h-8 gap-1 bg-transparent p-0">
+              <TabsTrigger
+                value="board"
+                className="px-3 py-1.5 text-sm data-[state=active]:font-medium"
+              >
                 Board
               </TabsTrigger>
-              <TabsTrigger value="todayPlusBoard" className="px-2 py-1 text-xs">
+              <TabsTrigger
+                value="todayPlusBoard"
+                className="px-3 py-1.5 text-sm data-[state=active]:font-medium"
+              >
                 Today + Board
               </TabsTrigger>
             </TabsList>
@@ -1096,7 +1108,7 @@ function TaskFeatureFilters() {
   }
 
   return (
-    <div className="rounded-lg border border-border/50 bg-background/60 p-2">
+    <div className="rounded-lg border border-border bg-card p-4">
       <TaskFilterControls />
     </div>
   );
@@ -1107,11 +1119,11 @@ function TaskFeatureContent() {
 
   if (meta.isLoading) {
     return (
-      <div className="flex h-full min-h-0 flex-col gap-3 overflow-hidden px-3 py-2 md:px-4">
-        <div className="flex items-center justify-between shrink-0">
+      <div className="flex h-full min-h-0 flex-col gap-3 overflow-hidden px-6 py-4 md:px-8">
+        <div className="flex shrink-0 items-center justify-between">
           <p className="text-sm text-muted-foreground">Organize and track your work</p>
         </div>
-        <div className="flex-1 min-h-0 flex items-center justify-center">
+        <div className="flex min-h-0 flex-1 items-center justify-center">
           <p className="text-sm text-muted-foreground">Loading...</p>
         </div>
       </div>
@@ -1119,17 +1131,21 @@ function TaskFeatureContent() {
   }
 
   return (
-    <div className="flex h-full w-full flex-1 min-h-0 flex-col overflow-hidden px-3 py-2 md:px-4">
+    <div className="flex h-full w-full min-h-0 flex-1 flex-col overflow-hidden px-6 py-4 md:px-8">
       {state.isEmptyState ? (
-        <div className="flex flex-1 min-h-0 items-center justify-center">
-          <div className="flex flex-col items-center justify-center gap-2 text-center max-w-sm">
+        <div className="flex min-h-0 flex-1 items-center justify-center py-16">
+          <div className="flex max-w-xs flex-col items-center justify-center gap-3 text-center">
+            <InboxIcon
+              className="size-8 text-muted-foreground"
+              aria-hidden
+            />
             <h3 className="text-sm font-medium">No tasks yet</h3>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Create your first task to get started
             </p>
             <Button
               size="sm"
-              className="mt-4"
+              className="mt-2 h-8"
               onClick={() => actions.openCreate({ status: "Not Started" })}
             >
               Add your first task
@@ -1137,7 +1153,7 @@ function TaskFeatureContent() {
             <Button
               size="sm"
               variant="outline"
-              className="mt-2"
+              className="h-8"
               onClick={() => actions.setCreateTagDialogOpen(true)}
             >
               Create a tag
@@ -1145,17 +1161,21 @@ function TaskFeatureContent() {
           </div>
         </div>
       ) : state.showNoResults ? (
-        <div className="flex flex-1 min-h-0 items-center justify-center">
-          <div className="flex flex-col items-center justify-center gap-2 text-center max-w-sm">
+        <div className="flex min-h-0 flex-1 items-center justify-center py-16">
+          <div className="flex max-w-xs flex-col items-center justify-center gap-3 text-center">
+            <SearchXIcon
+              className="size-8 text-muted-foreground"
+              aria-hidden
+            />
             <h3 className="text-sm font-medium">No matching tasks</h3>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Try adjusting your search or filters
             </p>
             {state.hasActiveFilters && (
               <Button
                 variant="outline"
                 size="sm"
-                className="mt-3"
+                className="mt-2 h-8"
                 onClick={actions.clearFilters}
               >
                 Clear filters
@@ -1231,7 +1251,7 @@ function TaskFeatureCreateTagDialog() {
       open={state.isCreateTagDialogOpen}
       onOpenChange={actions.setCreateTagDialogOpen}
     >
-      <DialogContent className="sm:max-w-[400px]">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Create new tag</DialogTitle>
           <DialogDescription>
@@ -1240,9 +1260,12 @@ function TaskFeatureCreateTagDialog() {
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="tag-name">Tag name</Label>
+            <Label className="text-sm font-medium" htmlFor="tag-name">
+              Tag name
+            </Label>
             <Input
               id="tag-name"
+              className="h-8 text-sm"
               value={state.newTagName}
               onChange={(event) => actions.setNewTagName(event.target.value)}
               placeholder="e.g., urgent, work, personal"
@@ -1254,9 +1277,10 @@ function TaskFeatureCreateTagDialog() {
             />
           </div>
         </div>
-        <DialogFooter>
+        <DialogFooter className="gap-2">
           <Button
             variant="outline"
+            className="h-8 text-sm"
             onClick={() => {
               actions.setNewTagName("");
               actions.setCreateTagDialogOpen(false);
@@ -1265,6 +1289,7 @@ function TaskFeatureCreateTagDialog() {
             Cancel
           </Button>
           <Button
+            className="h-8 text-sm"
             onClick={actions.createTagFromDialog}
             disabled={!state.newTagName.trim() || state.isCreatingTag}
           >

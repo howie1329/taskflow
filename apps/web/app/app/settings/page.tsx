@@ -7,16 +7,14 @@ export const metadata = {
 
 export default function SettingsPage() {
   return (
-    <div className="flex h-full min-h-0 w-full flex-col px-3 py-3 md:px-5 md:py-5">
-      <div className="mb-5 flex items-center justify-between md:mb-6">
-        <div>
-          <h1 className="text-xl font-semibold tracking-tight">Settings</h1>
-          <p className="text-sm text-muted-foreground">
-            Manage your profile, preferences, and AI settings
-          </p>
-        </div>
+    <div className="flex h-full min-h-0 w-full flex-col px-6 py-6 md:px-8">
+      <div className="mb-6 shrink-0">
+        <h1 className="text-xl font-semibold tracking-tight">Settings</h1>
+        <p className="text-sm text-muted-foreground">
+          Manage your profile, preferences, and AI settings
+        </p>
       </div>
-      <div className="min-h-0 flex-1">
+      <div className="min-h-0 flex-1 overflow-hidden">
         <SettingsLayout />
       </div>
     </div>

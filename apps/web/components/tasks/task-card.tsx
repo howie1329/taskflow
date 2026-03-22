@@ -4,6 +4,7 @@ import type { Doc } from "@/convex/_generated/dataModel";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { priorityDotClassName } from "@/lib/task-priority-styles";
 
 type Task = Doc<"tasks">;
 type Project = Doc<"projects">;
@@ -32,12 +33,6 @@ export function TaskCard({
     .map((id) => tags.find((t) => t._id === id))
     .filter(Boolean) as Tag[];
 
-  const priorityColors = {
-    low: "bg-blue-500",
-    medium: "bg-amber-500",
-    high: "bg-red-500",
-  };
-
   const formatDate = (timestamp: number | null | undefined) => {
     if (!timestamp) return null;
     const date = new Date(timestamp);
@@ -57,15 +52,28 @@ export function TaskCard({
 
   return (
     <Card
-      className="group cursor-pointer rounded-none border-0 bg-transparent px-2.5 py-2 shadow-none ring-0 transition-colors hover:bg-muted/45 focus-visible:outline-none"
+      role="button"
+      tabIndex={0}
+      className={cn(
+        "group cursor-pointer gap-0 rounded-none border-0 bg-transparent px-3 py-2 shadow-none ring-0",
+        "transition-[color,background-color,transform] duration-150 ease-[cubic-bezier(0.16,1,0.3,1)]",
+        "hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        "motion-safe:active:scale-[0.99]",
+      )}
       onClick={() => onClick(task)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault()
+          onClick(task)
+        }
+      }}
     >
       {/* Top row: Project badge */}
       <div className="mb-1 flex items-center justify-between gap-2">
         {project ? (
           <Badge
             variant="outline"
-            className="h-4 max-w-[55%] truncate border-border/40 px-1.5 py-0 text-[10px] text-foreground/75"
+            className="h-5 max-w-[55%] truncate border-border px-1.5 py-0 text-xs leading-none text-foreground/80"
             style={{ borderColor: project.color, color: project.color }}
           >
             <span className="mr-1">{project.icon}</span>
@@ -74,7 +82,7 @@ export function TaskCard({
         ) : (
           <Badge
             variant="outline"
-            className="h-4 border-border/40 px-1.5 py-0 text-[10px] text-muted-foreground"
+            className="h-5 border-border px-1.5 py-0 text-xs leading-none text-muted-foreground"
           >
             No project
           </Badge>
@@ -86,7 +94,7 @@ export function TaskCard({
             <Badge
               variant="outline"
               className={cn(
-                "h-4 shrink-0 border-border/40 px-1 py-0 text-[10px] tabular-nums text-muted-foreground",
+                "h-5 shrink-0 border-border px-1.5 py-0 text-xs leading-none tabular-nums text-muted-foreground",
                 isOverdue && "border-destructive text-destructive",
               )}
             >
@@ -95,8 +103,8 @@ export function TaskCard({
           )}
           <div
             className={cn(
-              "h-1.5 w-1.5 rounded-full opacity-70",
-              priorityColors[task.priority],
+              "h-1.5 w-1.5 rounded-full opacity-80",
+              priorityDotClassName(task.priority),
             )}
             title={`Priority: ${task.priority}`}
           />
@@ -106,7 +114,7 @@ export function TaskCard({
       {/* Title */}
       <h4
         className={cn(
-          "mb-0.5 text-[13px] font-medium leading-snug line-clamp-2",
+          "mb-0.5 text-sm font-medium leading-snug line-clamp-2",
           isCompleted && "line-through text-muted-foreground",
         )}
       >
@@ -122,7 +130,7 @@ export function TaskCard({
               <Badge
                 key={idx}
                 variant="secondary"
-                className="h-4 max-w-[90px] truncate border border-transparent px-1 py-0 text-[10px]"
+                className="h-5 max-w-[90px] truncate border border-transparent px-1.5 py-0 text-xs leading-none"
                 style={{
                   backgroundColor: `${tag.color}14`,
                   color: tag.color,
@@ -133,7 +141,7 @@ export function TaskCard({
               </Badge>
             ))}
             {taskTags.length > 2 && (
-              <span className="text-[10px] text-muted-foreground tabular-nums">
+              <span className="text-xs text-muted-foreground tabular-nums">
                 +{taskTags.length - 2}
               </span>
             )}
@@ -144,7 +152,7 @@ export function TaskCard({
         {task.scheduledDate && (
           <Badge
             variant="secondary"
-            className="h-4 shrink-0 px-1 py-0 text-[10px] text-muted-foreground/90"
+            className="h-5 shrink-0 px-1.5 py-0 text-xs leading-none text-muted-foreground"
           >
             {task.scheduledDate}
           </Badge>

@@ -145,30 +145,30 @@ export const InboxItemRow = memo(function InboxItemRow({
         isNew && !prefersReducedMotion ? { opacity: 0, y: 8 } : false
       }
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2, ease: "easeOut" }}
+      transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
-        "group flex items-start gap-2.5 px-3 py-2.5 transition-colors hover:bg-muted/50",
+        "group flex items-start gap-1.5 px-3 py-2 transition-colors hover:bg-muted/80",
         isArchived && "opacity-70",
         isAnyLoading && "opacity-70",
       )}
       role="listitem"
       aria-busy={isAnyLoading}
     >
-        <div className="flex-1 min-w-0 space-y-0.5 pr-1">
+        <div className="min-w-0 flex-1 space-y-0.5 pr-1">
           <p
-            className="text-[13px] font-medium truncate leading-5"
+            className="truncate text-sm font-medium leading-5"
             id={`inbox-item-${item._id}-content`}
           >
             {rowCopy.title}
           </p>
           <p
-            className="text-[11px] text-muted-foreground leading-4 line-clamp-1"
+            className="line-clamp-1 text-xs leading-4 text-muted-foreground"
             id={`inbox-item-${item._id}-snippet`}
           >
             {rowCopy.snippet}
           </p>
           <p
-            className="text-[11px] text-muted-foreground tabular-nums sm:hidden"
+            className="text-xs tabular-nums text-muted-foreground sm:hidden"
             id={`inbox-item-${item._id}-time`}
           >
             {formatRelativeTime(item.createdAt)}
@@ -198,7 +198,7 @@ export const InboxItemRow = memo(function InboxItemRow({
         ) : (
           <div className="shrink-0 flex items-center gap-1">
             <p
-              className="text-[11px] text-muted-foreground tabular-nums hidden sm:block"
+              className="hidden text-xs tabular-nums text-muted-foreground sm:block"
               id={`inbox-item-${item._id}-time-desktop`}
             >
               {formatRelativeTime(item.createdAt)}
@@ -237,7 +237,7 @@ export const InboxItemRow = memo(function InboxItemRow({
                   >
                     <HugeiconsIcon icon={NoteIcon} className="size-4" />
                     Note
-                    <span className="ml-auto text-[10px] text-muted-foreground">
+                    <span className="ml-auto text-xs text-muted-foreground">
                       Soon
                     </span>
                   </DropdownMenuItem>

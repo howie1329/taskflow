@@ -137,10 +137,10 @@ export const MobileActionSheet = memo(function MobileActionSheet({
             Choose an action to perform on this inbox item
           </SheetDescription>
         </SheetHeader>
-        <div className="flex flex-col gap-1 py-4">
+        <div className="flex flex-col gap-2 py-4">
           <Button
             variant="ghost"
-            className="justify-start gap-2 h-12 touch-manipulation min-h-[44px]"
+            className="h-11 min-h-11 touch-manipulation justify-start gap-2"
             onClick={() => handleConvert("task")}
             disabled={isLoading}
             aria-busy={isLoading && actionType === "convert-task"}
@@ -149,17 +149,17 @@ export const MobileActionSheet = memo(function MobileActionSheet({
           </Button>
           <Button
             variant="ghost"
-            className="justify-start gap-2 h-12 touch-manipulation min-h-[44px]"
+            className="h-11 min-h-11 touch-manipulation justify-start gap-2"
             disabled
             aria-disabled="true"
           >
             <HugeiconsIcon icon={NoteIcon} className="size-4" />
             Convert to Note
-            <span className="ml-auto text-[10px] text-muted-foreground">Soon</span>
+            <span className="ml-auto text-xs text-muted-foreground">Soon</span>
           </Button>
           <Button
             variant="ghost"
-            className="justify-start gap-2 h-12 touch-manipulation min-h-[44px]"
+            className="h-11 min-h-11 touch-manipulation justify-start gap-2"
             onClick={() => handleConvert("project")}
             disabled={isLoading}
             aria-busy={isLoading && actionType === "convert-project"}
@@ -174,7 +174,7 @@ export const MobileActionSheet = memo(function MobileActionSheet({
           {isArchived ? (
             <Button
               variant="ghost"
-              className="justify-start gap-2 h-12 touch-manipulation min-h-[44px]"
+              className="h-11 min-h-11 touch-manipulation justify-start gap-2"
               onClick={handleUnarchive}
               disabled={isLoading}
               aria-busy={isLoading && actionType === "unarchive"}
@@ -184,7 +184,7 @@ export const MobileActionSheet = memo(function MobileActionSheet({
           ) : (
             <Button
               variant="ghost"
-              className="justify-start gap-2 h-12 touch-manipulation min-h-[44px]"
+              className="h-11 min-h-11 touch-manipulation justify-start gap-2"
               onClick={handleArchive}
               disabled={isLoading}
               aria-busy={isLoading && actionType === "archive"}
@@ -196,7 +196,7 @@ export const MobileActionSheet = memo(function MobileActionSheet({
             <AlertDialogTrigger asChild>
               <Button
                 variant="ghost"
-                className="justify-start gap-2 h-12 touch-manipulation min-h-[44px] text-destructive hover:text-destructive"
+                className="h-11 min-h-11 touch-manipulation justify-start gap-2 text-destructive hover:text-destructive"
                 disabled={isLoading}
               >
                 <HugeiconsIcon icon={Delete01Icon} className="size-4" />

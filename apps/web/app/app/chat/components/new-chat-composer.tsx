@@ -34,13 +34,13 @@ function NewChatComposerInner() {
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="flex min-h-0 flex-1 items-center justify-center px-4 py-8 md:py-10">
-        <div className="w-full max-w-4xl space-y-5">
-          <h1 className="text-center text-2xl font-medium tracking-tight text-foreground md:text-3xl">
+      <div className="flex min-h-0 flex-1 items-center justify-center px-4 py-8 md:py-8">
+        <div className="w-full max-w-2xl space-y-4">
+          <h1 className="text-center text-lg font-semibold tracking-tight text-foreground md:text-xl">
             What can I help with?
           </h1>
 
-          <Suggestions className="mx-auto w-full max-w-2xl flex-wrap justify-center">
+          <Suggestions className="mx-auto w-full flex-wrap justify-center gap-2">
             {CHAT_SUGGESTIONS.map((suggestion) => (
               <Suggestion
                 key={suggestion.value}
@@ -48,7 +48,7 @@ function NewChatComposerInner() {
                 onClick={handleSuggestionSelect}
                 variant="outline"
                 size="sm"
-                className="rounded-full border-border/70 bg-background/60 px-4 text-xs text-muted-foreground hover:bg-muted/40 hover:border-border hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
+                className="rounded-md border-border bg-background px-3 text-xs font-medium text-muted-foreground transition-colors duration-150 hover:bg-muted hover:border-border hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
               >
                 {suggestion.title}
               </Suggestion>

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { exaAnswerResponseSchema } from "@/lib/AITools/Exa/types";
 import { CodeBlock } from "./code-block";
-import { ToolEmptyState, ToolResultHeader, ToolResultSection, ToolResultShell } from "./tool-result-shell";
+import { ToolResultHeader, ToolResultSection, ToolResultShell } from "./tool-result-shell";
 
 function renderAnswer(answer: unknown) {
   if (typeof answer === "string") {
@@ -14,16 +14,40 @@ function renderAnswer(answer: unknown) {
   return <CodeBlock code={JSON.stringify(answer, null, 2)} language="json" />;
 }
 
-export function ExaAnswerCard({ output }: { output: unknown }) {
+function getInputQuestion(input: unknown) {
+  if (!input || typeof input !== "object") return null;
+  const inputObj = input as Record<string, unknown>;
+  return (
+    (typeof inputObj.query === "string" && inputObj.query) ||
+    (typeof inputObj.question === "string" && inputObj.question) ||
+    null
+  );
+}
+
+export function ExaAnswerCard({
+  input,
+  output,
+}: {
+  input?: unknown;
+  output: unknown;
+}) {
   const [showAll, setShowAll] = useState(false);
   const parsed = exaAnswerResponseSchema.safeParse(output);
   if (!parsed.success) {
-    return <ToolEmptyState message="Exa answer response could not be parsed." />;
+    return (
+      <ToolResultShell>
+        <ToolResultHeader title="Exa Answer" pills={["unparsed response"]} />
+        <ToolResultSection title="Raw output">
+          <CodeBlock code={JSON.stringify(output, null, 2)} language="json" />
+        </ToolResultSection>
+      </ToolResultShell>
+    );
   }
 
   const data = parsed.data;
   const citations = data.citations ?? [];
   const visibleCitations = showAll ? citations : citations.slice(0, 5);
+  const question = getInputQuestion(input);
 
   return (
     <ToolResultShell>
@@ -31,9 +55,16 @@ export function ExaAnswerCard({ output }: { output: unknown }) {
         title="Exa Answer"
         pills={[
           `${citations.length} citations`,
-          data.requestId ? `id:${data.requestId.slice(0, 8)}` : "no-id",
-        ]}
+          data.requestId ? `id:${data.requestId.slice(0, 8)}` : null,
+        ].filter((value): value is string => Boolean(value))}
       />
+      {question ? (
+        <ToolResultSection title="Question">
+          <p className="rounded-sm bg-muted/20 px-2 py-1 font-mono text-xs">
+            {question}
+          </p>
+        </ToolResultSection>
+      ) : null}
       <ToolResultSection title="Answer">{renderAnswer(data.answer)}</ToolResultSection>
       {citations.length > 0 ? (
         <ToolResultSection title="Citations">

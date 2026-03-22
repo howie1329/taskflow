@@ -24,7 +24,7 @@ export function Workflow() {
           {workflowSteps.map((step, index) => (
             <div
               key={step.title}
-              className="rounded-xl border border-border/40 bg-card/60 p-4 dark:bg-card/35"
+              className="rounded-xl landing-surface p-4"
             >
               <div className="mb-4 flex items-center justify-between">
                 <HugeiconsIcon
