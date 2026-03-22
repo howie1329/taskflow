@@ -32,12 +32,13 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { ChatEmptyStateWithSuggestions } from "./components/chat-empty-state-suggestions";
-import { MessageDetailsSheet } from "./components/message-details-sheet";
 import { ThreadComposerBar } from "./components/thread-composer-bar";
 import { ThreadDialogs } from "./components/thread-dialogs";
 import { ThreadHeader } from "./components/thread-header";
 import { ThreadMessageList } from "./components/thread-message-list";
 import { useThreadPageActions } from "./components/use-thread-page-actions";
+import { useSidebar } from "@/components/ui/sidebar";
+import { useChatInspectorFocusActions } from "@/components/app/chat-inspector-context";
 
 import "streamdown/styles.css";
 import "katex/dist/katex.min.css";
@@ -91,13 +92,14 @@ function ThreadPageContent() {
   const { messages, status, error } = useChatMessages();
   const { sendText } = useChatMessagingActions();
   const { thread, project } = useChatConfig();
+  const { setInspectorFocus } = useChatInspectorFocusActions();
   const { updateTitle, softDelete } = useChatThreadActions();
   const { preferences } = useViewer();
+  const { isMobile, setOpen, setOpenMobile } = useSidebar("inspector");
 
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editTitle, setEditTitle] = useState(thread?.title || "");
-  const [messageDetailsId, setMessageDetailsId] = useState<string | null>(null);
   const [clearedErrorMessage, setClearedErrorMessage] = useState<string | null>(
     null,
   );
@@ -151,12 +153,28 @@ function ThreadPageContent() {
     }
   };
 
-  const selectedMessage =
-    messages.find((m) => m.id === messageDetailsId) ?? null;
-
   if (shouldShowNotFound) {
     return <ThreadNotFoundState onBack={() => router.push("/app/chat")} />;
   }
+
+  const revealInspector = () => {
+    if (isMobile) {
+      setOpenMobile(true);
+      return;
+    }
+
+    setOpen(true);
+  };
+
+  const handleInspectMessage = (messageId: string) => {
+    setInspectorFocus({ type: "message", messageId });
+    revealInspector();
+  };
+
+  const handleInspectTool = (messageId: string, toolCallId: string) => {
+    setInspectorFocus({ type: "tool", messageId, toolCallId });
+    revealInspector();
+  };
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col overflow-hidden">
@@ -215,19 +233,13 @@ function ThreadPageContent() {
               preferences={preferences ?? undefined}
               onRegenerate={(id) => void regenerateAssistantResponse(id)}
               onCopy={(text) => void copyAssistantMessage(text)}
-              onOpenDetails={setMessageDetailsId}
+              onInspectMessage={handleInspectMessage}
+              onInspectTool={handleInspectTool}
             />
           )}
         </ConversationContent>
         <ConversationScrollButton />
       </Conversation>
-
-      <MessageDetailsSheet
-        open={!!messageDetailsId}
-        onOpenChange={(open) => !open && setMessageDetailsId(null)}
-        message={selectedMessage}
-        onCopy={copyAssistantMessage}
-      />
 
       <ThreadComposerBar textareaRef={composerRef} />
     </div>

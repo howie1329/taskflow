@@ -40,6 +40,7 @@ import { ChatSidebar } from "@/components/app/chat-sidebar";
 import { NotesAppSidebar } from "@/components/app/notes-app-sidebar";
 import { NotesProvider } from "@/components/notes";
 import { cn } from "@/lib/utils";
+import { ChatInspectorProvider } from "@/components/app/chat-inspector-context";
 
 const navItems = [
   {
@@ -179,16 +180,16 @@ function WorkspaceSidebarContent({
                 const handleChatClick =
                   isChatRoute && isChatItem
                     ? (event: React.MouseEvent<HTMLAnchorElement>) => {
-                        event.preventDefault();
-                        setChatSidebarMode("threads");
-                      }
+                      event.preventDefault();
+                      setChatSidebarMode("threads");
+                    }
                     : undefined;
                 const handleNotesClick =
                   isNotesRoute && isNotesItem
                     ? (event: React.MouseEvent<HTMLAnchorElement>) => {
-                        event.preventDefault();
-                        setNotesSidebarMode("notes");
-                      }
+                      event.preventDefault();
+                      setNotesSidebarMode("notes");
+                    }
                     : undefined;
 
                 return (
@@ -356,7 +357,7 @@ export function AppShell({ children, right }: AppShellProps) {
                 ? "relative flex flex-1 flex-col overflow-hidden"
                 : isChatThreadRoute
                   ? "relative flex min-h-0 flex-1 flex-col overflow-hidden px-2 pb-2"
-                : "relative flex min-h-0 flex-1 flex-col gap-2 overflow-hidden p-2 md:gap-2 md:p-2"
+                  : "relative flex min-h-0 flex-1 flex-col gap-2 overflow-hidden p-2 md:gap-2 md:p-2"
           }
         >
           {children}
@@ -368,21 +369,33 @@ export function AppShell({ children, right }: AppShellProps) {
           side="right"
           variant="sidebar"
           collapsible="offcanvas"
-          className="border-l border-border"
+          className={cn(
+            "border-l border-border/60 bg-background/95 supports-backdrop-filter:bg-background/90",
+            isChatRoute && "bg-background",
+          )}
           style={
             {
-              "--sidebar-width": "22rem",
-              "--sidebar-width-mobile": "22rem",
+              "--sidebar-width": isChatRoute ? "28rem" : "22rem",
+              "--sidebar-width-mobile": isChatRoute ? "28rem" : "22rem",
             } as React.CSSProperties
           }
         >
-          <SidebarHeader className="border-b border-border">
-            <div className="flex h-8 items-center justify-between">
-              <span className="text-sm font-semibold tracking-tight">Inspector</span>
+          <SidebarHeader
+            className={cn(
+              "border-b border-border/50 px-4 py-3",
+              isChatRoute && "border-b-0 pb-2",
+            )}
+          >
+            <div className="flex min-h-8 items-center justify-between">
+              <div className="min-w-0">
+                <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                  {isChatRoute ? "Dossier" : "Inspector"}
+                </span>
+              </div>
               <SidebarTrigger scope="inspector" aria-label="Close inspector" />
             </div>
           </SidebarHeader>
-          <SidebarContent className="p-4">
+          <SidebarContent className={cn("p-4 pt-2", isChatRoute && "pt-0")}>
             <InspectorPanelContent>
               <div className="min-h-0 flex-1 overflow-y-auto">{right}</div>
             </InspectorPanelContent>
@@ -394,8 +407,12 @@ export function AppShell({ children, right }: AppShellProps) {
   );
 
   if (isNotesRoute) {
-    return <NotesProvider>{shell}</NotesProvider>;
+    return (
+      <ChatInspectorProvider>
+        <NotesProvider>{shell}</NotesProvider>
+      </ChatInspectorProvider>
+    );
   }
 
-  return shell;
+  return <ChatInspectorProvider>{shell}</ChatInspectorProvider>;
 }

@@ -4,9 +4,15 @@ import {
   formatTokenCount,
   formatUsdMicros,
 } from "@/lib/chat/thread-context"
+import type { ExtractedChatSource } from "@/lib/chat/extract-sources"
 import { getMessageFiles, getMessageReasoning, getMessageText } from "@/app/app/chat/[threadId]/components/message-parts"
 import { getToolCalls } from "@/app/app/chat/[threadId]/components/tool-calls"
-import { getToolStateInfo } from "@/app/app/chat/[threadId]/components/tool-meta"
+import {
+  getToolDisplayNameFromKey,
+  getToolInputQuery,
+  getToolStateInfo,
+  getToolSummary,
+} from "@/app/app/chat/[threadId]/components/tool-meta"
 
 type SummaryChip = {
   id: string
@@ -25,6 +31,13 @@ function estimateTokens(text: string) {
 function getMessageLengthLabel(text: string) {
   const wordCount = text.trim().length ? text.trim().split(/\s+/).length : 0
   return `${wordCount} words`
+}
+
+function truncateText(text: string, maxLength = 180) {
+  const normalized = text.replace(/\s+/g, " ").trim()
+  if (!normalized) return ""
+  if (normalized.length <= maxLength) return normalized
+  return `${normalized.slice(0, maxLength).trim()}...`
 }
 
 export function buildThreadInspectorSummary({
@@ -96,6 +109,104 @@ export function buildThreadContextChips({
       : null,
     costUsdMicros !== undefined ? `cost ${formatUsdMicros(costUsdMicros)}` : null,
   ]
+}
+
+export function buildThreadDossierHeader({
+  activeModel,
+  contextHealthLabel,
+  contextLabel,
+  updatedAt,
+  sourceCount,
+  daytonaSignal,
+}: {
+  activeModel?: string | null
+  contextHealthLabel: string
+  contextLabel: string
+  updatedAt?: number
+  sourceCount: number
+  daytonaSignal?: string | null
+}) {
+  const tags = [
+    activeModel ? `Model ${activeModel}` : null,
+    contextHealthLabel !== "Unknown" ? `Context ${contextHealthLabel}` : null,
+    contextLabel !== "—" ? contextLabel : null,
+    sourceCount > 0 ? `${sourceCount} sources` : "No sources yet",
+  ]
+
+  const status = daytonaSignal ?? (updatedAt ? `Updated ${formatTimestamp(updatedAt)}` : "Ready")
+
+  return {
+    status,
+    tags,
+  }
+}
+
+export function buildEvidenceSummary({
+  sources,
+}: {
+  sources: ExtractedChatSource[]
+}) {
+  const topDomains = Array.from(new Set(sources.map((source) => source.domain))).slice(0, 3)
+  const recentSources = sources.slice(-3).reverse()
+
+  return {
+    title:
+      sources.length > 0 ? `${sources.length} source${sources.length === 1 ? "" : "s"} captured` : "No evidence yet",
+    description:
+      sources.length > 0
+        ? `Grounded in ${topDomains.join(", ")}`
+        : "Searches, citations, and tool evidence will collect here as the thread develops.",
+    domains: topDomains,
+    recentSources,
+  }
+}
+
+export function buildThreadFocusSummary({
+  messages,
+  summaryText,
+}: {
+  messages: UIMessage[]
+  summaryText: string
+}) {
+  const lastAssistantMessage = [...messages]
+    .reverse()
+    .find((message) => message.role === "assistant")
+  const lastUserMessage = [...messages]
+    .reverse()
+    .find((message) => message.role === "user")
+
+  const assistantText = lastAssistantMessage ? getMessageText(lastAssistantMessage) : ""
+  const userText = lastUserMessage ? getMessageText(lastUserMessage) : ""
+  const lastAssistantTools = lastAssistantMessage ? getToolCalls(lastAssistantMessage) : []
+
+  return {
+    title: "Current thread focus",
+    description:
+      truncateText(assistantText, 220) ||
+      truncateText(summaryText, 220) ||
+      "Continue the conversation to build a clearer dossier of this thread.",
+    stats: [
+      {
+        label: "Latest user intent",
+        value: truncateText(userText, 80) || "No user message yet",
+      },
+      {
+        label: "Latest assistant output",
+        value: assistantText.trim() ? getMessageLengthLabel(assistantText) : "No assistant response yet",
+      },
+      {
+        label: "Tool activity",
+        value:
+          lastAssistantTools.length > 0
+            ? `${lastAssistantTools.length} tool call${lastAssistantTools.length === 1 ? "" : "s"}`
+            : "No recent tool calls",
+      },
+    ],
+    tags: [
+      lastAssistantMessage ? "Latest assistant response" : null,
+      summaryText ? "Memory saved" : "No memory yet",
+    ],
+  }
 }
 
 export function buildMessageDetailsViewModel(message: UIMessage | null) {
@@ -178,5 +289,52 @@ export function buildMessageDetailsViewModel(message: UIMessage | null) {
     reasoningText,
     attachments,
     toolCalls,
+  }
+}
+
+export function buildToolFocusViewModel({
+  message,
+  toolCallId,
+}: {
+  message: UIMessage | null
+  toolCallId: string
+}) {
+  if (!message) return null
+
+  const toolCall = getToolCalls(message).find((item) => item.id === toolCallId)
+  if (!toolCall) return null
+
+  const stateInfo = getToolStateInfo(toolCall.state)
+  const summary = getToolSummary(toolCall)
+  const query = getToolInputQuery(toolCall.input, toolCall.toolKey)
+
+  return {
+    title: getToolDisplayNameFromKey(toolCall.toolKey),
+    description: summary ?? stateInfo.badgeLabel,
+    tags: [
+      stateInfo.badgeLabel,
+      toolCall.toolKey,
+      query ? truncateText(query, 36) : null,
+    ],
+    stats: [
+      {
+        label: "Status",
+        value: stateInfo.badgeLabel,
+      },
+      {
+        label: "Input",
+        value: query ?? "No compact input summary",
+      },
+      {
+        label: "Message",
+        value: message.id.slice(0, 8),
+      },
+    ],
+    outputSummary:
+      summary ??
+      (typeof toolCall.errorText === "string" && toolCall.errorText.trim()
+        ? toolCall.errorText
+        : "No structured output summary available."),
+    output: toolCall.output,
   }
 }

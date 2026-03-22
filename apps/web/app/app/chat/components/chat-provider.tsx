@@ -389,7 +389,6 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   );
 
   const stopStreaming = useCallback(() => stop(), [stop]);
-
   const updateThreadTitleMutation = useMutation(api.chat.updateThreadTitle);
   const softDeleteThreadMutation = useMutation(api.chat.softDeleteThread);
   const setThreadScopeMutation = useMutation(api.chat.setThreadScope);

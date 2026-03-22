@@ -44,7 +44,8 @@ interface ThreadMessageListProps {
   preferences: PreferencesLike | undefined;
   onRegenerate: (assistantMessageId: string) => void;
   onCopy: (messageText: string) => void;
-  onOpenDetails: (messageId: string) => void;
+  onInspectMessage: (messageId: string) => void;
+  onInspectTool: (messageId: string, toolCallId: string) => void;
 }
 
 export function ThreadMessageList({
@@ -53,7 +54,8 @@ export function ThreadMessageList({
   preferences,
   onRegenerate,
   onCopy,
-  onOpenDetails,
+  onInspectMessage,
+  onInspectTool,
 }: ThreadMessageListProps) {
   return (
     <>
@@ -68,7 +70,8 @@ export function ThreadMessageList({
             preferences={preferences}
             onRegenerate={onRegenerate}
             onCopy={onCopy}
-            onOpenDetails={onOpenDetails}
+            onInspectMessage={onInspectMessage}
+            onInspectTool={onInspectTool}
           />
         );
       })}
@@ -84,7 +87,8 @@ interface ThreadMessageRowProps {
   preferences: PreferencesLike | undefined;
   onRegenerate: (assistantMessageId: string) => void;
   onCopy: (messageText: string) => void;
-  onOpenDetails: (messageId: string) => void;
+  onInspectMessage: (messageId: string) => void;
+  onInspectTool: (messageId: string, toolCallId: string) => void;
 }
 
 const ThreadMessageRow = memo(function ThreadMessageRow({
@@ -95,7 +99,8 @@ const ThreadMessageRow = memo(function ThreadMessageRow({
   preferences,
   onRegenerate,
   onCopy,
-  onOpenDetails,
+  onInspectMessage,
+  onInspectTool,
 }: ThreadMessageRowProps) {
   const parsedMessage = useMemo(() => parseMessageParts(message), [message]);
   const {
@@ -139,7 +144,8 @@ const ThreadMessageRow = memo(function ThreadMessageRow({
             plainMessageText={messageText}
             onRegenerate={onRegenerate}
             onCopy={onCopy}
-            onOpenDetails={onOpenDetails}
+            onInspectMessage={onInspectMessage}
+            onInspectTool={onInspectTool}
           />
         ) : (
           <div className="whitespace-pre-wrap text-[15px] leading-7">
@@ -181,7 +187,8 @@ interface AssistantMessageBodyProps {
   plainMessageText: string;
   onRegenerate: (assistantMessageId: string) => void;
   onCopy: (messageText: string) => void;
-  onOpenDetails: (messageId: string) => void;
+  onInspectMessage: (messageId: string) => void;
+  onInspectTool: (messageId: string, toolCallId: string) => void;
 }
 
 function AssistantMessageBody({
@@ -196,7 +203,8 @@ function AssistantMessageBody({
   plainMessageText,
   onRegenerate,
   onCopy,
-  onOpenDetails,
+  onInspectMessage,
+  onInspectTool,
 }: AssistantMessageBodyProps) {
   const {
     spec,
@@ -222,7 +230,11 @@ function AssistantMessageBody({
       )}
 
       {toolCalls.length > 0 && (
-        <ToolPanels toolCalls={toolCalls} preferences={preferences} />
+        <ToolPanels
+          toolCalls={toolCalls}
+          preferences={preferences}
+          onInspectTool={(toolCallId) => onInspectTool(message.id, toolCallId)}
+        />
       )}
 
       {hasReasoning &&
@@ -288,9 +300,9 @@ function AssistantMessageBody({
           <CopyIcon className="size-3.5" />
         </MessageAction>
         <MessageAction
-          tooltip="Details"
-          label="Details"
-          onClick={() => onOpenDetails(message.id)}
+          tooltip="Inspect"
+          label="Inspect"
+          onClick={() => onInspectMessage(message.id)}
         >
           <EllipsisIcon className="size-3.5" />
         </MessageAction>

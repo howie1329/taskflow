@@ -9,6 +9,7 @@ import {
   ToolSummaryBar,
   ToolRawPayload,
 } from "@/components/ai-elements/tool";
+import { Button } from "@/components/ui/button";
 import { detectProvider } from "@/components/ai-elements/provider-badge";
 import {
   Collapsible,
@@ -37,6 +38,7 @@ interface PreferencesLike {
 interface ToolPanelsProps {
   toolCalls: ToolCall[];
   preferences: PreferencesLike | undefined;
+  onInspectTool?: (toolCallId: string) => void;
 }
 
 function renderToolContent(toolCall: ToolCall): ReactNode {
@@ -70,7 +72,11 @@ function renderToolContent(toolCall: ToolCall): ReactNode {
   return <p className="text-sm text-muted-foreground">Completed</p>;
 }
 
-export function ToolPanels({ toolCalls, preferences }: ToolPanelsProps) {
+export function ToolPanels({
+  toolCalls,
+  preferences,
+  onInspectTool,
+}: ToolPanelsProps) {
   if (toolCalls.length === 0) return null;
 
   const showToolDetails = preferences?.aiChatShowToolDetails !== false;
@@ -107,6 +113,21 @@ export function ToolPanels({ toolCalls, preferences }: ToolPanelsProps) {
                       </span>
                     ))}
                   </div>
+                ) : null}
+                {onInspectTool ? (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-5 px-1.5 text-[10px] font-medium"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      onInspectTool(toolCall.id);
+                    }}
+                  >
+                    Inspect
+                  </Button>
                 ) : null}
                 <CollapsibleTrigger
                   className="rounded-sm p-0.5 text-muted-foreground transition-colors hover:text-foreground"
