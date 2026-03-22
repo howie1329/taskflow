@@ -2,7 +2,6 @@
 
 import type { Doc } from "@/convex/_generated/dataModel";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { priorityDotClassName } from "@/lib/task-priority-styles";
 
@@ -23,12 +22,10 @@ export function TaskCard({
   projects = [],
   tags = [],
 }: TaskCardProps) {
-  // Find the project for this task
   const project = task.projectId
     ? projects.find((p) => p._id === task.projectId)
     : null;
 
-  // Find the tags for this task
   const taskTags = task.tagIds
     .map((id) => tags.find((t) => t._id === id))
     .filter(Boolean) as Tag[];
@@ -55,9 +52,9 @@ export function TaskCard({
       role="button"
       tabIndex={0}
       className={cn(
-        "group cursor-pointer gap-0 rounded-none border-0 bg-transparent px-3 py-2 shadow-none ring-0",
-        "transition-[color,background-color,transform] duration-150 ease-[cubic-bezier(0.16,1,0.3,1)]",
-        "hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        "group cursor-pointer gap-0 rounded-none border-0 bg-transparent px-3 py-2.5 shadow-none ring-0",
+        "transition-[background-color,border-color,color,transform] duration-150 ease-[cubic-bezier(0.16,1,0.3,1)]",
+        "hover:bg-accent/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         "motion-safe:active:scale-[0.99]",
       )}
       onClick={() => onClick(task)}
@@ -68,95 +65,97 @@ export function TaskCard({
         }
       }}
     >
-      {/* Top row: Project badge */}
-      <div className="mb-1 flex items-center justify-between gap-2">
-        {project ? (
-          <Badge
-            variant="outline"
-            className="h-5 max-w-[55%] truncate border-border px-1.5 py-0 text-xs leading-none text-foreground/80"
-            style={{ borderColor: project.color, color: project.color }}
-          >
-            <span className="mr-1">{project.icon}</span>
-            {project.title}
-          </Badge>
-        ) : (
-          <Badge
-            variant="outline"
-            className="h-5 border-border px-1.5 py-0 text-xs leading-none text-muted-foreground"
-          >
-            No project
-          </Badge>
-        )}
-
-        {/* Due date + Priority */}
-        <div className="flex items-center gap-1">
-          {task.dueDate && (
-            <Badge
-              variant="outline"
-              className={cn(
-                "h-5 shrink-0 border-border px-1.5 py-0 text-xs leading-none tabular-nums text-muted-foreground",
-                isOverdue && "border-destructive text-destructive",
-              )}
-            >
-              {formatDate(task.dueDate)}
-            </Badge>
-          )}
-          <div
-            className={cn(
-              "h-1.5 w-1.5 rounded-full opacity-80",
-              priorityDotClassName(task.priority),
-            )}
-            title={`Priority: ${task.priority}`}
-          />
-        </div>
-      </div>
-
-      {/* Title */}
-      <h4
-        className={cn(
-          "mb-0.5 text-sm font-medium leading-snug line-clamp-2",
-          isCompleted && "line-through text-muted-foreground",
-        )}
-      >
-        {task.title}
-      </h4>
-
-      {/* Bottom row: Tags + Scheduled */}
-      <div className="flex items-center gap-1">
-        {/* Tags */}
-        {taskTags.length > 0 && (
-          <div className="flex flex-1 items-center gap-1 overflow-hidden">
-            {taskTags.slice(0, 2).map((tag, idx) => (
-              <Badge
-                key={idx}
-                variant="secondary"
-                className="h-5 max-w-[90px] truncate border border-transparent px-1.5 py-0 text-xs leading-none"
-                style={{
-                  backgroundColor: `${tag.color}14`,
-                  color: tag.color,
-                  borderColor: `${tag.color}66`,
-                }}
-              >
-                {tag.name}
-              </Badge>
-            ))}
-            {taskTags.length > 2 && (
-              <span className="text-xs text-muted-foreground tabular-nums">
-                +{taskTags.length - 2}
-              </span>
+      <div className="flex flex-col gap-1.5">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex min-w-0 items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
+            {project ? (
+              <>
+                <span
+                  className="size-1.5 shrink-0 rounded-full"
+                  style={{ backgroundColor: project.color }}
+                  aria-hidden="true"
+                />
+                <span
+                  className="truncate text-foreground/78"
+                  title={project.title}
+                >
+                  {project.icon ? `${project.icon} ${project.title}` : project.title}
+                </span>
+              </>
+            ) : (
+              <span className="truncate">No project</span>
             )}
           </div>
-        )}
 
-        {/* Scheduled date */}
-        {task.scheduledDate && (
-          <Badge
-            variant="secondary"
-            className="h-5 shrink-0 px-1.5 py-0 text-xs leading-none text-muted-foreground"
-          >
-            {task.scheduledDate}
-          </Badge>
-        )}
+          <div className="flex shrink-0 items-center gap-2">
+            {task.dueDate ? (
+              <span
+                className={cn(
+                  "inline-flex h-5 items-center rounded-md border border-border bg-background px-1.5 text-[11px] font-medium tabular-nums text-muted-foreground",
+                  isOverdue &&
+                    "border-destructive/40 bg-destructive/8 text-destructive dark:border-destructive/50 dark:bg-destructive/12",
+                )}
+                title={new Date(task.dueDate).toLocaleDateString("en-US", {
+                  month: "long",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              >
+                {formatDate(task.dueDate)}
+              </span>
+            ) : null}
+
+            <span
+              className={cn(
+                "size-1.5 rounded-full opacity-85",
+                priorityDotClassName(task.priority),
+              )}
+              title={`Priority: ${task.priority}`}
+              aria-label={`Priority: ${task.priority}`}
+            />
+          </div>
+        </div>
+
+        <h4
+          className={cn(
+            "text-sm font-medium leading-[1.35] tracking-[-0.01em] text-foreground",
+            "line-clamp-2",
+            isCompleted && "text-muted-foreground line-through decoration-muted-foreground/70",
+          )}
+        >
+          {task.title}
+        </h4>
+
+        <div className="flex min-w-0 items-center gap-1.5 text-[11px] text-muted-foreground">
+          {taskTags.length > 0 ? (
+            <div className="flex min-w-0 flex-1 items-center gap-1.5 overflow-hidden">
+              {taskTags.slice(0, 2).map((tag) => (
+                <span
+                  key={tag._id}
+                  className="truncate rounded-sm bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground"
+                  title={tag.name}
+                >
+                  {tag.name}
+                </span>
+              ))}
+              {taskTags.length > 2 ? (
+                <span className="shrink-0 tabular-nums">
+                  +{taskTags.length - 2}
+                </span>
+              ) : null}
+            </div>
+          ) : (
+            <span className="flex-1 truncate text-muted-foreground/70">
+              {project ? "Task" : "Standalone task"}
+            </span>
+          )}
+
+          {task.scheduledDate ? (
+            <span className="shrink-0 rounded-sm border border-border/70 px-1.5 py-0.5 tabular-nums text-muted-foreground/90">
+              {task.scheduledDate}
+            </span>
+          ) : null}
+        </div>
       </div>
     </Card>
   );
