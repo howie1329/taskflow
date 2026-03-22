@@ -140,10 +140,13 @@ function getDefaultInterfaceId({
 function getEffectiveToolLock(
   selectedMode: ModeName,
   toolLock: ToolKey | null,
+  hasDaytonaRepo: boolean,
 ) {
   if (!toolLock) return null;
   const availableInMode = new Set(
-    getToolLockCommandsForMode(selectedMode)
+    getToolLockCommandsForMode(selectedMode, {
+      includeDaytonaCommands: hasDaytonaRepo,
+    })
       .map((c) => c.toolKey)
       .filter((k): k is ToolKey => k !== null),
   );
@@ -266,6 +269,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   const [toolLock, setToolLock] = useState<ToolKey | null>(null);
   const hasUserSelectedModel = useRef(false);
   const previousThreadId = useRef(activeThreadId);
+  const hasDaytonaRepo = Boolean(thread?.daytona?.repoUrl);
 
   useEffect(() => {
     if (previousThreadId.current !== activeThreadId) {
@@ -275,8 +279,8 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   }, [activeThreadId]);
 
   const effectiveToolLock = useMemo(
-    () => getEffectiveToolLock(selectedMode, toolLock),
-    [selectedMode, toolLock],
+    () => getEffectiveToolLock(selectedMode, toolLock, hasDaytonaRepo),
+    [selectedMode, toolLock, hasDaytonaRepo],
   );
 
   useEffect(() => {

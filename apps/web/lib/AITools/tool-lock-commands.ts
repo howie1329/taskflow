@@ -30,6 +30,15 @@ export type ToolKey =
   | "valyuWebSearch"
   | "valyuFinanceSearch"
   | "firecrawlScrape"
+  | "getDaytonaStatus"
+  | "startDaytonaInstance"
+  | "stopDaytonaInstance"
+  | "deleteDaytonaInstance"
+  | "researchDaytonaRepo"
+  | "listDaytonaRepoFiles"
+  | "searchDaytonaRepo"
+  | "readDaytonaRepoFile"
+  | "runDaytonaReadCommand"
 
 export type ToolLockCommand = {
   command: string
@@ -260,14 +269,93 @@ const CONTROL_COMMANDS: ToolLockCommand[] = [
   },
 ]
 
+const DAYTONA_COMMANDS: ToolLockCommand[] = [
+  {
+    command: "/repo.status",
+    label: "Repo: Status",
+    description: "Check the attached Daytona repo workspace status",
+    toolKey: "getDaytonaStatus",
+    allowedModes: ALL_MODES,
+  },
+  {
+    command: "/repo.start",
+    label: "Repo: Start",
+    description: "Start the attached Daytona repo workspace",
+    toolKey: "startDaytonaInstance",
+    allowedModes: ALL_MODES,
+  },
+  {
+    command: "/repo.stop",
+    label: "Repo: Stop",
+    description: "Stop the attached Daytona repo workspace",
+    toolKey: "stopDaytonaInstance",
+    allowedModes: ALL_MODES,
+  },
+  {
+    command: "/repo.delete",
+    label: "Repo: Delete",
+    description: "Delete the attached Daytona repo workspace",
+    toolKey: "deleteDaytonaInstance",
+    allowedModes: ALL_MODES,
+  },
+  {
+    command: "/repo.research",
+    label: "Repo: Research",
+    description: "Delegate a repo question to the Daytona research subagent",
+    toolKey: "researchDaytonaRepo",
+    allowedModes: ALL_MODES,
+  },
+  {
+    command: "/repo.list",
+    label: "Repo: List Files",
+    description: "List files and folders in the attached repo",
+    toolKey: "listDaytonaRepoFiles",
+    allowedModes: ALL_MODES,
+  },
+  {
+    command: "/repo.search",
+    label: "Repo: Search",
+    description: "Search the attached repo for code, routes, or symbols",
+    toolKey: "searchDaytonaRepo",
+    allowedModes: ALL_MODES,
+  },
+  {
+    command: "/repo.read",
+    label: "Repo: Read File",
+    description: "Read a file from the attached repo",
+    toolKey: "readDaytonaRepoFile",
+    allowedModes: ALL_MODES,
+  },
+  {
+    command: "/repo.inspect",
+    label: "Repo: Inspect",
+    description: "Run a bounded read-only repo inspection command",
+    toolKey: "runDaytonaReadCommand",
+    allowedModes: ALL_MODES,
+  },
+]
+
 export const TOOL_LOCK_COMMANDS: ToolLockCommand[] = [
   ...TASKFLOW_COMMANDS,
   ...MODE_SPECIFIC_COMMANDS,
+  ...DAYTONA_COMMANDS,
   ...CONTROL_COMMANDS,
 ]
 
-export const getToolLockCommandsForMode = (mode: ModeName): ToolLockCommand[] => {
+export const getToolLockCommandsForMode = (
+  mode: ModeName,
+  options?: {
+    includeDaytonaCommands?: boolean
+  },
+): ToolLockCommand[] => {
   return TOOL_LOCK_COMMANDS.filter((commandDef) => {
+    if (
+      !options?.includeDaytonaCommands &&
+      commandDef.command.startsWith("/repo.")
+    ) {
+      return false
+    }
+
     return commandDef.allowedModes.includes(mode)
   })
 }
@@ -275,9 +363,12 @@ export const getToolLockCommandsForMode = (mode: ModeName): ToolLockCommand[] =>
 export const findToolLockCommand = (
   command: string,
   mode: ModeName,
+  options?: {
+    includeDaytonaCommands?: boolean
+  },
 ): ToolLockCommand | undefined => {
   const normalized = command.trim().toLowerCase()
-  return getToolLockCommandsForMode(mode).find(
+  return getToolLockCommandsForMode(mode, options).find(
     (commandDef) => commandDef.command.toLowerCase() === normalized,
   )
 }

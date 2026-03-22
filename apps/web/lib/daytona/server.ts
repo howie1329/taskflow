@@ -17,6 +17,9 @@ type RepoCommandResult = {
   exitCode: number
   stdout: string
   truncated: boolean
+  path?: string
+  startLine?: number
+  endLine?: number
 }
 
 type RepoListEntry = {
@@ -335,6 +338,9 @@ export const runSandboxReadCommand = async (
   input: ReadCommandInput,
 ): Promise<RepoCommandResult> => {
   let command = ""
+  let path: string | undefined
+  let startLine: number | undefined
+  let endLine: number | undefined
 
   switch (input.command) {
     case "pwd":
@@ -362,19 +368,24 @@ export const runSandboxReadCommand = async (
     }
     case "cat": {
       const filePath = normalizeRepoPath(input.path)
+      path = filePath
       command = `cat -- ${shellQuote(filePath)}`
       break
     }
     case "head": {
       const filePath = normalizeRepoPath(input.path)
       const lines = Math.min(Math.max(input.lines ?? 40, 1), MAX_HEAD_LINES)
+      path = filePath
+      startLine = 1
+      endLine = lines
       command = `head -n ${lines} -- ${shellQuote(filePath)}`
       break
     }
     case "sed": {
       const filePath = normalizeRepoPath(input.path)
-      const startLine = Math.max(1, Math.floor(input.startLine ?? 1))
-      const endLine = Math.max(startLine, Math.floor(input.endLine ?? startLine + 39))
+      startLine = Math.max(1, Math.floor(input.startLine ?? 1))
+      endLine = Math.max(startLine, Math.floor(input.endLine ?? startLine + 39))
+      path = filePath
       command = `sed -n '${startLine},${endLine}p' -- ${shellQuote(filePath)}`
       break
     }
@@ -396,5 +407,8 @@ export const runSandboxReadCommand = async (
     exitCode: result.exitCode,
     stdout: truncated.text,
     truncated: truncated.truncated,
+    path,
+    startLine,
+    endLine,
   }
 }

@@ -36,7 +36,7 @@ import type { Id } from "@/convex/_generated/dataModel";
 import { Tools } from "@/lib/AITools/index";
 import { buildSystemPrompt, type ProjectContext } from "@/lib/ai_context";
 import { supermemoryTools, withSupermemory } from "@supermemory/tools/ai-sdk";
-import { ModeMapping } from "@/lib/AITools/ModeMapping";
+import { getActiveToolsForMode } from "@/lib/AITools/ModeMapping";
 import type { ModeName } from "@/lib/AITools/ModePrompts";
 import { getChatGenUISystemPrompt } from "@/lib/genui/chat-prompt";
 
@@ -440,21 +440,34 @@ export async function POST(req: Request) {
     }
   }
 
-  const selectedMode = ModeMapping[mode] ? mode : "Basic";
-  const modeConfig = ModeMapping[selectedMode];
+  const selectedMode = mode;
+  const hasDaytonaRepo = Boolean(thread?.daytona?.repoUrl)
+  const activeToolsForMode = getActiveToolsForMode(selectedMode, {
+    includeDaytonaTools: hasDaytonaRepo,
+  })
   const validatedToolLock =
     typeof toolLock === "string" &&
       toolLock.length > 0 &&
       Object.prototype.hasOwnProperty.call(Tools, toolLock) &&
-      modeConfig.activeTools.includes(toolLock as keyof typeof Tools)
+      activeToolsForMode.includes(toolLock as keyof typeof Tools)
       ? (toolLock as keyof typeof Tools)
       : null;
   const activeTools = validatedToolLock
     ? [validatedToolLock]
-    : modeConfig.activeTools;
+    : activeToolsForMode;
 
   const instructionSections = [
-    buildSystemPrompt(projectContext ?? undefined, selectedMode as ModeName),
+    buildSystemPrompt(
+      projectContext ?? undefined,
+      selectedMode as ModeName,
+      undefined,
+      thread?.daytona?.repoUrl
+        ? {
+            repoUrl: thread.daytona.repoUrl,
+            status: thread.daytona.status,
+          }
+        : undefined,
+    ),
   ];
 
   if (validatedToolLock) {

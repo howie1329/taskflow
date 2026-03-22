@@ -21,6 +21,7 @@ import {
   GlobalIcon,
   MoreHorizontalIcon,
   PencilEdit01Icon,
+  SourceCodeCircleIcon,
 } from "@hugeicons/core-free-icons"
 
 interface ThreadHeaderProps {
@@ -48,6 +49,17 @@ export function ThreadHeader({
 
   const showPrimarySidebarTrigger = !isMobile && primarySidebarState === "collapsed"
   const inspectorOpen = isMobile ? inspectorOpenMobile : inspectorOpenDesktop
+  const daytonaStatus = thread?.daytona?.status
+  const daytonaLabel =
+    daytonaStatus === "ready"
+      ? "Repo ready"
+      : daytonaStatus === "provisioning"
+        ? "Repo provisioning"
+        : daytonaStatus === "stopped"
+          ? "Repo stopped"
+          : daytonaStatus === "failed"
+            ? "Repo failed"
+            : "Repo attached"
 
   return (
     <div className="shrink-0 border-b border-border bg-background/90 px-3 py-1 backdrop-blur supports-backdrop-filter:bg-background/80">
@@ -113,6 +125,19 @@ export function ThreadHeader({
                 All workspace
               </Badge>
             )}
+            {thread?.daytona?.repoUrl ? (
+              <Badge
+                variant="secondary"
+                className="h-6 max-w-[180px] items-center truncate rounded-md border border-border bg-muted/50 px-2 text-xs font-normal text-muted-foreground"
+              >
+                <HugeiconsIcon
+                  icon={SourceCodeCircleIcon}
+                  className="mr-1.5 size-3.5 shrink-0"
+                  strokeWidth={2}
+                />
+                <span className="truncate">{daytonaLabel}</span>
+              </Badge>
+            ) : null}
           </div>
         </div>
 

@@ -115,6 +115,7 @@ export function getToolInputQuery(
 
   const directQuery = getStringField(input, [
     "query",
+    "task",
     "title",
     "name",
     "url",

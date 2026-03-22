@@ -34,12 +34,16 @@ export function ToolLockCommandMenu({
   className,
 }: ToolLockCommandMenuProps) {
   const { textInput } = usePromptInputController()
-  const { selectedMode, toolLock } = useChatConfig()
+  const { selectedMode, toolLock, thread } = useChatConfig()
   const { setToolLock } = useChatConfigActions()
+  const hasDaytonaRepo = Boolean(thread?.daytona?.repoUrl)
 
   const modeCommands = useMemo(
-    () => getToolLockCommandsForMode(selectedMode),
-    [selectedMode],
+    () =>
+      getToolLockCommandsForMode(selectedMode, {
+        includeDaytonaCommands: hasDaytonaRepo,
+      }),
+    [hasDaytonaRepo, selectedMode],
   )
 
   const showCommandMenu = textInput.value.trimStart().startsWith("/")
