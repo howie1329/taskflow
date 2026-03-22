@@ -1,4 +1,10 @@
-import { query, mutation, internalAction, internalQuery, internalMutation } from "./_generated/server";
+import {
+  query,
+  mutation,
+  internalAction,
+  internalQuery,
+  internalMutation,
+} from "./_generated/server";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import type { Doc } from "./_generated/dataModel";
@@ -25,6 +31,68 @@ type ThreadUsageTotals = {
   totalTokens: number;
   totalCostUsdMicros: number;
 };
+
+const daytonaStatusValidator = v.union(
+  v.literal("idle"),
+  v.literal("provisioning"),
+  v.literal("ready"),
+  v.literal("stopped"),
+  v.literal("failed"),
+)
+
+const daytonaCloneStatusValidator = v.union(
+  v.literal("not_started"),
+  v.literal("running"),
+  v.literal("succeeded"),
+  v.literal("failed"),
+)
+
+const daytonaStateValidator = v.object({
+  repoUrl: v.string(),
+  clonePath: v.optional(v.string()),
+  sandboxId: v.optional(v.string()),
+  status: daytonaStatusValidator,
+  cloneStatus: daytonaCloneStatusValidator,
+  createdAt: v.number(),
+  updatedAt: v.number(),
+  errorMessage: v.optional(v.string()),
+})
+
+const EMPTY_DAYTONA_STATUS = {
+  exists: false,
+  repoUrl: null,
+  sandboxId: null,
+  status: "idle" as const,
+  cloneStatus: "not_started" as const,
+  updatedAt: null,
+  errorMessage: null,
+}
+
+const toDaytonaStatusPayload = (
+  daytona: {
+    repoUrl: string
+    clonePath?: string
+    sandboxId?: string
+    status: "idle" | "provisioning" | "ready" | "stopped" | "failed"
+    cloneStatus: "not_started" | "running" | "succeeded" | "failed"
+    updatedAt: number
+    errorMessage?: string
+  } | null | undefined,
+) => {
+  if (!daytona) {
+    return EMPTY_DAYTONA_STATUS
+  }
+
+  return {
+    exists: true,
+    repoUrl: daytona.repoUrl,
+    sandboxId: daytona.sandboxId ?? null,
+    status: daytona.status,
+    cloneStatus: daytona.cloneStatus,
+    updatedAt: daytona.updatedAt,
+    errorMessage: daytona.errorMessage ?? null,
+  }
+}
 
 const getUtcDayKey = (timestamp: number) =>
   new Date(timestamp).toISOString().slice(0, 10);
@@ -245,6 +313,30 @@ export const getThread = query({
     return thread;
   },
 });
+
+export const getThreadDaytonaStatus = query({
+  args: {
+    threadId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx)
+    if (!userId) {
+      return EMPTY_DAYTONA_STATUS
+    }
+
+    const thread = await ctx.db
+      .query("thread")
+      .withIndex("by_threadId", (q) => q.eq("threadId", args.threadId))
+      .filter((q) => q.eq(q.field("userId"), userId))
+      .first()
+
+    if (!thread || thread.deletedAt !== undefined || !thread.daytona) {
+      return EMPTY_DAYTONA_STATUS
+    }
+
+    return toDaytonaStatusPayload(thread.daytona)
+  },
+})
 
 /**
  * List all messages for a specific thread
@@ -797,6 +889,65 @@ export const setThreadSummary = mutation({
 
     await ctx.db.patch(thread._id, {
       summary: args.summary,
+      updatedAt: Date.now(),
+    })
+
+    return await ctx.db.get(thread._id)
+  },
+})
+
+export const setThreadDaytonaState = mutation({
+  args: {
+    threadId: v.string(),
+    daytona: daytonaStateValidator,
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx)
+    if (!userId) {
+      throw new Error("Not authenticated")
+    }
+
+    const thread = await ctx.db
+      .query("thread")
+      .withIndex("by_threadId", (q) => q.eq("threadId", args.threadId))
+      .filter((q) => q.eq(q.field("userId"), userId))
+      .first()
+
+    if (!thread || thread.deletedAt !== undefined) {
+      throw new Error("Thread not found or access denied")
+    }
+
+    await ctx.db.patch(thread._id, {
+      daytona: args.daytona,
+      updatedAt: Date.now(),
+    })
+
+    return await ctx.db.get(thread._id)
+  },
+})
+
+export const clearThreadDaytonaState = mutation({
+  args: {
+    threadId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx)
+    if (!userId) {
+      throw new Error("Not authenticated")
+    }
+
+    const thread = await ctx.db
+      .query("thread")
+      .withIndex("by_threadId", (q) => q.eq("threadId", args.threadId))
+      .filter((q) => q.eq(q.field("userId"), userId))
+      .first()
+
+    if (!thread || thread.deletedAt !== undefined) {
+      throw new Error("Thread not found or access denied")
+    }
+
+    await ctx.db.patch(thread._id, {
+      daytona: undefined,
       updatedAt: Date.now(),
     })
 

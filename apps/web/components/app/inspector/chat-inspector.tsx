@@ -8,10 +8,19 @@ import {
   CheckCircle2Icon,
   CopyIcon,
   ExternalLinkIcon,
+  LoaderCircleIcon,
+  PlayIcon,
+  RefreshCcwIcon,
   SaveIcon,
+  ServerCogIcon,
+  SquareIcon,
+  Trash2Icon,
+  TriangleAlertIcon,
 } from "lucide-react"
 import { api } from "@/convex/_generated/api"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { extractSourcesFromMessages } from "@/lib/chat/extract-sources"
@@ -37,6 +46,11 @@ import {
   RightPanelShell,
   RightPanelSummaryBar,
 } from "@/components/app/right-panel-primitives"
+import {
+  EMPTY_DAYTONA_STATUS,
+  type DaytonaStatus,
+  type DaytonaStatusPayload,
+} from "@/lib/daytona/state"
 
 type ChatInspectorProps = {
   threadId?: string
@@ -85,14 +99,58 @@ async function copyText(value: string, successMessage: string) {
   }
 }
 
+function getDaytonaStatusLabel(status: DaytonaStatus) {
+  switch (status) {
+    case "provisioning":
+      return "Provisioning"
+    case "ready":
+      return "Ready"
+    case "stopped":
+      return "Stopped"
+    case "failed":
+      return "Failed"
+    default:
+      return "Not started"
+  }
+}
+
+function getDaytonaAcknowledgeText(daytona: DaytonaStatusPayload) {
+  if (daytona.status === "ready") {
+    return "Daytona instance created and repository clone completed."
+  }
+
+  if (daytona.status === "stopped") {
+    return "Daytona instance is stopped and still attached to this thread."
+  }
+
+  if (daytona.status === "failed") {
+    return daytona.errorMessage ?? "Daytona setup failed."
+  }
+
+  if (daytona.status === "provisioning") {
+    return "Daytona is provisioning this thread's sandbox."
+  }
+
+  return "No Daytona instance has been created for this thread yet."
+}
+
 export function ChatInspector({ threadId }: ChatInspectorProps) {
   const [activeTab, setActiveTab] = useState("overview")
   const [memoryDraft, setMemoryDraft] = useState("")
   const [isSavingMemory, setIsSavingMemory] = useState(false)
+  const [repoDraft, setRepoDraft] = useState("")
+  const [daytonaAction, setDaytonaAction] = useState<
+    null | "spin-up" | "status" | "start" | "stop" | "delete"
+  >(null)
   const threads = useQuery(api.chat.listThreads, {}) ?? []
   const bootstrap = useQuery(api.chat.getChatBootstrap)
   const saveThreadSummary = useMutation(api.chat.setThreadSummary)
   const thread = useQuery(api.chat.getThread, threadId ? { threadId } : "skip")
+  const daytonaStatus =
+    useQuery(
+      api.chat.getThreadDaytonaStatus,
+      threadId ? { threadId } : "skip",
+    ) ?? EMPTY_DAYTONA_STATUS
   const messagesQuery = useQuery(
     api.chat.listMessages,
     threadId ? { threadId } : "skip",
@@ -132,6 +190,10 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
   useEffect(() => {
     setMemoryDraft(thread?.summary?.summaryText ?? "")
   }, [thread?.threadId, thread?.summary?.summaryText])
+
+  useEffect(() => {
+    setRepoDraft(daytonaStatus.repoUrl ?? "")
+  }, [thread?.threadId, daytonaStatus.repoUrl])
 
   if (!threadId) {
     return (
@@ -205,6 +267,9 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
   const summaryText = thread.summary?.summaryText ?? ""
   const hasSummary = Boolean(summaryText)
   const hasUnsavedMemoryChanges = memoryDraft !== summaryText
+  const hasDaytonaInstance = daytonaStatus.exists
+  const isDaytonaBusy = daytonaAction !== null
+  const daytonaSpinUpBlocked = hasDaytonaInstance || isDaytonaBusy
   const scopeLabel =
     thread.scope === "project" && project ? project.title : "Workspace"
   const inspectorSummary = buildThreadInspectorSummary({
@@ -221,7 +286,7 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
       ? `${lastPromptTokens ?? "—"} / ${activeModelDetails.contextLength}`
       : String(lastPromptTokens ?? "—"),
     contextHealthLabel,
-    costUsdMicros: usageTotals?.costUsdMicros,
+    costUsdMicros: usageTotals?.totalCostUsdMicros,
   })
 
   const handleCopySources = async () => {
@@ -267,6 +332,118 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
     }
   }
 
+  const runDaytonaAction = async ({
+    action,
+    endpoint,
+    body,
+    successMessage,
+  }: {
+    action: NonNullable<typeof daytonaAction>
+    endpoint: string
+    body: Record<string, string>
+    successMessage: string
+  }) => {
+    setDaytonaAction(action)
+    try {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      })
+
+      const payload = (await response.json()) as { error?: string }
+      if (!response.ok) {
+        throw new Error(payload.error ?? "Daytona request failed")
+      }
+
+      toast.success(successMessage)
+      setActiveTab("daytona")
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Daytona request failed",
+      )
+    } finally {
+      setDaytonaAction(null)
+    }
+  }
+
+  const handleSpinUpDaytona = async () => {
+    const repoUrl = repoDraft.trim()
+    if (!threadId || !repoUrl || daytonaSpinUpBlocked) {
+      return
+    }
+
+    await runDaytonaAction({
+      action: "spin-up",
+      endpoint: "/api/daytona/spin-up",
+      body: { threadId, repoUrl },
+      successMessage: "Daytona instance created successfully",
+    })
+  }
+
+  const handleRefreshDaytonaStatus = async () => {
+    if (!threadId || !daytonaStatus.sandboxId || isDaytonaBusy) return
+
+    await runDaytonaAction({
+      action: "status",
+      endpoint: "/api/daytona/status",
+      body: { threadId },
+      successMessage: "Daytona status refreshed",
+    })
+  }
+
+  const handleStopDaytona = async () => {
+    if (
+      !threadId ||
+      !daytonaStatus.sandboxId ||
+      daytonaStatus.status === "stopped" ||
+      isDaytonaBusy
+    ) {
+      return
+    }
+
+    await runDaytonaAction({
+      action: "stop",
+      endpoint: "/api/daytona/stop",
+      body: { threadId },
+      successMessage: "Daytona instance stopped",
+    })
+  }
+
+  const handleStartDaytona = async () => {
+    if (
+      !threadId ||
+      !daytonaStatus.sandboxId ||
+      daytonaStatus.status !== "stopped" ||
+      isDaytonaBusy
+    ) {
+      return
+    }
+
+    await runDaytonaAction({
+      action: "start",
+      endpoint: "/api/daytona/start",
+      body: { threadId },
+      successMessage: "Daytona instance started",
+    })
+  }
+
+  const handleDeleteDaytona = async () => {
+    if (!threadId || !daytonaStatus.sandboxId || isDaytonaBusy) return
+    if (!window.confirm("Delete this Daytona instance from the thread?")) {
+      return
+    }
+
+    await runDaytonaAction({
+      action: "delete",
+      endpoint: "/api/daytona/delete",
+      body: { threadId },
+      successMessage: "Daytona instance deleted",
+    })
+  }
+
   return (
     <RightPanelShell>
       <RightPanelScrollBody className="pt-1">
@@ -303,6 +480,12 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
               className="h-8 rounded-none px-0 py-0 text-sm font-medium"
             >
               Memory
+            </TabsTrigger>
+            <TabsTrigger
+              value="daytona"
+              className="h-8 rounded-none px-0 py-0 text-sm font-medium"
+            >
+              Daytona
             </TabsTrigger>
           </TabsList>
 
@@ -512,6 +695,165 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
                 />
               )}
             </RightPanelCollapsibleSection>
+          </TabsContent>
+
+          <TabsContent value="daytona" className="mt-0 space-y-3">
+            <RightPanelSection
+              title="Daytona"
+              description="Create one Daytona sandbox for this thread by cloning a public GitHub repository."
+            >
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <label
+                    htmlFor="daytona-repo-url"
+                    className="text-sm font-medium text-foreground"
+                  >
+                    Repository URL
+                  </label>
+                  <Input
+                    id="daytona-repo-url"
+                    type="url"
+                    placeholder="https://github.com/owner/repo"
+                    value={repoDraft}
+                    onChange={(event) => setRepoDraft(event.target.value)}
+                    disabled={hasDaytonaInstance || isDaytonaBusy}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    type="button"
+                    onClick={handleSpinUpDaytona}
+                    disabled={!repoDraft.trim() || daytonaSpinUpBlocked}
+                    className="col-span-2"
+                  >
+                    {daytonaAction === "spin-up" ? (
+                      <>
+                        <LoaderCircleIcon className="size-4 animate-spin" />
+                        Spinning up instance
+                      </>
+                    ) : (
+                      <>
+                        <ServerCogIcon className="size-4" />
+                        Spin up instance
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleRefreshDaytonaStatus}
+                    disabled={!daytonaStatus.sandboxId || isDaytonaBusy}
+                  >
+                    {daytonaAction === "status" ? (
+                      <LoaderCircleIcon className="size-4 animate-spin" />
+                    ) : (
+                      <RefreshCcwIcon className="size-4" />
+                    )}
+                    Get status
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={
+                      daytonaStatus.status === "stopped"
+                        ? handleStartDaytona
+                        : handleStopDaytona
+                    }
+                    disabled={
+                      !daytonaStatus.sandboxId ||
+                      isDaytonaBusy
+                    }
+                  >
+                    {daytonaAction === "stop" || daytonaAction === "start" ? (
+                      <LoaderCircleIcon className="size-4 animate-spin" />
+                    ) : daytonaStatus.status === "stopped" ? (
+                      <PlayIcon className="size-4" />
+                    ) : (
+                      <SquareIcon className="size-4" />
+                    )}
+                    {daytonaStatus.status === "stopped"
+                      ? "Start instance"
+                      : "Stop instance"}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleDeleteDaytona}
+                    disabled={!daytonaStatus.sandboxId || isDaytonaBusy}
+                    className="col-span-2"
+                  >
+                    {daytonaAction === "delete" ? (
+                      <LoaderCircleIcon className="size-4 animate-spin" />
+                    ) : (
+                      <Trash2Icon className="size-4" />
+                    )}
+                    Delete instance
+                  </Button>
+                </div>
+
+                {hasDaytonaInstance ? (
+                  <div className="rounded-lg border border-border bg-muted/15 px-3 py-2 text-xs text-muted-foreground">
+                    This thread already has a Daytona instance attached. Delete it to spin up a fresh one.
+                  </div>
+                ) : null}
+              </div>
+            </RightPanelSection>
+
+            <RightPanelSection
+              title="Status"
+              description="Basic Daytona status for the current thread."
+            >
+              <div className="space-y-3">
+                <RightPanelChipRow
+                  chips={[
+                    getDaytonaStatusLabel(daytonaStatus.status),
+                    daytonaStatus.cloneStatus.replace(/_/g, " "),
+                  ]}
+                />
+
+                <RightPanelList>
+                  <RightPanelListRow>
+                    <div className="flex items-center justify-between gap-3 text-sm">
+                      <span className="text-muted-foreground">Repository</span>
+                      <span className="max-w-[14rem] truncate font-medium text-foreground">
+                        {daytonaStatus.repoUrl ?? "—"}
+                      </span>
+                    </div>
+                  </RightPanelListRow>
+                  <RightPanelListRow>
+                    <div className="flex items-center justify-between gap-3 text-sm">
+                      <span className="text-muted-foreground">Sandbox</span>
+                      <span className="font-medium text-foreground">
+                        {daytonaStatus.sandboxId ?? "—"}
+                      </span>
+                    </div>
+                  </RightPanelListRow>
+                  <RightPanelListRow>
+                    <div className="flex items-center justify-between gap-3 text-sm">
+                      <span className="text-muted-foreground">Last updated</span>
+                      <span className="font-medium text-foreground">
+                        {daytonaStatus.updatedAt
+                          ? formatTimestamp(daytonaStatus.updatedAt)
+                          : "—"}
+                      </span>
+                    </div>
+                  </RightPanelListRow>
+                </RightPanelList>
+
+                <Alert variant={daytonaStatus.status === "failed" ? "destructive" : "default"}>
+                  {daytonaStatus.status === "failed" ? (
+                    <TriangleAlertIcon className="size-4" />
+                  ) : (
+                    <CheckCircle2Icon className="size-4" />
+                  )}
+                  <AlertTitle>Acknowledgment</AlertTitle>
+                  <AlertDescription>
+                    {getDaytonaAcknowledgeText(daytonaStatus)}
+                  </AlertDescription>
+                </Alert>
+              </div>
+            </RightPanelSection>
           </TabsContent>
         </Tabs>
       </RightPanelScrollBody>
