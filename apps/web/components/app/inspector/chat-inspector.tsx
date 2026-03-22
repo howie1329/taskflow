@@ -26,6 +26,7 @@ import { useChatInspectorFocus, useChatInspectorFocusActions } from "@/component
 import {
   RightPanelDossierHeader,
   RightPanelEmptyState,
+  RightPanelInlineMeta,
   RightPanelMetaList,
   RightPanelMetaRow,
   RightPanelScrollBody,
@@ -41,6 +42,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 import { Input } from "@/components/ui/input"
+import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { extractSourcesFromMessages } from "@/lib/chat/extract-sources"
@@ -170,6 +172,17 @@ function getDaytonaAcknowledgeText(daytona: DaytonaStatusPayload) {
   }
 
   return "No Daytona instance has been created for this thread yet."
+}
+
+function formatInspectorCost(value?: number) {
+  if (value === undefined) return null
+
+  return Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 4,
+    maximumFractionDigits: 4,
+  }).format(value / 1_000_000)
 }
 
 function InspectorCollapsible({
@@ -558,7 +571,7 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="gap-4">
           <TabsList
             variant="line"
-            className="sticky top-0 z-10 h-10 w-full justify-start gap-3 overflow-x-auto border-b border-border/50 bg-background/95 px-2 backdrop-blur supports-backdrop-filter:bg-background/88"
+            className="sticky top-0 z-10 h-10 w-full justify-start gap-4 overflow-x-auto border-b border-border/45 bg-background/88 px-2 backdrop-blur supports-backdrop-filter:bg-background/80"
           >
             <TabsTrigger value="focus" className="h-9 flex-none rounded-none px-0 text-sm font-medium">
               Focus
@@ -576,7 +589,7 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
 
           <TabsContent value="focus" className="mt-0">
             <RightPanelDossierHeader
-              className="border-b-0 pb-2"
+              className="pb-1"
               title={thread.title || "Untitled chat"}
               description={
                 focus?.type === "tool"
@@ -585,6 +598,7 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
                     ? "Selected message in context."
                     : headerModel.status
               }
+              eyebrow={focus ? "Focus" : "Inspector"}
               actions={
                 focus ? (
                   <Button
@@ -600,22 +614,15 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
                 ) : null
               }
               meta={
-                <div className="space-y-3">
-                  <RightPanelTagRow
-                    tags={[
-                      scopeLabel,
-                      ...headerModel.tags,
-                      usageTotals?.totalCostUsdMicros !== undefined
-                        ? `Cost ${Intl.NumberFormat("en-US", {
-                            style: "currency",
-                            currency: "USD",
-                            minimumFractionDigits: 4,
-                            maximumFractionDigits: 4,
-                          }).format(usageTotals.totalCostUsdMicros / 1_000_000)}`
-                        : null,
-                    ]}
-                  />
-                </div>
+                <RightPanelInlineMeta
+                  items={[
+                    scopeLabel,
+                    ...headerModel.tags,
+                    formatInspectorCost(usageTotals?.totalCostUsdMicros)
+                      ? `Cost ${formatInspectorCost(usageTotals?.totalCostUsdMicros)}`
+                      : null,
+                  ]}
+                />
               }
             />
             <RightPanelSectionBlock
@@ -635,7 +642,7 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
               }
             >
               {focus?.type === "tool" && selectedToolView ? (
-                <RightPanelSurface className="space-y-4">
+                <div className="space-y-4 px-2">
                   <div className="space-y-2">
                     <div className="text-base font-semibold tracking-[-0.02em] text-foreground">
                       {selectedToolView.title}
@@ -643,9 +650,10 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
                     <p className="text-sm leading-6 text-muted-foreground">
                       {selectedToolView.description}
                     </p>
-                    <RightPanelTagRow tags={selectedToolView.tags} />
+                    <RightPanelInlineMeta items={selectedToolView.tags} />
                   </div>
 
+                  <Separator className="bg-border/35" />
                   <RightPanelMetaList>
                     {selectedToolView.stats.map((stat) => (
                       <RightPanelMetaRow
@@ -666,13 +674,13 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
                   </div>
 
                   <InspectorCollapsible title="Raw output">
-                    <RightPanelSurface className="bg-background px-3 py-3">
+                    <RightPanelSurface className="px-3 py-3">
                       <FocusToolOutput output={selectedToolView.output} />
                     </RightPanelSurface>
                   </InspectorCollapsible>
-                </RightPanelSurface>
+                </div>
               ) : focus?.type === "message" && selectedMessageView ? (
-                <RightPanelSurface className="space-y-4">
+                <div className="space-y-4 px-2">
                   <div className="space-y-2">
                     <div className="text-base font-semibold tracking-[-0.02em] text-foreground">
                       {selectedMessageView.summaryTitle}
@@ -680,9 +688,10 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
                     <p className="text-sm leading-6 text-muted-foreground">
                       {selectedMessageView.summaryDescription}
                     </p>
-                    <RightPanelTagRow tags={selectedMessageView.chips} />
+                    <RightPanelInlineMeta items={selectedMessageView.chips} />
                   </div>
 
+                  <Separator className="bg-border/35" />
                   <RightPanelMetaList>
                     {selectedMessageView.metrics.map((metric) => (
                       <RightPanelMetaRow
@@ -695,16 +704,16 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
 
                   {selectedMessageView.reasoningText?.trim() ? (
                     <InspectorCollapsible title="Reasoning">
-                      <RightPanelSurface className="bg-background px-3 py-3">
+                      <RightPanelSurface className="px-3 py-3">
                         <p className="whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
                           {selectedMessageView.reasoningText}
                         </p>
                       </RightPanelSurface>
                     </InspectorCollapsible>
                   ) : null}
-                </RightPanelSurface>
+                </div>
               ) : (
-                <RightPanelSurface className="space-y-4">
+                <div className="space-y-4 px-2">
                   <div className="space-y-2">
                     <p className="text-base font-semibold tracking-[-0.02em] text-foreground">
                       {threadFocus.title}
@@ -712,34 +721,34 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
                     <p className="text-sm leading-6 text-muted-foreground">
                       {threadFocus.description}
                     </p>
-                    <RightPanelTagRow tags={threadFocus.tags} />
+                    <RightPanelInlineMeta items={threadFocus.tags} />
                   </div>
 
+                  <Separator className="bg-border/35" />
                   <RightPanelMetaList>
                     {threadFocus.stats.map((stat) => (
                       <RightPanelMetaRow key={stat.label} label={stat.label} value={stat.value} />
                     ))}
                   </RightPanelMetaList>
-                </RightPanelSurface>
+                </div>
               )}
             </RightPanelSectionBlock>
           </TabsContent>
 
           <TabsContent value="evidence" className="mt-0">
             <RightPanelDossierHeader
-              className="border-b-0 pb-2"
+              className="pb-1"
               title="Evidence dossier"
               description={evidenceModel.description}
+              eyebrow="Evidence"
               meta={
-                <div className="space-y-3">
-                  <RightPanelTagRow
-                    tags={[
-                      scopeLabel,
-                      ...evidenceModel.domains,
-                      `${sources.length} source${sources.length === 1 ? "" : "s"}`,
-                    ]}
-                  />
-                </div>
+                <RightPanelInlineMeta
+                  items={[
+                    scopeLabel,
+                    ...evidenceModel.domains,
+                    `${sources.length} source${sources.length === 1 ? "" : "s"}`,
+                  ]}
+                />
               }
             />
             <RightPanelSectionBlock
@@ -760,10 +769,10 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
                 ) : null
               }
             >
-              <RightPanelSurface className="space-y-4">
+              <div className="space-y-4 px-2">
                 <div className="space-y-2">
                   <p className="text-sm font-medium text-foreground">{evidenceModel.title}</p>
-                  <RightPanelTagRow tags={evidenceModel.domains} />
+                  <RightPanelInlineMeta items={evidenceModel.domains} />
                 </div>
 
                 {evidenceModel.recentSources.length === 0 ? (
@@ -786,44 +795,40 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
                             <p className="text-sm font-medium leading-6 text-foreground">
                               {source.title ?? source.domain}
                             </p>
-                            <p className="text-xs uppercase tracking-[0.12em] text-muted-foreground">
-                              {source.domain}
-                            </p>
+                            <RightPanelInlineMeta
+                              items={[
+                                source.domain.toUpperCase(),
+                                source.toolKey,
+                                source.messageId ? `Msg ${source.messageId.slice(0, 8)}` : null,
+                              ]}
+                            />
                           </div>
                           <ExternalLinkIcon className="mt-1 size-4 shrink-0 text-muted-foreground" />
                         </div>
-                        <RightPanelTagRow
-                          className="mt-2"
-                          tags={[
-                            source.toolKey,
-                            source.messageId ? `Msg ${source.messageId.slice(0, 8)}` : null,
-                          ]}
-                        />
                       </a>
                     ))}
                   </div>
                 )}
-              </RightPanelSurface>
+              </div>
             </RightPanelSectionBlock>
           </TabsContent>
 
           <TabsContent value="memory" className="mt-0">
             <RightPanelDossierHeader
-              className="border-b-0 pb-2"
+              className="pb-1"
               title="Thread memory"
               description="Stored context summary for compaction and continuity."
+              eyebrow="Memory"
               meta={
-                <div className="space-y-3">
-                  <RightPanelTagRow
-                    tags={[
-                      scopeLabel,
-                      hasSummary ? "Artifact saved" : "No memory yet",
-                      thread.summary?.updatedAt
-                        ? `Updated ${formatTimestamp(thread.summary.updatedAt)}`
-                        : null,
-                    ]}
-                  />
-                </div>
+                <RightPanelInlineMeta
+                  items={[
+                    scopeLabel,
+                    hasSummary ? "Artifact saved" : "No memory yet",
+                    thread.summary?.updatedAt
+                      ? `Updated ${formatTimestamp(thread.summary.updatedAt)}`
+                      : null,
+                  ]}
+                />
               }
             />
             <RightPanelSectionBlock
@@ -873,7 +878,7 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
               }
             >
               {hasSummary ? (
-                <RightPanelSurface className="space-y-4">
+                <div className="space-y-4 px-2">
                   <RightPanelMetaList>
                     <RightPanelMetaRow
                       label="State"
@@ -894,12 +899,12 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
                   </RightPanelMetaList>
 
                   {isEditingMemory ? (
-                    <div className="space-y-3">
+                    <RightPanelSurface className="space-y-3">
                       <Textarea
                         value={memoryDraft}
                         onChange={(event) => setMemoryDraft(event.target.value)}
                         maxLength={2000}
-                        className="min-h-40 resize-y rounded-lg border-border/60 bg-background text-sm"
+                        className="min-h-40 resize-y rounded-lg border-border/60 bg-background/80 text-sm"
                         placeholder="Thread memory summary"
                       />
                       <div className="flex items-center justify-end gap-2">
@@ -937,13 +942,14 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
                           )}
                         </Button>
                       </div>
-                    </div>
+                    </RightPanelSurface>
                   ) : (
                     <div className="space-y-3">
+                      <Separator className="bg-border/35" />
                       <p className="whitespace-pre-wrap text-sm leading-6 text-foreground">
                         {summaryText}
                       </p>
-                      <div className="flex items-center gap-2 rounded-lg border border-border/40 bg-background px-3 py-2 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-2 rounded-lg border border-border/30 bg-transparent px-3 py-2 text-xs text-muted-foreground">
                         <CheckCircle2Icon className="size-3.5" />
                         <span>
                           Memory stays readable by default. Editing is an explicit secondary action.
@@ -951,7 +957,7 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
                       </div>
                     </div>
                   )}
-                </RightPanelSurface>
+                </div>
               ) : (
                 <RightPanelEmptyState
                   title="No rolling summary yet"
@@ -963,28 +969,27 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
 
           <TabsContent value="operations" className="mt-0">
             <RightPanelDossierHeader
-              className="border-b-0 pb-2"
+              className="pb-1"
               title="Operations"
               description="Sandbox controls and thread-level execution activity."
+              eyebrow="Operations"
               meta={
-                <div className="space-y-3">
-                  <RightPanelTagRow
-                    tags={[
-                      scopeLabel,
-                      getDaytonaStatusLabel(daytonaStatus.status),
-                      toolSummary.length > 0
-                        ? `${toolSummary.length} tool type${toolSummary.length === 1 ? "" : "s"}`
-                        : "No tool activity",
-                    ]}
-                  />
-                </div>
+                <RightPanelInlineMeta
+                  items={[
+                    scopeLabel,
+                    getDaytonaStatusLabel(daytonaStatus.status),
+                    toolSummary.length > 0
+                      ? `${toolSummary.length} tool type${toolSummary.length === 1 ? "" : "s"}`
+                      : "No tool activity",
+                  ]}
+                />
               }
             />
             <RightPanelSectionBlock
               title="Sandbox"
               description="Daytona stays available here, but quieter unless the thread is actively using it."
             >
-              <RightPanelSurface className="space-y-4">
+              <div className="space-y-4 px-2">
                 <RightPanelTagRow
                   tags={[
                     getDaytonaStatusLabel(daytonaStatus.status),
@@ -1033,7 +1038,7 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
                     </Button>
                   }
                 >
-                  <div className="space-y-3">
+                  <div className="space-y-3 pt-1">
                     <div className="space-y-2">
                       <label
                         htmlFor="daytona-repo-url"
@@ -1107,8 +1112,8 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
                     <div
                       className={`rounded-lg border px-3 py-2 text-xs ${
                         daytonaStatus.status === "failed"
-                          ? "border-destructive/30 bg-destructive/10 text-destructive"
-                          : "border-border/40 bg-background text-muted-foreground"
+                          ? "border-destructive/30 bg-destructive/8 text-destructive"
+                          : "border-border/30 bg-transparent text-muted-foreground"
                       }`}
                     >
                       <div className="flex items-center gap-2">
@@ -1134,18 +1139,18 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
                       {toolSummary.map((tool) => (
                         <div
                           key={tool.toolKey}
-                          className="flex items-center justify-between gap-3 border-b border-border/40 pb-2 last:border-b-0 last:pb-0"
+                          className="flex items-center justify-between gap-3 border-b border-border/35 pb-2 last:border-b-0 last:pb-0"
                         >
                           <span className="text-sm font-medium text-foreground">
                             {tool.toolKey}
                           </span>
-                          <RightPanelTagRow tags={[`${tool.count} calls`]} />
+                          <span className="text-sm text-muted-foreground">{tool.count} calls</span>
                         </div>
                       ))}
                     </div>
                   )}
                 </InspectorCollapsible>
-              </RightPanelSurface>
+              </div>
             </RightPanelSectionBlock>
           </TabsContent>
         </Tabs>

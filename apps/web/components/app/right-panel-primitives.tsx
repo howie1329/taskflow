@@ -1,9 +1,11 @@
 import type { ReactNode } from "react"
+import { Badge } from "@/components/ui/badge"
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
+import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
 import { ChevronDownIcon } from "lucide-react"
 
@@ -222,27 +224,24 @@ export function RightPanelDossierHeader({
   meta,
   actions,
   className,
+  eyebrow = "Inspector",
 }: {
   title: ReactNode
   description?: ReactNode
   meta?: ReactNode
   actions?: ReactNode
   className?: string
+  eyebrow?: ReactNode
 }) {
   return (
-    <section
-      className={cn(
-        "sticky top-0 z-10 -mx-1 border-b border-border/55 bg-background/95 px-1 pb-4 pt-1 backdrop-blur supports-backdrop-filter:bg-background/88",
-        className,
-      )}
-    >
-      <div className="space-y-3 px-2">
+    <section className={cn("px-2 pt-1", className)}>
+      <div className="space-y-2.5">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 space-y-1.5">
-            <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
-              Inspector
+            <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground/85">
+              {eyebrow}
             </p>
-            <div className="text-[18px] font-semibold leading-tight tracking-[-0.02em] text-foreground">
+            <div className="text-[17px] font-semibold leading-tight tracking-[-0.02em] text-foreground">
               {title}
             </div>
             {description ? (
@@ -254,6 +253,7 @@ export function RightPanelDossierHeader({
           {actions ? <div className="shrink-0">{actions}</div> : null}
         </div>
         {meta ? <div>{meta}</div> : null}
+        <Separator className="bg-border/45" />
       </div>
     </section>
   )
@@ -318,7 +318,7 @@ export function RightPanelSurface({
   return (
     <div
       className={cn(
-        "rounded-xl border border-border/45 bg-muted/10 px-4 py-4",
+        "rounded-lg border border-border/35 bg-muted/[0.04] px-4 py-4",
         className,
       )}
     >
@@ -349,7 +349,7 @@ export function RightPanelMetaRow({
   return (
     <div
       className={cn(
-        "flex items-start justify-between gap-4 border-b border-border/40 pb-2 text-sm last:border-b-0 last:pb-0",
+        "flex items-start justify-between gap-4 border-b border-border/35 pb-2.5 text-sm last:border-b-0 last:pb-0",
         className,
       )}
     >
@@ -374,12 +374,35 @@ export function RightPanelTagRow({
   return (
     <div className={cn("flex flex-wrap gap-2", className)}>
       {visibleTags.map((tag, index) => (
-        <span
+        <Badge
           key={index}
-          className="inline-flex min-h-6 items-center rounded-full border border-border/50 bg-background px-2.5 text-[11px] font-medium text-muted-foreground"
+          variant="ghost"
+          className="h-6 rounded-full border border-border/45 bg-transparent px-2.5 text-[11px] font-medium text-muted-foreground hover:bg-transparent"
         >
           {tag}
-        </span>
+        </Badge>
+      ))}
+    </div>
+  )
+}
+
+export function RightPanelInlineMeta({
+  items,
+  className,
+}: {
+  items: Array<ReactNode | null | false | undefined>
+  className?: string
+}) {
+  const visibleItems = items.filter(Boolean)
+  if (visibleItems.length === 0) return null
+
+  return (
+    <div className={cn("flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground", className)}>
+      {visibleItems.map((item, index) => (
+        <div key={index} className="inline-flex items-center gap-3">
+          {index > 0 ? <span className="text-border">/</span> : null}
+          <span>{item}</span>
+        </div>
       ))}
     </div>
   )
