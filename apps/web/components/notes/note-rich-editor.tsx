@@ -335,8 +335,8 @@ function ToolbarButton({
           size="icon-xs"
           onClick={onClick}
           className={cn(
-            "h-7 w-7 motion-safe:transition-[background-color,color,transform] motion-safe:duration-100 motion-safe:ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.97]",
-            active && "bg-muted text-foreground",
+            "h-7 w-7 rounded-md text-muted-foreground motion-safe:transition-[background-color,color,transform] motion-safe:duration-100 motion-safe:ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-muted/50 hover:text-foreground active:scale-[0.97]",
+            active && "bg-muted/70 text-foreground",
           )}
           type="button"
         >
@@ -819,7 +819,7 @@ function NoteEditorToolbar({ className }: { className?: string }) {
       <KeyboardShortcutsPlugin onOpenLinkEditor={openLinkEditor} />
       <div
         className={cn(
-          "flex flex-wrap items-center gap-0.5 rounded-md border border-border bg-muted/30 px-1 py-1",
+          "flex flex-wrap items-center gap-0.5 text-muted-foreground",
           className,
         )}
       >
@@ -858,7 +858,7 @@ function NoteEditorToolbar({ className }: { className?: string }) {
           icon={<Code2 className="size-3" />}
         />
 
-        <div className="mx-0.5 h-4 w-px shrink-0 bg-border" />
+        <div className="mx-1 h-4 w-px shrink-0 bg-border/70" />
 
         <ToolbarButton
           active={toolbarState.blockType === "paragraph"}
@@ -897,7 +897,7 @@ function NoteEditorToolbar({ className }: { className?: string }) {
           icon={<Code2 className="size-3" />}
         />
 
-        <div className="mx-0.5 h-4 w-px shrink-0 bg-border" />
+        <div className="mx-1 h-4 w-px shrink-0 bg-border/70" />
 
         <ToolbarButton
           active={toolbarState.bullet}
@@ -924,7 +924,7 @@ function NoteEditorToolbar({ className }: { className?: string }) {
               />
             </div>
           </PopoverTrigger>
-          <PopoverContent className="w-72 rounded-lg" align="start">
+          <PopoverContent className="w-72 rounded-lg border-border/70" align="start">
             <LinkEditor
               initialUrl={activeLinkUrl}
               onApply={applyLink}
@@ -987,21 +987,21 @@ export function NoteRichEditor({
   )
 
   return (
-    <div className={cn("flex flex-col gap-2", className)}>
+    <div className={cn("flex min-h-0 flex-1 flex-col overflow-hidden gap-2", className)}>
       <LexicalComposer initialConfig={initialConfig}>
         <NoteEditorToolbar className={toolbarClassName} />
-        <div className="relative flex-1">
+        <div className="relative min-h-0 flex-1 overflow-hidden">
           <RichTextPlugin
             contentEditable={
               <ContentEditable
                 className={cn(
-                  "min-h-[240px] rounded-md border border-border bg-background px-1 py-2 text-sm leading-relaxed outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-offset-0",
+                  "h-full min-h-[240px] overflow-y-auto rounded-none border-0 bg-transparent px-0 py-0 text-sm leading-relaxed outline-none focus-visible:ring-0 focus-visible:ring-offset-0",
                   editorClassName,
                 )}
               />
             }
             placeholder={
-              <div className="pointer-events-none absolute left-1 top-2 text-sm text-muted-foreground/60">
+              <div className="pointer-events-none absolute left-0 top-0 text-sm text-muted-foreground/55">
                 {placeholder}
               </div>
             }

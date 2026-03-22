@@ -352,9 +352,9 @@ export function AppShell({ children, right }: AppShellProps) {
         <main
           className={
             isTasksRoute || isNotesRoute
-              ? "relative flex flex-1 flex-col overflow-hidden"
+              ? "relative flex min-h-0 flex-1 flex-col overflow-hidden"
               : isSettingsRoute
-                ? "relative flex flex-1 flex-col overflow-hidden"
+                ? "relative flex min-h-0 flex-1 flex-col overflow-hidden"
                 : isChatThreadRoute
                   ? "relative flex min-h-0 flex-1 flex-col overflow-hidden px-2 pb-2"
                   : "relative flex min-h-0 flex-1 flex-col gap-2 overflow-hidden p-2 md:gap-2 md:p-2"

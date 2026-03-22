@@ -57,20 +57,31 @@ export default function NotePage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-full min-h-0 w-full flex-col overflow-hidden px-4 py-3 md:px-8 md:py-4">
-        <div className="mx-auto w-full max-w-[42rem] rounded-lg border border-border bg-card p-4">
-          <Skeleton className="mb-4 h-9 w-3/5" />
-          <div className="flex flex-wrap items-center gap-2">
-            <Skeleton className="h-6 w-24 rounded-md" />
-            <Skeleton className="h-6 w-20 rounded-md" />
+      <div className="flex h-full min-h-0 w-full flex-col overflow-hidden px-4 py-4 md:px-8 md:py-5">
+        <div className="mx-auto w-full max-w-[50rem] border-b border-border/70 pb-5">
+          <Skeleton className="h-11 w-3/5 max-w-full" />
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <Skeleton className="h-4 w-24" />
             <Skeleton className="h-4 w-16" />
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-4 w-14" />
           </div>
         </div>
-        <div className="mx-auto mt-3 flex w-full max-w-[42rem] flex-1 flex-col space-y-3 rounded-lg border border-border bg-muted/20 p-4">
-          <Skeleton className="h-8 w-72 max-w-full" />
-          <Skeleton className="h-24 w-full" />
-          <Skeleton className="h-24 w-full" />
-          <Skeleton className="h-24 w-4/5" />
+        <div className="mx-auto mt-5 flex w-full max-w-[50rem] flex-1 flex-col">
+          <div className="flex flex-wrap items-center gap-1 border-b border-border/60 pb-3">
+            <Skeleton className="h-7 w-7 rounded-md" />
+            <Skeleton className="h-7 w-7 rounded-md" />
+            <Skeleton className="h-7 w-7 rounded-md" />
+            <Skeleton className="h-7 w-px rounded-none" />
+            <Skeleton className="h-7 w-7 rounded-md" />
+            <Skeleton className="h-7 w-7 rounded-md" />
+          </div>
+          <div className="mt-6 space-y-5">
+            <Skeleton className="h-8 w-72 max-w-full" />
+            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-20 w-4/5" />
+          </div>
         </div>
       </div>
     )
