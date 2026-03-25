@@ -594,6 +594,8 @@ const sidebarMenuButtonVariants = cva(
         default: "",
         outline:
           "bg-background text-sidebar-foreground shadow-[0_0_0_1px_hsl(var(--sidebar-border))] hover:text-sidebar-accent-foreground hover:shadow-[0_0_0_1px_hsl(var(--sidebar-accent))]",
+        navPill:
+          "!rounded-full px-2.5 text-sidebar-foreground/75 hover:bg-sidebar-accent/80 hover:text-sidebar-accent-foreground data-active:bg-sidebar-accent data-active:text-sidebar-accent-foreground",
       },
       size: {
         default: "h-8 min-h-8",
