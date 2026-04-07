@@ -606,10 +606,10 @@ function NotesMiniChat({ note }: { note: Note }) {
             value={input}
             onChange={(event) => setInput(event.target.value)}
             placeholder="Ask about this note..."
-            className="min-h-16 max-h-56 px-3 py-2 text-sm leading-relaxed placeholder:text-muted-foreground"
+            className="min-h-16 max-h-56 px-3 py-2 text-sm leading-snug placeholder:text-muted-foreground"
           />
-          <PromptInputFooter className="border-t border-border px-3 py-2 text-muted-foreground">
-            <div className="flex items-center gap-2 text-xs">
+          <PromptInputFooter className="border-t border-border/50 px-3 py-2 text-xs text-muted-foreground">
+            <div className="flex items-center gap-2">
               {status === "streaming" || status === "submitted" ? (
                 <span className="inline-flex items-center gap-1.5 text-muted-foreground">
                   <HugeiconsIcon
@@ -627,7 +627,8 @@ function NotesMiniChat({ note }: { note: Note }) {
               status={status}
               onStop={stop}
               size="icon-sm"
-              className="size-8 rounded-md shadow-none"
+              variant="default"
+              className="size-8 rounded-md border-0 shadow-none bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
               disabled={status !== "streaming" && status !== "submitted" && !input.trim()}
             />
           </PromptInputFooter>

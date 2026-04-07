@@ -127,7 +127,7 @@ const ThreadMessageRow = memo(function ThreadMessageRow({
     >
       <MessageContent
         className={cn(
-          "text-[15px] leading-7",
+          "text-sm leading-snug",
           message.role === "assistant" && "w-full",
           message.role === "user" && "max-w-xl",
         )}
@@ -150,7 +150,7 @@ const ThreadMessageRow = memo(function ThreadMessageRow({
             onInspectTool={onInspectTool}
           />
         ) : (
-          <div className="whitespace-pre-wrap text-[15px] leading-7">
+          <div className="whitespace-pre-wrap text-sm leading-snug">
             {hasFiles && (
               <Attachments variant="inline" className="mb-2">
                 {files.map((file, fileIndex) => (
@@ -263,7 +263,7 @@ function AssistantMessageBody({
             <Skeleton className="h-4 w-full max-w-[70%] rounded" />
             <Skeleton className="h-4 w-12 shrink-0 rounded" />
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
             <span className="animate-pulse">Thinking...</span>
             <span className="sr-only">Streaming response</span>
           </div>
@@ -283,7 +283,7 @@ function AssistantMessageBody({
       )}
 
       {isStreamingMessage && renderedText?.trim() && (
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
           <ActivityIcon className="size-3.5 animate-pulse" />
           <span>Streaming...</span>
         </div>

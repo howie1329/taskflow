@@ -32,7 +32,11 @@ export const updateMyPreferences = mutation({
     onboardingVersion: v.optional(v.string()),
     notificationsEnabled: v.optional(v.boolean()),
     taskDefaultView: v.optional(
-      v.union(v.literal("board"), v.literal("todayPlusBoard")),
+      v.union(
+        v.literal("board"),
+        v.literal("todayPlusBoard"),
+        v.literal("list"),
+      ),
     ),
     hideCompletedTasks: v.optional(v.boolean()),
     aiChatShowActions: v.optional(v.boolean()),

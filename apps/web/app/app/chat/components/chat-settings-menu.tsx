@@ -40,7 +40,7 @@ export interface ChatSettingsContentProps {
 }
 
 export const CHAT_SETTINGS_TRIGGER_CLASS_NAME =
-  "rounded-md border-border bg-background text-foreground shadow-none transition-[color,background-color,border-color,transform] duration-150 ease-out hover:bg-muted/50 motion-safe:active:scale-[0.97]";
+  "h-8 rounded-md border-0 bg-transparent text-xs font-medium text-foreground shadow-none transition-[color,background-color,transform] duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent/50 motion-safe:active:scale-[0.97]";
 
 export const CHAT_SETTINGS_POPOVER_CLASS_NAME =
   "gap-0 overflow-hidden rounded-xl border border-border bg-popover p-0 shadow-md ring-0";

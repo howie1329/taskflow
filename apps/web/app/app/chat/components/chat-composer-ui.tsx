@@ -22,7 +22,7 @@ import {
 import { ToolLockCommandMenu } from "./tool-lock-command-menu";
 
 export const CHAT_COMPOSER_INPUT_CLASS_NAME =
-  "**:data-[slot=input-group]:rounded-md **:data-[slot=input-group]:border-border **:data-[slot=input-group]:bg-background **:data-[slot=input-group]:shadow-none **:data-[slot=input-group]:transition-colors **:data-[slot=input-group]:duration-150 **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:border-ring **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:ring-2 **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:ring-ring/30";
+  "**:data-[slot=input-group]:rounded-md **:data-[slot=input-group]:border-input **:data-[slot=input-group]:bg-input **:data-[slot=input-group]:shadow-none **:data-[slot=input-group]:transition-colors **:data-[slot=input-group]:duration-150 **:data-[slot=input-group]:dark:bg-input/30 **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:border-ring **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:ring-2 **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:ring-ring/30 **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:ring-offset-0";
 
 export function getComposerHeaderClassName(showPromptHeader: boolean) {
   return `grid overflow-hidden transition-[grid-template-rows,opacity,margin-bottom] duration-200 ease-out ${
@@ -50,7 +50,7 @@ export function ChatComposerToolHeader({
 }) {
   return (
     <div className={getComposerHeaderClassName(show)} aria-hidden={!show}>
-      <div className="overflow-hidden rounded-md border border-border bg-background px-3 py-2 transition-colors duration-150">
+      <div className="overflow-hidden rounded-md border border-input bg-input px-3 py-2 transition-colors duration-150 dark:bg-input/30">
         <ToolLockCommandMenu textareaRef={textareaRef} />
       </div>
     </div>
@@ -80,7 +80,7 @@ export function ComposerAttachmentsPreview() {
 }
 
 const COMPOSER_ICON_BUTTON_CLASS_NAME =
-  "size-8 rounded-md border-transparent bg-transparent text-muted-foreground shadow-none transition-[color,background-color,border-color,transform] duration-150 ease-out hover:bg-muted hover:text-foreground motion-safe:active:scale-[0.97]";
+  "size-8 rounded-md text-muted-foreground shadow-none transition-[color,background-color,transform] duration-150 motion-safe:active:scale-[0.97] ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent/50 hover:text-foreground";
 
 export function ComposerSlashCommandButton({
   value,
@@ -96,7 +96,7 @@ export function ComposerSlashCommandButton({
       <TooltipTrigger asChild>
         <Button
           type="button"
-          variant="outline"
+          variant="ghost"
           size="icon-sm"
           aria-label="Slash commands"
           className={COMPOSER_ICON_BUTTON_CLASS_NAME}
@@ -118,7 +118,7 @@ export function ComposerImageButton({ onClick }: { onClick: () => void }) {
       <TooltipTrigger asChild>
         <Button
           type="button"
-          variant="outline"
+          variant="ghost"
           size="icon-sm"
           aria-label="Add image"
           className={COMPOSER_ICON_BUTTON_CLASS_NAME}
@@ -154,7 +154,8 @@ export function ComposerSubmitButton({
             status={status}
             onStop={onStop}
             size="icon-sm"
-            className="size-8 rounded-md shadow-none"
+            variant="default"
+            className="size-8 rounded-md border-0 shadow-none bg-primary text-primary-foreground hover:bg-primary/90"
           />
         </div>
       </TooltipTrigger>

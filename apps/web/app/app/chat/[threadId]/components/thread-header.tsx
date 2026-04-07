@@ -62,8 +62,8 @@ export function ThreadHeader({
             : "Repo attached"
 
   return (
-    <div className="shrink-0 border-b border-border bg-background/90 px-3 py-1 backdrop-blur supports-backdrop-filter:bg-background/80">
-      <div className="flex min-h-8 items-center justify-between gap-2 md:gap-3">
+    <div className="shrink-0 border-b border-border/50 bg-background px-3 py-2">
+      <div className="flex min-h-10 items-center justify-between gap-2 md:gap-3">
         <div className="flex min-w-0 items-center gap-2">
           <AnimatePresence initial={false}>
             {showPrimarySidebarTrigger ? (
@@ -95,13 +95,13 @@ export function ThreadHeader({
           </Button>
 
           <div className="flex min-w-0 items-center gap-2">
-            <h2 className="truncate text-sm font-medium tracking-tight">
+            <h2 className="truncate text-base font-semibold leading-tight tracking-tight">
               {thread?.title || "New chat"}
             </h2>
             {project ? (
               <Badge
                 variant="secondary"
-                className="h-6 max-w-[160px] items-center truncate rounded-md border border-border bg-muted/50 px-2 text-xs font-normal text-muted-foreground"
+                className="h-6 max-w-[160px] items-center truncate rounded-md border border-border/70 bg-transparent px-2 text-[11px] font-normal leading-none text-muted-foreground"
               >
                 <HugeiconsIcon
                   icon={FolderManagementIcon}
@@ -115,7 +115,7 @@ export function ThreadHeader({
             ) : (
               <Badge
                 variant="secondary"
-                className="h-6 rounded-md border border-border bg-muted/50 px-2 text-xs font-normal text-muted-foreground"
+                className="h-6 rounded-md border border-border/70 bg-transparent px-2 text-[11px] font-normal leading-none text-muted-foreground"
               >
                 <HugeiconsIcon
                   icon={GlobalIcon}
@@ -128,7 +128,7 @@ export function ThreadHeader({
             {thread?.daytona?.repoUrl ? (
               <Badge
                 variant="secondary"
-                className="h-6 max-w-[180px] items-center truncate rounded-md border border-border bg-muted/50 px-2 text-xs font-normal text-muted-foreground"
+                className="h-6 max-w-[180px] items-center truncate rounded-md border border-border/70 bg-transparent px-2 text-[11px] font-normal leading-none text-muted-foreground"
               >
                 <HugeiconsIcon
                   icon={SourceCodeCircleIcon}

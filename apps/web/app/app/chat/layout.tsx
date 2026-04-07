@@ -24,7 +24,7 @@ function ChatMobileHeader() {
   if (!isMobile) return null;
 
   return (
-    <div className="sticky top-0 z-30 flex h-11 min-h-11 items-center justify-between border-b border-border bg-background/90 px-2 backdrop-blur supports-backdrop-filter:bg-background/80">
+    <div className="sticky top-0 z-30 flex h-11 min-h-11 items-center justify-between border-b border-border/50 bg-background px-2">
       <div className="flex min-w-0 items-center gap-2">
         {isThreadRoute ? (
           <Button
@@ -43,7 +43,7 @@ function ChatMobileHeader() {
         ) : (
           <SidebarTrigger className="size-8" />
         )}
-        <h1 className="truncate text-sm font-medium">
+        <h1 className="truncate text-base font-semibold leading-tight">
           {isThreadRoute ? thread?.title || "Chat" : "Chat"}
         </h1>
       </div>

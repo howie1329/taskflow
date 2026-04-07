@@ -114,12 +114,12 @@ export function ChatSettingsChips({
         trigger={
           <Button
             type="button"
-            variant="outline"
+            variant="ghost"
             size="default"
             aria-label={`Model: ${selectedModel?.name ?? "Select model"}${selectedModel?.interface ? ` via ${formatInterfaceDisplay(selectedModel.interface)}` : ""}`}
             className={cn(
               CHAT_SETTINGS_TRIGGER_CLASS_NAME,
-              "h-8 max-w-44 justify-start gap-1.5 px-3 text-sm sm:max-w-52",
+              "max-w-44 justify-start gap-1.5 px-2.5 sm:max-w-52",
             )}
           >
             {selectedModel?.interface === "groq" ? (
@@ -131,7 +131,7 @@ export function ChatSettingsChips({
             ) : (
               <CpuIcon className="size-4 shrink-0" />
             )}
-            <span className="min-w-0 flex-1 truncate text-sm font-medium">
+            <span className="min-w-0 flex-1 truncate text-xs font-medium">
               {selectedModel?.name ?? "Select model"}
               {selectedModel?.interface && formatInterfaceDisplay(selectedModel.interface) ? (
                 <span className="ml-1 font-normal text-muted-foreground">
@@ -158,10 +158,10 @@ export function ChatSettingsChips({
         trigger={
           <Button
             type="button"
-            variant="outline"
+            variant="ghost"
             size="icon"
             aria-label={`Mode: ${selectedMode}`}
-            className={cn(CHAT_SETTINGS_TRIGGER_CLASS_NAME, "shrink-0")}
+            className={cn(CHAT_SETTINGS_TRIGGER_CLASS_NAME, "size-8 shrink-0 p-0")}
           >
             <WandSparklesIcon className="size-4" />
           </Button>
@@ -182,10 +182,10 @@ export function ChatSettingsChips({
         trigger={
           <Button
             type="button"
-            variant="outline"
+            variant="ghost"
             size="icon"
             aria-label={`Project: ${projectLabel}`}
-            className={cn(CHAT_SETTINGS_TRIGGER_CLASS_NAME, "shrink-0")}
+            className={cn(CHAT_SETTINGS_TRIGGER_CLASS_NAME, "size-8 shrink-0 p-0")}
           >
             {selectedProject ? (
               <FolderIcon className="size-4" />

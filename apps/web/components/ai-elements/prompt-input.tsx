@@ -1060,7 +1060,7 @@ export const PromptInputSubmit = ({
   return (
     <motion.div
       whileTap={prefersReducedMotion ? undefined : { scale: 0.96 }}
-      transition={{ duration: 0.1, ease: "easeOut" }}
+      transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
     >
       <InputGroupButton
         aria-label={isGenerating ? "Stop generating" : "Send message"}

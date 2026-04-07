@@ -59,7 +59,7 @@ export function PreferencesTab() {
 
   const [selectedModelId, setSelectedModelId] = useState<string>("");
   const [taskDefaultView, setTaskDefaultView] = useState<
-    "board" | "todayPlusBoard"
+    "board" | "todayPlusBoard" | "list"
   >("board");
   const [hideCompletedTasks, setHideCompletedTasks] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -395,7 +395,9 @@ export function PreferencesTab() {
                 <Select
                   value={taskDefaultView}
                   onValueChange={(value) =>
-                    setTaskDefaultView(value as "board" | "todayPlusBoard")
+                    setTaskDefaultView(
+                      value as "board" | "todayPlusBoard" | "list",
+                    )
                   }
                 >
                   <SelectTrigger className="w-full">
@@ -406,6 +408,7 @@ export function PreferencesTab() {
                     <SelectItem value="todayPlusBoard">
                       Today + Board (Split View)
                     </SelectItem>
+                    <SelectItem value="list">List (by status)</SelectItem>
                   </SelectContent>
                 </Select>
 
@@ -414,7 +417,9 @@ export function PreferencesTab() {
                   <span className="font-medium">
                     {preferences?.taskDefaultView === "todayPlusBoard"
                       ? "Today + Board"
-                      : "Board"}
+                      : preferences?.taskDefaultView === "list"
+                        ? "List"
+                        : "Board"}
                   </span>
                 </div>
 

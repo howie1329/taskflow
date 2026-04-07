@@ -98,10 +98,10 @@ export function ChatComposerInput({
           id={id}
           ref={textareaRef}
           placeholder={placeholder}
-          className="min-h-16 max-h-56 px-3 py-2 text-sm leading-relaxed placeholder:text-muted-foreground"
+          className="min-h-16 max-h-56 px-3 py-2 text-sm leading-snug placeholder:text-muted-foreground"
         />
-        <PromptInputFooter className="border-t border-border px-3 py-2 text-muted-foreground">
-          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2 sm:gap-3">
+        <PromptInputFooter className="border-t border-border/50 px-3 py-2 text-xs text-muted-foreground">
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
             <ComposerSlashCommandButton
               value={textInput.value}
               setInput={textInput.setInput}
