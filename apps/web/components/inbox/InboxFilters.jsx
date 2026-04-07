@@ -31,16 +31,16 @@ export const InboxFilters = memo(function InboxFilters({
         <HugeiconsIcon
           icon={isSearching ? Loading03Icon : Search01Icon}
           className={cn(
-            "absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground",
+            "absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground",
             isSearching && "animate-spin",
           )}
         />
         <Input
           type="text"
-          placeholder="Search inbox..."
+          placeholder="Search inbox…"
           value={searchQuery}
           onChange={handleChange}
-          className="h-8 border-border pl-9 text-sm focus-visible:ring-ring/50"
+          className="h-8 rounded-md border-border pl-8 text-xs focus-visible:ring-2 focus-visible:ring-ring"
           aria-label="Search inbox items"
         />
         <AnimatePresence>
@@ -53,12 +53,12 @@ export const InboxFilters = memo(function InboxFilters({
                 duration: 0.14,
                 ease: [0.16, 1, 0.3, 1],
               }}
-              className="absolute right-2 top-1/2 -translate-y-1/2"
+              className="absolute right-1.5 top-1/2 -translate-y-1/2"
             >
               <Button
                 variant="ghost"
                 size="icon-xs"
-                className="h-6 w-6"
+                className="size-6"
                 onClick={handleClear}
                 aria-label="Clear search"
               >
