@@ -463,6 +463,7 @@ export function AppShell({ children, right }: AppShellProps) {
   const isChatThreadRoute = isChatRoute && pathname !== "/app/chat"
   const isNotesRoute = pathname.startsWith("/app/notes")
   const isTasksRoute = pathname.startsWith("/app/tasks")
+  const isProjectsRoute = pathname.startsWith("/app/projects")
   const isSettingsRoute = pathname.startsWith("/app/settings")
   const showInspector =
     !isOnboardingRoute && !isSettingsRoute && (isChatRoute || isNotesRoute)
@@ -500,7 +501,8 @@ export function AppShell({ children, right }: AppShellProps) {
     <SidebarProvider
       defaultOpenInspector={false}
       className={cn(
-        (isChatRoute || isTasksRoute) && "h-svh overflow-hidden",
+        (isChatRoute || isTasksRoute || isProjectsRoute) &&
+          "h-svh overflow-hidden",
       )}
       style={{ "--sidebar-width": "15rem" } as React.CSSProperties}
     >
@@ -530,7 +532,8 @@ export function AppShell({ children, right }: AppShellProps) {
           (isChatRoute ||
             isSettingsRoute ||
             isTasksRoute ||
-            isNotesRoute) &&
+            isNotesRoute ||
+            isProjectsRoute) &&
             "min-h-0",
         )}
       >
@@ -555,7 +558,7 @@ export function AppShell({ children, right }: AppShellProps) {
         )}
         <main
           className={
-            isTasksRoute || isNotesRoute
+            isTasksRoute || isNotesRoute || isProjectsRoute
               ? "relative flex min-h-0 flex-1 flex-col overflow-hidden"
               : isSettingsRoute
                 ? "relative flex min-h-0 flex-1 flex-col overflow-hidden"

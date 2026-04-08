@@ -23,12 +23,12 @@ const navTriggerClass = cn(
   "after:!hidden data-active:after:!hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
 );
 
-/** Scrolls inside the right column only; nav stays fixed and clickable. */
-const contentScrollClass =
-  "min-h-0 w-full flex-1 overflow-y-auto overscroll-contain px-0 pb-4 pt-0 text-xs md:pl-6";
+/** Body padding; column wrapper owns overflow-y-auto (single scroll host). */
+const contentBodyClass =
+  "w-full px-0 pb-4 pt-0 text-xs md:pl-6";
 
 const tabPanelClass =
-  "mt-0 flex h-full min-h-0 flex-col overflow-hidden data-[state=inactive]:hidden";
+  "mt-0 block w-full flex-none data-[state=inactive]:hidden";
 
 export function SettingsLayout() {
   const [activeTab, setActiveTab] = useState("profile");
@@ -99,12 +99,12 @@ export function SettingsLayout() {
 
       <div
         className={cn(
-          "flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden",
-          "md:col-start-2 md:row-start-1 md:h-full md:min-h-0 md:max-h-full md:flex-1 md:self-stretch",
+          "flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto overscroll-contain",
+          "md:col-start-2 md:row-start-1 md:h-full md:min-h-0 md:flex-1 md:self-stretch",
         )}
       >
         <TabsContent value="profile" className={tabPanelClass}>
-          <div className={contentScrollClass}>
+          <div className={contentBodyClass}>
             <div className="max-w-[560px]">
               <ProfileTab />
             </div>
@@ -112,7 +112,7 @@ export function SettingsLayout() {
         </TabsContent>
 
         <TabsContent value="preferences" className={tabPanelClass}>
-          <div className={contentScrollClass}>
+          <div className={contentBodyClass}>
             <div className="max-w-[560px]">
               <PreferencesTab />
             </div>
@@ -120,7 +120,7 @@ export function SettingsLayout() {
         </TabsContent>
 
         <TabsContent value="ai" className={tabPanelClass}>
-          <div className={contentScrollClass}>
+          <div className={contentBodyClass}>
             <div className="max-w-[560px]">
               <AITab onGoToPreferences={() => setActiveTab("preferences")} />
             </div>

@@ -209,14 +209,14 @@ export default function ProjectsPage() {
   }, [deleteProject, isSheetOpen])
 
   return (
-    <div className="flex h-full w-full flex-col gap-4">
-      <div className="flex shrink-0 flex-col gap-2.5 rounded-[20px] border border-border/70 bg-card/45 p-3 sm:p-3.5">
-        <div className="flex flex-col gap-2.5 lg:flex-row lg:items-center lg:gap-3">
-          <div className="hidden shrink-0 lg:block">
-            <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground/80">
+    <div className="flex h-full min-h-0 w-full flex-col overflow-hidden">
+      <div className="shrink-0 border-b border-border/50 bg-background px-4 py-3 md:px-8">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:gap-4">
+          <div className="min-w-0 shrink-0">
+            <h1 className="text-xl font-semibold leading-tight tracking-tight">
               Projects
-            </p>
-            <p className="text-sm text-muted-foreground">
+            </h1>
+            <p className="text-xs leading-snug text-muted-foreground">
               Group related work together
             </p>
           </div>
@@ -224,28 +224,28 @@ export default function ProjectsPage() {
           <Tabs
             value={activeTab}
             onValueChange={(v) => setActiveTab(v as "active" | "archived")}
-            className="w-full shrink-0 sm:w-auto"
+            className="w-full min-w-0 shrink-0 sm:w-auto"
           >
             <TabsList
               variant="line"
-              className="h-9 w-full rounded-lg border border-border/70 bg-card/70 p-1 sm:w-auto"
+              className="h-8 w-full flex-nowrap rounded-md border border-border/70 bg-transparent p-0.5 sm:w-max"
             >
               <TabsTrigger
                 value="active"
-                className="h-7 flex-1 rounded-md px-3 text-sm text-muted-foreground data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:after:hidden sm:flex-none"
+                className="h-7 flex-1 rounded-md px-2.5 text-xs font-medium text-muted-foreground data-[state=active]:bg-accent data-[state=active]:text-accent-foreground data-[state=active]:after:hidden sm:flex-none"
               >
                 Active
               </TabsTrigger>
               <TabsTrigger
                 value="archived"
-                className="h-7 flex-1 rounded-md px-3 text-sm text-muted-foreground data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:after:hidden sm:flex-none"
+                className="h-7 flex-1 rounded-md px-2.5 text-xs font-medium text-muted-foreground data-[state=active]:bg-accent data-[state=active]:text-accent-foreground data-[state=active]:after:hidden sm:flex-none"
               >
                 Archived
               </TabsTrigger>
             </TabsList>
           </Tabs>
 
-          <InputGroup className="h-9 min-w-0 flex-1 rounded-lg border-border/70 bg-card/70 shadow-none">
+          <InputGroup className="h-8 min-w-0 flex-1 rounded-md border-input bg-input shadow-none dark:bg-input/30">
             <InputGroupAddon>
               <HugeiconsIcon icon={SearchIcon} strokeWidth={2} />
             </InputGroupAddon>
@@ -256,7 +256,7 @@ export default function ProjectsPage() {
               onChange={(e) => setSearchQuery(e.target.value)}
               aria-label="Search projects"
               aria-describedby="search-shortcut"
-              className="text-sm"
+              className="text-xs"
             />
             {searchQuery ? (
               <InputGroupAddon align="inline-end">
@@ -273,9 +273,9 @@ export default function ProjectsPage() {
           </InputGroup>
 
           <Button
-            size="default"
+            size="sm"
             onClick={handleCreateClick}
-            className="h-9 shrink-0 rounded-lg"
+            className="h-8 shrink-0 px-3 text-xs transition-[transform,box-shadow] duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.98]"
           >
             <HugeiconsIcon
               icon={PlusSignIcon}
@@ -290,33 +290,42 @@ export default function ProjectsPage() {
         </div>
       </div>
 
-      <div className="flex-1 min-h-0">
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 md:px-8">
         {isLoading ? (
           <ProjectGridSkeleton count={6} />
         ) : displayProjects.length === 0 ? (
           <Empty className="h-full min-h-[400px]">
             <EmptyHeader>
               {searchQuery ? (
-                <EmptyMedia variant="icon">
+                <EmptyMedia
+                  variant="icon"
+                  className="border-0 bg-muted/30 [&_svg]:text-muted-foreground"
+                >
                   <HugeiconsIcon icon={SearchIcon} strokeWidth={2} />
                 </EmptyMedia>
               ) : activeTab === "active" ? (
-                <EmptyMedia variant="icon">
+                <EmptyMedia
+                  variant="icon"
+                  className="border-0 bg-muted/30 [&_svg]:text-muted-foreground"
+                >
                   <HugeiconsIcon icon={Folder02Icon} strokeWidth={2} />
                 </EmptyMedia>
               ) : (
-                <EmptyMedia variant="icon">
+                <EmptyMedia
+                  variant="icon"
+                  className="border-0 bg-muted/30 [&_svg]:text-muted-foreground"
+                >
                   <HugeiconsIcon icon={Archive02Icon} strokeWidth={2} />
                 </EmptyMedia>
               )}
-              <EmptyTitle>
+              <EmptyTitle className="text-base font-semibold leading-tight">
                 {searchQuery
                   ? "No matching projects"
                   : activeTab === "active"
                     ? "No active projects"
                     : "No archived projects"}
               </EmptyTitle>
-              <EmptyDescription>
+              <EmptyDescription className="text-xs leading-snug text-muted-foreground">
                 {searchQuery ? (
                   <>
                     No projects match your search.{" "}
@@ -335,7 +344,10 @@ export default function ProjectsPage() {
               </EmptyDescription>
             </EmptyHeader>
             {activeTab === "active" && !searchQuery && (
-              <Button onClick={handleCreateClick} className="rounded-lg">
+              <Button
+                onClick={handleCreateClick}
+                className="h-8 text-xs transition-[transform,box-shadow] duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.98]"
+              >
                 <HugeiconsIcon
                   icon={PlusSignIcon}
                   strokeWidth={2}

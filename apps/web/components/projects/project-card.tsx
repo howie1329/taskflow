@@ -81,7 +81,7 @@ export function ProjectCard({
       role="button"
       tabIndex={0}
       aria-label={`${project.title} project. Press Enter to open.`}
-      className="group relative flex h-full cursor-pointer flex-col rounded-[18px] border border-border/70 bg-card/50 p-4 outline-none transition-[background-color,border-color,transform] duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] hover:border-border hover:bg-accent/20 motion-safe:active:scale-[0.99] focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-offset-2"
+      className="group relative flex h-full cursor-pointer flex-col rounded-md border border-border/50 bg-transparent p-4 outline-none transition-[background-color,border-color] duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent/50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
     >
       <div className="mb-3 flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2.5">
@@ -97,7 +97,7 @@ export function ProjectCard({
           >
             {project.icon}
           </span>
-          <h3 className="truncate text-[15px] font-medium tracking-[-0.01em] text-foreground">
+          <h3 className="truncate text-sm font-medium tracking-tight text-foreground">
             {project.title}
           </h3>
         </div>
@@ -163,7 +163,7 @@ export function ProjectCard({
 
       <p
         className={cn(
-          "mb-5 flex-1 text-sm leading-relaxed",
+          "mb-5 flex-1 text-[11px] leading-snug",
           project.description
             ? "line-clamp-2 text-muted-foreground"
             : "text-muted-foreground/60 italic",
