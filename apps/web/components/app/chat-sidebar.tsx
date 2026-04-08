@@ -114,7 +114,7 @@ export function ChatSidebar({ onBackToWorkspace }: ChatSidebarProps) {
   if (isCollapsed) {
     return (
       <>
-        <SidebarHeader>
+        <SidebarHeader className="gap-1 border-b border-sidebar-border/50 px-1.5 py-2">
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton
@@ -183,10 +183,10 @@ export function ChatSidebar({ onBackToWorkspace }: ChatSidebarProps) {
 
   return (
     <>
-      <SidebarHeader>
+      <SidebarHeader className="gap-1 border-b border-sidebar-border/50 px-1.5 py-2">
         <SidebarMenu>
           <SidebarMenuItem>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1">
               <SidebarMenuButton
                 tooltip="Back to workspace"
                 onClick={onBackToWorkspace}

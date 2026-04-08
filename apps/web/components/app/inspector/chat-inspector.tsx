@@ -45,7 +45,7 @@ import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
-import { extractSourcesFromMessages } from "@/lib/chat/extract-sources"
+import { extractSourcesFromMessages, formatExtractedSourceLabel } from "@/lib/chat/extract-sources"
 import {
   formatTimestamp,
   getContextHealthLabel,
@@ -351,7 +351,6 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
           <RightPanelDossierHeader
             title="Choose a thread"
             description="Thread context, evidence, and operating details appear here once a conversation is selected."
-            meta={<RightPanelTagRow tags={["AI chat dossier"]} />}
           />
 
           <RightPanelSectionBlock
@@ -364,20 +363,16 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
                 description="Start a conversation to populate the dossier."
               />
             ) : (
-              <RightPanelSurface className="px-0 py-0">
-                <div className="divide-y divide-border/45">
-                  {threads.slice(0, 6).map((item) => (
-                    <Link
-                      key={item.threadId}
-                      href={`/app/chat/${item.threadId}`}
-                      className="block px-4 py-3 text-sm transition-colors duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] hover:bg-muted/20"
-                    >
-                      <div className="font-medium text-foreground">
-                        {item.title || "Untitled chat"}
-                      </div>
-                    </Link>
-                  ))}
-                </div>
+              <RightPanelSurface className="space-y-1 px-0 py-0">
+                {threads.slice(0, 6).map((item) => (
+                  <Link
+                    key={item.threadId}
+                    href={`/app/chat/${item.threadId}`}
+                    className="block rounded-md px-3 py-2 text-xs font-medium transition-colors hover:bg-accent/50"
+                  >
+                    {item.title || "Untitled chat"}
+                  </Link>
+                ))}
               </RightPanelSurface>
             )}
           </RightPanelSectionBlock>
@@ -393,7 +388,6 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
           <RightPanelDossierHeader
             title="Loading thread"
             description="Gathering context, evidence, and memory."
-            meta={<RightPanelTagRow tags={["Inspector"]} />}
           />
         </RightPanelScrollBody>
       </RightPanelShell>
@@ -407,7 +401,6 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
           <RightPanelDossierHeader
             title="Thread not found"
             description="This conversation may have been removed."
-            meta={<RightPanelTagRow tags={["Inspector"]} />}
           />
         </RightPanelScrollBody>
       </RightPanelShell>
@@ -416,7 +409,7 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
 
   const handleCopySources = async () => {
     await copyText(
-      sources.map((source) => source.url).join("\n"),
+      sources.map((source) => formatExtractedSourceLabel(source)).join("\n"),
       "Sources copied",
     )
   }
@@ -571,18 +564,30 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="gap-4">
           <TabsList
             variant="line"
-            className="sticky top-0 z-10 h-10 w-full justify-start gap-4 overflow-x-auto border-b border-border/45 bg-background/88 px-2 backdrop-blur supports-backdrop-filter:bg-background/80"
+            className="sticky top-0 z-10 mb-1 h-8 w-full min-w-0 shrink-0 flex-nowrap justify-start gap-1 overflow-x-auto rounded-md border border-border/70 bg-transparent p-0.5"
           >
-            <TabsTrigger value="focus" className="h-9 flex-none rounded-none px-0 text-sm font-medium">
+            <TabsTrigger
+              value="focus"
+              className="h-7 shrink-0 rounded-md px-2.5 text-xs font-medium text-muted-foreground after:!hidden data-active:bg-accent data-active:text-accent-foreground data-active:shadow-none"
+            >
               Focus
             </TabsTrigger>
-            <TabsTrigger value="evidence" className="h-9 flex-none rounded-none px-0 text-sm font-medium">
+            <TabsTrigger
+              value="evidence"
+              className="h-7 shrink-0 rounded-md px-2.5 text-xs font-medium text-muted-foreground after:!hidden data-active:bg-accent data-active:text-accent-foreground data-active:shadow-none"
+            >
               Evidence
             </TabsTrigger>
-            <TabsTrigger value="memory" className="h-9 flex-none rounded-none px-0 text-sm font-medium">
+            <TabsTrigger
+              value="memory"
+              className="h-7 shrink-0 rounded-md px-2.5 text-xs font-medium text-muted-foreground after:!hidden data-active:bg-accent data-active:text-accent-foreground data-active:shadow-none"
+            >
               Memory
             </TabsTrigger>
-            <TabsTrigger value="operations" className="h-9 flex-none rounded-none px-0 text-sm font-medium">
+            <TabsTrigger
+              value="operations"
+              className="h-7 shrink-0 rounded-md px-2.5 text-xs font-medium text-muted-foreground after:!hidden data-active:bg-accent data-active:text-accent-foreground data-active:shadow-none"
+            >
               Operations
             </TabsTrigger>
           </TabsList>
@@ -598,7 +603,7 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
                     ? "Selected message in context."
                     : headerModel.status
               }
-              eyebrow={focus ? "Focus" : "Inspector"}
+              eyebrow={focus ? "Focus" : undefined}
               actions={
                 focus ? (
                   <Button
@@ -693,7 +698,16 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
 
                   <Separator className="bg-border/35" />
                   <RightPanelMetaList>
-                    {selectedMessageView.metrics.map((metric) => (
+                    {selectedMessageView.metrics
+                      .filter(
+                        (
+                          metric,
+                        ): metric is {
+                          label: string
+                          value: string
+                        } => Boolean(metric),
+                      )
+                      .map((metric) => (
                       <RightPanelMetaRow
                         key={metric.label}
                         label={metric.label}
@@ -740,7 +754,6 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
               className="pb-1"
               title="Evidence dossier"
               description={evidenceModel.description}
-              eyebrow="Evidence"
               meta={
                 <RightPanelInlineMeta
                   items={[
@@ -782,7 +795,8 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
                   />
                 ) : (
                   <div className="space-y-3">
-                    {evidenceModel.recentSources.map((source) => (
+                    {evidenceModel.recentSources.map((source) =>
+                      source.kind === "url" && source.url ? (
                       <a
                         key={source.url}
                         href={source.url}
@@ -793,11 +807,11 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0 space-y-1">
                             <p className="text-sm font-medium leading-6 text-foreground">
-                              {source.title ?? source.domain}
+                              {source.title ?? source.domain ?? source.url}
                             </p>
                             <RightPanelInlineMeta
                               items={[
-                                source.domain.toUpperCase(),
+                                source.domain ? source.domain.toUpperCase() : "WEB",
                                 source.toolKey,
                                 source.messageId ? `Msg ${source.messageId.slice(0, 8)}` : null,
                               ]}
@@ -806,7 +820,29 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
                           <ExternalLinkIcon className="mt-1 size-4 shrink-0 text-muted-foreground" />
                         </div>
                       </a>
-                    ))}
+                      ) : (
+                      <div
+                        key={formatExtractedSourceLabel(source)}
+                        className="block border-b border-border/40 pb-3 last:border-b-0 last:pb-0"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0 space-y-1">
+                            <p className="text-sm font-medium leading-6 text-foreground">
+                              {source.title ?? source.path}
+                            </p>
+                            <RightPanelInlineMeta
+                              items={[
+                                "REPO",
+                                formatExtractedSourceLabel(source),
+                                source.toolKey,
+                                source.messageId ? `Msg ${source.messageId.slice(0, 8)}` : null,
+                              ]}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      ),
+                    )}
                   </div>
                 )}
               </div>
@@ -818,7 +854,6 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
               className="pb-1"
               title="Thread memory"
               description="Stored context summary for compaction and continuity."
-              eyebrow="Memory"
               meta={
                 <RightPanelInlineMeta
                   items={[
@@ -972,7 +1007,6 @@ export function ChatInspector({ threadId }: ChatInspectorProps) {
               className="pb-1"
               title="Operations"
               description="Sandbox controls and thread-level execution activity."
-              eyebrow="Operations"
               meta={
                 <RightPanelInlineMeta
                   items={[

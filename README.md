@@ -1,11 +1,10 @@
 # Taskflow
 
-Taskflow is a monorepo for the current web app, shared packages, and a placeholder mobile workspace.
+Taskflow is a monorepo for the current web app and shared packages.
 
 ## Current Repo Status
 
 - `apps/web`: active product app and the only app in active development
-- `apps/mobile`: placeholder workspace, not yet an active product surface
 - `apps/frontend`: deprecated legacy app
 - `apps/backend`: deprecated legacy backend
 - `packages/*`: shared packages used across Taskflow work
@@ -16,7 +15,6 @@ Taskflow is a monorepo for the current web app, shared packages, and a placehold
 taskflow/
 ├── apps/
 │   ├── web/       # Active Next.js + Convex app
-│   ├── mobile/    # Placeholder Expo workspace
 │   ├── frontend/  # Deprecated legacy app
 │   └── backend/   # Deprecated legacy backend
 ├── packages/      # Shared packages

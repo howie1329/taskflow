@@ -23,5 +23,4 @@ Start there:
 ## Repo Status
 
 - `apps/web` is active
-- `apps/mobile` is a planned/placeholder workspace
 - `apps/frontend` and `apps/backend` are deprecated

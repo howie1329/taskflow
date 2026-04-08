@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { AdvancedResearchCard } from "@/components/ai-elements/advanced-research-card";
+import { DaytonaResearchCard } from "./daytona-research-card";
 import { ExaAnswerCard } from "@/components/ai-elements/exa-answer-card";
 import { ExaWebSearchCard } from "@/components/ai-elements/exa-web-search-card";
 import { FirecrawlScrapeCard } from "@/components/ai-elements/firecrawl-scrape-card";
@@ -17,8 +18,12 @@ import { TASKFLOW_TOOL_KEYS } from "@/lib/AITools/taskflow-tool-keys";
 import type { ToolCall } from "./tool-calls";
 
 type ToolDefinition = {
-  render?: (toolCall: ToolCall) => ReactNode | null;
+  render?: (
+    toolCall: ToolCall,
+    context: { progress: Array<{ data: { toolKey: string; toolCallId: string; status: "running" | "done" | "error"; text: string } }> },
+  ) => ReactNode | null;
   summarize?: (toolCall: ToolCall) => string | null;
+  hideRawPayload?: boolean;
 };
 
 function getOutputArrayLength(output: unknown, key: string): number {
@@ -143,6 +148,38 @@ const TOOL_DEFINITIONS: Record<string, ToolDefinition> = {
   stopDaytonaInstance: {
     summarize: () => "Stopped Daytona sandbox",
   },
+  deleteDaytonaInstance: {
+    summarize: () => "Deleted Daytona sandbox",
+  },
+  researchDaytonaRepo: {
+    render: (toolCall, context) => (
+      <DaytonaResearchCard
+        output={toolCall.output}
+        progress={context.progress.map((item) => item.data)}
+      />
+    ),
+    summarize: (toolCall) => {
+      if (!toolCall.output || typeof toolCall.output !== "object") {
+        return "Researched the attached repo"
+      }
+
+      const output = toolCall.output as {
+        keyFindings?: unknown[]
+        citations?: unknown[]
+        summary?: string
+      }
+
+      const findings = Array.isArray(output.keyFindings) ? output.keyFindings.length : 0
+      const citations = Array.isArray(output.citations) ? output.citations.length : 0
+
+      if (findings > 0) {
+        return `Researched repo with ${findings} findings and ${citations} citations`
+      }
+
+      return output.summary ?? "Researched the attached repo"
+    },
+    hideRawPayload: true,
+  },
   listDaytonaRepoFiles: {
     summarize: (toolCall) => {
       if (!toolCall.output || typeof toolCall.output !== "object") {
@@ -205,10 +242,21 @@ const TOOL_DEFINITIONS: Record<string, ToolDefinition> = {
         command?: string
         exitCode?: number | null
         message?: string
+        path?: string | null
+        startLine?: number | null
+        endLine?: number | null
       }
 
       if (!output.command) {
         return output.message ?? "Ran Daytona read command"
+      }
+
+      if (output.path) {
+        const range =
+          output.startLine && output.endLine
+            ? `:${output.startLine}-${output.endLine}`
+            : ""
+        return `Ran ${output.command} on ${output.path}${range} (exit ${output.exitCode ?? "?"})`
       }
 
       return `Ran ${output.command} (exit ${output.exitCode ?? "?"})`

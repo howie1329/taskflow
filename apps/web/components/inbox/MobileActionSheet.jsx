@@ -111,9 +111,9 @@ export const MobileActionSheet = memo(function MobileActionSheet({
     return (
       <>
         {isBtnLoading ? (
-          <HugeiconsIcon icon={Loading03Icon} className="size-4 animate-spin" />
+          <HugeiconsIcon icon={Loading03Icon} className="size-3.5 animate-spin" />
         ) : (
-          <HugeiconsIcon icon={icon} className="size-4" />
+          <HugeiconsIcon icon={icon} className="size-3.5" />
         )}
         {isBtnLoading ? `${label}...` : label}
       </>
@@ -126,21 +126,21 @@ export const MobileActionSheet = memo(function MobileActionSheet({
     <Sheet open={open} onOpenChange={handleSheetOpenChange}>
       <SheetContent
         side="bottom"
-        className="h-auto"
+        className="h-auto rounded-t-lg bg-popover text-popover-foreground"
         role="dialog"
         aria-modal="true"
         aria-label={`Actions for inbox item: ${item.content.slice(0, 50)}${item.content.length > 50 ? "..." : ""}`}
       >
         <SheetHeader className="text-left">
-          <SheetTitle className="text-sm">Actions</SheetTitle>
+          <SheetTitle className="text-base font-semibold">Actions</SheetTitle>
           <SheetDescription className="sr-only">
             Choose an action to perform on this inbox item
           </SheetDescription>
         </SheetHeader>
-        <div className="flex flex-col gap-2 py-4">
+        <div className="flex flex-col gap-1 py-4">
           <Button
             variant="ghost"
-            className="h-11 min-h-11 touch-manipulation justify-start gap-2"
+            className="h-9 min-h-9 touch-manipulation justify-start gap-2 text-xs"
             onClick={() => handleConvert("task")}
             disabled={isLoading}
             aria-busy={isLoading && actionType === "convert-task"}
@@ -149,17 +149,19 @@ export const MobileActionSheet = memo(function MobileActionSheet({
           </Button>
           <Button
             variant="ghost"
-            className="h-11 min-h-11 touch-manipulation justify-start gap-2"
+            className="h-9 min-h-9 touch-manipulation justify-start gap-2 text-xs"
             disabled
             aria-disabled="true"
           >
-            <HugeiconsIcon icon={NoteIcon} className="size-4" />
+            <HugeiconsIcon icon={NoteIcon} className="size-3.5" />
             Convert to Note
-            <span className="ml-auto text-xs text-muted-foreground">Soon</span>
+            <span className="ml-auto text-[11px] text-muted-foreground">
+              Soon
+            </span>
           </Button>
           <Button
             variant="ghost"
-            className="h-11 min-h-11 touch-manipulation justify-start gap-2"
+            className="h-9 min-h-9 touch-manipulation justify-start gap-2 text-xs"
             onClick={() => handleConvert("project")}
             disabled={isLoading}
             aria-busy={isLoading && actionType === "convert-project"}
@@ -174,7 +176,7 @@ export const MobileActionSheet = memo(function MobileActionSheet({
           {isArchived ? (
             <Button
               variant="ghost"
-              className="h-11 min-h-11 touch-manipulation justify-start gap-2"
+              className="h-9 min-h-9 touch-manipulation justify-start gap-2 text-xs"
               onClick={handleUnarchive}
               disabled={isLoading}
               aria-busy={isLoading && actionType === "unarchive"}
@@ -184,7 +186,7 @@ export const MobileActionSheet = memo(function MobileActionSheet({
           ) : (
             <Button
               variant="ghost"
-              className="h-11 min-h-11 touch-manipulation justify-start gap-2"
+              className="h-9 min-h-9 touch-manipulation justify-start gap-2 text-xs"
               onClick={handleArchive}
               disabled={isLoading}
               aria-busy={isLoading && actionType === "archive"}
@@ -196,27 +198,33 @@ export const MobileActionSheet = memo(function MobileActionSheet({
             <AlertDialogTrigger asChild>
               <Button
                 variant="ghost"
-                className="h-11 min-h-11 touch-manipulation justify-start gap-2 text-destructive hover:text-destructive"
+                className="h-9 min-h-9 touch-manipulation justify-start gap-2 text-xs text-destructive hover:text-destructive"
                 disabled={isLoading}
               >
-                <HugeiconsIcon icon={Delete01Icon} className="size-4" />
+                <HugeiconsIcon icon={Delete01Icon} className="size-3.5" />
                 Delete
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Delete inbox item?</AlertDialogTitle>
-                <AlertDialogDescription>
+                <AlertDialogTitle className="text-base font-semibold">
+                  Delete inbox item?
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-xs text-muted-foreground">
                   This action cannot be undone. The item will be permanently
                   removed.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel disabled={isLoading}>
+                <AlertDialogCancel
+                  className="h-8 rounded-md"
+                  disabled={isLoading}
+                >
                   Cancel
                 </AlertDialogCancel>
                 <AlertDialogAction
                   variant="destructive"
+                  className="h-8 rounded-md"
                   onClick={handleDelete}
                   disabled={isLoading}
                   aria-busy={isLoading && actionType === "delete"}
@@ -225,7 +233,7 @@ export const MobileActionSheet = memo(function MobileActionSheet({
                     <>
                       <HugeiconsIcon
                         icon={Loading03Icon}
-                        className="size-4 animate-spin mr-2"
+                        className="mr-2 size-3.5 animate-spin"
                       />
                       Deleting...
                     </>

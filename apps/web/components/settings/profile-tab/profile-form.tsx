@@ -8,6 +8,9 @@ import { Field, FieldLabel, FieldDescription } from "@/components/ui/field";
 import { toast } from "sonner";
 import { api } from "@/convex/_generated/api";
 
+const inputClass =
+  "h-8 rounded-md focus-visible:ring-2 focus-visible:ring-ring";
+
 interface ProfileFormProps {
   initialData: {
     firstName: string;
@@ -29,7 +32,6 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Basic validation
     if (
       !formData.firstName.trim() ||
       !formData.lastName.trim() ||
@@ -39,7 +41,6 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
       return;
     }
 
-    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
       toast.error("Please enter a valid email address");
@@ -70,10 +71,10 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-1">
-        <h2 className="text-lg font-semibold tracking-tight">
+        <h2 className="text-base font-semibold tracking-tight">
           Profile Information
         </h2>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           Manage your personal information
         </p>
       </div>
@@ -82,6 +83,7 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
         <Field>
           <FieldLabel>First Name</FieldLabel>
           <Input
+            className={inputClass}
             value={formData.firstName}
             onChange={(e) => handleChange("firstName", e.target.value)}
             placeholder="Enter your first name"
@@ -94,6 +96,7 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
         <Field>
           <FieldLabel>Last Name</FieldLabel>
           <Input
+            className={inputClass}
             value={formData.lastName}
             onChange={(e) => handleChange("lastName", e.target.value)}
             placeholder="Enter your last name"
@@ -107,6 +110,7 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
       <Field>
         <FieldLabel>Contact Email</FieldLabel>
         <Input
+          className={inputClass}
           type="email"
           value={formData.email}
           onChange={(e) => handleChange("email", e.target.value)}
@@ -120,11 +124,7 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
       </Field>
 
       <div className="flex justify-end">
-        <Button
-          type="submit"
-          disabled={isSubmitting}
-          className="min-w-24 motion-safe:active:scale-[0.97]"
-        >
+        <Button type="submit" disabled={isSubmitting} className="min-w-24 h-8 rounded-md">
           {isSubmitting ? "Saving..." : "Save Changes"}
         </Button>
       </div>

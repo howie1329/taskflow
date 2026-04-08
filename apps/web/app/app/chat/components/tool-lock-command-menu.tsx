@@ -2,8 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import type { RefObject } from "react"
-import { XIcon } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
+import { TerminalIcon, XIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import {
@@ -34,12 +33,16 @@ export function ToolLockCommandMenu({
   className,
 }: ToolLockCommandMenuProps) {
   const { textInput } = usePromptInputController()
-  const { selectedMode, toolLock } = useChatConfig()
+  const { selectedMode, toolLock, thread } = useChatConfig()
   const { setToolLock } = useChatConfigActions()
+  const hasDaytonaRepo = Boolean(thread?.daytona?.repoUrl)
 
   const modeCommands = useMemo(
-    () => getToolLockCommandsForMode(selectedMode),
-    [selectedMode],
+    () =>
+      getToolLockCommandsForMode(selectedMode, {
+        includeDaytonaCommands: hasDaytonaRepo,
+      }),
+    [hasDaytonaRepo, selectedMode],
   )
 
   const showCommandMenu = textInput.value.trimStart().startsWith("/")
@@ -162,54 +165,80 @@ export function ToolLockCommandMenu({
     <div className={cn("flex w-full flex-col gap-2", className)}>
       {toolLock ? (
         <div className="flex items-center">
-          <Badge
-            variant="secondary"
-            className="flex items-center gap-1 rounded-full border border-border/60 bg-muted/25 px-2.5 py-0.5 text-[11px] font-normal"
-          >
+          <div className="flex items-center gap-1 rounded-md border border-border/50 bg-muted/20 px-2 py-1 text-[11px] font-normal text-foreground">
             <span className="text-muted-foreground">Locked:</span>{" "}
-            {lockedCommand?.command ?? toolLock}
+            <span className="min-w-0 truncate font-medium tabular-nums">
+              {lockedCommand?.command ?? toolLock}
+            </span>
             <Button
               type="button"
               variant="ghost"
               size="icon-sm"
-              className="size-4 rounded-full p-0 hover:bg-transparent"
+              className="size-5 shrink-0 rounded-md p-0 text-muted-foreground hover:bg-accent/50 hover:text-foreground"
               onClick={clearToolLock}
               aria-label="Clear tool lock"
             >
               <XIcon className="size-3" />
             </Button>
-          </Badge>
+          </div>
         </div>
       ) : null}
 
       {showCommandMenu ? (
-        <div className="overflow-hidden rounded-md border border-border/60 bg-background">
-          <PromptInputCommand className="border-none">
+        <div className="overflow-hidden rounded-lg border border-border/70 bg-popover shadow-sm">
+          <PromptInputCommand className="border-none bg-transparent">
             <PromptInputCommandList className="max-h-56">
-              <PromptInputCommandEmpty>No matching command</PromptInputCommandEmpty>
-              <PromptInputCommandGroup heading={`Commands for ${selectedMode}`}>
-                {filteredCommands.map((commandDef) => (
-                  <PromptInputCommandItem
-                    key={commandDef.command}
-                    ref={(node) => {
-                      itemRefs.current[commandDef.command] = node
-                    }}
-                    value={`${commandDef.command} ${commandDef.label}`}
-                    onSelect={() => handleSelect(commandDef)}
-                    className={
-                      activeCommand?.command === commandDef.command
-                        ? "bg-accent text-accent-foreground"
-                        : undefined
-                    }
-                  >
-                    <div className="flex w-full flex-col">
-                      <span className="font-medium text-xs">{commandDef.command}</span>
-                      <span className="text-[11px] text-muted-foreground">
-                        {commandDef.description}
-                      </span>
-                    </div>
-                  </PromptInputCommandItem>
-                ))}
+              <PromptInputCommandEmpty className="text-xs text-muted-foreground">
+                No matching command
+              </PromptInputCommandEmpty>
+              <PromptInputCommandGroup
+                heading={`Commands for ${selectedMode}`}
+                className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wide [&_[cmdk-group-heading]]:text-muted-foreground"
+              >
+                {filteredCommands.map((commandDef) => {
+                  const isActive = activeCommand?.command === commandDef.command
+                  return (
+                    <PromptInputCommandItem
+                      key={commandDef.command}
+                      ref={(node) => {
+                        itemRefs.current[commandDef.command] = node
+                      }}
+                      value={`${commandDef.command} ${commandDef.label}`}
+                      onSelect={() => handleSelect(commandDef)}
+                      className={cn(
+                        "items-start gap-2 py-2",
+                        isActive
+                          ? "bg-accent text-accent-foreground data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground"
+                          : undefined,
+                      )}
+                    >
+                      <TerminalIcon
+                        className={cn(
+                          "mt-0.5 size-3 shrink-0 opacity-80",
+                          isActive
+                            ? "text-accent-foreground"
+                            : "text-muted-foreground",
+                        )}
+                        aria-hidden
+                      />
+                      <div className="flex min-w-0 flex-1 flex-col">
+                        <span className="text-xs font-medium leading-snug">
+                          {commandDef.command}
+                        </span>
+                        <span
+                          className={cn(
+                            "text-[11px] leading-snug",
+                            isActive
+                              ? "text-accent-foreground/85"
+                              : "text-muted-foreground",
+                          )}
+                        >
+                          {commandDef.description}
+                        </span>
+                      </div>
+                    </PromptInputCommandItem>
+                  )
+                })}
               </PromptInputCommandGroup>
             </PromptInputCommandList>
           </PromptInputCommand>

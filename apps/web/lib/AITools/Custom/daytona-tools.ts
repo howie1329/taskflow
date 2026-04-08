@@ -3,7 +3,9 @@ import { ConvexHttpClient } from "convex/browser"
 import { z } from "zod"
 import { api } from "@/convex/_generated/api"
 import { emitToolProgress } from "@/lib/AITools/progress"
+import { buildDaytonaResearchModelOutput } from "@/lib/AITools/Custom/daytona-research-model-output"
 import {
+  deleteSandbox,
   getSandboxStatus,
   listSandboxRepoFiles,
   readSandboxRepoFile,
@@ -19,6 +21,10 @@ import {
   type DaytonaStatus,
   type DaytonaThreadState,
 } from "@/lib/daytona/state"
+import {
+  daytonaResearchOutputSchema,
+  runDaytonaResearchAgent,
+} from "@/lib/daytona/research-agent"
 
 const daytonaStatusResponseSchema = z.object({
   exists: z.boolean(),
@@ -62,45 +68,16 @@ const readRepoFileOutputSchema = z.object({
   message: z.string(),
 })
 
-const runReadCommandInputSchema = z.discriminatedUnion("command", [
-  z.object({ command: z.literal("pwd") }),
-  z.object({ command: z.literal("git_status") }),
-  z.object({
-    command: z.literal("git_log"),
-    limit: z.number().int().min(1).max(50).optional(),
-  }),
-  z.object({
-    command: z.literal("ls"),
-    path: z.string().optional(),
-  }),
-  z.object({
-    command: z.literal("find"),
-    path: z.string().optional(),
-    depth: z.number().int().min(1).max(5).optional(),
-    limit: z.number().int().min(1).max(200).optional(),
-  }),
-  z.object({
-    command: z.literal("cat"),
-    path: z.string(),
-  }),
-  z.object({
-    command: z.literal("head"),
-    path: z.string(),
-    lines: z.number().int().min(1).max(200).optional(),
-  }),
-  z.object({
-    command: z.literal("sed"),
-    path: z.string(),
-    startLine: z.number().int().min(1).optional(),
-    endLine: z.number().int().min(1).optional(),
-  }),
-  z.object({
-    command: z.literal("rg"),
-    query: z.string().min(1),
-    path: z.string().optional(),
-    limit: z.number().int().min(1).max(100).optional(),
-  }),
-])
+const runReadCommandInputSchema = z.object({
+  command: z.enum(["pwd", "git_status", "git_log", "ls", "find", "cat", "head", "sed", "rg"]),
+  path: z.string().optional(),
+  query: z.string().optional(),
+  limit: z.number().int().min(1).max(200).optional(),
+  depth: z.number().int().min(1).max(5).optional(),
+  lines: z.number().int().min(1).max(200).optional(),
+  startLine: z.number().int().min(1).optional(),
+  endLine: z.number().int().min(1).optional(),
+})
 
 const runReadCommandOutputSchema = z.object({
   command: z.string(),
@@ -108,6 +85,9 @@ const runReadCommandOutputSchema = z.object({
   stdout: z.string(),
   truncated: z.boolean(),
   message: z.string(),
+  path: z.string().nullable().optional(),
+  startLine: z.number().nullable().optional(),
+  endLine: z.number().nullable().optional(),
 })
 
 type ToolContext = {
@@ -122,6 +102,64 @@ type DaytonaThread = {
 
 const MISSING_DAYTONA_MESSAGE =
   "No Daytona sandbox is attached to this thread. Use the Daytona sidebar first."
+
+const isAbortError = (error: unknown) =>
+  error instanceof Error && error.name === "AbortError"
+
+const normalizeRunReadCommandInput = (
+  input: z.infer<typeof runReadCommandInputSchema>,
+) => {
+  switch (input.command) {
+    case "pwd":
+    case "git_status":
+      return { command: input.command } as const
+    case "git_log":
+      return { command: input.command, limit: input.limit } as const
+    case "ls":
+      return { command: input.command, path: input.path } as const
+    case "find":
+      return {
+        command: input.command,
+        path: input.path,
+        depth: input.depth,
+        limit: input.limit,
+      } as const
+    case "cat":
+      if (!input.path) {
+        throw new Error("The read command 'cat' requires a file path.")
+      }
+      return { command: input.command, path: input.path } as const
+    case "head":
+      if (!input.path) {
+        throw new Error("The read command 'head' requires a file path.")
+      }
+      return {
+        command: input.command,
+        path: input.path,
+        lines: input.lines,
+      } as const
+    case "sed":
+      if (!input.path) {
+        throw new Error("The read command 'sed' requires a file path.")
+      }
+      return {
+        command: input.command,
+        path: input.path,
+        startLine: input.startLine,
+        endLine: input.endLine,
+      } as const
+    case "rg":
+      if (!input.query) {
+        throw new Error("The read command 'rg' requires a query string.")
+      }
+      return {
+        command: input.command,
+        query: input.query,
+        path: input.path,
+        limit: input.limit,
+      } as const
+  }
+}
 
 const getToolContext = (context: unknown) => {
   if (!context || typeof context !== "object") {
@@ -331,7 +369,7 @@ const ensureReadySandbox = async ({
 
 export const getDaytonaStatusTool = tool({
   description:
-    "Get the current Daytona sandbox status for the active chat thread. Use this only when the user asks about Daytona instance status for this thread.",
+    "Check whether the active chat thread has a Daytona repo sandbox attached and what state it is in. Use this for repo-analysis setup, attached repo availability, or when the user asks whether the sandbox is ready.",
   inputSchema: z.object({}),
   outputSchema: daytonaStatusResponseSchema,
   execute: async (_input, { toolCallId, experimental_context }) => {
@@ -365,7 +403,7 @@ export const getDaytonaStatusTool = tool({
 
 export const startDaytonaInstanceTool = tool({
   description:
-    "Start the existing Daytona sandbox for the active chat thread when it is stopped.",
+    "Start the existing Daytona sandbox for the active chat thread when repo analysis is needed and the sandbox is currently stopped.",
   inputSchema: z.object({}),
   outputSchema: daytonaStatusResponseSchema,
   execute: async (_input, { toolCallId, experimental_context }) => {
@@ -412,7 +450,7 @@ export const startDaytonaInstanceTool = tool({
 
 export const stopDaytonaInstanceTool = tool({
   description:
-    "Stop the existing Daytona sandbox for the active chat thread when it is running.",
+    "Stop the existing Daytona sandbox for the active chat thread when the user asks to stop the attached repo workspace or it should no longer stay running.",
   inputSchema: z.object({}),
   outputSchema: daytonaStatusResponseSchema,
   execute: async (_input, { toolCallId, experimental_context }) => {
@@ -460,7 +498,7 @@ export const stopDaytonaInstanceTool = tool({
 
 export const listDaytonaRepoFilesTool = tool({
   description:
-    "List files and directories from the repo cloned into the current thread's Daytona sandbox.",
+    "List files and directories in the attached repo. Prefer this to orient yourself in the codebase, inspect folders, and choose the next file to read.",
   inputSchema: z.object({
     path: z.string().optional(),
     limit: z.number().int().min(1).max(200).optional(),
@@ -478,12 +516,21 @@ export const listDaytonaRepoFilesTool = tool({
     const client = createClient(token)
     const ready = await ensureReadySandbox({ client, threadId, emit })
 
-    if (!ready.ok || !ready.daytona.sandboxId) {
+    if (!ready.ok) {
       emit("done", ready.message)
       return listRepoFilesOutputSchema.parse({
         files: [],
         truncated: false,
         message: ready.message,
+      })
+    }
+
+    if (!ready.daytona.sandboxId) {
+      emit("done", MISSING_DAYTONA_MESSAGE)
+      return listRepoFilesOutputSchema.parse({
+        files: [],
+        truncated: false,
+        message: MISSING_DAYTONA_MESSAGE,
       })
     }
 
@@ -506,9 +553,75 @@ export const listDaytonaRepoFilesTool = tool({
   },
 })
 
+export const researchDaytonaRepoTool = tool({
+  description:
+    "Delegate broad repo analysis to a dedicated Daytona research subagent. Prefer this for codebase questions like 'where is X', 'how does this work', 'summarize this repo', or 'what does this function do' so the main assistant stays focused on synthesis.",
+  inputSchema: z.object({
+    task: z.string().min(3),
+  }),
+  outputSchema: daytonaResearchOutputSchema,
+  execute: async ({ task }, { toolCallId, experimental_context, abortSignal }) => {
+    const emit = createProgressEmitter({
+      experimental_context,
+      toolKey: "researchDaytonaRepo",
+      toolCallId,
+    })
+    emit("running", "Preparing Daytona repo research...")
+
+    const { token, threadId } = getToolContext(experimental_context)
+    const client = createClient(token)
+    const ready = await ensureReadySandbox({ client, threadId, emit })
+
+    if (!ready.ok || !ready.daytona.sandboxId) {
+      const message = ready.ok ? MISSING_DAYTONA_MESSAGE : ready.message
+      emit("done", message)
+
+      return daytonaResearchOutputSchema.parse({
+        task,
+        summary: message,
+        keyFindings: [],
+        citations: [],
+        limitations: [message],
+        transcript: null,
+        message,
+      })
+    }
+
+    try {
+      return await runDaytonaResearchAgent({
+        task,
+        sandboxId: ready.daytona.sandboxId,
+        repoUrl: ready.daytona.repoUrl,
+        clonePath: ready.daytona.clonePath,
+        abortSignal,
+        emitProgress: emit,
+      })
+    } catch (error) {
+      if (isAbortError(error)) {
+        throw error
+      }
+
+      const message =
+        error instanceof Error ? error.message : "Daytona research failed."
+
+      emit("error", message)
+      return daytonaResearchOutputSchema.parse({
+        task,
+        summary: message,
+        keyFindings: [],
+        citations: [],
+        limitations: [message],
+        transcript: null,
+        message,
+      })
+    }
+  },
+  toModelOutput: ({ output }) => buildDaytonaResearchModelOutput(output),
+})
+
 export const searchDaytonaRepoTool = tool({
   description:
-    "Search the repo cloned into the current thread's Daytona sandbox using ripgrep.",
+    "Search the attached repo with ripgrep to locate implementations, symbols, routes, config, or strings before reading files. Prefer this for 'where is X?' questions.",
   inputSchema: z.object({
     query: z.string().min(1),
     path: z.string().optional(),
@@ -527,12 +640,21 @@ export const searchDaytonaRepoTool = tool({
     const client = createClient(token)
     const ready = await ensureReadySandbox({ client, threadId, emit })
 
-    if (!ready.ok || !ready.daytona.sandboxId) {
+    if (!ready.ok) {
       emit("done", ready.message)
       return searchRepoOutputSchema.parse({
         matches: [],
         truncated: false,
         message: ready.message,
+      })
+    }
+
+    if (!ready.daytona.sandboxId) {
+      emit("done", MISSING_DAYTONA_MESSAGE)
+      return searchRepoOutputSchema.parse({
+        matches: [],
+        truncated: false,
+        message: MISSING_DAYTONA_MESSAGE,
       })
     }
 
@@ -558,7 +680,7 @@ export const searchDaytonaRepoTool = tool({
 
 export const readDaytonaRepoFileTool = tool({
   description:
-    "Read a file from the repo cloned into the current thread's Daytona sandbox.",
+    "Read a file from the attached repo to verify implementation details. Prefer this after search results to inspect the exact code and cite the file path and line range in your answer.",
   inputSchema: z.object({
     path: z.string(),
     startLine: z.number().int().min(1).optional(),
@@ -580,7 +702,7 @@ export const readDaytonaRepoFileTool = tool({
     const client = createClient(token)
     const ready = await ensureReadySandbox({ client, threadId, emit })
 
-    if (!ready.ok || !ready.daytona.sandboxId) {
+    if (!ready.ok) {
       emit("done", ready.message)
       return readRepoFileOutputSchema.parse({
         path: null,
@@ -589,6 +711,18 @@ export const readDaytonaRepoFileTool = tool({
         endLine: null,
         truncated: false,
         message: ready.message,
+      })
+    }
+
+    if (!ready.daytona.sandboxId) {
+      emit("done", MISSING_DAYTONA_MESSAGE)
+      return readRepoFileOutputSchema.parse({
+        path: null,
+        content: "",
+        startLine: null,
+        endLine: null,
+        truncated: false,
+        message: MISSING_DAYTONA_MESSAGE,
       })
     }
 
@@ -617,7 +751,7 @@ export const readDaytonaRepoFileTool = tool({
 
 export const runDaytonaReadCommandTool = tool({
   description:
-    "Run a tightly constrained read-only command inside the current thread's Daytona repo sandbox.",
+    "Run a tightly constrained read-only command in the attached repo only when list/search/read are not enough. Use this for bounded inspection, not as a first choice.",
   inputSchema: runReadCommandInputSchema,
   outputSchema: runReadCommandOutputSchema,
   execute: async (input, { toolCallId, experimental_context }) => {
@@ -632,7 +766,7 @@ export const runDaytonaReadCommandTool = tool({
     const client = createClient(token)
     const ready = await ensureReadySandbox({ client, threadId, emit })
 
-    if (!ready.ok || !ready.daytona.sandboxId) {
+    if (!ready.ok) {
       emit("done", ready.message)
       return runReadCommandOutputSchema.parse({
         command: input.command,
@@ -640,8 +774,27 @@ export const runDaytonaReadCommandTool = tool({
         stdout: "",
         truncated: false,
         message: ready.message,
+        path: null,
+        startLine: null,
+        endLine: null,
       })
     }
+
+    if (!ready.daytona.sandboxId) {
+      emit("done", MISSING_DAYTONA_MESSAGE)
+      return runReadCommandOutputSchema.parse({
+        command: input.command,
+        exitCode: null,
+        stdout: "",
+        truncated: false,
+        message: MISSING_DAYTONA_MESSAGE,
+        path: null,
+        startLine: null,
+        endLine: null,
+      })
+    }
+
+    const normalizedInput = normalizeRunReadCommandInput(input)
 
     const result = await runSandboxReadCommand(
       {
@@ -649,7 +802,7 @@ export const runDaytonaReadCommandTool = tool({
         repoUrl: ready.daytona.repoUrl,
         clonePath: ready.daytona.clonePath,
       },
-      input,
+      normalizedInput,
     )
 
     emit("done", `Command ${input.command} finished with exit code ${result.exitCode}.`)
@@ -658,10 +811,43 @@ export const runDaytonaReadCommandTool = tool({
       exitCode: result.exitCode,
       stdout: result.stdout,
       truncated: result.truncated,
+      path: result.path ?? null,
+      startLine: result.startLine ?? null,
+      endLine: result.endLine ?? null,
       message:
         result.truncated
           ? "Showing truncated command output. Narrow the command input to inspect more."
           : "Command completed.",
     })
+  },
+})
+
+export const deleteDaytonaInstanceTool = tool({
+  description:
+    "Delete the Daytona sandbox attached to the active chat thread only when the user explicitly asks to remove or reset the attached repo workspace.",
+  inputSchema: z.object({}),
+  outputSchema: daytonaStatusResponseSchema,
+  execute: async (_input, { toolCallId, experimental_context }) => {
+    const emit = createProgressEmitter({
+      experimental_context,
+      toolKey: "deleteDaytonaInstance",
+      toolCallId,
+    })
+    emit("running", "Deleting Daytona sandbox...")
+
+    const { token, threadId } = getToolContext(experimental_context)
+    const client = createClient(token)
+    const thread = await loadThread(client, threadId)
+
+    if (!thread?.daytona?.sandboxId) {
+      emit("done", MISSING_DAYTONA_MESSAGE)
+      return daytonaStatusResponseSchema.parse(EMPTY_DAYTONA_STATUS)
+    }
+
+    await deleteSandbox(thread.daytona.sandboxId)
+    await client.mutation(api.chat.clearThreadDaytonaState, { threadId })
+
+    emit("done", "Daytona sandbox deleted.")
+    return daytonaStatusResponseSchema.parse(EMPTY_DAYTONA_STATUS)
   },
 })

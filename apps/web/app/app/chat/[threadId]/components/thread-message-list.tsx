@@ -108,6 +108,7 @@ const ThreadMessageRow = memo(function ThreadMessageRow({
     reasoningText,
     text: messageText,
     toolCalls,
+    toolProgress,
   } = parsedMessage;
   const hasReasoning = !!reasoningText;
   const hasFiles = files.length > 0;
@@ -126,7 +127,7 @@ const ThreadMessageRow = memo(function ThreadMessageRow({
     >
       <MessageContent
         className={cn(
-          "text-[15px] leading-7",
+          "text-sm leading-snug",
           message.role === "assistant" && "w-full",
           message.role === "user" && "max-w-xl",
         )}
@@ -136,6 +137,7 @@ const ThreadMessageRow = memo(function ThreadMessageRow({
             message={message}
             messageFiles={files}
             toolCalls={toolCalls}
+            toolProgress={toolProgress}
             hasReasoning={hasReasoning}
             reasoningText={reasoningText}
             preferences={preferences}
@@ -148,7 +150,7 @@ const ThreadMessageRow = memo(function ThreadMessageRow({
             onInspectTool={onInspectTool}
           />
         ) : (
-          <div className="whitespace-pre-wrap text-[15px] leading-7">
+          <div className="whitespace-pre-wrap text-sm leading-snug">
             {hasFiles && (
               <Attachments variant="inline" className="mb-2">
                 {files.map((file, fileIndex) => (
@@ -179,6 +181,7 @@ interface AssistantMessageBodyProps {
   message: UIMessage;
   messageFiles: ReturnType<typeof parseMessageParts>["files"];
   toolCalls: ToolCall[];
+  toolProgress: ReturnType<typeof parseMessageParts>["toolProgress"];
   hasReasoning: boolean;
   reasoningText: string | null;
   preferences: PreferencesLike | undefined;
@@ -195,6 +198,7 @@ function AssistantMessageBody({
   message,
   messageFiles,
   toolCalls,
+  toolProgress,
   hasReasoning,
   reasoningText,
   preferences,
@@ -232,6 +236,7 @@ function AssistantMessageBody({
       {toolCalls.length > 0 && (
         <ToolPanels
           toolCalls={toolCalls}
+          toolProgress={toolProgress}
           preferences={preferences}
           onInspectTool={(toolCallId) => onInspectTool(message.id, toolCallId)}
         />
@@ -258,7 +263,7 @@ function AssistantMessageBody({
             <Skeleton className="h-4 w-full max-w-[70%] rounded" />
             <Skeleton className="h-4 w-12 shrink-0 rounded" />
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
             <span className="animate-pulse">Thinking...</span>
             <span className="sr-only">Streaming response</span>
           </div>
@@ -278,7 +283,7 @@ function AssistantMessageBody({
       )}
 
       {isStreamingMessage && renderedText?.trim() && (
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
           <ActivityIcon className="size-3.5 animate-pulse" />
           <span>Streaming...</span>
         </div>

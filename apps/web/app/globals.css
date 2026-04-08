@@ -90,13 +90,13 @@
   --chart-3: oklch(0.5600 0 0);
   --chart-4: oklch(0.4400 0 0);
   --chart-5: oklch(0.9200 0 0);
-  --sidebar: oklch(0.1800 0 0);
+  --sidebar: oklch(0 0 0);
   --sidebar-foreground: oklch(1 0 0);
   --sidebar-primary: oklch(1 0 0);
   --sidebar-primary-foreground: oklch(0 0 0);
-  --sidebar-accent: oklch(0.3200 0 0);
-  --sidebar-accent-foreground: oklch(1 0 0);
-  --sidebar-border: oklch(0.3200 0 0);
+  --sidebar-accent: oklch(0.2400 0 0);
+  --sidebar-accent-foreground: oklch(0.9600 0 0);
+  --sidebar-border: oklch(0.2200 0 0);
   --sidebar-ring: oklch(0.7200 0 0);
   --font-sans: Geist, sans-serif;
   --font-serif: Georgia, serif;

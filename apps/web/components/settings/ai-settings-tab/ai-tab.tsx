@@ -5,7 +5,6 @@ import { useMutation, useQuery } from "convex/react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { MessageQuestionIcon } from "@hugeicons/core-free-icons";
 import { api } from "@/convex/_generated/api";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
@@ -111,28 +110,28 @@ export function AITab({ onGoToPreferences }: AITabProps) {
     <div className="space-y-0">
       <section className="space-y-4 pb-6">
         <div className="space-y-1">
-          <h2 className="text-lg font-semibold tracking-tight">Usage</h2>
-          <p className="text-sm text-muted-foreground">
+          <h2 className="text-base font-semibold tracking-tight">Usage</h2>
+          <p className="text-xs text-muted-foreground">
             Basic chat activity for your account.
           </p>
         </div>
 
         {usage === undefined ? (
           <div className="space-y-2">
-            <Skeleton className="h-5 w-56" />
-            <Skeleton className="h-5 w-48" />
+            <Skeleton className="h-4 w-56 rounded-md" />
+            <Skeleton className="h-4 w-48 rounded-md" />
           </div>
         ) : (
-          <div className="space-y-2 text-sm">
+          <div className="space-y-2 text-xs">
             <p className="text-muted-foreground">
               Messages sent today (UTC):{" "}
-              <span className="font-medium text-foreground">
+              <span className="tabular-nums font-medium text-foreground">
                 {usage?.messagesSentToday ?? 0}
               </span>
             </p>
             <p className="text-muted-foreground">
               Total messages sent:{" "}
-              <span className="font-medium text-foreground">
+              <span className="tabular-nums font-medium text-foreground">
                 {usage?.messagesSentTotal ?? 0}
               </span>
             </p>
@@ -142,8 +141,8 @@ export function AITab({ onGoToPreferences }: AITabProps) {
 
       <section className="space-y-6 border-t border-border py-6">
         <div className="space-y-1">
-          <h2 className="text-lg font-semibold tracking-tight">AI Chat</h2>
-          <p className="text-sm text-muted-foreground">
+          <h2 className="text-base font-semibold tracking-tight">AI Chat</h2>
+          <p className="text-xs text-muted-foreground">
             Control what the assistant shows while it works.
           </p>
         </div>
@@ -158,7 +157,7 @@ export function AITab({ onGoToPreferences }: AITabProps) {
                 </FieldDescription>
               </div>
               {isLoading ? (
-                <Skeleton className="h-6 w-10" />
+                <Skeleton className="h-6 w-10 rounded-md" />
               ) : (
                 <Switch
                   checked={showActions}
@@ -179,7 +178,7 @@ export function AITab({ onGoToPreferences }: AITabProps) {
                 </FieldDescription>
               </div>
               {isLoading ? (
-                <Skeleton className="h-6 w-10" />
+                <Skeleton className="h-6 w-10 rounded-md" />
               ) : (
                 <Switch
                   checked={showToolDetails}
@@ -200,7 +199,7 @@ export function AITab({ onGoToPreferences }: AITabProps) {
                 </FieldDescription>
               </div>
               {isLoading ? (
-                <Skeleton className="h-6 w-10" />
+                <Skeleton className="h-6 w-10 rounded-md" />
               ) : (
                 <Switch
                   checked={showReasoning}
@@ -218,23 +217,25 @@ export function AITab({ onGoToPreferences }: AITabProps) {
         <div className="space-y-3">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="space-y-1">
-              <h2 className="text-lg font-semibold tracking-tight">
+              <h2 className="text-base font-semibold tracking-tight">
                 AI Model Settings
               </h2>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 Browse models and pricing. Your default model is set in
                 Preferences.
               </p>
               {!isLoading && (
-                <p className="text-xs text-muted-foreground">
+                <p className="text-[11px] text-muted-foreground">
                   Last synced: {formatSyncTime(lastSyncedAt)}
                 </p>
               )}
             </div>
             {isLoading ? (
-              <Skeleton className="h-5 w-24" />
+              <Skeleton className="h-4 w-28 rounded-md" />
             ) : (
-              <Badge variant="secondary">{count} models available</Badge>
+              <p className="text-[11px] tabular-nums text-muted-foreground">
+                {count} models available
+              </p>
             )}
           </div>
 
@@ -243,7 +244,7 @@ export function AITab({ onGoToPreferences }: AITabProps) {
               type="button"
               variant="outline"
               size="sm"
-              className="motion-safe:active:scale-[0.97]"
+              className="h-8 rounded-md"
               onClick={onGoToPreferences}
             >
               Change default in Preferences
@@ -251,17 +252,17 @@ export function AITab({ onGoToPreferences }: AITabProps) {
           )}
         </div>
 
-        <div className="space-y-4">
+        <div className="flex flex-col">
           {isLoading ? (
             <>
               {[1, 2, 3].map((i) => (
-                <div key={i} className="space-y-3 rounded-lg border border-border bg-card p-4">
-                  <div className="flex items-center justify-between">
-                    <Skeleton className="h-5 w-48" />
-                    <Skeleton className="h-4 w-24" />
+                <div key={i} className="space-y-2 py-4 first:pt-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <Skeleton className="h-4 w-48 rounded-md" />
+                    <Skeleton className="h-3 w-20 rounded-md" />
                   </div>
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-64" />
+                  <Skeleton className="h-3 w-full rounded-md" />
+                  <Skeleton className="h-3 w-2/3 rounded-md" />
                 </div>
               ))}
             </>
@@ -272,10 +273,10 @@ export function AITab({ onGoToPreferences }: AITabProps) {
                 className="mb-3 size-8 text-muted-foreground"
                 aria-hidden
               />
-              <p className="text-sm font-medium text-foreground">
+              <p className="text-base font-semibold text-foreground">
                 No models available yet
               </p>
-              <p className="mt-1 max-w-xs text-sm text-muted-foreground">
+              <p className="mt-1 max-w-xs text-xs text-muted-foreground">
                 Models will appear here after the next sync (every 6 hours).
               </p>
             </div>
@@ -286,33 +287,31 @@ export function AITab({ onGoToPreferences }: AITabProps) {
                 <div
                   key={model.modelId}
                   className={cn(
-                    "space-y-3 rounded-lg border bg-card p-4 transition-colors duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none",
-                    isSelected
-                      ? "border-primary bg-muted/30"
-                      : "border-border",
+                    "space-y-2 rounded-md px-3 py-3 transition-colors duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none",
+                    isSelected ? "bg-accent" : "hover:bg-accent/50",
                   )}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 space-y-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="font-medium">{model.name}</span>
+                        <span className="text-xs font-medium">{model.name}</span>
                         {isSelected && (
-                          <Badge variant="outline" className="font-normal">
+                          <span className="text-[11px] text-muted-foreground">
                             Default
-                          </Badge>
+                          </span>
                         )}
                       </div>
-                      <span className="inline-block rounded-md bg-muted px-1.5 py-0.5 font-mono text-xs text-muted-foreground">
+                      <span className="block font-mono text-[11px] text-muted-foreground">
                         {model.modelId}
                       </span>
                     </div>
                   </div>
 
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     {model.description}
                   </p>
 
-                  <div className="flex flex-wrap gap-4 border-t border-border pt-2 text-xs text-muted-foreground">
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 pt-1 text-[11px] text-muted-foreground">
                     <span>
                       <span className="font-medium text-foreground/80">
                         Input:

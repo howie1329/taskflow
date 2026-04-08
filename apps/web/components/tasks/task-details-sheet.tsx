@@ -8,7 +8,6 @@ import {
   SheetTitle,
   SheetFooter,
 } from "@/components/ui/sheet";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -59,6 +58,9 @@ interface TaskUpdate {
   scheduledDate?: string;
   dueDate?: number;
 }
+
+const fieldLabelClass =
+  "text-[11px] font-medium uppercase tracking-wide text-muted-foreground";
 
 interface TaskDetailsSheetProps {
   task: Task | null;
@@ -283,33 +285,39 @@ export function TaskDetailsSheet({
   const panelContent = (
     <div className="flex h-full flex-col">
           {/* Header Block */}
-          <SheetHeader className="pb-4 pt-6">
+          <SheetHeader className="shrink-0 gap-2 px-4 pb-3 pt-5 sm:px-5">
             {/* Top row: Project + Status + Actions */}
-            <div className="flex items-center justify-between mb-3">
-              <Badge variant="outline" className="text-xs px-2 py-0.5 h-6">
+            <div className="mb-3 flex items-center justify-between">
+              <div className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
                 {project ? (
                   <>
-                    <span className="mr-1">{project.icon}</span>
-                    {project.title}
+                    <span
+                      className="size-2 shrink-0 rounded-full"
+                      style={{ backgroundColor: project.color }}
+                      aria-hidden
+                    />
+                    {project.icon ? (
+                      <span className="shrink-0">{project.icon}</span>
+                    ) : null}
+                    <span className="truncate text-foreground">{project.title}</span>
                   </>
                 ) : (
-                  "No project"
+                  <span>No project</span>
                 )}
-              </Badge>
+              </div>
               <div className="flex items-center gap-1.5">
-                {/* Toggle Complete Button */}
                 {onToggleComplete && (
                   <Button
                     variant="ghost"
                     size="icon-sm"
                     onClick={handleToggleComplete}
-                    className="h-8 w-8"
+                    className="size-8"
                     title={isCompleted ? "Mark incomplete" : "Mark complete"}
                   >
                     {isCompleted ? (
-                      <CheckSquareIcon className="h-4 w-4 text-primary" />
+                      <CheckSquareIcon className="size-4 text-foreground" />
                     ) : (
-                      <SquareIcon className="h-4 w-4" />
+                      <SquareIcon className="size-4 text-muted-foreground" />
                     )}
                   </Button>
                 )}
@@ -319,10 +327,10 @@ export function TaskDetailsSheet({
                     variant="ghost"
                     size="icon-sm"
                     onClick={() => setIsEditing(true)}
-                    className="h-8 w-8"
+                    className="size-8"
                     title="Edit task"
                   >
-                    <PencilIcon className="h-4 w-4" />
+                    <PencilIcon className="size-4" />
                   </Button>
                 )}
                 {isEditing && (
@@ -330,10 +338,10 @@ export function TaskDetailsSheet({
                     variant="ghost"
                     size="icon-sm"
                     onClick={handleCancelEdit}
-                    className="h-8 w-8"
+                    className="size-8"
                     title="Cancel editing"
                   >
-                    <XIcon className="h-4 w-4" />
+                    <XIcon className="size-4" />
                   </Button>
                 )}
               </div>
@@ -344,8 +352,8 @@ export function TaskDetailsSheet({
                 {renderInSidebar ? (
                   <h2
                     className={cn(
-                      "text-foreground text-lg font-medium leading-snug",
-                      isCompleted && "line-through text-muted-foreground",
+                      "text-xl font-semibold leading-snug tracking-tight text-foreground",
+                      isCompleted && "text-muted-foreground line-through",
                     )}
                   >
                     {task.title}
@@ -353,31 +361,29 @@ export function TaskDetailsSheet({
                 ) : (
                   <SheetTitle
                     className={cn(
-                      "text-lg font-medium leading-snug",
-                      isCompleted && "line-through text-muted-foreground",
+                      "text-xl font-semibold leading-snug tracking-tight",
+                      isCompleted && "text-muted-foreground line-through",
                     )}
                   >
                     {task.title}
                   </SheetTitle>
                 )}
 
-                {/* Meta row: Scheduled / Due / Priority */}
-                <div className="flex items-center gap-2 mt-3 text-sm">
+                <div className="mt-3 flex flex-wrap items-center gap-2">
                   {task.scheduledDate && (
-                    <Badge variant="secondary" className="text-xs px-2 py-0.5 h-6">
+                    <span className="text-[11px] tabular-nums text-muted-foreground">
                       {task.scheduledDate}
-                    </Badge>
+                    </span>
                   )}
                   {task.dueDate && (
-                    <Badge
-                      variant="outline"
+                    <span
                       className={cn(
-                        "text-xs px-2 py-0.5 h-6",
-                        isOverdue && "border-destructive text-destructive",
+                        "text-[11px] tabular-nums text-muted-foreground",
+                        isOverdue && "text-destructive",
                       )}
                     >
-                      Due: {formatDate(task.dueDate)}
-                    </Badge>
+                      Due {formatDate(task.dueDate)}
+                    </span>
                   )}
                   <div
                     className={cn(
@@ -388,12 +394,10 @@ export function TaskDetailsSheet({
                   />
                 </div>
               </>
+            ) : renderInSidebar ? (
+              <h2 className="text-base font-semibold text-foreground">Edit task</h2>
             ) : (
-              renderInSidebar ? (
-                <h2 className="text-foreground text-base font-medium">Edit task</h2>
-              ) : (
-                <SheetTitle className="text-base font-medium">Edit task</SheetTitle>
-              )
+              <SheetTitle className="text-base font-semibold">Edit task</SheetTitle>
             )}
           </SheetHeader>
 
@@ -407,49 +411,55 @@ export function TaskDetailsSheet({
                   <Input
                     value={editedTitle}
                     onChange={(e) => setEditedTitle(e.target.value)}
-                    className="h-8 rounded-md px-3 text-sm font-medium"
+                    className="h-8 rounded-md text-sm font-medium"
                     placeholder="Task title"
                   />
                   <Textarea
                     value={editedDescription}
                     onChange={(e) => setEditedDescription(e.target.value)}
-                    className="min-h-28 rounded-md px-3 py-2 text-sm leading-relaxed"
+                    className="min-h-28 rounded-md text-xs leading-snug"
                     placeholder="Description (optional)"
                   />
                   <Textarea
                     value={editedNotes}
                     onChange={(e) => setEditedNotes(e.target.value)}
-                    className="min-h-24 rounded-md px-3 py-2 text-sm leading-relaxed"
+                    className="min-h-24 rounded-md text-xs leading-snug"
                     placeholder="Notes (optional)"
                   />
                 </div>
 
-                <div className="space-y-4 rounded-lg border border-border p-4">
-                  <h4 className="text-sm font-medium text-muted-foreground">
-                    Options
-                  </h4>
+                <div className="space-y-4">
+                  <p className={fieldLabelClass}>Options</p>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm text-muted-foreground mb-1.5 block">
+                      <label className="mb-1.5 block text-xs text-muted-foreground">
                         Status
                       </label>
                       <Select
                         value={editedStatus}
                         onValueChange={(v) => setEditedStatus(v as Task["status"])}
                       >
-                        <SelectTrigger className="h-8 text-sm">
+                        <SelectTrigger className="h-8 text-xs">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Not Started">Not Started</SelectItem>
-                          <SelectItem value="To Do">To Do</SelectItem>
-                          <SelectItem value="In Progress">In Progress</SelectItem>
-                          <SelectItem value="Completed">Completed</SelectItem>
+                          <SelectItem value="Not Started" className="text-xs">
+                            Not Started
+                          </SelectItem>
+                          <SelectItem value="To Do" className="text-xs">
+                            To Do
+                          </SelectItem>
+                          <SelectItem value="In Progress" className="text-xs">
+                            In Progress
+                          </SelectItem>
+                          <SelectItem value="Completed" className="text-xs">
+                            Completed
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     <div>
-                      <label className="text-sm text-muted-foreground mb-1.5 block">
+                      <label className="mb-1.5 block text-xs text-muted-foreground">
                         Priority
                       </label>
                       <Select
@@ -458,7 +468,7 @@ export function TaskDetailsSheet({
                           setEditedPriority(v as Task["priority"])
                         }
                       >
-                        <SelectTrigger className="h-8 text-sm">
+                        <SelectTrigger className="h-8 text-xs">
                           <SelectValue>
                             <div className="flex items-center gap-2">
                               <div
@@ -473,7 +483,7 @@ export function TaskDetailsSheet({
                         </SelectTrigger>
                         <SelectContent>
                           {(["low", "medium", "high"] as const).map((p) => (
-                            <SelectItem key={p} value={p} className="text-sm">
+                            <SelectItem key={p} value={p} className="text-xs">
                               <div className="flex items-center gap-2">
                                 <div
                                   className={cn(
@@ -490,11 +500,11 @@ export function TaskDetailsSheet({
                     </div>
                   </div>
                   <div>
-                    <label className="text-sm text-muted-foreground mb-1.5 block">
+                    <label className="mb-1.5 block text-xs text-muted-foreground">
                       Project
                     </label>
                     <Select value={editedProjectId} onValueChange={setEditedProjectId}>
-                      <SelectTrigger className="h-8 text-sm">
+                      <SelectTrigger className="h-8 text-xs">
                         <SelectValue placeholder="No project" />
                       </SelectTrigger>
                       <SelectContent>
@@ -512,12 +522,12 @@ export function TaskDetailsSheet({
                     </Select>
                   </div>
                   <div>
-                    <label className="text-sm text-muted-foreground mb-1.5 block">
+                    <label className="mb-1.5 block text-xs text-muted-foreground">
                       Tags
                     </label>
                     {availableTags.length === 0 ? (
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-xs text-muted-foreground">
                           No tags available.
                         </span>
                         <Button
@@ -525,21 +535,21 @@ export function TaskDetailsSheet({
                           variant="outline"
                           size="sm"
                           onClick={() => setIsCreateTagDialogOpen(true)}
-                          className="h-8 px-3 text-sm"
+                          className="h-8 rounded-md px-3 text-xs"
                         >
                           + Create tag
                         </Button>
                       </div>
                     ) : (
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-1.5">
                         {availableTags.map((tag) => {
                           const isSelected = editedTagIds.includes(tag._id as string);
                           return (
                             <Button
                               key={tag._id as string}
                               type="button"
-                              variant={isSelected ? "secondary" : "outline"}
-                              size="xs"
+                              variant="ghost"
+                              size="sm"
                               onClick={() => {
                                 setEditedTagIds((prev) =>
                                   isSelected
@@ -547,12 +557,12 @@ export function TaskDetailsSheet({
                                     : [...prev, tag._id as string],
                                 );
                               }}
-                              className="h-8 rounded-md px-3 text-sm"
+                              className={cn(
+                                "h-7 rounded-md border-l-2 pl-2 pr-2 text-xs font-normal text-muted-foreground",
+                                isSelected && "bg-accent/50 font-medium text-foreground",
+                              )}
+                              style={{ borderLeftColor: tag.color }}
                             >
-                              <span
-                                className="inline-block w-1.5 h-1.5 rounded-full mr-1.5"
-                                style={{ backgroundColor: tag.color }}
-                              />
                               {tag.name}
                             </Button>
                           );
@@ -562,7 +572,7 @@ export function TaskDetailsSheet({
                           variant="outline"
                           size="sm"
                           onClick={() => setIsCreateTagDialogOpen(true)}
-                          className="h-8 rounded-md border-dashed px-3 text-sm"
+                          className="h-7 rounded-md border-dashed px-2 text-xs"
                         >
                           + Create tag
                         </Button>
@@ -571,25 +581,25 @@ export function TaskDetailsSheet({
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm text-muted-foreground mb-1.5 block">
+                      <label className="mb-1.5 block text-xs text-muted-foreground">
                         Scheduled
                       </label>
                       <Input
                         type="date"
                         value={editedScheduledDate}
                         onChange={(e) => setEditedScheduledDate(e.target.value)}
-                        className="h-8 text-sm"
+                        className="h-8 text-xs"
                       />
                     </div>
                     <div>
-                      <label className="text-sm text-muted-foreground mb-1.5 block">
+                      <label className="mb-1.5 block text-xs text-muted-foreground">
                         Due Date
                       </label>
                       <Input
                         type="date"
                         value={editedDueDate}
                         onChange={(e) => setEditedDueDate(e.target.value)}
-                        className="h-8 text-sm"
+                        className="h-8 text-xs"
                       />
                     </div>
                   </div>
@@ -600,7 +610,7 @@ export function TaskDetailsSheet({
                     size="sm"
                     onClick={handleSave}
                     disabled={!editedTitle.trim()}
-                    className="h-8 text-sm"
+                    className="h-8 rounded-md text-xs"
                   >
                     Save
                   </Button>
@@ -608,7 +618,7 @@ export function TaskDetailsSheet({
                     variant="outline"
                     size="sm"
                     onClick={handleCancelEdit}
-                    className="h-8 text-sm"
+                    className="h-8 rounded-md text-xs"
                   >
                     Cancel
                   </Button>
@@ -619,8 +629,8 @@ export function TaskDetailsSheet({
             {/* Subtasks Section */}
             {!isEditing && (
               <div>
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-sm font-medium text-muted-foreground">
+                <div className="mb-3 flex items-center justify-between">
+                  <h4 className={fieldLabelClass}>
                     Subtasks {subtaskProgress && `(${subtaskProgress})`}
                   </h4>
                   {totalSubtasks > 0 && (
@@ -644,7 +654,7 @@ export function TaskDetailsSheet({
                       value={newSubtaskTitle}
                       onChange={(e) => setNewSubtaskTitle(e.target.value)}
                       placeholder="Add a checklist item..."
-                      className="h-8 flex-1 text-sm"
+                      className="h-8 flex-1 text-xs"
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
                           handleAddSubtask();
@@ -655,9 +665,9 @@ export function TaskDetailsSheet({
                       size="icon-sm"
                       onClick={handleAddSubtask}
                       disabled={!newSubtaskTitle.trim()}
-                      className="h-8 w-8"
+                      className="size-8"
                     >
-                      <PlusIcon className="h-4 w-4" />
+                      <PlusIcon className="size-4" />
                     </Button>
                   </div>
                 )}
@@ -667,7 +677,7 @@ export function TaskDetailsSheet({
                   {visibleSubtasks.map((subtask) => (
                     <div
                       key={subtask._id as string}
-                      className="flex items-center gap-2 group rounded-lg px-1"
+                      className="group flex items-center gap-2 rounded-md px-1 py-0.5 transition-colors duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent/50"
                     >
                       {editingSubtaskId === subtask._id ? (
                         <div className="flex gap-2 flex-1">
@@ -676,7 +686,7 @@ export function TaskDetailsSheet({
                             onChange={(e) =>
                               setEditingSubtaskTitle(e.target.value)
                             }
-                            className="h-8 text-sm flex-1"
+                            className="h-8 flex-1 text-xs"
                             onKeyDown={(e) => {
                               if (e.key === "Enter") {
                                 handleSaveSubtask();
@@ -689,9 +699,9 @@ export function TaskDetailsSheet({
                           <Button
                             size="icon-sm"
                             onClick={handleSaveSubtask}
-                            className="h-8 w-8"
+                            className="size-8"
                           >
-                            <CheckSquareIcon className="h-4 w-4" />
+                            <CheckSquareIcon className="size-4" />
                           </Button>
                         </div>
                       ) : (
@@ -702,19 +712,19 @@ export function TaskDetailsSheet({
                             onClick={() =>
                               handleToggleSubtask(subtask._id as string)
                             }
-                            className="h-7 w-7 shrink-0"
+                            className="size-7 shrink-0"
                           >
                             {subtask.isComplete ? (
-                              <CheckSquareIcon className="h-4 w-4 text-primary" />
+                              <CheckSquareIcon className="size-4 text-foreground" />
                             ) : (
-                              <SquareIcon className="h-4 w-4" />
+                              <SquareIcon className="size-4 text-muted-foreground" />
                             )}
                           </Button>
                           <span
                             className={cn(
-                              "text-sm flex-1 cursor-pointer",
+                              "flex-1 cursor-pointer text-xs",
                               subtask.isComplete &&
-                                "line-through text-muted-foreground",
+                                "text-muted-foreground line-through",
                             )}
                             onClick={() =>
                               onUpdateSubtask && handleEditSubtask(subtask)
@@ -722,15 +732,15 @@ export function TaskDetailsSheet({
                           >
                             {subtask.title}
                           </span>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                          <div className="flex gap-1 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
                             {onUpdateSubtask && (
                               <Button
                                 variant="ghost"
                                 size="icon-sm"
                                 onClick={() => handleEditSubtask(subtask)}
-                                className="h-7 w-7"
+                                className="size-7"
                               >
-                                <PencilIcon className="h-3.5 w-3.5" />
+                                <PencilIcon className="size-3.5" />
                               </Button>
                             )}
                             {onDeleteSubtask && (
@@ -740,9 +750,9 @@ export function TaskDetailsSheet({
                                 onClick={() =>
                                   handleDeleteSubtask(subtask._id as string)
                                 }
-                                className="h-7 w-7 text-destructive"
+                                className="size-7 text-destructive"
                               >
-                                <TrashIcon className="h-3.5 w-3.5" />
+                                <TrashIcon className="size-3.5" />
                               </Button>
                             )}
                           </div>
@@ -771,23 +781,16 @@ export function TaskDetailsSheet({
             {/* Tags */}
             {!isEditing && taskTags.length > 0 && (
               <div>
-                <h4 className="text-sm font-medium text-muted-foreground mb-2">
-                  Tags
-                </h4>
-                <div className="flex flex-wrap gap-2">
+                <h4 className={cn(fieldLabelClass, "mb-2")}>Tags</h4>
+                <div className="flex flex-wrap gap-1.5">
                   {taskTags.map((tag, idx) => (
-                    <Badge
+                    <span
                       key={idx}
-                      variant="secondary"
-                      className="text-xs px-2 py-0.5 h-6"
-                      style={{
-                        backgroundColor: `${tag.color}20`,
-                        color: tag.color,
-                        borderColor: tag.color,
-                      }}
+                      className="border-l-2 pl-2 text-xs text-muted-foreground"
+                      style={{ borderLeftColor: tag.color }}
                     >
                       {tag.name}
-                    </Badge>
+                    </span>
                   ))}
                 </div>
               </div>
@@ -796,12 +799,10 @@ export function TaskDetailsSheet({
             {/* Description (only show if not editing - editing is in header) */}
             {!isEditing && (
               <div>
-                <h4 className="text-sm font-medium text-muted-foreground mb-2">
-                  Description
-                </h4>
-                <p className="text-sm leading-relaxed text-foreground">
+                <h4 className={cn(fieldLabelClass, "mb-2")}>Description</h4>
+                <p className="text-xs leading-snug text-foreground">
                   {task.description || (
-                    <span className="text-muted-foreground italic">
+                    <span className="italic text-muted-foreground">
                       No description provided
                     </span>
                   )}
@@ -812,39 +813,46 @@ export function TaskDetailsSheet({
             {/* Notes (only show if not editing - editing is in header) */}
             {!isEditing && task.notes && (
               <div>
-                <h4 className="text-sm font-medium text-muted-foreground mb-2">
-                  Notes
-                </h4>
-                <p className="text-sm leading-relaxed text-foreground">{task.notes}</p>
+                <h4 className={cn(fieldLabelClass, "mb-2")}>Notes</h4>
+                <p className="text-xs leading-snug text-foreground">{task.notes}</p>
               </div>
             )}
 
             {/* Scheduling Section */}
             {!isEditing && (
               <div className="border-t border-border pt-4">
-                <h4 className="text-sm font-medium text-muted-foreground mb-3">
-                  Scheduling
-                </h4>
-                <dl className="space-y-2 text-sm">
-                  <div className="flex justify-between">
+                <h4 className={cn(fieldLabelClass, "mb-3")}>Scheduling</h4>
+                <dl className="space-y-2 text-xs leading-snug">
+                  <div className="flex justify-between gap-3">
                     <dt className="text-muted-foreground">Scheduled</dt>
-                    <dd>{task.scheduledDate || "—"}</dd>
+                    <dd className="text-foreground">
+                      {task.scheduledDate || "—"}
+                    </dd>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between gap-3">
                     <dt className="text-muted-foreground">Due</dt>
-                    <dd className={cn(isOverdue && "text-destructive")}>
+                    <dd
+                      className={cn(
+                        "text-foreground",
+                        isOverdue && "text-destructive",
+                      )}
+                    >
                       {task.dueDate ? formatDate(task.dueDate) : "—"}
                     </dd>
                   </div>
                   {task.completionDate && (
-                    <div className="flex justify-between">
+                    <div className="flex justify-between gap-3">
                       <dt className="text-muted-foreground">Completed</dt>
-                      <dd>{formatDate(task.completionDate)}</dd>
+                      <dd className="text-foreground">
+                        {formatDate(task.completionDate)}
+                      </dd>
                     </div>
                   )}
-                  <div className="flex justify-between">
+                  <div className="flex justify-between gap-3">
                     <dt className="text-muted-foreground">Last active</dt>
-                    <dd>{formatDate(task.lastActiveAt)}</dd>
+                    <dd className="text-foreground">
+                      {formatDate(task.lastActiveAt)}
+                    </dd>
                   </div>
                 </dl>
               </div>
@@ -853,39 +861,45 @@ export function TaskDetailsSheet({
             {/* Work & Metadata Section */}
             {!isEditing && (
               <div>
-                <h4 className="text-sm font-medium text-muted-foreground mb-3">
-                  Work & Metadata
-                </h4>
-                <dl className="space-y-2 text-sm">
-                  <div className="flex justify-between">
+                <h4 className={cn(fieldLabelClass, "mb-3")}>Work & Metadata</h4>
+                <dl className="space-y-2 text-xs leading-snug">
+                  <div className="flex justify-between gap-3">
                     <dt className="text-muted-foreground">Energy</dt>
-                    <dd className="capitalize">{task.energyLevel}</dd>
+                    <dd className="capitalize text-foreground">
+                      {task.energyLevel}
+                    </dd>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between gap-3">
                     <dt className="text-muted-foreground">Difficulty</dt>
-                    <dd className="capitalize">{task.difficulty}</dd>
+                    <dd className="capitalize text-foreground">
+                      {task.difficulty}
+                    </dd>
                   </div>
                   <div className="flex justify-between gap-3">
                     <dt className="text-muted-foreground">Context</dt>
-                    <dd className="text-right">{task.context.join(", ") || "—"}</dd>
+                    <dd className="text-right text-foreground">
+                      {task.context.join(", ") || "—"}
+                    </dd>
                   </div>
                   {task.estimatedDuration && (
-                    <div className="flex justify-between">
+                    <div className="flex justify-between gap-3">
                       <dt className="text-muted-foreground">Estimated</dt>
-                      <dd>
+                      <dd className="text-foreground">
                         {Math.round((task.estimatedDuration / 60) * 10) / 10}h
                       </dd>
                     </div>
                   )}
                   {task.actualDuration && (
-                    <div className="flex justify-between">
+                    <div className="flex justify-between gap-3">
                       <dt className="text-muted-foreground">Actual</dt>
-                      <dd>{Math.round((task.actualDuration / 60) * 10) / 10}h</dd>
+                      <dd className="text-foreground">
+                        {Math.round((task.actualDuration / 60) * 10) / 10}h
+                      </dd>
                     </div>
                   )}
-                  <div className="flex justify-between">
+                  <div className="flex justify-between gap-3">
                     <dt className="text-muted-foreground">Source</dt>
-                    <dd className="capitalize">
+                    <dd className="capitalize text-foreground">
                       {task.source.replace("-", " ")}
                     </dd>
                   </div>
@@ -896,7 +910,7 @@ export function TaskDetailsSheet({
             {/* Timestamps Footer */}
             {!isEditing && (
               <div className="pt-2 mt-1">
-                <dl className="space-y-1 text-xs text-muted-foreground">
+                <dl className="space-y-1 text-[11px] text-muted-foreground">
                   <div className="flex justify-between">
                     <dt>Created</dt>
                     <dd>{formatDate(task.createdAt)}</dd>
@@ -915,7 +929,7 @@ export function TaskDetailsSheet({
             <SheetFooter className="shrink-0 gap-2 border-t border-border py-3 sm:flex-row sm:justify-between">
               {showDeleteConfirm ? (
                 <>
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-xs text-muted-foreground">
                     Are you sure?
                   </span>
                   <div className="flex gap-2">
@@ -923,7 +937,7 @@ export function TaskDetailsSheet({
                       variant="outline"
                       size="sm"
                       onClick={() => setShowDeleteConfirm(false)}
-                      className="h-8 text-sm"
+                      className="h-8 rounded-md text-xs"
                     >
                       Cancel
                     </Button>
@@ -931,7 +945,7 @@ export function TaskDetailsSheet({
                       variant="destructive"
                       size="sm"
                       onClick={handleDelete}
-                      className="h-8 text-sm"
+                      className="h-8 rounded-md text-xs"
                     >
                       Delete
                     </Button>
@@ -942,7 +956,7 @@ export function TaskDetailsSheet({
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowDeleteConfirm(true)}
-                  className="h-8 text-sm text-destructive hover:text-destructive"
+                  className="h-8 text-xs text-destructive hover:text-destructive"
                 >
                   Delete task
                 </Button>
@@ -959,18 +973,23 @@ export function TaskDetailsSheet({
       >
         <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>
-            <DialogTitle>Create new tag</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-base font-semibold">
+              Create new tag
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
               Enter a name for your new tag. Color will be set automatically.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="tag-name">Tag name</Label>
+              <Label htmlFor="tag-name" className="text-xs">
+                Tag name
+              </Label>
               <Input
                 id="tag-name"
                 value={newTagName}
                 onChange={(e) => setNewTagName(e.target.value)}
+                className="h-8 text-xs"
                 placeholder="e.g., urgent, work, personal"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && newTagName.trim()) {
@@ -980,9 +999,10 @@ export function TaskDetailsSheet({
               />
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="gap-2">
             <Button
               variant="outline"
+              className="h-8 rounded-md text-xs"
               onClick={() => {
                 setNewTagName("");
                 setIsCreateTagDialogOpen(false);
@@ -991,6 +1011,7 @@ export function TaskDetailsSheet({
               Cancel
             </Button>
             <Button
+              className="h-8 rounded-md text-xs"
               onClick={handleCreateTag}
               disabled={!newTagName.trim() || isCreatingTag}
             >
@@ -1018,7 +1039,10 @@ export function TaskDetailsSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side={isMobile ? "bottom" : "right"}
-        className={cn("sm:max-w-md", isMobile && "h-[85vh]")}
+        className={cn(
+          "bg-popover text-popover-foreground sm:max-w-md",
+          isMobile && "h-[85vh] rounded-t-lg",
+        )}
       >
         {panelContent}
       </SheetContent>

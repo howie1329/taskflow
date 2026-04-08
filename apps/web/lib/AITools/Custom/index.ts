@@ -1,7 +1,9 @@
 import { AdvancedResearchTool } from "./advanced-research"
 import {
+  deleteDaytonaInstanceTool,
   getDaytonaStatusTool,
   listDaytonaRepoFilesTool,
+  researchDaytonaRepoTool,
   readDaytonaRepoFileTool,
   runDaytonaReadCommandTool,
   searchDaytonaRepoTool,
@@ -14,6 +16,8 @@ export const CustomTools = {
   getDaytonaStatus: getDaytonaStatusTool,
   startDaytonaInstance: startDaytonaInstanceTool,
   stopDaytonaInstance: stopDaytonaInstanceTool,
+  deleteDaytonaInstance: deleteDaytonaInstanceTool,
+  researchDaytonaRepo: researchDaytonaRepoTool,
   listDaytonaRepoFiles: listDaytonaRepoFilesTool,
   searchDaytonaRepo: searchDaytonaRepoTool,
   readDaytonaRepoFile: readDaytonaRepoFileTool,
@@ -21,3 +25,15 @@ export const CustomTools = {
 } as const
 
 export const CustomToolsKeys = Object.keys(CustomTools) as (keyof typeof CustomTools)[]
+
+export const DaytonaToolKeys = [
+  "getDaytonaStatus",
+  "startDaytonaInstance",
+  "stopDaytonaInstance",
+  "deleteDaytonaInstance",
+  "researchDaytonaRepo",
+  "listDaytonaRepoFiles",
+  "searchDaytonaRepo",
+  "readDaytonaRepoFile",
+  "runDaytonaReadCommand",
+] as const

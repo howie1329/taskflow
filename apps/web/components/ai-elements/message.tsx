@@ -51,7 +51,10 @@ export const Message = ({ className, from, ...props }: MessageProps) => {
       transition={
         prefersReducedMotion
           ? undefined
-          : { duration: from === "user" ? 0.15 : 0.2, ease: "easeOut" }
+          : {
+              duration: from === "user" ? 0.15 : 0.2,
+              ease: [0.16, 1, 0.3, 1],
+            }
       }
       {...props}
     />
@@ -67,9 +70,9 @@ export const MessageContent = ({
 }: MessageContentProps) => (
   <div
     className={cn(
-      "is-user:dark flex w-fit min-w-0 max-w-full flex-col gap-2 overflow-hidden text-sm",
-      "group-[.is-user]:ml-auto group-[.is-user]:rounded-lg group-[.is-user]:border group-[.is-user]:border-border group-[.is-user]:bg-muted/50 group-[.is-user]:px-3 group-[.is-user]:py-2 group-[.is-user]:text-foreground",
-      "group-[.is-assistant]:rounded-lg group-[.is-assistant]:bg-transparent group-[.is-assistant]:px-3 group-[.is-assistant]:py-2 group-[.is-assistant]:text-foreground",
+      "is-user:dark flex w-fit min-w-0 max-w-full flex-col gap-2 overflow-hidden text-sm leading-snug",
+      "group-[.is-user]:ml-auto group-[.is-user]:rounded-lg group-[.is-user]:border group-[.is-user]:border-border/50 group-[.is-user]:bg-secondary group-[.is-user]:px-3 group-[.is-user]:py-2 group-[.is-user]:text-foreground",
+      "group-[.is-assistant]:rounded-none group-[.is-assistant]:bg-transparent group-[.is-assistant]:px-0 group-[.is-assistant]:py-1 group-[.is-assistant]:text-foreground",
       className,
     )}
     {...props}

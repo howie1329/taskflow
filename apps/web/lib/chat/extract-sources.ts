@@ -6,15 +6,23 @@ type MessageLike = {
 };
 
 type ExtractedChatSource = {
-  url: string;
+  kind: "url" | "file";
+  url?: string;
+  path?: string;
+  startLine?: number;
+  endLine?: number;
   title?: string;
-  domain: string;
+  domain?: string;
   toolKey: string;
   messageId: string;
 };
 
 type SourceCandidate = {
-  url: string;
+  kind: "url" | "file";
+  url?: string;
+  path?: string;
+  startLine?: number;
+  endLine?: number;
   title?: string;
 };
 
@@ -42,6 +50,7 @@ function toSourceCandidate(value: unknown): SourceCandidate | null {
   if (!url) return null;
 
   return {
+    kind: "url",
     url,
     title: getString(value.title),
   };
@@ -56,6 +65,29 @@ function collectArraySources(value: unknown): SourceCandidate[] {
     if (candidate) {
       results.push(candidate);
     }
+  }
+
+  return results;
+}
+
+function collectDaytonaCitations(value: unknown): SourceCandidate[] {
+  if (!Array.isArray(value)) return [];
+
+  const results: SourceCandidate[] = [];
+  for (const item of value) {
+    if (!isRecord(item)) continue;
+    const path = getString(item.path);
+    if (!path) continue;
+
+    results.push({
+      kind: "file",
+      path,
+      startLine:
+        typeof item.startLine === "number" ? Math.floor(item.startLine) : undefined,
+      endLine:
+        typeof item.endLine === "number" ? Math.floor(item.endLine) : undefined,
+      title: getString(item.label) ?? path,
+    });
   }
 
   return results;
@@ -86,6 +118,8 @@ function extractToolSources(
         ...collectArraySources(output.scrapedSources),
       ];
     }
+    case "researchDaytonaRepo":
+      return collectDaytonaCitations(output.citations);
     default:
       return [];
   }
@@ -115,20 +149,53 @@ export function extractSourcesFromMessages(
       const messageId = message.messageId ?? "unknown-message";
 
       for (const source of sources) {
-        if (!deduped.has(source.url)) {
-          deduped.set(source.url, {
-            url: source.url,
-            title: source.title,
-            domain: getDomain(source.url),
-            toolKey,
-            messageId,
-          });
+        const key =
+          source.kind === "url"
+            ? source.url
+            : `${source.path}:${source.startLine ?? ""}:${source.endLine ?? ""}`
+
+        if (!key || deduped.has(key)) {
+          continue
         }
+
+        deduped.set(key, {
+          kind: source.kind,
+          url: source.url,
+          path: source.path,
+          startLine: source.startLine,
+          endLine: source.endLine,
+          title: source.title,
+          domain: source.url ? getDomain(source.url) : undefined,
+          toolKey,
+          messageId,
+        });
       }
     }
   }
 
   return Array.from(deduped.values());
+}
+
+export function formatExtractedSourceLabel(source: ExtractedChatSource) {
+  if (source.kind === "url" && source.url) {
+    return source.url
+  }
+
+  if (!source.path) {
+    return ""
+  }
+
+  if (typeof source.startLine === "number" && typeof source.endLine === "number") {
+    return source.startLine === source.endLine
+      ? `${source.path}:${source.startLine}`
+      : `${source.path}:${source.startLine}-${source.endLine}`
+  }
+
+  if (typeof source.startLine === "number") {
+    return `${source.path}:${source.startLine}`
+  }
+
+  return source.path
 }
 
 export type { ExtractedChatSource };

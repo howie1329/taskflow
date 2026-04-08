@@ -147,7 +147,7 @@ export const InboxItemRow = memo(function InboxItemRow({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
-        "group flex items-start gap-1.5 px-3 py-2 transition-colors hover:bg-muted/80",
+        "group flex items-start gap-1.5 px-3 py-2 transition-colors hover:bg-accent/50",
         isArchived && "opacity-70",
         isAnyLoading && "opacity-70",
       )}
@@ -156,19 +156,19 @@ export const InboxItemRow = memo(function InboxItemRow({
     >
         <div className="min-w-0 flex-1 space-y-0.5 pr-1">
           <p
-            className="truncate text-sm font-medium leading-5"
+            className="truncate text-xs font-medium leading-snug"
             id={`inbox-item-${item._id}-content`}
           >
             {rowCopy.title}
           </p>
           <p
-            className="line-clamp-1 text-xs leading-4 text-muted-foreground"
+            className="line-clamp-1 text-[11px] leading-snug text-muted-foreground"
             id={`inbox-item-${item._id}-snippet`}
           >
             {rowCopy.snippet}
           </p>
           <p
-            className="text-xs tabular-nums text-muted-foreground sm:hidden"
+            className="text-[11px] tabular-nums text-muted-foreground sm:hidden"
             id={`inbox-item-${item._id}-time`}
           >
             {formatRelativeTime(item.createdAt)}
@@ -193,12 +193,12 @@ export const InboxItemRow = memo(function InboxItemRow({
             aria-expanded={isMobileActionsOpen}
             disabled={isAnyLoading}
           >
-            <HugeiconsIcon icon={MoreVerticalIcon} className="size-4" />
+            <HugeiconsIcon icon={MoreVerticalIcon} className="size-3.5" />
           </Button>
         ) : (
           <div className="shrink-0 flex items-center gap-1">
             <p
-              className="hidden text-xs tabular-nums text-muted-foreground sm:block"
+              className="hidden text-[11px] tabular-nums text-muted-foreground sm:block"
               id={`inbox-item-${item._id}-time-desktop`}
             >
               {formatRelativeTime(item.createdAt)}
@@ -213,31 +213,33 @@ export const InboxItemRow = memo(function InboxItemRow({
                   aria-haspopup="menu"
                   disabled={isAnyLoading}
                 >
-                  <HugeiconsIcon icon={MoreVerticalIcon} className="size-4" />
+                  <HugeiconsIcon icon={MoreVerticalIcon} className="size-3.5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuContent align="end" className="w-48 text-xs">
+              <DropdownMenuLabel className="text-xs font-medium">
+                Actions
+              </DropdownMenuLabel>
 
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger aria-haspopup="menu">
-                  <HugeiconsIcon icon={ArrowRight01Icon} className="size-4" />
+                  <HugeiconsIcon icon={ArrowRight01Icon} className="size-3.5" />
                   Convert to
                 </DropdownMenuSubTrigger>
-                <DropdownMenuSubContent>
+                <DropdownMenuSubContent className="text-xs">
                   <DropdownMenuItem
                     onClick={() => handleConvert("task")}
                     disabled={localLoading.convert}
                   >
-                    <HugeiconsIcon icon={Task01Icon} className="size-4" />
+                    <HugeiconsIcon icon={Task01Icon} className="size-3.5" />
                     Task
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     disabled
                   >
-                    <HugeiconsIcon icon={NoteIcon} className="size-4" />
+                    <HugeiconsIcon icon={NoteIcon} className="size-3.5" />
                     Note
-                    <span className="ml-auto text-xs text-muted-foreground">
+                    <span className="ml-auto text-[11px] text-muted-foreground">
                       Soon
                     </span>
                   </DropdownMenuItem>
@@ -247,7 +249,7 @@ export const InboxItemRow = memo(function InboxItemRow({
                   >
                     <HugeiconsIcon
                       icon={FolderManagementIcon}
-                      className="size-4"
+                      className="size-3.5"
                     />
                     Project
                   </DropdownMenuItem>
@@ -261,7 +263,7 @@ export const InboxItemRow = memo(function InboxItemRow({
                   onClick={handleUnarchive}
                   disabled={localLoading.archive}
                 >
-                  <HugeiconsIcon icon={Unarchive03Icon} className="size-4" />
+                  <HugeiconsIcon icon={Unarchive03Icon} className="size-3.5" />
                   Unarchive
                 </DropdownMenuItem>
               ) : (
@@ -269,7 +271,7 @@ export const InboxItemRow = memo(function InboxItemRow({
                   onClick={handleArchive}
                   disabled={localLoading.archive}
                 >
-                  <HugeiconsIcon icon={ArchiveIcon} className="size-4" />
+                  <HugeiconsIcon icon={ArchiveIcon} className="size-3.5" />
                   Archive
                 </DropdownMenuItem>
               )}
@@ -281,22 +283,27 @@ export const InboxItemRow = memo(function InboxItemRow({
                     onSelect={(e) => e.preventDefault()}
                     disabled={localLoading.delete}
                   >
-                    <HugeiconsIcon icon={Delete01Icon} className="size-4" />
+                    <HugeiconsIcon icon={Delete01Icon} className="size-3.5" />
                     Delete
                   </DropdownMenuItem>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Delete inbox item?</AlertDialogTitle>
-                    <AlertDialogDescription>
+                    <AlertDialogTitle className="text-base font-semibold">
+                      Delete inbox item?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription className="text-xs text-muted-foreground">
                       This action cannot be undone. The item will be permanently
                       removed.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogCancel className="h-8 rounded-md">
+                      Cancel
+                    </AlertDialogCancel>
                     <AlertDialogAction
                       variant="destructive"
+                      className="h-8 rounded-md"
                       onClick={handleDelete}
                       disabled={localLoading.delete}
                     >

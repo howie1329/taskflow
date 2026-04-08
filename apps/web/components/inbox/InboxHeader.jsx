@@ -5,17 +5,22 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export const InboxHeader = memo(function InboxHeader() {
   return (
-    <header>
-      <h1 className="sr-only">Inbox</h1>
-      <p className="text-sm text-muted-foreground">Capture fast, triage later</p>
+    <header className="shrink-0 pb-2">
+      <h1 className="text-xl font-semibold tracking-tight text-foreground">
+        Inbox
+      </h1>
+      <p className="text-xs text-muted-foreground">
+        Capture fast, triage later
+      </p>
     </header>
   );
 });
 
 export function InboxHeaderSkeleton() {
   return (
-    <div>
-      <Skeleton className="h-4 w-56 max-w-full" />
+    <div className="shrink-0 space-y-2 pb-2">
+      <Skeleton className="h-7 w-28 rounded-md" />
+      <Skeleton className="h-3 w-48 max-w-full rounded-md" />
     </div>
   );
 }

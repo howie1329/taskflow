@@ -36,7 +36,7 @@ function NewChatComposerInner() {
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex min-h-0 flex-1 items-center justify-center px-4 py-8 md:py-8">
         <div className="w-full max-w-2xl space-y-4">
-          <h1 className="text-center text-lg font-semibold tracking-tight text-foreground md:text-xl">
+          <h1 className="text-center text-xl font-semibold leading-tight tracking-tight text-foreground">
             What can I help with?
           </h1>
 
@@ -46,9 +46,9 @@ function NewChatComposerInner() {
                 key={suggestion.value}
                 suggestion={suggestion.value}
                 onClick={handleSuggestionSelect}
-                variant="outline"
+                variant="ghost"
                 size="sm"
-                className="rounded-md border-border bg-background px-3 text-xs font-medium text-muted-foreground transition-colors duration-150 hover:bg-muted hover:border-border hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
+                className="h-8 rounded-md px-3 text-xs font-medium text-muted-foreground transition-colors duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-100 hover:bg-accent/50 hover:text-foreground active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
               >
                 {suggestion.title}
               </Suggestion>
@@ -63,7 +63,7 @@ function NewChatComposerInner() {
             onSelectProjectId={setSelectedProjectId}
           />
 
-          <p className="mt-2 text-center text-xs text-muted-foreground">
+          <p className="mt-2 text-center text-[11px] leading-snug text-muted-foreground">
             AI can make mistakes. Check important info.
           </p>
         </div>

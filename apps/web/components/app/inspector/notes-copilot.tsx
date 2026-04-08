@@ -606,10 +606,10 @@ function NotesMiniChat({ note }: { note: Note }) {
             value={input}
             onChange={(event) => setInput(event.target.value)}
             placeholder="Ask about this note..."
-            className="min-h-16 max-h-56 px-3 py-2 text-sm leading-relaxed placeholder:text-muted-foreground"
+            className="min-h-16 max-h-56 px-3 py-2 text-sm leading-snug placeholder:text-muted-foreground"
           />
-          <PromptInputFooter className="border-t border-border px-3 py-2 text-muted-foreground">
-            <div className="flex items-center gap-2 text-xs">
+          <PromptInputFooter className="border-t border-border/50 px-3 py-2 text-xs text-muted-foreground">
+            <div className="flex items-center gap-2">
               {status === "streaming" || status === "submitted" ? (
                 <span className="inline-flex items-center gap-1.5 text-muted-foreground">
                   <HugeiconsIcon
@@ -627,7 +627,8 @@ function NotesMiniChat({ note }: { note: Note }) {
               status={status}
               onStop={stop}
               size="icon-sm"
-              className="size-8 rounded-md shadow-none"
+              variant="default"
+              className="size-8 rounded-md border-0 shadow-none bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
               disabled={status !== "streaming" && status !== "submitted" && !input.trim()}
             />
           </PromptInputFooter>
@@ -955,7 +956,7 @@ export function NotesCopilot() {
 
   if (!selectedNote) {
     return (
-      <p className="text-sm leading-relaxed text-muted-foreground">
+      <p className="text-xs leading-snug text-muted-foreground">
         Open a note to use the mini chat.
       </p>
     )
@@ -969,15 +970,24 @@ export function NotesCopilot() {
     >
       <TabsList
         variant="line"
-        className="h-auto w-full justify-start gap-1 rounded-none bg-transparent p-0"
+        className="h-8 w-full min-w-0 shrink-0 flex-nowrap justify-start gap-1 overflow-x-auto rounded-md border border-border/70 bg-transparent p-0.5"
       >
-        <TabsTrigger value="chat" className="px-2 py-1.5 text-sm font-medium">
+        <TabsTrigger
+          value="chat"
+          className="h-7 shrink-0 rounded-md px-2.5 text-xs font-medium text-muted-foreground after:!hidden data-active:bg-accent data-active:text-accent-foreground data-active:shadow-none"
+        >
           Chat
         </TabsTrigger>
-        <TabsTrigger value="reviewer" className="px-2 py-1.5 text-sm font-medium">
+        <TabsTrigger
+          value="reviewer"
+          className="h-7 shrink-0 rounded-md px-2.5 text-xs font-medium text-muted-foreground after:!hidden data-active:bg-accent data-active:text-accent-foreground data-active:shadow-none"
+        >
           Reviewer
         </TabsTrigger>
-        <TabsTrigger value="info" className="px-2 py-1.5 text-sm font-medium">
+        <TabsTrigger
+          value="info"
+          className="h-7 shrink-0 rounded-md px-2.5 text-xs font-medium text-muted-foreground after:!hidden data-active:bg-accent data-active:text-accent-foreground data-active:shadow-none"
+        >
           Info
         </TabsTrigger>
       </TabsList>

@@ -45,16 +45,15 @@ export function BoardView({
       .sort((a, b) => a.orderIndex - b.orderIndex);
   };
 
-  // Filter out Completed column if hideCompleted is true
   const visibleColumns = hideCompleted
     ? columns.filter((c) => c.id !== "Completed")
     : columns;
 
   return (
-    <div className="h-full w-full min-h-0 overflow-y-auto lg:overflow-y-hidden">
+    <div className="flex min-h-0 h-full w-full flex-1 flex-col overflow-y-auto lg:overflow-y-hidden">
       <div
         className={cn(
-          "grid gap-3 pb-1 lg:h-full lg:gap-0 lg:overflow-hidden lg:rounded-[20px] lg:border lg:border-border/70 lg:bg-card/45",
+          "flex min-h-0 flex-1 flex-col gap-4 pb-1 lg:grid lg:h-full lg:min-h-0 lg:gap-0 lg:overflow-hidden",
           visibleColumns.length === 3 ? "lg:grid-cols-3" : "lg:grid-cols-4",
         )}
       >
@@ -66,17 +65,17 @@ export function BoardView({
             <div
               key={column.id}
               className={cn(
-                "flex min-w-0 flex-col overflow-hidden rounded-[18px] border border-border/70 bg-card/50",
-                "lg:min-h-0 lg:rounded-none lg:border-0 lg:border-l lg:border-border/60 lg:bg-transparent",
+                "flex min-w-0 flex-col overflow-hidden",
+                "lg:min-h-0 lg:border-l lg:border-border/50",
                 "lg:first:border-l-0",
               )}
             >
-              <div className="sticky top-0 z-10 flex min-h-10 shrink-0 items-center justify-between gap-2 border-b border-border/60 bg-background/92 px-3 py-2 backdrop-blur supports-backdrop-filter:bg-background/80 lg:bg-card/75 lg:supports-backdrop-filter:bg-card/70">
+              <div className="flex min-h-9 shrink-0 items-center justify-between gap-2 border-b border-border/40 px-2 py-1.5">
                 <div className="flex min-w-0 items-center gap-2">
-                  <h3 className="truncate text-sm font-medium tracking-tight text-foreground">
+                  <h3 className="truncate text-xs font-semibold tracking-tight text-foreground">
                     {column.label}
                   </h3>
-                  <span className="shrink-0 rounded-md bg-muted px-2 py-0.5 text-[11px] font-medium tabular-nums text-muted-foreground">
+                  <span className="shrink-0 tabular-nums text-[11px] text-muted-foreground">
                     {columnTasks.length}
                   </span>
                 </div>
@@ -84,7 +83,7 @@ export function BoardView({
                   variant="ghost"
                   size="icon-sm"
                   className={cn(
-                    "shrink-0 rounded-md text-muted-foreground",
+                    "shrink-0 text-muted-foreground",
                     isMobile ? "size-8" : "size-7",
                   )}
                   onClick={() => onCreateTask({ status: column.id })}
@@ -96,7 +95,7 @@ export function BoardView({
 
               <div
                 className={cn(
-                  "min-h-0 flex-1 divide-y divide-border/40 overflow-y-auto bg-transparent",
+                  "min-h-0 flex-1 overflow-y-auto bg-transparent",
                   isCompleted && "text-muted-foreground",
                 )}
               >
@@ -111,7 +110,6 @@ export function BoardView({
                     />
                   );
                 })}
-                {/* Always show Add task card at bottom */}
                 <AddTaskCard
                   onClick={() => onCreateTask({ status: column.id })}
                 />
