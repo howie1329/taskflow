@@ -104,10 +104,10 @@ export function NotesAppSidebar({ onBackToWorkspace }: NotesAppSidebarProps) {
   if (isCollapsed) {
     return (
       <>
-        <SidebarHeader>
+        <SidebarHeader className="gap-1 border-b border-sidebar-border/50 px-1.5 py-2">
           <SidebarMenu>
             <SidebarMenuItem>
-              <div className="flex flex-col gap-2 px-2 py-2">
+              <div className="flex flex-col gap-2">
                 <SidebarMenuButton
                   tooltip="Open notes"
                   onClick={() => setOpen(true)}
@@ -161,10 +161,10 @@ export function NotesAppSidebar({ onBackToWorkspace }: NotesAppSidebarProps) {
 
   return (
     <>
-      <SidebarHeader>
+      <SidebarHeader className="gap-1 border-b border-sidebar-border/50 px-1.5 py-2">
         <SidebarMenu>
           <SidebarMenuItem>
-            <div className="flex items-center gap-2 px-2 py-2">
+            <div className="flex items-center gap-1">
               <SidebarMenuButton
                 tooltip="Back to workspace"
                 onClick={onBackToWorkspace}

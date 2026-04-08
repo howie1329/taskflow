@@ -208,20 +208,22 @@ export function NoteEditor({
         <EmptyHeader>
           <EmptyMedia
             variant="icon"
-            className="size-8 rounded-lg border border-border bg-background text-muted-foreground [&_svg]:size-5"
+            className="size-8 rounded-lg bg-muted/30 text-muted-foreground [&_svg]:size-5"
           >
             <HugeiconsIcon icon={NoteIcon} className="size-5" strokeWidth={2} />
           </EmptyMedia>
-          <EmptyTitle className="text-sm font-medium">Select a note</EmptyTitle>
-          <EmptyDescription className="max-w-[20rem] text-sm text-muted-foreground">
+          <EmptyTitle className="text-base font-semibold leading-tight">
+            Select a note
+          </EmptyTitle>
+          <EmptyDescription className="max-w-[20rem] text-xs leading-snug text-muted-foreground">
             Choose a note from the list or create a new one
           </EmptyDescription>
         </EmptyHeader>
-        <Button size="sm" className="h-8" onClick={onCreateNote}>
+        <Button size="sm" className="h-8 text-xs" onClick={onCreateNote}>
           <HugeiconsIcon icon={Add01Icon} className="mr-2 size-4" strokeWidth={2} />
           Create note
         </Button>
-        <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
+        <div className="mt-4 flex items-center gap-2 text-[11px] text-muted-foreground">
           <Kbd>⌘</Kbd>
           <span>N</span>
           <span>to create</span>
@@ -319,7 +321,7 @@ export function NoteEditor({
   if (isInSheet) {
     return (
       <div className="flex h-full min-h-0 flex-col overflow-hidden bg-background">
-        <div className="sticky top-0 z-10 shrink-0 border-b border-border/70 bg-background/95 px-4 pb-3 pt-2 backdrop-blur supports-backdrop-filter:bg-background/90">
+        <div className="sticky top-0 z-10 shrink-0 border-b border-border/50 bg-background px-4 pb-3 pt-2">
           <div className="mx-auto w-full max-w-[48rem]">
             <div className="mb-3 flex items-center justify-between gap-3">
               <Button
@@ -352,9 +354,9 @@ export function NoteEditor({
               }}
               onBlur={(e) => flushTitleUpdate(e.target.value)}
               placeholder="Note title"
-              className="h-auto border-0 bg-transparent px-0 py-0 text-2xl font-semibold tracking-tight shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/40"
+              className="h-auto border-0 bg-transparent px-0 py-0 text-xl font-semibold leading-tight tracking-tight shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/40"
             />
-            <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+            <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] leading-tight text-muted-foreground">
               {detailsStrip.map((item) => (
                 <span key={item}>{item}</span>
               ))}
@@ -372,8 +374,8 @@ export function NoteEditor({
               onChange={handleContentChange}
               placeholder="Start writing..."
               className="h-full min-h-0"
-              toolbarClassName="sticky top-0 z-10 -mx-1 mb-5 border-b border-border/60 bg-background/90 px-1 pb-2 backdrop-blur supports-backdrop-filter:bg-background/80"
-              editorClassName="h-full min-h-0 border-0 bg-transparent px-0 py-0 text-[15px] leading-8"
+              toolbarClassName="sticky top-0 z-10 -mx-1 mb-5 border-b border-border/50 bg-background px-1 pb-2"
+              editorClassName="h-full min-h-0 border-0 bg-transparent px-0 py-0 text-sm leading-snug"
             />
           </div>
         </div>
@@ -383,7 +385,7 @@ export function NoteEditor({
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-background">
-      <div className="sticky top-0 z-10 shrink-0 border-b border-border/70 bg-background/95 px-4 pb-4 pt-4 backdrop-blur supports-backdrop-filter:bg-background/90 md:px-8 md:pb-5">
+      <div className="sticky top-0 z-10 shrink-0 border-b border-border/50 bg-background px-4 py-3 md:px-8 md:py-4">
         <div className="mx-auto flex max-w-[50rem] items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
             <Input
@@ -395,9 +397,9 @@ export function NoteEditor({
               }}
               onBlur={(e) => flushTitleUpdate(e.target.value)}
               placeholder="Note title"
-              className="h-auto border-0 bg-transparent px-0 py-0 text-[2rem] font-semibold tracking-tight shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/40 md:text-[2.375rem]"
+              className="h-auto border-0 bg-transparent px-0 py-0 text-xl font-semibold leading-tight tracking-tight shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/40"
             />
-            <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+            <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] leading-tight text-muted-foreground">
               {detailsStrip.map((item) => (
                 <span key={item}>{item}</span>
               ))}
@@ -433,8 +435,8 @@ export function NoteEditor({
             onChange={handleContentChange}
             placeholder="Start writing..."
             className="h-full min-h-0"
-            toolbarClassName="sticky top-0 z-10 -mx-1 mb-6 border-b border-border/60 bg-background/90 px-1 pb-2 backdrop-blur supports-backdrop-filter:bg-background/80"
-            editorClassName="h-full min-h-0 border-0 bg-transparent px-0 py-0 text-[15px] leading-8"
+            toolbarClassName="sticky top-0 z-10 -mx-1 mb-6 border-b border-border/50 bg-background px-1 pb-2"
+            editorClassName="h-full min-h-0 border-0 bg-transparent px-0 py-0 text-sm leading-snug"
           />
         </div>
       </div>

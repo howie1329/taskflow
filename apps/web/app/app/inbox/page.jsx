@@ -17,38 +17,30 @@ import {
   useMobileActions,
 } from "@/hooks/inbox";
 
-const inboxColumnClass =
-  "mx-auto flex h-full w-full max-w-2xl min-h-0 flex-col overflow-hidden px-6 py-4 md:px-8 md:py-6";
+const inboxShellClass =
+  "flex h-full w-full min-h-0 flex-col overflow-hidden px-4 py-3";
 
-// Container component with loading state
 function InboxContainer({ children, isInitialLoading }) {
   if (isInitialLoading) {
     return (
-      <div className="flex h-full w-full min-h-0 flex-col overflow-hidden">
-        <div className={`${inboxColumnClass} flex flex-1 flex-col gap-4`}>
+      <div className={inboxShellClass}>
+        <div className="flex min-h-0 flex-1 flex-col gap-3">
           <InboxHeaderSkeleton />
-          <Skeleton className="h-24 w-full rounded-lg" />
+          <Skeleton className="h-20 w-full rounded-md" />
           <Skeleton className="h-8 w-full rounded-md" />
-          <div className="flex flex-col gap-2">
-            <Skeleton className="h-12 w-full rounded-lg" />
-            <Skeleton className="h-12 w-full rounded-lg" />
-            <Skeleton className="h-12 w-full rounded-lg" />
+          <div className="flex flex-col gap-1.5">
+            <Skeleton className="h-9 w-full rounded-md" />
+            <Skeleton className="h-9 w-full rounded-md" />
+            <Skeleton className="h-9 w-full rounded-md" />
           </div>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="flex h-full w-full min-h-0 flex-col overflow-hidden">
-      <div className={`${inboxColumnClass} flex flex-1 flex-col gap-4`}>
-        {children}
-      </div>
-    </div>
-  );
+  return <div className={inboxShellClass}>{children}</div>;
 }
 
-// Custom hook for search with debouncing
 function useSearchState() {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
@@ -63,7 +55,6 @@ function useSearchState() {
   return { searchQuery, setSearchQuery, debouncedSearchQuery };
 }
 
-// Custom hook for items filtering
 function useFilteredItems(items) {
   return useMemo(() => {
     const openItems = items?.filter((item) => item.status === "open") ?? [];
@@ -73,7 +64,6 @@ function useFilteredItems(items) {
   }, [items]);
 }
 
-// Custom hook for client-side filtering
 function useClientSideFiltering(
   openItems,
   archivedItems,
@@ -83,7 +73,8 @@ function useClientSideFiltering(
   return useMemo(() => {
     const normalizedSearch = searchQuery.trim().toLowerCase();
     const normalizedDebounced = debouncedSearchQuery.trim().toLowerCase();
-    const isTypingAhead = Boolean(normalizedSearch) && normalizedSearch !== normalizedDebounced;
+    const isTypingAhead =
+      Boolean(normalizedSearch) && normalizedSearch !== normalizedDebounced;
 
     if (!isTypingAhead) {
       return {
@@ -213,7 +204,9 @@ export default function InboxPage() {
 
   const isInitialLoading = isItemsLoading && !lastItemsRef.current;
   const isRefreshing = isItemsLoading && !!lastItemsRef.current;
-  const isSearching = isTypingAhead || (searchQuery !== debouncedSearchQuery && isItemsLoading);
+  const isSearching =
+    isTypingAhead ||
+    (searchQuery !== debouncedSearchQuery && isItemsLoading);
 
   return (
     <InboxContainer isInitialLoading={isInitialLoading}>
@@ -236,7 +229,9 @@ export default function InboxPage() {
         isLoading={isInitialLoading}
         isRefreshing={isRefreshing}
         isSearching={isSearching}
-        activeMobileItemId={isOpen && selectedItem ? String(selectedItem._id) : null}
+        activeMobileItemId={
+          isOpen && selectedItem ? String(selectedItem._id) : null
+        }
         onCapture={handleCapture}
         onArchive={archiveItem}
         onUnarchive={unarchiveItem}

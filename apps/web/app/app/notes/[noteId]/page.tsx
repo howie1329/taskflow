@@ -58,7 +58,7 @@ export default function NotePage() {
   if (isLoading) {
     return (
       <div className="flex h-full min-h-0 w-full flex-col overflow-hidden px-4 py-4 md:px-8 md:py-5">
-        <div className="mx-auto w-full max-w-[50rem] border-b border-border/70 pb-5">
+        <div className="mx-auto w-full max-w-[50rem] border-b border-border/50 pb-5">
           <Skeleton className="h-11 w-3/5 max-w-full" />
           <div className="mt-3 flex flex-wrap items-center gap-3">
             <Skeleton className="h-4 w-24" />
@@ -68,7 +68,7 @@ export default function NotePage() {
           </div>
         </div>
         <div className="mx-auto mt-5 flex w-full max-w-[50rem] flex-1 flex-col">
-          <div className="flex flex-wrap items-center gap-1 border-b border-border/60 pb-3">
+          <div className="flex flex-wrap items-center gap-1 border-b border-border/50 pb-3">
             <Skeleton className="h-7 w-7 rounded-md" />
             <Skeleton className="h-7 w-7 rounded-md" />
             <Skeleton className="h-7 w-7 rounded-md" />
@@ -91,7 +91,7 @@ export default function NotePage() {
     return (
       <div className="flex h-full flex-col">
         {isMobile && (
-          <div className="flex items-center gap-2 border-b border-border px-4 py-2.5 md:hidden">
+          <div className="flex items-center gap-2 border-b border-border/50 bg-background px-4 py-2.5 md:hidden">
             <Button
               variant="ghost"
               size="icon-sm"
@@ -103,7 +103,7 @@ export default function NotePage() {
                 strokeWidth={2}
               />
             </Button>
-            <span className="text-sm font-medium">Back to notes</span>
+            <span className="text-base font-semibold leading-tight">Back to notes</span>
           </div>
         )}
 
@@ -112,12 +112,14 @@ export default function NotePage() {
             <EmptyHeader>
               <EmptyMedia
                 variant="icon"
-                className="size-8 rounded-lg border border-border bg-background text-muted-foreground [&_svg]:size-5"
+                className="size-8 rounded-lg bg-muted/30 text-muted-foreground [&_svg]:size-5"
               >
                 <HugeiconsIcon icon={NoteIcon} className="size-5" strokeWidth={2} />
               </EmptyMedia>
-              <EmptyTitle className="text-sm font-medium">Note not found</EmptyTitle>
-              <EmptyDescription className="max-w-[20rem] text-sm text-muted-foreground">
+              <EmptyTitle className="text-base font-semibold leading-tight">
+                Note not found
+              </EmptyTitle>
+              <EmptyDescription className="max-w-[20rem] text-xs leading-snug text-muted-foreground">
                 This note may have been deleted or the link is invalid.
               </EmptyDescription>
             </EmptyHeader>
@@ -138,7 +140,7 @@ export default function NotePage() {
   return (
     <div className="flex h-full min-h-0 w-full flex-col overflow-hidden">
       {isMobile && (
-        <div className="flex items-center gap-2 border-b border-border px-4 py-2.5 md:hidden">
+        <div className="flex items-center gap-2 border-b border-border/50 bg-background px-4 py-2.5 md:hidden">
           <Button
             variant="ghost"
             size="icon-sm"
@@ -150,7 +152,9 @@ export default function NotePage() {
               strokeWidth={2}
             />
           </Button>
-          <span className="text-sm font-medium">Back to notes</span>
+          <span className="truncate text-base font-semibold leading-tight">
+            {selectedNote?.title || "Note"}
+          </span>
         </div>
       )}
 

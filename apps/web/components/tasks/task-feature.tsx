@@ -18,6 +18,7 @@ import { api } from "@/convex/_generated/api";
 import { useViewer } from "@/components/settings/hooks/use-viewer";
 import { BoardView } from "@/components/tasks/board-view";
 import { TodayBoardView } from "@/components/tasks/today-board-view";
+import { TaskListView } from "@/components/tasks/task-list-view";
 import { TaskDetailsSheet } from "@/components/tasks/task-details-sheet";
 import { CreateTaskSheet } from "@/components/tasks/create-task-sheet";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -49,6 +50,12 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Kbd } from "@/components/ui/kbd";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -69,7 +76,7 @@ type Project = Doc<"projects">;
 type Tag = Doc<"tags">;
 type Subtask = Doc<"subtasks">;
 
-type TaskView = "board" | "todayPlusBoard";
+type TaskView = "board" | "todayPlusBoard" | "list";
 type StatusFilter = "all" | Task["status"];
 type PriorityFilter = "all" | Task["priority"];
 type ScheduleFilter = "any" | "today" | "week" | "unscheduled";
@@ -972,7 +979,7 @@ function TaskFilterControls() {
 
 function TaskFeatureFrame({ children }: { children: ReactNode }) {
   return (
-    <div className="flex h-full w-full min-h-0 flex-col overflow-hidden bg-background">
+    <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden bg-background">
       {children}
     </div>
   );
@@ -980,155 +987,159 @@ function TaskFeatureFrame({ children }: { children: ReactNode }) {
 
 function TaskFeatureToolbar() {
   const { state, actions, meta } = useTaskFeature();
-
-  return (
-    <div className="flex shrink-0 flex-col gap-2">
-      <div className="flex flex-col gap-2.5 lg:flex-row lg:items-center lg:gap-3">
-        <div className="hidden shrink-0 lg:block">
-          <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground/80">
-            Tasks
-          </p>
-          <p className="text-sm text-muted-foreground">
-            Organize and track your work
-          </p>
-        </div>
-
-        <div className="min-w-0 flex-1">
-          {state.isSearchOpen || state.searchInput.length > 0 ? (
-            <InputGroup className="h-9 rounded-lg border-border/70 bg-card/70 shadow-none">
-              <InputGroupAddon>
-                <SearchIcon className="size-4" />
-              </InputGroupAddon>
-              <InputGroupInput
-                id="task-search-input"
-                ref={meta.searchInputRef}
-                value={state.searchInput}
-                onChange={(event) => actions.setSearchInput(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Escape") {
-                    if (state.searchInput.trim().length === 0) {
-                      actions.closeSearch();
-                      actions.focusSearchButton();
-                    } else {
-                      actions.clearSearch();
-                    }
-                  }
-                }}
-                placeholder="Search tasks"
-                aria-label="Search tasks"
-                className="text-sm"
-              />
-              <InputGroupButton
-                size="icon-xs"
-                onClick={actions.clearSearch}
-                aria-label="Clear search"
-              >
-                <XIcon className="size-3.5" />
-              </InputGroupButton>
-            </InputGroup>
-          ) : (
-            <Button
-              // eslint-disable-next-line react-hooks/refs -- forwarded ref object for focus restore outside render
-              ref={meta.searchButtonRef}
-              variant="outline"
-              size="default"
-              className="h-9 w-full justify-between rounded-lg border-border/70 bg-card/70 px-3 text-sm"
-              onClick={actions.openSearch}
-              aria-expanded={state.isSearchOpen}
-              aria-controls="task-search-input"
-            >
-              <span className="flex items-center gap-2">
-                <SearchIcon data-icon="inline-start" />
-                Search tasks
-              </span>
-              <Kbd>/</Kbd>
-            </Button>
-          )}
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2 lg:flex-nowrap lg:justify-end">
-          <label className="inline-flex h-9 items-center gap-2 rounded-lg border border-border/70 bg-card/70 px-3 text-sm text-foreground">
-            <Switch
-              size="sm"
-              checked={state.hideCompleted}
-              onCheckedChange={actions.toggleHideCompleted}
-            />
-            <span className="font-medium leading-none">Hide completed</span>
-          </label>
-
-          <Tabs
-            value={state.currentView}
-            onValueChange={(value) => actions.setView(value as TaskView)}
-            className="shrink-0"
-          >
-            <TabsList
-              variant="line"
-              className="h-9 rounded-lg border border-border/70 bg-card/70 p-1"
-            >
-              <TabsTrigger
-                value="board"
-                className="h-7 rounded-md px-3 text-sm text-muted-foreground data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:after:hidden"
-              >
-                Board
-              </TabsTrigger>
-              <TabsTrigger
-                value="todayPlusBoard"
-                className="h-7 rounded-md px-3 text-sm text-muted-foreground data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:after:hidden"
-              >
-                Today + Board
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function TaskFeatureFilters() {
-  const { state } = useTaskFeature();
   const isMobile = useIsMobile();
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
 
-  if (state.isEmptyState) {
-    return null;
-  }
-
-  if (isMobile) {
-    return (
-      <>
-        <Button
-          variant="outline"
-          size="sm"
-          className="h-8 w-fit rounded-lg border-border/70 bg-card/70"
-          onClick={() => setIsMobileFiltersOpen(true)}
-        >
-          <SlidersHorizontalIcon data-icon="inline-start" />
-          Filters
-        </Button>
-        <Sheet open={isMobileFiltersOpen} onOpenChange={setIsMobileFiltersOpen}>
-          <SheetContent
-            side="bottom"
-            className="h-[70vh] rounded-t-[20px] border-border/70 bg-background"
-          >
-            <SheetHeader>
-              <SheetTitle>Filter tasks</SheetTitle>
-              <SheetDescription>
-                Narrow tasks by status, priority, project, tag, and schedule.
-              </SheetDescription>
-            </SheetHeader>
-            <div className="overflow-y-auto p-4">
-              <TaskFilterControls />
-            </div>
-          </SheetContent>
-        </Sheet>
-      </>
-    );
-  }
+  const tabTriggerClass =
+    "h-7 rounded-md px-2.5 text-xs font-medium text-muted-foreground data-[state=active]:bg-accent data-[state=active]:text-accent-foreground data-[state=active]:shadow-none data-[state=active]:after:hidden sm:px-3";
 
   return (
-    <div className="rounded-[18px] border border-border/70 bg-card/45 p-2.5">
-      <TaskFilterControls />
+    <div className="flex min-h-11 shrink-0 flex-wrap items-center gap-x-2 gap-y-2 border-b border-border/50 px-4 py-2">
+      <h1 className="shrink-0 text-xl font-semibold tracking-tight text-foreground">
+        Tasks
+      </h1>
+
+      <div className="min-w-0 flex-1 basis-[140px] sm:basis-auto sm:min-w-40">
+        {state.isSearchOpen || state.searchInput.length > 0 ? (
+          <InputGroup className="h-8 rounded-md border border-border/70 bg-transparent shadow-none">
+            <InputGroupAddon>
+              <SearchIcon className="size-3.5" />
+            </InputGroupAddon>
+            <InputGroupInput
+              id="task-search-input"
+              ref={meta.searchInputRef}
+              value={state.searchInput}
+              onChange={(event) => actions.setSearchInput(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Escape") {
+                  if (state.searchInput.trim().length === 0) {
+                    actions.closeSearch();
+                    actions.focusSearchButton();
+                  } else {
+                    actions.clearSearch();
+                  }
+                }
+              }}
+              placeholder="Search tasks"
+              aria-label="Search tasks"
+              className="text-xs"
+            />
+            <InputGroupButton
+              size="icon-xs"
+              onClick={actions.clearSearch}
+              aria-label="Clear search"
+            >
+              <XIcon className="size-3.5" />
+            </InputGroupButton>
+          </InputGroup>
+        ) : (
+          <div className="flex items-center gap-1">
+            <Button
+              // eslint-disable-next-line react-hooks/refs -- forwarded ref object for focus restore outside render
+              ref={meta.searchButtonRef}
+              variant="ghost"
+              size="icon"
+              className="size-8 shrink-0 text-muted-foreground"
+              onClick={actions.openSearch}
+              aria-expanded={state.isSearchOpen}
+              aria-controls="task-search-input"
+              aria-label="Search tasks"
+            >
+              <SearchIcon className="size-4" />
+            </Button>
+            <Kbd className="hidden sm:inline-flex">/</Kbd>
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-wrap items-center justify-end gap-1.5 sm:ml-auto">
+        {!state.isEmptyState &&
+          (isMobile ? (
+            <>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-8 text-muted-foreground"
+                onClick={() => setIsMobileFiltersOpen(true)}
+                aria-label="Open filters"
+              >
+                <SlidersHorizontalIcon className="size-4" />
+              </Button>
+              <Sheet
+                open={isMobileFiltersOpen}
+                onOpenChange={setIsMobileFiltersOpen}
+              >
+                <SheetContent
+                  side="bottom"
+                  className="h-[70vh] rounded-t-lg border-border/70 bg-background"
+                >
+                  <SheetHeader>
+                    <SheetTitle>Filter tasks</SheetTitle>
+                    <SheetDescription>
+                      Narrow tasks by status, priority, project, tag, and
+                      schedule.
+                    </SheetDescription>
+                  </SheetHeader>
+                  <div className="overflow-y-auto p-4">
+                    <TaskFilterControls />
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </>
+          ) : (
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-8 text-muted-foreground"
+                  aria-label="Filters"
+                >
+                  <SlidersHorizontalIcon className="size-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                align="end"
+                className="flex w-80 max-h-[min(70vh,28rem)] flex-col gap-2 overflow-y-auto p-3"
+              >
+                <TaskFilterControls />
+              </PopoverContent>
+            </Popover>
+          ))}
+
+        <label className="inline-flex h-8 cursor-pointer items-center gap-2 rounded-md px-1.5 text-xs text-foreground">
+          <Switch
+            size="sm"
+            checked={state.hideCompleted}
+            onCheckedChange={actions.toggleHideCompleted}
+            aria-label="Hide completed tasks"
+          />
+          <span className="hidden font-medium leading-none sm:inline">
+            Hide completed
+          </span>
+        </label>
+
+        <Tabs
+          value={state.currentView}
+          onValueChange={(value) => actions.setView(value as TaskView)}
+          className="min-w-0 max-w-full shrink-0 overflow-x-auto"
+        >
+          <TabsList
+            variant="line"
+            className="h-8 w-max min-w-0 flex-nowrap rounded-md border border-border/70 bg-transparent p-0.5"
+          >
+            <TabsTrigger value="board" className={tabTriggerClass}>
+              Board
+            </TabsTrigger>
+            <TabsTrigger value="todayPlusBoard" className={tabTriggerClass}>
+              Today + Board
+            </TabsTrigger>
+            <TabsTrigger value="list" className={tabTriggerClass}>
+              List
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
     </div>
   );
 }
@@ -1138,16 +1149,18 @@ function TaskFeatureContent() {
 
   if (meta.isLoading) {
     return (
-      <div className="flex h-full min-h-0 flex-col gap-3 overflow-hidden px-6 py-3 md:px-8">
-        <div className="flex min-h-0 flex-1 items-center justify-center">
-          <p className="text-sm text-muted-foreground">Loading...</p>
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-4 py-3">
+        <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto pt-1">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <Skeleton key={i} className="h-9 w-full rounded-md" />
+          ))}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-full w-full min-h-0 flex-1 flex-col overflow-hidden px-6 py-3 md:px-8">
+    <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden px-4 py-3">
       {state.isEmptyState ? (
         <div className="flex min-h-0 flex-1 items-center justify-center py-16">
           <div className="flex max-w-xs flex-col items-center justify-center gap-3 text-center">
@@ -1155,13 +1168,15 @@ function TaskFeatureContent() {
               className="size-8 text-muted-foreground"
               aria-hidden
             />
-            <h3 className="text-sm font-medium">No tasks yet</h3>
+            <h3 className="text-xl font-semibold tracking-tight">
+              No tasks yet
+            </h3>
             <p className="text-sm text-muted-foreground">
               Create your first task to get started
             </p>
             <Button
               size="sm"
-              className="mt-2 h-8 rounded-lg"
+              className="mt-2 h-8 rounded-md"
               onClick={() => actions.openCreate({ status: "Not Started" })}
             >
               Add your first task
@@ -1169,7 +1184,7 @@ function TaskFeatureContent() {
             <Button
               size="sm"
               variant="outline"
-              className="h-8 rounded-lg"
+              className="h-8 rounded-md"
               onClick={() => actions.setCreateTagDialogOpen(true)}
             >
               Create a tag
@@ -1183,7 +1198,9 @@ function TaskFeatureContent() {
               className="size-8 text-muted-foreground"
               aria-hidden
             />
-            <h3 className="text-sm font-medium">No matching tasks</h3>
+            <h3 className="text-xl font-semibold tracking-tight">
+              No matching tasks
+            </h3>
             <p className="text-sm text-muted-foreground">
               Try adjusting your search or filters
             </p>
@@ -1191,7 +1208,7 @@ function TaskFeatureContent() {
               <Button
                 variant="outline"
                 size="sm"
-                className="mt-2 h-8 rounded-lg"
+                className="mt-2 h-8 rounded-md"
                 onClick={actions.clearFilters}
               >
                 Clear filters
@@ -1199,24 +1216,35 @@ function TaskFeatureContent() {
             )}
           </div>
         </div>
-      ) : state.currentView === "board" ? (
-        <BoardView
-          tasks={state.filteredTasks}
-          onTaskClick={actions.openDetails}
-          onCreateTask={actions.openCreate}
-          projects={state.projects}
-          tags={state.tags}
-          hideCompleted={state.hideCompleted}
-        />
       ) : (
-        <TodayBoardView
-          tasks={state.filteredTasks}
-          onTaskClick={actions.openDetails}
-          onCreateTask={actions.openCreate}
-          projects={state.projects}
-          tags={state.tags}
-          hideCompleted={state.hideCompleted}
-        />
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          {state.currentView === "list" ? (
+            <TaskListView
+              tasks={state.filteredTasks}
+              onTaskClick={actions.openDetails}
+              onCreateTask={actions.openCreate}
+              hideCompleted={state.hideCompleted}
+            />
+          ) : state.currentView === "board" ? (
+            <BoardView
+              tasks={state.filteredTasks}
+              onTaskClick={actions.openDetails}
+              onCreateTask={actions.openCreate}
+              projects={state.projects}
+              tags={state.tags}
+              hideCompleted={state.hideCompleted}
+            />
+          ) : (
+            <TodayBoardView
+              tasks={state.filteredTasks}
+              onTaskClick={actions.openDetails}
+              onCreateTask={actions.openCreate}
+              projects={state.projects}
+              tags={state.tags}
+              hideCompleted={state.hideCompleted}
+            />
+          )}
+        </div>
       )}
     </div>
   );
@@ -1321,7 +1349,6 @@ export const TaskFeature = {
   Provider: TaskFeatureProvider,
   Frame: TaskFeatureFrame,
   Toolbar: TaskFeatureToolbar,
-  Filters: TaskFeatureFilters,
   Content: TaskFeatureContent,
   Sheets: TaskFeatureSheets,
   CreateTagDialog: TaskFeatureCreateTagDialog,

@@ -40,10 +40,10 @@ export interface ChatSettingsContentProps {
 }
 
 export const CHAT_SETTINGS_TRIGGER_CLASS_NAME =
-  "rounded-md border-border bg-background text-foreground shadow-none transition-[color,background-color,border-color,transform] duration-150 ease-out hover:bg-muted/50 motion-safe:active:scale-[0.97]";
+  "h-8 rounded-md border-0 bg-transparent text-xs font-medium text-foreground shadow-none transition-[color,background-color,transform] duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent/50 motion-safe:active:scale-[0.97]";
 
 export const CHAT_SETTINGS_POPOVER_CLASS_NAME =
-  "gap-0 overflow-hidden rounded-xl border border-border bg-popover p-0 shadow-md ring-0";
+  "gap-0 overflow-hidden rounded-lg border border-border/70 bg-popover p-0 shadow-sm ring-0";
 
 /** List row / menu option: explicit properties, ease-out, light press (popover rows are wide) */
 const SETTINGS_MENU_ROW_INTERACTION =
@@ -68,8 +68,8 @@ export function SettingsSection({
       aria-label={title}
     >
       <div className="px-2 pb-1.5 pt-1">
-        <div className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-          <span className="inline-flex size-4 shrink-0 items-center justify-center text-foreground/80">
+        <div className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+          <span className="inline-flex size-3 shrink-0 items-center justify-center text-foreground/80">
             {icon}
           </span>
           <span>{title}</span>
@@ -112,15 +112,14 @@ export function SettingsOptionButton({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex w-full min-w-0 origin-left items-start gap-3 rounded-md px-3 py-2.5 text-left hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
+        "flex w-full min-w-0 origin-left items-start gap-3 rounded-md bg-transparent px-3 py-2.5 text-left hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
         SETTINGS_MENU_ROW_INTERACTION,
-        selected ? "bg-muted/55" : "bg-transparent",
       )}
     >
       <span
         className={cn(
           "mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-md text-foreground/70",
-          selected ? "bg-foreground/8 text-foreground" : "bg-muted/35",
+          selected ? "bg-muted/30 text-foreground" : "bg-muted/35",
         )}
       >
         {selected ? <CheckIcon className="size-3.5" /> : leadingIcon}
@@ -128,7 +127,12 @@ export function SettingsOptionButton({
       <span className="min-w-0 flex-1">
         <span className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
           <span className="min-w-0 flex-1">
-            <span className="block truncate text-sm font-medium text-foreground">
+            <span
+              className={cn(
+                "block truncate text-xs text-foreground",
+                selected ? "font-semibold" : "font-medium",
+              )}
+            >
               {title}
             </span>
             {meta ? (
@@ -236,8 +240,8 @@ export function ModelSettingsList({
               "rounded-md px-2.5 py-1 text-xs font-medium",
               SETTINGS_FILTER_CHIP_INTERACTION,
               selectedInterface === "all"
-                ? "bg-muted/55 text-foreground"
-                : "bg-muted/20 text-muted-foreground hover:bg-muted/40 hover:text-foreground",
+                ? "bg-accent text-accent-foreground"
+                : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
             )}
           >
             All
@@ -251,8 +255,8 @@ export function ModelSettingsList({
                 "rounded-md px-2.5 py-1 text-xs font-medium",
                 SETTINGS_FILTER_CHIP_INTERACTION,
                 selectedInterface === iface
-                  ? "bg-muted/55 text-foreground"
-                  : "bg-muted/20 text-muted-foreground hover:bg-muted/40 hover:text-foreground",
+                  ? "bg-accent text-accent-foreground"
+                  : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
               )}
             >
               {formatInterfaceDisplay(iface) ?? iface}
@@ -268,12 +272,12 @@ export function ModelSettingsList({
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
             placeholder="Search models..."
-            className="h-8 rounded-md border-border/40 bg-muted/20 pl-8 text-sm"
+            className="h-8 rounded-md border-input bg-input pl-8 text-xs dark:bg-input/30"
           />
         </div>
       </div>
       <SettingsSection
-        icon={<SparklesIcon className="size-4" />}
+        icon={<SparklesIcon className="size-3" />}
         title="Model"
       >
         {availableModels.length === 0 ? (
@@ -326,12 +330,12 @@ export function ModeSettingsList({
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
             placeholder="Search modes..."
-            className="h-8 rounded-md border-border/40 bg-muted/20 pl-8 text-sm"
+            className="h-8 rounded-md border-input bg-input pl-8 text-xs dark:bg-input/30"
           />
         </div>
       </div>
       <SettingsSection
-        icon={<WandSparklesIcon className="size-4" />}
+        icon={<WandSparklesIcon className="size-3" />}
         title="Mode"
       >
         {filteredModes.length > 0 ? (
@@ -391,16 +395,16 @@ export function ProjectSettingsList({
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
             placeholder="Search projects..."
-            className="h-8 rounded-md border-border/40 bg-muted/20 pl-8 text-sm"
+            className="h-8 rounded-md border-input bg-input pl-8 text-xs dark:bg-input/30"
           />
         </div>
       </div>
       <SettingsSection
         icon={
           selectedProject ? (
-            <FolderIcon className="size-4" />
+            <FolderIcon className="size-3" />
           ) : (
-            <GlobeIcon className="size-4" />
+            <GlobeIcon className="size-3" />
           )
         }
         title="Project"
@@ -538,25 +542,17 @@ function ModelSettingsOptionButton({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex w-full min-w-0 origin-left items-center gap-2 rounded-md px-2 py-2 text-left hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
+        "flex w-full min-w-0 origin-left items-center gap-2 rounded-md bg-transparent px-2 py-2 text-left hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
         SETTINGS_MENU_ROW_INTERACTION,
-        selected ? "bg-muted/55" : "bg-transparent",
       )}
     >
-      <span
-        className={cn(
-          "flex size-4 shrink-0 items-center justify-center rounded-md bg-muted/35 text-foreground/75",
-          selected ? "bg-foreground/8 text-foreground" : null,
-        )}
-      >
+      <span className="flex size-4 shrink-0 items-center justify-center rounded-md bg-muted/25 text-foreground/75">
         {model.interface === "groq" ? (
           <ModelSelectorLogo provider="groq" className="size-2.5" />
         ) : model.interface === "openrouter" ? (
           <ModelSelectorLogo provider="openrouter" className="size-2.5" />
         ) : model.provider ? (
           <ModelSelectorLogo provider={model.provider} className="size-2.5" />
-        ) : selected ? (
-          <CheckIcon className="size-2.5" />
         ) : (
           <CpuIcon className="size-2.5" />
         )}
@@ -564,16 +560,21 @@ function ModelSettingsOptionButton({
 
       <span className="min-w-0 flex-1">
         <span className="flex min-w-0 items-center gap-2">
-          <span className="truncate text-sm font-medium text-foreground">
+          <span
+            className={cn(
+              "truncate text-xs text-foreground",
+              selected ? "font-semibold" : "font-medium",
+            )}
+          >
             {model.name}
           </span>
           {formatInterfaceDisplay(model.interface) ? (
-            <span className="shrink-0 rounded-md bg-muted/50 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+            <span className="shrink-0 rounded-md bg-muted/40 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
               {formatInterfaceDisplay(model.interface)}
             </span>
           ) : null}
         </span>
-        <span className="mt-0.5 flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1 text-[10px] text-muted-foreground tabular-nums">
+        <span className="mt-0.5 flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] text-muted-foreground tabular-nums">
           <span className="whitespace-nowrap">
             {formatModelPrice(model.pricing.prompt)} /{" "}
             {formatModelPrice(model.pricing.completion)}
@@ -644,7 +645,7 @@ function ModelSettingsOptionButton({
       </span>
 
       {selected ? (
-        <CheckIcon className="size-2.5 shrink-0 text-foreground" />
+        <CheckIcon className="size-3 shrink-0 text-foreground" aria-hidden />
       ) : null}
     </button>
   );
@@ -664,29 +665,24 @@ function ModeSettingsOptionButton({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex w-full min-w-0 origin-left items-center gap-2 rounded-md px-2 py-2 text-left hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
+        "flex w-full min-w-0 origin-left items-center gap-2 rounded-md bg-transparent px-2 py-2 text-left hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
         SETTINGS_MENU_ROW_INTERACTION,
-        selected ? "bg-muted/55" : "bg-transparent",
       )}
     >
-      <span
-        className={cn(
-          "flex size-4 shrink-0 items-center justify-center rounded-md bg-muted/35 text-foreground/75",
-          selected ? "bg-foreground/8 text-foreground" : null,
-        )}
-      >
-        {selected ? (
-          <CheckIcon className="size-2.5" />
-        ) : (
-          <WandSparklesIcon className="size-2.5" />
-        )}
+      <span className="flex size-4 shrink-0 items-center justify-center rounded-md bg-muted/25 text-foreground/75">
+        <WandSparklesIcon className="size-2.5" />
       </span>
 
       <span className="min-w-0 flex-1">
-        <span className="truncate text-sm font-medium text-foreground">
+        <span
+          className={cn(
+            "truncate text-xs text-foreground",
+            selected ? "font-semibold" : "font-medium",
+          )}
+        >
           {mode}
         </span>
-        <span className="mt-0.5 flex min-w-0 items-center gap-1.5 text-[10px] text-muted-foreground">
+        <span className="mt-0.5 flex min-w-0 items-center gap-1.5 text-[11px] text-muted-foreground">
           <span className="truncate">Prompt behavior</span>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -711,7 +707,7 @@ function ModeSettingsOptionButton({
       </span>
 
       {selected ? (
-        <CheckIcon className="size-2.5 shrink-0 text-foreground" />
+        <CheckIcon className="size-3 shrink-0 text-foreground" aria-hidden />
       ) : null}
     </button>
   );
@@ -737,26 +733,25 @@ function ProjectSettingsOptionButton({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex w-full min-w-0 origin-left items-center gap-2 rounded-md px-2 py-2 text-left hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
+        "flex w-full min-w-0 origin-left items-center gap-2 rounded-md bg-transparent px-2 py-2 text-left hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
         SETTINGS_MENU_ROW_INTERACTION,
-        selected ? "bg-muted/55" : "bg-transparent",
       )}
     >
-      <span
-        className={cn(
-          "flex size-4 shrink-0 items-center justify-center rounded-md bg-muted/35 text-foreground/75",
-          selected ? "bg-foreground/8 text-foreground" : null,
-        )}
-      >
+      <span className="flex size-4 shrink-0 items-center justify-center rounded-md bg-muted/25 text-foreground/75">
         {icon}
       </span>
 
       <span className="min-w-0 flex-1">
-        <span className="truncate text-sm font-medium text-foreground">
+        <span
+          className={cn(
+            "truncate text-xs text-foreground",
+            selected ? "font-semibold" : "font-medium",
+          )}
+        >
           {title}
         </span>
         {meta ? (
-          <span className="mt-0.5 flex min-w-0 items-center gap-1.5 text-[10px] text-muted-foreground">
+          <span className="mt-0.5 flex min-w-0 items-center gap-1.5 text-[11px] text-muted-foreground">
             <span className="truncate">{meta}</span>
             {tooltipContent ? (
               <Tooltip>
@@ -784,7 +779,7 @@ function ProjectSettingsOptionButton({
       </span>
 
       {selected ? (
-        <CheckIcon className="size-2.5 shrink-0 text-foreground" />
+        <CheckIcon className="size-3 shrink-0 text-foreground" aria-hidden />
       ) : null}
     </button>
   );

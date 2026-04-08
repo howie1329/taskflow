@@ -29,8 +29,12 @@ export const InboxEmptyState = memo(function InboxEmptyState({
           <EmptyMedia variant="icon">
             <HugeiconsIcon icon={Search01Icon} className="size-4" />
           </EmptyMedia>
-          <EmptyTitle>No matches found</EmptyTitle>
-          <EmptyDescription>Try adjusting your search terms</EmptyDescription>
+          <EmptyTitle className="text-xl font-semibold">
+            No matches found
+          </EmptyTitle>
+          <EmptyDescription className="text-xs text-muted-foreground">
+            Try adjusting your search terms
+          </EmptyDescription>
         </EmptyHeader>
       </Empty>
     );
@@ -43,8 +47,10 @@ export const InboxEmptyState = memo(function InboxEmptyState({
           <EmptyMedia variant="icon">
             <HugeiconsIcon icon={ArchiveIcon} className="size-4" />
           </EmptyMedia>
-          <EmptyTitle>No archived items</EmptyTitle>
-          <EmptyDescription>
+          <EmptyTitle className="text-xl font-semibold">
+            No archived items
+          </EmptyTitle>
+          <EmptyDescription className="text-xs text-muted-foreground">
             Archived items will appear here. You can unarchive them anytime.
           </EmptyDescription>
         </EmptyHeader>
@@ -58,8 +64,10 @@ export const InboxEmptyState = memo(function InboxEmptyState({
         <EmptyMedia variant="icon">
           <HugeiconsIcon icon={InboxDownloadIcon} className="size-4" />
         </EmptyMedia>
-        <EmptyTitle>Your inbox is empty</EmptyTitle>
-        <EmptyDescription>
+        <EmptyTitle className="text-xl font-semibold">
+          Your inbox is empty
+        </EmptyTitle>
+        <EmptyDescription className="text-xs text-muted-foreground">
           Use the capture box above to quickly dump thoughts, ideas, and tasks
           to process later.
         </EmptyDescription>

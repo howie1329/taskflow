@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export function ProjectCardSkeleton() {
   return (
     <div
-      className="flex h-full flex-col rounded-[18px] border border-border/70 bg-card/50 p-4"
+      className="flex h-full flex-col rounded-md border border-border/50 bg-transparent p-4"
       aria-hidden="true"
     >
       <div className="mb-3 flex items-center gap-2.5">

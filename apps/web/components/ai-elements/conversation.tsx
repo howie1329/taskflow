@@ -32,7 +32,10 @@ export const ConversationContent = ({
   ...props
 }: ConversationContentProps) => (
   <StickToBottom.Content
-    className={cn("relative z-10 flex flex-col gap-6 p-4", className)}
+    className={cn(
+      "relative z-10 flex flex-col gap-4 px-4 py-6 md:px-8",
+      className,
+    )}
     {...props}
   />
 );
@@ -71,21 +74,27 @@ export const ConversationEmptyState = ({
       <>
         {icon && <div className="text-muted-foreground">{icon}</div>}
         <div className="space-y-1">
-          <h3 className="font-medium text-sm">{title}</h3>
+          <h3 className="text-base font-semibold leading-tight text-foreground">
+            {title}
+          </h3>
           {description && (
-            <p className="text-muted-foreground text-sm">{description}</p>
+            <p className="text-xs leading-snug text-muted-foreground">
+              {description}
+            </p>
           )}
         </div>
         {suggestions && suggestions.length > 0 && onSuggestionSelect && (
           <div className="mt-4 flex flex-wrap justify-center gap-2">
-            <p className="w-full text-xs text-muted-foreground">Try asking…</p>
+            <p className="w-full text-[11px] text-muted-foreground">
+              Try asking…
+            </p>
             {suggestions.map((s) => (
               <Button
                 key={s.value}
                 type="button"
-                variant="outline"
+                variant="ghost"
                 size="sm"
-                className="rounded-md border-border bg-background px-3 text-xs font-medium text-muted-foreground transition-colors duration-150 hover:bg-muted hover:border-border hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/30"
+                className="h-8 rounded-md px-3 text-xs font-medium text-muted-foreground transition-colors duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent/50 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/30"
                 onClick={() => onSuggestionSelect(s.value)}
               >
                 {s.title}
@@ -118,7 +127,9 @@ export const ConversationScrollButton = ({
         animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
         exit={prefersReducedMotion ? undefined : { opacity: 0, y: 10, scale: 0.95 }}
         transition={
-          prefersReducedMotion ? undefined : { duration: 0.2, ease: "easeOut" }
+          prefersReducedMotion
+            ? undefined
+            : { duration: 0.2, ease: [0.16, 1, 0.3, 1] }
         }
         className="pointer-events-auto absolute bottom-4 left-[50%] z-30 -translate-x-1/2"
       >

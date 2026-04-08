@@ -114,20 +114,15 @@ export function NotesRail({
         )}
       >
         <div className="flex items-center justify-between gap-2">
-          <span
-            className={cn(
-              "font-medium text-muted-foreground",
-              isSidebar ? "text-[9px] uppercase tracking-wide" : "text-sm",
-            )}
-          >
+          <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
             Notes
           </span>
           <Button
             className={cn(
               "rounded-md transition-colors duration-150 ease-[cubic-bezier(0.16,1,0.3,1)]",
-              isSidebar ? "size-7 shrink-0 p-0" : "h-8 px-3 text-xs font-medium",
+              isSidebar ? "size-8 shrink-0 p-0" : "h-8 px-3 text-xs font-medium",
             )}
-            variant="outline"
+            variant="ghost"
             onClick={onCreateNote}
             aria-label="New note"
           >
@@ -136,7 +131,11 @@ export function NotesRail({
               className={cn("shrink-0", isSidebar ? "size-3" : "mr-2 size-3.5")}
               strokeWidth={2}
             />
-            {isSidebar ? <span className="sr-only">New note</span> : "New"}
+            {isSidebar ? (
+              <span className="sr-only">New note</span>
+            ) : (
+              <span>New</span>
+            )}
           </Button>
         </div>
 
@@ -169,7 +168,7 @@ export function NotesRail({
         </InputGroup>
 
         {typeLabel ? (
-          <div className="flex items-center justify-between gap-2 rounded-md border border-dashed border-border/60 px-3 py-2 text-xs text-muted-foreground">
+          <div className="flex items-center justify-between gap-2 rounded-md border border-dashed border-border/50 px-3 py-2 text-xs text-muted-foreground">
             <span className="truncate">
               Filtered by <span className="text-foreground/90">{typeLabel}</span>
             </span>
@@ -205,12 +204,16 @@ export function NotesRail({
               <EmptyHeader>
                 <EmptyMedia
                   variant="icon"
-                  className="size-8 rounded-lg border border-border text-muted-foreground [&_svg]:size-5"
+                  className="size-8 rounded-lg bg-muted/30 text-muted-foreground [&_svg]:size-5"
                 >
                   <HugeiconsIcon icon={NoteIcon} className="size-5" strokeWidth={2} />
                 </EmptyMedia>
-                <EmptyTitle>No notes yet</EmptyTitle>
-                <EmptyDescription>Create your first note to get started</EmptyDescription>
+                <EmptyTitle className="text-base font-semibold leading-tight">
+                  No notes yet
+                </EmptyTitle>
+                <EmptyDescription className="text-xs leading-snug">
+                  Create your first note to get started
+                </EmptyDescription>
               </EmptyHeader>
               <Button size="sm" onClick={onCreateNote}>
                 New note
@@ -272,7 +275,7 @@ export function NotesRail({
                   )}
                 >
                   <NoteSection label="Latest" count={0} />
-                  <div className="px-3 py-4 text-sm text-muted-foreground">
+                  <div className="px-3 py-4 text-xs leading-snug text-muted-foreground">
                     All of your visible notes are pinned.
                   </div>
                 </section>

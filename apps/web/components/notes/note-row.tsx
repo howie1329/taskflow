@@ -47,8 +47,8 @@ export function NoteRow({
         "motion-safe:transition-colors motion-safe:duration-150 motion-safe:ease-[cubic-bezier(0.16,1,0.3,1)]",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-offset-1 focus-visible:ring-offset-background",
         isActive
-          ? "bg-muted font-medium text-foreground"
-          : "text-muted-foreground hover:bg-muted hover:text-foreground",
+          ? "bg-accent font-medium text-accent-foreground"
+          : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
       )}
       aria-current={isActive ? "page" : undefined}
     >

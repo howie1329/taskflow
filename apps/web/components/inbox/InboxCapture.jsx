@@ -13,8 +13,7 @@ import { useReducedMotion } from "motion/react";
 
 import { cn } from "@/lib/utils";
 
-// Auto-resize textarea hook - extracted for reuse
-function useAutoResizeTextarea(ref, value, minHeight = 80, maxHeight = 200) {
+function useAutoResizeTextarea(ref, value, minHeight = 72, maxHeight = 200) {
   useEffect(() => {
     const textarea = ref.current;
     if (!textarea) return;
@@ -28,7 +27,6 @@ function useAutoResizeTextarea(ref, value, minHeight = 80, maxHeight = 200) {
   }, [value, ref, minHeight, maxHeight]);
 }
 
-// Keyboard shortcut: C to focus capture
 function useCaptureFocusShortcut(textareaRef, disabled) {
   useEffect(() => {
     if (disabled) return;
@@ -85,13 +83,10 @@ export const InboxCapture = memo(function InboxCapture({
     };
   }, []);
 
-  // Auto-resize textarea
-  useAutoResizeTextarea(textareaRef, value, 80, 200);
+  useAutoResizeTextarea(textareaRef, value, 72, 200);
 
-  // Keyboard shortcut to focus
   useCaptureFocusShortcut(textareaRef, disabled || isCapturing);
 
-  // Define capture handler first so it can be used in key handler
   const handleCaptureClick = useCallback(async () => {
     if (!value.trim() || isCapturing) return;
 
@@ -140,10 +135,7 @@ export const InboxCapture = memo(function InboxCapture({
 
   return (
     <div
-      className={cn(
-        "space-y-2 rounded-lg border border-border bg-card p-4 text-card-foreground",
-        className,
-      )}
+      className={cn("space-y-2", className)}
       role="form"
       aria-label="Capture new inbox item"
     >
@@ -155,7 +147,7 @@ export const InboxCapture = memo(function InboxCapture({
           onKeyDown={handleKeyDown}
           placeholder="What's on your mind?"
           className={cn(
-            "min-h-[88px] resize-none border-border bg-transparent pr-12 text-sm focus-visible:ring-[3px] focus-visible:ring-ring/50",
+            "min-h-[72px] resize-none rounded-md pr-12 text-xs leading-snug focus-visible:ring-2 focus-visible:ring-ring",
             isNearLimit && !isAtLimit && "border-muted-foreground/35",
             isAtLimit && "border-destructive",
           )}
@@ -169,7 +161,7 @@ export const InboxCapture = memo(function InboxCapture({
           <div
             id="capture-count"
             className={cn(
-              "absolute bottom-2 right-2 text-xs tabular-nums text-muted-foreground",
+              "absolute bottom-2 right-2 text-[11px] tabular-nums text-muted-foreground",
               isAtLimit && "font-medium text-destructive",
             )}
             aria-live="polite"
@@ -181,9 +173,9 @@ export const InboxCapture = memo(function InboxCapture({
       </div>
       <div
         id="capture-help"
-        className="flex items-center justify-between gap-2 text-xs text-muted-foreground"
+        className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-muted-foreground"
       >
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
           <span className="flex items-center gap-1">
             <Kbd>Enter</Kbd> to capture
           </span>
@@ -203,22 +195,25 @@ export const InboxCapture = memo(function InboxCapture({
             onClick={handleCaptureClick}
             disabled={isDisabled || !value.trim() || isAtLimit}
             aria-busy={isCapturing}
-            className={cn(
-              "transition-transform duration-100 ease-[cubic-bezier(0.16,1,0.3,1)]",
-              !prefersReducedMotion && "active:scale-[0.97]",
-            )}
+            className="h-8 rounded-md text-xs"
           >
             {isCapturing ? (
               <>
                 <HugeiconsIcon
                   icon={Loading03Icon}
-                  className={cn("size-4 mr-2", !prefersReducedMotion && "animate-spin")}
+                  className={cn(
+                    "mr-2 size-4",
+                    !prefersReducedMotion && "animate-spin",
+                  )}
                 />
-                Capturing...
+                Capturing…
               </>
             ) : isCaptured ? (
               <>
-                <HugeiconsIcon icon={CheckmarkCircle02Icon} className="size-4 mr-2" />
+                <HugeiconsIcon
+                  icon={CheckmarkCircle02Icon}
+                  className="mr-2 size-4"
+                />
                 Captured
               </>
             ) : (

@@ -1,7 +1,6 @@
 "use client";
 
 import type { Doc } from "@/convex/_generated/dataModel";
-import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { priorityDotClassName } from "@/lib/task-priority-styles";
 
@@ -48,20 +47,19 @@ export function TaskCard({
   const isCompleted = task.status === "Completed";
 
   return (
-    <Card
+    <div
       role="button"
       tabIndex={0}
       className={cn(
-        "group cursor-pointer gap-0 rounded-none border-0 bg-transparent px-3 py-2.5 shadow-none ring-0",
-        "transition-[background-color,border-color,color,transform] duration-150 ease-[cubic-bezier(0.16,1,0.3,1)]",
-        "hover:bg-accent/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-        "motion-safe:active:scale-[0.99]",
+        "group cursor-pointer px-3 py-2.5",
+        "transition-[background-color,color] duration-150 ease-[cubic-bezier(0.16,1,0.3,1)]",
+        "hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
       )}
       onClick={() => onClick(task)}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault()
-          onClick(task)
+          e.preventDefault();
+          onClick(task);
         }
       }}
     >
@@ -91,9 +89,10 @@ export function TaskCard({
             {task.dueDate ? (
               <span
                 className={cn(
-                  "inline-flex h-5 items-center rounded-md border border-border bg-background px-1.5 text-[11px] font-medium tabular-nums text-muted-foreground",
+                  "text-[11px] font-medium tabular-nums text-muted-foreground",
                   isOverdue &&
-                    "border-destructive/40 bg-destructive/8 text-destructive dark:border-destructive/50 dark:bg-destructive/12",
+                    !isCompleted &&
+                    "text-destructive",
                 )}
                 title={new Date(task.dueDate).toLocaleDateString("en-US", {
                   month: "long",
@@ -118,9 +117,10 @@ export function TaskCard({
 
         <h4
           className={cn(
-            "text-sm font-medium leading-[1.35] tracking-[-0.01em] text-foreground",
+            "text-xs font-medium leading-snug tracking-tight text-foreground",
             "line-clamp-2",
-            isCompleted && "text-muted-foreground line-through decoration-muted-foreground/70",
+            isCompleted &&
+              "text-muted-foreground line-through decoration-muted-foreground/70",
           )}
         >
           {task.title}
@@ -132,7 +132,7 @@ export function TaskCard({
               {taskTags.slice(0, 2).map((tag) => (
                 <span
                   key={tag._id}
-                  className="truncate rounded-sm bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground"
+                  className="truncate text-[11px] text-muted-foreground"
                   title={tag.name}
                 >
                   {tag.name}
@@ -151,12 +151,12 @@ export function TaskCard({
           )}
 
           {task.scheduledDate ? (
-            <span className="shrink-0 rounded-sm border border-border/70 px-1.5 py-0.5 tabular-nums text-muted-foreground/90">
+            <span className="shrink-0 tabular-nums text-muted-foreground/90">
               {task.scheduledDate}
             </span>
           ) : null}
         </div>
       </div>
-    </Card>
+    </div>
   );
 }

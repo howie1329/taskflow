@@ -8,7 +8,7 @@ Primary execution workspace for planned work.
 
 ## Current Behavior
 
-- Task board with status columns
+- Task board with status columns, Today+Board split, and List (grouped by status)
 - Today+Board workflow
 - Create/edit/delete tasks
 - Subtasks and tags support
@@ -20,8 +20,7 @@ Primary execution workspace for planned work.
 - Entry page: `app/app/tasks/page.tsx`
 - Feature module composition:
   - `TaskFeature.Provider`
-  - `TaskFeature.Toolbar`
-  - `TaskFeature.Filters`
+  - `TaskFeature.Toolbar` (search, filters popover / mobile sheet, hide completed, view tabs)
   - `TaskFeature.Content`
   - `TaskFeature.DetailsSheet`
   - `TaskFeature.CreateSheet`

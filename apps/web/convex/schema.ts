@@ -166,9 +166,13 @@ const schema = defineSchema({
     onboardingCompletedAt: v.optional(v.number()),
     onboardingVersion: v.optional(v.string()),
     notificationsEnabled: v.optional(v.boolean()),
-    // Task view preference (board | todayPlusBoard)
+    // Task view preference (board | todayPlusBoard | list)
     taskDefaultView: v.optional(
-      v.union(v.literal("board"), v.literal("todayPlusBoard")),
+      v.union(
+        v.literal("board"),
+        v.literal("todayPlusBoard"),
+        v.literal("list"),
+      ),
     ),
     // Hide completed tasks in board/list views
     hideCompletedTasks: v.optional(v.boolean()),

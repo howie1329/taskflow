@@ -89,6 +89,9 @@ const statusOptions: Task["status"][] = [
 
 const priorityOptions: Task["priority"][] = ["low", "medium", "high"];
 
+const fieldLabelClass =
+  "text-[11px] font-medium uppercase tracking-wide text-muted-foreground";
+
 export function CreateTaskSheet({
   open,
   onOpenChange,
@@ -228,11 +231,11 @@ export function CreateTaskSheet({
     <div className="flex h-full flex-col">
       <SheetHeader className="shrink-0 gap-2 px-4 pb-3 pt-5 sm:px-5">
         {renderInSidebar ? (
-          <h2 className="text-lg font-medium tracking-tight text-foreground">
+          <h2 className="text-base font-semibold tracking-tight text-foreground">
             New task
           </h2>
         ) : (
-          <SheetTitle className="text-lg font-medium tracking-tight text-foreground">
+          <SheetTitle className="text-base font-semibold tracking-tight text-foreground">
             New task
           </SheetTitle>
         )}
@@ -251,7 +254,7 @@ export function CreateTaskSheet({
         <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-4 py-4 sm:px-5">
           <div className="flex flex-col gap-3.5">
             <Field>
-              <FieldLabel htmlFor={ids.title} className="sr-only">
+              <FieldLabel htmlFor={ids.title} className={fieldLabelClass}>
                 Title
               </FieldLabel>
               <FieldContent>
@@ -260,7 +263,7 @@ export function CreateTaskSheet({
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="What needs to be done?"
-                  className="h-auto rounded-none border-0 border-b border-border/60 px-0 py-2 text-[24px] font-medium tracking-[-0.02em] shadow-none focus-visible:ring-0"
+                  className="h-8 text-sm font-medium"
                   aria-invalid={showTitleError}
                   aria-describedby={showTitleError ? ids.titleError : undefined}
                 />
@@ -270,9 +273,8 @@ export function CreateTaskSheet({
               </FieldContent>
             </Field>
 
-            {/* Description */}
             <Field>
-              <FieldLabel htmlFor={ids.description} className="sr-only">
+              <FieldLabel htmlFor={ids.description} className={fieldLabelClass}>
                 Description
               </FieldLabel>
               <FieldContent>
@@ -282,7 +284,7 @@ export function CreateTaskSheet({
                   onChange={(e) => setDescription(e.target.value)}
                   onKeyDown={handleDescriptionKeyDown}
                   placeholder="Add details (optional)"
-                  className="min-h-32 rounded-xl border-border/60 bg-card/40 px-3 py-3 text-sm leading-relaxed"
+                  className="min-h-32 rounded-md text-xs leading-snug"
                 />
               </FieldContent>
             </Field>
@@ -291,24 +293,12 @@ export function CreateTaskSheet({
           <Separator />
 
           <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex flex-col gap-0.5">
-                <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground/80">
-                  Properties
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Set context without interrupting capture.
-                </p>
-              </div>
-            </div>
+            <p className={fieldLabelClass}>Properties</p>
 
             <FieldGroup className="gap-4">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <Field>
-                  <FieldLabel
-                    htmlFor={ids.project}
-                    className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground"
-                  >
+                  <FieldLabel htmlFor={ids.project} className={fieldLabelClass}>
                     Project
                   </FieldLabel>
                   <FieldContent>
@@ -318,18 +308,19 @@ export function CreateTaskSheet({
                     >
                       <SelectTrigger
                         id={ids.project}
-                        className="h-9 w-full rounded-lg border-border/60 bg-card/40 text-sm"
+                        className="h-8 w-full rounded-md text-xs"
                       >
                         <SelectValue placeholder="No project" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="__none__" className="text-sm">
+                        <SelectItem value="__none__" className="text-xs">
                           No project
                         </SelectItem>
                         {projects.map((project) => (
                           <SelectItem
                             key={project._id as string}
                             value={project._id as string}
+                            className="text-xs"
                           >
                             <div className="flex items-center gap-2">
                               <div
@@ -348,10 +339,7 @@ export function CreateTaskSheet({
 
                 {/* Status */}
                 <Field>
-                  <FieldLabel
-                    htmlFor={ids.status}
-                    className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground"
-                  >
+                  <FieldLabel htmlFor={ids.status} className={fieldLabelClass}>
                     Status
                   </FieldLabel>
                   <FieldContent>
@@ -361,13 +349,13 @@ export function CreateTaskSheet({
                     >
                       <SelectTrigger
                         id={ids.status}
-                        className="h-9 w-full rounded-lg border-border/60 bg-card/40 text-sm"
+                        className="h-8 w-full rounded-md text-xs"
                       >
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         {statusOptions.map((s) => (
-                          <SelectItem key={s} value={s}>
+                          <SelectItem key={s} value={s} className="text-xs">
                             {s}
                           </SelectItem>
                         ))}
@@ -378,10 +366,7 @@ export function CreateTaskSheet({
 
                 {/* Priority */}
                 <Field>
-                  <FieldLabel
-                    htmlFor={ids.priority}
-                    className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground"
-                  >
+                  <FieldLabel htmlFor={ids.priority} className={fieldLabelClass}>
                     Priority
                   </FieldLabel>
                   <FieldContent>
@@ -391,7 +376,7 @@ export function CreateTaskSheet({
                     >
                       <SelectTrigger
                         id={ids.priority}
-                        className="h-9 w-full rounded-lg border-border/60 bg-card/40 text-sm"
+                        className="h-8 w-full rounded-md text-xs"
                       >
                         <SelectValue>
                           <div className="flex items-center gap-2">
@@ -407,7 +392,7 @@ export function CreateTaskSheet({
                       </SelectTrigger>
                       <SelectContent>
                         {priorityOptions.map((p) => (
-                          <SelectItem key={p} value={p}>
+                          <SelectItem key={p} value={p} className="text-xs">
                             <div className="flex items-center gap-2">
                               <div
                                 className={cn(
@@ -425,10 +410,7 @@ export function CreateTaskSheet({
                 </Field>
 
                 <Field>
-                  <FieldLabel
-                    htmlFor={ids.scheduled}
-                    className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground"
-                  >
+                  <FieldLabel htmlFor={ids.scheduled} className={fieldLabelClass}>
                     Scheduled
                   </FieldLabel>
                   <FieldContent>
@@ -437,16 +419,13 @@ export function CreateTaskSheet({
                       type="date"
                       value={scheduledDate}
                       onChange={(e) => setScheduledDate(e.target.value)}
-                      className="h-9 rounded-lg border-border/60 bg-card/40 text-sm"
+                      className="h-8 rounded-md text-xs"
                     />
                   </FieldContent>
                 </Field>
 
                 <Field>
-                  <FieldLabel
-                    htmlFor={ids.due}
-                    className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground"
-                  >
+                  <FieldLabel htmlFor={ids.due} className={fieldLabelClass}>
                     Due Date
                   </FieldLabel>
                   <FieldContent>
@@ -455,39 +434,37 @@ export function CreateTaskSheet({
                       type="date"
                       value={dueDate}
                       onChange={(e) => setDueDate(e.target.value)}
-                      className="h-9 rounded-lg border-border/60 bg-card/40 text-sm"
+                      className="h-8 rounded-md text-xs"
                     />
                   </FieldContent>
                 </Field>
               </div>
 
               <Field>
-                <FieldLabel className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">
-                  Tags
-                </FieldLabel>
+                <FieldLabel className={fieldLabelClass}>Tags</FieldLabel>
                 <FieldContent>
                   {tags.length === 0 ? (
-                    <span className="text-sm text-muted-foreground">
+                    <span className="text-xs text-muted-foreground">
                       No tags available. Create tags in Settings.
                     </span>
                   ) : (
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-1.5">
                       {tags.map((tag) => {
                         const isSelected = tagIds.includes(tag._id as string);
                         return (
                           <Button
                             key={tag._id as string}
                             type="button"
-                            variant={isSelected ? "secondary" : "outline"}
-                            size="xs"
+                            variant="ghost"
+                            size="sm"
                             onClick={() => toggleTag(tag._id as string)}
                             aria-pressed={isSelected}
-                            className="h-7 rounded-full border-border/60 px-2.5"
+                            className={cn(
+                              "h-7 rounded-md border-l-2 pl-2 pr-2 text-xs font-normal text-muted-foreground",
+                              isSelected && "bg-accent/50 font-medium text-foreground",
+                            )}
+                            style={{ borderLeftColor: tag.color }}
                           >
-                            <span
-                              className="mr-1.5 inline-block size-1.5 rounded-full"
-                              style={{ backgroundColor: tag.color }}
-                            />
                             {tag.name}
                           </Button>
                         );
@@ -507,14 +484,14 @@ export function CreateTaskSheet({
             type="button"
             variant="outline"
             onClick={handleCancel}
-            className="h-8 rounded-lg"
+            className="h-8 rounded-md"
           >
             Cancel
           </Button>
           <Button
             type="submit"
             disabled={!canSubmit}
-            className="h-8 rounded-lg"
+            className="h-8 rounded-md"
           >
             Create
           </Button>
@@ -532,8 +509,8 @@ export function CreateTaskSheet({
       <SheetContent
         side={isMobile ? "bottom" : "right"}
         className={cn(
-          "bg-background sm:max-w-lg",
-          isMobile ? "h-[85vh] rounded-t-[22px]" : "sm:max-w-[36rem]",
+          "bg-popover text-popover-foreground sm:max-w-lg",
+          isMobile ? "h-[85vh] rounded-t-lg" : "sm:max-w-xl",
         )}
       >
         {content}
