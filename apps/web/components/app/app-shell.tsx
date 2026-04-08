@@ -576,10 +576,7 @@ export function AppShell({ children, right }: AppShellProps) {
           side="right"
           variant="sidebar"
           collapsible="offcanvas"
-          className={cn(
-            "border-l border-border/60 bg-background/95 supports-backdrop-filter:bg-background/90",
-            isChatRoute && "bg-background",
-          )}
+          className="border-l border-border/60 bg-background"
           style={
             {
               "--sidebar-width": isChatRoute ? "28rem" : "22rem",
@@ -587,24 +584,19 @@ export function AppShell({ children, right }: AppShellProps) {
             } as React.CSSProperties
           }
         >
-          <SidebarHeader
-            className={cn(
-              "border-b border-border/50 px-4 py-3",
-              isChatRoute && "border-b-0 pb-2",
-            )}
-          >
-            <div className="flex min-h-8 items-center justify-between">
-              <div className="min-w-0">
-                <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
-                  {isChatRoute ? "Dossier" : "Inspector"}
-                </span>
+          <SidebarHeader className="border-b border-border/50 px-4 py-3">
+            <div className="flex min-h-8 items-center justify-between gap-3">
+              <div className="min-w-0 truncate text-base font-semibold tracking-tight text-foreground">
+                {isChatRoute ? "Dossier" : "Inspector"}
               </div>
               <SidebarTrigger scope="inspector" aria-label="Close inspector" />
             </div>
           </SidebarHeader>
-          <SidebarContent className={cn("p-4 pt-2", isChatRoute && "pt-0")}>
+          <SidebarContent className="flex min-h-0 flex-1 flex-col overflow-hidden p-4 pt-3">
             <InspectorPanelContent>
-              <div className="min-h-0 flex-1 overflow-y-auto">{right}</div>
+              <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+                {right}
+              </div>
             </InspectorPanelContent>
           </SidebarContent>
           <SidebarRail scope="inspector" />

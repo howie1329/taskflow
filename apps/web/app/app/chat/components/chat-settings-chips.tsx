@@ -13,9 +13,10 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import {
+  ChevronDownIcon,
+  CpuIcon,
   FolderIcon,
   GlobeIcon,
-  CpuIcon,
   WandSparklesIcon,
 } from "lucide-react"
 import {
@@ -123,13 +124,13 @@ export function ChatSettingsChips({
             )}
           >
             {selectedModel?.interface === "groq" ? (
-              <ModelSelectorLogo provider="groq" className="size-4 shrink-0" />
+              <ModelSelectorLogo provider="groq" className="size-3 shrink-0" />
             ) : selectedModel?.interface === "openrouter" ? (
-              <ModelSelectorLogo provider="openrouter" className="size-4 shrink-0" />
+              <ModelSelectorLogo provider="openrouter" className="size-3 shrink-0" />
             ) : selectedModel?.provider ? (
-              <ModelSelectorLogo provider={selectedModel.provider} className="size-4 shrink-0" />
+              <ModelSelectorLogo provider={selectedModel.provider} className="size-3 shrink-0" />
             ) : (
-              <CpuIcon className="size-4 shrink-0" />
+              <CpuIcon className="size-3 shrink-0" />
             )}
             <span className="min-w-0 flex-1 truncate text-xs font-medium">
               {selectedModel?.name ?? "Select model"}
@@ -139,6 +140,10 @@ export function ChatSettingsChips({
                 </span>
               ) : null}
             </span>
+            <ChevronDownIcon
+              className="size-3 shrink-0 text-muted-foreground opacity-70"
+              aria-hidden
+            />
           </Button>
         }
       >
@@ -159,11 +164,21 @@ export function ChatSettingsChips({
           <Button
             type="button"
             variant="ghost"
-            size="icon"
+            size="default"
             aria-label={`Mode: ${selectedMode}`}
-            className={cn(CHAT_SETTINGS_TRIGGER_CLASS_NAME, "size-8 shrink-0 p-0")}
+            className={cn(
+              CHAT_SETTINGS_TRIGGER_CLASS_NAME,
+              "max-w-36 justify-start gap-1.5 px-2.5 sm:max-w-44",
+            )}
           >
-            <WandSparklesIcon className="size-4" />
+            <WandSparklesIcon className="size-3 shrink-0" aria-hidden />
+            <span className="min-w-0 flex-1 truncate text-xs font-medium">
+              {selectedMode}
+            </span>
+            <ChevronDownIcon
+              className="size-3 shrink-0 text-muted-foreground opacity-70"
+              aria-hidden
+            />
           </Button>
         }
       >

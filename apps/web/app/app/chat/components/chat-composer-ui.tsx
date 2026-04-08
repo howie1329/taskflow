@@ -50,7 +50,7 @@ export function ChatComposerToolHeader({
 }) {
   return (
     <div className={getComposerHeaderClassName(show)} aria-hidden={!show}>
-      <div className="overflow-hidden rounded-md border border-input bg-input px-3 py-2 transition-colors duration-150 dark:bg-input/30">
+      <div className="overflow-hidden rounded-lg border border-border/50 bg-background px-3 py-2">
         <ToolLockCommandMenu textareaRef={textareaRef} />
       </div>
     </div>
@@ -102,7 +102,7 @@ export function ComposerSlashCommandButton({
           className={COMPOSER_ICON_BUTTON_CLASS_NAME}
           onClick={() => openComposerCommands(value, setInput, onFocus)}
         >
-          <span className="text-[13px] font-semibold leading-none">/</span>
+          <span className="text-xs font-semibold leading-none">/</span>
         </Button>
       </TooltipTrigger>
       <TooltipContent sideOffset={6}>

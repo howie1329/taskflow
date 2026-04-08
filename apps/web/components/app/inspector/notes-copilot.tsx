@@ -956,7 +956,7 @@ export function NotesCopilot() {
 
   if (!selectedNote) {
     return (
-      <p className="text-sm leading-relaxed text-muted-foreground">
+      <p className="text-xs leading-snug text-muted-foreground">
         Open a note to use the mini chat.
       </p>
     )
@@ -970,15 +970,24 @@ export function NotesCopilot() {
     >
       <TabsList
         variant="line"
-        className="h-auto w-full justify-start gap-1 rounded-none bg-transparent p-0"
+        className="h-8 w-full min-w-0 shrink-0 flex-nowrap justify-start gap-1 overflow-x-auto rounded-md border border-border/70 bg-transparent p-0.5"
       >
-        <TabsTrigger value="chat" className="px-2 py-1.5 text-sm font-medium">
+        <TabsTrigger
+          value="chat"
+          className="h-7 shrink-0 rounded-md px-2.5 text-xs font-medium text-muted-foreground after:!hidden data-active:bg-accent data-active:text-accent-foreground data-active:shadow-none"
+        >
           Chat
         </TabsTrigger>
-        <TabsTrigger value="reviewer" className="px-2 py-1.5 text-sm font-medium">
+        <TabsTrigger
+          value="reviewer"
+          className="h-7 shrink-0 rounded-md px-2.5 text-xs font-medium text-muted-foreground after:!hidden data-active:bg-accent data-active:text-accent-foreground data-active:shadow-none"
+        >
           Reviewer
         </TabsTrigger>
-        <TabsTrigger value="info" className="px-2 py-1.5 text-sm font-medium">
+        <TabsTrigger
+          value="info"
+          className="h-7 shrink-0 rounded-md px-2.5 text-xs font-medium text-muted-foreground after:!hidden data-active:bg-accent data-active:text-accent-foreground data-active:shadow-none"
+        >
           Info
         </TabsTrigger>
       </TabsList>

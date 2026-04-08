@@ -23,6 +23,7 @@ import {
   RightPanelSection,
   RightPanelShell,
   RightPanelSummaryBar,
+  RightPanelSurface,
 } from "@/components/app/right-panel-primitives"
 import {
   getToolDisplayNameFromKey,
@@ -88,11 +89,11 @@ export function MessageDetailsSheet({
                   <RightPanelList>
                     {viewModel.metrics.map((metric) => (
                       <RightPanelListRow key={metric.label}>
-                        <div className="flex items-center justify-between gap-3 text-sm">
-                          <span className="text-muted-foreground">
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-[11px] text-muted-foreground">
                             {metric.label}
                           </span>
-                          <span className="font-medium text-foreground">
+                          <span className="text-xs font-medium text-foreground">
                             {metric.value}
                           </span>
                         </div>
@@ -112,7 +113,7 @@ export function MessageDetailsSheet({
                       description="This message does not include files."
                     />
                   ) : (
-                    <div className="rounded-xl border border-border/45 bg-background px-3 py-3">
+                    <RightPanelSurface>
                       <Attachments variant="list">
                         {viewModel.attachments.map((file, fileIndex) => (
                           <Attachment
@@ -131,7 +132,7 @@ export function MessageDetailsSheet({
                           </Attachment>
                         ))}
                       </Attachments>
-                    </div>
+                    </RightPanelSurface>
                   )}
                 </RightPanelCollapsibleSection>
 
@@ -141,7 +142,7 @@ export function MessageDetailsSheet({
                   defaultOpen={false}
                 >
                   {viewModel.reasoningText?.trim() ? (
-                    <div className="rounded-xl border border-border/45 bg-background px-4 py-3">
+                    <RightPanelSurface className="px-4 py-3">
                       <p
                         className={cn(
                           "whitespace-pre-wrap text-sm leading-6 text-muted-foreground",
@@ -149,7 +150,7 @@ export function MessageDetailsSheet({
                       >
                         {viewModel.reasoningText}
                       </p>
-                    </div>
+                    </RightPanelSurface>
                   ) : (
                     <RightPanelEmptyState
                       title="No reasoning captured"
@@ -176,7 +177,7 @@ export function MessageDetailsSheet({
                           <RightPanelListRow key={tool.id}>
                             <div className="space-y-2">
                               <div className="flex items-start justify-between gap-3">
-                                <div className="text-sm font-medium leading-6 text-foreground">
+                                <div className="text-xs font-medium leading-snug text-foreground">
                                   {getToolDisplayNameFromKey(tool.toolKey)}
                                 </div>
                                 <RightPanelChipRow
@@ -199,11 +200,11 @@ export function MessageDetailsSheet({
                   description="Rendered text content for this message."
                   defaultOpen={false}
                 >
-                  <div className="rounded-xl border border-border/45 bg-background px-4 py-3">
+                  <RightPanelSurface className="px-4 py-3">
                     <p className="whitespace-pre-wrap text-sm leading-6 text-foreground">
                       {viewModel.text || "No text in this message."}
                     </p>
-                  </div>
+                  </RightPanelSurface>
                 </RightPanelCollapsibleSection>
               </>
             )}

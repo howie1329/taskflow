@@ -29,14 +29,14 @@ export function RightPanelScrollBody({
   children: ReactNode
 }) {
   return (
-    <div className={cn("min-h-0 flex-1 overflow-y-auto px-1 pb-8", className)}>
-      <div className="space-y-4 pr-1">{children}</div>
+    <div className={cn("min-h-0 flex-1 overflow-y-auto overscroll-contain px-0 pb-8", className)}>
+      <div className="space-y-4 pr-0">{children}</div>
     </div>
   )
 }
 
 export function RightPanelSummaryBar({
-  eyebrow = "Summary",
+  eyebrow,
   title,
   description,
   actions,
@@ -47,21 +47,21 @@ export function RightPanelSummaryBar({
   actions?: ReactNode
 }) {
   return (
-    <div className="rounded-lg border border-border/50 bg-card px-4 py-3">
+    <div className="border-b border-border/50 pb-3">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 space-y-1">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-            <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
-              {eyebrow}
-            </span>
-            <div className="min-w-0 text-base font-semibold leading-snug text-foreground">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            {eyebrow ? (
+              <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                {eyebrow}
+              </span>
+            ) : null}
+            <div className="min-w-0 text-base font-semibold leading-snug tracking-tight text-foreground">
               {title}
             </div>
           </div>
           {description ? (
-            <div className="text-sm leading-relaxed text-muted-foreground">
-              {description}
-            </div>
+            <div className="text-xs leading-snug text-muted-foreground">{description}</div>
           ) : null}
         </div>
         {actions ? <div className="shrink-0">{actions}</div> : null}
@@ -85,7 +85,7 @@ export function RightPanelChipRow({
       {visibleChips.map((chip, index) => (
         <div
           key={index}
-          className="rounded-md border border-border/50 bg-muted/20 px-2 py-1 font-mono text-xs font-medium text-foreground"
+          className="rounded-md bg-muted/30 px-2 py-1 font-mono text-[11px] font-medium text-foreground"
         >
           {chip}
         </div>
@@ -108,19 +108,12 @@ export function RightPanelSection({
   actions?: ReactNode
 }) {
   return (
-    <section
-      className={cn(
-        "rounded-lg border border-border/50 bg-card px-4 py-4",
-        className,
-      )}
-    >
-      <div className="mb-3 flex items-start justify-between gap-3">
+    <section className={cn("space-y-3 border-b border-border/50 pb-4 last:border-b-0", className)}>
+      <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 space-y-1">
-          <h3 className="text-sm font-medium tracking-[-0.01em] text-foreground">
-            {title}
-          </h3>
+          <h3 className="text-xs font-semibold tracking-tight text-foreground">{title}</h3>
           {description ? (
-            <p className="text-sm leading-6 text-muted-foreground">{description}</p>
+            <p className="text-xs leading-snug text-muted-foreground">{description}</p>
           ) : null}
         </div>
         {actions ? <div className="shrink-0">{actions}</div> : null}
@@ -144,28 +137,24 @@ export function RightPanelCollapsibleSection({
   actions?: ReactNode
 }) {
   return (
-    <Collapsible defaultOpen={defaultOpen} className="group">
-      <div className="rounded-lg border border-border/50 bg-card px-4 py-4">
-        <div className="flex items-start justify-between gap-3">
-          <CollapsibleTrigger className="flex min-w-0 flex-1 items-start gap-3 text-left">
-            <ChevronDownIcon className="mt-0.5 size-4 shrink-0 text-muted-foreground transition-transform duration-150 group-data-[state=open]:rotate-180" />
-            <div className="min-w-0 space-y-1">
-              <div className="text-sm font-medium tracking-[-0.01em] text-foreground">
-                {title}
-              </div>
-              {description ? (
-                <div className="text-sm leading-6 text-muted-foreground">
-                  {description}
-                </div>
-              ) : null}
+    <Collapsible defaultOpen={defaultOpen} className="group border-b border-border/50 pb-4 last:border-b-0">
+      <div className="flex items-start justify-between gap-2">
+        <CollapsibleTrigger className="flex min-w-0 flex-1 items-start gap-2 rounded-md text-left outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          <ChevronDownIcon className="mt-0.5 size-3 shrink-0 text-muted-foreground transition-transform duration-150 group-data-[state=open]:rotate-180" />
+          <div className="min-w-0 space-y-1">
+            <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+              {title}
             </div>
-          </CollapsibleTrigger>
-          {actions ? <div className="shrink-0">{actions}</div> : null}
-        </div>
-        <CollapsibleContent className="pt-4 data-[state=closed]:animate-out data-[state=open]:animate-in">
-          {children}
-        </CollapsibleContent>
+            {description ? (
+              <div className="text-xs leading-snug text-muted-foreground">{description}</div>
+            ) : null}
+          </div>
+        </CollapsibleTrigger>
+        {actions ? <div className="shrink-0 pt-0.5">{actions}</div> : null}
       </div>
+      <CollapsibleContent className="data-[state=closed]:animate-out data-[state=open]:animate-in">
+        <div className="mt-3 space-y-3 pl-5">{children}</div>
+      </CollapsibleContent>
     </Collapsible>
   )
 }
@@ -177,11 +166,7 @@ export function RightPanelList({
   children: ReactNode
   className?: string
 }) {
-  return (
-    <div className={cn("overflow-hidden rounded-lg border border-border/50", className)}>
-      {children}
-    </div>
-  )
+  return <div className={cn("flex flex-col gap-0", className)}>{children}</div>
 }
 
 export function RightPanelListRow({
@@ -194,7 +179,7 @@ export function RightPanelListRow({
   return (
     <div
       className={cn(
-        "border-b border-border bg-background px-4 py-3 last:border-b-0",
+        "rounded-md px-3 py-2 text-xs transition-colors hover:bg-accent/50",
         className,
       )}
     >
@@ -211,9 +196,9 @@ export function RightPanelEmptyState({
   description: ReactNode
 }) {
   return (
-    <div className="rounded-lg border border-dashed border-border bg-muted/15 px-4 py-4">
-      <p className="text-sm font-medium text-foreground">{title}</p>
-      <p className="mt-1 text-sm leading-6 text-muted-foreground">{description}</p>
+    <div className="rounded-md border border-dashed border-border/60 px-3 py-3">
+      <p className="text-xs font-medium text-foreground">{title}</p>
+      <p className="mt-1 text-[11px] leading-snug text-muted-foreground">{description}</p>
     </div>
   )
 }
@@ -224,7 +209,7 @@ export function RightPanelDossierHeader({
   meta,
   actions,
   className,
-  eyebrow = "Inspector",
+  eyebrow,
 }: {
   title: ReactNode
   description?: ReactNode
@@ -234,18 +219,20 @@ export function RightPanelDossierHeader({
   eyebrow?: ReactNode
 }) {
   return (
-    <section className={cn("px-2 pt-1", className)}>
-      <div className="space-y-2.5">
+    <section className={cn("px-0 pt-0", className)}>
+      <div className="space-y-2">
         <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0 space-y-1.5">
-            <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground/85">
-              {eyebrow}
-            </p>
-            <div className="text-[17px] font-semibold leading-tight tracking-[-0.02em] text-foreground">
+          <div className="min-w-0 space-y-1">
+            {eyebrow ? (
+              <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                {eyebrow}
+              </p>
+            ) : null}
+            <div className="text-base font-semibold leading-snug tracking-tight text-foreground">
               {title}
             </div>
             {description ? (
-              <p className="max-w-[28rem] text-sm leading-6 text-muted-foreground">
+              <p className="max-w-[28rem] text-xs leading-snug text-muted-foreground">
                 {description}
               </p>
             ) : null}
@@ -267,9 +254,9 @@ export function RightPanelSectionDivider({
   className?: string
 }) {
   return (
-    <div className={cn("flex items-center gap-3 px-2", className)}>
+    <div className={cn("flex items-center gap-3 px-0", className)}>
       <div className="h-px flex-1 bg-border/60" />
-      <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+      <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
         {label}
       </span>
       <div className="h-px flex-1 bg-border/60" />
@@ -291,14 +278,12 @@ export function RightPanelSectionBlock({
   className?: string
 }) {
   return (
-    <section className={cn("space-y-3 px-2", className)}>
+    <section className={cn("space-y-3 border-b border-border/50 px-0 pb-4 last:border-b-0", className)}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 space-y-1">
-          <h3 className="text-sm font-medium tracking-[-0.01em] text-foreground">
-            {title}
-          </h3>
+          <h3 className="text-xs font-semibold tracking-tight text-foreground">{title}</h3>
           {description ? (
-            <p className="text-sm leading-6 text-muted-foreground">{description}</p>
+            <p className="text-xs leading-snug text-muted-foreground">{description}</p>
           ) : null}
         </div>
         {actions ? <div className="shrink-0">{actions}</div> : null}
@@ -316,14 +301,7 @@ export function RightPanelSurface({
   className?: string
 }) {
   return (
-    <div
-      className={cn(
-        "rounded-lg border border-border/35 bg-muted/[0.04] px-4 py-4",
-        className,
-      )}
-    >
-      {children}
-    </div>
+    <div className={cn("rounded-md bg-muted/30 px-3 py-3", className)}>{children}</div>
   )
 }
 
@@ -349,12 +327,12 @@ export function RightPanelMetaRow({
   return (
     <div
       className={cn(
-        "flex items-start justify-between gap-4 border-b border-border/35 pb-2.5 text-sm last:border-b-0 last:pb-0",
+        "flex items-start justify-between gap-4 pb-2 text-xs last:pb-0",
         className,
       )}
     >
       <span className="text-muted-foreground">{label}</span>
-      <span className="max-w-[16rem] text-right font-medium text-foreground">
+      <span className="max-w-[16rem] text-right text-[11px] font-medium text-foreground">
         {value}
       </span>
     </div>
@@ -397,7 +375,12 @@ export function RightPanelInlineMeta({
   if (visibleItems.length === 0) return null
 
   return (
-    <div className={cn("flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground", className)}>
+    <div
+      className={cn(
+        "flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground",
+        className,
+      )}
+    >
       {visibleItems.map((item, index) => (
         <div key={index} className="inline-flex items-center gap-3">
           {index > 0 ? <span className="text-border">/</span> : null}
