@@ -49,8 +49,9 @@ export function TaskListView({
     : columns
 
   return (
-    <div className="h-full w-full min-h-0 overflow-y-auto">
-      <div className="flex flex-col gap-1 pb-2">
+    <div className="flex min-h-0 h-full w-full flex-1 flex-col overflow-hidden">
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+        <div className="flex flex-col gap-1 pb-2">
         {visibleColumns.map((column) => {
           const columnTasks = getTasksByStatus(column.id)
 
@@ -106,6 +107,7 @@ export function TaskListView({
             </Collapsible>
           )
         })}
+        </div>
       </div>
     </div>
   )

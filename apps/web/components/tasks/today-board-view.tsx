@@ -47,7 +47,7 @@ export function TodayBoardView({
   );
 
   return (
-    <div className="flex h-full w-full min-h-0 flex-col gap-4 overflow-y-auto lg:flex-row lg:gap-0 lg:overflow-hidden">
+    <div className="flex min-h-0 h-full w-full flex-1 flex-col gap-4 overflow-y-auto lg:flex-row lg:gap-0 lg:overflow-hidden">
       <div
         className={cn(
           "flex min-h-[220px] min-w-0 flex-col overflow-hidden lg:min-h-0 lg:w-[31%] lg:shrink-0 lg:border-r lg:border-border/50 xl:w-[27%]",
@@ -99,8 +99,8 @@ export function TodayBoardView({
         </div>
       </div>
 
-      <div className="h-full min-h-[300px] min-w-0 flex-1 lg:min-h-0 lg:pl-3">
-        <div className="h-full min-h-0">
+      <div className="flex min-h-[300px] min-w-0 flex-1 flex-col overflow-hidden lg:min-h-0 lg:pl-3">
+        <div className="min-h-0 flex-1 overflow-hidden">
           <BoardView
             tasks={boardTasks}
             onTaskClick={onTaskClick}

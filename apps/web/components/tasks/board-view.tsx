@@ -50,10 +50,10 @@ export function BoardView({
     : columns;
 
   return (
-    <div className="h-full w-full min-h-0 overflow-y-auto lg:overflow-y-hidden">
+    <div className="flex min-h-0 h-full w-full flex-1 flex-col overflow-y-auto lg:overflow-y-hidden">
       <div
         className={cn(
-          "flex flex-col gap-4 pb-1 lg:h-full lg:grid lg:gap-0 lg:overflow-hidden",
+          "flex min-h-0 flex-1 flex-col gap-4 pb-1 lg:grid lg:h-full lg:min-h-0 lg:gap-0 lg:overflow-hidden",
           visibleColumns.length === 3 ? "lg:grid-cols-3" : "lg:grid-cols-4",
         )}
       >

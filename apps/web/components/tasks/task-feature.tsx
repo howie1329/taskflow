@@ -979,7 +979,7 @@ function TaskFilterControls() {
 
 function TaskFeatureFrame({ children }: { children: ReactNode }) {
   return (
-    <div className="flex h-full w-full min-h-0 flex-col overflow-hidden bg-background">
+    <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden bg-background">
       {children}
     </div>
   );
@@ -1149,8 +1149,8 @@ function TaskFeatureContent() {
 
   if (meta.isLoading) {
     return (
-      <div className="flex h-full min-h-0 flex-col overflow-hidden px-4 py-3">
-        <div className="flex min-h-0 flex-1 flex-col gap-2 pt-1">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-4 py-3">
+        <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto pt-1">
           {Array.from({ length: 8 }).map((_, i) => (
             <Skeleton key={i} className="h-9 w-full rounded-md" />
           ))}
@@ -1160,7 +1160,7 @@ function TaskFeatureContent() {
   }
 
   return (
-    <div className="flex h-full w-full min-h-0 flex-1 flex-col overflow-hidden px-4 py-3">
+    <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden px-4 py-3">
       {state.isEmptyState ? (
         <div className="flex min-h-0 flex-1 items-center justify-center py-16">
           <div className="flex max-w-xs flex-col items-center justify-center gap-3 text-center">
@@ -1216,31 +1216,35 @@ function TaskFeatureContent() {
             )}
           </div>
         </div>
-      ) : state.currentView === "list" ? (
-        <TaskListView
-          tasks={state.filteredTasks}
-          onTaskClick={actions.openDetails}
-          onCreateTask={actions.openCreate}
-          hideCompleted={state.hideCompleted}
-        />
-      ) : state.currentView === "board" ? (
-        <BoardView
-          tasks={state.filteredTasks}
-          onTaskClick={actions.openDetails}
-          onCreateTask={actions.openCreate}
-          projects={state.projects}
-          tags={state.tags}
-          hideCompleted={state.hideCompleted}
-        />
       ) : (
-        <TodayBoardView
-          tasks={state.filteredTasks}
-          onTaskClick={actions.openDetails}
-          onCreateTask={actions.openCreate}
-          projects={state.projects}
-          tags={state.tags}
-          hideCompleted={state.hideCompleted}
-        />
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          {state.currentView === "list" ? (
+            <TaskListView
+              tasks={state.filteredTasks}
+              onTaskClick={actions.openDetails}
+              onCreateTask={actions.openCreate}
+              hideCompleted={state.hideCompleted}
+            />
+          ) : state.currentView === "board" ? (
+            <BoardView
+              tasks={state.filteredTasks}
+              onTaskClick={actions.openDetails}
+              onCreateTask={actions.openCreate}
+              projects={state.projects}
+              tags={state.tags}
+              hideCompleted={state.hideCompleted}
+            />
+          ) : (
+            <TodayBoardView
+              tasks={state.filteredTasks}
+              onTaskClick={actions.openDetails}
+              onCreateTask={actions.openCreate}
+              projects={state.projects}
+              tags={state.tags}
+              hideCompleted={state.hideCompleted}
+            />
+          )}
+        </div>
       )}
     </div>
   );

@@ -9,7 +9,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
@@ -41,6 +40,12 @@ import { useTheme } from "next-themes";
 import type { Doc } from "@/convex/_generated/dataModel";
 
 type Tag = Doc<"tags">;
+
+const selectTriggerClass =
+  "h-8 w-full rounded-md focus-visible:ring-2 focus-visible:ring-ring";
+
+const inputClass =
+  "h-8 rounded-md focus-visible:ring-2 focus-visible:ring-ring";
 
 export function PreferencesTab() {
   const { isLoading: isLoadingViewer, preferences } = useViewer();
@@ -144,7 +149,6 @@ export function PreferencesTab() {
 
     setIsSaving(true);
     try {
-      console.log("selectedModel", selectedModel);
       await updatePreferences({
         defaultAIModel: {
           modelId: selectedModel.modelId,
@@ -289,10 +293,10 @@ export function PreferencesTab() {
   return (
     <div className="space-y-6">
       <div className="space-y-1">
-        <h2 className="text-lg font-semibold tracking-tight">
+        <h2 className="text-base font-semibold tracking-tight">
           General Preferences
         </h2>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           Customize your workspace experience
         </p>
       </div>
@@ -302,15 +306,15 @@ export function PreferencesTab() {
           <Field>
             <FieldLabel>Default AI Model</FieldLabel>
             {isLoadingViewer || isLoadingModels ? (
-              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-8 w-full rounded-md" />
             ) : isEmpty ? (
-              <div className="text-sm text-muted-foreground">
+              <div className="text-xs text-muted-foreground">
                 <p className="italic">
                   No models available yet. Models sync automatically every 6
                   hours.
                 </p>
                 {lastSyncedAt && (
-                  <p className="mt-1 text-xs">
+                  <p className="mt-1 text-[11px]">
                     Last synced: {formatSyncTime(lastSyncedAt)}
                   </p>
                 )}
@@ -321,7 +325,7 @@ export function PreferencesTab() {
                   value={selectedModelId}
                   onValueChange={setSelectedModelId}
                 >
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className={selectTriggerClass}>
                     <SelectValue placeholder="Select a default AI model" />
                   </SelectTrigger>
                   <SelectContent>
@@ -339,21 +343,18 @@ export function PreferencesTab() {
                 </Select>
 
                 {currentDefaultModel && (
-                  <div className="text-sm">
+                  <div className="text-xs">
                     <span className="text-muted-foreground">
                       Current default:{" "}
                     </span>
                     <span className="font-medium">{currentDefaultModel.name}</span>
-                    <span className="ml-2 font-mono text-xs text-muted-foreground">
+                    <span className="ml-2 font-mono text-[11px] text-muted-foreground">
                       ({currentDefaultModel.modelId})
                     </span>
                     {!isModelInList && (
-                      <Badge
-                        variant="outline"
-                        className="ml-2 align-middle font-normal text-muted-foreground"
-                      >
-                        Not in current catalog
-                      </Badge>
+                      <span className="ml-2 align-middle text-[11px] text-muted-foreground">
+                        (not in current catalog)
+                      </span>
                     )}
                   </div>
                 )}
@@ -376,7 +377,7 @@ export function PreferencesTab() {
                   (currentDefaultModel?.modelId === selectedModelId &&
                     models.some((m) => m.modelId === selectedModelId))
                 }
-                className="motion-safe:active:scale-[0.97]"
+                className="h-8 rounded-md"
               >
                 {isSaving ? "Saving..." : "Save Default Model"}
               </Button>
@@ -385,11 +386,11 @@ export function PreferencesTab() {
         </section>
 
         <section className="space-y-6 border-t border-border py-6">
-          <h3 className="text-sm font-semibold tracking-tight">Tasks</h3>
+          <h3 className="text-xs font-semibold tracking-tight">Tasks</h3>
           <Field>
             <FieldLabel>Default Task View</FieldLabel>
             {isLoadingViewer ? (
-              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-8 w-full rounded-md" />
             ) : (
               <>
                 <Select
@@ -400,7 +401,7 @@ export function PreferencesTab() {
                     )
                   }
                 >
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className={selectTriggerClass}>
                     <SelectValue placeholder="Select default task view" />
                   </SelectTrigger>
                   <SelectContent>
@@ -412,7 +413,7 @@ export function PreferencesTab() {
                   </SelectContent>
                 </Select>
 
-                <div className="mt-2 text-sm">
+                <div className="mt-2 text-xs">
                   <span className="text-muted-foreground">Current default: </span>
                   <span className="font-medium">
                     {preferences?.taskDefaultView === "todayPlusBoard"
@@ -434,7 +435,7 @@ export function PreferencesTab() {
                     disabled={
                       isSaving || preferences?.taskDefaultView === taskDefaultView
                     }
-                    className="motion-safe:active:scale-[0.97]"
+                    className="h-8 rounded-md"
                   >
                     {isSaving ? "Saving..." : "Save Default View"}
                   </Button>
@@ -466,7 +467,7 @@ export function PreferencesTab() {
         </section>
 
         <section className="space-y-6 border-t border-border py-6">
-          <h3 className="text-sm font-semibold tracking-tight">
+          <h3 className="text-xs font-semibold tracking-tight">
             Notifications
           </h3>
           <Field>
@@ -492,11 +493,12 @@ export function PreferencesTab() {
         </section>
 
         <section className="space-y-6 border-t border-border py-6">
-          <h3 className="text-sm font-semibold tracking-tight">Tags</h3>
+          <h3 className="text-xs font-semibold tracking-tight">Tags</h3>
           <Field>
             <FieldLabel>New tag</FieldLabel>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
               <Input
+                className={inputClass}
                 value={newTagName}
                 onChange={(e) => setNewTagName(e.target.value)}
                 placeholder="Tag name"
@@ -507,14 +509,14 @@ export function PreferencesTab() {
                   type="color"
                   value={newTagColor}
                   onChange={(e) => setNewTagColor(e.target.value)}
-                  className="h-10 w-16 p-1"
+                  className="h-8 w-14 shrink-0 p-1"
                   aria-label="Tag color"
                   disabled={isCreatingTag}
                 />
                 <Button
                   onClick={handleCreateTag}
                   disabled={isCreatingTag || !newTagName.trim()}
-                  className="h-10 motion-safe:active:scale-[0.97]"
+                  className="h-8 rounded-md"
                 >
                   {isCreatingTag ? "Creating..." : "Create"}
                 </Button>
@@ -529,25 +531,25 @@ export function PreferencesTab() {
             {isLoadingTags ? (
               <div className="space-y-2">
                 {[1, 2, 3].map((i) => (
-                  <Skeleton key={i} className="h-10 w-full" />
+                  <Skeleton key={i} className="h-9 w-full rounded-md" />
                 ))}
               </div>
             ) : tags.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 No tags yet. Create your first tag above.
               </p>
             ) : (
               tags.map((tag) => (
                 <div
                   key={tag._id}
-                  className="flex min-h-10 items-center justify-between gap-3 rounded-lg border border-border bg-card px-3 py-2 transition-colors duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none hover:bg-muted/80"
+                  className="flex min-h-8 items-center justify-between gap-3 rounded-md px-3 py-2 transition-colors duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none hover:bg-accent/50"
                 >
                   <div className="flex min-w-0 items-center gap-2">
                     <span
                       className="inline-block size-2.5 shrink-0 rounded-full"
                       style={{ backgroundColor: tag.color }}
                     />
-                    <span className="truncate text-sm font-medium">
+                    <span className="truncate text-xs font-medium">
                       {tag.name}
                     </span>
                   </div>
@@ -555,7 +557,7 @@ export function PreferencesTab() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="motion-safe:active:scale-[0.97]"
+                      className="h-8 rounded-md"
                       onClick={() => setEditingTag(tag)}
                     >
                       Edit
@@ -563,7 +565,7 @@ export function PreferencesTab() {
                     <Button
                       variant="destructive"
                       size="sm"
-                      className="motion-safe:active:scale-[0.97]"
+                      className="h-8 rounded-md"
                       onClick={() => setTagToDelete(tag)}
                     >
                       Delete
@@ -576,11 +578,11 @@ export function PreferencesTab() {
         </section>
 
         <section className="space-y-6 border-t border-border pt-6">
-          <h3 className="text-sm font-semibold tracking-tight">Appearance</h3>
+          <h3 className="text-xs font-semibold tracking-tight">Appearance</h3>
           <Field>
             <FieldLabel>Theme</FieldLabel>
             {!theme ? (
-              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-8 w-full rounded-md" />
             ) : (
               <Select
                 value={themeValue}
@@ -588,7 +590,7 @@ export function PreferencesTab() {
                   setTheme(value as "system" | "light" | "dark")
                 }
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className={selectTriggerClass}>
                   <SelectValue placeholder="Select theme" />
                 </SelectTrigger>
                 <SelectContent>
@@ -613,13 +615,16 @@ export function PreferencesTab() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit tag</DialogTitle>
-            <DialogDescription>Update the name or color.</DialogDescription>
+            <DialogTitle className="text-base font-semibold">Edit tag</DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              Update the name or color.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <Field>
               <FieldLabel>Name</FieldLabel>
               <Input
+                className={inputClass}
                 value={editTagName}
                 onChange={(e) => setEditTagName(e.target.value)}
                 disabled={isEditingTag}
@@ -631,7 +636,7 @@ export function PreferencesTab() {
                 type="color"
                 value={editTagColor}
                 onChange={(e) => setEditTagColor(e.target.value)}
-                className="h-10 w-20 p-1"
+                className="h-8 w-16 p-1"
                 disabled={isEditingTag}
               />
             </Field>
@@ -639,12 +644,17 @@ export function PreferencesTab() {
           <DialogFooter>
             <Button
               variant="outline"
+              className="h-8 rounded-md"
               onClick={() => setEditingTag(null)}
               disabled={isEditingTag}
             >
               Cancel
             </Button>
-            <Button onClick={handleSaveTag} disabled={isEditingTag}>
+            <Button
+              className="h-8 rounded-md"
+              onClick={handleSaveTag}
+              disabled={isEditingTag}
+            >
               {isEditingTag ? "Saving..." : "Save changes"}
             </Button>
           </DialogFooter>
@@ -659,17 +669,23 @@ export function PreferencesTab() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete tag?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-base font-semibold">
+              Delete tag?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-xs text-muted-foreground">
               This removes the tag from all tasks. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeletingTag}>
+            <AlertDialogCancel
+              className="h-8 rounded-md"
+              disabled={isDeletingTag}
+            >
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
+              className="h-8 rounded-md"
               onClick={handleDeleteTag}
               disabled={isDeletingTag}
             >

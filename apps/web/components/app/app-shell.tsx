@@ -16,7 +16,6 @@ import {
   ArrowDown01Icon,
   SearchIcon,
   PlusSignIcon,
-  HelpCircleIcon,
   SidebarLeftIcon,
 } from "@hugeicons/core-free-icons"
 
@@ -36,6 +35,7 @@ import {
   SidebarMenuItem,
   SidebarProvider,
   SidebarRail,
+  SidebarSeparator,
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar"
@@ -87,12 +87,13 @@ const navWorkspace: NavItemDef[] = [
     href: "/app/projects",
     icon: FolderManagementIcon,
   },
-  {
-    title: "Settings",
-    href: "/app/settings",
-    icon: SettingsIcon,
-  },
 ]
+
+const settingsNavItem: NavItemDef = {
+  title: "Settings",
+  href: "/app/settings",
+  icon: SettingsIcon,
+}
 
 const navTools: NavItemDef[] = [
   {
@@ -107,7 +108,12 @@ const navTools: NavItemDef[] = [
   },
 ]
 
-const allNavItems: NavItemDef[] = [...navPrimary, ...navWorkspace, ...navTools]
+const allNavItems: NavItemDef[] = [
+  ...navPrimary,
+  ...navWorkspace,
+  settingsNavItem,
+  ...navTools,
+]
 
 function getPageTitle(pathname: string): string {
   if (pathname.startsWith("/app/projects/")) return "Projects"
@@ -131,6 +137,7 @@ function buildCommandItems(): WorkspaceNavCommandItem[] {
       ...item,
       group: "Workspace",
     })),
+    { ...settingsNavItem, group: "Workspace" },
     ...navTools.map((item) => ({
       ...item,
       group: "Tools",
@@ -329,41 +336,65 @@ function WorkspaceSidebarContent({
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <Collapsible defaultOpen className="group border-t border-sidebar-border/40">
-          <CollapsibleTrigger className="flex w-full items-center gap-1 rounded-md px-3 py-2 text-left text-[11px] font-medium text-muted-foreground uppercase tracking-wide outline-none ring-sidebar-ring transition-colors hover:bg-sidebar-accent/40 hover:text-sidebar-foreground focus-visible:ring-2">
-            <span>Workspace</span>
-            <HugeiconsIcon
-              icon={ArrowDown01Icon}
-              className="ml-auto size-3 shrink-0 opacity-70 transition-transform group-data-[state=open]:rotate-180"
-              strokeWidth={2}
-            />
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <div className="px-2 pb-2">
-              <SidebarMenu>
-                <NavRows items={navWorkspace} {...navProps} />
-              </SidebarMenu>
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
+        {isCollapsed ? (
+          <>
+            <SidebarGroup className="border-t border-sidebar-border/40 py-2">
+              <SidebarGroupLabel className="sr-only">Workspace</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <NavRows items={navWorkspace} {...navProps} />
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+            <SidebarSeparator />
+            <SidebarGroup className="py-2">
+              <SidebarGroupLabel className="sr-only">Tools</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <NavRows items={navTools} {...navProps} />
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </>
+        ) : (
+          <>
+            <Collapsible defaultOpen className="group border-t border-sidebar-border/40">
+              <CollapsibleTrigger className="flex w-full items-center gap-1 rounded-md px-3 py-2 text-left text-[11px] font-medium text-muted-foreground uppercase tracking-wide outline-none ring-sidebar-ring transition-colors hover:bg-sidebar-accent/40 hover:text-sidebar-foreground focus-visible:ring-2">
+                <span>Workspace</span>
+                <HugeiconsIcon
+                  icon={ArrowDown01Icon}
+                  className="ml-auto size-3 shrink-0 opacity-70 transition-transform group-data-[state=open]:rotate-180"
+                  strokeWidth={2}
+                />
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="px-2 pb-2">
+                  <SidebarMenu>
+                    <NavRows items={navWorkspace} {...navProps} />
+                  </SidebarMenu>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
 
-        <Collapsible defaultOpen className="group border-t border-sidebar-border/40">
-          <CollapsibleTrigger className="flex w-full items-center gap-1 rounded-md px-3 py-2 text-left text-[11px] font-medium text-muted-foreground uppercase tracking-wide outline-none ring-sidebar-ring transition-colors hover:bg-sidebar-accent/40 hover:text-sidebar-foreground focus-visible:ring-2">
-            <span>Tools</span>
-            <HugeiconsIcon
-              icon={ArrowDown01Icon}
-              className="ml-auto size-3 shrink-0 opacity-70 transition-transform group-data-[state=open]:rotate-180"
-              strokeWidth={2}
-            />
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <div className="px-2 pb-2">
-              <SidebarMenu>
-                <NavRows items={navTools} {...navProps} />
-              </SidebarMenu>
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
+            <Collapsible defaultOpen className="group border-t border-sidebar-border/40">
+              <CollapsibleTrigger className="flex w-full items-center gap-1 rounded-md px-3 py-2 text-left text-[11px] font-medium text-muted-foreground uppercase tracking-wide outline-none ring-sidebar-ring transition-colors hover:bg-sidebar-accent/40 hover:text-sidebar-foreground focus-visible:ring-2">
+                <span>Tools</span>
+                <HugeiconsIcon
+                  icon={ArrowDown01Icon}
+                  className="ml-auto size-3 shrink-0 opacity-70 transition-transform group-data-[state=open]:rotate-180"
+                  strokeWidth={2}
+                />
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="px-2 pb-2">
+                  <SidebarMenu>
+                    <NavRows items={navTools} {...navProps} />
+                  </SidebarMenu>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+          </>
+        )}
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border/50 p-2">
@@ -373,12 +404,12 @@ function WorkspaceSidebarContent({
               asChild
               size="sm"
               variant="navPill"
-              tooltip="Help"
+              tooltip="Settings"
               className="text-sidebar-foreground/70"
             >
-              <Link href="/app/settings">
-                <HugeiconsIcon icon={HelpCircleIcon} className="shrink-0" strokeWidth={2} />
-                <span>Help</span>
+              <Link href={settingsNavItem.href}>
+                <HugeiconsIcon icon={settingsNavItem.icon} className="shrink-0" strokeWidth={2} />
+                <span>{settingsNavItem.title}</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -468,7 +499,9 @@ export function AppShell({ children, right }: AppShellProps) {
   const shell = (
     <SidebarProvider
       defaultOpenInspector={false}
-      className={cn(isChatRoute && "h-svh overflow-hidden")}
+      className={cn(
+        (isChatRoute || isTasksRoute) && "h-svh overflow-hidden",
+      )}
       style={{ "--sidebar-width": "15rem" } as React.CSSProperties}
     >
       <Sidebar scope="primary" variant="sidebar" collapsible="icon">
@@ -492,7 +525,14 @@ export function AppShell({ children, right }: AppShellProps) {
         <SidebarRail scope="primary" />
       </Sidebar>
       <SidebarInset
-        className={cn("min-w-0 overflow-hidden", isChatRoute && "min-h-0")}
+        className={cn(
+          "min-w-0 overflow-hidden",
+          (isChatRoute ||
+            isSettingsRoute ||
+            isTasksRoute ||
+            isNotesRoute) &&
+            "min-h-0",
+        )}
       >
         {!isOnboardingRoute && !isChatRoute && (
           <div className="md:hidden sticky top-0 z-20 flex h-10 items-center gap-2 px-2 bg-background/70 backdrop-blur supports-backdrop-filter:bg-background/50">
