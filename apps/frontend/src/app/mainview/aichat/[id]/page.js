@@ -36,6 +36,9 @@ import { ChatMessageProvider } from "@/presentation/components/aiChat/providers/
 import { ChatPageClient } from "@/presentation/components/aiChat/providers/ChatPageClient";
 import { ChatSuggestionProvider } from "@/presentation/components/aiChat/providers/ChatSuggestionProvider";
 import { ChatContextProvider } from "@/presentation/components/aiChat/providers/ChatContextProvider";
+import rehypeHighlight from "rehype-highlight";
+import "highlight.js/styles/github-dark.css";
+import rehypeSanitize from "rehype-sanitize";
 
 function Page() {
   const { id } = useParams();
@@ -165,8 +168,44 @@ export const RenderAssistantMessageContent = ({
           <span className="text-xs text-blue-500/70">🧠 Smart Context</span>
         )}
       </div>
-      <div className="relative text-foreground rounded-none w-full max-w-[65%] px-2 py-2 prose prose-sm border-r">
-        <Markdown remarkPlugins={[remarkGfm]}>{partContent.text}</Markdown>
+      <div className="relative text-foreground rounded-none w-full max-w-[65%] px-2 py-2 prose prose-sm dark:prose-invert border-r">
+        <Markdown
+          remarkPlugins={[remarkGfm]}
+          rehypePlugins={[rehypeSanitize, rehypeHighlight]}
+          components={{
+            // Customize code blocks
+            code({ node, inline, className, children, ...props }) {
+              const match = /language-(\w+)/.exec(className || "");
+              return !inline && match ? (
+                <pre className="bg-muted p-4 rounded-lg overflow-x-auto">
+                  <code className={className} {...props}>
+                    {children}
+                  </code>
+                </pre>
+              ) : (
+                <code
+                  className="bg-muted px-1 py-0.5 rounded text-sm"
+                  {...props}
+                >
+                  {children}
+                </code>
+              );
+            },
+            // Customize links
+            a({ node, ...props }) {
+              return (
+                <a
+                  {...props}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                />
+              );
+            },
+          }}
+        >
+          {partContent.text}
+        </Markdown>
       </div>
       <div className="flex flex-row gap-2 items-center">
         <p className="text-muted-foreground/60 text-xs">{timestamp}</p>

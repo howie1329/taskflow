@@ -13,6 +13,13 @@
         "*"
       ]
     },
+    "@taskflow/web#build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "!.next/cache/**"],
+      "env": [
+        "*"
+      ]
+    },
     "@taskflow/backend#build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**"],
@@ -21,6 +28,11 @@
       ]
     },
      "@taskflow/backend#start": {
+      "cache": false,
+      "persistent": true,
+      "env": ["*"]
+    },
+    "@taskflow/web#start": {
       "cache": false,
       "persistent": true,
       "env": ["*"]

@@ -1,0 +1,5 @@
+interface:
+  display_name: "Planning Docs Scout"
+  short_description: "Find Markdown guides before planning"
+  default_prompt: "Use $planning-docs-scout to scan this repo for Markdown docs relevant to the requested feature (including UI/design guidelines), then summarize the key constraints that should shape the plan."
+

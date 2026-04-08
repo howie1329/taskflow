@@ -50,6 +50,7 @@ export const taskService = {
   },
 
   async updateTask(taskId, userId, updates, emitToUser) {
+    console.log("updateTask", taskId, userId, updates, emitToUser);
     const task = await taskOps.update(taskId, userId, updates);
 
     if (task) {

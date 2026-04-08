@@ -7,6 +7,7 @@ import { convertToModelMessages, pruneMessages } from "ai";
 import { emitToRoom } from "../sockets/index.js";
 
 export const conversationService = {
+  // This is deprecated but could be used in the future
   async createConversation(userId, title, id) {
     const created_conversation = await conversationOps.create({
       userId,
@@ -24,7 +25,8 @@ export const conversationService = {
     );
 
     if (!conversation) {
-      const title = await aiChatService.createTitle(initialMessage);
+      const title =
+        await aiChatService.createTitleFromInitalMessage(initialMessage);
       const newConversation = await conversationOps.create({
         id: conversationId,
         userId,

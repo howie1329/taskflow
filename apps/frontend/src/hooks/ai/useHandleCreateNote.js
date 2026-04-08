@@ -7,7 +7,7 @@ const useHandleCreateNote = () => {
   const createNote = async (message, model) => {
     const token = await getToken();
     const response = await axiosClient.post(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/ai/create-note`,
+      "/api/v1/ai/create-note",
       { message: message, model: model },
       {
         headers: {

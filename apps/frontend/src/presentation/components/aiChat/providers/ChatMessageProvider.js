@@ -2,7 +2,7 @@
 import useFetchConversation from "@/hooks/ai/useFetchConversation";
 import useFetchConversationMessages from "@/hooks/ai/useFetchConversationMessages";
 import { useChat } from "@ai-sdk/react";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { DefaultChatTransport } from "ai";
 import { useAuth } from "@clerk/nextjs";
 import { useQueryClient } from "@tanstack/react-query";
@@ -267,8 +267,6 @@ export const ChatMessageProvider = ({ conversationId, children }) => {
   const { data: fetchedMessages, isLoading: messagesLoading } =
     useFetchConversationMessages(conversationId);
 
-  const [toolArtifacts, setToolArtifacts] = useState(toolArtifactsDummyData);
-
   // Use the useChat hook to send messages to the backend
   const { messages, sendMessage, status, setMessages, stop, regenerate } =
     useChat({
@@ -312,12 +310,9 @@ export const ChatMessageProvider = ({ conversationId, children }) => {
     }
   }, [fetchedMessages, setMessages]);
 
-  // Collect Tool Artifacts from the useChat Hook
-  useEffect(() => {
-    console.log("Messages", messages);
-    const tempToolArtifacts = toolArtifactsCollector(messages);
-    setToolArtifacts(tempToolArtifacts);
-    console.log("Temp Tool Artifacts", tempToolArtifacts);
+  // Compute Tool Artifacts from messages using useMemo for efficiency
+  const toolArtifacts = useMemo(() => {
+    return toolArtifactsCollector(messages);
   }, [messages]);
 
   // Update the conversation title on messsages receive
@@ -361,6 +356,14 @@ export const useChatMessageContext = () => {
     );
   }
   return context;
+};
+
+export const useToolArtifacts = () => {
+  const { messages } = useChatMessageContext();
+  const toolArtifacts = useMemo(() => {
+    return toolArtifactsCollector(messages);
+  }, [messages]);
+  return toolArtifacts;
 };
 
 export const toolArtifactsCollector = (messages) => {

@@ -4,10 +4,10 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
-  ConnectIcon,
   Delete03Icon,
   EllipseSelectionIcon,
   TaskEdit01Icon,
+  TextIndentMoreIcon,
 } from "@hugeicons/core-free-icons/index";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/popover";
 import { useEffect, useState } from "react";
 import { useSocket } from "@/lib/sockets/SocketProvider";
+import { ChatArtifactClient } from "./ChatArtifactClient";
 export const ChatHeaderClient = () => {
   const {
     conversation,
@@ -65,16 +66,7 @@ export const ChatHeaderClient = () => {
           />
 
           {/* Will be used to show tool artifacts in a sheet*/}
-          {toolArtifacts.length > 0 && (
-            <Button
-              variant="outline"
-              size="icon"
-              className="hover:bg-foreground hover:text-white rounded-none hover:cursor-pointer"
-              onClick={() => setIsToolArtifactsOpen(!isToolArtifactsOpen)}
-            >
-              <HugeiconsIcon icon={ConnectIcon} strokeWidth={2} />
-            </Button>
-          )}
+          {toolArtifacts.length > 0 && <ChatArtifactClient />}
         </div>
       </div>
       <Separator />

@@ -109,7 +109,11 @@ export const aiChatService = {
     });
 
     const { object: summaryObject } = await generateObject({
-      model: openRouter("openai/gpt-oss-20b:free"),
+      model: openRouter("openai/gpt-oss-20b:free", {
+        extraBody: {
+          models: ["deepseek/deepseek-r1-0528:free", "openai/gpt-5-nano"],
+        },
+      }),
       system:
         "You are a summarization agent. You are tasked with summarizing the messages into a concise summary." +
         "This summary will be used in other llms and agents to help them continue the conversation.",
@@ -139,23 +143,29 @@ export const aiChatService = {
   async createTitleFromInitalMessage(message) {
     const initialMessage = message.parts[0].text;
     const { text: title } = await generateText({
-      model: openRouter("openai/gpt-oss-20b:free"),
+      model: openRouter("openai/gpt-oss-20b:free", {
+        extraBody: {
+          models: ["deepseek/deepseek-r1-0528:free", "openai/gpt-5-nano"],
+        },
+      }),
       system:
         "You are a title generation agent. You are tasked with generating a title for a conversation based on the initial message.",
       prompt: `Generate a title for a conversation based on the initial message: ${initialMessage}. 
       The title should be a single sentence and should be no more than 100 characters.
       You must return text.`,
-      maxOutputTokens: 100,
       temperature: 0.7,
       maxRetries: 2,
     });
-
     return title;
   },
 
   async titleConversation(summary) {
     const { text: title } = await generateText({
-      model: openRouter("openai/gpt-oss-20b:free"),
+      model: openRouter("openai/gpt-oss-20b:free", {
+        extraBody: {
+          models: ["deepseek/deepseek-r1-0528:free", "openai/gpt-5-nano"],
+        },
+      }),
       system:
         "You are a title generation agent. You are tasked with generating a title for a conversation based on the content.",
       prompt: `Generate a title for a conversation based on the content: ${summary}. You must return text.`,
@@ -208,12 +218,13 @@ export const vercelChatService = {
   }) {
     const stream = createUIMessageStream({
       execute: ({ writer }) => {
-        const miniAgent = VercelMiniAgents(writer);
+        const artifactsCollector = [];
+        const miniAgent = VercelMiniAgents(writer, artifactsCollector);
 
         const agent = new VercelAgent({
           model: openRouter(model, {
             extraBody: {
-              models: ["openai/gpt-4o-mini"], // testing for fallback model,
+              models: ["openai/gpt-5-nano"], // testing for fallback model,
             },
           }),
 
@@ -254,13 +265,28 @@ export const vercelChatService = {
               }
             },
             onFinish: async ({ messages }) => {
-              // Need To save search results to the database
-              // Need to see what is excatly being saved to the database
-              console.log("Messages in onFinish", messages);
+              console.log("Message in onFinish", messages[0]);
+              console.log("Artifacts Collector", artifactsCollector);
+
+              // Add collected artifacts to message parts for database persistence
+              const messageWithArtifacts = {
+                ...messages[0],
+                parts: [
+                  ...messages[0].parts,
+                  ...artifactsCollector.map((artifact) => ({
+                    type: `data-artifact-${artifact.toolName.toLowerCase()}`,
+                    id: artifact.id,
+                    data: artifact,
+                  })),
+                ],
+              };
+
+              console.log("Message with artifacts", messageWithArtifacts);
+
               await conversationService.addAiResponseToConversation(
                 userId,
                 conversationId,
-                messages[0]
+                messageWithArtifacts
               );
             },
           })
@@ -295,7 +321,11 @@ export const AIActivatedServices = {
     const tools = VercelAITools();
     try {
       const agent = new VercelAgent({
-        model: openRouter(model),
+        model: openRouter(model, {
+          extraBody: {
+            models: ["deepseek/deepseek-r1-0528:free", "openai/gpt-5-nano"],
+          },
+        }),
         system:
           "You are a note creation agent. You are tasked with creating a new note based on the user's message.",
         stopWhen: stepCountIs(4),
@@ -356,7 +386,11 @@ export const suggestedMessageService = {
     }
     try {
       const { object: suggestedMessages } = await generateObject({
-        model: openRouter(model),
+        model: openRouter(model, {
+          extraBody: {
+            models: ["deepseek/deepseek-r1-0528:free", "openai/gpt-5-nano"],
+          },
+        }),
         prompt:
           "Generate a array of suggested 3-4 questions from the users perspective to continue the conversation. " +
           "The questions should be no more then 2 sentences each." +

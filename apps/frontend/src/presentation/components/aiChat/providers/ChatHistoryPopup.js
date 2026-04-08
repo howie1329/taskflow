@@ -45,7 +45,7 @@ export const ChatHistoryPopup = () => {
       <PopoverContent
         side="top"
         sideOffset={10}
-        className="flex flex-col w-screen lg:w-[80vw] h-[35h] overflow-y-auto rounded-none gap-2 "
+        className="flex flex-col w-screen lg:w-[60vw] h-[35vh] overflow-y-hidden rounded-none gap-2 "
       >
         <div className="flex flex-row items-center justify-between border px-1">
           <HugeiconsIcon

@@ -19,6 +19,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import useCompleteSubtask from "@/hooks/tasks/subtasks/useCompleteSubtask";
 import { useFetchTaskSubtask } from "@/hooks/tasks/subtasks/useFetchTaskSubtask";
 import useIncompleteSubtask from "@/hooks/tasks/subtasks/useIncompleteSubtask";
@@ -61,6 +69,7 @@ export const TaskCardSheet = ({ selectedTask, isOpen, onOpenChange }) => {
   const [editingSubtaskId, setEditingSubtaskId] = useState(null);
   const [editingSubtaskName, setEditingSubtaskName] = useState("");
   const [newSubtaskName, setNewSubtaskName] = useState("");
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const { mutate: deleteTask } = useDeleteTask();
   const { mutate: completeSubtask } = useCompleteSubtask();
@@ -75,6 +84,7 @@ export const TaskCardSheet = ({ selectedTask, isOpen, onOpenChange }) => {
   const descriptionTimeoutRef = useRef(null);
   const statusTimeoutRef = useRef(null);
   const dueDateTimeoutRef = useRef(null);
+  const notesTimeoutRef = useRef(null);
 
   // Update local state when selectedTask changes
   useEffect(() => {
@@ -190,6 +200,33 @@ export const TaskCardSheet = ({ selectedTask, isOpen, onOpenChange }) => {
     };
   }, [dueDate, selectedTask.id, selectedTask.date, updateTask]);
 
+  // Debounced update for notes
+  // Debounced update for notes
+  useEffect(() => {
+    if (notesTimeoutRef.current) {
+      clearTimeout(notesTimeoutRef.current);
+    }
+
+    // Normalize both values to empty string for comparison
+    const normalizedNotes = notes || "";
+    const originalNotes = selectedTask.notes || "";
+
+    if (normalizedNotes !== originalNotes) {
+      notesTimeoutRef.current = setTimeout(() => {
+        updateTask({
+          taskId: selectedTask.id,
+          taskData: { notes: normalizedNotes || null },
+        });
+      }, 1000);
+    }
+
+    return () => {
+      if (notesTimeoutRef.current) {
+        clearTimeout(notesTimeoutRef.current);
+      }
+    };
+  }, [notes, selectedTask.id, selectedTask.notes, updateTask]);
+
   const handleDescriptionChange = (e) => {
     setDescription(e.target.value);
   };
@@ -204,6 +241,10 @@ export const TaskCardSheet = ({ selectedTask, isOpen, onOpenChange }) => {
 
   const handleDueDateChange = (e) => {
     setDueDate(e.target.value);
+  };
+
+  const handleNotesChange = (e) => {
+    setNotes(e.target.value);
   };
 
   const handleCheckedChange = (subtaskId, isComplete) => {
@@ -275,7 +316,6 @@ export const TaskCardSheet = ({ selectedTask, isOpen, onOpenChange }) => {
         subtaskName: newSubtaskName.trim(),
         isComplete: false,
       };
-      console.log("Creating subtask with data:", subtaskData);
       createSubtask(subtaskData);
       setNewSubtaskName("");
     }
@@ -289,7 +329,17 @@ export const TaskCardSheet = ({ selectedTask, isOpen, onOpenChange }) => {
   };
 
   const deleteButtonClick = () => {
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
     deleteTask(selectedTask.id);
+    setIsDeleteDialogOpen(false);
+    onOpenChange(false);
+  };
+
+  const handleCancelDelete = () => {
+    setIsDeleteDialogOpen(false);
   };
 
   const LoadingSubtasks = () => {
@@ -505,6 +555,8 @@ export const TaskCardSheet = ({ selectedTask, isOpen, onOpenChange }) => {
             )}
             <h3 className="text-sm font-medium mt-4">Notes:</h3>
             <Textarea
+              value={notes}
+              onChange={handleNotesChange}
               className="h-full rounded-none"
               placeholder="Add notes to this task..."
             />
@@ -517,6 +569,28 @@ export const TaskCardSheet = ({ selectedTask, isOpen, onOpenChange }) => {
           </Button>
         </SheetFooter>
       </SheetContent>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Task</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "{title}"? This action cannot be
+              undone and will also delete all subtasks associated with this
+              task.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleCancelDelete}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleConfirmDelete}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Sheet>
   );
 };
