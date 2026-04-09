@@ -14,6 +14,4 @@ This section documents current product behavior in `apps/web`.
 - [Onboarding](./onboarding.md)
 - [Notifications](./notifications.md)
 
-## Archive
-
-Historical UI planning docs live under [`../archive/2026-legacy-plans/`](../archive/2026-legacy-plans/README.md).
+Historical UI planning docs were removed during repo cleanup once their decisions were reflected in the current docs.

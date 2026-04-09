@@ -66,4 +66,3 @@ These are guiding constraints from legacy chat work, not a promise that every op
 
 - [`../features/ai-chat.md`](../features/ai-chat.md)
 - [`./overview.md`](./overview.md)
-- [`../archive/2026-legacy-plans/README.md`](../archive/2026-legacy-plans/README.md)

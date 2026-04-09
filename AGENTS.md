@@ -26,52 +26,32 @@ Write code that another strong engineer can quickly understand, safely extend, a
 - Build custom UI when a shadcn component exists or can be added
 - Introduce new abstractions, helpers, or patterns without checking if something equivalent already exists
 - Add semicolons (codebase omits them)
-- Use TypeScript in `apps/frontend` (it's JavaScript)
-- Touch `apps/backend/db/schema.js` directly—use migrations (`npm run db:generate --workspace=@taskflow/backend`)
 
 ## Do
 
 - Use `cn()` from `@/lib/utils` for class merging
 - Use `"use client"` on client components
 - Run `npm run lint` before committing
-- Rebuild RAG after changes: `npm run build --workspace=@taskflow/rag`
 
 ## Apps
 
-| App      | Path            | Stack                                                                                 |
-| -------- | --------------- | ------------------------------------------------------------------------------------- |
-| Frontend | `apps/frontend` | Next.js 16, React 19, JS (not TS), Tailwind 4, shadcn, Clerk, Zustand, TanStack Query |
-| Web      | `apps/web`      | Next.js, Convex, TypeScript, shadcn, Hugeicons                                        |
-| Backend  | `apps/backend`  | Express 5, Drizzle, PostgreSQL, BullMQ, Socket.io                                     |
+| App | Path | Stack |
+| --- | --- | --- |
+| Web | `apps/web` | Next.js, Convex, TypeScript, shadcn, Hugeicons |
 
-Frontend uses Lucide/Hugeicons; Web uses Hugeicons. Both use shadcn from `@/components/ui`.
+Web uses Hugeicons and shadcn from `@/components/ui`.
 
 ## Commands
 
 ```bash
 npm run dev              # All apps
-npm run dev:frontend      # Frontend only
-npm run dev:backend       # Backend only
 npm run dev:web           # Web only
 npm run build             # Build all
 npm run lint              # Lint all
-npm run db:push --workspace=@taskflow/backend     # Push schema
-npm run db:generate --workspace=@taskflow/backend # Generate migrations
-npm run db:studio --workspace=@taskflow/backend   # Drizzle Studio
 ```
-
-## Backend Pattern
-
-Use `BaseOperationHandler` for route handlers. See existing controllers in `apps/backend` for the pattern.
-
-## Database
-
-- Schema: `apps/backend/db/schema.js`
-- Relations: `apps/backend/db/relations.js`
-- Operations: `apps/backend/db/operations/`
 
 ## Naming
 
-- Components: PascalCase (`TaskCard.jsx`)
-- Hooks: `use` + camelCase (`useCreateTask.js`)
+- Components: PascalCase (`TaskCard.tsx`)
+- Hooks: `use` + camelCase (`useCreateTask`)
 - Folders: lowercase-with-hyphens

@@ -6,31 +6,12 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
     },
-    "@taskflow/frontend#build": {
-      "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**"],
-      "env": [
-        "*"
-      ]
-    },
     "@taskflow/web#build": {
       "dependsOn": ["^build"],
       "outputs": [".next/**", "!.next/cache/**"],
       "env": [
         "*"
       ]
-    },
-    "@taskflow/backend#build": {
-      "dependsOn": ["^build"],
-      "outputs": ["dist/**"],
-      "env": [
-        "*"
-      ]
-    },
-     "@taskflow/backend#start": {
-      "cache": false,
-      "persistent": true,
-      "env": ["*"]
     },
     "@taskflow/web#start": {
       "cache": false,
@@ -51,16 +32,6 @@
     "test": {
       "dependsOn": ["build"],
       "outputs": []
-    },
-    "db:push": {
-      "cache": false
-    },
-    "db:generate": {
-      "cache": false
-    },
-    "db:studio": {
-      "cache": false,
-      "persistent": true
     }
   }
 }

@@ -85,5 +85,3 @@ const context = assemblePromptContext({
 - `ai` — UIMessage, generateText, Output
 - `gpt-tokenizer` — Token estimation
 - `zod` — ThreadState schema
-
-No dependency on `@taskflow/chat-content`.
