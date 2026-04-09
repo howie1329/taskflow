@@ -31,7 +31,10 @@ import {
   PromptInputSubmit,
   PromptInputTextarea,
 } from "@/components/ai-elements/prompt-input"
-import { CHAT_COMPOSER_INPUT_CLASS_NAME } from "@/app/app/chat/components/chat-composer-ui"
+import {
+  CHAT_COMPOSER_INPUT_CLASS_NAME,
+  CHAT_COMPOSER_TEXTAREA_CLASS_NAME,
+} from "@/app/app/chat/components/chat-composer-ui"
 import { useNotes } from "@/components/notes"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -595,7 +598,7 @@ function NotesMiniChat({ note }: { note: Note }) {
         <ConversationScrollButton />
       </Conversation>
 
-      <div className="shrink-0 border-t border-border pt-3">
+      <div className="shrink-0 border-t border-border/50 pt-2">
         <PromptInput
           onSubmit={({ text }) => handleSubmit(text)}
           className={CHAT_COMPOSER_INPUT_CLASS_NAME}
@@ -606,12 +609,12 @@ function NotesMiniChat({ note }: { note: Note }) {
             value={input}
             onChange={(event) => setInput(event.target.value)}
             placeholder="Ask about this note..."
-            className="min-h-16 max-h-56 px-3 py-2 text-sm leading-snug placeholder:text-muted-foreground"
+            className={CHAT_COMPOSER_TEXTAREA_CLASS_NAME}
           />
-          <PromptInputFooter className="border-t border-border/50 px-3 py-2 text-xs text-muted-foreground">
-            <div className="flex items-center gap-2">
+          <PromptInputFooter className="border-t border-border/50 px-3 py-1 text-[11px] text-muted-foreground">
+            <div className="flex items-center gap-1.5">
               {status === "streaming" || status === "submitted" ? (
-                <span className="inline-flex items-center gap-1.5 text-muted-foreground">
+                <span className="inline-flex items-center gap-1.5">
                   <HugeiconsIcon
                     icon={Loading03Icon}
                     className="size-3.5 animate-spin"

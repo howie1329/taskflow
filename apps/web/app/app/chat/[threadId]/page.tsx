@@ -223,7 +223,7 @@ function ThreadPageContent() {
       />
 
       <Conversation className="flex-1">
-        <ConversationContent className="mx-auto flex w-full max-w-2xl flex-col">
+        <ConversationContent className="mx-auto flex w-full max-w-3xl flex-col">
           {messages.length === 0 ? (
             <ChatEmptyStateWithSuggestions textareaRef={composerRef} />
           ) : (
