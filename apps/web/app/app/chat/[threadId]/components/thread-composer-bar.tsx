@@ -99,8 +99,8 @@ export function ThreadComposerBar({ textareaRef }: ThreadComposerBarProps) {
   ) : null;
 
   return (
-    <div className="shrink-0 border-t border-border/50 bg-background pb-[calc(env(safe-area-inset-bottom)+8px)] pt-3">
-      <div className="mx-auto w-full max-w-2xl px-4 md:px-8">
+    <div className="shrink-0 border-t border-border/50 bg-background pb-[calc(env(safe-area-inset-bottom)+8px)] pt-2">
+      <div className="mx-auto w-full max-w-3xl px-4 md:px-8">
         <ChatComposerInput
           id="thread-message"
           placeholder="Continue the conversation..."

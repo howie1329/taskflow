@@ -22,12 +22,16 @@ import {
 import { ToolLockCommandMenu } from "./tool-lock-command-menu";
 
 export const CHAT_COMPOSER_INPUT_CLASS_NAME =
-  "**:data-[slot=input-group]:rounded-md **:data-[slot=input-group]:border-input **:data-[slot=input-group]:bg-input **:data-[slot=input-group]:shadow-none **:data-[slot=input-group]:transition-colors **:data-[slot=input-group]:duration-150 **:data-[slot=input-group]:dark:bg-input/30 **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:border-ring **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:ring-2 **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:ring-ring/30 **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:ring-offset-0";
+  "**:data-[slot=input-group]:rounded-md **:data-[slot=input-group]:border-input **:data-[slot=input-group]:bg-input **:data-[slot=input-group]:shadow-none **:data-[slot=input-group]:transition-colors **:data-[slot=input-group]:duration-150 **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:border-ring **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:ring-2 **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:ring-ring **:data-[slot=input-group]:has-[[data-slot=input-group-control]:focus-visible]:ring-offset-0"
+
+/** Shared textarea sizing: short default height, wider max scroll than min for long prompts */
+export const CHAT_COMPOSER_TEXTAREA_CLASS_NAME =
+  "max-h-48 min-h-11 px-3 py-1.5 leading-snug"
 
 export function getComposerHeaderClassName(showPromptHeader: boolean) {
   return `grid overflow-hidden transition-[grid-template-rows,opacity,margin-bottom] duration-200 ease-out ${
     showPromptHeader
-      ? "mb-2 grid-rows-[1fr] opacity-100"
+      ? "mb-1.5 grid-rows-[1fr] opacity-100"
       : "pointer-events-none mb-0 grid-rows-[0fr] opacity-0"
   }`;
 }
@@ -50,7 +54,7 @@ export function ChatComposerToolHeader({
 }) {
   return (
     <div className={getComposerHeaderClassName(show)} aria-hidden={!show}>
-      <div className="overflow-hidden rounded-lg border border-border/50 bg-background px-3 py-2">
+      <div className="overflow-hidden border-b border-border/50 pb-1.5">
         <ToolLockCommandMenu textareaRef={textareaRef} />
       </div>
     </div>
@@ -62,7 +66,7 @@ export function ComposerAttachmentsPreview() {
   if (attachments.files.length === 0) return null;
 
   return (
-    <div className="px-3 pt-3">
+    <div className="px-3 pt-2">
       <Attachments variant="inline" className="mr-auto">
         {attachments.files.map((file) => (
           <Attachment
@@ -106,7 +110,7 @@ export function ComposerSlashCommandButton({
         </Button>
       </TooltipTrigger>
       <TooltipContent sideOffset={6}>
-        <p>Slash commands</p>
+        <p className="text-xs">Target a tool for your next message</p>
       </TooltipContent>
     </Tooltip>
   );

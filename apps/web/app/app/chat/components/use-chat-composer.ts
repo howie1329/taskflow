@@ -5,6 +5,7 @@ import {
   usePromptInputAttachments,
   usePromptInputController,
 } from "@/components/ai-elements/prompt-input"
+import { parseSlashCommandInput } from "@/lib/chat/slash-command-query"
 import {
   useChatConfig,
   useChatConfigActions,
@@ -39,8 +40,8 @@ export function useChatComposer() {
 
   const { setScope } = useChatThreadActions()
 
-  const showPromptHeader =
-    textInput.value.trimStart().startsWith("/") || !!toolLock
+  const { menuOpen: slashMenuOpen } = parseSlashCommandInput(textInput.value)
+  const showPromptHeader = slashMenuOpen || !!toolLock
 
   return {
     textInput,

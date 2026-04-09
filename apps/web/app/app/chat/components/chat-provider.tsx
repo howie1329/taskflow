@@ -274,6 +274,9 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (previousThreadId.current !== activeThreadId) {
       hasUserSelectedModel.current = false;
+      // Reset one-shot tool targeting when the active thread changes
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- thread-scoped UI state
+      setToolLock(null);
       previousThreadId.current = activeThreadId;
     }
   }, [activeThreadId]);
@@ -370,21 +373,26 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         userId: currentUserId,
       } = requestStateRef.current;
       if ((!trimmed && !hasFiles) || !currentModel || !currentUserId) return;
-      await sendMessage(
-        { text: trimmed, files },
-        {
-          body: {
-            model: currentModel,
-            interface: currentInterface ?? undefined,
-            userId: currentUserId,
-            projectId: currentProjectId,
-            mode: currentMode,
-            toolLock: currentToolLock,
+      try {
+        await sendMessage(
+          { text: trimmed, files },
+          {
+            body: {
+              model: currentModel,
+              interface: currentInterface ?? undefined,
+              userId: currentUserId,
+              projectId: currentProjectId,
+              mode: currentMode,
+              toolLock: currentToolLock,
+            },
           },
-        },
-      );
+        );
+        setToolLock(null);
+      } catch {
+        // One-shot lock retained so the user can retry after a failed send
+      }
     },
-    [sendMessage],
+    [sendMessage, setToolLock],
   );
 
   const sendText = useCallback(

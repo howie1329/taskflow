@@ -262,8 +262,8 @@ const MODE_SPECIFIC_COMMANDS: ToolLockCommand[] = [
 const CONTROL_COMMANDS: ToolLockCommand[] = [
   {
     command: "/tool.off",
-    label: "Disable Tool Lock",
-    description: "Clear the current tool lock and allow normal tool selection",
+    label: "Use all tools",
+    description: "Cancel next-message tool targeting (assistant picks tools again)",
     toolKey: null,
     allowedModes: ALL_MODES,
   },

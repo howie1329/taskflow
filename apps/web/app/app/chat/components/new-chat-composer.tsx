@@ -35,7 +35,7 @@ function NewChatComposerInner() {
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex min-h-0 flex-1 items-center justify-center px-4 py-8 md:py-8">
-        <div className="w-full max-w-2xl space-y-4">
+        <div className="w-full max-w-3xl space-y-3">
           <h1 className="text-center text-xl font-semibold leading-tight tracking-tight text-foreground">
             What can I help with?
           </h1>

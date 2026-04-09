@@ -2,21 +2,15 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import type { RefObject } from "react"
-import { TerminalIcon, XIcon } from "lucide-react"
+import { XIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import {
-  PromptInputCommand,
-  PromptInputCommandEmpty,
-  PromptInputCommandGroup,
-  PromptInputCommandItem,
-  PromptInputCommandList,
-  usePromptInputController,
-} from "@/components/ai-elements/prompt-input"
+import { parseSlashCommandInput } from "@/lib/chat/slash-command-query"
 import {
   findToolLockCommandByToolKey,
   getToolLockCommandsForMode,
 } from "@/lib/AITools/tool-lock-commands"
+import { usePromptInputController } from "@/components/ai-elements/prompt-input"
 import { useChatConfig, useChatConfigActions } from "./chat-provider"
 
 interface ToolLockCommandMenuProps {
@@ -45,8 +39,8 @@ export function ToolLockCommandMenu({
     [hasDaytonaRepo, selectedMode],
   )
 
-  const showCommandMenu = textInput.value.trimStart().startsWith("/")
-  const queryText = textInput.value.trimStart().slice(1).toLowerCase()
+  const { menuOpen: showCommandMenu, filterQuery: queryText } =
+    parseSlashCommandInput(textInput.value)
   const [activeIndex, setActiveIndex] = useState(0)
   const itemRefs = useRef<Record<string, HTMLDivElement | null>>({})
   const filteredCommands = useMemo(() => {
@@ -57,7 +51,8 @@ export function ToolLockCommandMenu({
       const normalizedCommand = commandDef.command.slice(1).toLowerCase()
       return (
         normalizedCommand.includes(queryText) ||
-        commandDef.label.toLowerCase().includes(queryText)
+        commandDef.label.toLowerCase().includes(queryText) ||
+        commandDef.description.toLowerCase().includes(queryText)
       )
     })
   }, [modeCommands, queryText, showCommandMenu])
@@ -65,16 +60,19 @@ export function ToolLockCommandMenu({
 
   const lockedCommand = toolLock ? findToolLockCommandByToolKey(toolLock) : null
 
-  const handleSelect = useCallback((command: (typeof modeCommands)[number]) => {
-    if (command.toolKey === null) {
-      setToolLock(null)
-    } else {
-      setToolLock(command.toolKey)
-    }
+  const handleSelect = useCallback(
+    (command: (typeof modeCommands)[number]) => {
+      if (command.toolKey === null) {
+        setToolLock(null)
+      } else {
+        setToolLock(command.toolKey)
+      }
 
-    textInput.setInput(stripLeadingSlashCommand(textInput.value))
-    textareaRef?.current?.focus()
-  }, [setToolLock, textInput, textareaRef])
+      textInput.setInput(stripLeadingSlashCommand(textInput.value))
+      textareaRef?.current?.focus()
+    },
+    [setToolLock, textInput, textareaRef],
+  )
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -162,86 +160,101 @@ export function ToolLockCommandMenu({
   }
 
   return (
-    <div className={cn("flex w-full flex-col gap-2", className)}>
+    <div className={cn("flex w-full flex-col gap-1.5", className)}>
       {toolLock ? (
-        <div className="flex items-center">
-          <div className="flex items-center gap-1 rounded-md border border-border/50 bg-muted/20 px-2 py-1 text-[11px] font-normal text-foreground">
-            <span className="text-muted-foreground">Locked:</span>{" "}
-            <span className="min-w-0 truncate font-medium tabular-nums">
-              {lockedCommand?.command ?? toolLock}
-            </span>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              className="size-5 shrink-0 rounded-md p-0 text-muted-foreground hover:bg-accent/50 hover:text-foreground"
-              onClick={clearToolLock}
-              aria-label="Clear tool lock"
-            >
-              <XIcon className="size-3" />
-            </Button>
-          </div>
+        <div className="flex items-center gap-2">
+          <p className="text-[11px] text-muted-foreground">
+            <span className="font-medium text-foreground">Next message</span>
+            {" · "}
+            {lockedCommand?.label ?? toolLock}
+          </p>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            className="size-6 shrink-0 rounded-md text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+            onClick={clearToolLock}
+            aria-label="Clear next-message tool targeting"
+          >
+            <XIcon className="size-3" />
+          </Button>
         </div>
       ) : null}
 
       {showCommandMenu ? (
-        <div className="overflow-hidden rounded-lg border border-border/70 bg-popover shadow-sm">
-          <PromptInputCommand className="border-none bg-transparent">
-            <PromptInputCommandList className="max-h-56">
-              <PromptInputCommandEmpty className="text-xs text-muted-foreground">
-                No matching command
-              </PromptInputCommandEmpty>
-              <PromptInputCommandGroup
-                heading={`Commands for ${selectedMode}`}
-                className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wide [&_[cmdk-group-heading]]:text-muted-foreground"
-              >
-                {filteredCommands.map((commandDef) => {
-                  const isActive = activeCommand?.command === commandDef.command
-                  return (
-                    <PromptInputCommandItem
-                      key={commandDef.command}
-                      ref={(node) => {
-                        itemRefs.current[commandDef.command] = node
-                      }}
-                      value={`${commandDef.command} ${commandDef.label}`}
-                      onSelect={() => handleSelect(commandDef)}
-                      className={cn(
-                        "items-start gap-2 py-2",
-                        isActive
-                          ? "bg-accent text-accent-foreground data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground"
-                          : undefined,
-                      )}
-                    >
-                      <TerminalIcon
+        <div
+          className="overflow-hidden rounded-lg border border-border/70 bg-popover"
+          role="listbox"
+          aria-label="Commands for your next message"
+        >
+          <div className="border-b border-border/50 px-3 py-2">
+            <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+              Next message tool
+            </p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              {selectedMode} mode · applies once, then clears after send
+            </p>
+          </div>
+          <div className="max-h-56 overflow-y-auto overscroll-contain py-1">
+            {filteredCommands.length === 0 ? (
+              <p className="px-3 py-3 text-xs text-muted-foreground">
+                No matching command. Try another word or clear the slash.
+              </p>
+            ) : (
+              filteredCommands.map((commandDef) => {
+                const isActive = activeCommand?.command === commandDef.command
+                return (
+                  <div
+                    key={commandDef.command}
+                    ref={(node) => {
+                      itemRefs.current[commandDef.command] = node
+                    }}
+                    role="option"
+                    aria-selected={isActive}
+                    className={cn(
+                      "mx-1 cursor-pointer rounded-md px-2 py-2 outline-none transition-colors duration-150 ease-[cubic-bezier(0.16,1,0.3,1)]",
+                      isActive
+                        ? "bg-accent text-accent-foreground"
+                        : "hover:bg-accent/50",
+                    )}
+                    onMouseDown={(e) => {
+                      e.preventDefault()
+                      handleSelect(commandDef)
+                    }}
+                    onMouseEnter={() => {
+                      setActiveIndex(filteredCommands.indexOf(commandDef))
+                    }}
+                  >
+                    <div className="flex min-w-0 flex-col gap-0.5">
+                      <span className="text-xs font-medium leading-snug">
+                        {commandDef.label}
+                      </span>
+                      <span
                         className={cn(
-                          "mt-0.5 size-3 shrink-0 opacity-80",
+                          "text-[11px] leading-snug",
                           isActive
-                            ? "text-accent-foreground"
+                            ? "text-accent-foreground/90"
                             : "text-muted-foreground",
                         )}
-                        aria-hidden
-                      />
-                      <div className="flex min-w-0 flex-1 flex-col">
-                        <span className="text-xs font-medium leading-snug">
-                          {commandDef.command}
-                        </span>
-                        <span
-                          className={cn(
-                            "text-[11px] leading-snug",
-                            isActive
-                              ? "text-accent-foreground/85"
-                              : "text-muted-foreground",
-                          )}
-                        >
-                          {commandDef.description}
-                        </span>
-                      </div>
-                    </PromptInputCommandItem>
-                  )
-                })}
-              </PromptInputCommandGroup>
-            </PromptInputCommandList>
-          </PromptInputCommand>
+                      >
+                        {commandDef.description}
+                      </span>
+                      <span
+                        className={cn(
+                          "font-mono text-[10px] leading-none",
+                          isActive
+                            ? "text-accent-foreground/75"
+                            : "text-muted-foreground/80",
+                        )}
+                      >
+                        {commandDef.command}
+                      </span>
+                    </div>
+                  </div>
+                )
+              })
+            )}
+          </div>
         </div>
       ) : null}
     </div>

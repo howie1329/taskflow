@@ -10,7 +10,7 @@ export function ComposerHints({
   if (!show || !!toolLock) return null
   return (
     <span className="text-[11px] text-muted-foreground">
-      Type / for commands · Ctrl+↵ to send
+      Type / to pick a tool for your next send · Ctrl+↵ to send
     </span>
   )
 }
