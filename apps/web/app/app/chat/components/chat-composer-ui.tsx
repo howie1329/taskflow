@@ -110,7 +110,7 @@ export function ComposerSlashCommandButton({
         </Button>
       </TooltipTrigger>
       <TooltipContent sideOffset={6}>
-        <p>Slash commands</p>
+        <p className="text-xs">Target a tool for your next message</p>
       </TooltipContent>
     </Tooltip>
   );
