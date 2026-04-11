@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   ArrowLeft01Icon,
@@ -37,8 +37,11 @@ import Link from "next/link";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Doc } from "@/convex/_generated/dataModel";
+import { SHORTCUT_HINT, SHORTCUT_KEYS } from "@/lib/keyboard-shortcuts";
+import { shouldIgnoreGlobalShortcut } from "@/lib/should-ignore-global-shortcut";
 
 export function ChatSidebar() {
+  const router = useRouter();
   const pathname = usePathname();
   const [deleteThreadId, setDeleteThreadId] = useState<string | null>(null);
   const { setTheme, resolvedTheme } = useTheme();
@@ -80,6 +83,20 @@ export function ChatSidebar() {
     await softDelete({ threadId: deleteThreadId });
     setDeleteThreadId(null);
   };
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!(event.metaKey || event.ctrlKey)) return;
+      if (event.key.toLowerCase() !== SHORTCUT_KEYS.createNew) return;
+      if (shouldIgnoreGlobalShortcut(event.target)) return;
+
+      event.preventDefault();
+      router.push("/app/chat");
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [router]);
 
   const deleteDialog = (
     <AlertDialog
@@ -123,7 +140,7 @@ export function ChatSidebar() {
             </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton
-                tooltip="Search threads"
+                tooltip={`Search threads (${SHORTCUT_HINT.localSearch})`}
                 onClick={() => setOpen(true)}
                 className="justify-center"
               >
@@ -134,7 +151,7 @@ export function ChatSidebar() {
             <SidebarMenuItem>
               <SidebarMenuButton
                 asChild
-                tooltip="New chat"
+                tooltip={`New chat (${SHORTCUT_HINT.createNew})`}
                 isActive={isNewChat}
                 className="justify-center"
               >

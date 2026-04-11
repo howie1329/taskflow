@@ -3,14 +3,17 @@
 import { memo, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Kbd } from "@/components/ui/kbd";
 import { AnimatePresence, motion } from "motion/react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Loading03Icon, Search01Icon } from "@hugeicons/core-free-icons";
 import { cn } from "@/lib/utils";
+import { SHORTCUT_DISPLAY } from "@/lib/keyboard-shortcuts";
 
 export const InboxFilters = memo(function InboxFilters({
   searchQuery,
   onSearchChange,
+  inputRef,
   isSearching = false,
   className = "",
 }) {
@@ -36,6 +39,7 @@ export const InboxFilters = memo(function InboxFilters({
           )}
         />
         <Input
+          ref={inputRef}
           type="text"
           placeholder="Search inbox…"
           value={searchQuery}
@@ -44,7 +48,7 @@ export const InboxFilters = memo(function InboxFilters({
           aria-label="Search inbox items"
         />
         <AnimatePresence>
-          {searchQuery && (
+          {searchQuery ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -65,6 +69,10 @@ export const InboxFilters = memo(function InboxFilters({
                 ×
               </Button>
             </motion.div>
+          ) : (
+            <div className="absolute right-2 top-1/2 -translate-y-1/2">
+              <Kbd className="h-5 text-[10px]">{SHORTCUT_DISPLAY.localSearch}</Kbd>
+            </div>
           )}
         </AnimatePresence>
       </div>

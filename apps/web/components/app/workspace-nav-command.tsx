@@ -12,6 +12,8 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command"
+import { SHORTCUT_HINT, SHORTCUT_KEYS } from "@/lib/keyboard-shortcuts"
+import { shouldIgnoreGlobalShortcut } from "@/lib/should-ignore-global-shortcut"
 
 export type { WorkspaceNavCommandItem } from "@/lib/workspace-nav"
 
@@ -30,11 +32,9 @@ export function WorkspaceNavCommand({
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== "k") return
-      const t = e.target as HTMLElement | null
-      if (!t) return
-      if (t.closest("input, textarea, select, [contenteditable=true]"))
-        return
+      if (!(e.metaKey || e.ctrlKey)) return
+      if (e.key.toLowerCase() !== SHORTCUT_KEYS.goTo) return
+      if (shouldIgnoreGlobalShortcut(e.target)) return
       e.preventDefault()
       onOpenChange(true)
     }
@@ -57,7 +57,7 @@ export function WorkspaceNavCommand({
       open={open}
       onOpenChange={onOpenChange}
       title="Go to"
-      description="Search workspace pages"
+      description={`Search workspace pages · ${SHORTCUT_HINT.routeHop}`}
       showCloseButton={false}
     >
       <Command className="rounded-lg">

@@ -11,6 +11,7 @@ import {
   useNewItemsAnimation,
   useMobileActions,
 } from "@/hooks/inbox";
+import { shouldIgnoreGlobalShortcut } from "@/lib/should-ignore-global-shortcut";
 
 const inboxShellClass =
   "flex h-full w-full min-h-0 flex-col overflow-hidden px-4 py-3";
@@ -98,6 +99,7 @@ export default function InboxPage() {
     useSearchState();
   const [activeTab, setActiveTab] = useState("open");
   const captureInputRef = useRef(null);
+  const searchInputRef = useRef(null);
   const lastItemsRef = useRef(null);
   const lastCountsRef = useRef({ open: 0, archived: 0 });
 
@@ -187,6 +189,28 @@ export default function InboxPage() {
     captureInputRef.current?.focus();
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape" && isOpen) {
+        closeActions();
+        return;
+      }
+      if (
+        event.key === "/" &&
+        !event.metaKey &&
+        !event.ctrlKey &&
+        !event.altKey &&
+        !shouldIgnoreGlobalShortcut(event.target)
+      ) {
+        event.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, closeActions]);
+
   const handleMobileActionOpenChange = useCallback(
     (nextOpen) => {
       if (!nextOpen) {
@@ -210,6 +234,7 @@ export default function InboxPage() {
         captureInputRef={captureInputRef}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
+        searchInputRef={searchInputRef}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         openItems={openItems}

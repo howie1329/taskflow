@@ -46,6 +46,9 @@ import {
 import { useMutation, useQuery } from "convex/react"
 import { api } from "@/convex/_generated/api"
 import type { Doc } from "@/convex/_generated/dataModel"
+import { Kbd } from "@/components/ui/kbd"
+import { SHORTCUT_DISPLAY } from "@/lib/keyboard-shortcuts"
+import { shouldIgnoreGlobalShortcut } from "@/lib/should-ignore-global-shortcut"
 
 export default function ProjectsPage() {
   const router = useRouter()
@@ -189,8 +192,14 @@ export default function ProjectsPage() {
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Cmd/Ctrl + K to focus search
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+      // Slash focuses local search when we're not in an editable field.
+      if (
+        e.key === "/" &&
+        !e.metaKey &&
+        !e.ctrlKey &&
+        !e.altKey &&
+        !shouldIgnoreGlobalShortcut(e.target)
+      ) {
         e.preventDefault()
         searchInputRef.current?.focus()
       }
@@ -269,7 +278,11 @@ export default function ProjectsPage() {
                   ×
                 </Button>
               </InputGroupAddon>
-            ) : null}
+            ) : (
+              <InputGroupAddon align="inline-end">
+                <Kbd className="h-5 text-[10px]">{SHORTCUT_DISPLAY.localSearch}</Kbd>
+              </InputGroupAddon>
+            )}
           </InputGroup>
 
           <Button
@@ -285,7 +298,7 @@ export default function ProjectsPage() {
             New project
           </Button>
           <span id="search-shortcut" className="sr-only">
-            Press Command K or Control K to focus search
+            Press slash to focus project search
           </span>
         </div>
       </div>

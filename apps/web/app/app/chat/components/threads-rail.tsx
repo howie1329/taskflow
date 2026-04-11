@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
@@ -12,6 +12,7 @@ import {
   SearchIcon,
 } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/ui/button";
+import { Kbd } from "@/components/ui/kbd";
 import {
   InputGroup,
   InputGroupAddon,
@@ -30,6 +31,8 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
+import { SHORTCUT_DISPLAY, SHORTCUT_HINT, SHORTCUT_KEYS } from "@/lib/keyboard-shortcuts";
+import { shouldIgnoreGlobalShortcut } from "@/lib/should-ignore-global-shortcut";
 import type { ChatProject, ChatThread } from "./thread-types";
 import { ProjectThreadGroup } from "./project-thread-group";
 import { ThreadRow } from "./thread-row";
@@ -63,6 +66,7 @@ export function ThreadsRail({
   const [editingTitle, setEditingTitle] = useState("");
   const [isPinnedOpen, setIsPinnedOpen] = useState(true);
   const [isProjectsOpen, setIsProjectsOpen] = useState(true);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const isSidebar = variant === "sidebar";
   const {
@@ -121,6 +125,24 @@ export function ThreadsRail({
     />
   );
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (
+        event.key === SHORTCUT_KEYS.localSearch &&
+        !event.metaKey &&
+        !event.ctrlKey &&
+        !event.altKey &&
+        !shouldIgnoreGlobalShortcut(event.target)
+      ) {
+        event.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   return (
     <nav
       aria-label="Threads"
@@ -161,6 +183,7 @@ export function ThreadsRail({
               )}
               variant={isNewChat ? "secondary" : "outline"}
               aria-label="New chat"
+              title={`New chat (${SHORTCUT_HINT.createNew})`}
             >
               <HugeiconsIcon
                 icon={PlusSignIcon}
@@ -173,7 +196,10 @@ export function ThreadsRail({
               {isSidebar ? (
                 <span className="sr-only">New chat</span>
               ) : (
-                "New"
+                <span className="inline-flex items-center gap-1.5">
+                  <span>New</span>
+                  <Kbd className="h-5 text-[10px]">{SHORTCUT_DISPLAY.createNew}</Kbd>
+                </span>
               )}
             </Button>
           </Link>
@@ -190,6 +216,7 @@ export function ThreadsRail({
             />
           </InputGroupAddon>
           <InputGroupInput
+            ref={searchInputRef}
             placeholder="Search threads..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -209,6 +236,11 @@ export function ThreadsRail({
                   strokeWidth={2}
                 />
               </Button>
+            </InputGroupAddon>
+          )}
+          {!searchQuery && (
+            <InputGroupAddon>
+              <Kbd className="h-5 text-[10px]">{SHORTCUT_DISPLAY.localSearch}</Kbd>
             </InputGroupAddon>
           )}
         </InputGroup>

@@ -13,6 +13,7 @@ export const InboxContent = memo(function InboxContent({
   captureInputRef,
   searchQuery,
   setSearchQuery,
+  searchInputRef,
   activeTab,
   setActiveTab,
   openItems,
@@ -53,6 +54,7 @@ export const InboxContent = memo(function InboxContent({
           <InboxFilters
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
+            inputRef={searchInputRef}
             isSearching={isSearching}
             className="min-w-0 flex-1"
           />

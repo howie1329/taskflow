@@ -30,6 +30,7 @@ import {
 } from "@/components/app/workspace-nav-command"
 import { useWorkspaceChrome } from "@/components/app/workspace-chrome-context"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { SHORTCUT_DISPLAY, SHORTCUT_HINT } from "@/lib/keyboard-shortcuts"
 
 type WorkspaceHeaderStripProps = {
   pageTitle: string
@@ -119,23 +120,30 @@ export function WorkspaceHeaderStrip({
 
         {noteDetailChrome ? (
           <div className="flex min-w-0 max-w-[min(100%,340px)] flex-1 items-center gap-1 sm:max-w-[min(100%,min(400px,52vw))]">
-            <button
-              type="button"
-              onClick={onToggleWorkspacePanel}
-              className={cn(
-                "text-muted-foreground hover:bg-accent/80 hover:text-accent-foreground inline-flex size-8 shrink-0 items-center justify-center rounded-md border border-transparent transition-colors",
-                primaryOpen && "border-border bg-accent/40 text-foreground",
-              )}
-              aria-expanded={primaryOpen}
-              aria-controls="workspace-primary-panel"
-            >
-              <HugeiconsIcon
-                icon={SidebarLeftIcon}
-                className="size-3.5 shrink-0 opacity-70"
-                strokeWidth={2}
-              />
-              <span className="sr-only">Toggle workspace panel</span>
-            </button>
+            <div className="flex shrink-0 items-center gap-1">
+              <button
+                type="button"
+                onClick={onToggleWorkspacePanel}
+                className={cn(
+                  "text-muted-foreground hover:bg-accent/80 hover:text-accent-foreground inline-flex size-8 shrink-0 items-center justify-center rounded-md border border-transparent transition-colors",
+                  primaryOpen && "border-border bg-accent/40 text-foreground",
+                )}
+                aria-expanded={primaryOpen}
+                aria-controls="workspace-primary-panel"
+                aria-keyshortcuts="Meta+B"
+                title={`Toggle workspace panel (${SHORTCUT_HINT.toggleSidebar})`}
+              >
+                <HugeiconsIcon
+                  icon={SidebarLeftIcon}
+                  className="size-3.5 shrink-0 opacity-70"
+                  strokeWidth={2}
+                />
+                <span className="sr-only">Toggle workspace panel</span>
+              </button>
+              <Kbd className="hidden h-5 text-[10px] md:inline-flex">
+                {SHORTCUT_DISPLAY.toggleSidebar}
+              </Kbd>
+            </div>
             <Input
               key={noteDetailChrome.noteId}
               defaultValue={noteDetailChrome.defaultTitle}
@@ -155,6 +163,8 @@ export function WorkspaceHeaderStrip({
             )}
             aria-expanded={primaryOpen}
             aria-controls="workspace-primary-panel"
+            aria-keyshortcuts="Meta+B"
+            title={`Toggle workspace panel (${SHORTCUT_HINT.toggleSidebar})`}
           >
             <HugeiconsIcon
               icon={SidebarLeftIcon}
@@ -162,6 +172,9 @@ export function WorkspaceHeaderStrip({
               strokeWidth={2}
             />
             <span className="truncate">{pageTitle}</span>
+            <Kbd className="hidden h-5 text-[10px] md:inline-flex">
+              {SHORTCUT_DISPLAY.toggleSidebar}
+            </Kbd>
           </button>
         )}
 
@@ -301,8 +314,13 @@ export function WorkspaceHeaderStrip({
             )}
             aria-expanded={inspectorOpen}
             aria-controls="workspace-inspector-panel"
+            aria-keyshortcuts="Meta+I"
+            title={`Toggle ${inspectorLabel.toLowerCase()} (${SHORTCUT_HINT.toggleInspector})`}
           >
             <span className="truncate">{inspectorLabel}</span>
+            <Kbd className="hidden h-5 text-[10px] md:inline-flex">
+              {SHORTCUT_DISPLAY.toggleInspector}
+            </Kbd>
           </button>
         ) : null}
 
@@ -312,10 +330,13 @@ export function WorkspaceHeaderStrip({
           size="sm"
           className="text-muted-foreground h-8 shrink-0 gap-1.5 px-2.5 text-xs"
           onClick={() => setCommandOpen(true)}
-          title="Go to a page in the app (⌘K or Ctrl+K)"
+          title={`Go to a page in the app (${SHORTCUT_HINT.goTo})`}
+          aria-keyshortcuts="Meta+K"
         >
           <span className="hidden sm:inline">Go to</span>
-          <Kbd className="font-mono text-[10px] leading-none">⌘K</Kbd>
+          <Kbd className="font-mono text-[10px] leading-none">
+            {SHORTCUT_DISPLAY.goTo}
+          </Kbd>
           <span className="sr-only">Open go to menu</span>
         </Button>
 
