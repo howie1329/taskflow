@@ -518,7 +518,10 @@ export function AppShell({ children, right }: AppShellProps) {
         defaultOpen={false}
         defaultOpenInspector={false}
         className={cn(
-          (isChatRoute || isTasksRoute || isProjectsRoute) &&
+          (isChatRoute ||
+            isTasksRoute ||
+            isProjectsRoute ||
+            isSettingsRoute) &&
             "h-svh overflow-hidden",
         )}
         style={
