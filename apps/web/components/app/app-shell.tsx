@@ -6,13 +6,6 @@ import { useEffect, useMemo, useState } from "react"
 import { motion, useReducedMotion } from "motion/react"
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
-  Task01Icon,
-  FolderManagementIcon,
-  MessageQuestionIcon,
-  NoteIcon,
-  SettingsIcon,
-  InboxDownloadIcon,
-  NotificationIcon,
   ArrowDown01Icon,
   SearchIcon,
   PlusSignIcon,
@@ -22,7 +15,6 @@ import {
 import { AccountMenu } from "@/components/auth/sign-out-button"
 import { useViewer } from "@/components/settings/hooks/use-viewer"
 import {
-  Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
@@ -34,7 +26,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
-  SidebarRail,
   SidebarSeparator,
   SidebarTrigger,
   useSidebar,
@@ -49,106 +40,21 @@ import { NotesAppSidebar } from "@/components/app/notes-app-sidebar"
 import { NotesProvider } from "@/components/notes"
 import { cn } from "@/lib/utils"
 import { ChatInspectorProvider } from "@/components/app/chat-inspector-context"
+import { WorkspaceNavCommand } from "@/components/app/workspace-nav-command"
 import {
-  WorkspaceNavCommand,
-  type WorkspaceNavCommandItem,
-} from "@/components/app/workspace-nav-command"
-import type { ComponentProps } from "react"
-
-type NavIcon = ComponentProps<typeof HugeiconsIcon>["icon"]
-
-type NavItemDef = {
-  title: string
-  href: string
-  icon: NavIcon
-}
-
-const navPrimary: NavItemDef[] = [
-  {
-    title: "Inbox",
-    href: "/app/inbox",
-    icon: InboxDownloadIcon,
-  },
-  {
-    title: "Tasks",
-    href: "/app/tasks",
-    icon: Task01Icon,
-  },
-]
-
-const navWorkspace: NavItemDef[] = [
-  {
-    title: "Notifications",
-    href: "/app/notifications",
-    icon: NotificationIcon,
-  },
-  {
-    title: "Projects",
-    href: "/app/projects",
-    icon: FolderManagementIcon,
-  },
-]
-
-const settingsNavItem: NavItemDef = {
-  title: "Settings",
-  href: "/app/settings",
-  icon: SettingsIcon,
-}
-
-const navTools: NavItemDef[] = [
-  {
-    title: "AI Chat",
-    href: "/app/chat",
-    icon: MessageQuestionIcon,
-  },
-  {
-    title: "Notes",
-    href: "/app/notes",
-    icon: NoteIcon,
-  },
-]
-
-const allNavItems: NavItemDef[] = [
-  ...navPrimary,
-  ...navWorkspace,
+  buildWorkspaceCommandItems,
+  getPageTitle,
+  navPrimary,
+  navTools,
+  navWorkspace,
   settingsNavItem,
-  ...navTools,
-]
-
-function getPageTitle(pathname: string): string {
-  if (pathname.startsWith("/app/projects/")) return "Projects"
-  if (pathname.startsWith("/app/chat/")) return "AI Chat"
-  if (pathname.startsWith("/app/notes/")) return "Notes"
-  const item = allNavItems.find(
-    (item) => pathname === item.href || pathname.startsWith(`${item.href}/`),
-  )
-  if (item) return item.title
-  if (pathname === "/app") return "Overview"
-  return "Taskflow"
-}
-
-function buildCommandItems(): WorkspaceNavCommandItem[] {
-  return [
-    ...navPrimary.map((item) => ({
-      ...item,
-      group: "Primary",
-    })),
-    ...navWorkspace.map((item) => ({
-      ...item,
-      group: "Workspace",
-    })),
-    { ...settingsNavItem, group: "Workspace" },
-    ...navTools.map((item) => ({
-      ...item,
-      group: "Tools",
-    })),
-  ]
-}
-
-interface AppShellProps {
-  children: React.ReactNode
-  right?: React.ReactNode
-}
+  type NavItemDef,
+} from "@/lib/workspace-nav"
+import { FloatingWorkspacePanel } from "@/components/app/floating-workspace-panel"
+import { WorkspaceHeaderStrip } from "@/components/app/workspace-header-strip"
+import { useWorkspaceRouteCycle } from "@/hooks/use-workspace-route-cycle"
+import { useIsMobile } from "@/hooks/use-mobile"
+import { trackFloatingPanelOpen } from "@/lib/workspace-shell-analytics"
 
 interface WorkspaceSidebarContentProps {
   pathname: string
@@ -226,7 +132,7 @@ function WorkspaceSidebarContent({
   const { state, isMobile, toggleSidebar } = useSidebar()
   const isCollapsed = state === "collapsed" && !isMobile
   const [commandOpen, setCommandOpen] = useState(false)
-  const commandItems = useMemo(() => buildCommandItems(), [])
+  const commandItems = useMemo(() => buildWorkspaceCommandItems(), [])
 
   const navProps: WorkspaceSidebarContentProps = {
     pathname,
@@ -445,6 +351,250 @@ function InspectorPanelContent({ children }: { children: React.ReactNode }) {
   )
 }
 
+interface AppShellProps {
+  children: React.ReactNode
+  right?: React.ReactNode
+}
+
+type AppShellInnerProps = {
+  children: React.ReactNode
+  right?: React.ReactNode
+  pathname: string
+  pageTitle: string
+  isOnboardingRoute: boolean
+  isChatRoute: boolean
+  isChatThreadRoute: boolean
+  isNotesRoute: boolean
+  isTasksRoute: boolean
+  isProjectsRoute: boolean
+  isSettingsRoute: boolean
+  showInspector: boolean
+  chatSidebarMode: "threads" | "workspace"
+  setChatSidebarMode: React.Dispatch<
+    React.SetStateAction<"threads" | "workspace">
+  >
+  notesSidebarMode: "notes" | "workspace"
+  setNotesSidebarMode: React.Dispatch<
+    React.SetStateAction<"notes" | "workspace">
+  >
+}
+
+function AppShellInner({
+  children,
+  right,
+  pathname,
+  pageTitle,
+  isOnboardingRoute,
+  isChatRoute,
+  isChatThreadRoute,
+  isNotesRoute,
+  isTasksRoute,
+  isProjectsRoute,
+  isSettingsRoute,
+  showInspector,
+  chatSidebarMode,
+  setChatSidebarMode,
+  notesSidebarMode,
+  setNotesSidebarMode,
+}: AppShellInnerProps) {
+  const isMobile = useIsMobile()
+  const {
+    open: primaryOpen,
+    setOpen: setPrimaryOpen,
+    openMobile: primaryOpenMobile,
+    setOpenMobile: setPrimaryOpenMobile,
+  } = useSidebar()
+  const {
+    open: inspectorOpen,
+    setOpen: setInspectorOpen,
+    openMobile: inspectorOpenMobile,
+    setOpenMobile: setInspectorOpenMobile,
+  } = useSidebar("inspector")
+
+  const primaryExpanded = isMobile ? primaryOpenMobile : primaryOpen
+  const inspectorExpanded = isMobile ? inspectorOpenMobile : inspectorOpen
+
+  const commandItems = useMemo(() => buildWorkspaceCommandItems(), [])
+
+  const inspectorLabel = isChatRoute ? "Dossier" : "Inspector"
+
+  const openWorkspacePanel = () => {
+    trackFloatingPanelOpen("left", true)
+    if (isMobile) {
+      setPrimaryOpenMobile(true)
+      return
+    }
+    setInspectorOpen(false)
+    setPrimaryOpen(true)
+  }
+
+  const openInspectorPanel = () => {
+    trackFloatingPanelOpen("right", true)
+    if (isMobile) {
+      setInspectorOpenMobile(true)
+      return
+    }
+    setPrimaryOpen(false)
+    setInspectorOpen(true)
+  }
+
+  const handlePrimaryOpenChange = (next: boolean) => {
+    trackFloatingPanelOpen("left", next)
+    if (next) {
+      if (isMobile) setInspectorOpenMobile(false)
+      else setInspectorOpen(false)
+    }
+    if (isMobile) setPrimaryOpenMobile(next)
+    else setPrimaryOpen(next)
+  }
+
+  const handleInspectorOpenChange = (next: boolean) => {
+    trackFloatingPanelOpen("right", next)
+    if (next) {
+      if (isMobile) setPrimaryOpenMobile(false)
+      else setPrimaryOpen(false)
+    }
+    if (isMobile) setInspectorOpenMobile(next)
+    else setInspectorOpen(next)
+  }
+
+  const primaryPanelBody =
+    isChatRoute && chatSidebarMode === "threads" ? (
+      <ChatSidebar
+        onBackToWorkspace={() => setChatSidebarMode("workspace")}
+      />
+    ) : isNotesRoute && notesSidebarMode === "notes" ? (
+      <NotesAppSidebar
+        onBackToWorkspace={() => setNotesSidebarMode("workspace")}
+      />
+    ) : (
+      <WorkspaceSidebarContent
+        pathname={pathname}
+        isChatRoute={isChatRoute}
+        isNotesRoute={isNotesRoute}
+        setChatSidebarMode={setChatSidebarMode}
+        setNotesSidebarMode={setNotesSidebarMode}
+      />
+    )
+
+  return (
+    <>
+      <FloatingWorkspacePanel
+        side="left"
+        open={primaryExpanded}
+        onOpenChange={handlePrimaryOpenChange}
+        title="Workspace"
+        panelClassName="!w-[min(100vw-1rem,15rem)] max-w-[min(100vw-1rem,15rem)]"
+        persistMount={false}
+      >
+        <div
+          id="workspace-primary-panel"
+          role="navigation"
+          aria-label="Workspace"
+          className="flex min-h-0 flex-1 flex-col overflow-hidden"
+        >
+          {primaryPanelBody}
+        </div>
+      </FloatingWorkspacePanel>
+
+      <SidebarInset
+        className={cn(
+          "min-w-0 overflow-hidden",
+          (isChatRoute ||
+            isSettingsRoute ||
+            isTasksRoute ||
+            isNotesRoute ||
+            isProjectsRoute) &&
+            "min-h-0",
+        )}
+      >
+        {!isOnboardingRoute ? (
+          <WorkspaceHeaderStrip
+            pageTitle={pageTitle}
+            showInspector={showInspector}
+            inspectorLabel={inspectorLabel}
+            isChatRoute={isChatRoute}
+            isNotesRoute={isNotesRoute}
+            chatSidebarMode={chatSidebarMode}
+            notesSidebarMode={notesSidebarMode}
+            onChatModeChange={setChatSidebarMode}
+            onNotesModeChange={setNotesSidebarMode}
+            commandItems={commandItems}
+            onOpenWorkspacePanel={openWorkspacePanel}
+            onOpenInspectorPanel={openInspectorPanel}
+            primaryOpen={primaryExpanded}
+            inspectorOpen={inspectorExpanded}
+            hideMobileBar={isChatRoute}
+          />
+        ) : null}
+        <main
+          className={
+            isTasksRoute || isNotesRoute || isProjectsRoute
+              ? "relative flex min-h-0 flex-1 flex-col overflow-hidden"
+              : isSettingsRoute
+                ? "relative flex min-h-0 flex-1 flex-col overflow-hidden"
+                : isChatThreadRoute
+                  ? "relative flex min-h-0 flex-1 flex-col overflow-hidden px-2 pb-2"
+                  : "relative flex min-h-0 flex-1 flex-col gap-2 overflow-hidden p-2 md:gap-2 md:p-2"
+          }
+        >
+          {children}
+        </main>
+      </SidebarInset>
+
+      {showInspector ? (
+        <FloatingWorkspacePanel
+          side="right"
+          open={inspectorExpanded}
+          onOpenChange={handleInspectorOpenChange}
+          title={inspectorLabel}
+          persistMount
+          style={
+            {
+              "--panel-w": isChatRoute ? "28rem" : "22rem",
+            } as React.CSSProperties
+          }
+          panelClassName={
+            isChatRoute
+              ? "!w-[min(100vw-1rem,28rem)] max-w-[min(100vw-1rem,28rem)]"
+              : "!w-[min(100vw-1rem,22rem)] max-w-[min(100vw-1rem,22rem)]"
+          }
+          aria-labelledby="workspace-inspector-heading"
+        >
+          <div
+            id="workspace-inspector-panel"
+            role="complementary"
+            aria-label={inspectorLabel}
+            className="flex min-h-0 flex-1 flex-col overflow-hidden"
+          >
+            <SidebarHeader className="border-b border-border/50 px-4 py-3">
+              <div className="flex min-h-8 items-center justify-between gap-3">
+                <div
+                  id="workspace-inspector-heading"
+                  className="min-w-0 truncate text-base font-semibold tracking-tight text-foreground"
+                >
+                  {inspectorLabel}
+                </div>
+                <SidebarTrigger
+                  scope="inspector"
+                  aria-label={`Close ${inspectorLabel.toLowerCase()}`}
+                />
+              </div>
+            </SidebarHeader>
+            <SidebarContent className="flex min-h-0 flex-1 flex-col overflow-hidden p-4 pt-3">
+              <InspectorPanelContent>
+                <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+                  {right}
+                </div>
+              </InspectorPanelContent>
+            </SidebarContent>
+          </div>
+        </FloatingWorkspacePanel>
+      ) : null}
+    </>
+  )
+}
+
 export function AppShell({ children, right }: AppShellProps) {
   const pathname = usePathname()
   const pageTitle = getPageTitle(pathname)
@@ -467,6 +617,10 @@ export function AppShell({ children, right }: AppShellProps) {
   const isSettingsRoute = pathname.startsWith("/app/settings")
   const showInspector =
     !isOnboardingRoute && !isSettingsRoute && (isChatRoute || isNotesRoute)
+
+  useWorkspaceRouteCycle(
+    !isOnboardingRoute && isOnboarded && pathname.startsWith("/app"),
+  )
 
   useEffect(() => {
     if (isLoading) return
@@ -499,109 +653,38 @@ export function AppShell({ children, right }: AppShellProps) {
 
   const shell = (
     <SidebarProvider
+      defaultOpen={false}
       defaultOpenInspector={false}
       className={cn(
         (isChatRoute || isTasksRoute || isProjectsRoute) &&
           "h-svh overflow-hidden",
       )}
-      style={{ "--sidebar-width": "15rem" } as React.CSSProperties}
+      style={
+        {
+          "--sidebar-width": "15rem",
+          "--panel-w": "15rem",
+        } as React.CSSProperties
+      }
     >
-      <Sidebar scope="primary" variant="sidebar" collapsible="icon">
-        {isChatRoute && chatSidebarMode === "threads" ? (
-          <ChatSidebar
-            onBackToWorkspace={() => setChatSidebarMode("workspace")}
-          />
-        ) : isNotesRoute && notesSidebarMode === "notes" ? (
-          <NotesAppSidebar
-            onBackToWorkspace={() => setNotesSidebarMode("workspace")}
-          />
-        ) : (
-          <WorkspaceSidebarContent
-            pathname={pathname}
-            isChatRoute={isChatRoute}
-            isNotesRoute={isNotesRoute}
-            setChatSidebarMode={setChatSidebarMode}
-            setNotesSidebarMode={setNotesSidebarMode}
-          />
-        )}
-        <SidebarRail scope="primary" />
-      </Sidebar>
-      <SidebarInset
-        className={cn(
-          "min-w-0 overflow-hidden",
-          (isChatRoute ||
-            isSettingsRoute ||
-            isTasksRoute ||
-            isNotesRoute ||
-            isProjectsRoute) &&
-            "min-h-0",
-        )}
+      <AppShellInner
+        right={right}
+        pathname={pathname}
+        pageTitle={pageTitle}
+        isOnboardingRoute={isOnboardingRoute}
+        isChatRoute={isChatRoute}
+        isChatThreadRoute={isChatThreadRoute}
+        isNotesRoute={isNotesRoute}
+        isTasksRoute={isTasksRoute}
+        isProjectsRoute={isProjectsRoute}
+        isSettingsRoute={isSettingsRoute}
+        showInspector={showInspector}
+        chatSidebarMode={chatSidebarMode}
+        setChatSidebarMode={setChatSidebarMode}
+        notesSidebarMode={notesSidebarMode}
+        setNotesSidebarMode={setNotesSidebarMode}
       >
-        {!isOnboardingRoute && !isChatRoute && (
-          <div className="md:hidden sticky top-0 z-20 flex h-10 items-center gap-2 px-2 bg-background/70 backdrop-blur supports-backdrop-filter:bg-background/50">
-            <SidebarTrigger className="-ml-1" />
-            <div className="min-w-0 flex-1">
-              <div className="truncate text-[11px] font-medium text-muted-foreground">
-                {pageTitle}
-              </div>
-            </div>
-            {showInspector ? (
-              <SidebarTrigger
-                scope="inspector"
-                className="[&_svg]:rotate-180"
-                aria-label="Open inspector"
-              />
-            ) : (
-              <div className="w-7" aria-hidden="true" />
-            )}
-          </div>
-        )}
-        <main
-          className={
-            isTasksRoute || isNotesRoute || isProjectsRoute
-              ? "relative flex min-h-0 flex-1 flex-col overflow-hidden"
-              : isSettingsRoute
-                ? "relative flex min-h-0 flex-1 flex-col overflow-hidden"
-                : isChatThreadRoute
-                  ? "relative flex min-h-0 flex-1 flex-col overflow-hidden px-2 pb-2"
-                  : "relative flex min-h-0 flex-1 flex-col gap-2 overflow-hidden p-2 md:gap-2 md:p-2"
-          }
-        >
-          {children}
-        </main>
-      </SidebarInset>
-      {showInspector && (
-        <Sidebar
-          scope="inspector"
-          side="right"
-          variant="sidebar"
-          collapsible="offcanvas"
-          className="border-l border-border/60 bg-background"
-          style={
-            {
-              "--sidebar-width": isChatRoute ? "28rem" : "22rem",
-              "--sidebar-width-mobile": isChatRoute ? "28rem" : "22rem",
-            } as React.CSSProperties
-          }
-        >
-          <SidebarHeader className="border-b border-border/50 px-4 py-3">
-            <div className="flex min-h-8 items-center justify-between gap-3">
-              <div className="min-w-0 truncate text-base font-semibold tracking-tight text-foreground">
-                {isChatRoute ? "Dossier" : "Inspector"}
-              </div>
-              <SidebarTrigger scope="inspector" aria-label="Close inspector" />
-            </div>
-          </SidebarHeader>
-          <SidebarContent className="flex min-h-0 flex-1 flex-col overflow-hidden p-4 pt-3">
-            <InspectorPanelContent>
-              <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-                {right}
-              </div>
-            </InspectorPanelContent>
-          </SidebarContent>
-          <SidebarRail scope="inspector" />
-        </Sidebar>
-      )}
+        {children}
+      </AppShellInner>
     </SidebarProvider>
   )
 

@@ -121,6 +121,13 @@ This PRD defines a cohesive upgrade to the workspace layout so navigation, conte
 2. Should primary sidebar width be user-resizable, or only the inspector?
 3. Do we standardize on one mobile header component for all `/app/*` routes in Phase 1, or only Chat + default shell?
 
+## Tracking (header-first workspace shell)
+
+- **Route hop order** (single source: `WORKSPACE_ROUTE_CYCLE_HREFS` in `apps/web/lib/workspace-nav.ts`): `/app/inbox` → `/app/tasks` → `/app/notifications` → `/app/projects` → `/app/chat` → `/app/notes` → `/app/settings` (wraps).
+- **Route hop shortcut:** **⌥⌘→** next route, **⌥⌘←** previous (Windows: **Ctrl+Alt+→** / **←**). Ignored when focus is in an input, textarea, select, or contenteditable. Does not replace **⌘K** (command palette) or **⌘B** / **⌘I** (primary / inspector toggles from `SidebarProvider`).
+- **Shell implementation:** `WorkspaceHeaderStrip`, `FloatingWorkspacePanel`, and refactored `AppShell` in `apps/web/components/app/`.
+- **GitHub issue (optional):** Add the issue URL here after filing with [header-workspace-shell-prd-github-issue.md](./header-workspace-shell-prd-github-issue.md).
+
 ## References
 
 - Next.js App Router — [Parallel Routes](https://nextjs.org/docs/app/building-your-application/routing/parallel-routes)

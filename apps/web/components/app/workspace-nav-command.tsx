@@ -3,7 +3,6 @@
 import { useCallback, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { HugeiconsIcon } from "@hugeicons/react"
-import type { ComponentProps } from "react"
 import {
   Command,
   CommandDialog,
@@ -14,12 +13,7 @@ import {
   CommandList,
 } from "@/components/ui/command"
 
-export type WorkspaceNavCommandItem = {
-  title: string
-  href: string
-  icon: ComponentProps<typeof HugeiconsIcon>["icon"]
-  group: string
-}
+export type { WorkspaceNavCommandItem } from "@/lib/workspace-nav"
 
 type WorkspaceNavCommandProps = {
   open: boolean
