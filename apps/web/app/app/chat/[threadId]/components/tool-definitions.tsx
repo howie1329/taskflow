@@ -8,8 +8,7 @@ import { FirecrawlSearchCard } from "@/components/ai-elements/firecrawl-search-c
 import { ParallelWebSearchCard } from "@/components/ai-elements/parallel-web-search-card";
 import { TaskflowToolResultCard } from "@/components/ai-elements/taskflow-tool-result-card";
 import { TavilyWebSearchCard } from "@/components/ai-elements/tavily-web-search-card";
-import { ValyuFinanceSearchCard } from "@/components/ai-elements/valyu-finance-search-card";
-import { ValyuWebSearchCard } from "@/components/ai-elements/valyu-web-search-card";
+import { ValyuFinanceSearchCard, ValyuWebSearchCard } from "@/components/ai-elements/valyu-search-card";
 import {
   isTavilyWebSearchOutput,
   normalizeTavilyOutput,

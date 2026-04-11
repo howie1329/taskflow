@@ -1,51 +1,42 @@
-"use client";
+"use client"
+
+import { isPlainObject } from "@/lib/utils/guards"
+import { getDomain } from "@/lib/utils/url"
 
 type MessageLike = {
-  messageId?: string;
-  content: unknown;
-};
+  messageId?: string
+  content: unknown
+}
 
 type ExtractedChatSource = {
-  kind: "url" | "file";
-  url?: string;
-  path?: string;
-  startLine?: number;
-  endLine?: number;
-  title?: string;
-  domain?: string;
-  toolKey: string;
-  messageId: string;
-};
+  kind: "url" | "file"
+  url?: string
+  path?: string
+  startLine?: number
+  endLine?: number
+  title?: string
+  domain?: string
+  toolKey: string
+  messageId: string
+}
 
 type SourceCandidate = {
-  kind: "url" | "file";
-  url?: string;
-  path?: string;
-  startLine?: number;
-  endLine?: number;
-  title?: string;
-};
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
+  kind: "url" | "file"
+  url?: string
+  path?: string
+  startLine?: number
+  endLine?: number
+  title?: string
 }
 
 function getString(value: unknown): string | undefined {
   return typeof value === "string" && value.trim().length > 0
     ? value.trim()
-    : undefined;
-}
-
-function getDomain(url: string) {
-  try {
-    return new URL(url).hostname.replace(/^www\./, "");
-  } catch {
-    return url;
-  }
+    : undefined
 }
 
 function toSourceCandidate(value: unknown): SourceCandidate | null {
-  if (!isRecord(value)) return null;
+  if (!isPlainObject(value)) return null;
   const url = getString(value.url);
   if (!url) return null;
 
@@ -75,7 +66,7 @@ function collectDaytonaCitations(value: unknown): SourceCandidate[] {
 
   const results: SourceCandidate[] = [];
   for (const item of value) {
-    if (!isRecord(item)) continue;
+    if (!isPlainObject(item)) continue;
     const path = getString(item.path);
     if (!path) continue;
 
@@ -97,7 +88,7 @@ function extractToolSources(
   toolKey: string,
   output: unknown,
 ): SourceCandidate[] {
-  if (!isRecord(output)) return [];
+  if (!isPlainObject(output)) return [];
 
   switch (toolKey) {
     case "tavilyWebSearch":
@@ -111,7 +102,7 @@ function extractToolSources(
     case "firecrawlSearch":
       return collectArraySources(output.data);
     case "firecrawlScrape":
-      return isRecord(output.data) ? collectArraySources([output.data]) : [];
+      return isPlainObject(output.data) ? collectArraySources([output.data]) : [];
     case "advancedResearch": {
       return [
         ...collectArraySources(output.sources),
@@ -134,7 +125,7 @@ export function extractSourcesFromMessages(
     if (!Array.isArray(message.content)) continue;
 
     for (const part of message.content) {
-      if (!isRecord(part)) continue;
+      if (!isPlainObject(part)) continue;
 
       const type = getString(part.type);
       if (!type || (!type.startsWith("tool-") && type !== "dynamic-tool")) {

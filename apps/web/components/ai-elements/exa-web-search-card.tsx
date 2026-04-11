@@ -3,16 +3,9 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { exaSearchResponseSchema } from "@/lib/AITools/Exa/types";
+import { getDomain } from "@/lib/utils/url";
 import { CodeBlock } from "./code-block";
 import { ToolEmptyState, ToolResultHeader, ToolResultSection, ToolResultShell } from "./tool-result-shell";
-
-function getDomain(url: string) {
-  try {
-    return new URL(url).hostname.replace(/^www\./, "");
-  } catch {
-    return url;
-  }
-}
 
 function getInputQuery(input: unknown) {
   if (!input || typeof input !== "object") return null;
