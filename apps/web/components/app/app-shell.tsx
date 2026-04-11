@@ -45,6 +45,10 @@ import {
   type NavItemDef,
 } from "@/lib/workspace-nav"
 import { WorkspaceHeaderStrip } from "@/components/app/workspace-header-strip"
+import {
+  WorkspaceChromeProvider,
+  useWorkspaceChrome,
+} from "@/components/app/workspace-chrome-context"
 import { useWorkspaceRouteCycle } from "@/hooks/use-workspace-route-cycle"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { trackFloatingPanelOpen } from "@/lib/workspace-shell-analytics"
@@ -273,6 +277,8 @@ function AppShellInner({
   notesSidebarMode,
   setNotesSidebarMode,
 }: AppShellInnerProps) {
+  const { pageTitleOverride } = useWorkspaceChrome()
+  const displayTitle = pageTitleOverride ?? pageTitle
   const isMobile = useIsMobile()
   const {
     open: primaryOpen,
@@ -367,7 +373,7 @@ function AppShellInner({
       >
         {!isOnboardingRoute ? (
           <WorkspaceHeaderStrip
-            pageTitle={pageTitle}
+            pageTitle={displayTitle}
             showInspector={showInspector}
             inspectorLabel={inspectorLabel}
             isChatRoute={isChatRoute}
@@ -381,7 +387,6 @@ function AppShellInner({
             onToggleInspectorPanel={toggleInspectorPanel}
             primaryOpen={primaryExpanded}
             inspectorOpen={inspectorExpanded}
-            hideMobileBar={isChatRoute}
           />
         ) : null}
         <main
@@ -505,40 +510,42 @@ export function AppShell({ children, right }: AppShellProps) {
   }
 
   const shell = (
-    <SidebarProvider
-      defaultOpen={false}
-      defaultOpenInspector={false}
-      className={cn(
-        (isChatRoute || isTasksRoute || isProjectsRoute) &&
-          "h-svh overflow-hidden",
-      )}
-      style={
-        {
-          "--sidebar-width": "15rem",
-          "--panel-w": "15rem",
-        } as React.CSSProperties
-      }
-    >
-      <AppShellInner
-        right={right}
-        pathname={pathname}
-        pageTitle={pageTitle}
-        isOnboardingRoute={isOnboardingRoute}
-        isChatRoute={isChatRoute}
-        isChatThreadRoute={isChatThreadRoute}
-        isNotesRoute={isNotesRoute}
-        isTasksRoute={isTasksRoute}
-        isProjectsRoute={isProjectsRoute}
-        isSettingsRoute={isSettingsRoute}
-        showInspector={showInspector}
-        chatSidebarMode={chatSidebarMode}
-        setChatSidebarMode={setChatSidebarMode}
-        notesSidebarMode={notesSidebarMode}
-        setNotesSidebarMode={setNotesSidebarMode}
+    <WorkspaceChromeProvider>
+      <SidebarProvider
+        defaultOpen={false}
+        defaultOpenInspector={false}
+        className={cn(
+          (isChatRoute || isTasksRoute || isProjectsRoute) &&
+            "h-svh overflow-hidden",
+        )}
+        style={
+          {
+            "--sidebar-width": "15rem",
+            "--panel-w": "15rem",
+          } as React.CSSProperties
+        }
       >
-        {children}
-      </AppShellInner>
-    </SidebarProvider>
+        <AppShellInner
+          right={right}
+          pathname={pathname}
+          pageTitle={pageTitle}
+          isOnboardingRoute={isOnboardingRoute}
+          isChatRoute={isChatRoute}
+          isChatThreadRoute={isChatThreadRoute}
+          isNotesRoute={isNotesRoute}
+          isTasksRoute={isTasksRoute}
+          isProjectsRoute={isProjectsRoute}
+          isSettingsRoute={isSettingsRoute}
+          showInspector={showInspector}
+          chatSidebarMode={chatSidebarMode}
+          setChatSidebarMode={setChatSidebarMode}
+          notesSidebarMode={notesSidebarMode}
+          setNotesSidebarMode={setNotesSidebarMode}
+        >
+          {children}
+        </AppShellInner>
+      </SidebarProvider>
+    </WorkspaceChromeProvider>
   )
 
   if (isNotesRoute) {

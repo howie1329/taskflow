@@ -1,16 +1,33 @@
 "use client"
 
 import { useState } from "react"
+import { usePathname, useRouter } from "next/navigation"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { SidebarLeftIcon } from "@hugeicons/core-free-icons"
+import {
+  ArrowLeft01Icon,
+  Delete02Icon,
+  Layers01Icon,
+  MoreHorizontalIcon,
+  PencilEdit01Icon,
+  SidebarLeftIcon,
+} from "@hugeicons/core-free-icons"
 import { cn } from "@/lib/utils"
 import { AccountMenu } from "@/components/auth/sign-out-button"
 import { Button } from "@/components/ui/button"
 import { Kbd } from "@/components/ui/kbd"
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
   WorkspaceNavCommand,
   type WorkspaceNavCommandItem,
 } from "@/components/app/workspace-nav-command"
+import { useWorkspaceChrome } from "@/components/app/workspace-chrome-context"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 type WorkspaceHeaderStripProps = {
   pageTitle: string
@@ -27,8 +44,6 @@ type WorkspaceHeaderStripProps = {
   onToggleInspectorPanel: () => void
   primaryOpen: boolean
   inspectorOpen: boolean
-  /** When true, hide strip on small screens (e.g. Chat uses its own mobile header). */
-  hideMobileBar?: boolean
 }
 
 export function WorkspaceHeaderStrip({
@@ -46,9 +61,13 @@ export function WorkspaceHeaderStrip({
   onToggleInspectorPanel,
   primaryOpen,
   inspectorOpen,
-  hideMobileBar,
 }: WorkspaceHeaderStripProps) {
   const [commandOpen, setCommandOpen] = useState(false)
+  const pathname = usePathname()
+  const router = useRouter()
+  const isMobile = useIsMobile()
+  const { chatThreadActions } = useWorkspaceChrome()
+  const isChatThreadRoute = pathname.startsWith("/app/chat/")
 
   return (
     <>
@@ -59,11 +78,25 @@ export function WorkspaceHeaderStrip({
       />
 
       <header
-        className={cn(
-          "z-20 flex min-h-10 shrink-0 items-center gap-2 border-b border-border/50 bg-background/80 px-2 py-1.5 backdrop-blur-md supports-backdrop-filter:bg-background/60 md:px-3",
-          hideMobileBar && "hidden md:flex",
-        )}
+        className="z-20 flex min-h-10 shrink-0 items-center gap-2 border-b border-border/50 bg-background/80 px-2 py-1.5 backdrop-blur-md supports-backdrop-filter:bg-background/60 md:px-3"
       >
+        {isChatThreadRoute && isMobile ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            className="shrink-0 md:hidden"
+            onClick={() => router.push("/app/chat")}
+          >
+            <HugeiconsIcon
+              icon={ArrowLeft01Icon}
+              className="size-4"
+              strokeWidth={2}
+            />
+            <span className="sr-only">Back to chats</span>
+          </Button>
+        ) : null}
+
         <button
           type="button"
           onClick={onToggleWorkspacePanel}
@@ -137,6 +170,60 @@ export function WorkspaceHeaderStrip({
         ) : null}
 
         <div className="min-w-0 flex-1" />
+
+        {isChatThreadRoute && chatThreadActions ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                className="shrink-0"
+              >
+                <HugeiconsIcon
+                  icon={MoreHorizontalIcon}
+                  className="size-4"
+                  strokeWidth={2}
+                />
+                <span className="sr-only">Conversation actions</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={chatThreadActions.onEditTitle}>
+                <HugeiconsIcon
+                  icon={PencilEdit01Icon}
+                  className="mr-2 size-4"
+                  strokeWidth={2}
+                />
+                Edit title
+              </DropdownMenuItem>
+              {chatThreadActions.onCompactChat ? (
+                <DropdownMenuItem
+                  onClick={() => void chatThreadActions.onCompactChat?.()}
+                >
+                  <HugeiconsIcon
+                    icon={Layers01Icon}
+                    className="mr-2 size-4"
+                    strokeWidth={2}
+                  />
+                  Compact chat
+                </DropdownMenuItem>
+              ) : null}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={chatThreadActions.onDelete}
+                className="text-destructive focus:text-destructive"
+              >
+                <HugeiconsIcon
+                  icon={Delete02Icon}
+                  className="mr-2 size-4"
+                  strokeWidth={2}
+                />
+                Delete thread
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : null}
 
         {showInspector ? (
           <button
