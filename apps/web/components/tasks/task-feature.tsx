@@ -995,10 +995,6 @@ function TaskFeatureToolbar() {
 
   return (
     <div className="flex min-h-11 shrink-0 flex-wrap items-center gap-x-2 gap-y-2 border-b border-border/50 px-4 py-2">
-      <h1 className="shrink-0 text-xl font-semibold tracking-tight text-foreground">
-        Tasks
-      </h1>
-
       <div className="min-w-0 flex-1 basis-[140px] sm:basis-auto sm:min-w-40">
         {state.isSearchOpen || state.searchInput.length > 0 ? (
           <InputGroup className="h-8 rounded-md border border-border/70 bg-transparent shadow-none">

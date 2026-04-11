@@ -1,17 +1,12 @@
 "use client"
 
 import { useState } from "react"
-import Link from "next/link"
 import { HugeiconsIcon } from "@hugeicons/react"
-import {
-  PlusSignIcon,
-  SearchIcon,
-  SidebarLeftIcon,
-} from "@hugeicons/core-free-icons"
+import { SidebarLeftIcon } from "@hugeicons/core-free-icons"
 import { cn } from "@/lib/utils"
 import { AccountMenu } from "@/components/auth/sign-out-button"
-import { SidebarMenuButton } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
+import { Kbd } from "@/components/ui/kbd"
 import {
   WorkspaceNavCommand,
   type WorkspaceNavCommandItem,
@@ -158,31 +153,18 @@ export function WorkspaceHeaderStrip({
           </button>
         ) : null}
 
-        <SidebarMenuButton
+        <Button
+          type="button"
+          variant="outline"
           size="sm"
-          className="size-8 shrink-0 rounded-md"
-          tooltip="Search"
+          className="text-muted-foreground h-8 shrink-0 gap-1.5 px-2.5 text-xs"
           onClick={() => setCommandOpen(true)}
+          title="Go to a page in the app (⌘K or Ctrl+K)"
         >
-          <HugeiconsIcon icon={SearchIcon} className="shrink-0" strokeWidth={2} />
-          <span className="sr-only">Search</span>
-        </SidebarMenuButton>
-
-        <SidebarMenuButton
-          size="sm"
-          asChild
-          tooltip="New task"
-          className="size-8 shrink-0 rounded-md"
-        >
-          <Link href="/app/tasks" aria-label="New task">
-            <HugeiconsIcon
-              icon={PlusSignIcon}
-              className="size-3 shrink-0"
-              strokeWidth={2}
-            />
-            <span className="sr-only">New task</span>
-          </Link>
-        </SidebarMenuButton>
+          <span className="hidden sm:inline">Go to</span>
+          <Kbd className="font-mono text-[10px] leading-none">⌘K</Kbd>
+          <span className="sr-only">Open go to menu</span>
+        </Button>
 
         <div className="flex shrink-0 items-center">
           <AccountMenu triggerVariant="icon" />

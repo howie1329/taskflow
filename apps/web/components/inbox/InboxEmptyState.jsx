@@ -65,7 +65,7 @@ export const InboxEmptyState = memo(function InboxEmptyState({
           <HugeiconsIcon icon={InboxDownloadIcon} className="size-4" />
         </EmptyMedia>
         <EmptyTitle className="text-xl font-semibold">
-          Your inbox is empty
+          Nothing to triage yet
         </EmptyTitle>
         <EmptyDescription className="text-xs text-muted-foreground">
           Use the capture box above to quickly dump thoughts, ideas, and tasks
