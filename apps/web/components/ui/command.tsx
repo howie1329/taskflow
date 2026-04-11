@@ -55,7 +55,7 @@ function CommandDialog({
       </DialogHeader>
       <DialogContent
         className={cn(
-          "rounded-lg top-1/3 translate-y-0 overflow-hidden p-0",
+          "rounded-lg overflow-hidden border border-border/70 bg-popover p-0 text-popover-foreground duration-200",
           className
         )}
         showCloseButton={showCloseButton}
@@ -71,18 +71,18 @@ function CommandInput({
   ...props
 }: React.ComponentProps<typeof CommandPrimitive.Input>) {
   return (
-    <div data-slot="command-input-wrapper" className="border-b pb-0">
-      <InputGroup className="bg-input/30 border-input/30 h-8 border-none shadow-none! *:data-[slot=input-group-addon]:pl-2!">
+    <div data-slot="command-input-wrapper" className="border-b border-border/50">
+      <InputGroup className="h-8 rounded-none border-0 bg-input shadow-none! *:data-[slot=input-group-addon]:pl-2! dark:bg-input">
         <CommandPrimitive.Input
-          data-slot="command-input"
+          data-slot="input-group-control"
           className={cn(
-            "w-full text-xs outline-hidden disabled:cursor-not-allowed disabled:opacity-50",
+            "min-w-0 flex-1 border-0 bg-transparent text-xs shadow-none ring-0 outline-hidden focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:ring-0 dark:bg-transparent dark:disabled:bg-transparent",
             className
           )}
           {...props}
         />
         <InputGroupAddon>
-          <HugeiconsIcon icon={SearchIcon} strokeWidth={2} className="size-4 shrink-0 opacity-50" />
+          <HugeiconsIcon icon={SearchIcon} strokeWidth={2} className="size-3 shrink-0 opacity-50" />
         </InputGroupAddon>
       </InputGroup>
     </div>
@@ -112,7 +112,7 @@ function CommandEmpty({
   return (
     <CommandPrimitive.Empty
       data-slot="command-empty"
-      className={cn("py-6 text-center text-xs", className)}
+      className={cn("py-6 text-center text-xs text-muted-foreground", className)}
       {...props}
     />
   )
@@ -125,7 +125,10 @@ function CommandGroup({
   return (
     <CommandPrimitive.Group
       data-slot="command-group"
-      className={cn("text-foreground [&_[cmdk-group-heading]]:text-muted-foreground overflow-hidden [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs", className)}
+      className={cn(
+        "text-foreground overflow-hidden [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wide [&_[cmdk-group-heading]]:text-muted-foreground",
+        className,
+      )}
       {...props}
     />
   )
@@ -153,7 +156,7 @@ function CommandItem({
     <CommandPrimitive.Item
       data-slot="command-item"
       className={cn(
-        "data-selected:bg-muted data-selected:text-foreground data-selected:*:[svg]:text-foreground relative flex cursor-default items-center gap-2 rounded-md px-2 py-2 text-xs outline-hidden select-none [&_svg:not([class*='size-'])]:size-4 [[data-slot=dialog-content]_&]:rounded-md! group/command-item data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+        "relative flex cursor-default select-none items-center gap-2 rounded-md px-2 py-2 text-xs outline-hidden hover:bg-accent/50 data-selected:bg-accent data-selected:font-medium data-selected:text-accent-foreground data-selected:*:[svg]:text-accent-foreground data-selected:hover:bg-accent [[data-slot=dialog-content]_&]:rounded-md! group/command-item data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-3 [&_svg]:shrink-0",
         className
       )}
       {...props}
@@ -171,7 +174,10 @@ function CommandShortcut({
   return (
     <span
       data-slot="command-shortcut"
-      className={cn("text-muted-foreground group-data-selected/command-item:text-foreground ml-auto text-xs tracking-widest", className)}
+      className={cn(
+        "ml-auto text-xs tracking-widest text-muted-foreground group-data-selected/command-item:text-accent-foreground",
+        className,
+      )}
       {...props}
     />
   )

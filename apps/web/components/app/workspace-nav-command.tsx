@@ -213,6 +213,7 @@ export function WorkspaceNavCommand({
       title="Command"
       description={`Pages, actions, and entities · ${SHORTCUT_HINT.routeHop}`}
       showCloseButton={false}
+      className="sm:max-w-lg"
     >
       <Command className="rounded-lg">
         <CommandInput placeholder="Search commands, pages, and content…" />
@@ -228,7 +229,7 @@ export function WorkspaceNavCommand({
                   onSelect={() => run(item.href)}
                 >
                   {item.icon ? (
-                    <HugeiconsIcon icon={item.icon} className="size-4 shrink-0" />
+                    <HugeiconsIcon icon={item.icon} className="size-3 shrink-0" />
                   ) : null}
                   <span className="truncate">{item.title}</span>
                 </CommandItem>
@@ -244,7 +245,7 @@ export function WorkspaceNavCommand({
                   value={`${action.title} ${action.group} ${action.keywords?.join(" ") ?? ""}`}
                   onSelect={() => runAction(action)}
                 >
-                  <HugeiconsIcon icon={action.icon} className="size-4 shrink-0" />
+                  <HugeiconsIcon icon={action.icon} className="size-3 shrink-0" />
                   <span>{action.title}</span>
                   {action.shortcut ? (
                     <CommandShortcut>{action.shortcut}</CommandShortcut>
@@ -262,7 +263,7 @@ export function WorkspaceNavCommand({
                   value={`${action.title} ${action.group} ${action.keywords?.join(" ") ?? ""}`}
                   onSelect={() => runAction(action)}
                 >
-                  <HugeiconsIcon icon={action.icon} className="size-4 shrink-0" />
+                  <HugeiconsIcon icon={action.icon} className="size-3 shrink-0" />
                   <span>{action.title}</span>
                   {action.shortcut ? (
                     <CommandShortcut>{action.shortcut}</CommandShortcut>
@@ -324,7 +325,7 @@ export function WorkspaceNavCommand({
                     value={`${item.title} ${item.href}`}
                     onSelect={() => run(item.href)}
                   >
-                    <HugeiconsIcon icon={item.icon} className="size-4 shrink-0" />
+                    <HugeiconsIcon icon={item.icon} className="size-3 shrink-0" />
                     {item.title}
                   </CommandItem>
                 ))}
