@@ -27,7 +27,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
 import { ThreadsRail } from "@/app/app/chat/components/threads-rail";
@@ -39,11 +38,7 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Doc } from "@/convex/_generated/dataModel";
 
-interface ChatSidebarProps {
-  onBackToWorkspace?: () => void;
-}
-
-export function ChatSidebar({ onBackToWorkspace }: ChatSidebarProps) {
+export function ChatSidebar() {
   const pathname = usePathname();
   const [deleteThreadId, setDeleteThreadId] = useState<string | null>(null);
   const { setTheme, resolvedTheme } = useTheme();
@@ -183,25 +178,7 @@ export function ChatSidebar({ onBackToWorkspace }: ChatSidebarProps) {
 
   return (
     <>
-      <SidebarHeader className="gap-1 border-b border-sidebar-border/50 px-1.5 py-2">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <div className="flex items-center gap-1">
-              <SidebarMenuButton
-                tooltip="Back to workspace"
-                onClick={onBackToWorkspace}
-                className="flex-1"
-              >
-                <HugeiconsIcon icon={ArrowLeft01Icon} className="shrink-0" />
-                <span>Back to workspace</span>
-              </SidebarMenuButton>
-              <SidebarTrigger className="size-8 shrink-0" />
-            </div>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
-
-      <SidebarContent className="min-w-0 px-0 overflow-hidden">
+      <SidebarContent className="min-w-0 overflow-hidden px-0 pt-0">
         <ThreadsRail
           className="w-full"
           variant="sidebar"

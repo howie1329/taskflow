@@ -39,8 +39,8 @@ export function SettingsLayout() {
       onValueChange={setActiveTab}
       orientation="vertical"
       className={cn(
-        "flex min-h-0 w-full flex-1 flex-col gap-4",
-        "md:grid md:h-full md:min-h-0 md:grid-cols-[224px_minmax(0,1fr)] md:grid-rows-1 md:items-stretch md:gap-8",
+        "flex h-full min-h-0 w-full flex-1 flex-col gap-4",
+        "md:grid md:min-h-0 md:grid-cols-[224px_minmax(0,1fr)] md:grid-rows-[minmax(0,1fr)] md:items-stretch md:gap-8 md:overflow-hidden",
       )}
     >
       <div className="shrink-0 md:hidden">
@@ -100,7 +100,7 @@ export function SettingsLayout() {
       <div
         className={cn(
           "flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto overscroll-contain",
-          "md:col-start-2 md:row-start-1 md:h-full md:min-h-0 md:flex-1 md:self-stretch",
+          "md:col-start-2 md:row-start-1 md:h-full md:min-h-0 md:max-h-full md:flex-1 md:self-stretch md:overflow-y-auto",
         )}
       >
         <TabsContent value="profile" className={tabPanelClass}>

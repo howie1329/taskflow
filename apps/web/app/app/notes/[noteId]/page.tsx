@@ -139,25 +139,6 @@ export default function NotePage() {
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col overflow-hidden">
-      {isMobile && (
-        <div className="flex items-center gap-2 border-b border-border/50 bg-background px-4 py-2.5 md:hidden">
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={() => router.push("/app/notes")}
-          >
-            <HugeiconsIcon
-              icon={ArrowLeft01Icon}
-              className="size-4"
-              strokeWidth={2}
-            />
-          </Button>
-          <span className="truncate text-base font-semibold leading-tight">
-            {selectedNote?.title || "Note"}
-          </span>
-        </div>
-      )}
-
       <div className="min-h-0 flex-1">
         <NoteEditor
           note={selectedNote}

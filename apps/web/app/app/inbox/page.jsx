@@ -3,12 +3,7 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  InboxHeader,
-  InboxHeaderSkeleton,
-  InboxContent,
-  MobileActionSheet,
-} from "@/components/inbox";
+import { InboxContent, MobileActionSheet } from "@/components/inbox";
 import {
   useInboxItems,
   useInboxCounts,
@@ -25,7 +20,6 @@ function InboxContainer({ children, isInitialLoading }) {
     return (
       <div className={inboxShellClass}>
         <div className="flex min-h-0 flex-1 flex-col gap-3">
-          <InboxHeaderSkeleton />
           <Skeleton className="h-20 w-full rounded-md" />
           <Skeleton className="h-8 w-full rounded-md" />
           <div className="flex flex-col gap-1.5">
@@ -210,7 +204,6 @@ export default function InboxPage() {
 
   return (
     <InboxContainer isInitialLoading={isInitialLoading}>
-      <InboxHeader />
       <InboxContent
         captureText={captureText}
         setCaptureText={setCaptureText}
