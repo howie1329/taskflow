@@ -15,6 +15,7 @@ import {
 import { AccountMenu } from "@/components/auth/sign-out-button"
 import { useViewer } from "@/components/settings/hooks/use-viewer"
 import {
+  Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
@@ -26,6 +27,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
+  SidebarRail,
   SidebarSeparator,
   SidebarTrigger,
   useSidebar,
@@ -50,7 +52,6 @@ import {
   settingsNavItem,
   type NavItemDef,
 } from "@/lib/workspace-nav"
-import { FloatingWorkspacePanel } from "@/components/app/floating-workspace-panel"
 import { WorkspaceHeaderStrip } from "@/components/app/workspace-header-strip"
 import { useWorkspaceRouteCycle } from "@/hooks/use-workspace-route-cycle"
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -438,26 +439,6 @@ function AppShellInner({
     setInspectorOpen(true)
   }
 
-  const handlePrimaryOpenChange = (next: boolean) => {
-    trackFloatingPanelOpen("left", next)
-    if (next) {
-      if (isMobile) setInspectorOpenMobile(false)
-      else setInspectorOpen(false)
-    }
-    if (isMobile) setPrimaryOpenMobile(next)
-    else setPrimaryOpen(next)
-  }
-
-  const handleInspectorOpenChange = (next: boolean) => {
-    trackFloatingPanelOpen("right", next)
-    if (next) {
-      if (isMobile) setPrimaryOpenMobile(false)
-      else setPrimaryOpen(false)
-    }
-    if (isMobile) setInspectorOpenMobile(next)
-    else setInspectorOpen(next)
-  }
-
   const primaryPanelBody =
     isChatRoute && chatSidebarMode === "threads" ? (
       <ChatSidebar
@@ -479,13 +460,11 @@ function AppShellInner({
 
   return (
     <>
-      <FloatingWorkspacePanel
-        side="left"
-        open={primaryExpanded}
-        onOpenChange={handlePrimaryOpenChange}
-        title="Workspace"
-        panelClassName="!w-[min(100vw-1rem,15rem)] max-w-[min(100vw-1rem,15rem)]"
-        persistMount={false}
+      <Sidebar
+        scope="primary"
+        variant="inset"
+        collapsible="icon"
+        className="z-10"
       >
         <div
           id="workspace-primary-panel"
@@ -495,7 +474,8 @@ function AppShellInner({
         >
           {primaryPanelBody}
         </div>
-      </FloatingWorkspacePanel>
+        <SidebarRail scope="primary" />
+      </Sidebar>
 
       <SidebarInset
         className={cn(
@@ -543,23 +523,18 @@ function AppShellInner({
       </SidebarInset>
 
       {showInspector ? (
-        <FloatingWorkspacePanel
+        <Sidebar
+          scope="inspector"
           side="right"
-          open={inspectorExpanded}
-          onOpenChange={handleInspectorOpenChange}
-          title={inspectorLabel}
-          persistMount
+          variant="inset"
+          collapsible="offcanvas"
+          className="z-10 border-0 bg-transparent shadow-none"
           style={
             {
-              "--panel-w": isChatRoute ? "28rem" : "22rem",
+              "--sidebar-width": isChatRoute ? "28rem" : "22rem",
+              "--sidebar-width-mobile": isChatRoute ? "28rem" : "22rem",
             } as React.CSSProperties
           }
-          panelClassName={
-            isChatRoute
-              ? "!w-[min(100vw-1rem,28rem)] max-w-[min(100vw-1rem,28rem)]"
-              : "!w-[min(100vw-1rem,22rem)] max-w-[min(100vw-1rem,22rem)]"
-          }
-          aria-labelledby="workspace-inspector-heading"
         >
           <div
             id="workspace-inspector-panel"
@@ -589,7 +564,8 @@ function AppShellInner({
               </InspectorPanelContent>
             </SidebarContent>
           </div>
-        </FloatingWorkspacePanel>
+          <SidebarRail scope="inspector" />
+        </Sidebar>
       ) : null}
     </>
   )
@@ -653,7 +629,7 @@ export function AppShell({ children, right }: AppShellProps) {
 
   const shell = (
     <SidebarProvider
-      defaultOpen={false}
+      defaultOpen={true}
       defaultOpenInspector={false}
       className={cn(
         (isChatRoute || isTasksRoute || isProjectsRoute) &&

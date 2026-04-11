@@ -125,7 +125,7 @@ This PRD defines a cohesive upgrade to the workspace layout so navigation, conte
 
 - **Route hop order** (single source: `WORKSPACE_ROUTE_CYCLE_HREFS` in `apps/web/lib/workspace-nav.ts`): `/app/inbox` → `/app/tasks` → `/app/notifications` → `/app/projects` → `/app/chat` → `/app/notes` → `/app/settings` (wraps).
 - **Route hop shortcut:** **⌥⌘→** next route, **⌥⌘←** previous (Windows: **Ctrl+Alt+→** / **←**). Ignored when focus is in an input, textarea, select, or contenteditable. Does not replace **⌘K** (command palette) or **⌘B** / **⌘I** (primary / inspector toggles from `SidebarProvider`).
-- **Shell implementation:** `WorkspaceHeaderStrip`, `FloatingWorkspacePanel`, and refactored `AppShell` in `apps/web/components/app/`.
+- **Shell implementation:** `WorkspaceHeaderStrip` and refactored `AppShell` using shadcn `Sidebar` / `SidebarInset` with **`variant="inset"`** (sidebar-04 style: separated rounded panels on a muted canvas—not modal overlays) in `apps/web/components/app/`.
 - **GitHub issue (optional):** Add the issue URL here after filing with [header-workspace-shell-prd-github-issue.md](./header-workspace-shell-prd-github-issue.md).
 
 ## References
