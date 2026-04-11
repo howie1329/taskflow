@@ -28,8 +28,8 @@ type WorkspaceHeaderStripProps = {
   onChatModeChange: (mode: "threads" | "workspace") => void
   onNotesModeChange: (mode: "notes" | "workspace") => void
   commandItems: WorkspaceNavCommandItem[]
-  onOpenWorkspacePanel: () => void
-  onOpenInspectorPanel: () => void
+  onToggleWorkspacePanel: () => void
+  onToggleInspectorPanel: () => void
   primaryOpen: boolean
   inspectorOpen: boolean
   /** When true, hide strip on small screens (e.g. Chat uses its own mobile header). */
@@ -47,8 +47,8 @@ export function WorkspaceHeaderStrip({
   onChatModeChange,
   onNotesModeChange,
   commandItems,
-  onOpenWorkspacePanel,
-  onOpenInspectorPanel,
+  onToggleWorkspacePanel,
+  onToggleInspectorPanel,
   primaryOpen,
   inspectorOpen,
   hideMobileBar,
@@ -71,7 +71,7 @@ export function WorkspaceHeaderStrip({
       >
         <button
           type="button"
-          onClick={onOpenWorkspacePanel}
+          onClick={onToggleWorkspacePanel}
           className={cn(
             "text-muted-foreground hover:bg-accent/80 hover:text-accent-foreground inline-flex max-w-[40%] min-w-0 items-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-left text-[11px] font-medium transition-colors md:max-w-[min(280px,45%)]",
             primaryOpen && "border-border bg-accent/40 text-foreground",
@@ -146,7 +146,7 @@ export function WorkspaceHeaderStrip({
         {showInspector ? (
           <button
             type="button"
-            onClick={onOpenInspectorPanel}
+            onClick={onToggleInspectorPanel}
             className={cn(
               "text-muted-foreground hover:bg-accent/80 hover:text-accent-foreground inline-flex max-w-[min(140px,28vw)] shrink-0 items-center gap-1.5 truncate rounded-md border border-transparent px-2 py-1 text-[11px] font-medium transition-colors",
               inspectorOpen && "border-border bg-accent/40 text-foreground",

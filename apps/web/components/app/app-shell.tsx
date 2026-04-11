@@ -5,14 +5,8 @@ import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
 import { motion, useReducedMotion } from "motion/react"
 import { HugeiconsIcon } from "@hugeicons/react"
-import {
-  ArrowDown01Icon,
-  SearchIcon,
-  PlusSignIcon,
-  SidebarLeftIcon,
-} from "@hugeicons/core-free-icons"
+import { ArrowDown01Icon } from "@hugeicons/core-free-icons"
 
-import { AccountMenu } from "@/components/auth/sign-out-button"
 import { useViewer } from "@/components/settings/hooks/use-viewer"
 import {
   Sidebar,
@@ -28,7 +22,6 @@ import {
   SidebarMenuItem,
   SidebarProvider,
   SidebarRail,
-  SidebarSeparator,
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar"
@@ -42,7 +35,6 @@ import { NotesAppSidebar } from "@/components/app/notes-app-sidebar"
 import { NotesProvider } from "@/components/notes"
 import { cn } from "@/lib/utils"
 import { ChatInspectorProvider } from "@/components/app/chat-inspector-context"
-import { WorkspaceNavCommand } from "@/components/app/workspace-nav-command"
 import {
   buildWorkspaceCommandItems,
   getPageTitle,
@@ -130,11 +122,6 @@ function WorkspaceSidebarContent({
   setChatSidebarMode,
   setNotesSidebarMode,
 }: WorkspaceSidebarContentProps) {
-  const { state, isMobile, toggleSidebar } = useSidebar()
-  const isCollapsed = state === "collapsed" && !isMobile
-  const [commandOpen, setCommandOpen] = useState(false)
-  const commandItems = useMemo(() => buildWorkspaceCommandItems(), [])
-
   const navProps: WorkspaceSidebarContentProps = {
     pathname,
     isChatRoute,
@@ -143,97 +130,9 @@ function WorkspaceSidebarContent({
     setNotesSidebarMode,
   }
 
-  const headerActions = (
-    <>
-      <SidebarMenuButton
-        size="sm"
-        className="size-8 shrink-0 rounded-md"
-        tooltip="Search"
-        onClick={() => setCommandOpen(true)}
-      >
-        <HugeiconsIcon icon={SearchIcon} className="shrink-0" strokeWidth={2} />
-        <span className="sr-only">Search</span>
-      </SidebarMenuButton>
-      <SidebarMenuButton
-        size="sm"
-        asChild
-        tooltip="New task"
-        className="size-8 shrink-0 rounded-md"
-      >
-        <Link href="/app/tasks" aria-label="New task">
-          <HugeiconsIcon icon={PlusSignIcon} className="size-3 shrink-0" strokeWidth={2} />
-          <span className="sr-only">New task</span>
-        </Link>
-      </SidebarMenuButton>
-      <SidebarTrigger className="size-8 shrink-0" />
-    </>
-  )
-
   return (
     <>
-      <WorkspaceNavCommand
-        open={commandOpen}
-        onOpenChange={setCommandOpen}
-        items={commandItems}
-      />
-
-      <SidebarHeader className="gap-1 border-b border-sidebar-border/50 px-1.5 py-2">
-        {isCollapsed ? (
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <AccountMenu triggerVariant="icon" />
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                size="sm"
-                tooltip="Search"
-                className="justify-center"
-                onClick={() => setCommandOpen(true)}
-              >
-                <HugeiconsIcon icon={SearchIcon} className="shrink-0" strokeWidth={2} />
-                <span className="sr-only">Search</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                asChild
-                tooltip="New task"
-                className="justify-center"
-              >
-                <Link href="/app/tasks" aria-label="New task">
-                  <HugeiconsIcon
-                    icon={PlusSignIcon}
-                    className="size-3 shrink-0"
-                    strokeWidth={2}
-                  />
-                  <span className="sr-only">New task</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                tooltip="Open sidebar"
-                className="justify-center"
-                onClick={toggleSidebar}
-              >
-                <HugeiconsIcon icon={SidebarLeftIcon} className="size-3" />
-                <span className="sr-only">Open sidebar</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        ) : (
-          <SidebarMenu className="gap-1">
-            <SidebarMenuItem className="flex w-full flex-row items-center gap-1">
-              <div className="min-w-0 flex-1">
-                <AccountMenu triggerVariant="header" className="w-full" />
-              </div>
-              {headerActions}
-            </SidebarMenuItem>
-          </SidebarMenu>
-        )}
-      </SidebarHeader>
-
-      <SidebarContent className="gap-0 px-0">
+      <SidebarContent className="gap-0 px-0 pt-2">
         <SidebarGroup className="py-2">
           <SidebarGroupLabel className="sr-only">Primary</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -243,65 +142,41 @@ function WorkspaceSidebarContent({
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {isCollapsed ? (
-          <>
-            <SidebarGroup className="border-t border-sidebar-border/40 py-2">
-              <SidebarGroupLabel className="sr-only">Workspace</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <NavRows items={navWorkspace} {...navProps} />
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-            <SidebarSeparator />
-            <SidebarGroup className="py-2">
-              <SidebarGroupLabel className="sr-only">Tools</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <NavRows items={navTools} {...navProps} />
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </>
-        ) : (
-          <>
-            <Collapsible defaultOpen className="group border-t border-sidebar-border/40">
-              <CollapsibleTrigger className="flex w-full items-center gap-1 rounded-md px-3 py-2 text-left text-[11px] font-medium text-muted-foreground uppercase tracking-wide outline-none ring-sidebar-ring transition-colors hover:bg-sidebar-accent/40 hover:text-sidebar-foreground focus-visible:ring-2">
-                <span>Workspace</span>
-                <HugeiconsIcon
-                  icon={ArrowDown01Icon}
-                  className="ml-auto size-3 shrink-0 opacity-70 transition-transform group-data-[state=open]:rotate-180"
-                  strokeWidth={2}
-                />
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="px-2 pb-2">
-                  <SidebarMenu>
-                    <NavRows items={navWorkspace} {...navProps} />
-                  </SidebarMenu>
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
+        <Collapsible defaultOpen className="group border-t border-sidebar-border/40">
+          <CollapsibleTrigger className="flex w-full items-center gap-1 rounded-md px-3 py-2 text-left text-[11px] font-medium text-muted-foreground uppercase tracking-wide outline-none ring-sidebar-ring transition-colors hover:bg-sidebar-accent/40 hover:text-sidebar-foreground focus-visible:ring-2">
+            <span>Workspace</span>
+            <HugeiconsIcon
+              icon={ArrowDown01Icon}
+              className="ml-auto size-3 shrink-0 opacity-70 transition-transform group-data-[state=open]:rotate-180"
+              strokeWidth={2}
+            />
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <div className="px-2 pb-2">
+              <SidebarMenu>
+                <NavRows items={navWorkspace} {...navProps} />
+              </SidebarMenu>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
 
-            <Collapsible defaultOpen className="group border-t border-sidebar-border/40">
-              <CollapsibleTrigger className="flex w-full items-center gap-1 rounded-md px-3 py-2 text-left text-[11px] font-medium text-muted-foreground uppercase tracking-wide outline-none ring-sidebar-ring transition-colors hover:bg-sidebar-accent/40 hover:text-sidebar-foreground focus-visible:ring-2">
-                <span>Tools</span>
-                <HugeiconsIcon
-                  icon={ArrowDown01Icon}
-                  className="ml-auto size-3 shrink-0 opacity-70 transition-transform group-data-[state=open]:rotate-180"
-                  strokeWidth={2}
-                />
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="px-2 pb-2">
-                  <SidebarMenu>
-                    <NavRows items={navTools} {...navProps} />
-                  </SidebarMenu>
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
-          </>
-        )}
+        <Collapsible defaultOpen className="group border-t border-sidebar-border/40">
+          <CollapsibleTrigger className="flex w-full items-center gap-1 rounded-md px-3 py-2 text-left text-[11px] font-medium text-muted-foreground uppercase tracking-wide outline-none ring-sidebar-ring transition-colors hover:bg-sidebar-accent/40 hover:text-sidebar-foreground focus-visible:ring-2">
+            <span>Tools</span>
+            <HugeiconsIcon
+              icon={ArrowDown01Icon}
+              className="ml-auto size-3 shrink-0 opacity-70 transition-transform group-data-[state=open]:rotate-180"
+              strokeWidth={2}
+            />
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <div className="px-2 pb-2">
+              <SidebarMenu>
+                <NavRows items={navTools} {...navProps} />
+              </SidebarMenu>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border/50 p-2">
@@ -419,24 +294,26 @@ function AppShellInner({
 
   const inspectorLabel = isChatRoute ? "Dossier" : "Inspector"
 
-  const openWorkspacePanel = () => {
-    trackFloatingPanelOpen("left", true)
+  const toggleWorkspacePanel = () => {
+    const next = !primaryExpanded
+    trackFloatingPanelOpen("left", next)
     if (isMobile) {
-      setPrimaryOpenMobile(true)
+      setPrimaryOpenMobile(next)
       return
     }
-    setInspectorOpen(false)
-    setPrimaryOpen(true)
+    if (next) setInspectorOpen(false)
+    setPrimaryOpen(next)
   }
 
-  const openInspectorPanel = () => {
-    trackFloatingPanelOpen("right", true)
+  const toggleInspectorPanel = () => {
+    const next = !inspectorExpanded
+    trackFloatingPanelOpen("right", next)
     if (isMobile) {
-      setInspectorOpenMobile(true)
+      setInspectorOpenMobile(next)
       return
     }
-    setPrimaryOpen(false)
-    setInspectorOpen(true)
+    if (next) setPrimaryOpen(false)
+    setInspectorOpen(next)
   }
 
   const primaryPanelBody =
@@ -500,8 +377,8 @@ function AppShellInner({
             onChatModeChange={setChatSidebarMode}
             onNotesModeChange={setNotesSidebarMode}
             commandItems={commandItems}
-            onOpenWorkspacePanel={openWorkspacePanel}
-            onOpenInspectorPanel={openInspectorPanel}
+            onToggleWorkspacePanel={toggleWorkspacePanel}
+            onToggleInspectorPanel={toggleInspectorPanel}
             primaryOpen={primaryExpanded}
             inspectorOpen={inspectorExpanded}
             hideMobileBar={isChatRoute}
