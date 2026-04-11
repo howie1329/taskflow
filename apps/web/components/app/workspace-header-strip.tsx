@@ -9,11 +9,13 @@ import {
   Layers01Icon,
   MoreHorizontalIcon,
   PencilEdit01Icon,
+  PinIcon,
   SidebarLeftIcon,
 } from "@hugeicons/core-free-icons"
 import { cn } from "@/lib/utils"
 import { AccountMenu } from "@/components/auth/sign-out-button"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Kbd } from "@/components/ui/kbd"
 import {
   DropdownMenu,
@@ -66,8 +68,9 @@ export function WorkspaceHeaderStrip({
   const pathname = usePathname()
   const router = useRouter()
   const isMobile = useIsMobile()
-  const { chatThreadActions } = useWorkspaceChrome()
+  const { chatThreadActions, noteDetailChrome } = useWorkspaceChrome()
   const isChatThreadRoute = pathname.startsWith("/app/chat/")
+  const isNoteDetailRoute = /^\/app\/notes\/[^/]+$/.test(pathname)
 
   return (
     <>
@@ -97,23 +100,70 @@ export function WorkspaceHeaderStrip({
           </Button>
         ) : null}
 
-        <button
-          type="button"
-          onClick={onToggleWorkspacePanel}
-          className={cn(
-            "text-muted-foreground hover:bg-accent/80 hover:text-accent-foreground inline-flex max-w-[40%] min-w-0 items-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-left text-[11px] font-medium transition-colors md:max-w-[min(280px,45%)]",
-            primaryOpen && "border-border bg-accent/40 text-foreground",
-          )}
-          aria-expanded={primaryOpen}
-          aria-controls="workspace-primary-panel"
-        >
-          <HugeiconsIcon
-            icon={SidebarLeftIcon}
-            className="size-3.5 shrink-0 opacity-70"
-            strokeWidth={2}
-          />
-          <span className="truncate">{pageTitle}</span>
-        </button>
+        {isNoteDetailRoute && isMobile ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            className="shrink-0 md:hidden"
+            onClick={() => router.push("/app/notes")}
+          >
+            <HugeiconsIcon
+              icon={ArrowLeft01Icon}
+              className="size-4"
+              strokeWidth={2}
+            />
+            <span className="sr-only">Back to notes</span>
+          </Button>
+        ) : null}
+
+        {noteDetailChrome ? (
+          <div className="flex min-w-0 max-w-[min(100%,340px)] flex-1 items-center gap-1 sm:max-w-[min(100%,min(400px,52vw))]">
+            <button
+              type="button"
+              onClick={onToggleWorkspacePanel}
+              className={cn(
+                "text-muted-foreground hover:bg-accent/80 hover:text-accent-foreground inline-flex size-8 shrink-0 items-center justify-center rounded-md border border-transparent transition-colors",
+                primaryOpen && "border-border bg-accent/40 text-foreground",
+              )}
+              aria-expanded={primaryOpen}
+              aria-controls="workspace-primary-panel"
+            >
+              <HugeiconsIcon
+                icon={SidebarLeftIcon}
+                className="size-3.5 shrink-0 opacity-70"
+                strokeWidth={2}
+              />
+              <span className="sr-only">Toggle workspace panel</span>
+            </button>
+            <Input
+              key={noteDetailChrome.noteId}
+              defaultValue={noteDetailChrome.defaultTitle}
+              onChange={(e) => noteDetailChrome.onTitleChange(e.target.value)}
+              onBlur={(e) => noteDetailChrome.onTitleBlur(e.target.value)}
+              placeholder="Note title"
+              className="h-8 min-w-0 flex-1 border-0 bg-transparent px-1 py-0 text-[11px] font-medium shadow-none focus-visible:ring-1 focus-visible:ring-ring"
+            />
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={onToggleWorkspacePanel}
+            className={cn(
+              "text-muted-foreground hover:bg-accent/80 hover:text-accent-foreground inline-flex max-w-[40%] min-w-0 items-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-left text-[11px] font-medium transition-colors md:max-w-[min(280px,45%)]",
+              primaryOpen && "border-border bg-accent/40 text-foreground",
+            )}
+            aria-expanded={primaryOpen}
+            aria-controls="workspace-primary-panel"
+          >
+            <HugeiconsIcon
+              icon={SidebarLeftIcon}
+              className="size-3.5 shrink-0 opacity-70"
+              strokeWidth={2}
+            />
+            <span className="truncate">{pageTitle}</span>
+          </button>
+        )}
 
         {isChatRoute ? (
           <div
@@ -170,6 +220,22 @@ export function WorkspaceHeaderStrip({
         ) : null}
 
         <div className="min-w-0 flex-1" />
+
+        {noteDetailChrome ? (
+          <div className="flex shrink-0 items-center gap-0.5">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              onClick={noteDetailChrome.onTogglePin}
+              className={cn(noteDetailChrome.pinned && "text-primary")}
+              title={noteDetailChrome.pinned ? "Unpin note" : "Pin note"}
+            >
+              <HugeiconsIcon icon={PinIcon} className="size-4" strokeWidth={2} />
+            </Button>
+            {noteDetailChrome.moreMenu}
+          </div>
+        ) : null}
 
         {isChatThreadRoute && chatThreadActions ? (
           <DropdownMenu>

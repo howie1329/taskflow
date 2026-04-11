@@ -14,11 +14,23 @@ export type ChatThreadChromeActions = {
   onCompactChat?: () => void | Promise<void>
 }
 
+export type NoteDetailChrome = {
+  noteId: string
+  defaultTitle: string
+  onTitleChange: (value: string) => void
+  onTitleBlur: (value: string) => void
+  pinned: boolean
+  onTogglePin: () => void
+  moreMenu: ReactNode
+}
+
 type WorkspaceChromeContextValue = {
   pageTitleOverride: string | null
   setPageTitleOverride: (value: string | null) => void
   chatThreadActions: ChatThreadChromeActions | null
   setChatThreadActions: (value: ChatThreadChromeActions | null) => void
+  noteDetailChrome: NoteDetailChrome | null
+  setNoteDetailChrome: (value: NoteDetailChrome | null) => void
 }
 
 const WorkspaceChromeContext = createContext<WorkspaceChromeContextValue | null>(
@@ -29,6 +41,8 @@ export function WorkspaceChromeProvider({ children }: { children: ReactNode }) {
   const [pageTitleOverride, setPageTitleOverride] = useState<string | null>(null)
   const [chatThreadActions, setChatThreadActions] =
     useState<ChatThreadChromeActions | null>(null)
+  const [noteDetailChrome, setNoteDetailChrome] =
+    useState<NoteDetailChrome | null>(null)
 
   const value = useMemo(
     () => ({
@@ -36,8 +50,10 @@ export function WorkspaceChromeProvider({ children }: { children: ReactNode }) {
       setPageTitleOverride,
       chatThreadActions,
       setChatThreadActions,
+      noteDetailChrome,
+      setNoteDetailChrome,
     }),
-    [pageTitleOverride, chatThreadActions],
+    [pageTitleOverride, chatThreadActions, noteDetailChrome],
   )
 
   return (

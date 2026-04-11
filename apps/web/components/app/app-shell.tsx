@@ -326,9 +326,7 @@ function AppShellInner({
     isChatRoute && chatSidebarMode === "threads" ? (
       <ChatSidebar />
     ) : isNotesRoute && notesSidebarMode === "notes" ? (
-      <NotesAppSidebar
-        onBackToWorkspace={() => setNotesSidebarMode("workspace")}
-      />
+      <NotesAppSidebar />
     ) : (
       <WorkspaceSidebarContent
         pathname={pathname}
@@ -422,7 +420,7 @@ function AppShellInner({
             aria-label={inspectorLabel}
             className="flex min-h-0 flex-1 flex-col overflow-hidden"
           >
-            {isChatRoute ? null : (
+            {isChatRoute || isNotesRoute ? null : (
               <SidebarHeader className="border-b border-border/50 px-4 py-3">
                 <div className="flex min-h-8 items-center justify-between gap-3">
                   <div
@@ -441,7 +439,7 @@ function AppShellInner({
             <SidebarContent
               className={cn(
                 "flex min-h-0 flex-1 flex-col overflow-hidden p-4",
-                !isChatRoute && "pt-3",
+                !isChatRoute && !isNotesRoute && "pt-3",
               )}
             >
               <InspectorPanelContent>
