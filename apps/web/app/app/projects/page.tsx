@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo, useEffect, useRef } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import {
   InputGroup,
@@ -52,6 +52,7 @@ import { shouldIgnoreGlobalShortcut } from "@/lib/should-ignore-global-shortcut"
 
 export default function ProjectsPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [activeTab, setActiveTab] = useState<"active" | "archived">("active")
   const [searchQuery, setSearchQuery] = useState("")
   const [isSheetOpen, setIsSheetOpen] = useState(false)
@@ -216,6 +217,20 @@ export default function ProjectsPage() {
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [deleteProject, isSheetOpen])
+
+  useEffect(() => {
+    const intent = searchParams.get("intent")
+    if (intent !== "create-project") return
+    setEditingProject(null)
+    setIsSheetOpen(true)
+
+    const params = new URLSearchParams(searchParams.toString())
+    params.delete("intent")
+    const nextQuery = params.toString()
+    router.replace(nextQuery ? `/app/projects?${nextQuery}` : "/app/projects", {
+      scroll: false,
+    })
+  }, [router, searchParams])
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col overflow-hidden">

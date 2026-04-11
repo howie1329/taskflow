@@ -1,5 +1,7 @@
 "use client"
 
+import { useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Kbd } from "@/components/ui/kbd"
 import {
@@ -21,6 +23,8 @@ import { useNotes } from "@/components/notes"
 import { cn } from "@/lib/utils"
 
 export default function NotesPage() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const { createNote, openCreateNotePicker, sortedNotes, selectNote } = useNotes()
   const recentNotes = sortedNotes.slice(0, 4)
   const tips = [
@@ -28,6 +32,20 @@ export default function NotesPage() {
     { label: "Jump to search", shortcut: "/" },
     { label: "Pin important notes", shortcut: "Keep favorites at the top" },
   ]
+
+  useEffect(() => {
+    const intent = searchParams.get("intent")
+    if (intent !== "create-note") return
+
+    void createNote({ noteType: "blank", templateKey: "blank" })
+
+    const params = new URLSearchParams(searchParams.toString())
+    params.delete("intent")
+    const nextQuery = params.toString()
+    router.replace(nextQuery ? `/app/notes?${nextQuery}` : "/app/notes", {
+      scroll: false,
+    })
+  }, [createNote, router, searchParams])
 
   return (
     <div className="flex h-full w-full min-h-0 px-4 py-4 md:px-8 md:py-6">
