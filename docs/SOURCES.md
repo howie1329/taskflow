@@ -18,17 +18,10 @@ Use this file to find the current source of truth quickly.
 
 ## Shared Package Docs
 
-- [`packages/Taskflow-Rag/README.md`](../packages/Taskflow-Rag/README.md)
 - [`packages/Taskflow-Context-Compaction/README.md`](../packages/Taskflow-Context-Compaction/README.md)
-- [`packages/Taskflow-Chat-Content/README.md`](../packages/Taskflow-Chat-Content/README.md)
 
 ## Legacy Reference
 
-Legacy app-local docs have been removed. The repo keeps only a brief reference here:
+The repo keeps only a brief reference here:
 
 - [`LEGACY/feature-inventory.md`](./LEGACY/feature-inventory.md)
-
-Deprecated app code still exists in:
-
-- `apps/frontend`
-- `apps/backend`

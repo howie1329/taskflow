@@ -5,21 +5,8 @@ import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
 import { motion, useReducedMotion } from "motion/react"
 import { HugeiconsIcon } from "@hugeicons/react"
-import {
-  Task01Icon,
-  FolderManagementIcon,
-  MessageQuestionIcon,
-  NoteIcon,
-  SettingsIcon,
-  InboxDownloadIcon,
-  NotificationIcon,
-  ArrowDown01Icon,
-  SearchIcon,
-  PlusSignIcon,
-  SidebarLeftIcon,
-} from "@hugeicons/core-free-icons"
+import { ArrowDown01Icon } from "@hugeicons/core-free-icons"
 
-import { AccountMenu } from "@/components/auth/sign-out-button"
 import { useViewer } from "@/components/settings/hooks/use-viewer"
 import {
   Sidebar,
@@ -35,7 +22,6 @@ import {
   SidebarMenuItem,
   SidebarProvider,
   SidebarRail,
-  SidebarSeparator,
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar"
@@ -50,105 +36,22 @@ import { NotesProvider } from "@/components/notes"
 import { cn } from "@/lib/utils"
 import { ChatInspectorProvider } from "@/components/app/chat-inspector-context"
 import {
-  WorkspaceNavCommand,
-  type WorkspaceNavCommandItem,
-} from "@/components/app/workspace-nav-command"
-import type { ComponentProps } from "react"
-
-type NavIcon = ComponentProps<typeof HugeiconsIcon>["icon"]
-
-type NavItemDef = {
-  title: string
-  href: string
-  icon: NavIcon
-}
-
-const navPrimary: NavItemDef[] = [
-  {
-    title: "Inbox",
-    href: "/app/inbox",
-    icon: InboxDownloadIcon,
-  },
-  {
-    title: "Tasks",
-    href: "/app/tasks",
-    icon: Task01Icon,
-  },
-]
-
-const navWorkspace: NavItemDef[] = [
-  {
-    title: "Notifications",
-    href: "/app/notifications",
-    icon: NotificationIcon,
-  },
-  {
-    title: "Projects",
-    href: "/app/projects",
-    icon: FolderManagementIcon,
-  },
-]
-
-const settingsNavItem: NavItemDef = {
-  title: "Settings",
-  href: "/app/settings",
-  icon: SettingsIcon,
-}
-
-const navTools: NavItemDef[] = [
-  {
-    title: "AI Chat",
-    href: "/app/chat",
-    icon: MessageQuestionIcon,
-  },
-  {
-    title: "Notes",
-    href: "/app/notes",
-    icon: NoteIcon,
-  },
-]
-
-const allNavItems: NavItemDef[] = [
-  ...navPrimary,
-  ...navWorkspace,
+  buildWorkspaceCommandItems,
+  getPageTitle,
+  navPrimary,
+  navTools,
+  navWorkspace,
   settingsNavItem,
-  ...navTools,
-]
-
-function getPageTitle(pathname: string): string {
-  if (pathname.startsWith("/app/projects/")) return "Projects"
-  if (pathname.startsWith("/app/chat/")) return "AI Chat"
-  if (pathname.startsWith("/app/notes/")) return "Notes"
-  const item = allNavItems.find(
-    (item) => pathname === item.href || pathname.startsWith(`${item.href}/`),
-  )
-  if (item) return item.title
-  if (pathname === "/app") return "Overview"
-  return "Taskflow"
-}
-
-function buildCommandItems(): WorkspaceNavCommandItem[] {
-  return [
-    ...navPrimary.map((item) => ({
-      ...item,
-      group: "Primary",
-    })),
-    ...navWorkspace.map((item) => ({
-      ...item,
-      group: "Workspace",
-    })),
-    { ...settingsNavItem, group: "Workspace" },
-    ...navTools.map((item) => ({
-      ...item,
-      group: "Tools",
-    })),
-  ]
-}
-
-interface AppShellProps {
-  children: React.ReactNode
-  right?: React.ReactNode
-}
+  type NavItemDef,
+} from "@/lib/workspace-nav"
+import { WorkspaceHeaderStrip } from "@/components/app/workspace-header-strip"
+import {
+  WorkspaceChromeProvider,
+  useWorkspaceChrome,
+} from "@/components/app/workspace-chrome-context"
+import { useWorkspaceRouteCycle } from "@/hooks/use-workspace-route-cycle"
+import { useIsMobile } from "@/hooks/use-mobile"
+import { trackFloatingPanelOpen } from "@/lib/workspace-shell-analytics"
 
 interface WorkspaceSidebarContentProps {
   pathname: string
@@ -223,11 +126,6 @@ function WorkspaceSidebarContent({
   setChatSidebarMode,
   setNotesSidebarMode,
 }: WorkspaceSidebarContentProps) {
-  const { state, isMobile, toggleSidebar } = useSidebar()
-  const isCollapsed = state === "collapsed" && !isMobile
-  const [commandOpen, setCommandOpen] = useState(false)
-  const commandItems = useMemo(() => buildCommandItems(), [])
-
   const navProps: WorkspaceSidebarContentProps = {
     pathname,
     isChatRoute,
@@ -236,97 +134,9 @@ function WorkspaceSidebarContent({
     setNotesSidebarMode,
   }
 
-  const headerActions = (
-    <>
-      <SidebarMenuButton
-        size="sm"
-        className="size-8 shrink-0 rounded-md"
-        tooltip="Search"
-        onClick={() => setCommandOpen(true)}
-      >
-        <HugeiconsIcon icon={SearchIcon} className="shrink-0" strokeWidth={2} />
-        <span className="sr-only">Search</span>
-      </SidebarMenuButton>
-      <SidebarMenuButton
-        size="sm"
-        asChild
-        tooltip="New task"
-        className="size-8 shrink-0 rounded-md"
-      >
-        <Link href="/app/tasks" aria-label="New task">
-          <HugeiconsIcon icon={PlusSignIcon} className="size-3 shrink-0" strokeWidth={2} />
-          <span className="sr-only">New task</span>
-        </Link>
-      </SidebarMenuButton>
-      <SidebarTrigger className="size-8 shrink-0" />
-    </>
-  )
-
   return (
     <>
-      <WorkspaceNavCommand
-        open={commandOpen}
-        onOpenChange={setCommandOpen}
-        items={commandItems}
-      />
-
-      <SidebarHeader className="gap-1 border-b border-sidebar-border/50 px-1.5 py-2">
-        {isCollapsed ? (
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <AccountMenu triggerVariant="icon" />
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                size="sm"
-                tooltip="Search"
-                className="justify-center"
-                onClick={() => setCommandOpen(true)}
-              >
-                <HugeiconsIcon icon={SearchIcon} className="shrink-0" strokeWidth={2} />
-                <span className="sr-only">Search</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                asChild
-                tooltip="New task"
-                className="justify-center"
-              >
-                <Link href="/app/tasks" aria-label="New task">
-                  <HugeiconsIcon
-                    icon={PlusSignIcon}
-                    className="size-3 shrink-0"
-                    strokeWidth={2}
-                  />
-                  <span className="sr-only">New task</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                tooltip="Open sidebar"
-                className="justify-center"
-                onClick={toggleSidebar}
-              >
-                <HugeiconsIcon icon={SidebarLeftIcon} className="size-3" />
-                <span className="sr-only">Open sidebar</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        ) : (
-          <SidebarMenu className="gap-1">
-            <SidebarMenuItem className="flex w-full flex-row items-center gap-1">
-              <div className="min-w-0 flex-1">
-                <AccountMenu triggerVariant="header" className="w-full" />
-              </div>
-              {headerActions}
-            </SidebarMenuItem>
-          </SidebarMenu>
-        )}
-      </SidebarHeader>
-
-      <SidebarContent className="gap-0 px-0">
+      <SidebarContent className="gap-0 px-0 pt-2">
         <SidebarGroup className="py-2">
           <SidebarGroupLabel className="sr-only">Primary</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -336,65 +146,41 @@ function WorkspaceSidebarContent({
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {isCollapsed ? (
-          <>
-            <SidebarGroup className="border-t border-sidebar-border/40 py-2">
-              <SidebarGroupLabel className="sr-only">Workspace</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <NavRows items={navWorkspace} {...navProps} />
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-            <SidebarSeparator />
-            <SidebarGroup className="py-2">
-              <SidebarGroupLabel className="sr-only">Tools</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <NavRows items={navTools} {...navProps} />
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </>
-        ) : (
-          <>
-            <Collapsible defaultOpen className="group border-t border-sidebar-border/40">
-              <CollapsibleTrigger className="flex w-full items-center gap-1 rounded-md px-3 py-2 text-left text-[11px] font-medium text-muted-foreground uppercase tracking-wide outline-none ring-sidebar-ring transition-colors hover:bg-sidebar-accent/40 hover:text-sidebar-foreground focus-visible:ring-2">
-                <span>Workspace</span>
-                <HugeiconsIcon
-                  icon={ArrowDown01Icon}
-                  className="ml-auto size-3 shrink-0 opacity-70 transition-transform group-data-[state=open]:rotate-180"
-                  strokeWidth={2}
-                />
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="px-2 pb-2">
-                  <SidebarMenu>
-                    <NavRows items={navWorkspace} {...navProps} />
-                  </SidebarMenu>
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
+        <Collapsible defaultOpen className="group border-t border-sidebar-border/40">
+          <CollapsibleTrigger className="flex w-full items-center gap-1 rounded-md px-3 py-2 text-left text-[11px] font-medium text-muted-foreground uppercase tracking-wide outline-none ring-sidebar-ring transition-colors hover:bg-sidebar-accent/40 hover:text-sidebar-foreground focus-visible:ring-2">
+            <span>Workspace</span>
+            <HugeiconsIcon
+              icon={ArrowDown01Icon}
+              className="ml-auto size-3 shrink-0 opacity-70 transition-transform group-data-[state=open]:rotate-180"
+              strokeWidth={2}
+            />
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <div className="px-2 pb-2">
+              <SidebarMenu>
+                <NavRows items={navWorkspace} {...navProps} />
+              </SidebarMenu>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
 
-            <Collapsible defaultOpen className="group border-t border-sidebar-border/40">
-              <CollapsibleTrigger className="flex w-full items-center gap-1 rounded-md px-3 py-2 text-left text-[11px] font-medium text-muted-foreground uppercase tracking-wide outline-none ring-sidebar-ring transition-colors hover:bg-sidebar-accent/40 hover:text-sidebar-foreground focus-visible:ring-2">
-                <span>Tools</span>
-                <HugeiconsIcon
-                  icon={ArrowDown01Icon}
-                  className="ml-auto size-3 shrink-0 opacity-70 transition-transform group-data-[state=open]:rotate-180"
-                  strokeWidth={2}
-                />
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="px-2 pb-2">
-                  <SidebarMenu>
-                    <NavRows items={navTools} {...navProps} />
-                  </SidebarMenu>
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
-          </>
-        )}
+        <Collapsible defaultOpen className="group border-t border-sidebar-border/40">
+          <CollapsibleTrigger className="flex w-full items-center gap-1 rounded-md px-3 py-2 text-left text-[11px] font-medium text-muted-foreground uppercase tracking-wide outline-none ring-sidebar-ring transition-colors hover:bg-sidebar-accent/40 hover:text-sidebar-foreground focus-visible:ring-2">
+            <span>Tools</span>
+            <HugeiconsIcon
+              icon={ArrowDown01Icon}
+              className="ml-auto size-3 shrink-0 opacity-70 transition-transform group-data-[state=open]:rotate-180"
+              strokeWidth={2}
+            />
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <div className="px-2 pb-2">
+              <SidebarMenu>
+                <NavRows items={navTools} {...navProps} />
+              </SidebarMenu>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border/50 p-2">
@@ -445,6 +231,231 @@ function InspectorPanelContent({ children }: { children: React.ReactNode }) {
   )
 }
 
+interface AppShellProps {
+  children: React.ReactNode
+  right?: React.ReactNode
+}
+
+type AppShellInnerProps = {
+  children: React.ReactNode
+  right?: React.ReactNode
+  pathname: string
+  pageTitle: string
+  isOnboardingRoute: boolean
+  isChatRoute: boolean
+  isChatThreadRoute: boolean
+  isNotesRoute: boolean
+  isTasksRoute: boolean
+  isProjectsRoute: boolean
+  isSettingsRoute: boolean
+  showInspector: boolean
+  chatSidebarMode: "threads" | "workspace"
+  setChatSidebarMode: React.Dispatch<
+    React.SetStateAction<"threads" | "workspace">
+  >
+  notesSidebarMode: "notes" | "workspace"
+  setNotesSidebarMode: React.Dispatch<
+    React.SetStateAction<"notes" | "workspace">
+  >
+}
+
+function AppShellInner({
+  children,
+  right,
+  pathname,
+  pageTitle,
+  isOnboardingRoute,
+  isChatRoute,
+  isChatThreadRoute,
+  isNotesRoute,
+  isTasksRoute,
+  isProjectsRoute,
+  isSettingsRoute,
+  showInspector,
+  chatSidebarMode,
+  setChatSidebarMode,
+  notesSidebarMode,
+  setNotesSidebarMode,
+}: AppShellInnerProps) {
+  const { pageTitleOverride } = useWorkspaceChrome()
+  const displayTitle = pageTitleOverride ?? pageTitle
+  const isMobile = useIsMobile()
+  const {
+    open: primaryOpen,
+    setOpen: setPrimaryOpen,
+    openMobile: primaryOpenMobile,
+    setOpenMobile: setPrimaryOpenMobile,
+  } = useSidebar()
+  const {
+    open: inspectorOpen,
+    setOpen: setInspectorOpen,
+    openMobile: inspectorOpenMobile,
+    setOpenMobile: setInspectorOpenMobile,
+  } = useSidebar("inspector")
+
+  const primaryExpanded = isMobile ? primaryOpenMobile : primaryOpen
+  const inspectorExpanded = isMobile ? inspectorOpenMobile : inspectorOpen
+
+  const commandItems = useMemo(() => buildWorkspaceCommandItems(), [])
+
+  const inspectorLabel = isChatRoute ? "Dossier" : "Inspector"
+
+  const toggleWorkspacePanel = () => {
+    const next = !primaryExpanded
+    trackFloatingPanelOpen("left", next)
+    if (isMobile) {
+      setPrimaryOpenMobile(next)
+      return
+    }
+    if (next) setInspectorOpen(false)
+    setPrimaryOpen(next)
+  }
+
+  const toggleInspectorPanel = () => {
+    const next = !inspectorExpanded
+    trackFloatingPanelOpen("right", next)
+    if (isMobile) {
+      setInspectorOpenMobile(next)
+      return
+    }
+    if (next) setPrimaryOpen(false)
+    setInspectorOpen(next)
+  }
+
+  const primaryPanelBody =
+    isChatRoute && chatSidebarMode === "threads" ? (
+      <ChatSidebar />
+    ) : isNotesRoute && notesSidebarMode === "notes" ? (
+      <NotesAppSidebar />
+    ) : (
+      <WorkspaceSidebarContent
+        pathname={pathname}
+        isChatRoute={isChatRoute}
+        isNotesRoute={isNotesRoute}
+        setChatSidebarMode={setChatSidebarMode}
+        setNotesSidebarMode={setNotesSidebarMode}
+      />
+    )
+
+  return (
+    <>
+      <Sidebar
+        scope="primary"
+        variant="inset"
+        collapsible="offcanvas"
+        className="z-10"
+      >
+        <div
+          id="workspace-primary-panel"
+          role="navigation"
+          aria-label="Workspace"
+          className="flex min-h-0 flex-1 flex-col overflow-hidden"
+        >
+          {primaryPanelBody}
+        </div>
+        <SidebarRail scope="primary" />
+      </Sidebar>
+
+      <SidebarInset
+        className={cn(
+          "min-w-0 overflow-hidden",
+          (isChatRoute ||
+            isSettingsRoute ||
+            isTasksRoute ||
+            isNotesRoute ||
+            isProjectsRoute) &&
+            "min-h-0",
+        )}
+      >
+        {!isOnboardingRoute ? (
+          <WorkspaceHeaderStrip
+            pageTitle={displayTitle}
+            showInspector={showInspector}
+            inspectorLabel={inspectorLabel}
+            isChatRoute={isChatRoute}
+            isNotesRoute={isNotesRoute}
+            chatSidebarMode={chatSidebarMode}
+            notesSidebarMode={notesSidebarMode}
+            onChatModeChange={setChatSidebarMode}
+            onNotesModeChange={setNotesSidebarMode}
+            commandItems={commandItems}
+            onToggleWorkspacePanel={toggleWorkspacePanel}
+            onToggleInspectorPanel={toggleInspectorPanel}
+            primaryOpen={primaryExpanded}
+            inspectorOpen={inspectorExpanded}
+          />
+        ) : null}
+        <main
+          className={
+            isTasksRoute || isNotesRoute || isProjectsRoute
+              ? "relative flex min-h-0 flex-1 flex-col overflow-hidden"
+              : isSettingsRoute
+                ? "relative flex min-h-0 flex-1 flex-col overflow-hidden"
+                : isChatThreadRoute
+                  ? "relative flex min-h-0 flex-1 flex-col overflow-hidden px-2 pb-2"
+                  : "relative flex min-h-0 flex-1 flex-col gap-2 overflow-hidden p-2 md:gap-2 md:p-2"
+          }
+        >
+          {children}
+        </main>
+      </SidebarInset>
+
+      {showInspector ? (
+        <Sidebar
+          scope="inspector"
+          side="right"
+          variant="inset"
+          collapsible="offcanvas"
+          className="z-10 border-0 bg-transparent shadow-none"
+          style={
+            {
+              "--sidebar-width": isChatRoute ? "28rem" : "22rem",
+              "--sidebar-width-mobile": isChatRoute ? "28rem" : "22rem",
+            } as React.CSSProperties
+          }
+        >
+          <div
+            id="workspace-inspector-panel"
+            role="complementary"
+            aria-label={inspectorLabel}
+            className="flex min-h-0 flex-1 flex-col overflow-hidden"
+          >
+            {isChatRoute || isNotesRoute ? null : (
+              <SidebarHeader className="border-b border-border/50 px-4 py-3">
+                <div className="flex min-h-8 items-center justify-between gap-3">
+                  <div
+                    id="workspace-inspector-heading"
+                    className="min-w-0 truncate text-base font-semibold tracking-tight text-foreground"
+                  >
+                    {inspectorLabel}
+                  </div>
+                  <SidebarTrigger
+                    scope="inspector"
+                    aria-label={`Close ${inspectorLabel.toLowerCase()}`}
+                  />
+                </div>
+              </SidebarHeader>
+            )}
+            <SidebarContent
+              className={cn(
+                "flex min-h-0 flex-1 flex-col overflow-hidden p-4",
+                !isChatRoute && !isNotesRoute && "pt-3",
+              )}
+            >
+              <InspectorPanelContent>
+                <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+                  {right}
+                </div>
+              </InspectorPanelContent>
+            </SidebarContent>
+          </div>
+          <SidebarRail scope="inspector" />
+        </Sidebar>
+      ) : null}
+    </>
+  )
+}
+
 export function AppShell({ children, right }: AppShellProps) {
   const pathname = usePathname()
   const pageTitle = getPageTitle(pathname)
@@ -467,6 +478,10 @@ export function AppShell({ children, right }: AppShellProps) {
   const isSettingsRoute = pathname.startsWith("/app/settings")
   const showInspector =
     !isOnboardingRoute && !isSettingsRoute && (isChatRoute || isNotesRoute)
+
+  useWorkspaceRouteCycle(
+    !isOnboardingRoute && isOnboarded && pathname.startsWith("/app"),
+  )
 
   useEffect(() => {
     if (isLoading) return
@@ -498,111 +513,45 @@ export function AppShell({ children, right }: AppShellProps) {
   }
 
   const shell = (
-    <SidebarProvider
-      defaultOpenInspector={false}
-      className={cn(
-        (isChatRoute || isTasksRoute || isProjectsRoute) &&
-          "h-svh overflow-hidden",
-      )}
-      style={{ "--sidebar-width": "15rem" } as React.CSSProperties}
-    >
-      <Sidebar scope="primary" variant="sidebar" collapsible="icon">
-        {isChatRoute && chatSidebarMode === "threads" ? (
-          <ChatSidebar
-            onBackToWorkspace={() => setChatSidebarMode("workspace")}
-          />
-        ) : isNotesRoute && notesSidebarMode === "notes" ? (
-          <NotesAppSidebar
-            onBackToWorkspace={() => setNotesSidebarMode("workspace")}
-          />
-        ) : (
-          <WorkspaceSidebarContent
-            pathname={pathname}
-            isChatRoute={isChatRoute}
-            isNotesRoute={isNotesRoute}
-            setChatSidebarMode={setChatSidebarMode}
-            setNotesSidebarMode={setNotesSidebarMode}
-          />
-        )}
-        <SidebarRail scope="primary" />
-      </Sidebar>
-      <SidebarInset
+    <WorkspaceChromeProvider>
+      <SidebarProvider
+        defaultOpen={false}
+        defaultOpenInspector={false}
         className={cn(
-          "min-w-0 overflow-hidden",
           (isChatRoute ||
-            isSettingsRoute ||
             isTasksRoute ||
-            isNotesRoute ||
-            isProjectsRoute) &&
-            "min-h-0",
+            isProjectsRoute ||
+            isSettingsRoute) &&
+            "h-svh overflow-hidden",
         )}
+        style={
+          {
+            "--sidebar-width": "15rem",
+            "--panel-w": "15rem",
+          } as React.CSSProperties
+        }
       >
-        {!isOnboardingRoute && !isChatRoute && (
-          <div className="md:hidden sticky top-0 z-20 flex h-10 items-center gap-2 px-2 bg-background/70 backdrop-blur supports-backdrop-filter:bg-background/50">
-            <SidebarTrigger className="-ml-1" />
-            <div className="min-w-0 flex-1">
-              <div className="truncate text-[11px] font-medium text-muted-foreground">
-                {pageTitle}
-              </div>
-            </div>
-            {showInspector ? (
-              <SidebarTrigger
-                scope="inspector"
-                className="[&_svg]:rotate-180"
-                aria-label="Open inspector"
-              />
-            ) : (
-              <div className="w-7" aria-hidden="true" />
-            )}
-          </div>
-        )}
-        <main
-          className={
-            isTasksRoute || isNotesRoute || isProjectsRoute
-              ? "relative flex min-h-0 flex-1 flex-col overflow-hidden"
-              : isSettingsRoute
-                ? "relative flex min-h-0 flex-1 flex-col overflow-hidden"
-                : isChatThreadRoute
-                  ? "relative flex min-h-0 flex-1 flex-col overflow-hidden px-2 pb-2"
-                  : "relative flex min-h-0 flex-1 flex-col gap-2 overflow-hidden p-2 md:gap-2 md:p-2"
-          }
+        <AppShellInner
+          right={right}
+          pathname={pathname}
+          pageTitle={pageTitle}
+          isOnboardingRoute={isOnboardingRoute}
+          isChatRoute={isChatRoute}
+          isChatThreadRoute={isChatThreadRoute}
+          isNotesRoute={isNotesRoute}
+          isTasksRoute={isTasksRoute}
+          isProjectsRoute={isProjectsRoute}
+          isSettingsRoute={isSettingsRoute}
+          showInspector={showInspector}
+          chatSidebarMode={chatSidebarMode}
+          setChatSidebarMode={setChatSidebarMode}
+          notesSidebarMode={notesSidebarMode}
+          setNotesSidebarMode={setNotesSidebarMode}
         >
           {children}
-        </main>
-      </SidebarInset>
-      {showInspector && (
-        <Sidebar
-          scope="inspector"
-          side="right"
-          variant="sidebar"
-          collapsible="offcanvas"
-          className="border-l border-border/60 bg-background"
-          style={
-            {
-              "--sidebar-width": isChatRoute ? "28rem" : "22rem",
-              "--sidebar-width-mobile": isChatRoute ? "28rem" : "22rem",
-            } as React.CSSProperties
-          }
-        >
-          <SidebarHeader className="border-b border-border/50 px-4 py-3">
-            <div className="flex min-h-8 items-center justify-between gap-3">
-              <div className="min-w-0 truncate text-base font-semibold tracking-tight text-foreground">
-                {isChatRoute ? "Dossier" : "Inspector"}
-              </div>
-              <SidebarTrigger scope="inspector" aria-label="Close inspector" />
-            </div>
-          </SidebarHeader>
-          <SidebarContent className="flex min-h-0 flex-1 flex-col overflow-hidden p-4 pt-3">
-            <InspectorPanelContent>
-              <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-                {right}
-              </div>
-            </InspectorPanelContent>
-          </SidebarContent>
-          <SidebarRail scope="inspector" />
-        </Sidebar>
-      )}
-    </SidebarProvider>
+        </AppShellInner>
+      </SidebarProvider>
+    </WorkspaceChromeProvider>
   )
 
   if (isNotesRoute) {

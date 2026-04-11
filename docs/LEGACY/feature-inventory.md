@@ -1,13 +1,8 @@
 # Legacy Feature Inventory
 
-This file is a short reference for what existed before the `apps/web` rewrite became the active product direction.
+This file is a short reference for what existed before the repo was cleaned down to `apps/web`.
 
-## Legacy App Status
-
-- `apps/frontend`: deprecated legacy Next.js app
-- `apps/backend`: deprecated legacy Express backend
-
-The legacy app-local docs were intentionally removed during the docs rewrite. This file keeps only the high-signal history that still helps current work.
+The old `apps/frontend` and `apps/backend` implementations were removed after the Convex-based `apps/web` app became the only active product surface.
 
 ## Major Legacy Feature Areas
 

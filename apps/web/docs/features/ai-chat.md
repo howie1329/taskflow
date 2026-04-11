@@ -43,4 +43,3 @@ The default interaction should favor readable conversation first, with deeper ex
 See:
 
 - [`../architecture/ai.md`](../architecture/ai.md)
-- [`../archive/2026-legacy-plans/README.md`](../archive/2026-legacy-plans/README.md)

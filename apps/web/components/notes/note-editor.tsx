@@ -1,10 +1,10 @@
 "use client"
 
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Kbd } from "@/components/ui/kbd"
-import { SidebarTrigger } from "@/components/ui/sidebar"
+import { useWorkspaceChrome } from "@/components/app/workspace-chrome-context"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -202,6 +202,97 @@ export function NoteEditor({
     [note, onUpdateNote],
   )
 
+  const { setNoteDetailChrome } = useWorkspaceChrome()
+  const noteTypeOptions = useMemo(() => getAllTemplates(), [])
+
+  const moreActionsMenu = useMemo(() => {
+    if (!note) return null
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon-sm" title="More actions">
+            <HugeiconsIcon icon={ArrowRight01Icon} className="size-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <HugeiconsIcon
+                icon={FolderManagementIcon}
+                className="mr-2 size-4"
+              />
+              Move to...
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent className="w-48">
+              <DropdownMenuItem onClick={() => onMoveNote(note._id, "__none__")}>
+                No project
+              </DropdownMenuItem>
+              {projects.map((p) => (
+                <DropdownMenuItem
+                  key={p._id}
+                  onClick={() => onMoveNote(note._id, p._id)}
+                >
+                  {p.icon} {p.title}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>Change type</DropdownMenuSubTrigger>
+            <DropdownMenuSubContent className="w-44">
+              <DropdownMenuRadioGroup value={note.noteType ?? "blank"}>
+                {noteTypeOptions.map((template) => (
+                  <DropdownMenuRadioItem
+                    key={template.key}
+                    value={template.noteType}
+                    onSelect={(event) => {
+                      event.preventDefault()
+                      onUpdateNote(note._id, { noteType: template.noteType })
+                    }}
+                  >
+                    {template.label}
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+          <DropdownMenuItem
+            onClick={() => onDeleteNote(note._id)}
+            className="text-destructive focus:bg-destructive/10 focus:text-destructive"
+          >
+            <HugeiconsIcon icon={Delete01Icon} className="mr-2 size-4" strokeWidth={2} />
+            Delete
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    )
+  }, [note, projects, onMoveNote, onUpdateNote, onDeleteNote, noteTypeOptions])
+
+  useEffect(() => {
+    if (!note || isInSheet || !moreActionsMenu) {
+      setNoteDetailChrome(null)
+      return
+    }
+    setNoteDetailChrome({
+      noteId: note._id,
+      defaultTitle: note.title,
+      onTitleChange: queueTitleUpdate,
+      onTitleBlur: (value) => flushTitleUpdate(value),
+      pinned: note.pinned,
+      onTogglePin: () => onPinNote(note._id),
+      moreMenu: moreActionsMenu,
+    })
+    return () => setNoteDetailChrome(null)
+  }, [
+    note,
+    isInSheet,
+    moreActionsMenu,
+    queueTitleUpdate,
+    flushTitleUpdate,
+    onPinNote,
+    setNoteDetailChrome,
+  ])
+
   if (!note) {
     return (
       <Empty className="h-full min-h-[280px] max-w-md border-0">
@@ -234,7 +325,6 @@ export function NoteEditor({
 
   const project = projectForNote(note.projectId)
   const noteTemplate = getTemplateByNoteType(note.noteType)
-  const noteTypeOptions = getAllTemplates()
   const wordCount = note.contentText.split(/\s+/).filter(Boolean).length
 
   const saveStateLabel =
@@ -253,70 +343,6 @@ export function NoteEditor({
     `${wordCount} words`,
     formatRelativeTime(note.updatedAt),
   ]
-
-  const moreActionsMenu = (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon-sm" title="More actions">
-          <HugeiconsIcon icon={ArrowRight01Icon} className="size-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
-        <DropdownMenuItem onClick={() => onPinNote(note._id)}>
-          <HugeiconsIcon icon={PinIcon} className="size-4 mr-2" />
-          {note.pinned ? "Unpin" : "Pin"}
-        </DropdownMenuItem>
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger>
-            <HugeiconsIcon
-              icon={FolderManagementIcon}
-              className="size-4 mr-2"
-            />
-            Move to...
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent className="w-48">
-            <DropdownMenuItem onClick={() => onMoveNote(note._id, "__none__")}>
-              No project
-            </DropdownMenuItem>
-            {projects.map((p) => (
-              <DropdownMenuItem
-                key={p._id}
-                onClick={() => onMoveNote(note._id, p._id)}
-              >
-                {p.icon} {p.title}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger>Change type</DropdownMenuSubTrigger>
-          <DropdownMenuSubContent className="w-44">
-            <DropdownMenuRadioGroup value={note.noteType ?? "blank"}>
-              {noteTypeOptions.map((template) => (
-                <DropdownMenuRadioItem
-                  key={template.key}
-                  value={template.noteType}
-                  onSelect={(event) => {
-                    event.preventDefault()
-                    onUpdateNote(note._id, { noteType: template.noteType })
-                  }}
-                >
-                  {template.label}
-                </DropdownMenuRadioItem>
-              ))}
-            </DropdownMenuRadioGroup>
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
-        <DropdownMenuItem
-          onClick={() => onDeleteNote(note._id)}
-          className="text-destructive focus:bg-destructive/10 focus:text-destructive"
-        >
-          <HugeiconsIcon icon={Delete01Icon} className="mr-2 size-4" strokeWidth={2} />
-          Delete
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  )
 
   if (isInSheet) {
     return (
@@ -385,50 +411,15 @@ export function NoteEditor({
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-background">
-      <div className="sticky top-0 z-10 shrink-0 border-b border-border/50 bg-background px-4 py-3 md:px-8 md:py-4">
-        <div className="mx-auto flex max-w-[50rem] items-start justify-between gap-4">
-          <div className="min-w-0 flex-1">
-            <Input
-              key={note._id}
-              ref={titleInputRef}
-              defaultValue={note.title}
-              onChange={(e) => {
-                queueTitleUpdate(e.target.value)
-              }}
-              onBlur={(e) => flushTitleUpdate(e.target.value)}
-              placeholder="Note title"
-              className="h-auto border-0 bg-transparent px-0 py-0 text-xl font-semibold leading-tight tracking-tight shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/40"
-            />
-            <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] leading-tight text-muted-foreground">
-              {detailsStrip.map((item) => (
-                <span key={item}>{item}</span>
-              ))}
-              <span aria-hidden="true">•</span>
-              <span>{saveStateLabel}</span>
-            </div>
-          </div>
-          <div className="flex shrink-0 items-center gap-0.5 pt-1">
-            <SidebarTrigger
-              scope="inspector"
-              className="[&_svg]:rotate-180"
-              aria-label="Toggle inspector"
-            />
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              onClick={() => onPinNote(note._id)}
-              className={cn(note.pinned && "text-primary")}
-              title={note.pinned ? "Unpin note" : "Pin note"}
-            >
-              <HugeiconsIcon icon={PinIcon} className="size-4" strokeWidth={2} />
-            </Button>
-            {moreActionsMenu}
-          </div>
-        </div>
-      </div>
-
       <div className="min-h-0 flex-1 overflow-hidden px-4 py-4 md:px-8 md:py-5">
         <div className="mx-auto flex h-full min-h-0 max-w-[50rem] flex-col">
+          <div className="mb-4 flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-border/50 pb-3 text-[11px] leading-tight text-muted-foreground">
+            {detailsStrip.map((item) => (
+              <span key={item}>{item}</span>
+            ))}
+            <span aria-hidden="true">•</span>
+            <span>{saveStateLabel}</span>
+          </div>
           <NoteRichEditor
             key={note._id}
             value={note.content}

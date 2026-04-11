@@ -19,8 +19,3 @@ Start there:
 
 - [`SOURCES.md`](./SOURCES.md): current docs map
 - [`LEGACY/feature-inventory.md`](./LEGACY/feature-inventory.md): short legacy feature history and lessons
-
-## Repo Status
-
-- `apps/web` is active
-- `apps/frontend` and `apps/backend` are deprecated

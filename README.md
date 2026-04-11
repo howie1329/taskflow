@@ -2,9 +2,9 @@
 
 Taskflow is an AI-native productivity workspace built as a monorepo.
 
-Today, the active product is **`apps/web`** (Next.js + Convex), supported by reusable internal packages for retrieval-augmented context and chat-content processing.
+Today, the active product is **`apps/web`** (Next.js + Convex), supported by a shared package for chat context compaction.
 
-This README is focused on the active stack and shared packages that power it.
+This README is focused on the active stack that powers the current product.
 
 ---
 
@@ -33,9 +33,7 @@ taskflow/
 ├── apps/
 │   └── web/                              # Active product app (Next.js + Convex)
 ├── packages/
-│   ├── Taskflow-Rag/                     # RAG/context retrieval package
 │   ├── Taskflow-Context-Compaction/      # Chat context compaction package
-│   └── Taskflow-Chat-Content/            # Chat content utilities package
 └── docs/                                 # Repo-level supporting docs
 ```
 
@@ -68,20 +66,7 @@ taskflow/
 
 Taskflow’s reusable packages are first-class citizens in this monorepo.
 
-### 1) `@taskflow/rag`
-
-Location: `packages/Taskflow-Rag`
-
-Purpose:
-
-- Retrieval-augmented context handling
-- Context retrieval service primitives
-
-Primary dependency base:
-
-- `gpt-tokenizer`
-
-### 2) `@taskflow/context-compaction`
+### `@taskflow/context-compaction`
 
 Location: `packages/Taskflow-Context-Compaction`
 
@@ -96,22 +81,6 @@ Primary dependency base:
 - `ai`
 - `gpt-tokenizer`
 - `zod`
-
-### 3) `@taskflow/chat-content`
-
-Location: `packages/Taskflow-Chat-Content`
-
-Purpose:
-
-- Chat content validation and normalization
-- Token estimation
-- Summarization planning helpers
-
-Primary dependency base:
-
-- `gpt-tokenizer`
-- `zod`
-- peer compatibility with `ai`
 
 ---
 
@@ -216,19 +185,12 @@ npm run dev --workspace=@taskflow/web
 
 ```bash
 npm run dev
+npm run dev:web
 npm run build
+npm run build:web
+npm run start:web
 npm run lint
 npm run test
-```
-
-### Useful `apps/web` scripts
-
-```bash
-npm run dev:frontend --workspace=@taskflow/web
-npm run dev:backend --workspace=@taskflow/web
-npm run build --workspace=@taskflow/web
-npm run start --workspace=@taskflow/web
-npm run lint --workspace=@taskflow/web
 ```
 
 ---

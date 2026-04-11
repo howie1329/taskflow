@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -34,8 +34,8 @@ import {
 import { ChatEmptyStateWithSuggestions } from "./components/chat-empty-state-suggestions";
 import { ThreadComposerBar } from "./components/thread-composer-bar";
 import { ThreadDialogs } from "./components/thread-dialogs";
-import { ThreadHeader } from "./components/thread-header";
 import { ThreadMessageList } from "./components/thread-message-list";
+import { useWorkspaceChrome } from "@/components/app/workspace-chrome-context";
 import { useThreadPageActions } from "./components/use-thread-page-actions";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useChatInspectorFocusActions } from "@/components/app/chat-inspector-context";
@@ -91,11 +91,12 @@ function ThreadPageContent() {
   const composerRef = useRef<HTMLTextAreaElement>(null);
   const { messages, status, error } = useChatMessages();
   const { sendText } = useChatMessagingActions();
-  const { thread, project } = useChatConfig();
+  const { thread } = useChatConfig();
   const { setInspectorFocus } = useChatInspectorFocusActions();
   const { updateTitle, softDelete } = useChatThreadActions();
   const { preferences } = useViewer();
   const { isMobile, setOpen, setOpenMobile } = useSidebar("inspector");
+  const { setPageTitleOverride, setChatThreadActions } = useWorkspaceChrome();
 
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -133,7 +134,7 @@ function ThreadPageContent() {
     router.push("/app/chat");
   };
 
-  const handleCompactChat = async () => {
+  const handleCompactChat = useCallback(async () => {
     if (!thread) return;
     try {
       const res = await fetch("/api/chat/compact", {
@@ -151,7 +152,33 @@ function ThreadPageContent() {
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Compaction failed");
     }
-  };
+  }, [thread]);
+
+  useEffect(() => {
+    if (thread === undefined || thread === null) {
+      setPageTitleOverride(null);
+      setChatThreadActions(null);
+      return;
+    }
+    setPageTitleOverride(thread.title || "New chat");
+    setChatThreadActions({
+      onEditTitle: () => {
+        setEditTitle(thread.title || "");
+        setIsEditDialogOpen(true);
+      },
+      onDelete: () => setIsDeleteDialogOpen(true),
+      onCompactChat: handleCompactChat,
+    });
+    return () => {
+      setPageTitleOverride(null);
+      setChatThreadActions(null);
+    };
+  }, [
+    thread,
+    handleCompactChat,
+    setChatThreadActions,
+    setPageTitleOverride,
+  ]);
 
   if (shouldShowNotFound) {
     return <ThreadNotFoundState onBack={() => router.push("/app/chat")} />;
@@ -178,18 +205,6 @@ function ThreadPageContent() {
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col overflow-hidden">
-      <ThreadHeader
-        thread={thread}
-        project={project}
-        onBackToChats={() => router.push("/app/chat")}
-        onOpenEditTitle={() => {
-          setEditTitle(thread?.title || "");
-          setIsEditDialogOpen(true);
-        }}
-        onOpenDeleteThread={() => setIsDeleteDialogOpen(true)}
-        onCompactChat={handleCompactChat}
-      />
-
       {error && error.message !== clearedErrorMessage && (
         <div className="px-4 py-3 md:px-8">
           <Alert

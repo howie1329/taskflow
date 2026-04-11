@@ -23,16 +23,11 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { useSidebar } from "@/components/ui/sidebar"
 import { NotesRail, useNotes } from "@/components/notes"
 
-interface NotesAppSidebarProps {
-  onBackToWorkspace?: () => void;
-}
-
-export function NotesAppSidebar({ onBackToWorkspace }: NotesAppSidebarProps) {
+export function NotesAppSidebar() {
   const { state, isMobile, setOpen, setOpenMobile } = useSidebar()
   const isCollapsed = state === "collapsed" && !isMobile
   const searchInputRef = useRef<HTMLInputElement>(null)
@@ -161,24 +156,7 @@ export function NotesAppSidebar({ onBackToWorkspace }: NotesAppSidebarProps) {
 
   return (
     <>
-      <SidebarHeader className="gap-1 border-b border-sidebar-border/50 px-1.5 py-2">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <div className="flex items-center gap-1">
-              <SidebarMenuButton
-                tooltip="Back to workspace"
-                onClick={onBackToWorkspace}
-                className="flex-1"
-              >
-                <HugeiconsIcon icon={ArrowLeft01Icon} className="shrink-0" />
-                <span>Back to workspace</span>
-              </SidebarMenuButton>
-              <SidebarTrigger className="size-8 shrink-0" />
-            </div>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
-      <SidebarContent className="overflow-hidden px-0">
+      <SidebarContent className="overflow-hidden px-0 pt-0">
         <div className="flex h-full min-h-0 flex-col px-2 pb-2 md:px-3 md:pb-3">
           <NotesRail
             variant="sidebar"
