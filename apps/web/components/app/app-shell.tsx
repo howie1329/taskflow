@@ -324,9 +324,7 @@ function AppShellInner({
 
   const primaryPanelBody =
     isChatRoute && chatSidebarMode === "threads" ? (
-      <ChatSidebar
-        onBackToWorkspace={() => setChatSidebarMode("workspace")}
-      />
+      <ChatSidebar />
     ) : isNotesRoute && notesSidebarMode === "notes" ? (
       <NotesAppSidebar
         onBackToWorkspace={() => setNotesSidebarMode("workspace")}
@@ -424,21 +422,28 @@ function AppShellInner({
             aria-label={inspectorLabel}
             className="flex min-h-0 flex-1 flex-col overflow-hidden"
           >
-            <SidebarHeader className="border-b border-border/50 px-4 py-3">
-              <div className="flex min-h-8 items-center justify-between gap-3">
-                <div
-                  id="workspace-inspector-heading"
-                  className="min-w-0 truncate text-base font-semibold tracking-tight text-foreground"
-                >
-                  {inspectorLabel}
+            {isChatRoute ? null : (
+              <SidebarHeader className="border-b border-border/50 px-4 py-3">
+                <div className="flex min-h-8 items-center justify-between gap-3">
+                  <div
+                    id="workspace-inspector-heading"
+                    className="min-w-0 truncate text-base font-semibold tracking-tight text-foreground"
+                  >
+                    {inspectorLabel}
+                  </div>
+                  <SidebarTrigger
+                    scope="inspector"
+                    aria-label={`Close ${inspectorLabel.toLowerCase()}`}
+                  />
                 </div>
-                <SidebarTrigger
-                  scope="inspector"
-                  aria-label={`Close ${inspectorLabel.toLowerCase()}`}
-                />
-              </div>
-            </SidebarHeader>
-            <SidebarContent className="flex min-h-0 flex-1 flex-col overflow-hidden p-4 pt-3">
+              </SidebarHeader>
+            )}
+            <SidebarContent
+              className={cn(
+                "flex min-h-0 flex-1 flex-col overflow-hidden p-4",
+                !isChatRoute && "pt-3",
+              )}
+            >
               <InspectorPanelContent>
                 <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
                   {right}
