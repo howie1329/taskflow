@@ -463,7 +463,7 @@ function AppShellInner({
       <Sidebar
         scope="primary"
         variant="inset"
-        collapsible="icon"
+        collapsible="offcanvas"
         className="z-10"
       >
         <div
@@ -629,7 +629,7 @@ export function AppShell({ children, right }: AppShellProps) {
 
   const shell = (
     <SidebarProvider
-      defaultOpen={true}
+      defaultOpen={false}
       defaultOpenInspector={false}
       className={cn(
         (isChatRoute || isTasksRoute || isProjectsRoute) &&

@@ -10,11 +10,7 @@ import {
 } from "@hugeicons/core-free-icons"
 import { cn } from "@/lib/utils"
 import { AccountMenu } from "@/components/auth/sign-out-button"
-import {
-  SidebarMenuButton,
-  SidebarTrigger,
-  useSidebar,
-} from "@/components/ui/sidebar"
+import { SidebarMenuButton } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
 import {
   WorkspaceNavCommand,
@@ -57,7 +53,6 @@ export function WorkspaceHeaderStrip({
   inspectorOpen,
   hideMobileBar,
 }: WorkspaceHeaderStripProps) {
-  const { isMobile } = useSidebar()
   const [commandOpen, setCommandOpen] = useState(false)
 
   return (
@@ -192,10 +187,6 @@ export function WorkspaceHeaderStrip({
         <div className="flex shrink-0 items-center">
           <AccountMenu triggerVariant="icon" />
         </div>
-
-        {isMobile ? (
-          <SidebarTrigger className="shrink-0 md:hidden" aria-label="Open workspace" />
-        ) : null}
       </header>
     </>
   )
