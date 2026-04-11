@@ -24,6 +24,8 @@ import {
 import { useIsMobile } from "@/hooks/use-mobile";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { SidebarLeftIcon } from "@hugeicons/core-free-icons";
+import { SHORTCUT_KEYS } from "@/lib/keyboard-shortcuts";
+import { shouldIgnoreGlobalShortcut } from "@/lib/should-ignore-global-shortcut";
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const INSPECTOR_COOKIE_NAME = "inspector_sidebar_state";
@@ -31,9 +33,6 @@ const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 const SIDEBAR_WIDTH = "14rem";
 const SIDEBAR_WIDTH_MOBILE = "14rem";
 const SIDEBAR_WIDTH_ICON = "3rem";
-const SIDEBAR_KEYBOARD_SHORTCUT = "b";
-const INSPECTOR_KEYBOARD_SHORTCUT = "i";
-
 type SidebarScope = "primary" | "inspector";
 const DEFAULT_SIDEBAR_SCOPE: SidebarScope = "primary";
 
@@ -134,13 +133,6 @@ function SidebarProvider({
     [setOpenInspectorProp, inspectorOpen],
   );
 
-  const shouldIgnoreShortcut = React.useCallback((event: KeyboardEvent) => {
-    const target = event.target as HTMLElement | null;
-    if (!target) return false;
-    if (target.isContentEditable) return true;
-    return !!target.closest('input, textarea, select, [contenteditable="true"]');
-  }, []);
-
   const toggleSidebar = React.useCallback(
     (scope: SidebarScope) => {
       const isInspector = scope === "inspector";
@@ -166,14 +158,14 @@ function SidebarProvider({
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (!(event.metaKey || event.ctrlKey)) return;
-      if (shouldIgnoreShortcut(event)) return;
+      if (shouldIgnoreGlobalShortcut(event.target)) return;
 
       const key = event.key.toLowerCase();
-      if (key === SIDEBAR_KEYBOARD_SHORTCUT) {
+      if (key === SHORTCUT_KEYS.toggleSidebar) {
         event.preventDefault();
         toggleSidebar("primary");
       }
-      if (key === INSPECTOR_KEYBOARD_SHORTCUT) {
+      if (key === SHORTCUT_KEYS.toggleInspector) {
         event.preventDefault();
         toggleSidebar("inspector");
       }
@@ -181,7 +173,7 @@ function SidebarProvider({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [shouldIgnoreShortcut, toggleSidebar]);
+  }, [toggleSidebar]);
 
   const sidebars = React.useMemo<Record<SidebarScope, ScopedSidebarState>>(
     () => ({

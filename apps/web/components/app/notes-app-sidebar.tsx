@@ -26,6 +26,8 @@ import {
 } from "@/components/ui/sidebar"
 import { useSidebar } from "@/components/ui/sidebar"
 import { NotesRail, useNotes } from "@/components/notes"
+import { SHORTCUT_HINT, SHORTCUT_KEYS } from "@/lib/keyboard-shortcuts"
+import { shouldIgnoreGlobalShortcut } from "@/lib/should-ignore-global-shortcut"
 
 export function NotesAppSidebar() {
   const { state, isMobile, setOpen, setOpenMobile } = useSidebar()
@@ -62,20 +64,19 @@ export function NotesAppSidebar() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "n") {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === SHORTCUT_KEYS.createNew) {
         e.preventDefault()
         openCreateNotePicker()
       }
-      if (e.key === "/" && !e.metaKey && !e.ctrlKey) {
-        const target = e.target as HTMLElement
-        if (
-          target.tagName !== "INPUT" &&
-          target.tagName !== "TEXTAREA" &&
-          !target.isContentEditable
-        ) {
-          e.preventDefault()
-          searchInputRef.current?.focus()
-        }
+      if (
+        e.key === SHORTCUT_KEYS.localSearch &&
+        !e.metaKey &&
+        !e.ctrlKey &&
+        !e.altKey &&
+        !shouldIgnoreGlobalShortcut(e.target)
+      ) {
+        e.preventDefault()
+        searchInputRef.current?.focus()
       }
     }
     document.addEventListener("keydown", handleKeyDown)
@@ -117,6 +118,7 @@ export function NotesAppSidebar() {
                   className="size-8 rounded-lg"
                   onClick={handleCreateNote}
                   aria-label="New note"
+                  title={`New note (${SHORTCUT_HINT.createNew})`}
                 >
                   <HugeiconsIcon icon={PlusSignIcon} strokeWidth={2} />
                 </Button>

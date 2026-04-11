@@ -324,6 +324,7 @@ function TaskFeatureProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    const intent = searchParams.get("intent");
     const queryFromUrl = searchParams.get("q") ?? "";
     const statusValue = searchParams.get("status") ?? "all";
     const priorityValue = searchParams.get("priority") ?? "all";
@@ -364,23 +365,21 @@ function TaskFeatureProvider({ children }: { children: ReactNode }) {
 
     if (tagValue === "all") {
       setTagFilter("all");
-      return;
-    }
-
-    if (tags.some((tag) => String(tag._id) === tagValue)) {
+    } else if (tags.some((tag) => String(tag._id) === tagValue)) {
       setTagFilter(tagValue);
       if (lastCreatedTagIdRef.current === tagValue) {
         lastCreatedTagIdRef.current = null;
       }
-      return;
-    }
-
-    if (lastCreatedTagIdRef.current === tagValue) {
+    } else if (lastCreatedTagIdRef.current === tagValue) {
       setTagFilter(tagValue);
-      return;
+    } else {
+      setTagFilter("all");
     }
 
-    setTagFilter("all");
+    if (intent === "create-task") {
+      setCreateDefaults({ status: "Not Started" });
+      setIsCreateOpen(true);
+    }
   }, [isTasksIndexRoute, searchParams, projects, tags]);
 
   useEffect(() => {

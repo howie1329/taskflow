@@ -10,6 +10,7 @@ import {
   SearchIcon,
 } from "@hugeicons/core-free-icons"
 import { Button } from "@/components/ui/button"
+import { Kbd } from "@/components/ui/kbd"
 import {
   InputGroup,
   InputGroupAddon,
@@ -25,6 +26,7 @@ import {
 } from "@/components/ui/empty"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
+import { SHORTCUT_DISPLAY, SHORTCUT_HINT } from "@/lib/keyboard-shortcuts"
 import type { Note, NotesProject } from "./types"
 import { NoteRow } from "./note-row"
 import { NoteSection } from "./note-section"
@@ -125,6 +127,7 @@ export function NotesRail({
             variant="ghost"
             onClick={onCreateNote}
             aria-label="New note"
+            title={`New note (${SHORTCUT_HINT.createNew})`}
           >
             <HugeiconsIcon
               icon={PlusSignIcon}
@@ -134,7 +137,10 @@ export function NotesRail({
             {isSidebar ? (
               <span className="sr-only">New note</span>
             ) : (
-              <span>New</span>
+              <span className="inline-flex items-center gap-1.5">
+                <span>New</span>
+                <Kbd className="h-5 text-[10px]">{SHORTCUT_DISPLAY.createNew}</Kbd>
+              </span>
             )}
           </Button>
         </div>
@@ -163,6 +169,11 @@ export function NotesRail({
               >
                 <HugeiconsIcon icon={Cancel01Icon} className="size-3" strokeWidth={2} />
               </Button>
+            </InputGroupAddon>
+          )}
+          {!searchQuery && (
+            <InputGroupAddon>
+              <Kbd className="h-5 text-[10px]">{SHORTCUT_DISPLAY.localSearch}</Kbd>
             </InputGroupAddon>
           )}
         </InputGroup>

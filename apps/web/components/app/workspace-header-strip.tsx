@@ -1,16 +1,21 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { usePathname, useRouter } from "next/navigation"
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
+  Add01Icon,
   ArrowLeft01Icon,
   Delete02Icon,
+  FolderManagementIcon,
   Layers01Icon,
+  MessageQuestionIcon,
   MoreHorizontalIcon,
+  NoteIcon,
   PencilEdit01Icon,
   PinIcon,
   SidebarLeftIcon,
+  Task01Icon,
 } from "@hugeicons/core-free-icons"
 import { cn } from "@/lib/utils"
 import { AccountMenu } from "@/components/auth/sign-out-button"
@@ -26,10 +31,12 @@ import {
 } from "@/components/ui/dropdown-menu"
 import {
   WorkspaceNavCommand,
+  type WorkspaceCommandAction,
   type WorkspaceNavCommandItem,
 } from "@/components/app/workspace-nav-command"
 import { useWorkspaceChrome } from "@/components/app/workspace-chrome-context"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { SHORTCUT_DISPLAY, SHORTCUT_HINT } from "@/lib/keyboard-shortcuts"
 
 type WorkspaceHeaderStripProps = {
   pageTitle: string
@@ -71,6 +78,121 @@ export function WorkspaceHeaderStrip({
   const { chatThreadActions, noteDetailChrome } = useWorkspaceChrome()
   const isChatThreadRoute = pathname.startsWith("/app/chat/")
   const isNoteDetailRoute = /^\/app\/notes\/[^/]+$/.test(pathname)
+  const commandActions = useMemo<WorkspaceCommandAction[]>(
+    () => [
+      {
+        id: "create-task",
+        title: "New task",
+        group: "Create",
+        icon: Task01Icon,
+        shortcut: SHORTCUT_DISPLAY.createNew,
+        keywords: ["task", "todo", "create"],
+        onSelect: () => router.push("/app/tasks?intent=create-task"),
+      },
+      {
+        id: "create-project",
+        title: "New project",
+        group: "Create",
+        icon: FolderManagementIcon,
+        keywords: ["project", "workspace", "create"],
+        onSelect: () => router.push("/app/projects?intent=create-project"),
+      },
+      {
+        id: "create-note",
+        title: "New note",
+        group: "Create",
+        icon: NoteIcon,
+        keywords: ["note", "memo", "create"],
+        onSelect: () => router.push("/app/notes?intent=create-note"),
+      },
+      {
+        id: "create-chat",
+        title: "New chat",
+        group: "Create",
+        icon: MessageQuestionIcon,
+        shortcut: SHORTCUT_DISPLAY.createNew,
+        keywords: ["chat", "thread", "conversation", "create"],
+        onSelect: () => router.push("/app/chat"),
+      },
+      {
+        id: "toggle-workspace-panel",
+        title: primaryOpen ? "Hide workspace panel" : "Show workspace panel",
+        group: "Actions",
+        icon: SidebarLeftIcon,
+        shortcut: SHORTCUT_DISPLAY.toggleSidebar,
+        keywords: ["sidebar", "panel", "workspace"],
+        onSelect: onToggleWorkspacePanel,
+      },
+      ...(showInspector
+        ? [
+            {
+              id: "toggle-inspector",
+              title: inspectorOpen
+                ? `Hide ${inspectorLabel.toLowerCase()}`
+                : `Show ${inspectorLabel.toLowerCase()}`,
+              group: "Actions" as const,
+              icon: Layers01Icon,
+              shortcut: SHORTCUT_DISPLAY.toggleInspector,
+              keywords: ["inspector", "dossier", "panel"],
+              onSelect: onToggleInspectorPanel,
+            },
+          ]
+        : []),
+      ...(isChatRoute
+        ? [
+            {
+              id: "chat-sidebar-threads",
+              title: "Show chat threads rail",
+              group: "Actions" as const,
+              icon: MessageQuestionIcon,
+              keywords: ["chat", "threads", "sidebar", "rail"],
+              onSelect: () => onChatModeChange("threads"),
+            },
+            {
+              id: "chat-sidebar-workspace",
+              title: "Show workspace nav in chat",
+              group: "Actions" as const,
+              icon: SidebarLeftIcon,
+              keywords: ["chat", "workspace", "sidebar"],
+              onSelect: () => onChatModeChange("workspace"),
+            },
+          ]
+        : []),
+      ...(isNotesRoute
+        ? [
+            {
+              id: "notes-sidebar-notes",
+              title: "Show notes rail",
+              group: "Actions" as const,
+              icon: NoteIcon,
+              keywords: ["notes", "rail", "sidebar"],
+              onSelect: () => onNotesModeChange("notes"),
+            },
+            {
+              id: "notes-sidebar-workspace",
+              title: "Show workspace nav in notes",
+              group: "Actions" as const,
+              icon: SidebarLeftIcon,
+              keywords: ["notes", "workspace", "sidebar"],
+              onSelect: () => onNotesModeChange("workspace"),
+            },
+          ]
+        : []),
+    ],
+    [
+      inspectorLabel,
+      inspectorOpen,
+      isChatRoute,
+      isNotesRoute,
+      onChatModeChange,
+      onNotesModeChange,
+      onToggleInspectorPanel,
+      onToggleWorkspacePanel,
+      primaryOpen,
+      router,
+      showInspector,
+    ],
+  )
 
   return (
     <>
@@ -78,6 +200,7 @@ export function WorkspaceHeaderStrip({
         open={commandOpen}
         onOpenChange={setCommandOpen}
         items={commandItems}
+        actions={commandActions}
       />
 
       <header
@@ -119,23 +242,30 @@ export function WorkspaceHeaderStrip({
 
         {noteDetailChrome ? (
           <div className="flex min-w-0 max-w-[min(100%,340px)] flex-1 items-center gap-1 sm:max-w-[min(100%,min(400px,52vw))]">
-            <button
-              type="button"
-              onClick={onToggleWorkspacePanel}
-              className={cn(
-                "text-muted-foreground hover:bg-accent/80 hover:text-accent-foreground inline-flex size-8 shrink-0 items-center justify-center rounded-md border border-transparent transition-colors",
-                primaryOpen && "border-border bg-accent/40 text-foreground",
-              )}
-              aria-expanded={primaryOpen}
-              aria-controls="workspace-primary-panel"
-            >
-              <HugeiconsIcon
-                icon={SidebarLeftIcon}
-                className="size-3.5 shrink-0 opacity-70"
-                strokeWidth={2}
-              />
-              <span className="sr-only">Toggle workspace panel</span>
-            </button>
+            <div className="flex shrink-0 items-center gap-1">
+              <button
+                type="button"
+                onClick={onToggleWorkspacePanel}
+                className={cn(
+                  "text-muted-foreground hover:bg-accent/80 hover:text-accent-foreground inline-flex size-8 shrink-0 items-center justify-center rounded-md border border-transparent transition-colors",
+                  primaryOpen && "border-border bg-accent/40 text-foreground",
+                )}
+                aria-expanded={primaryOpen}
+                aria-controls="workspace-primary-panel"
+                aria-keyshortcuts="Meta+B"
+                title={`Toggle workspace panel (${SHORTCUT_HINT.toggleSidebar})`}
+              >
+                <HugeiconsIcon
+                  icon={SidebarLeftIcon}
+                  className="size-3.5 shrink-0 opacity-70"
+                  strokeWidth={2}
+                />
+                <span className="sr-only">Toggle workspace panel</span>
+              </button>
+              <Kbd className="hidden h-5 text-[10px] md:inline-flex">
+                {SHORTCUT_DISPLAY.toggleSidebar}
+              </Kbd>
+            </div>
             <Input
               key={noteDetailChrome.noteId}
               defaultValue={noteDetailChrome.defaultTitle}
@@ -155,6 +285,8 @@ export function WorkspaceHeaderStrip({
             )}
             aria-expanded={primaryOpen}
             aria-controls="workspace-primary-panel"
+            aria-keyshortcuts="Meta+B"
+            title={`Toggle workspace panel (${SHORTCUT_HINT.toggleSidebar})`}
           >
             <HugeiconsIcon
               icon={SidebarLeftIcon}
@@ -162,6 +294,9 @@ export function WorkspaceHeaderStrip({
               strokeWidth={2}
             />
             <span className="truncate">{pageTitle}</span>
+            <Kbd className="hidden h-5 text-[10px] md:inline-flex">
+              {SHORTCUT_DISPLAY.toggleSidebar}
+            </Kbd>
           </button>
         )}
 
@@ -301,8 +436,13 @@ export function WorkspaceHeaderStrip({
             )}
             aria-expanded={inspectorOpen}
             aria-controls="workspace-inspector-panel"
+            aria-keyshortcuts="Meta+I"
+            title={`Toggle ${inspectorLabel.toLowerCase()} (${SHORTCUT_HINT.toggleInspector})`}
           >
             <span className="truncate">{inspectorLabel}</span>
+            <Kbd className="hidden h-5 text-[10px] md:inline-flex">
+              {SHORTCUT_DISPLAY.toggleInspector}
+            </Kbd>
           </button>
         ) : null}
 
@@ -312,11 +452,15 @@ export function WorkspaceHeaderStrip({
           size="sm"
           className="text-muted-foreground h-8 shrink-0 gap-1.5 px-2.5 text-xs"
           onClick={() => setCommandOpen(true)}
-          title="Go to a page in the app (⌘K or Ctrl+K)"
+          title={`Open command modal (${SHORTCUT_HINT.goTo})`}
+          aria-keyshortcuts="Meta+K"
         >
-          <span className="hidden sm:inline">Go to</span>
-          <Kbd className="font-mono text-[10px] leading-none">⌘K</Kbd>
-          <span className="sr-only">Open go to menu</span>
+          <HugeiconsIcon icon={Add01Icon} className="size-3.5 shrink-0 opacity-80" strokeWidth={2} />
+          <span className="hidden sm:inline">Command</span>
+          <Kbd className="font-mono text-[10px] leading-none">
+            {SHORTCUT_DISPLAY.goTo}
+          </Kbd>
+          <span className="sr-only">Open command menu</span>
         </Button>
 
         <div className="flex shrink-0 items-center">
