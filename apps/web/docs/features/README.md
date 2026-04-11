@@ -4,6 +4,7 @@ This section documents current product behavior in `apps/web`.
 
 ## Core Workspace
 
+- [App shell and layout PRD](./layout-shell-prd.md) (planned improvements)
 - [Feature Status](./status.md)
 - [Inbox](./inbox.md)
 - [Tasks](./tasks.md)
