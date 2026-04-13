@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import type { Doc } from "./_generated/dataModel";
+import { DEFAULT_PROJECT_COLOR, DEFAULT_PROJECT_ICON } from "./constants";
 
 const inboxStatus = v.union(v.literal("open"), v.literal("archived"));
 
@@ -92,17 +93,22 @@ export const getInboxCounts = query({
       return { open: 0, archived: 0 };
     }
 
-    const allItems = await ctx.db
-      .query("inboxItems")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
-      .collect();
+    const [openItems, archivedItems] = await Promise.all([
+      ctx.db
+        .query("inboxItems")
+        .withIndex("by_user_status", (q) =>
+          q.eq("userId", userId).eq("status", "open"),
+        )
+        .collect(),
+      ctx.db
+        .query("inboxItems")
+        .withIndex("by_user_status", (q) =>
+          q.eq("userId", userId).eq("status", "archived"),
+        )
+        .collect(),
+    ]);
 
-    const open = allItems.filter((item) => item.status === "open").length;
-    const archived = allItems.filter(
-      (item) => item.status === "archived",
-    ).length;
-
-    return { open, archived };
+    return { open: openItems.length, archived: archivedItems.length };
   },
 });
 
@@ -343,8 +349,8 @@ export const convertInboxItemToProject = mutation({
       title,
       description,
       status: "active",
-      color: "#6366f1",
-      icon: "📁",
+      color: DEFAULT_PROJECT_COLOR,
+      icon: DEFAULT_PROJECT_ICON,
       createdAt: now,
       updatedAt: now,
     });

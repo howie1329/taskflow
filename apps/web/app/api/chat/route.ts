@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { createGroq } from "@ai-sdk/groq";
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createCerebras } from "@ai-sdk/cerebras";
 import {
   stepCountIs,
@@ -18,15 +17,6 @@ import {
   normalizeUIMessages,
   getInitialUserText,
   getLatestUserMessage,
-  fromStoredThreadMessage,
-  planCompaction,
-  selectContextMessages,
-  formatMessagesForSummarizer,
-  generateThreadSummary,
-  generateStructuredThreadState,
-  assemblePromptContext,
-  DEFAULT_COMPACTION_CONFIG,
-  isPastCompactionCooldown,
 } from "@taskflow/context-compaction";
 import { pipeJsonRender } from "@json-render/core";
 import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server";
@@ -39,20 +29,13 @@ import { supermemoryTools, withSupermemory } from "@supermemory/tools/ai-sdk";
 import { getActiveToolsForMode } from "@/lib/AITools/ModeMapping";
 import type { ModeName } from "@/lib/AITools/ModePrompts";
 import { getChatGenUISystemPrompt } from "@/lib/genui/chat-prompt";
-
-const COMPACTION_CONFIG = DEFAULT_COMPACTION_CONFIG;
-
-const chatApiWithSummary = api as typeof api & {
-  chat: typeof api.chat & {
-    setThreadSummary: unknown;
-  };
-};
-
-const fetchMutationUnsafe = fetchMutation as unknown as (
-  mutationRef: unknown,
-  args: unknown,
-  options: { token: string },
-) => Promise<unknown>;
+import {
+  convertStoredMessages,
+  runCompactionPipeline,
+  buildContextMessages,
+  assembleContext,
+} from "@/lib/chat/compaction";
+import { MAX_AGENT_OUTPUT_TOKENS } from "@/lib/ai/models";
 
 type ActiveAgentStream = {
   totalUsage: Promise<{
@@ -120,18 +103,9 @@ export async function POST(req: Request) {
     apiKey: process.env.OPENROUTER_AI_KEY,
   });
 
-  const googleModel = createGoogleGenerativeAI({
-    apiKey: process.env.GOOGLE_AI_KEY,
-  });
-
   if (!openRouter) {
     console.error("OpenRouter not initialized");
     return jsonError("OpenRouter not initialized", 500);
-  }
-
-  if (!googleModel) {
-    console.error("Google not initialized");
-    return jsonError("Google not initialized", 500);
   }
 
   let body: ChatRequestBody;
@@ -304,115 +278,36 @@ export async function POST(req: Request) {
     { threadId },
     { token },
   )
-  const threadMessages: UIMessage[] = storedMessages.map((message) =>
-    fromStoredThreadMessage({
-      messageId: message.messageId,
-      role: message.role,
-      model: message.model,
-      content: message.content,
-    })
-  )
+  const threadMessages = convertStoredMessages(storedMessages)
 
   const existingSummary = thread && "summary" in thread ? thread.summary : undefined
-  const previousCompaction = existingSummary
-    ? {
-      schemaVersion: 1 as const,
-      summaryText: existingSummary.summaryText,
-      summarizedThroughMessageId: existingSummary.summarizedThroughMessageId,
-      updatedAt: existingSummary.updatedAt,
-      threadState: existingSummary.threadState ?? undefined,
-      compactionMetadata: existingSummary.compactionMetadata ?? undefined,
-    }
-    : null
-
-  const compactionPlan = planCompaction({
-    messages: threadMessages,
-    previousCompaction: previousCompaction ?? undefined,
-    config: COMPACTION_CONFIG,
-    forceManual: compactManually,
-  })
 
   let summaryTextForContext = existingSummary?.summaryText ?? ""
   let threadStateForContext = existingSummary?.threadState ?? null
-  let messagesForModelContext = selectContextMessages({
+  let messagesForModelContext = buildContextMessages({
     messages: threadMessages,
-    summarizedThroughMessageId: existingSummary?.summarizedThroughMessageId ?? null,
-    recentMessageCount: COMPACTION_CONFIG.recentMessageCount,
+    existingSummary,
   })
 
-  const shouldRunCompaction =
-    compactionPlan.shouldCompact &&
-    compactionPlan.nextCursorMessageId &&
-    compactionPlan.messagesToSummarize.length > 0
-
-  const transcript =
-    shouldRunCompaction &&
-    formatMessagesForSummarizer(compactionPlan.messagesToSummarize, {
-      includeToolText: false,
-      maxCharsPerMessage: 8000,
+  try {
+    const compactionResult = await runCompactionPipeline({
+      threadId,
+      messages: threadMessages,
+      existingSummary,
+      forceManual: compactManually,
+      token,
     })
 
-  const transcriptLongEnough =
-    typeof transcript === "string" &&
-    transcript.length >= COMPACTION_CONFIG.minTranscriptChars
-
-  const pastCooldown = isPastCompactionCooldown(
-    existingSummary?.compactionMetadata?.lastCompactedAt,
-    COMPACTION_CONFIG
-  )
-
-  const runCompaction =
-    shouldRunCompaction &&
-    transcriptLongEnough &&
-    (compactManually || pastCooldown)
-
-  if (runCompaction && typeof transcript === "string") {
-    try {
-      const [updatedSummary, updatedState] = await Promise.all([
-        generateThreadSummary({
-          model: googleModel("gemini-3.1-flash-lite-preview"),
-          previousSummary: summaryTextForContext,
-          transcript,
-          maxSummaryChars: COMPACTION_CONFIG.maxSummaryChars,
-        }),
-        generateStructuredThreadState({
-          model: googleModel("gemini-3.1-flash-lite-preview"),
-          previousState: threadStateForContext ?? null,
-          transcript,
-        }),
-      ])
-
-      if (updatedSummary) {
-        await fetchMutationUnsafe(
-          chatApiWithSummary.chat.setThreadSummary,
-          {
-            threadId,
-            summary: {
-              schemaVersion: 1,
-              summaryText: updatedSummary,
-              summarizedThroughMessageId: compactionPlan.nextCursorMessageId!,
-              updatedAt: Date.now(),
-              threadState: updatedState,
-              compactionMetadata: {
-                lastCompactedAt: Date.now(),
-                lastCompactedMessageId: compactionPlan.nextCursorMessageId!,
-                messageCountAtCompaction: compactionPlan.currentMessageCount,
-                tokenEstimateAtCompaction: compactionPlan.currentTokenEstimate,
-              },
-            },
-          },
-          { token },
-        )
-        summaryTextForContext = updatedSummary
-        threadStateForContext = updatedState
-        messagesForModelContext = compactionPlan.messagesToKeep
-      }
-    } catch (error) {
-      console.error("Context compaction failed:", error)
+    if (compactionResult) {
+      summaryTextForContext = compactionResult.summaryText
+      threadStateForContext = compactionResult.threadState
+      messagesForModelContext = compactionResult.messagesForContext
     }
+  } catch (error) {
+    console.error("Context compaction failed:", error)
   }
 
-  messagesForModelContext = assemblePromptContext({
+  messagesForModelContext = assembleContext({
     summaryText: summaryTextForContext,
     threadState: threadStateForContext,
     messagesToKeep: messagesForModelContext,
@@ -547,7 +442,7 @@ export async function POST(req: Request) {
               containerTags: [userId],
             }) as unknown as typeof Tools),
           },
-          maxOutputTokens: 8000, // Balanced default to reduce runaway completions
+          maxOutputTokens: MAX_AGENT_OUTPUT_TOKENS,
           activeTools: activeTools as Array<keyof typeof Tools>,
         });
 

@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server"
 import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server"
 import { createGoogleGenerativeAI } from "@ai-sdk/google"
-import { ConvexHttpClient } from "convex/browser"
 import { generateObject } from "ai"
 import { api } from "@/convex/_generated/api"
 import type { Id } from "@/convex/_generated/dataModel"
-import { lexicalJsonToMarkdown, markdownToPlainText } from "@/lib/notes/lexical-markdown"
 import {
   createReviewerSignature,
   noteReviewerResultSchema,
 } from "@/lib/notes/reviewer"
+import { createConvexClient, getNoteMarkdown, getNoteText } from "@/lib/notes/note-api"
+import { COMPACTION_MODEL } from "@/lib/ai/models"
 
 const REVIEWER_SCHEMA_VERSION = 1
 
@@ -17,27 +17,7 @@ const googleProvider = createGoogleGenerativeAI({
   apiKey: process.env.GOOGLE_AI_KEY,
 })
 
-const googleModel = googleProvider("gemini-3.1-flash-lite-preview")
-
-function createClient(token: string) {
-  const url = process.env.NEXT_PUBLIC_CONVEX_URL
-  if (!url) {
-    throw new Error("Missing NEXT_PUBLIC_CONVEX_URL")
-  }
-
-  const client = new ConvexHttpClient(url)
-  client.setAuth(token)
-  return client
-}
-
-function getNoteMarkdown(note: { content?: string; contentText?: string }) {
-  try {
-    const markdown = lexicalJsonToMarkdown(note.content ?? "")
-    return markdown.trim()
-  } catch {
-    return note.contentText?.trim() ?? ""
-  }
-}
+const googleModel = googleProvider(COMPACTION_MODEL)
 
 export async function POST(req: Request) {
   const token = await convexAuthNextjsToken()
@@ -53,7 +33,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Missing noteId" }, { status: 400 })
   }
 
-  const client = createClient(token)
+  const client = createConvexClient(token)
   const note = await client.query(api.notes.getMyNote, {
     noteId: body.noteId as Id<"notes">,
   })
@@ -64,7 +44,7 @@ export async function POST(req: Request) {
 
   const noteTitle = note.title?.trim() || "Untitled note"
   const noteMarkdown = getNoteMarkdown(note)
-  const noteText = note.contentText?.trim() || markdownToPlainText(noteMarkdown)
+  const noteText = getNoteText(note)
   const currentSignature = createReviewerSignature({
     title: noteTitle,
     contentText: noteText,

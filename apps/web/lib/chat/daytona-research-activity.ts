@@ -63,9 +63,7 @@ export type DaytonaResearchActivityViewModel = {
   transcriptText: string | null
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value)
-}
+import { isPlainObject } from "@/lib/utils/guards"
 
 function normalizeCitationLabel(citation: ResearchCitation) {
   if (!citation.path) return null
@@ -125,7 +123,7 @@ function normalizeProgressItem(progress: ToolProgressItem, index: number) {
 }
 
 export function isDaytonaResearchOutput(output: unknown): output is ResearchOutput {
-  return isRecord(output) && (
+  return isPlainObject(output) && (
     "activity" in output ||
     "keyFindings" in output ||
     "citations" in output ||
@@ -147,7 +145,7 @@ export function buildDaytonaResearchActivityViewModel({
   const research = isDaytonaResearchOutput(output) ? output : {}
   const findings = Array.isArray(research.keyFindings)
     ? research.keyFindings
-        .filter((finding): finding is ResearchFinding => isRecord(finding))
+        .filter((finding): finding is ResearchFinding => isPlainObject(finding))
         .map((finding) => ({
           title: typeof finding.title === "string" ? finding.title : "Finding",
           detail: typeof finding.detail === "string" ? finding.detail : "",
@@ -183,7 +181,7 @@ export function buildDaytonaResearchActivityViewModel({
         )
       : [],
     transcriptText:
-      isRecord(research.transcript) && typeof research.transcript.text === "string"
+      isPlainObject(research.transcript) && typeof research.transcript.text === "string"
         ? research.transcript.text
         : null,
   }

@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import type { Doc } from "./_generated/dataModel";
+import { DEFAULT_PROJECT_COLOR, DEFAULT_PROJECT_ICON } from "./constants";
 
 // Get all projects for the current user
 export const listMyProjects = query({
@@ -87,8 +88,8 @@ export const createProject = mutation({
       title: args.title,
       description: args.description,
       status: "active",
-      color: args.color ?? "#6366f1", // Default indigo color
-      icon: args.icon ?? "📁", // Default folder icon
+      color: args.color ?? DEFAULT_PROJECT_COLOR,
+      icon: args.icon ?? DEFAULT_PROJECT_ICON,
       createdAt: now,
       updatedAt: now,
     });

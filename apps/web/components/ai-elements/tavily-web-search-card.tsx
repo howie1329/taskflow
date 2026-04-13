@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { TavilyWebSearchOutput } from "@/lib/AITools/Tavily/types";
+import { getDomain } from "@/lib/utils/url";
 import {
   ToolEmptyState,
   ToolResultHeader,
@@ -11,14 +12,6 @@ import {
 } from "./tool-result-shell";
 
 type TavilyWebSearchCardProps = TavilyWebSearchOutput;
-
-function getDomain(url: string) {
-  try {
-    return new URL(url).hostname.replace(/^www\./, "");
-  } catch {
-    return url;
-  }
-}
 
 export function TavilyWebSearchCard({
   query,

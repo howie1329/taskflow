@@ -7,60 +7,14 @@ import {
   runSandboxReadCommand,
   searchSandboxRepo,
 } from "@/lib/daytona/server"
-
-const repoFileSchema = z.object({
-  path: z.string(),
-  type: z.enum(["file", "directory", "other"]),
-})
-
-const repoSearchMatchSchema = z.object({
-  path: z.string(),
-  line: z.number(),
-  preview: z.string(),
-})
-
-const listRepoFilesOutputSchema = z.object({
-  files: z.array(repoFileSchema),
-  truncated: z.boolean(),
-  message: z.string(),
-})
-
-const searchRepoOutputSchema = z.object({
-  matches: z.array(repoSearchMatchSchema),
-  truncated: z.boolean(),
-  message: z.string(),
-})
-
-const readRepoFileOutputSchema = z.object({
-  path: z.string(),
-  content: z.string(),
-  startLine: z.number(),
-  endLine: z.number(),
-  truncated: z.boolean(),
-  message: z.string(),
-})
-
-const runReadCommandInputSchema = z.object({
-  command: z.enum(["pwd", "git_status", "git_log", "ls", "find", "cat", "head", "sed", "rg"]),
-  path: z.string().optional(),
-  query: z.string().optional(),
-  limit: z.number().int().min(1).max(200).optional(),
-  depth: z.number().int().min(1).max(5).optional(),
-  lines: z.number().int().min(1).max(200).optional(),
-  startLine: z.number().int().min(1).optional(),
-  endLine: z.number().int().min(1).optional(),
-})
-
-const runReadCommandOutputSchema = z.object({
-  command: z.string(),
-  exitCode: z.number(),
-  stdout: z.string(),
-  truncated: z.boolean(),
-  message: z.string(),
-  path: z.string().nullable(),
-  startLine: z.number().nullable(),
-  endLine: z.number().nullable(),
-})
+import {
+  listRepoFilesOutputSchema,
+  searchRepoOutputSchema,
+  readRepoFileOutputSchema,
+  runReadCommandInputSchema,
+  runReadCommandOutputSchema,
+  normalizeRunReadCommandInput,
+} from "@/lib/daytona/repo-tool-schemas"
 
 const subagentCitationSchema = z.object({
   path: z.string(),
@@ -135,61 +89,6 @@ type DaytonaResearchOptions = {
 }
 
 const DEFAULT_SUMMARY = "Daytona research completed, but the subagent did not return a structured summary."
-
-const normalizeRunReadCommandInput = (
-  input: z.infer<typeof runReadCommandInputSchema>,
-) => {
-  switch (input.command) {
-    case "pwd":
-    case "git_status":
-      return { command: input.command } as const
-    case "git_log":
-      return { command: input.command, limit: input.limit } as const
-    case "ls":
-      return { command: input.command, path: input.path } as const
-    case "find":
-      return {
-        command: input.command,
-        path: input.path,
-        depth: input.depth,
-        limit: input.limit,
-      } as const
-    case "cat":
-      if (!input.path) {
-        throw new Error("The read command 'cat' requires a file path.")
-      }
-      return { command: input.command, path: input.path } as const
-    case "head":
-      if (!input.path) {
-        throw new Error("The read command 'head' requires a file path.")
-      }
-      return {
-        command: input.command,
-        path: input.path,
-        lines: input.lines,
-      } as const
-    case "sed":
-      if (!input.path) {
-        throw new Error("The read command 'sed' requires a file path.")
-      }
-      return {
-        command: input.command,
-        path: input.path,
-        startLine: input.startLine,
-        endLine: input.endLine,
-      } as const
-    case "rg":
-      if (!input.query) {
-        throw new Error("The read command 'rg' requires a query string.")
-      }
-      return {
-        command: input.command,
-        query: input.query,
-        path: input.path,
-        limit: input.limit,
-      } as const
-  }
-}
 
 const normalizeLine = (value: number | null | undefined) =>
   typeof value === "number" && Number.isFinite(value) && value > 0 ? Math.floor(value) : null

@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server"
 import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server"
 import { createGoogleGenerativeAI } from "@ai-sdk/google"
-import { ConvexHttpClient } from "convex/browser"
 import { tavily } from "@tavily/core"
 import { api } from "@/convex/_generated/api"
 import type { Id } from "@/convex/_generated/dataModel"
@@ -17,17 +16,17 @@ import {
 } from "ai"
 import { z } from "zod"
 import {
-  lexicalJsonToMarkdown,
   markdownToLexicalState,
-  markdownToPlainText,
   validateLexicalEditorState,
 } from "@/lib/notes/lexical-markdown"
+import { createConvexClient, getNoteMarkdown, getNoteText } from "@/lib/notes/note-api"
+import { COMPACTION_MODEL } from "@/lib/ai/models"
 
 const googleProvider = createGoogleGenerativeAI({
   apiKey: process.env.GOOGLE_AI_KEY,
 })
 
-const googleModel = googleProvider("gemini-3.1-flash-lite-preview")
+const googleModel = googleProvider(COMPACTION_MODEL)
 
 const noteEditResultSchema = z.object({
   ok: z.boolean(),
@@ -62,17 +61,6 @@ type ToolContext = {
 }
 
 type SearchResponse = z.infer<typeof webSearchResultSchema>
-
-function createClient(token: string) {
-  const url = process.env.NEXT_PUBLIC_CONVEX_URL
-  if (!url) {
-    throw new Error("Missing NEXT_PUBLIC_CONVEX_URL")
-  }
-
-  const client = new ConvexHttpClient(url)
-  client.setAuth(token)
-  return client
-}
 
 function getToolContext(context: unknown): ToolContext {
   if (!context || typeof context !== "object") {
@@ -115,19 +103,6 @@ async function searchWithTavily(query: string, reason?: string): Promise<SearchR
   })
 }
 
-async function runBasicWebSearch(query: string, reason?: string) {
-  return await searchWithTavily(query, reason)
-}
-
-function getNoteMarkdown(note: { content?: string; contentText?: string }) {
-  try {
-    const markdown = lexicalJsonToMarkdown(note.content ?? "")
-    return markdown.trim()
-  } catch {
-    return note.contentText?.trim() ?? ""
-  }
-}
-
 export async function POST(req: Request) {
   const token = await convexAuthNextjsToken()
   if (!token) {
@@ -160,7 +135,7 @@ export async function POST(req: Request) {
     )
   }
 
-  const client = createClient(token)
+  const client = createConvexClient(token)
   const currentNote = await client.query(api.notes.getMyNote, {
     noteId: noteContext.noteId as Id<"notes">,
   })
@@ -177,7 +152,7 @@ export async function POST(req: Request) {
 
   const noteTitle = currentNote.title?.trim() || noteContext.title?.trim() || "Untitled note"
   const noteMarkdown = getNoteMarkdown(currentNote)
-  const noteText = currentNote.contentText?.trim() || markdownToPlainText(noteMarkdown)
+  const noteText = getNoteText(currentNote)
 
   const instructions = `You are the Taskflow Notes Mini Chat.
 You can only see the current note unless the user explicitly approves a web search.
@@ -211,7 +186,7 @@ Behavior rules:
       needsApproval: true,
       execute: async ({ title, content }, { experimental_context }) => {
         const { token: authToken, noteId } = getToolContext(experimental_context)
-        const toolClient = createClient(authToken)
+        const toolClient = createConvexClient(authToken)
 
         const note = await toolClient.query(api.notes.getMyNote, {
           noteId: noteId as Id<"notes">,

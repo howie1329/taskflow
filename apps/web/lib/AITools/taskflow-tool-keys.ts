@@ -1,22 +1,5 @@
-export const TASKFLOW_TOOL_KEYS = [
-  "listTasks",
-  "getTask",
-  "createTask",
-  "updateTask",
-  "deleteTask",
-  "listNotes",
-  "getNote",
-  "createNote",
-  "updateNote",
-  "deleteNote",
-  "listProjects",
-  "getProject",
-  "createProject",
-  "updateProject",
-  "deleteProject",
-  "listInboxItems",
-  "getInboxItem",
-  "createInboxItem",
-  "updateInboxItem",
-  "deleteInboxItem",
-] as const;
+import { taskflowTools } from "./Taskflow/Taskflow"
+
+export const TASKFLOW_TOOL_KEYS = Object.keys(taskflowTools) as ReadonlyArray<
+  keyof typeof taskflowTools
+>

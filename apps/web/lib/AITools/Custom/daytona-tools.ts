@@ -26,6 +26,15 @@ import {
   runDaytonaResearchAgent,
 } from "@/lib/daytona/research-agent"
 
+import {
+  listRepoFilesOutputSchema,
+  searchRepoOutputSchema,
+  readRepoFileOutputSchema,
+  runReadCommandInputSchema,
+  runReadCommandOutputSchema,
+  normalizeRunReadCommandInput,
+} from "@/lib/daytona/repo-tool-schemas"
+
 const daytonaStatusResponseSchema = z.object({
   exists: z.boolean(),
   repoUrl: z.string().nullable(),
@@ -34,60 +43,6 @@ const daytonaStatusResponseSchema = z.object({
   cloneStatus: z.enum(["not_started", "running", "succeeded", "failed"]),
   updatedAt: z.number().nullable(),
   errorMessage: z.string().nullable(),
-})
-
-const repoFileSchema = z.object({
-  path: z.string(),
-  type: z.enum(["file", "directory", "other"]),
-})
-
-const repoSearchMatchSchema = z.object({
-  path: z.string(),
-  line: z.number(),
-  preview: z.string(),
-})
-
-const listRepoFilesOutputSchema = z.object({
-  files: z.array(repoFileSchema),
-  truncated: z.boolean(),
-  message: z.string(),
-})
-
-const searchRepoOutputSchema = z.object({
-  matches: z.array(repoSearchMatchSchema),
-  truncated: z.boolean(),
-  message: z.string(),
-})
-
-const readRepoFileOutputSchema = z.object({
-  path: z.string().nullable(),
-  content: z.string(),
-  startLine: z.number().nullable(),
-  endLine: z.number().nullable(),
-  truncated: z.boolean(),
-  message: z.string(),
-})
-
-const runReadCommandInputSchema = z.object({
-  command: z.enum(["pwd", "git_status", "git_log", "ls", "find", "cat", "head", "sed", "rg"]),
-  path: z.string().optional(),
-  query: z.string().optional(),
-  limit: z.number().int().min(1).max(200).optional(),
-  depth: z.number().int().min(1).max(5).optional(),
-  lines: z.number().int().min(1).max(200).optional(),
-  startLine: z.number().int().min(1).optional(),
-  endLine: z.number().int().min(1).optional(),
-})
-
-const runReadCommandOutputSchema = z.object({
-  command: z.string(),
-  exitCode: z.number().nullable(),
-  stdout: z.string(),
-  truncated: z.boolean(),
-  message: z.string(),
-  path: z.string().nullable().optional(),
-  startLine: z.number().nullable().optional(),
-  endLine: z.number().nullable().optional(),
 })
 
 type ToolContext = {
@@ -105,61 +60,6 @@ const MISSING_DAYTONA_MESSAGE =
 
 const isAbortError = (error: unknown) =>
   error instanceof Error && error.name === "AbortError"
-
-const normalizeRunReadCommandInput = (
-  input: z.infer<typeof runReadCommandInputSchema>,
-) => {
-  switch (input.command) {
-    case "pwd":
-    case "git_status":
-      return { command: input.command } as const
-    case "git_log":
-      return { command: input.command, limit: input.limit } as const
-    case "ls":
-      return { command: input.command, path: input.path } as const
-    case "find":
-      return {
-        command: input.command,
-        path: input.path,
-        depth: input.depth,
-        limit: input.limit,
-      } as const
-    case "cat":
-      if (!input.path) {
-        throw new Error("The read command 'cat' requires a file path.")
-      }
-      return { command: input.command, path: input.path } as const
-    case "head":
-      if (!input.path) {
-        throw new Error("The read command 'head' requires a file path.")
-      }
-      return {
-        command: input.command,
-        path: input.path,
-        lines: input.lines,
-      } as const
-    case "sed":
-      if (!input.path) {
-        throw new Error("The read command 'sed' requires a file path.")
-      }
-      return {
-        command: input.command,
-        path: input.path,
-        startLine: input.startLine,
-        endLine: input.endLine,
-      } as const
-    case "rg":
-      if (!input.query) {
-        throw new Error("The read command 'rg' requires a query string.")
-      }
-      return {
-        command: input.command,
-        query: input.query,
-        path: input.path,
-        limit: input.limit,
-      } as const
-  }
-}
 
 const getToolContext = (context: unknown) => {
   if (!context || typeof context !== "object") {
