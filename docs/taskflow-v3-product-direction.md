@@ -2,9 +2,19 @@
 
 ## Status
 
-Proposed product direction for the next major version of Taskflow.
+Accepted planning direction for the next major version of Taskflow.
 
 This document narrows Taskflow from a collection of peer productivity products into one focused AI project execution workspace. It supersedes the broad product direction in older roadmaps when those documents conflict with this one.
+
+## Confirmed V3 Decisions
+
+- V3 will be built as a parallel application at `apps/web-v3` inside the existing npm/Turbo monorepo.
+- TanStack Start will replace Next.js for the V3 frontend.
+- Clerk will replace Convex Auth for authentication and user identity.
+- V3 will use its own Convex source directory and isolated development deployment while the existing application remains available as a reference.
+- V3 will selectively reuse proven product logic, visual assets, UI primitives, and backend behavior instead of reproducing every V2 route and feature.
+- The existing `apps/web` application will be removed after V3 is validated and ready for cutover.
+- V3 parity means delivering the focused V3 product, not recreating every V2 capability.
 
 ## Working Positioning
 
@@ -322,25 +332,127 @@ Provider, reasoning, memory, and tool details should not be normal user decision
 
 ## Technical Direction
 
-V3 should retain the current core stack:
+V3 will use a new frontend and authentication foundation while retaining the technologies and implementation work that continue to serve the focused product.
 
-- Next.js and React
-- Convex and the existing authentication foundation
+- TanStack Start and TanStack Router
+- TanStack Query with the official Convex integration
+- React
+- Convex with a V3-focused schema and function surface
+- Clerk authentication integrated with TanStack Start and Convex
 - TypeScript
+- Vite
 - Tailwind CSS and shadcn UI
+- Hugeicons
 - Vercel AI SDK
+- Zod
+- one primary AI provider or gateway
 
-The current technical problem is not an obsolete framework. It is product scope, dependency breadth, API drift, and the absence of a reliable verification baseline.
+TanStack Start is an intentional early-adopter choice. It is currently in Release Candidate status: its API is considered feature-complete and stable, but bugs or breaking changes may still occur before v1. A focused technical proof must validate the required Taskflow paths before V3 implementation expands.
+
+The framework change should not become a mechanical route-for-route migration. Product refocusing and technical migration should happen together so V3 does not inherit obsolete routes, dependencies, data fields, or framework conventions.
+
+### Parallel Application Strategy
+
+The repository is already an npm/Turbo monorepo. V3 should coexist with the current application during development:
+
+```text
+taskflow/
+  apps/
+    web/       # Existing Next.js and Convex Auth application
+    web-v3/    # TanStack Start, Clerk, and V3 Convex application
+  packages/
+    Taskflow-Context-Compaction/
+```
+
+The current `apps/web` application remains a behavioral and visual reference. It should not be modified to host both Next.js and TanStack Start.
+
+`apps/web-v3` should begin with a minimal dependency manifest. Dependencies should be added only when a retained V3 workflow requires them. The existing `apps/web/package.json` should not be copied wholesale.
+
+During development, the two applications should have separate commands, ports, environment files, and Convex deployments. The default development command should not start both frontends and both Convex deployments automatically.
+
+At cutover:
+
+1. Validate V3 against its product and technical acceptance criteria.
+2. Retire the existing frontend and legacy Convex deployment.
+3. Remove `apps/web`.
+4. Rename `apps/web-v3` to `apps/web` if the stable workspace name remains valuable.
+5. Update root scripts, deployment configuration, and canonical documentation.
+
+### Convex Strategy
+
+V3 should initially use its own `convex/` directory and development deployment rather than forcing one backend to support both product models and both authentication systems.
+
+This temporary separation is intentional because V3 changes:
+
+- authentication identity
+- project semantics
+- task scope
+- notes and project-entry modeling
+- AI proposal and approval behavior
+- retained routes and integrations
+
+Relevant Convex queries, mutations, validators, and indexes should be ported selectively. Legacy Notes, Notifications, Daytona, general Chat, and unused task metadata should not be copied merely for compatibility.
+
+Because there is no established user base, V3 should prefer a clean data model over compatibility layers. Any data retained for development or demonstration should use an explicit one-time migration or seed process.
+
+### Authentication Strategy
+
+Clerk owns:
+
+- sign-in and sign-up
+- email and social authentication
+- GitHub authentication
+- sessions and account security
+- identity and profile fundamentals
+
+Taskflow owns:
+
+- onboarding state
+- product-specific preferences
+- projects and project activity
+- connected-service metadata required by product workflows
+
+Convex functions must derive the authenticated identity from `ctx.auth`. Client-provided user IDs must never authorize data access, scope AI memory, or select external connected accounts.
+
+GitHub authentication and GitHub repository authorization must remain separate concepts. Signing in with GitHub does not automatically grant every repository scope Taskflow may later need. Explicit scoped connections or Composio connected accounts should be associated with the stable Clerk user identity.
+
+### Reuse Strategy
+
+Prefer selective reuse over wholesale migration.
+
+Good candidates for reuse:
+
+- brand assets and design tokens
+- shadcn primitives
+- useful shell and inspector patterns
+- proven project and task interactions
+- focused Convex business logic
+- AI structured-output and proposal foundations
+- context compaction if V3 conversations require it
+- loading, error, and empty-state patterns
+
+Do not automatically port:
+
+- Next.js route and layout structure
+- Notes as a peer product
+- general AI Chat
+- Notifications
+- Daytona and Code Agent
+- public roadmap
+- provider-heavy settings
+- unused AI Elements
+- redundant research providers
+- low-value task metadata and customization
 
 Technical work should prioritize:
 
-1. Establish passing lint, typecheck, and test commands.
-2. Add characterization coverage for retained data and AI paths.
-3. Introduce V3 project semantics without replacing the platform.
-4. Standardize the AI gateway and proposal protocol.
-5. Remove unused providers, tools, components, routes, and fields.
-6. Migrate retained data deliberately.
-7. Remove obsolete V2 paths after the focused flow is proven.
+1. Prove TanStack Start, Clerk, Convex, live queries, protected routes, mutations, and AI streaming together.
+2. Establish passing lint, typecheck, and test commands in `apps/web-v3` from the beginning.
+3. Define the focused V3 schema and authenticated ownership model.
+4. Build and validate capture-to-project before expanding the workspace.
+5. Standardize the AI gateway and proposal protocol.
+6. Port only retained product behavior and dependencies.
+7. Remove the V2 application after V3 is validated.
 
 ## Validation Wedge
 
@@ -405,36 +517,51 @@ If it does not improve one of those outcomes, it should be removed, embedded inv
 
 ## Recommended Sequence
 
-### Phase 0: Confirm the product decision
+### Phase 0: Establish the V3 workspace
 
 - Adopt this document as the canonical direction.
 - Mark conflicting roadmaps and plans as historical.
 - Confirm that Code Agent is archived rather than added to V3.
+- Create the isolated `apps/web-v3` workspace.
+- Establish separate V3 development commands, environment files, ports, and Convex deployment.
 
-### Phase 1: Prove capture-to-project
+### Phase 1: Prove the technical foundation
+
+- Integrate TanStack Start, Router, Query, Vite, Tailwind, and shadcn.
+- Integrate Clerk request middleware, protected routes, loaders, and server functions.
+- Configure Convex to validate Clerk identity.
+- Prove an authenticated Convex loader, live query, mutation, AI streaming endpoint, and sign-out flow.
+- Establish passing lint, typecheck, and test commands.
+
+### Phase 2: Prove capture-to-project
 
 - Define the project proposal contract.
-- Prototype the capture, clarification, preview, approval, and receipt flow.
+- Build the capture, clarification, preview, approval, and receipt flow in V3.
 - Test whether the workflow produces a useful project quickly.
 
-### Phase 2: Establish the project aggregate
+### Phase 3: Establish the project aggregate
 
 - Introduce the focused project, milestone, next-action, entry, blocker, decision, and question semantics.
-- Migrate only the existing data needed by the new model.
+- Port only the existing logic and data needed by the new model.
 
-### Phase 3: Build the project cockpit
+### Phase 4: Build the project cockpit
 
 - Make project status, next action, milestone, blockers, and recent changes visible in one surface.
 - Embed the project operator within the cockpit.
 
-### Phase 4: Build Command Center and Review
+### Phase 5: Build Command Center and Review
 
 - Derive attention and next-action views from project state.
 - Add stale, blocked, and missing-next-action review workflows.
 
-### Phase 5: Subtract the old product
+### Phase 6: Validate and cut over
 
-- Remove top-level Tasks, Notes, Chat, Notifications, and Code Agent surfaces.
-- Remove unused data fields, routes, dependencies, and AI providers.
-- Update marketing and onboarding around the focused promise.
+- Validate all retained V3 workflows independently of the legacy app.
+- Confirm authentication, authorization, AI approval, error recovery, and deployment behavior.
+- Update onboarding and marketing around the focused promise.
 
+### Phase 7: Remove the old product
+
+- Remove `apps/web` and retire its Convex deployment.
+- Remove unused root scripts, data paths, dependencies, and documentation.
+- Rename `apps/web-v3` if desired and make it the canonical application.

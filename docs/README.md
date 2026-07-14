@@ -15,10 +15,10 @@ Start there:
 - [`apps/web/docs/roadmap.md`](../apps/web/docs/roadmap.md)
 - [`apps/web/docs/ui-guidelines.md`](../apps/web/docs/ui-guidelines.md)
 
-## Proposed V3 Direction
+## Accepted V3 Direction
 
-- [`taskflow-v3-product-direction.md`](./taskflow-v3-product-direction.md): focused V3 positioning, product loop, information architecture, domain direction, and validation sequence
-- [`taskflow-primary-product-surfaces.md`](./taskflow-primary-product-surfaces.md): keep, reshape, remove, and defer decisions for the current product surfaces
+- [`taskflow-v3-product-direction.md`](./taskflow-v3-product-direction.md): canonical V3 positioning, product loop, TanStack Start and Clerk architecture, parallel application strategy, domain direction, and validation sequence
+- [`taskflow-primary-product-surfaces.md`](./taskflow-primary-product-surfaces.md): keep, reshape, replace, remove, and defer decisions for the current product and technology surfaces
 
 ## What Root Docs Keep
 

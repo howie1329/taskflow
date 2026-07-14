@@ -12,6 +12,11 @@ The canonical V3 direction is defined in [`taskflow-v3-product-direction.md`](./
 
 | Current area | Decision | V3 role |
 | --- | --- | --- |
+| Next.js application | Replace after V3 validation | Legacy behavioral and visual reference during development |
+| TanStack Start | Adopt | V3 frontend framework and routing foundation |
+| Convex Auth | Replace | Legacy authentication retained only by the old app until cutover |
+| Clerk | Adopt | V3 authentication, sessions, and stable external identity |
+| Convex | Keep with a V3 model | Reactive backend and database in an isolated V3 development deployment |
 | Projects | Keep and substantially reshape | Central product entity and project cockpit |
 | Tasks | Keep and simplify | Project actions and derived next-action views |
 | Inbox | Reshape | Temporary capture queue |
@@ -101,16 +106,44 @@ Capture is the entrance to project creation and project updates. The queue exist
 
 ### Authentication and account foundation
 
-Keep:
+Keep the product responsibilities but replace the implementation with Clerk.
+
+Clerk owns:
 
 - sign in and sign up
 - user identity
-- authenticated data ownership
 - account management
+- email and social authentication
+- GitHub authentication
+- sessions and account security
+
+Taskflow and Convex own:
+
+- authenticated data ownership derived from Clerk identity
 - onboarding completion state
 - minimal durable preferences
+- product-specific profile data
+- connections between the Clerk user and approved external-service accounts
 
 These capabilities support the product but should not consume primary navigation or product attention.
+
+GitHub sign-in should not be treated as automatic authorization for repository access. Any additional GitHub scopes or Composio connections should use an explicit connection flow associated with the stable Clerk identity.
+
+### Application and backend foundation
+
+V3 should be built at `apps/web-v3` alongside the existing `apps/web` application.
+
+The V3 application should use:
+
+- TanStack Start and TanStack Router
+- TanStack Query and the official Convex Query integration
+- Clerk authentication
+- a separate V3 Convex source directory and development deployment
+- a minimal dependency manifest
+
+The existing application remains available as a reference until V3 is validated. V3 should selectively port retained behavior rather than recreate the current route tree.
+
+Once V3 is ready, remove the legacy application and deployment. Rename `apps/web-v3` to `apps/web` only if retaining the stable workspace name is useful.
 
 ### Relevant AI infrastructure
 
